@@ -487,7 +487,6 @@ public static class Program
         [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_sln()
         {
-            Environment.SetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS, "true");
 
             var slnDir = _testAssetsManager
                .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln")
@@ -505,8 +504,6 @@ public static class Program
                 .Should()
                 .Pass();
 
-            Environment.SetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS, null);
-
             var expectedAssetPath = System.IO.Path.Combine(slnDir, "App", "bin", "Release", ToolsetInfo.CurrentTargetFramework, "publish", "App.dll");
             Assert.True(File.Exists(expectedAssetPath));
 
@@ -515,7 +512,6 @@ public static class Program
         [Fact]
         public void It_passes_using_PublishRelease_with_conflicting_capitalization_but_same_values_across_solution_projects()
         {
-            Environment.SetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS, "true");
 
             var slnDir = _testAssetsManager
                .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingCasing", "PublishReleaseConflictSln")
@@ -532,8 +528,6 @@ public static class Program
                 .Execute(@"dotnet", "publish")
                 .Should()
                 .Pass();
-
-            Environment.SetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS, null);
 
             var expectedAssetPath = System.IO.Path.Combine(slnDir, "App", "bin", "Release", ToolsetInfo.CurrentTargetFramework, "publish", "App.dll");
             Assert.True(File.Exists(expectedAssetPath));

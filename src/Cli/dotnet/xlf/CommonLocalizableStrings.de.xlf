@@ -198,9 +198,9 @@ Der Standardwert lautet TRUE, wenn eine Runtime-ID angegeben wird.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionExecutableConfigurationMismatchError">
-        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+        <source>Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:
 {1}.</source>
-        <target state="translated">Mehrere ausführbare Projekte in der Lösung enthalten widersprüchliche Werte für „{0}“. Stellen Sie sicher, dass die Werte übereinstimmen. Erwägen Sie die Verwendung einer Datei „Directory.build.props“, um alle Projektkonfigurationen festzulegen. In Konflikt stehende Projekte:
+        <target state="needs-review-translation">Mehrere ausführbare Projekte in der Lösung enthalten widersprüchliche Werte für „{0}“. Stellen Sie sicher, dass die Werte übereinstimmen. Erwägen Sie die Verwendung einer Datei „Directory.build.props“, um alle Projektkonfigurationen festzulegen. In Konflikt stehende Projekte:
 {1}.</target>
         <note />
       </trans-unit>

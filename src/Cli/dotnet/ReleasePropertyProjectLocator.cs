@@ -18,60 +18,85 @@ using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
 {
+    /// <summary>
+    /// This class is used to enable configuration changes at the project level.
+    /// Configuration evaluation occurs before a project file is evaluated, and the project file may have dependencies on the configuration.
+    /// Because of this, it is 'impossible' for the project file to correctly influence the value of Configuration.
+    /// This class allows evaluation of Configuration properties set in the project file before build time by giving back a global Configuration property to inject while building.
+    /// </summary>
     class ReleasePropertyProjectLocator
     {
-        private bool checkSolutions;
+        private ParseResult _parseResult;
+        private string _defaultedConfigurationProperty;
+        private IEnumerable<string> _slnOrProjectArgs;
+        private Option<string> _configOption;
+        private bool _isPublishingSolution = false;
+
+        private static string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
+        private static string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
         /// <summary>
         /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on 
         /// a boolean that may or may not exist in the targeted project.
-        /// <param name="defaultedConfigurationProperty">The boolean property to check the project for. Ex: PublishRelease</param>
-        /// <param name="slnOrProjectArgs">The arguments or solution passed to a dotnet invocation.</param>
-        /// <param name="configOption">The arguments passed to a dotnet invocation related to Configuration.</param>
         /// </summary>
         /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>
-        public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified(
-            ParseResult parseResult,
-            string defaultedConfigurationProperty,
-            IEnumerable<string> slnOrProjectArgs,
-            Option<string> configOption
-            )
+        public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified()
         {
-            ProjectInstance project = null;
-            var globalProperties = GetGlobalPropertiesFromUserArgs(parseResult);
+            Debug.Assert(_defaultedConfigurationProperty == MSBuildPropertyNames.PUBLISH_RELEASE || _defaultedConfigurationProperty == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
 
-            if (parseResult.HasOption(configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
+            ProjectInstance project = null;
+            var globalProperties = GetGlobalPropertiesFromUserArgs();
+
+            // Configuration doesn't work in a .proj file, but it does as a global property.
+            // Detect either A) --configuration option usage OR /p:Configuration=Foo, if so, don't use these properties.
+            if (_parseResult.HasOption(_configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
                 yield break;
 
-            // CLI Configuration values take precedence over ones in the project. Passing PublishRelease as a global property allows it to take precedence.
-            project = GetTargetedProject(slnOrProjectArgs, globalProperties, defaultedConfigurationProperty);
+            project = GetTargetedProject(globalProperties);
 
             if (project != null)
             {
-                string configurationToUse = "";
-                string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
-                if (!string.IsNullOrEmpty(releasePropertyFlag))
-                    configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : "";
-
-                if (!string.IsNullOrEmpty(configurationToUse) && !ProjectHasUserCustomizedConfiguration(project, defaultedConfigurationProperty))
-                    yield return $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}";
+                string releasePropertyFlag = project.GetPropertyValue(_defaultedConfigurationProperty);
+                if (!string.IsNullOrEmpty(releasePropertyFlag)) // The project set PublishRelease or PackRelease itself.
+                {
+                    string configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE;
+                    yield return new List<string> {
+                        $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}",
+                        _isPublishingSolution ? $"-property:_SolutionExtracted{_defaultedConfigurationProperty}=true" : "" // Allows us to spot conflicting configuration values during evaluation.
+                    };
+                }
+                else if (GetMaxProjectTargetFramework(project) >= 8) // For 8.0, these properties are enabled by default.
+                {
+                    yield return new List<string> {
+                        $"-property:{MSBuildPropertyNames.CONFIGURATION}={MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE}",
+                        $"-property:{_defaultedConfigurationProperty}=true",
+                        _isPublishingSolution ? $"-property:_SolutionExtracted{_defaultedConfigurationProperty}=true" : ""
+                    };
+                }
             }
             yield break;
         }
 
-
-        public ReleasePropertyProjectLocator(bool shouldCheckSolutionsForProjects)
-        {
-            checkSolutions = shouldCheckSolutionsForProjects;
-        }
+        // <summary>
+        /// <param name="defaultedConfigurationProperty">The boolean property to check the project for. Ex: PublishRelease, PackRelease.</param>
+        /// <param name="slnOrProjectArgs">The arguments parsed by System Command Line related to picking a solution or project file.</param>
+        /// <param name="configOption">The arguments parsed by System Command Line related to Configuration.</param>
+        /// </summary>
+        public ReleasePropertyProjectLocator(
+            ParseResult parseResult,
+            string defaultedConfigurationProperty,
+            IEnumerable<string> slnOrProjectArgs,
+            Option<string> configOption
+         )
+         => (_parseResult, _defaultedConfigurationProperty, _slnOrProjectArgs, _configOption) = (parseResult, defaultedConfigurationProperty, slnOrProjectArgs, configOption);
 
         /// <param name="slnProjectPropertytoCheck">A property to enforce if we are looking into SLN files. If projects disagree on the property, throws exception.</param>
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
-        public ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, Dictionary<string, string> globalProps, string slnProjectPropertytoCheck = "")
+        public ProjectInstance GetTargetedProject(Dictionary<string, string> globalProps)
         {
             string potentialProject = "";
 
-            foreach (string arg in slnOrProjectArgs.Append(Directory.GetCurrentDirectory()))
+            foreach (string arg in _slnOrProjectArgs.Append(Directory.GetCurrentDirectory()))
             {
                 if (IsValidProjectFilePath(arg))
                 {
@@ -90,7 +115,7 @@ namespace Microsoft.DotNet.Cli
 
                         if (!string.IsNullOrEmpty(potentialSln))
                         {
-                            return GetSlnProject(potentialSln, globalProps, slnProjectPropertytoCheck);
+                            return GetRandomSlnProject(potentialSln, globalProps);
                         }
                     } // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
                 }
@@ -99,15 +124,9 @@ namespace Microsoft.DotNet.Cli
             return string.IsNullOrEmpty(potentialProject) ? null : TryGetProjectInstance(potentialProject, globalProps);
         }
 
-        /// <returns>The executable project (first if multiple exist) in a SLN. Returns null if no executable project. Throws exception if two executable projects disagree
-        /// in the configuration property to check.</returns>
-        public ProjectInstance GetSlnProject(string slnPath, Dictionary<string, string> globalProps, string slnProjectConfigPropertytoCheck = "")
+        /// <returns>A random existant project in a solution file. Returns null if no projects exist.</returns>
+        public ProjectInstance GetRandomSlnProject(string slnPath, Dictionary<string, string> globalProps)
         {
-            // This has a performance overhead so don't do this unless opted in.
-            if (!checkSolutions)
-                return null;
-            Debug.Assert(slnProjectConfigPropertytoCheck == MSBuildPropertyNames.PUBLISH_RELEASE || slnProjectConfigPropertytoCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected");
-
             SlnFile sln;
             try
             {
@@ -118,51 +137,20 @@ namespace Microsoft.DotNet.Cli
                 return null; // This can be called if a solution doesn't exist. MSBuild will catch that for us.
             }
 
-            List<ProjectInstance> configuredProjects = new List<ProjectInstance>();
-            HashSet<string> configValues = new HashSet<string>();
-            object projectDataLock = new object();
-
-            bool shouldReturnNull = false;
-            string executableProjectOutputType = MSBuildPropertyNames.OUTPUT_TYPE_EXECUTABLE; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
-            const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
-            const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
-
-            Parallel.ForEach(sln.Projects.AsEnumerable(), (project, state) =>
+            foreach (var project in sln.Projects.AsEnumerable())
             {
                 if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(project.FilePath))
-                    return;
+                    continue;
 
                 var projectData = TryGetProjectInstance(project.FilePath, globalProps);
-                if (projectData == null)
-                    return;
-
-                if (projectData.GetPropertyValue(MSBuildPropertyNames.OUTPUT_TYPE) == executableProjectOutputType)
+                if (projectData != null)
                 {
-                    if (ProjectHasUserCustomizedConfiguration(projectData, slnProjectConfigPropertytoCheck))
-                    {
-                        shouldReturnNull = true;
-                        state.Stop(); // We don't want to override Configuration if ANY project in a sln uses a custom configuration
-                        return;
-                    }
-
-                    string useReleaseConfiguraton = projectData.GetPropertyValue(slnProjectConfigPropertytoCheck);
-                    if (!string.IsNullOrEmpty(useReleaseConfiguraton))
-                    {
-                        lock (projectDataLock)
-                        {
-                            configuredProjects.Add(projectData);
-                            configValues.Add(useReleaseConfiguraton.ToLower());
-                        }
-                    }
+                    _isPublishingSolution = true;
+                    return projectData;
                 }
-            });
+            };
 
-            if (configuredProjects.Any() && configValues.Count > 1 && !shouldReturnNull)
-            {
-                throw new GracefulException(CommonLocalizableStrings.SolutionExecutableConfigurationMismatchError, slnProjectConfigPropertytoCheck, String.Join("\n", (configuredProjects).Select(x => x.FullPath)));
-            }
-
-            return shouldReturnNull ? null : configuredProjects.FirstOrDefault();
+            return null;
         }
 
         /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails.</returns>
@@ -179,17 +167,48 @@ namespace Microsoft.DotNet.Cli
             return null;
         }
 
+        /// <returns>Returns true if the path exists and is a project file type.</returns> 
         private bool IsValidProjectFilePath(string path)
         {
             return File.Exists(path) && Path.GetExtension(path).EndsWith("proj");
         }
 
+        /// <param name="targetProject">The project which we want to get the TFM of.</param>
+        /// <returns>The target framework number (e.g. 8 for net8.0) of the project.
+        /// This will return 4 for any TFM not of the form netX.0 
+        /// If the project is multi-targeted, it will return the max TFM.</returns>
+        private int GetMaxProjectTargetFramework(ProjectInstance targetProject)
+        {
+            string multiTargetingFrameworks = targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORKS);
+            string targetFramework = targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORK);
+            if (!string.IsNullOrEmpty(multiTargetingFrameworks))
+            {
+                return 1; // split by ; and call inner function
+            }
+            else if (!string.IsNullOrEmpty(targetFramework))
+            {
+                return 1;
+            }
+            return 4;   // The project will not build or publish without a TFM, what we do here is irrelevant.
+
+            // inner function:
+            //int parseTfm(string token)
+            //{
+            //    if (token.StartsWith("net"))
+            //    {
+            //        int firstNumber = Int.Parse(new String(input.TakeWhile(Char.IsDigit).ToArray()));
+            //        return firstNumber;
+            //    }
+            //}
+            // if matches pattern net [digit] .0*, sort by greatest and pick greatest match 
+        }
+
         /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>
-        private Dictionary<string, string> GetGlobalPropertiesFromUserArgs(ParseResult parseResult)
+        private Dictionary<string, string> GetGlobalPropertiesFromUserArgs()
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            string[] globalPropEnumerable = parseResult.GetValue(CommonOptions.PropertiesOption);
+            string[] globalPropEnumerable = _parseResult.GetValue(CommonOptions.PropertiesOption);
 
             foreach (var keyEqVal in globalPropEnumerable)
             {
@@ -197,21 +216,6 @@ namespace Microsoft.DotNet.Cli
                 globalProperties[keyValuePair[0]] = keyValuePair[1];
             }
             return globalProperties;
-        }
-
-        /// <param name="propertyToDisableIfTrue">A property that will be disabled (NOT BY THIS FUCTION) based on the condition.</param>
-        /// <returns>Returns true if Configuration on a project is not Debug or Release. Note if someone explicitly set Debug, we don't detect that here.</returns>
-        /// <remarks>Will log that the property will not work if this is true.</remarks>
-        private bool ProjectHasUserCustomizedConfiguration(ProjectInstance project, string propertyToDisableIfTrue)
-        {
-            var config_value = project.GetPropertyValue(MSBuildPropertyNames.CONFIGURATION);
-            // Case does matter for configuration values.
-            if (!(config_value.Equals(MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE) || config_value.Equals(MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)))
-            {
-                Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.CustomConfigurationDisablesPublishAndPackReleaseProperties, project.FullPath, propertyToDisableIfTrue));
-                return true;
-            }
-            return false;
         }
     }
 }

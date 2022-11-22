@@ -198,9 +198,9 @@ L'impostazione predefinita è 'true' se si specifica un identificatore di runtim
         <note />
       </trans-unit>
       <trans-unit id="SolutionExecutableConfigurationMismatchError">
-        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+        <source>Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:
 {1}.</source>
-        <target state="translated">Più progetti eseguibili nella soluzione contengono valori '{0}' in conflitto. Verificare che i valori corrispondano. Prova a usare un file Directory.build.props per impostare tutte le configurazioni del progetto. Progetti in conflitto:
+        <target state="needs-review-translation">Più progetti eseguibili nella soluzione contengono valori '{0}' in conflitto. Verificare che i valori corrispondano. Prova a usare un file Directory.build.props per impostare tutte le configurazioni del progetto. Progetti in conflitto:
 {1}.</target>
         <note />
       </trans-unit>

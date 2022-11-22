@@ -198,9 +198,9 @@ The default is 'true' if a runtime identifier is specified.</source>
         <note />
       </trans-unit>
       <trans-unit id="SolutionExecutableConfigurationMismatchError">
-        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+        <source>Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:
 {1}.</source>
-        <target state="translated">方案中的多個可執行檔專案包含衝突的 '{0}' 值。請確認值相符。請考慮使用 Directory.build.props 檔案來設定所有專案組態。衝突的專案:
+        <target state="needs-review-translation">方案中的多個可執行檔專案包含衝突的 '{0}' 值。請確認值相符。請考慮使用 Directory.build.props 檔案來設定所有專案組態。衝突的專案:
 {1}。</target>
         <note />
       </trans-unit>

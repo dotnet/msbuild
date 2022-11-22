@@ -198,9 +198,9 @@ Jeśli określony jest identyfikator środowiska uruchomieniowego, wartość dom
         <note />
       </trans-unit>
       <trans-unit id="SolutionExecutableConfigurationMismatchError">
-        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+        <source>Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:
 {1}.</source>
-        <target state="translated">Wiele projektów wykonywalnych w rozwiązaniu zawiera powodujące konflikt wartości „{0}”. Upewnij się, że wartości są zgodne. Rozważ użycie pliku Directory.build.props, aby ustawić wszystkie konfiguracje projektu. Projekty powodujące konflikt:
+        <target state="needs-review-translation">Wiele projektów wykonywalnych w rozwiązaniu zawiera powodujące konflikt wartości „{0}”. Upewnij się, że wartości są zgodne. Rozważ użycie pliku Directory.build.props, aby ustawić wszystkie konfiguracje projektu. Projekty powodujące konflikt:
 {1}.</target>
         <note />
       </trans-unit>

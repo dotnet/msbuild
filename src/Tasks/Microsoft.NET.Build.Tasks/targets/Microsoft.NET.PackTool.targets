@@ -60,11 +60,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       </TfmSpecificPackageFile>
     </ItemGroup>
 
-    <!-- Enable warning for trying to use PackRelease with a solution if env-var is not set.-->
-    <NETSdkWarning Condition="'$(PackRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS)' == ''"
-                   ResourceName="PReleaseRequiresEnvVarOnSln"
-                   FormatArguments="PackRelease;DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS"
-    />
+
+    <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations. -->
+    <NETSdkError Condition="'$(_SolutionExtracted_PackRelease)' != '' and '$(_SolutionExtracted_PackRelease)' != '$(PackRelease)'"
+                  ResourceName="SolutionExecutableConfigurationMismatchError"
+                  FormatArguments="PackRelease;$(ProjectName)"/>
+
   </Target>
 
   <PropertyGroup>
