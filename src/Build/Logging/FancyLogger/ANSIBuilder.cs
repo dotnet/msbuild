@@ -97,11 +97,10 @@ namespace Microsoft.Build.Logging.FancyLogger
                 return result;
             }
 
-            public static string Loading()
+            public static string Spinner()
             {
-                char[] chars = { '⠄', '⠆', '⠇', '⠋', '⠙', '⠸', '⠰', '⠠', '⠰', '⠸', '⠙', '⠋', '⠇', '⠆' };
-                loadingCounter += (loadingCounter++) % (chars.Length - 1);
-
+                char[] chars = {'\\', '|', '/', '-'};
+                loadingCounter = (loadingCounter+1) % (chars.Length - 1);
                 return chars[loadingCounter].ToString();
             }
         }

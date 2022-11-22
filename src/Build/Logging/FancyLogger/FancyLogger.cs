@@ -165,16 +165,16 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             if (e.BuildEventContext?.TargetId != null)
             {
-                int lineId = targetConsoleLines[e.BuildEventContext.TargetId];
+                int targetLineId = targetConsoleLines[e.BuildEventContext.TargetId];
                 // If succeeded
                 if (e.Succeeded)
                 {
                     Log.WriteInLine(
                         ANSIBuilder.Formatting.Color("✓ " + e.TargetName, ANSIForegroundColor.Green)
-                    , lineId);
+                    , targetLineId);
                 }
                 Log.WriteInLine(
-                    ANSIBuilder.Eraser.EraseCurrentLine(), lineId+1
+                    ANSIBuilder.Eraser.EraseCurrentLine(), targetLineId+1
                 );
             }
         }
@@ -187,14 +187,13 @@ namespace Microsoft.Build.Logging.FancyLogger
                 int targetLineId = targetConsoleLines[e.BuildEventContext.TargetId];
                 Log.WriteInLine(
                     ANSIBuilder.Eraser.EraseCurrentLine() + "\t" +
-                    ANSIBuilder.Graphics.Loading() + " " +
+                    ANSIBuilder.Graphics.Spinner() + " " +
                     ANSIBuilder.Graphics.ProgressBar(0.6f, 16) + "\t" +
                     ANSIBuilder.Formatting.Dim(e.TaskName), 
                     targetLineId + 1
                 );
-                System.Threading.Thread.Sleep(100);
+                System.Threading.Thread.Sleep(200);
             }
-            // Console.WriteLine("\tA task has started");
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
