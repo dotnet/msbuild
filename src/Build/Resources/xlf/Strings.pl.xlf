@@ -350,6 +350,24 @@
         <target state="translated">MSB4274: wyłączenie węzła InProc prowadzi do obniżenia wydajności, gdy używane są wtyczki pamięci podręcznej projektu, które emitują żądania kompilowania serwera proxy.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RequiredPropertyNotSetErrorMessagingIsolationMode">
+        <source>
+      MSB4047: The "{0}" task was not given a value for the required parameter "{1}".
+      This may be due to the required parameter being defined in a dependency target that
+      was cached in a build with isolation mode set to IsolateProjects.Message. Set the isolation mode to IsolateProjects.False to fix this issue, as the current build
+      is incompatible in IsolateProjects.Message mode.
+    </source>
+        <target state="new">
+      MSB4047: The "{0}" task was not given a value for the required parameter "{1}".
+      This may be due to the required parameter being defined in a dependency target that
+      was cached in a build with isolation mode set to IsolateProjects.Message. Set the isolation mode to IsolateProjects.False to fix this issue, as the current build
+      is incompatible in IsolateProjects.Message mode.
+    </target>
+        <note>
+      {StrBegin="MSB4047: "}UE: This message is shown when a task parameter designated as "required" is not set in the project file during an isolated
+      messaging build.
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: niepowodzenia programu do rozpoznawania zestawu SDK: „{0}”</target>
