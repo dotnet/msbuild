@@ -1176,7 +1176,7 @@ namespace Microsoft.NET.Publish.Tests
             var linkedPdbSize = new FileInfo(linkedPdb).Length;
             var publishPdbSize = new FileInfo(publishedPdb).Length;
 
-            linkedPdbSize.Should().BeLessThan(intermediatePdbSize);
+            linkedPdbSize.Should().BeLessThanOrEqualTo(intermediatePdbSize);
             publishPdbSize.Should().Be(linkedPdbSize);
         }
 
@@ -1266,7 +1266,7 @@ namespace Microsoft.NET.Publish.Tests
             var linkedPdbSize = new FileInfo(linkedPdb).Length;
             var publishPdbSize = new FileInfo(publishedPdb).Length;
 
-            linkedPdbSize.Should().BeLessThan(intermediatePdbSize);
+            linkedPdbSize.Should().BeLessThanOrEqualTo(intermediatePdbSize);
             publishPdbSize.Should().Be(linkedPdbSize);
         }
 
