@@ -522,7 +522,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
-                LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(""),
+                LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
                 LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
@@ -813,11 +813,13 @@ namespace Microsoft.Build.Shared
             translator.TranslateEnum(ref importance, (int)importance);
         }
 
+        /// <summary>
+        /// Write a response file used log message into the translator
+        /// </summary>
         private void WriteResponseFileUsedEventToStream(ResponseFileUsedEventArgs responseFileUsedEventArgs, ITranslator translator)
         {
-            // code code code code
-            MessageImportance importance = MessageImportance.Normal;
-            translator.TranslateEnum(ref importance, (int)importance);
+            string filePath = responseFileUsedEventArgs.ResponseFilePath;
+            translator.Translate(ref filePath);
         }
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
