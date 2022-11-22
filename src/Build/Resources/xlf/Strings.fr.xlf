@@ -373,8 +373,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
-        <source>SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</source>
-        <target state="new">SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</target>
+        <source>SDK resolver "{0}" returned null.</source>
+        <target state="new">SDK resolver "{0}" returned null.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

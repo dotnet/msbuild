@@ -63,13 +63,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolverWithResolvableSdkPattern2 running");
 
             // First error is a generic "we failed" message.
-            _logger.Errors.Skip(1).Select(i => i.Message).ShouldBe(new[] {
+            _logger.Errors[0].Message.ShouldBe(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("FailedToResolveSDK", "notfound", string.Join($"{Environment.NewLine}  ", new[] {
                 "ERROR4",
                 ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", "MockResolverReturnsNull"),
                 "ERROR1",
                 "ERROR2",
                 "notfound"
-            });
+            })));
             _logger.Warnings.Select(i => i.Message).ShouldBe(new[] { "WARNING4", "WARNING2" });
         }
 
