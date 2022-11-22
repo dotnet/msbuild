@@ -27,7 +27,7 @@
     <AssemblyName>Microsoft.NET.StringTools.net35</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net35' AND '$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
   </ItemGroup>
