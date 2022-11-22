@@ -52,7 +52,7 @@
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Platforms" Version="6.0.7">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>4437f088ec63a72bdbc05a1792307415e45d20ad</Sha>
+      <Sha>943474ca16db7c65ba6cff4a89c3ebd219dde3e5</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.HostModel" Version="6.0.12-servicing.22568.7">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
