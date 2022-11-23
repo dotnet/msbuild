@@ -2423,7 +2423,7 @@ namespace Microsoft.Build.UnitTests
 
                 Assert.True(success); // "success"
                 Assert.True(File.Exists(destFile)); // "destination exists"
-                Assert.True((File.GetAttributes(destFile) & FileAttributes.ReparsePoint) != 0);
+                Assert.True((File.GetAttributes(destFile) & FileAttributes.ReparsePoint) != 0, "File was copied but is not a symlink");
 
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
