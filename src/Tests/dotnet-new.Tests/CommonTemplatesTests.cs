@@ -44,6 +44,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("EditorConfig file", "editorconfig", new[] { "--empty" })]
         public async void AllCommonItemsCreate(string expectedTemplateName, string templateShortName, string[]? args)
         {
+            Dictionary<string, string> environmentUnderTest = new() { ["DOTNET_NOLOGO"] = false.ToString() };
+            TestContext.Current.AddTestEnvironmentVariables(environmentUnderTest);
+
             TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
             {
                 TemplateSpecificArgs = args,
@@ -51,8 +54,10 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 VerifyCommandOutput = true,
                 VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },
                 SettingsDirectory = _fixture.HomeDirectory,
-                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath
+                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
+                UniqueFor = templateShortName.Equals("nugetconfig") ? UniqueForOption.OsPlatform : null,
             }
+            .WithCustomEnvironment(environmentUnderTest)
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
                     .AddScrubber(sb => sb.UnixifyNewlines(), "out")
