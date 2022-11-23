@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
     {
         public static VersionRange GetVersionRange(this ParseResult parseResult)
         {
-            string packageId = parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument);
+            string packageId = parseResult.GetValue(ToolInstallCommandParser.PackageIdArgument);
             string packageVersion = parseResult.GetValue(ToolInstallCommandParser.VersionOption);
             bool prerelease = parseResult.GetValue(ToolInstallCommandParser.PrereleaseOption);
 
