@@ -96,9 +96,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        public void test()
+        public void VerifyPrimaryReferenceToBadImageDoesNotThrow()
         {
-            ITaskItem w = new TaskItem(Path.Combine(s_myComponentsRootPath, "DependsOnX.dll"));
             ITaskItem x = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.dll"));
             ITaskItem xpdb = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.pdb"));
             ResolveAssemblyReference t = new()
@@ -106,8 +105,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 BuildEngine = new MockEngine(),
                 AllowedRelatedFileExtensions = new string[] { ".pdb" },
                 Assemblies = new ITaskItem[] { xpdb },
-                AssemblyFiles = new ITaskItem[] { w, x },
-                SearchPaths = new string[] { s_myComponentsRootPath }
+                AssemblyFiles = new ITaskItem[] { x },
+                SearchPaths = new string[] { "{RawFileName}" },
         };
 
             bool success = Execute(t);
