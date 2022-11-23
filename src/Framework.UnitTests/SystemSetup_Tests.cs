@@ -17,7 +17,6 @@ namespace Microsoft.Build.Framework
             NativeMethodsShared.MaxPath.ShouldBeGreaterThan(10000, "Long paths are not enabled. Enable long paths via the registry.");
         }
 
-#if NETCOREAPP
         [Fact]
         public void VerifySymLinksEnabled()
         {
@@ -26,7 +25,8 @@ namespace Microsoft.Build.Framework
             string path = Path.Combine(Path.GetTempPath(), "symLink");
             try
             {
-                string symLink = File.CreateSymbolicLink(path, file.Path).FullName;
+                string errorMessage = string.Empty;
+                NativeMethods.MakeSymbolicLink(path, file.Path, ref errorMessage).ShouldBeTrue(errorMessage);
                 string contents = File.ReadAllText(path);
                 contents.ShouldBe("fileContents", "You do not have permissions to create symbolic links.");
             }
@@ -38,6 +38,5 @@ namespace Microsoft.Build.Framework
                 }
             }
         }
-#endif
     }
 }

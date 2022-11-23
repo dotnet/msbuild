@@ -10,7 +10,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Threading;
 
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
@@ -104,6 +103,13 @@ internal static class NativeMethods
         ProcessPriorityBoost,
         MaxProcessInfoClass
     };
+
+    internal enum SymbolicLink
+    {
+        File = 0,
+        Directory = 1,
+        AllowUnprivilegedCreate = 2,
+    }
 
     private enum eDesiredAccess : int
     {
@@ -1474,6 +1480,40 @@ internal static class NativeMethods
     [SupportedOSPlatform("linux")]
     [DllImport("libc", SetLastError = true)]
     internal static extern int mkdir(string path, int mode);
+
+    //------------------------------------------------------------------------------
+    // CreateSymbolicLink
+    //------------------------------------------------------------------------------
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.I1)]
+    private static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
+
+    [DllImport("libc", SetLastError = true)]
+    private static extern int symlink(string oldpath, string newpath);
+
+    internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
+    {
+        bool symbolicLinkCreated;
+        if (IsWindows)
+        {
+            Version osVersion = Environment.OSVersion.Version;
+            SymbolicLink flags = SymbolicLink.File;
+            if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
+            {
+                flags |= SymbolicLink.AllowUnprivilegedCreate;
+            }
+
+            symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, flags);
+            errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+        }
+        else
+        {
+            symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
+            errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+        }
+
+        return symbolicLinkCreated;
+    }
 
     /// <summary>
     /// Gets the current OEM code page which is used by console apps
