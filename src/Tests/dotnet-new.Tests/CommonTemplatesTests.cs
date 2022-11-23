@@ -335,7 +335,8 @@ Restore succeeded\.",
             };
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
+            //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", /*"12.0", */"latest", "latestMajor", "default", "preview" };
 
             string?[] topLevelStatementSupport = { null, "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
@@ -442,8 +443,9 @@ Restore succeeded\.",
         }
 
         [Theory]
-        [InlineData("12.0")]
-        [InlineData("12")]
+        //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
+        //[InlineData("12.0")]
+        //[InlineData("12")]
         [InlineData("11.0")]
         [InlineData("11")]
         [InlineData("10.0")]
@@ -548,7 +550,8 @@ class Program
             };
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
+            //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", /*"12.0", */"latest", "latestMajor", "default", "preview" };
 
             string?[] supportedInFrameworkByDefault = { null, "net8.0", "netstandard2.1" };
             string?[] supportedInLanguageVersion = { "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
@@ -654,7 +657,8 @@ class Program
                 new { Template = "classlib", Frameworks = new[] { null, "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
+            //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", /*"12.0", */"latest", "latestMajor", "default", "preview" };
 
             string?[] supportedInFramework = { null, "net8.0" };
             string?[] supportedInLangVersion = { null, "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
@@ -757,7 +761,8 @@ class Program
                 new { Template = "classlib", Frameworks = new[] { null, "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
+            //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", /*"12.0", */"latest", "latestMajor", "default", "preview" };
 
             string?[] supportedFrameworks = { null, "net8.0" };
             string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
