@@ -580,6 +580,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1182: 不支援在 Visual Studio 2019 中以 .NET 6.0 或更高版本為目標。</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
+      <trans-unit id="Net7NotCompatibleWithDev173">
+        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
+        <target state="translated">NETSDK1192: 不支援在 Visual Studio 2022 17.3 中以 .NET 7.0 或更高版本為目標。</target>
+        <note>{StrBegin="NETSDK1192: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: 對指定的 RuntimeIdentifier '{0}'，無法使用任何應用程式主機。</target>
@@ -714,6 +719,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>
         <target state="translated">NETSDK1122: 將跳過 ReadyToRun 編譯，原因是只有 .NET Core 3.0 或更高版本支援此作業。</target>
         <note>{StrBegin="NETSDK1122: "}</note>
+      </trans-unit>
+      <trans-unit id="PublishSelfContainedMustBeBool">
+        <source>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</source>
+        <target state="translated">NETSDK1193: 如果已設定 PublishSelfContained，它必須是 True 或 False。提供的值是 '{0}'。</target>
+        <note>{StrBegin="NETSDK1193: "}</note>
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">
         <source>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</source>

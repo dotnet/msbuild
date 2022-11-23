@@ -2,11 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
@@ -191,7 +194,7 @@ Restore succeeded\.",
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
+                .And.HaveStdOutContaining($@"The template ""{expectedTemplateName}"" was created successfully.");
 
             Directory.Delete(workingDir, true);
         }
@@ -274,6 +277,47 @@ Restore succeeded\.",
             Directory.Delete(workingDir, true);
         }
 
+        [Fact]
+        public void NuGetConfigPermissions()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                //runs only on Unix
+                return;
+            }
+
+            string templateShortName = "nugetconfig";
+            string expectedTemplateName = "NuGet Config";
+            string workingDir = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, templateShortName)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($@"The template ""{expectedTemplateName}"" was created successfully.");
+
+            var process = Process.Start(new ProcessStartInfo()
+            {
+                FileName = "/bin/sh",
+                Arguments = "-c \"ls -la\"",
+                WorkingDirectory = workingDir
+            });
+
+            new Command(process)
+                .WorkingDirectory(workingDir)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.HaveStdOutMatching("^-rw-------.*nuget.config$", RegexOptions.Multiline);
+
+            Directory.Delete(workingDir, true);
+        }
+
         #region Project templates language features tests
 
         /// <summary>
@@ -326,7 +370,9 @@ Restore succeeded\.",
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(TopLevelProgramSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public void TopLevelProgramSupport(string name, bool buildPass, string? framework, string? langVersion, bool supportsFeature)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
@@ -538,7 +584,9 @@ class Program
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(NullableSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public void NullableSupport(string name, bool buildPass, string? framework, string? langVersion, bool supportsFeature)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
@@ -640,7 +688,9 @@ class Program
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(ImplicitUsingsSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public void ImplicitUsingsSupport(string name, bool buildPass, string? framework, string? langVersion, bool supportsFeature)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
@@ -727,7 +777,9 @@ class Program
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations.https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(FileScopedNamespacesSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public void FileScopedNamespacesSupport(string name, bool pass, string? framework, string? langVersion, bool supportsFeature)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");

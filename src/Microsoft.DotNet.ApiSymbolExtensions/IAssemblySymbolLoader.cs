@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 
-namespace Microsoft.DotNet.ApiCompatibility
+namespace Microsoft.DotNet.ApiSymbolExtensions
 {
     /// <summary>
     /// Loads <see cref="IAssemblySymbol"/> objects from source files, binaries or directories containing binaries.

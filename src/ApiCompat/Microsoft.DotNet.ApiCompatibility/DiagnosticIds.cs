@@ -30,7 +30,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         public const string CannotExpandVisibility = "CP0020";
 
         // Assembly loading ids
-        public const string AssemblyNotFound = "CP1001";
         public const string AssemblyReferenceNotFound = "CP1002";
     }
 }

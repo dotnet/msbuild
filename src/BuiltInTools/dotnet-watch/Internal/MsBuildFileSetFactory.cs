@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
@@ -67,7 +68,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
         public async Task<FileSet> CreateAsync(CancellationToken cancellationToken)
         {
-            var watchList = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var watchList = Path.GetTempFileName();
             try
             {
                 var projectDir = Path.GetDirectoryName(_projectFile);
@@ -150,14 +151,12 @@ namespace Microsoft.DotNet.Watcher.Internal
                         Debug.Assert(fileItems.All(f => Path.IsPathRooted(f.FilePath)), "All files should be rooted paths");
 #endif
 
-                        // TargetFrameworkVersion appears as v6.0 in msbuild. Ignore the leading v
-                        var targetFrameworkVersion = !string.IsNullOrEmpty(result.TargetFrameworkVersion) ?
-                            Version.Parse(result.TargetFrameworkVersion.AsSpan(1)) : // Ignore leading v
-                            null;
                         var projectInfo = new ProjectInfo(
                             _projectFile,
                             result.IsNetCoreApp,
-                            targetFrameworkVersion,
+                            EnvironmentVariableNames.TryParseTargetFrameworkVersion(result.TargetFrameworkVersion),
+                            result.RuntimeIdentifier,
+                            result.DefaultAppHostRuntimeIdentifier,
                             result.RunCommand,
                             result.RunArguments,
                             result.RunWorkingDirectory);

@@ -104,6 +104,9 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] TargetILCompilerPacks { get; set; }
 
+        [Output]
+        public ITaskItem[] ImplicitPackageReferences { get; set; }
+
         //  Runtime packs which aren't available for the specified RuntimeIdentifier
         [Output]
         public ITaskItem[] UnavailableRuntimePacks { get; set; }
@@ -621,6 +624,9 @@ namespace Microsoft.NET.Build.Tasks
             else
             {
                 HostILCompilerPacks = new[] { newItem };
+                var ilCompilerBuildPackageReference = new TaskItem(knownPack.ItemSpec);
+                ilCompilerBuildPackageReference.SetMetadata(MetadataKeys.Version, packVersion);
+                ImplicitPackageReferences = new[] { ilCompilerBuildPackageReference };
                 // ILCompiler supports cross target compilation. If there is a cross-target request, we need to download that package as well
                 // We expect RuntimeIdentifier to be defined during publish but can allow during build
                 if (RuntimeIdentifier != null)
@@ -633,17 +639,13 @@ namespace Microsoft.NET.Build.Tasks
                     if (!hostRuntimeIdentifier.Equals(targetRuntimeIdentifier))
                     {
                         var runtimeIlcPackName = packPattern.Replace("**RID**", targetRuntimeIdentifier);
-                        TaskItem targetIlcPackToDownload = new TaskItem(runtimeIlcPackName);
-                        targetIlcPackToDownload.SetMetadata(MetadataKeys.Version, packVersion);
-                        packagesToDownload.Add(targetIlcPackToDownload);
-
                         var newItem2 = new TaskItem(runtimeIlcPackName);
                         newItem2.SetMetadata(MetadataKeys.NuGetPackageId, runtimeIlcPackName);
                         newItem2.SetMetadata(MetadataKeys.NuGetPackageVersion, packVersion);
                         TargetILCompilerPacks = new[] { newItem2 };
                     }
                 }
-            }            
+            }
 
             return true;
         }

@@ -37,6 +37,5 @@ namespace Microsoft.NET.Build.Tasks
 
             return s_assemblyExtensions.Contains(extension) ? GetAssemblyVersion(sourcePath) : null;
         }
-
     }
 }

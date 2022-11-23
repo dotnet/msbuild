@@ -74,7 +74,7 @@
 
 # ApiCompat tools owned by runtime team
 # Area-ApiCompat
-/src/ApiCompat/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
-/src/Tests/Microsoft.DotNet.ApiCompatibility*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
-/src/Tests/Microsoft.DotNet.ApiCompat*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
-/src/Tests/Microsoft.DotNet.PackageValidation*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+/src/ApiCompat/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.ApiCompatibility*/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.ApiCompat*/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.PackageValidation*/ @dotnet/area-infrastructure-libraries

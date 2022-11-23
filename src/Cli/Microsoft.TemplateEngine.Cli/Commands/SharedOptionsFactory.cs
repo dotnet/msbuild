@@ -134,7 +134,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 Description = SymbolStrings.Option_Columns,
                 AllowMultipleArgumentsPerToken = true,
             };
-            option.FromAmong(
+            option.AcceptOnlyFromAmong(
                 TabularOutputSettings.ColumnNames.Author,
                 TabularOutputSettings.ColumnNames.Language,
                 TabularOutputSettings.ColumnNames.Type,

@@ -23,3 +23,4 @@
 - Install RC version of runtime -- https://github.com/dotnet/installer/commit/ea68501d392ab28b32af5d62946a764e2fadf88c
 - Update Templates -- https://github.com/dotnet/installer/pull/12946
 - Update DefaultKnownFrameworkReference to be the .0 versions -- https://github.com/dotnet/installer/pull/12654/commits/0e9ba442710970aabef42bbd3a2da69e30f031d4
+- Update to the 7.0.0 templates in installer after release -- https://github.com/dotnet/installer/pull/14961

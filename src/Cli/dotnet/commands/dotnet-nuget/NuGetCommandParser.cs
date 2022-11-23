@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Cli
             var localsCommand = new Command("locals");
 
             localsCommand.AddArgument(new Argument<string>("folders")
-                .FromAmong(new string[] { "all", "http-cache", "global-packages", "plugins-cache", "temp" }));
+                .AcceptOnlyFromAmong(new string[] { "all", "http-cache", "global-packages", "plugins-cache", "temp" }));
 
             localsCommand.AddOption(new Option<bool>("--force-english-output"));
             localsCommand.AddOption(new Option<bool>(new string[] { "-c", "--clear" }));
@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.Cli
             var trustCommand = new Command("trust");
 
             trustCommand.AddArgument(new Argument<string>("command") { Arity = ArgumentArity.ZeroOrOne }
-                         .FromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" }));
+                         .AcceptOnlyFromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" }));
 
             trustCommand.AddOption(new Option<string>("--algorithm"));
             trustCommand.AddOption(new Option<bool>("--allow-untrusted-root"));

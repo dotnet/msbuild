@@ -28,6 +28,21 @@
   },
   "postActions": [
     {
+      "id": "chmod",
+      "condition": "(OS != \"Windows_NT\") && (HostIdentifier == \"dotnetcli\" || HostIdentifier == \"dotnetcli-preview\")",
+      "description": "Apply permissions",
+      "manualInstructions": [
+        {
+          "text": "Run 'chmod 600 nuget.config'"
+        }
+      ],
+      "actionId": "cb9a6cf3-4f5c-4860-b9d2-03a574959774",
+      "args": {
+        "600": "nuget.config"
+      },
+      "continueOnError": false
+    },
+    {
       "id": "open-file",
       "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
       "description": "Opens nuget.config in the editor",

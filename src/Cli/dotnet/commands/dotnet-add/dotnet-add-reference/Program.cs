@@ -22,21 +22,21 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         public AddProjectToProjectReferenceCommand(ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.GetValueForArgument(AddCommandParser.ProjectArgument);
+            _fileOrDirectory = parseResult.GetValue(AddCommandParser.ProjectArgument);
         }
 
         public override int Execute()
         {
             var projects = new ProjectCollection();
-            bool interactive = _parseResult.GetValueForOption(AddProjectToProjectReferenceParser.InteractiveOption);
+            bool interactive = _parseResult.GetValue(AddProjectToProjectReferenceParser.InteractiveOption);
             MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(
                 projects,
                 _fileOrDirectory,
                 interactive);
 
-            var frameworkString = _parseResult.GetValueForOption(AddProjectToProjectReferenceParser.FrameworkOption);
+            var frameworkString = _parseResult.GetValue(AddProjectToProjectReferenceParser.FrameworkOption);
 
-            var arguments = _parseResult.GetValueForArgument(AddProjectToProjectReferenceParser.ProjectPathArgument).ToList().AsReadOnly();
+            var arguments = _parseResult.GetValue(AddProjectToProjectReferenceParser.ProjectPathArgument).ToList().AsReadOnly();
             PathUtility.EnsureAllPathsExist(arguments,
                 CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
             List<MsbuildProject> refs =

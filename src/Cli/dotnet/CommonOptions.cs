@@ -23,14 +23,14 @@ namespace Microsoft.DotNet.Cli
                 IsHidden = true
             }.ForwardAsProperty()
             .AllowSingleArgPerToken();
-            
+
         public static Option<VerbosityOptions> VerbosityOption =
             new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
                 description: CommonLocalizableStrings.VerbosityOptionDescription)
-                {
-                    ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
-                }.ForwardAsSingle(o => $"-verbosity:{o}");
+            {
+                ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
+            }.ForwardAsSingle(o => $"-verbosity:{o}");
 
         public static Option<VerbosityOptions> HiddenVerbosityOption =
             new ForwardedOption<VerbosityOptions>(
@@ -47,15 +47,15 @@ namespace Microsoft.DotNet.Cli
                 description)
             {
                 ArgumentHelpName = CommonLocalizableStrings.FrameworkArgumentName
-                    
+
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
             .AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
         private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
         private static Func<string, IEnumerable<string>> RuntimeArgFunc = o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
-        private static CompletionDelegate RuntimeCompletions = Complete.RunTimesFromProjectFile;
-        
-        public static Option<string> RuntimeOption = 
+        private static Func<CompletionContext, IEnumerable<CompletionItem>> RuntimeCompletions = Complete.RunTimesFromProjectFile;
+
+        public static Option<string> RuntimeOption =
             new ForwardedOption<string>(
                 new string[] { "-r", "--runtime" })
             {
@@ -72,7 +72,9 @@ namespace Microsoft.DotNet.Cli
             .AddCompletions(RuntimeCompletions);
 
         public static Option<bool> CurrentRuntimeOption(string description) =>
-            new ForwardedOption<bool>("--use-current-runtime", description)
+            new ForwardedOption<bool>(
+                new string[] { "--ucr", "--use-current-runtime" },
+                description)
                 .ForwardAs("-property:UseCurrentRuntimeIdentifier=True");
 
         public static Option<string> ConfigurationOption(string description) =>
@@ -133,9 +135,9 @@ namespace Microsoft.DotNet.Cli
             .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
         internal static string ArchOptionValue(ParseResult parseResult) =>
-            string.IsNullOrEmpty(parseResult.GetValueForOption(CommonOptions.ArchitectureOption)) ?
-                parseResult.GetValueForOption(CommonOptions.LongFormArchitectureOption) :
-                parseResult.GetValueForOption(CommonOptions.ArchitectureOption);
+            string.IsNullOrEmpty(parseResult.GetValue(CommonOptions.ArchitectureOption)) ?
+                parseResult.GetValue(CommonOptions.LongFormArchitectureOption) :
+                parseResult.GetValue(CommonOptions.ArchitectureOption);
 
         public static Option<string> OperatingSystemOption =
             new ForwardedOption<string>(
@@ -156,7 +158,7 @@ namespace Microsoft.DotNet.Cli
                 "--no-self-contained",
                 CommonLocalizableStrings.FrameworkDependentOptionDescription)
             // Flip the argument so that if this option is specified we get selfcontained=false
-            .SetForwardingFunction((arg, p) => ForwardSelfContainedOptions(!arg, p)); 
+            .SetForwardingFunction((arg, p) => ForwardSelfContainedOptions(!arg, p));
 
         public static readonly Option<string> TestPlatformOption = new Option<string>("--Platform");
 
@@ -184,7 +186,7 @@ namespace Microsoft.DotNet.Cli
                 // ResolveOsOptionToRuntimeIdentifier handles resolving the RID when both arch and os are specified
                 return Array.Empty<string>();
             }
-            
+
             var selfContainedSpecified = parseResult.HasOption(SelfContainedOption) || parseResult.HasOption(NoSelfContainedOption);
             return ResolveRidShorthandOptions(null, arg, selfContainedSpecified);
         }

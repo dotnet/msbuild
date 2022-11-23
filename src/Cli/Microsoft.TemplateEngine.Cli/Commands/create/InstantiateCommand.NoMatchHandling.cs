@@ -152,11 +152,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (templateGroup.ShortNames.Any())
             {
                 reporter.WriteLine(LocalizableStrings.InvalidParameterTemplateHint);
-                reporter.WriteCommand(
-                    Example
-                        .For<NewCommand>(args.ParseResult)
-                        .WithArgument(NewCommand.ShortNameArgument, templateGroup.ShortNames[0])
-                        .WithHelpOption());
+                var example = Example
+                    .For<NewCommand>(args.ParseResult)
+                    .WithArgument(NewCommand.ShortNameArgument, templateGroup.ShortNames[0]);
+                var language = matchInfos.Where(mi => mi.Language != null).FirstOrDefault()?.Language;
+                if (language != null)
+                {
+                    example.WithOption(language.Option, language.GetValueOrDefault<string>()!);
+                }
+                example.WithHelpOption();
+                reporter.WriteCommand(example);
             }
 
             return invalidOptionsList.Any() ? NewCommandStatus.InvalidOption : NewCommandStatus.NotFound;

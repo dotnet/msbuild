@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
             string msbuildAdditionalSdkResolverFolder = netFramework ? "-e DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER=%HELIX_CORRELATION_PAYLOAD%\\r" : IsPosixShell ? "" : "-msbuildAdditionalSdkResolverFolder %HELIX_CORRELATION_PAYLOAD%\\r";
 
-            var scheduler = new AssemblyScheduler(methodLimit: 32);
+            var scheduler = new AssemblyScheduler(methodLimit: !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("TestFullMSBuild")) ? 32 : 16);
             var assemblyPartitionInfos = scheduler.Schedule(targetPath, netFramework: netFramework);
 
             var partitionedWorkItem = new List<ITaskItem>();

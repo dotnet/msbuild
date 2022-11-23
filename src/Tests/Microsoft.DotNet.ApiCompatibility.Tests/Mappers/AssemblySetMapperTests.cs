@@ -116,9 +116,9 @@ namespace NamespaceInAssemblyD
 }
 "
             };
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> left = SymbolFactory.GetElementContainersFromSyntaxes(leftSyntaxes);
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> right1 = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes1);
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> right2 = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes2);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> left = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(leftSyntaxes);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right1 = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes1);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right2 = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes2);
             AssemblySetMapper assemblySetMapper = new(Mock.Of<IRuleRunner>(), new MapperSettings(), rightSetSize: 2);
             assemblySetMapper.AddElement(left, ElementSide.Left);
             assemblySetMapper.AddElement(right1, ElementSide.Right);

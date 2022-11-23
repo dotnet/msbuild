@@ -580,6 +580,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1182: le ciblage de .NET 6.0 ou plus dans Visual Studio 2019 n’est pas pris en charge.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
+      <trans-unit id="Net7NotCompatibleWithDev173">
+        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
+        <target state="translated">NETSDK1192: le ciblage de .NET 7.0 ou plus dans Visual Studio 2022 17.3 n’est pas pris en charge.</target>
+        <note>{StrBegin="NETSDK1192: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: il n'existe aucun d'hôte d'application disponible pour le RuntimeIdentifier spécifié '{0}'.</target>
@@ -714,6 +719,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>
         <target state="translated">NETSDK1122: la compilation ReadyToRun va être ignorée, car elle est uniquement prise en charge pour .NET Core 3.0 ou une version ultérieure.</target>
         <note>{StrBegin="NETSDK1122: "}</note>
+      </trans-unit>
+      <trans-unit id="PublishSelfContainedMustBeBool">
+        <source>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</source>
+        <target state="translated">NETSDK1193: Si PublishSelfContained est défini, il doit avoir la valeur true ou false. La valeur donnée a été '{0}'.</target>
+        <note>{StrBegin="NETSDK1193: "}</note>
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">
         <source>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</source>

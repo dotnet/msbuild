@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Rules;
+using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Moq;
 using Xunit;
 

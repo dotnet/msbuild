@@ -85,7 +85,8 @@ namespace Microsoft.DotNet.ShellShim
                             ex);
                     }
                 },
-                rollback: () => {
+                rollback: () =>
+                {
                     foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                     {
                         File.Delete(file.Value);
@@ -97,12 +98,13 @@ namespace Microsoft.DotNet.ShellShim
         {
             var files = new Dictionary<string, string>();
             TransactionalAction.Run(
-                action: () => {
+                action: () =>
+                {
                     try
                     {
                         foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
-                            var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                            var tempPath = Path.Combine(_fileSystem.Directory.CreateTemporarySubdirectory(), Path.GetRandomFileName());
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(file.Value, tempPath));
                             files[file.Value] = tempPath;
                         }
@@ -118,13 +120,15 @@ namespace Microsoft.DotNet.ShellShim
                             ex);
                     }
                 },
-                commit: () => {
+                commit: () =>
+                {
                     foreach (var value in files.Values)
                     {
                         _fileSystem.File.Delete(value);
                     }
                 },
-                rollback: () => {
+                rollback: () =>
+                {
                     foreach (var kvp in files)
                     {
                         FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(kvp.Value, kvp.Key));

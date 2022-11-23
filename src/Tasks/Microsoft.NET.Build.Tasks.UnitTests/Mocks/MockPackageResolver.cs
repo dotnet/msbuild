@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using NuGet.ProjectModel;
 using NuGet.Versioning;
 using System.IO;
 
@@ -24,5 +25,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             packageRoot = _root;
             return Path.Combine(_root, packageId, version.ToNormalizedString(), "path");
         }
+
+        public string ResolvePackageAssetPath(LockFileTargetLibrary package, string relativePath) => Path.Combine(GetPackageDirectory(package.Name, package.Version), relativePath);
     }
 }

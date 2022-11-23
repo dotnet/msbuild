@@ -9,14 +9,13 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Xunit;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests
+namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
 {
     internal static class SymbolFactory
     {
-        internal static string EmitAssemblyFromSyntax(string syntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
+        public static string EmitAssemblyFromSyntax(string syntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
         {
             CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey);
 
@@ -30,7 +29,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             return assemblyPath;
         }
 
-        internal static IAssemblySymbol GetAssemblyFromSyntax(string syntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
+        public static IAssemblySymbol GetAssemblyFromSyntax(string syntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
         {
             CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey);
 
@@ -39,7 +38,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             return compilation.Assembly;
         }
 
-        internal static IAssemblySymbol GetAssemblyFromSyntaxWithReferences(string syntax, IEnumerable<string> referencesSyntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
+        public static IAssemblySymbol GetAssemblyFromSyntaxWithReferences(string syntax, IEnumerable<string> referencesSyntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
         {
             CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey);
             CSharpCompilation compilationWithReferences = CreateCSharpCompilationFromSyntax(referencesSyntax, $"{assemblyName}_reference", enableNullable, publicKey);
@@ -49,27 +48,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.Empty(compilation.GetDiagnostics());
 
             return compilation.Assembly;
-        }
-
-        internal static IReadOnlyList<ElementContainer<IAssemblySymbol>> GetElementContainersFromSyntaxes(IEnumerable<string> syntaxes, IEnumerable<string> referencesSyntax = null, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
-        {
-            int i = 0;
-            List<ElementContainer<IAssemblySymbol>> result = new();
-            foreach (string syntax in syntaxes)
-            {
-                string asmName = $"{assemblyName}-{i}";
-                MetadataInformation info = new(asmName, $"runtime-{i}");
-                IAssemblySymbol symbol = referencesSyntax != null ?
-                    GetAssemblyFromSyntaxWithReferences(syntax, referencesSyntax, enableNullable, publicKey, asmName) :
-                    GetAssemblyFromSyntax(syntax, enableNullable, publicKey, asmName);
-
-                ElementContainer<IAssemblySymbol> container = new(symbol, info);
-                result.Add(container);
-
-                i++;
-            }
-
-            return result;
         }
 
         private static CSharpCompilation CreateCSharpCompilationFromSyntax(string syntax, string name, bool enableNullable, byte[] publicKey)

@@ -74,12 +74,12 @@ namespace Microsoft.DotNet.Cli
 
             static CliTemplateEngineHost GetEngineHost(ParseResult parseResult)
             {
-                bool disableSdkTemplates = parseResult.GetValueForOption(s_disableSdkTemplatesOption);
-                bool disableProjectContext = parseResult.GetValueForOption(s_disableProjectContextEvaluationOption)
+                bool disableSdkTemplates = parseResult.GetValue(s_disableSdkTemplatesOption);
+                bool disableProjectContext = parseResult.GetValue(s_disableProjectContextEvaluationOption)
                     || Env.GetEnvironmentVariableAsBool(EnableProjectContextEvaluationEnvVarName);
-                bool diagnosticMode = parseResult.GetValueForOption(s_diagnosticOption);
-                FileInfo? projectPath = parseResult.GetValueForOption(SharedOptions.ProjectPathOption);
-                FileInfo? outputPath = parseResult.GetValueForOption(SharedOptions.OutputOption);
+                bool diagnosticMode = parseResult.GetValue(s_diagnosticOption);
+                FileInfo? projectPath = parseResult.GetValue(SharedOptions.ProjectPathOption);
+                FileInfo? outputPath = parseResult.GetValue(SharedOptions.OutputOption);
 
                 OptionResult? verbosityOptionResult = parseResult.FindResultFor(s_verbosityOption);
                 VerbosityOptions verbosity = DefaultVerbosity;
@@ -145,7 +145,10 @@ namespace Microsoft.DotNet.Cli
                 builtIns.Add((typeof(ITemplateConstraintFactory), new ProjectCapabilityConstraintFactory()));
                 builtIns.Add((typeof(MSBuildEvaluator), new MSBuildEvaluator(outputDirectory: outputPath?.FullName, projectPath: projectPath?.FullName)));
             }
-            builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(new WorkloadInfoHelper())));
+
+            builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(
+                    new Lazy<IWorkloadsRepositoryEnumerator>(() => new WorkloadInfoHelper())))
+            );
             builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
 
             string? preferredLangEnvVar = Environment.GetEnvironmentVariable(PrefferedLangEnvVarName);
@@ -160,7 +163,7 @@ namespace Microsoft.DotNet.Cli
             };
             return new CliTemplateEngineHost(
                 HostIdentifier,
-                "v" + Product.Version,
+                Product.Version,
                 preferences,
                 builtIns,
                 outputPath: outputPath?.FullName,

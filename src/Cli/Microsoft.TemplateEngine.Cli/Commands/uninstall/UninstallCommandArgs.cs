@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public UninstallCommandArgs(BaseUninstallCommand uninstallCommand, ParseResult parseResult) : base(uninstallCommand, parseResult)
         {
-            TemplatePackages = parseResult.GetValueForArgument(BaseUninstallCommand.NameArgument) ?? Array.Empty<string>();
+            TemplatePackages = parseResult.GetValue(BaseUninstallCommand.NameArgument) ?? Array.Empty<string>();
 
             //workaround for --install source1 --install source2 case
             if (uninstallCommand is LegacyUninstallCommand && uninstallCommand.Aliases.Any(alias => TemplatePackages.Contains(alias)))

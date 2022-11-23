@@ -42,6 +42,13 @@
         <target state="translated">Znaleziono wiele projektów: {0}.</target>
         <note>{0} - semi-colon separated list of path to projects found.</note>
       </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
+        <source>Add project reference to solution action is not configured correctly in the template.
+    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
+        <target state="translated">Odwołanie do dodawania projektu do akcji rozwiązania nie jest poprawnie skonfigurowane w szablonie.
+ Elementów "solutionFolder" i "inRoot" nie można używać razem; użyj tylko jednej z opcji.</target>
+        <note>do not translate: 'solutionFolder', 'inRoot'</note>
+      </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
         <target state="translated">Dodawanie odwołania projektu do akcji rozwiązania nie jest poprawnie skonfigurowane w szablonie. Nie można określić plików projektu do dodania.</target>
@@ -62,6 +69,16 @@
         <target state="translated">Nie można dodać projektów do pliku rozwiązania.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_InRoot_Running">
+        <source>Adding
+    project(s): {0}
+    in the root of solution file: {1}</source>
+        <target state="translated">Dodawanie
+    projektów: {0}
+    w katalogu głównym pliku rozwiązania: {1}</target>
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</note>
+      </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
         <source>Adding
     project(s): {0}
@@ -71,7 +88,9 @@
     projektu (-ów): {0}
     do pliku rozwiązania: {1}
     folder rozwiązania: {2}</target>
-        <note />
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
         <source>Successfully added project(s) to a solution file.</source>
@@ -231,7 +250,7 @@
       <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
         <source>Run 'dotnet restore {0}' to restore the project.</source>
         <target state="translated">Uruchom polecenie „dotnet restore {0}”, aby przywrócić projekt.</target>
-        <note>do not translate 'dotnet restore {0}'</note>
+        <note>{Locked="dotnet restore {0}"}</note>
       </trans-unit>
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
         <source>Project context</source>
@@ -255,8 +274,8 @@
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
-        <target state="translated">Uruchom „wyszukiwanie obciążenia dotnet”, aby wyszukać obciążenia dostępne do zainstalowania w twoim zestawie SDK.</target>
-        <note />
+        <target state="translated">Uruchom 'dotnet workload search', aby wyszukać obciążenia dostępne do zainstalowania w twoim zestawie SDK.</target>
+        <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
     </body>
   </file>

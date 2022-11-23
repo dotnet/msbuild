@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new DocumentedCommand("fsi", DocsLink) { Arguments };
 
-            command.SetHandler((ParseResult parseResult) => FsiCommand.Run(parseResult.GetValueForArgument(Arguments)));
+            command.SetHandler((ParseResult parseResult) => FsiCommand.Run(parseResult.GetValue(Arguments)));
 
             return command;
         }

@@ -37,6 +37,11 @@
         <target state="translated">ID nainstalované úlohy</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadInfoDescription">
+        <source>Display information about installed workloads.</source>
+        <target state="translated">Zobrazí informace o nainstalovaných úlohách.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">
         <source>Install Type</source>
         <target state="translated">Typ instalace</target>

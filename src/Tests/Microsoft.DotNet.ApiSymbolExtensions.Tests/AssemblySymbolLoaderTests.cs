@@ -17,7 +17,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests
+namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
 {
     public class AssemblySymbolLoaderTests : SdkTest
     {
@@ -135,7 +135,7 @@ namespace MyNamespace
 
             IEnumerable<AssemblyLoadWarning> expected = new[]
             {
-                new AssemblyLoadWarning(DiagnosticIds.AssemblyNotFound, assembly.Identity.GetDisplayName(), $"Could not find matching assembly: '{assembly.Identity.GetDisplayName()}' in any of the search directories.")
+                new AssemblyLoadWarning(AssemblySymbolLoader.AssemblyNotFoundErrorCode, assembly.Identity.GetDisplayName(), $"Could not find matching assembly: '{assembly.Identity.GetDisplayName()}' in any of the search directories.")
             };
 
             Assert.Equal(expected, warnings);
@@ -186,7 +186,7 @@ namespace MyNamespace
 
                 IEnumerable<AssemblyLoadWarning> expected = new[]
                 {
-                    new AssemblyLoadWarning(DiagnosticIds.AssemblyNotFound, fromAssembly.Identity.GetDisplayName(), $"Could not find matching assembly: '{fromAssembly.Identity.GetDisplayName()}' in any of the search directories.")
+                    new AssemblyLoadWarning(AssemblySymbolLoader.AssemblyNotFoundErrorCode, fromAssembly.Identity.GetDisplayName(), $"Could not find matching assembly: '{fromAssembly.Identity.GetDisplayName()}' in any of the search directories.")
                 };
 
                 Assert.Equal(expected, warnings);
@@ -288,7 +288,7 @@ namespace MyNamespace
 
                 IEnumerable<AssemblyLoadWarning> expected = new List<AssemblyLoadWarning>
                 {
-                    new AssemblyLoadWarning(DiagnosticIds.AssemblyReferenceNotFound, expectedReference, $"Could not resolve reference '{expectedReference}' in any of the provided search directories.")
+                    new AssemblyLoadWarning(AssemblySymbolLoader.AssemblyReferenceNotFoundErrorCode, expectedReference, $"Could not resolve reference '{expectedReference}' in any of the provided search directories.")
                 };
 
                 Assert.Equal(expected, warnings);

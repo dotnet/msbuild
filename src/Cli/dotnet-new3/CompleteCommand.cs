@@ -35,8 +35,8 @@ namespace Dotnet_new3
         {
             try
             {
-                var input = result.GetValueForArgument(PathArgument) ?? string.Empty;
-                var position = result.GetValueForOption(PositionOption);
+                var input = result.GetValue(PathArgument) ?? string.Empty;
+                var position = result.GetValue(PositionOption);
 
                 if (position > input.Length)
                 {

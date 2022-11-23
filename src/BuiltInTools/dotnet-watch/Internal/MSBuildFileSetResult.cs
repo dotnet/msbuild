@@ -18,6 +18,10 @@ namespace Microsoft.DotNet.Watcher.Internal
 
         public string TargetFrameworkVersion { get; set; }
 
+        public string RuntimeIdentifier { get; set; }
+
+        public string DefaultAppHostRuntimeIdentifier { get; set; }
+
         public Dictionary<string, ProjectItems> Projects { get; set; }
     }
 

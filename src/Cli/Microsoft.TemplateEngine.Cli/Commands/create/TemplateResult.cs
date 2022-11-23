@@ -3,6 +3,7 @@
 //
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -29,6 +30,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal bool IsBaselineMatch { get; private set; }
 
+        internal OptionResult? Language { get; private set; }
+
         internal CliTemplateInfo TemplateInfo => _templateCommand.Template;
 
         internal IEnumerable<TemplateOptionResult> ValidTemplateOptions => _parametersInfo.Where(i => !(i is InvalidTemplateOptionResult));
@@ -41,6 +44,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             result.IsLanguageMatch = templateCommand.LanguageOption == null || !parseResult.HasErrorFor(templateCommand.LanguageOption);
             result.IsTypeMatch = templateCommand.TypeOption == null || !parseResult.HasErrorFor(templateCommand.TypeOption);
             result.IsBaselineMatch = templateCommand.BaselineOption == null || !parseResult.HasErrorFor(templateCommand.BaselineOption);
+
+            if (templateCommand.LanguageOption != null && result.IsTemplateMatch)
+            {
+                result.Language = parseResult.FindResultFor(templateCommand.LanguageOption);
+            }
+
             foreach (var option in templateCommand.TemplateOptions)
             {
                 if (parseResult.HasErrorFor(option.Value.Option))

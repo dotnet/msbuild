@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithParamsSharingPrefix",
+  "identity": "TestAssets.TemplateWithParamsSharingPrefix",
+  "groupIdentity": "TestAssets.TemplateWithParamsSharingPrefix",
+  "shortName": "TestAssets.TemplateWithParamsSharingPrefix",
+  "tags": { "type": "project" },
+  "symbols": {
+    "Param1": {
+      "type": "parameter"
+    },
+    "Param2": {
+      "type": "parameter"
+    },
+    "Param3": {
+      "type": "parameter"
+    },
+    "Param4": {
+      "type": "parameter"
+    }
+  }
+}

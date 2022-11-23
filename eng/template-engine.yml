@@ -33,7 +33,7 @@ jobs:
             name: NetCore1ESPool-Internal
             demands: ImageOverride -equals 1es-ubuntu-2004
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: 'ubuntu.2004.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-20.04-helix-amd64-20220502145738-4b2e4c2'
+          helixTargetQueue: 'ubuntu.2004.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-20.04-helix-amd64'
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Ubuntu.2004.Amd64
         strategy:

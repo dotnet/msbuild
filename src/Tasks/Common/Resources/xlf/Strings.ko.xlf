@@ -580,6 +580,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1182: Visual Studio 2019에서 .NET 6.0 이상을 대상으로 하는 것은 지원되지 않습니다.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
+      <trans-unit id="Net7NotCompatibleWithDev173">
+        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
+        <target state="translated">NETSDK1192: Visual Studio 2022 17.3에서 .NET 7.0 이상을 대상으로 하는 것은 지원되지 않습니다.</target>
+        <note>{StrBegin="NETSDK1192: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: 지정된 RuntimeIdentifier '{0}'에 사용할 수 있는 애플리케이션 호스트가 없습니다.</target>
@@ -714,6 +719,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>
         <target state="translated">NETSDK1122: ReadyToRun 컴파일은 .NET Core 3.0 이상에서만 지원되므로 건너뜁니다.</target>
         <note>{StrBegin="NETSDK1122: "}</note>
+      </trans-unit>
+      <trans-unit id="PublishSelfContainedMustBeBool">
+        <source>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</source>
+        <target state="translated">NETSDK1193: PublishSelfContained가 설정된 경우 true 또는 false여야 합니다. 지정된 값은 '{0}'입니다.</target>
+        <note>{StrBegin="NETSDK1193: "}</note>
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">
         <source>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</source>

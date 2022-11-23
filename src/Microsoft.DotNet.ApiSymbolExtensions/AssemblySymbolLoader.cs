@@ -12,23 +12,31 @@ using System.Reflection.PortableExecutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Microsoft.DotNet.ApiCompatibility
+namespace Microsoft.DotNet.ApiSymbolExtensions
 {
     /// <summary>
     /// Loads <see cref="IAssemblySymbol"/> objects from source files, binaries or directories containing binaries.
     /// </summary>
     public class AssemblySymbolLoader : IAssemblySymbolLoader
     {
-        /// <summary>
-        /// Dictionary that holds the paths to help loading dependencies. Keys will be assembly name and 
-        /// value are the containing folder.
-        /// </summary>
+        // Dictionary that holds the paths to help loading dependencies. Keys will be assembly name and 
+        // value are the containing folder.
         private readonly Dictionary<string, string> _referencePathFiles = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _referencePathDirectories = new(StringComparer.OrdinalIgnoreCase);
         private readonly List<AssemblyLoadWarning> _warnings = new();
         private readonly Dictionary<string, MetadataReference> _loadedAssemblies;
         private readonly bool _resolveReferences;
         private CSharpCompilation _cSharpCompilation;
+
+        /// <summary>
+        /// Error code that is emitted when an assembly isn't found.
+        /// </summary>
+        public const string AssemblyNotFoundErrorCode = "CP1001";
+
+        /// <summary>
+        /// Error code that is emitted when an assembly reference isn't found.
+        /// </summary>
+        public const string AssemblyReferenceNotFoundErrorCode = "CP1002";
 
         /// <inheritdoc />
         public AssemblySymbolLoader(bool resolveAssemblyReferences = false)
@@ -189,11 +197,6 @@ namespace Microsoft.DotNet.ApiCompatibility
             List<SyntaxTree> syntaxTrees = new();
             foreach (string filePath in filePaths)
             {
-                if (!File.Exists(filePath))
-                {
-                    throw new FileNotFoundException(string.Format(Resources.FileDoesNotExist, filePath));
-                }
-
                 syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(filePath)));
             }
 
@@ -242,7 +245,9 @@ namespace Microsoft.DotNet.ApiCompatibility
                 if (warnOnMissingAssemblies && !found)
                 {
                     string assemblyInfo = validateMatchingIdentity ? assembly.Identity.GetDisplayName() : assembly.Name;
-                    _warnings.Add(new AssemblyLoadWarning(DiagnosticIds.AssemblyNotFound, assemblyInfo, string.Format(Resources.MatchingAssemblyNotFound, assemblyInfo)));
+                    _warnings.Add(new AssemblyLoadWarning(AssemblyNotFoundErrorCode,
+                        assemblyInfo,
+                        string.Format(Resources.MatchingAssemblyNotFound, assemblyInfo)));
                 }
             }
 
@@ -369,7 +374,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                     if (!found)
                     {
                         _warnings.Add(new AssemblyLoadWarning(
-                            DiagnosticIds.AssemblyReferenceNotFound,
+                            AssemblyReferenceNotFoundErrorCode,
                             name,
                             string.Format(Resources.CouldNotResolveReference, name)));
                     }

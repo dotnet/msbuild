@@ -49,14 +49,14 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             IReporter reporter = null)
             : base(parseResult)
         {
-            _packageId = new PackageId(parseResult.GetValueForArgument(ToolUninstallCommandParser.PackageIdArgument));
-            _configFilePath = parseResult.GetValueForOption(ToolUpdateCommandParser.ConfigOption);
-            _framework = parseResult.GetValueForOption(ToolUpdateCommandParser.FrameworkOption);
-            _additionalFeeds = parseResult.GetValueForOption(ToolUpdateCommandParser.AddSourceOption);
-            _packageVersion = parseResult.GetValueForOption(ToolUpdateCommandParser.VersionOption);
-            _global = parseResult.GetValueForOption(ToolUpdateCommandParser.GlobalOption);
-            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolUpdateCommandParser.VerbosityOption));
-            _toolPath = parseResult.GetValueForOption(ToolUpdateCommandParser.ToolPathOption);
+            _packageId = new PackageId(parseResult.GetValue(ToolUninstallCommandParser.PackageIdArgument));
+            _configFilePath = parseResult.GetValue(ToolUpdateCommandParser.ConfigOption);
+            _framework = parseResult.GetValue(ToolUpdateCommandParser.FrameworkOption);
+            _additionalFeeds = parseResult.GetValue(ToolUpdateCommandParser.AddSourceOption);
+            _packageVersion = parseResult.GetValue(ToolUpdateCommandParser.VersionOption);
+            _global = parseResult.GetValue(ToolUpdateCommandParser.GlobalOption);
+            _verbosity = Enum.GetName(parseResult.GetValue(ToolUpdateCommandParser.VerbosityOption));
+            _toolPath = parseResult.GetValue(ToolUpdateCommandParser.ToolPathOption);
             _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand());
 
             _createToolPackageStoreInstallerUninstaller = createToolPackageStoreInstallerUninstaller ??

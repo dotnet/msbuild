@@ -207,6 +207,25 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Fact]
+        public void CanInstantiateTemplate_WithParamsSharingPrefix()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string templateLocation = GetTestTemplateLocation("TemplateWithParamsSharingPrefix");
+
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            // not asserting on actual generated content - as there is none
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithParamsSharingPrefix")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
+        }
+
+        [Fact]
         public void CanInstantiateTemplate_Angular_CanReplaceTextInLargeFile()
         {
             string workingDirectory = CreateTemporaryFolder();
@@ -396,6 +415,21 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.NotHaveStdOutContaining("Usage: new [options]")
                 .And.HaveStdOutContaining("Class Library (C#)")
                 .And.HaveStdOutContaining("--framework");
+        }
+
+        [Theory]
+        [InlineData("-lang", "F#", "--use-program-main")]
+        [InlineData("--language", "F#", "--use-program-main")]
+        [InlineData("-lang", "C#", "--no-exist")]
+        public void ExampleHasLanguageForSepecifiedLanguageWithInvalidOption(string languageOption, string language, string invalidOption)
+        {
+            CommandResult cmd = new DotnetNewCommand(Log, "console", languageOption, language, invalidOption)
+                .WithVirtualHive()
+                .Execute();
+            cmd.Should().Fail()
+                .And.HaveStdErrContaining($"'{invalidOption}' is not a valid option")
+                .And.HaveStdErrContaining("For more information, run:")
+                .And.HaveStdErrContaining($"dotnet new console --language {language} -h");
         }
 
         [Fact]

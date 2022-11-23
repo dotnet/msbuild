@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _fileSystemMockBuilder = FileSystemMockBuilder.Create();
         }
 
-        [Fact(Skip ="Product.Version not set correctly when running tests")]
+        [Fact(Skip = "Product.Version not set correctly when running tests")]
         public void TheSentinelHasTheCurrentVersionInItsName()
         {
             FirstTimeUseNoticeSentinel.SENTINEL.Should().Contain($"{Product.Version}");
@@ -170,6 +170,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             }
 
             public ITemporaryDirectory CreateTemporaryDirectory()
+            {
+                throw new NotImplementedException();
+            }
+
+            public string CreateTemporarySubdirectory()
             {
                 throw new NotImplementedException();
             }

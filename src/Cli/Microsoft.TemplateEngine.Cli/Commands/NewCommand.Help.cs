@@ -9,7 +9,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal partial class NewCommand
     {
-        public IEnumerable<HelpSectionDelegate> CustomHelpLayout()
+        public IEnumerable<Action<HelpContext>> CustomHelpLayout()
         {
             yield return (context) =>
             {

@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public void CanShowBasicInfoWithDebugReinit()
         {
             string home = CreateTemporaryFolder(folderName: "Home");
-            string cacheFilePath = Path.Combine(home, "dotnetcli", Version, "templatecache.json");
+            string cacheFilePath = Path.Combine(home, "dotnetcli", Product.Version, "templatecache.json");
 
             CommandResult commandResult = new DotnetNewCommand(_log)
                 .WithCustomHive(home)
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public void CanShowBasicInfoWithDebugRebuildCache()
         {
             string home = CreateTemporaryFolder(folderName: "Home");
-            string cacheFilePath = Path.Combine(home, "dotnetcli", Version, "templatecache.json");
+            string cacheFilePath = Path.Combine(home, "dotnetcli", Product.Version, "templatecache.json");
 
             CommandResult commandResult = new DotnetNewCommand(_log)
                 .WithCustomHive(home)
@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             Assert.Equal(2, createdCacheEntries.Length);
             Assert.Contains(Path.Combine(home, "packages"), createdCacheEntries);
-            Assert.True(File.Exists(Path.Combine(home, "dotnetcli", Version, "templatecache.json")));
+            Assert.True(File.Exists(Path.Combine(home, "dotnetcli", Product.Version, "templatecache.json")));
         }
 
         [Fact]

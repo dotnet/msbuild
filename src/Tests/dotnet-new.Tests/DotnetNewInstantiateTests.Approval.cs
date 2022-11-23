@@ -436,6 +436,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             return Verify(commandResult.StdErr)
                 .AddScrubber(output =>
                 {
+                    output = output.Replace(_fixture.HomeDirectory, "%HOME%");
                     //unify directory separators
                     output = output.Replace("\\", "/");
                     //order of files may vary, replace filename with placeholders
@@ -549,7 +550,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .AddScrubber(output =>
                 {
                     output.ScrubByRegex("\\-\\-debug\\:custom\\-hive [A-Za-z0-9\\-\\.\\\\\\/\\{\\}\\:_]+", "--debug:custom-hive %SETTINGS DIRECTORY%");
-                    output.ScrubByRegex("dotnetcli \\(version: v[A-Za-z0-9.-]+\\)", "dotnetcli (version: v%VERSION%)");
+                    output.ScrubByRegex("dotnetcli \\(version: [A-Za-z0-9.-]+\\)", "dotnetcli (version: %VERSION%)");
                 });
         }
 
@@ -570,7 +571,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             return Verify(commandResult.StdOut)
                 .AddScrubber(output =>
                 {
-                    output.ScrubByRegex("dotnetcli \\(version: v[A-Za-z0-9.-]+\\)", "dotnetcli (version: v%VERSION%)");
+                    output.ScrubByRegex("dotnetcli \\(version: [A-Za-z0-9.-]+\\)", "dotnetcli (version: %VERSION%)");
                 });
         }
 

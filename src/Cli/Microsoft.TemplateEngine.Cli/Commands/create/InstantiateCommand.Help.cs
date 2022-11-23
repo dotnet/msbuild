@@ -87,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ShowHintForOtherTemplates(templateGroup, preferredTemplate.Template, instantiateCommandArgs, context.Output);
         }
 
-        public IEnumerable<HelpSectionDelegate> CustomHelpLayout()
+        public IEnumerable<Action<HelpContext>> CustomHelpLayout()
         {
             yield return (context) =>
             {

@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Cli
                         Path.Combine(
                             CliFolderPathCalculator.DotnetUserProfileFolderPath,
                             ToolPathSentinelFileName)));
-                if (parseResult.GetValueForOption(Parser.DiagOption) && parseResult.IsDotnetBuiltInCommand())
+                if (parseResult.GetValue(Parser.DiagOption) && parseResult.IsDotnetBuiltInCommand())
                 {
                     Environment.SetEnvironmentVariable(CommandLoggingContext.Variables.Verbose, bool.TrueString);
                     CommandLoggingContext.SetVerbose(true);
@@ -234,7 +234,7 @@ namespace Microsoft.DotNet.Cli
             {
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStart();
                 var resolvedCommand = CommandFactoryUsingResolver.Create(
-                        "dotnet-" + parseResult.GetValueForArgument(Parser.DotnetSubCommand),
+                        "dotnet-" + parseResult.GetValue(Parser.DotnetSubCommand),
                         args.GetSubArguments(),
                         FrameworkConstants.CommonFrameworks.NetStandardApp15);
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();

@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NET.Sdk.FrameworkReferenceResolution.targets
 
@@ -123,6 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="HostILCompilerPacks" ItemName="HostILCompilerPack" />
       <Output TaskParameter="TargetILCompilerPacks" ItemName="TargetILCompilerPack" />
       <Output TaskParameter="UnavailableRuntimePacks" ItemName="UnavailableRuntimePack" />
+      <Output TaskParameter="ImplicitPackageReferences" ItemName="_ImplicitPackageReference" />
 
     </ProcessFrameworkReferences>
 
@@ -174,6 +175,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                         IsImplicitlyDefined="true"
                         PrivateAssets="all"
                         ExcludeAssets="all" />
+    </ItemGroup>
+
+    <!-- Add implicit package references that don't already exist in PackageReference. -->
+    <ItemGroup>
+      <_ImplicitPackageReference Remove="@(PackageReference)" />
+      <PackageReference Include="@(_ImplicitPackageReference)"
+                        IsImplicitlyDefined="true"
+                        PrivateAssets="all" />
     </ItemGroup>
   </Target>
 
