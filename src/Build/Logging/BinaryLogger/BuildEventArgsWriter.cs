@@ -434,6 +434,7 @@ Build
                 case PropertyReassignmentEventArgs propertyReassignment: Write(propertyReassignment); break;
                 case TaskCommandLineEventArgs taskCommandLine: Write(taskCommandLine); break;
                 case UninitializedPropertyReadEventArgs uninitializedPropertyRead: Write(uninitializedPropertyRead); break;
+                case ResponseFileUsedEventArgs responseFileUsed: Write(responseFileUsed); break;
                 case EnvironmentVariableReadEventArgs environmentVariableRead: Write(environmentVariableRead); break;
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: Write(propertyInitialValueSet); break;
                 case CriticalBuildMessageEventArgs criticalBuildMessage: Write(criticalBuildMessage); break;
@@ -506,7 +507,12 @@ Build
             WriteMessageFields(e, writeImportance: true);
             WriteDeduplicatedString(e.EnvironmentVariableName);
         }
-
+        private void Write(ResponseFileUsedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.ResponseFileUsed);
+            WriteMessageFields(e, writeImportance: true);
+            WriteDeduplicatedString(e.ResponseFilePath);
+        }
         private void Write(TaskCommandLineEventArgs e)
         {
             Write(BinaryLogRecordKind.TaskCommandLine);

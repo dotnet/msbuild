@@ -306,6 +306,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripResponseFileUsedEventArgs()
+        {
+            var args = new ResponseFileUsedEventArgs("MSBuild.rsp"); 
+            Roundtrip(args,
+                e => e.Message);
+        }
+         
+        [Fact]
         public void RoundtripCriticalBuildMessageEventArgs()
         {
             var args = new CriticalBuildMessageEventArgs(

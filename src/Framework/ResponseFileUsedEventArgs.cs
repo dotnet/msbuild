@@ -3,21 +3,26 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Arguments for the response file used event
     /// </summary>
     [Serializable]
-    public class ResponseFileUsedEventArgs : CustomBuildEventArgs
+    public class ResponseFileUsedEventArgs : BuildMessageEventArgs
     {
-        public string ResponseFilePath { private set; get; }
+        public ResponseFileUsedEventArgs()
+        {
+        }
         /// <summary>
         /// Initialize a new instance of the ResponseFileUsedEventArgs class.
         /// </summary>
         public ResponseFileUsedEventArgs(string responseFilePath) : base()
         {
-            ResponseFilePath = responseFilePath;
+            this.ResponseFilePath = responseFilePath;
         }
+        public string ResponseFilePath { set; get; }
     }
 }
