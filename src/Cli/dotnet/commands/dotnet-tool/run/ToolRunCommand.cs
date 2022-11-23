@@ -22,8 +22,8 @@ namespace Microsoft.DotNet.Tools.Tool.Run
             LocalToolsCommandResolver localToolsCommandResolver = null)
             : base(result)
         {
-            _toolCommandName = result.GetValueForArgument(ToolRunCommandParser.CommandNameArgument);
-            _forwardArgument = result.GetValueForArgument(ToolRunCommandParser.CommandArgument);
+            _toolCommandName = result.GetValue(ToolRunCommandParser.CommandNameArgument);
+            _forwardArgument = result.GetValue(ToolRunCommandParser.CommandArgument);
             _localToolsCommandResolver = localToolsCommandResolver ?? new LocalToolsCommandResolver();
         }
 

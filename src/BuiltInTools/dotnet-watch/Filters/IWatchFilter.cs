@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public interface IWatchFilter
+    internal interface IWatchFilter
     {
         ValueTask ProcessAsync(DotNetWatchContext context, CancellationToken cancellationToken);
     }

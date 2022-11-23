@@ -21,8 +21,8 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
         public RemovePackageReferenceCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.GetValueForArgument(RemoveCommandParser.ProjectArgument);
-            _arguments = parseResult.GetValueForArgument(RemovePackageParser.CmdPackageArgument).ToList().AsReadOnly();
+            _fileOrDirectory = parseResult.GetValue(RemoveCommandParser.ProjectArgument);
+            _arguments = parseResult.GetValue(RemovePackageParser.CmdPackageArgument).ToList().AsReadOnly();
             if (_fileOrDirectory == null)
             {
                 throw new ArgumentNullException(nameof(_fileOrDirectory));

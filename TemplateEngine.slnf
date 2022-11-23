@@ -21,7 +21,7 @@
       "src\\Tests\\dotnet-new.Tests\\dotnet-new.IntegrationTests.csproj",
       "src\\Tests\\dotnet.Tests\\dotnet.Tests.csproj",
       "template_feed\\Microsoft.DotNet.Common.ItemTemplates\\Microsoft.DotNet.Common.ItemTemplates.csproj",
-      "template_feed\\Microsoft.DotNet.Common.ProjectTemplates.7.0\\Microsoft.DotNet.Common.ProjectTemplates.7.0.csproj"
+      "template_feed\\Microsoft.DotNet.Common.ProjectTemplates.8.0\\Microsoft.DotNet.Common.ProjectTemplates.8.0.csproj"
     ]
   }
 }

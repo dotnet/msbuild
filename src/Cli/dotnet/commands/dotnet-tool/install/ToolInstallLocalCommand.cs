@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             IReporter reporter = null)
             : base(parseResult)
         {
-            _explicitManifestFile = parseResult.GetValueForOption(ToolAppliedOption.ToolManifestOption);
+            _explicitManifestFile = parseResult.GetValue(ToolAppliedOption.ToolManifestOption);
 
             _reporter = (reporter ?? Reporter.Output);
 

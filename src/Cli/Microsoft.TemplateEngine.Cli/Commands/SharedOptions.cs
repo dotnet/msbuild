@@ -15,7 +15,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(1, 1)
         };
 
-        public static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", SymbolStrings.Option_ProjectPath).ExistingOnly();
+        public static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", SymbolStrings.Option_ProjectPath).AcceptExistingOnly();
 
         internal static Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption();
 

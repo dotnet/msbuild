@@ -13,7 +13,7 @@
   "groupIdentity": "ItemNugetConfig",
   "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
-  "shortName": "nugetconfig",
+  "shortName": [ "nugetconfig", "nuget.config" ],
   "primaryOutputs": [
     {
       "path": "nuget.config"

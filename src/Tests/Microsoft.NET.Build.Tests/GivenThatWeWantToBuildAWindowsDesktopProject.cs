@@ -193,7 +193,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1140");
         }
 
-        [WindowsOnlyTheory]
+        [WindowsOnlyTheory(Skip="https://github.com/dotnet/sdk/pull/29009")]
         [InlineData(true)]
         [InlineData(false)]
         public void It_succeeds_if_windows_target_platform_version_does_not_have_trailing_zeros(bool setInTargetframework)

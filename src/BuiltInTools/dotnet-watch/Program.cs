@@ -23,7 +23,7 @@ using System.Diagnostics;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public class Program : IDisposable
+    internal sealed class Program : IDisposable
     {
         private const string Description = @"
 Environment variables:
@@ -474,11 +474,11 @@ Examples:
             protected override CommandLineOptions GetBoundValue(BindingContext bindingContext)
             {
                 var parseResults = bindingContext.ParseResult;
-                var projectValue = parseResults.GetValueForOption(_longProjectOption);
+                var projectValue = parseResults.GetValue(_longProjectOption);
                 if (string.IsNullOrEmpty(projectValue))
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    var projectShortValue = parseResults.GetValueForOption(_shortProjectOption);
+                    var projectShortValue = parseResults.GetValue(_shortProjectOption);
 #pragma warning restore CS0618 // Type or member is obsolete
                     if (!string.IsNullOrEmpty(projectShortValue))
                     {
@@ -489,14 +489,14 @@ Examples:
 
                 var options = new CommandLineOptions
                 {
-                    Quiet = parseResults.GetValueForOption(_quietOption),
-                    List = parseResults.GetValueForOption(_listOption),
-                    NoHotReload = parseResults.GetValueForOption(_noHotReloadOption),
-                    NonInteractive = parseResults.GetValueForOption(_nonInteractiveOption),
-                    Verbose = parseResults.GetValueForOption(_verboseOption),
+                    Quiet = parseResults.GetValue(_quietOption),
+                    List = parseResults.GetValue(_listOption),
+                    NoHotReload = parseResults.GetValue(_noHotReloadOption),
+                    NonInteractive = parseResults.GetValue(_nonInteractiveOption),
+                    Verbose = parseResults.GetValue(_verboseOption),
                     Project = projectValue,
-                    LaunchProfile = parseResults.GetValueForOption(_launchProfileOption),
-                    RemainingArguments = parseResults.GetValueForArgument(_argumentsToForward),
+                    LaunchProfile = parseResults.GetValue(_launchProfileOption),
+                    RemainingArguments = parseResults.GetValue(_argumentsToForward),
                 };
                 return options;
             }

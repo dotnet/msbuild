@@ -24,7 +24,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class BrowserRefreshServer : IAsyncDisposable
+    internal sealed class BrowserRefreshServer : IAsyncDisposable
     {
         private readonly byte[] ReloadMessage = Encoding.UTF8.GetBytes("Reload");
         private readonly byte[] WaitMessage = Encoding.UTF8.GetBytes("Wait");

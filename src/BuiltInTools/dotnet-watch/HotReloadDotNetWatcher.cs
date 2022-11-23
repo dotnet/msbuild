@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Watcher.Internal;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
@@ -18,7 +19,7 @@ using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public class HotReloadDotNetWatcher : IAsyncDisposable
+    internal sealed class HotReloadDotNetWatcher : IAsyncDisposable
     {
         private readonly IReporter _reporter;
         private readonly IConsole _console;
@@ -307,8 +308,12 @@ namespace Microsoft.DotNet.Watcher
                 processSpec.EnvironmentVariables["ASPNETCORE_URLS"] = context.LaunchSettingsProfile.ApplicationUrl;
             }
 
-            var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(rootVariableName)))
+            var rootVariableName = EnvironmentVariableNames.TryGetDotNetRootVariableName(
+                project.RuntimeIdentifier ?? "",
+                project.DefaultAppHostRuntimeIdentifier ?? "",
+                project.TargetFrameworkVersion);
+
+            if (rootVariableName != null && string.IsNullOrEmpty(Environment.GetEnvironmentVariable(rootVariableName)))
             {
                 processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(_muxerPath);
             }

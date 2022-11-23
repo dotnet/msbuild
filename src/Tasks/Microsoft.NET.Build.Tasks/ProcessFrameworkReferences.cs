@@ -319,7 +319,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     ProcessRuntimeIdentifier(string.IsNullOrEmpty(RuntimeIdentifier) ? "any" : RuntimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack,
-                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, EnableRuntimePackDownload && useRuntimePackAndDownloadIfNecessary,
+                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, useRuntimePackAndDownloadIfNecessary,
                         wasReferencedDirectly: frameworkReference != null);
 
                     processedPrimaryRuntimeIdentifier = true;
@@ -556,7 +556,9 @@ namespace Microsoft.NET.Build.Tasks
                         runtimePacks.Add(runtimePackItem);
                     }
 
-                    if (runtimePackPath == null && (wasReferencedDirectly || !DisableTransitiveFrameworkReferenceDownloads))
+                    if (EnableRuntimePackDownload &&
+                        runtimePackPath == null &&
+                        (wasReferencedDirectly || !DisableTransitiveFrameworkReferenceDownloads))
                     {
                         TaskItem packageToDownload = new TaskItem(runtimePackName);
                         packageToDownload.SetMetadata(MetadataKeys.Version, resolvedRuntimePackVersion);

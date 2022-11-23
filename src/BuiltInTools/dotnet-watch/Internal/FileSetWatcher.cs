@@ -9,7 +9,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class FileSetWatcher : IDisposable
+    internal sealed class FileSetWatcher : IDisposable
     {
         private readonly FileWatcher _fileWatcher;
         private readonly FileSet _fileSet;

@@ -39,17 +39,15 @@ namespace Microsoft.DotNet.Watcher.Tools
             app.UsePollingWatcher = usePollingWatcher;
             await app.StartWatcherAsync();
 
-            var types = await GetCompiledAppDefinedTypes(app);
-            Assert.Equal(2, types);
+            await AssertCompiledAppDefinedTypes(app, expected: 2);
 
             var fileToChange = Path.Combine(app.SourceDirectory, "include", "Foo.cs");
             var programCs = File.ReadAllText(fileToChange);
             File.WriteAllText(fileToChange, programCs);
 
-            await app.HasFileChanged();
-            await app.HasRestarted();
-            types = await GetCompiledAppDefinedTypes(app);
-            Assert.Equal(2, types);
+            await app.AssertFileChanged();
+            await app.AssertRestarted();
+            await AssertCompiledAppDefinedTypes(app, expected: 2);
         }
 
         [Fact]
@@ -63,15 +61,13 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            var types = await GetCompiledAppDefinedTypes(app);
-            Assert.Equal(2, types);
+            await AssertCompiledAppDefinedTypes(app, expected: 2);
 
             var fileToChange = Path.Combine(app.SourceDirectory, "include", "Foo.cs");
             File.Delete(fileToChange);
 
-            await app.HasRestarted();
-            types = await GetCompiledAppDefinedTypes(app);
-            Assert.Equal(1, types);
+            await app.AssertRestarted();
+            await AssertCompiledAppDefinedTypes(app, expected: 1);
         }
 
         [Fact]
@@ -85,15 +81,13 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            var types = await GetCompiledAppDefinedTypes(app);
-            Assert.Equal(2, types);
+            await AssertCompiledAppDefinedTypes(app, expected: 2);
 
             var folderToDelete = Path.Combine(app.SourceDirectory, "include");
             Directory.Delete(folderToDelete, recursive: true);
 
-            await app.HasRestarted();
-            types = await GetCompiledAppDefinedTypes(app);
-            Assert.Equal(1, types);
+            await app.AssertRestarted();
+            await AssertCompiledAppDefinedTypes(app, expected: 1);
         }
 
         [Fact]
@@ -111,7 +105,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var newFile = Path.Combine(app.SourceDirectory, "include", "Foo_new.cs");
             File.Move(oldFile, newFile);
 
-            await app.HasRestarted();
+            await app.AssertRestarted();
         }
 
         [Fact]
@@ -128,7 +122,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var changedFile = Path.Combine(app.SourceDirectory, "exclude", "Baz.cs");
             File.WriteAllText(changedFile, "");
 
-            var fileChanged = app.HasFileChanged();
+            var fileChanged = app.AssertFileChanged();
             var finished = await Task.WhenAny(Task.Delay(TimeSpan.FromSeconds(5)), fileChanged);
             Assert.NotSame(fileChanged, finished);
         }
@@ -144,9 +138,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             app.Prepare();
             app.Start(new[] { "--list" });
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(30));
-            var lines = await app.Process.GetAllOutputLinesAsync(cts.Token);
+            var lines = await app.Process.GetAllOutputLinesAsync(CancellationToken.None);
             var files = lines.Where(l => !l.StartsWith("watch :"));
 
             AssertEx.EqualFileList(
@@ -160,10 +152,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 files);
         }
 
-        private async Task<int> GetCompiledAppDefinedTypes(WatchableApp app)
+        private async Task AssertCompiledAppDefinedTypes(WatchableApp app, int expected)
         {
-            var definedTypesMessage = await app.Process.GetOutputLineStartsWithAsync("Defined types = ");
-            return int.Parse(definedTypesMessage.Split('=').Last());
+            var prefix = "Defined types = ";
+
+            var line = await app.AssertOutputLineStartsWith(prefix);
+            Assert.Equal(expected, int.Parse(line));
         }
     }
 }

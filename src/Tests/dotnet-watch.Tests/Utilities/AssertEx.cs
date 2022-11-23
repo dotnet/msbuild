@@ -8,7 +8,7 @@ using Xunit.Sdk;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public static class AssertEx
+    internal static class AssertEx
     {
         public static void EqualFileList(string root, IEnumerable<string> expectedFiles, FileSet actualFiles)
             => EqualFileList(root, expectedFiles, actualFiles.Select(f => f.FilePath));
