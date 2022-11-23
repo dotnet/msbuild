@@ -263,7 +263,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             bool supportsImplicitUsings,
             bool supportsFileScopedNs)
         {
-            const string currentDefaultFramework = "net7.0";
+            const string currentDefaultFramework = "net8.0";
             //string currentDefaultFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
 
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
