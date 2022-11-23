@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.New;
 using Microsoft.Extensions.Logging;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -50,6 +51,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 VerifyCommandOutput = true,
                 VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },
                 SettingsDirectory = _fixture.HomeDirectory,
+                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath
             }
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
@@ -67,9 +69,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             //  on dev and CI runs and possibly from the version within test host. Easiest is just to scrub it away
             if (templateShortName.Equals("globaljson") && args == null)
             {
-                options.CustomScrubbers?.AddScrubber(
-                    sb => sb.ScrubByRegex("(^    \"version\": \")(.*)(\"$)", "$1%CURRENT-VER%$3", RegexOptions.Multiline),
-                    "json");
+                string sdkVersionUnderTest = await new SdkInfoProvider().GetCurrentVersionAsync(default).ConfigureAwait(false);
+                options.CustomScrubbers?.AddScrubber(sb => sb.Replace(sdkVersionUnderTest, "%CURRENT-VER%"), "json");
             }
 
             VerificationEngine engine = new VerificationEngine(_logger);
@@ -208,6 +209,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             {
                 bool supportsTopLevel = topLevelStatementSupportedLanguages.Contains(langVersion) && !unsupportedFrameworkVersions.Contains(framework);
 
+                // If forceDisableTopLevel is requested - then generate params only if it makes sense - for C# console project of a version that
+                //  supports top level statements. Otherwise it doesn't make sense to test this overwritting functionality
                 if ((!supportsTopLevel || !templateName.Equals(consoleTemplateShortname) || (lang != null && lang != "C#")) && forceDisableTopLevel)
                 {
                     return null;
@@ -216,18 +219,23 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 return new object?[]
                 {
                     templateName,
+                    // buildPass
                     supportedLanguageVersions.Contains(langVersion) && !unsupportedFrameworkVersions.Contains(framework),
                     framework,
                     langVersion,
+                    // langVersionUnsupported
                     unsupportedLanguageVersions.Contains(langVersion),
                     lang,
+                    // supportsNullable
                     nullableSupportedLanguages.Contains(langVersion)
-                    || langVersion == null && nullableSupportedInFrameworkByDefault.Contains(framework),
+                     || langVersion == null && nullableSupportedInFrameworkByDefault.Contains(framework),
                     supportsTopLevel,
                     forceDisableTopLevel,
+                    // supportsImplicitUsings
                     implicitUsingsSupportedLanguages.Contains(langVersion) && implicitUsingsSupportedInFramework.Contains(framework),
+                    // supportsFileScopedNs
                     fileScopedNamespacesSupportedLanguages.Contains(langVersion)
-                    || langVersion == null && fileScopedNamespacesSupportedFrameworkByDefault.Contains(framework),
+                     || langVersion == null && fileScopedNamespacesSupportedFrameworkByDefault.Contains(framework),
                 };
             }
         }
