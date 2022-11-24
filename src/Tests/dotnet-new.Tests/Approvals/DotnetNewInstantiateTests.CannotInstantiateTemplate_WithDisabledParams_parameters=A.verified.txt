@@ -1,5 +1,5 @@
 ﻿
-// value of paramA: 
-// value of paramB: 
+// value of paramA: placeholderA
+// value of paramB: placeholderB
 
 
