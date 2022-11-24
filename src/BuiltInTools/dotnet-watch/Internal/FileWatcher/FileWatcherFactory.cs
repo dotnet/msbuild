@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public static class FileWatcherFactory
+    internal static class FileWatcherFactory
     {
         public static IFileSystemWatcher CreateWatcher(string watchedDirectory)
             => CreateWatcher(watchedDirectory, CommandLineOptions.IsPollingEnabled);

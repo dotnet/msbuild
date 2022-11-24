@@ -14,7 +14,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public class DotNetWatcher : IAsyncDisposable
+    internal sealed class DotNetWatcher : IAsyncDisposable
     {
         private readonly IReporter _reporter;
         private readonly ProcessRunner _processRunner;

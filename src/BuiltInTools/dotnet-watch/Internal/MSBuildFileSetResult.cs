@@ -3,39 +3,55 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class MSBuildFileSetResult
+    [DataContract]
+    internal sealed class MSBuildFileSetResult
     {
-        public string RunCommand { get; set; }
+        [DataMember]
+        public string RunCommand { get; init; }
 
-        public string RunArguments { get; set; }
+        [DataMember]
+        public string RunArguments { get; init; }
 
-        public string RunWorkingDirectory { get; set; }
+        [DataMember]
+        public string RunWorkingDirectory { get; init; }
 
-        public bool IsNetCoreApp { get; set; }
+        [DataMember]
+        public bool IsNetCoreApp { get; init; }
 
-        public string TargetFrameworkVersion { get; set; }
+        [DataMember]
+        public string TargetFrameworkVersion { get; init; }
 
-        public string RuntimeIdentifier { get; set; }
+        [DataMember]
+        public string RuntimeIdentifier { get; init; }
 
-        public string DefaultAppHostRuntimeIdentifier { get; set; }
+        [DataMember]
+        public string DefaultAppHostRuntimeIdentifier { get; init; }
 
-        public Dictionary<string, ProjectItems> Projects { get; set; }
+        [DataMember]
+        public Dictionary<string, ProjectItems> Projects { get; init; }
     }
 
-    public class ProjectItems
+    [DataContract]
+    internal sealed class ProjectItems
     {
-        public List<string> Files { get; set; } = new();
+        [DataMember]
+        public List<string> Files { get; init; } = new();
 
-        public List<StaticFileItem> StaticFiles { get; set; } = new();
+        [DataMember]
+        public List<StaticFileItem> StaticFiles { get; init; } = new();
     }
 
-    public class StaticFileItem
+    [DataContract]
+    internal sealed class StaticFileItem
     {
-        public string FilePath { get; set; }
+        [DataMember]
+        public string FilePath { get; init; }
 
-        public string StaticWebAssetPath { get; set; }
+        [DataMember]
+        public string StaticWebAssetPath { get; init; }
     }
 }

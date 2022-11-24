@@ -8,7 +8,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class RudeEditDialog
+    internal sealed class RudeEditDialog
     {
         private readonly IReporter _reporter;
         private readonly IRequester _requester;

@@ -80,18 +80,33 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             bool failed = false;
 
+            using var cancellationOnFailure = new CancellationTokenSource();
+
             while (!_source.Completion.IsCompleted && !failed)
             {
-                while (await _source.OutputAvailableAsync(CancellationToken.None))
+                try
                 {
-                    var line = await _source.ReceiveAsync(CancellationToken.None);
-                    _lines.Add(line);
-                    if (success(line))
+                    while (await _source.OutputAvailableAsync(cancellationOnFailure.Token))
                     {
-                        return line;
-                    }
+                        var line = await _source.ReceiveAsync(cancellationOnFailure.Token);
+                        _lines.Add(line);
+                        if (success(line))
+                        {
+                            return line;
+                        }
 
-                    failed |= failure(line);
+                        if (failure(line))
+                        {
+                            failed = true;
+
+                            // Limit the time to collect remaining output after a failure to avoid hangs:
+                            cancellationOnFailure.CancelAfter(TimeSpan.FromSeconds(1));
+                        }
+                    }
+                }
+                catch (OperationCanceledException) when (failed)
+                {
+                    break;
                 }
             }
 
