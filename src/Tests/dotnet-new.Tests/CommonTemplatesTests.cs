@@ -173,8 +173,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             var templatesToTest = new[]
             {
-                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net6.0", "net7.0", "net8.0" } },
-                new { Template = "classlib", Frameworks = new[] { null, "net6.0", "net7.0", "net8.0", "netstandard2.0", "netstandard2.1" } }
+                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, /*"net6.0",*/ "net7.0", "net8.0" } },
+                new { Template = "classlib", Frameworks = new[] { null, /*"net6.0",*/ "net7.0", "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
 
             //features: top-level statements; nullables; implicit usings; filescoped namespaces
