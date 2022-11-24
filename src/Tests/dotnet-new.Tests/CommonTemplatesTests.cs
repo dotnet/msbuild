@@ -32,30 +32,41 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
         [Theory]
         [InlineData("dotnet gitignore file", "gitignore", null)]
+        [InlineData("dotnet gitignore file", ".gitignore", null)]
         [InlineData("global.json file", "globaljson", null)]
         [InlineData("global.json file", "globaljson", new[] { "--sdk-version", "5.0.200" })]
         [InlineData("global.json file", "globaljson", new[] { "--sdk-version", "5.0.200", "--roll-forward", "major" })]
+        [InlineData("global.json file", "global.json", null)]
+        [InlineData("global.json file", "global.json", new[] { "--sdk-version", "5.0.200" })]
+        [InlineData("global.json file", "global.json", new[] { "--sdk-version", "5.0.200", "--roll-forward", "major" })]
         [InlineData("NuGet Config", "nugetconfig", null)]
+        [InlineData("NuGet Config", "nuget.config", null)]
         [InlineData("Solution File", "sln", null)]
         [InlineData("Solution File", "solution", null)]
         [InlineData("Dotnet local tool manifest file", "tool-manifest", null)]
         [InlineData("Web Config", "webconfig", null)]
         [InlineData("EditorConfig file", "editorconfig", null)]
         [InlineData("EditorConfig file", "editorconfig", new[] { "--empty" })]
+        [InlineData("EditorConfig file", ".editorconfig", null)]
+        [InlineData("EditorConfig file", ".editorconfig", new[] { "--empty" })]
         public async void AllCommonItemsCreate(string expectedTemplateName, string templateShortName, string[]? args)
         {
             Dictionary<string, string> environmentUnderTest = new() { ["DOTNET_NOLOGO"] = false.ToString() };
             TestContext.Current.AddTestEnvironmentVariables(environmentUnderTest);
 
+            string itemName = expectedTemplateName.Replace(' ', '-').Replace('.', '-');
+
             TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
             {
-                TemplateSpecificArgs = args,
+                // squeshing snapshots by creating output unique for template (but not alias) and preventing item to have name by alias
+                TemplateSpecificArgs = new[] { "-o", itemName, "-n", "item" }.Concat(args ?? Enumerable.Empty<string>()),
                 SnapshotsDirectory = "Approvals",
                 VerifyCommandOutput = true,
                 VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },
                 SettingsDirectory = _fixture.HomeDirectory,
                 DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
-                UniqueFor = templateShortName.Equals("nugetconfig") ? UniqueForOption.OsPlatform : null,
+                DoNotPrependTemplateNameToScenarioName = true,
+                UniqueFor = expectedTemplateName.Equals("NuGet Config") ? UniqueForOption.OsPlatform : null,
             }
             .WithCustomEnvironment(environmentUnderTest)
             .WithCustomScrubbers(
@@ -72,7 +83,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             // globaljson is appending current sdk version. Due to the 'base' dotnet used to run test this version differs
             //  on dev and CI runs and possibly from the version within test host. Easiest is just to scrub it away
-            if (templateShortName.Equals("globaljson") && args == null)
+            if (expectedTemplateName.Equals("global.json file") && args == null)
             {
                 string sdkVersionUnderTest = await new SdkInfoProvider().GetCurrentVersionAsync(default).ConfigureAwait(false);
                 options.CustomScrubbers?.AddScrubber(sb => sb.Replace(sdkVersionUnderTest, "%CURRENT-VER%"), "json");
@@ -162,24 +173,24 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             var templatesToTest = new[]
             {
-                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net7.0" } },
-                new { Template = "classlib", Frameworks = new[] { null, "net7.0", "netstandard2.0", "netstandard2.1" } }
+                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net6.0", "net7.0", "net8.0" } },
+                new { Template = "classlib", Frameworks = new[] { null, "net6.0", "net7.0", "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
 
             //features: top-level statements; nullables; implicit usings; filescoped namespaces
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string[] unsupportedFrameworkVersions = { "net5.0", "netcoreapp3.1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
+            //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
 
-            string?[] nullableSupportedInFrameworkByDefault = { null, "net7.0", "netstandard2.1" };
-            string?[] implicitUsingsSupportedInFramework = { null, "net7.0" };
-            string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net7.0" };
+            string?[] nullableSupportedInFrameworkByDefault = { null, "net7.0", "net8.0", "netstandard2.1" };
+            string?[] implicitUsingsSupportedInFramework = { null, "net6.0", "net7.0", "net8.0" };
+            string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net7.0", "net8.0" };
 
-            string?[] nullableSupportedLanguages = { "8.0", "9.0", "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
-            string?[] topLevelStatementSupportedLanguages = { null, "9.0", "10.0", "11", "11.0", "latest", "latestMajor", "default", "preview" };
-            string?[] implicitUsingsSupportedLanguages = { null, "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
-            string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
+            string?[] nullableSupportedLanguages = { "8.0", "9.0", "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
+            string?[] topLevelStatementSupportedLanguages = { null, "9.0", "10.0", "11", "11.0", /*"12",*/ "latest", "latestMajor", "default", "preview" };
+            string?[] implicitUsingsSupportedLanguages = { null, "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
+            string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
 
             string?[] supportedLangs = { null, "C#", "F#", "VB" };
 
@@ -191,7 +202,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                     IEnumerable<string?> langs = new string?[] { null };
                     if (langVersion == null)
                     {
-                        frameworks = frameworks.Concat(unsupportedFrameworkVersions);
                         langs = supportedLangs;
                     }
 
@@ -212,7 +222,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             object?[]? CreateParams(string templateName, string? langVersion, string? lang, string? framework, bool forceDisableTopLevel)
             {
-                bool supportsTopLevel = topLevelStatementSupportedLanguages.Contains(langVersion) && !unsupportedFrameworkVersions.Contains(framework);
+                bool supportsTopLevel = topLevelStatementSupportedLanguages.Contains(langVersion);
 
                 // If forceDisableTopLevel is requested - then generate params only if it makes sense - for C# console project of a version that
                 //  supports top level statements. Otherwise it doesn't make sense to test this overwritting functionality
@@ -225,7 +235,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 {
                     templateName,
                     // buildPass
-                    supportedLanguageVersions.Contains(langVersion) && !unsupportedFrameworkVersions.Contains(framework),
+                    supportedLanguageVersions.Contains(langVersion),
                     framework,
                     langVersion,
                     // langVersionUnsupported
@@ -263,8 +273,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             bool supportsImplicitUsings,
             bool supportsFileScopedNs)
         {
-            const string currentDefaultFramework = "net8.0";
-            //string currentDefaultFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+            // "net8.0";
+            string currentDefaultFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
 
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
             string outputDir = "MyProject";
