@@ -9,7 +9,6 @@ using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
@@ -44,7 +43,6 @@ namespace Microsoft.DotNet.Cli
         {
             Debug.Assert(_defaultedConfigurationProperty == MSBuildPropertyNames.PUBLISH_RELEASE || _defaultedConfigurationProperty == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
 
-            ProjectInstance project = null;
             var globalProperties = GetGlobalPropertiesFromUserArgs();
 
             // Configuration doesn't work in a .proj file, but it does as a global property.
@@ -52,7 +50,7 @@ namespace Microsoft.DotNet.Cli
             if (_parseResult.HasOption(_configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
                 return Enumerable.Empty<string>();
 
-            project = GetTargetedProject(globalProperties);
+            ProjectInstance project = GetTargetedProject(globalProperties);
 
             if (project != null)
             {
@@ -93,8 +91,6 @@ namespace Microsoft.DotNet.Cli
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
         public ProjectInstance GetTargetedProject(Dictionary<string, string> globalProps)
         {
-            string potentialProject = "";
-
             foreach (string arg in _slnOrProjectArgs.Append(Directory.GetCurrentDirectory()))
             {
                 if (IsValidProjectFilePath(arg))
@@ -107,20 +103,18 @@ namespace Microsoft.DotNet.Cli
                     {
                         return TryGetProjectInstance(MsbuildProject.GetProjectFileFromDirectory(arg).FullName, globalProps);
                     }
-                    catch (GracefulException)
+                    catch (GracefulException)  // Fall back to looking for a solution if multiple project files are found.
                     {
-                        // Fall back to looking for a solution if multiple project files are found.
                         string potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
 
                         if (!string.IsNullOrEmpty(potentialSln))
                         {
                             return GetRandomSlnProject(potentialSln, globalProps);
                         }
-                    } // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
+                    }
                 }
             }
-
-            return string.IsNullOrEmpty(potentialProject) ? null : TryGetProjectInstance(potentialProject, globalProps);
+            return null;  // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
         }
 
         /// <returns>A random existant project in a solution file. Returns null if no projects exist.</returns>
