@@ -113,11 +113,11 @@
     },
     "csharpFeature_ImplicitUsings": {
       "type": "computed",
-      "value": "(Framework == \"net7.0\" || Framework == \"net8.0\")&& csharp10orLater == \"true\""
+      "value": "Framework == \"net8.0\" && csharp10orLater == \"true\""
     },
     "csharpFeature_FileScopedNamespaces": {
       "type": "computed",
-      "value": "(Framework == \"net7.0\" || Framework == \"net8.0\" || langVersion != \"\") && csharp10orLater == \"true\""
+      "value": "(Framework == \"net8.0\" || langVersion != \"\") && csharp10orLater == \"true\""
     },
     "csharpFeature_Nullable": {
       "type": "computed",
