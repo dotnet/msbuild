@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-
+using System.Xml;
 using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -634,6 +634,16 @@ namespace Microsoft.Build.Construction
                         if (onError != null)
                         {
                             ProjectErrorUtilities.ThrowInvalidProject(onError.Location, "NodeMustBeLastUnderElement", XMakeElements.onError, XMakeElements.target, childElement.Name);
+                        }
+
+                        if (childElement.ChildNodes.Count != 0)
+                        {
+                            // If the element has inner text and no child elements, then this should be a property and throw invalid child element of <Target>
+                            var firstNode = childElement.FirstChild;
+                            if (firstNode.NodeType == XmlNodeType.Text && firstNode.ChildNodes.Count == 0)
+                            {
+                                ProjectXmlUtilities.ThrowProjectInvalidChildElement(childElement.Name, childElement.ParentNode.Name, childElement.Location);
+                            }
                         }
 
                         child = ParseProjectTaskElement(childElement, target);
