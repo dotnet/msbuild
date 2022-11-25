@@ -638,7 +638,7 @@ namespace Microsoft.Build.Construction
 
                         if (childElement.ChildNodes.Count == 1 && childElement.FirstChild.NodeType==XmlNodeType.Text)
                         {
-                            // If the element has inner text and no other child elements except test, then this should be a property and throw invalid child element of <Target>
+                            // If the element has inner text and no other child elements except text, then this should be a property and throw invalid child element of <Target>
                             ProjectXmlUtilities.ThrowProjectInvalidChildElement(childElement.Name, childElement.ParentNode.Name, childElement.Location);
                         }
 
