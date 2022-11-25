@@ -706,7 +706,13 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
 
-                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
+                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine);
+                CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
+                if (CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine, out projectFile))
+                {
+                    commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
+                }
+
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
                                             switchesNotFromAutoResponseFile,
@@ -2286,8 +2292,15 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    bool foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine, out projectFile);
-
+                    bool foundProjectAutoResponseFile = false;
+                    if (!recursing && !string.IsNullOrEmpty(projectFile))
+                    {
+                        foundProjectAutoResponseFile = true;
+                    }
+                    else
+                    {
+                        foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine, out projectFile);
+                    }
                     if (foundProjectAutoResponseFile)
                     {
                         // we presumably read in more switches, so start our switch processing all over again,
