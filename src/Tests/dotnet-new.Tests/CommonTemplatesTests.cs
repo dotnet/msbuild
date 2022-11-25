@@ -173,8 +173,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             var templatesToTest = new[]
             {
-                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, /*"net6.0",*/ "net7.0", "net8.0" } },
-                new { Template = "classlib", Frameworks = new[] { null, /*"net6.0",*/ "net7.0", "net8.0", "netstandard2.0", "netstandard2.1" } }
+                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net6.0", "net7.0", "net8.0" } },
+                new { Template = "classlib", Frameworks = new[] { null, "net6.0", "net7.0", "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
 
             //features: top-level statements; nullables; implicit usings; filescoped namespaces
@@ -183,9 +183,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
             string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
 
-            string?[] nullableSupportedInFrameworkByDefault = { null, "net7.0", "net8.0", "netstandard2.1" };
+            string?[] nullableSupportedInFrameworkByDefault = { null, "net6.0", "net7.0", "net8.0", "netstandard2.1" };
             string?[] implicitUsingsSupportedInFramework = { null, "net6.0", "net7.0", "net8.0" };
-            string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net7.0", "net8.0" };
+            string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net6.0", "net7.0", "net8.0" };
 
             string?[] nullableSupportedLanguages = { "8.0", "9.0", "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
             string?[] topLevelStatementSupportedLanguages = { null, "9.0", "10.0", "11", "11.0", /*"12",*/ "latest", "latestMajor", "default", "preview" };
@@ -207,6 +207,12 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
                     foreach (string? framework in frameworks)
                     {
+                        // Skip tests due to https://github.com/dotnet/templating/issues/5668#issuecomment-1327438284
+                        if (framework == "net6.0" && double.TryParse(langVersion, out double lv) && lv >= 11)
+                        {
+                            continue;
+                        }
+
                         foreach (string? lang in langs)
                         {
                             yield return CreateParams(template.Template, langVersion, lang, framework, false)!;
