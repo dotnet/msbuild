@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'">$(LibraryTargetFrameworks);net35</TargetFrameworks>
+    <TargetFrameworks>$(LibraryTargetFrameworks);net35</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>true</IsPackable>
@@ -14,6 +13,11 @@
 
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
     <PackageDescription>This package contains the $(AssemblyName) assembly which implements common string-related functionality such as weak interning.</PackageDescription>
+    
+    <IncludeBuildOutput Condition="'$(TargetFramework)' == 'net35'">false</IncludeBuildOutput>
+    <!-- Don't publish the reference assembly if the build output isn't included. -->
+    <TargetsForTfmSpecificBuildOutput Condition="'$(IncludeBuildOutput)' != 'true'" />
+    <NoWarn Condition="'$(IncludeBuildOutput)' != 'true'">$(NoWarn),NU5128</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
