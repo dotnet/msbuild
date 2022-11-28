@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests
         {
             var args = new ResponseFileUsedEventArgs("MSBuild.rsp"); 
             Roundtrip(args,
-                e => e.Message);
+                e => e.ResponseFilePath);
         }
          
         [Fact]
