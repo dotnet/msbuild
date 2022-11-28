@@ -117,9 +117,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                 ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
     <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations. -->
-    <NETSdkError Condition="'$(_SolutionExtracted_PublishRelease)' != '' and '$(_SolutionExtracted_PublishRelease)' != '$(PublishRelease)'"
+    <NETSdkError  Condition="'$(_SolutionLevelPublishRelease)' != '' and '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
                   ResourceName="SolutionExecutableConfigurationMismatchError"
-                  FormatArguments="PublishRelease;$(ProjectName)"/>
+                  FormatArguments="PublishRelease;Full"/>
 
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->

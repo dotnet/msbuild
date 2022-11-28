@@ -14,6 +14,8 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.NET.Pack.Tests
 {
@@ -85,19 +87,21 @@ namespace Microsoft.NET.Pack.Tests
                 .HaveStdOutContaining("NETSDK1085");
         }
 
-        [Fact]
-        public void It_packs_with_release_if_PackRelease_property_set()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_packs_with_release_if_PackRelease_property_set(bool optedOut)
         {
+            if (optedOut)
+            {
+                Environment.SetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, "true");
+            }
+
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PackReleaseHelloWorld")
+               .CopyTestAsset("HelloWorld", $"PackReleaseBasicTest-Opted-Out-{optedOut}")
                .WithSource();
 
-            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
-
-            new BuildCommand(helloWorldAsset)
-               .Execute()
-               .Should()
-               .Pass();
+            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
 
             var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
 
@@ -106,8 +110,10 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", optedOut ? "Debug" : "Release", "HelloWorld.1.0.0.nupkg");
             Assert.True(File.Exists(expectedAssetPath));
+
+            Environment.SetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, null);
         }
 
         [Fact]
@@ -123,11 +129,6 @@ namespace Microsoft.NET.Pack.Tests
                    propertyGroup.Add(new XElement(ns + "PackRelease", "true"));
                });
 
-            new BuildCommand(helloWorldAsset)
-               .Execute()
-               .Should()
-               .Pass();
-
             var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
 
             packCommand
@@ -135,32 +136,26 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
             Assert.True(File.Exists(expectedAssetPath));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/27066")]
-        public void It_warns_if_PackRelease_set_on_sln_but_env_var_not_used()
+        [Fact]
+        public void It_fails_with_conflicting_PackRelease_values_in_solution_file()
         {
             var slnDir = _testAssetsManager
-               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln") // This also has PackRelease enabled
+               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues")
                .WithSource()
                .Path;
 
-            new BuildCommand(Log, slnDir, "App.sln")
-               .Execute()
-               .Should()
-               .Pass();
-
-            var publishCommand = new DotnetCommand(Log)
+            new DotnetCommand(Log)
                 .WithWorkingDirectory(slnDir)
-                .Execute(@"dotnet", "pack")
+                .Execute("dotnet", "pack")
                 .Should()
-                .Pass()
+                .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1190");
+                .HaveStdErrContaining(CommonLocalizableStrings.SolutionExecutableConfigurationMismatchError);
         }
-
 
         [Fact]
         public void A_PackRelease_property_does_not_override_other_command_configuration()
@@ -170,14 +165,9 @@ namespace Microsoft.NET.Pack.Tests
                .WithSource()
                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
 
-            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
+            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
 
-            new BuildCommand(helloWorldAsset)
-               .Execute()
-               .Should()
-               .Pass();
-
-            // Another command, which should not be affected by PackRelease
+            // publish command should not be affected by PackRelease
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
@@ -185,7 +175,7 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.False(File.Exists(expectedAssetPath));
         }
     }

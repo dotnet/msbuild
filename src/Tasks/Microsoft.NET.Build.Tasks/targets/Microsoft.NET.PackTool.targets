@@ -62,7 +62,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
     <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations. -->
-    <NETSdkError Condition="'$(_SolutionExtracted_PackRelease)' != '' and '$(_SolutionExtracted_PackRelease)' != '$(PackRelease)'"
+    <NETSdkError Condition="'$(_SolutionLevelPackRelease)' != '' and '$(_SolutionLevelPackRelease)' != '$(PackRelease)'"
                   ResourceName="SolutionExecutableConfigurationMismatchError"
                   FormatArguments="PackRelease;$(ProjectName)"/>
 

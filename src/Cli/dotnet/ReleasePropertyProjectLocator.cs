@@ -42,6 +42,10 @@ namespace Microsoft.DotNet.Cli
         public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified()
         {
             Debug.Assert(_defaultedConfigurationProperty == MSBuildPropertyNames.PUBLISH_RELEASE || _defaultedConfigurationProperty == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
+            if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
+            {
+                return Enumerable.Empty<string>();
+            }
 
             var globalProperties = GetGlobalPropertiesFromUserArgs();
 
@@ -60,14 +64,14 @@ namespace Microsoft.DotNet.Cli
                     string configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE;
                     return new List<string> {
                         $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}",
-                        _isPublishingSolution ? $"-property:_SolutionExtracted{_defaultedConfigurationProperty}=true" : "" // Allows us to spot conflicting configuration values during evaluation.
+                        _isPublishingSolution ? $"-property:_SolutionLevel{_defaultedConfigurationProperty}=true" : "" // Allows us to spot conflicting configuration values during evaluation.
                     };
                 }
                 else if (GetProjectMaxModernTargetFramework(project) >= 8) // For 8.0, these properties are enabled by default.
                 {
                     return new List<string> {
                         $"-property:{MSBuildPropertyNames.CONFIGURATION}={MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE}",
-                        _isPublishingSolution ? $"-property:_SolutionExtracted{_defaultedConfigurationProperty}=true" : ""
+                        _isPublishingSolution ? $"-property:_SolutionLevel{_defaultedConfigurationProperty}=true" : ""
                     };
                 }
             }
