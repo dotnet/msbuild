@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
@@ -353,6 +354,31 @@ namespace Microsoft.Build.UnitTests
 
             // missing required parameter
             logger.AssertLogContains("MSB4044");
+        }
+
+        /// <summary>
+        /// If no resource string is passed to ErrorFromResources and
+        /// the isolation mode is set to IsolateProjects.Message, then
+        /// we should error because a required parameter is missing and
+        /// note that this may be due to a target's referenced property
+        /// being cached.
+        /// </summary>
+        [Fact]
+        public void ErrorFromResourcesNoResourcesMessageIsolationMode()
+        {
+            string projectContents = @"
+<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <Target Name=`Build`>
+    <ErrorFromResources />
+  </Target>
+</Project>
+";
+            var logger = new MockLogger();
+            _ = Helpers.BuildProjectContentUsingBuildManager(projectContents, logger, new BuildParameters()
+            {
+                IsolateProjects = IsolateProjects.Message,
+            });
+            logger.AssertLogContains("MSB4047");
         }
     }
 }
