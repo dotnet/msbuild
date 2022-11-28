@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.404-rtm.22571.13">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.404-rtm.22575.6">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>81a6b3990a59ea77eb4a13f65242dd166cf7a23b</Sha>
+      <Sha>87e5f0cad0ff547b1ca59c34119890a4ad68c2db</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.404">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>81a6b3990a59ea77eb4a13f65242dd166cf7a23b</Sha>
+      <Sha>87e5f0cad0ff547b1ca59c34119890a4ad68c2db</Sha>
     </Dependency>
     <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.404">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>81a6b3990a59ea77eb4a13f65242dd166cf7a23b</Sha>
+      <Sha>87e5f0cad0ff547b1ca59c34119890a4ad68c2db</Sha>
     </Dependency>
     <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.404">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>81a6b3990a59ea77eb4a13f65242dd166cf7a23b</Sha>
+      <Sha>87e5f0cad0ff547b1ca59c34119890a4ad68c2db</Sha>
     </Dependency>
     <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.404">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>81a6b3990a59ea77eb4a13f65242dd166cf7a23b</Sha>
+      <Sha>87e5f0cad0ff547b1ca59c34119890a4ad68c2db</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.404">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>81a6b3990a59ea77eb4a13f65242dd166cf7a23b</Sha>
+      <Sha>87e5f0cad0ff547b1ca59c34119890a4ad68c2db</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.404">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>81a6b3990a59ea77eb4a13f65242dd166cf7a23b</Sha>
+      <Sha>87e5f0cad0ff547b1ca59c34119890a4ad68c2db</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="6.0.12">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
@@ -168,23 +168,23 @@
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="6.0.12">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>fb084615fb24289d4a41753a27b326acdff496c6</Sha>
+      <Sha>e8b4ef2cfc595ccca430b7a3c31cad2855e003eb</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.6.0" Version="6.0.12-servicing.22554.3">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.6.0" Version="6.0.12-servicing.22578.4">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>fb084615fb24289d4a41753a27b326acdff496c6</Sha>
+      <Sha>e8b4ef2cfc595ccca430b7a3c31cad2855e003eb</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.6.0" Version="6.0.12-servicing.22554.3">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.6.0" Version="6.0.12-servicing.22578.4">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>fb084615fb24289d4a41753a27b326acdff496c6</Sha>
+      <Sha>e8b4ef2cfc595ccca430b7a3c31cad2855e003eb</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="6.0.12">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>fb084615fb24289d4a41753a27b326acdff496c6</Sha>
+      <Sha>e8b4ef2cfc595ccca430b7a3c31cad2855e003eb</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="6.0.11-servicing.22523.2" CoherentParentDependency="Microsoft.WindowsDesktop.App.Runtime.win-x64">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="6.0.12-servicing.22569.2" CoherentParentDependency="Microsoft.WindowsDesktop.App.Runtime.win-x64">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>96c5254e5ca5040021caf779216b1b3641875b1e</Sha>
+      <Sha>4178d795849932702f98b7f375f6341267510326</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="6.0.12">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
