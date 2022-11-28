@@ -1053,7 +1053,7 @@ namespace Microsoft.Build.Execution
 
             void SerializeCaches()
             {
-                var errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
+                string errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile, _buildParameters.IsolateProjects);
 
                 if (!string.IsNullOrEmpty(errorMessage))
                 {

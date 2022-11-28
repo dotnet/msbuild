@@ -201,6 +201,14 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        public int GetLowestConfigId()
+        {
+            lock (_lockObject)
+            {
+                return _configurations.OrderBy(kvp => kvp.Key).FirstOrDefault().Key;
+            }
+        }
+
         /// <summary>
         /// Gets the smallest configuration id of any configuration
         /// in this cache.

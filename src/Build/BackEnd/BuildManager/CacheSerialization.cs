@@ -13,7 +13,7 @@ namespace Microsoft.Build.Execution
 {
     internal static class CacheSerialization
     {
-        public static string SerializeCaches(IConfigCache configCache, IResultsCache resultsCache, string outputCacheFile)
+        public static string SerializeCaches(IConfigCache configCache, IResultsCache resultsCache, string outputCacheFile, IsolateProjects isolateProjects)
         {
             ErrorUtilities.VerifyThrowInternalNull(outputCacheFile, nameof(outputCacheFile));
 

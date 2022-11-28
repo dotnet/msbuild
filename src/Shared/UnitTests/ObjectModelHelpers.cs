@@ -1719,16 +1719,16 @@ namespace Microsoft.Build.UnitTests
             var nodes = new Dictionary<int, (bool IsRoot, string ProjectPath)>();
 
             // add nodes with dependencies
-            foreach (var nodeDependencies in dependencyEdges)
+            foreach (var nodeWithDependencies in dependencyEdges)
             {
-                var parent = nodeDependencies.Key;
+                var parent = nodeWithDependencies.Key;
 
                 if (!nodes.ContainsKey(parent))
                 {
                     TransientTestFile file = createProjectFile(
                         env,
                         parent,
-                        nodeDependencies.Value,
+                        nodeWithDependencies.Value,
                         projectReferenceTargets: null,
                         defaultTargets: null,
                         extraContent: GetExtraContent(parent));

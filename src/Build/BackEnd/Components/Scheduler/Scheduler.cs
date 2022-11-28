@@ -367,8 +367,8 @@ namespace Microsoft.Build.BackEnd
 
             // Record these results to the cache only if they are not present in the
             // override cache, which can happen if we are building in isolation mode
-            // (IsolateProjects.Message), and the received result was built by a
-            // dependency, isolation-violating project.
+            // (IsolateProjects.Message), and the received result was built by an
+            // isolation-violating dependency project.
             if (_configCache is not ConfigCacheWithOverride || !((ConfigCacheWithOverride)_configCache).HasConfigurationInOverrideCache(result.ConfigurationId))
             {
                 _resultsCache.AddResult(result);
