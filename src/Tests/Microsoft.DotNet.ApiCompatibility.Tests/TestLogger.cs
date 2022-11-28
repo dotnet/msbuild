@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         public List<string> errors = new();
         public List<string> warnings = new();
 
+        public bool SuppressionWasLogged => errors.Count != 0;
+
         public bool LogError(Suppression suppression, string code, string format, params string[] args)
         {
             errors.Add(code + " " + string.Format(format, args));

@@ -44,10 +44,15 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             if (_suppressionEngine.IsErrorSuppressed(suppression))
                 return false;
 
+            SuppressionWasLogged = true;
+
             TextWriter textWriter = errorOutput ? Console.Error : Console.Out;
             textWriter.WriteLine(code + ": " + string.Format(format, args));
 
             return true;
         }
+
+        /// <inheritdoc />
+        public bool SuppressionWasLogged { get; private set; }
     }
 }

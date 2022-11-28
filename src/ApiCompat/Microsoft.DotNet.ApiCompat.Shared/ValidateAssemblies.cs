@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
@@ -84,6 +85,8 @@ namespace Microsoft.DotNet.ApiCompat
 
             // Execute the enqueued work item(s).
             apiCompatRunner.ExecuteWorkItems();
+
+            SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.CompatibilityLogger);
 
             if (generateSuppressionFile)
             {

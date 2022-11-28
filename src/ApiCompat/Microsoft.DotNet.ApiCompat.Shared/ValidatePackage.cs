@@ -74,6 +74,8 @@ namespace Microsoft.DotNet.ApiCompat
             {
                 // Execute the work items that were enqueued.
                 serviceProvider.ApiCompatRunner.ExecuteWorkItems();
+
+                SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.CompatibilityLogger);
             }
 
             if (generateSuppressionFile)
