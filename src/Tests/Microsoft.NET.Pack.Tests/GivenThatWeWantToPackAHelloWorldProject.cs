@@ -161,6 +161,29 @@ namespace Microsoft.NET.Pack.Tests
         }
 
         [Fact]
+        public void It_packs_with_Release_on_all_TargetFrameworks_If_8_or_above_is_included()
+        {
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = "net7.0;net8.0"
+            };
+            testProject.RecordProperties("Configuration");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new DotnetPackCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: "net7.0", configuration: "Release"); // this will fail if configuration is debug and TFM code didn't work.
+            var finalConfiguration = properties["Configuration"];
+            Assert.True(finalConfiguration == "Release");
+        }
+
+        [Fact]
         public void It_fails_with_conflicting_PackRelease_values_in_solution_file()
         {
             var slnDir = _testAssetsManager
