@@ -111,10 +111,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(EnableCompressionInSingleFile)' == 'true' And
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
-    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And
-                            '$(EnableCompressionInSingleFile)' == 'true' And
-                            '$(SelfContained)' != 'true'"
-                ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
     <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations. -->
     <NETSdkError  Condition="'$(_SolutionLevelPublishRelease)' != '' and '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
