@@ -328,6 +328,11 @@
         <target state="translated">Начальное значение свойства: $({0})="{1}" Источник: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
+        <source>MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Please define property beneath property group</source>
+        <target state="new">MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Please define property beneath property group</target>
+        <note>{StrBegin="MSB4070: "}</note>
+      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: Отключение внутрипроцессного узла приводит к замедлению при использовании плагинов кэша проекта, которые создают запросы на сборку прокси-сервера.</target>
