@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19487")]
+        [Fact]
         public void ItCanPublishAMultiTFMProjectWithImplicitRestore()
         {
             var testInstance = _testAssetsManager.CopyTestAsset(
