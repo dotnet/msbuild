@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.NET.Build.Tasks;
 using System.Xml.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -140,7 +141,7 @@ namespace Microsoft.NET.Pack.Tests
             Assert.True(File.Exists(expectedAssetPath));
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/27066")]
         public void It_fails_with_conflicting_PackRelease_values_in_solution_file()
         {
             var slnDir = _testAssetsManager
@@ -154,7 +155,7 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(CommonLocalizableStrings.SolutionExecutableConfigurationMismatchError);
+                .HaveStdErrContaining(Strings.SolutionProjectConfigurationsConflict);
         }
 
         [Fact]

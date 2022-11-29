@@ -650,11 +650,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1162: PDB 생성: R2R 실행 파일 '{0}'을(를) 찾을 수 없습니다.</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
-      <trans-unit id="PReleaseRequiresEnvVarOnSln">
-        <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
-        <target state="translated">NETSDK1190: 솔루션 프로젝트에서 '{0}'을(를) 사용하려면 환경 변수 '{1}'(true)를 설정해야 합니다. 이렇게 하면 작업을 완료하는 시간이 늘어나게 됩니다.</target>
-        <note>{StrBegin="NETSDK1190: "}</note>
-      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: 도구로서 팩은 자체 포함을 지원하지 않습니다.</target>
@@ -804,6 +799,13 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: GenerateRuntimeConfigurationFiles에 대해 'AdditionalProbingPaths'가 지정되었지만 'RuntimeConfigDevPath'가 비어 있어서 건너뜁니다.</target>
         <note>{StrBegin="NETSDK1048: "}</note>
+      </trans-unit>
+      <trans-unit id="SolutionProjectConfigurationsConflict">
+        <source>NETSDK1194: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:
+{1}.</source>
+        <target state="new">NETSDK1194: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:
+{1}.</target>
+        <note>{StrBegin="NETSDK1194: "}</note>
       </trans-unit>
       <trans-unit id="TargetFrameworkIsEol">
         <source>NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>

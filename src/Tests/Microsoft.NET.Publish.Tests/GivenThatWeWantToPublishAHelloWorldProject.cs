@@ -7,16 +7,16 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using Microsoft.DotNet.Tools;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.DotNet.Cli;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -534,7 +534,7 @@ public static class Program
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(CommonLocalizableStrings.SolutionExecutableConfigurationMismatchError);
+                .HaveStdErrContaining(Strings.SolutionProjectConfigurationsConflict);
         }
 
         [Fact]
@@ -589,34 +589,6 @@ public static class Program
 
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
-        }
-
-        [Fact]
-        public void PublishRelease_overrides_Configuration_Debug_on_proj()
-        {
-            var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld")
-               .WithSource()
-               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
-               .WithProjectChanges(project =>
-               {
-                   var ns = project.Root.Name.Namespace;
-                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                   propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
-                   propertyGroup.Add(new XElement(ns + "Configuration", "Debug"));
-               });
-
-            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
-
-            publishCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
-            Assert.False(File.Exists(expectedAssetPath));
-            var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
-            Assert.True(File.Exists(releaseAssetPath));
         }
 
         [Theory]
