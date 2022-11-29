@@ -37,6 +37,8 @@
 
   <ItemGroup>
     <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\AspNetSdkBaselineTest.cs" Link="AspNetSdkBaselineTest.cs" />
+    <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\StaticWebAssetsBaselineFactory.cs" Link="StaticWebAssetsBaselineFactory.cs" />
+    <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\StaticWebAssetsBaselineComparer.cs" Link="StaticWebAssetsBaselineComparer.cs" />
   </ItemGroup>
   
   <ItemGroup>
