@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Commands;
 using System.Globalization;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -51,20 +52,20 @@ namespace Microsoft.NET.TestFramework
 
         public const string LatestRuntimePatchForNetCoreApp2_0 = "2.0.9";
 
-        public void AddTestEnvironmentVariables(SdkCommandSpec command)
+        public void AddTestEnvironmentVariables(IDictionary<string, string> environment)
         {
-            command.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
+            environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
 
             //  Set NUGET_PACKAGES environment variable to match value from build.ps1
-            command.Environment["NUGET_PACKAGES"] = NuGetCachePath;
+            environment["NUGET_PACKAGES"] = NuGetCachePath;
 
-            command.Environment["GenerateResourceMSBuildArchitecture"] = "CurrentArchitecture";
-            command.Environment["GenerateResourceMSBuildRuntime"] = "CurrentRuntime";
+            environment["GenerateResourceMSBuildArchitecture"] = "CurrentArchitecture";
+            environment["GenerateResourceMSBuildRuntime"] = "CurrentRuntime";
 
             //  Prevent test MSBuild nodes from persisting
-            command.Environment["MSBUILDDISABLENODEREUSE"] = "1";
+            environment["MSBUILDDISABLENODEREUSE"] = "1";
 
-            ToolsetUnderTest.AddTestEnvironmentVariables(command);
+            ToolsetUnderTest.AddTestEnvironmentVariables(environment);
         }
 
 

@@ -117,11 +117,6 @@
         <target state="translated">Sanal anahtar sözcük, '{0}' üyesinden kaldırılamıyor.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldNotResolveReference">
-        <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
-        <target state="translated">Sağlanan arama dizinlerinin hiçbirinde '{0}' başvurusu çözümlenemedi.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">Öğe null olmamalıdır. Dizinde null bulundu: {0}.</target>
@@ -135,11 +130,6 @@
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
         <target state="translated">'{0}' sabit listesindeki '{1}' alan değeri, '{2}' öğesinden '{3}' öğesine değiştirildi.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FileDoesNotExist">
-        <source>File '{0}' does not exist.</source>
-        <target state="translated">'{0}' dosyası yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="IndexShouldBeWithinSetSizeRange">
@@ -162,16 +152,6 @@
         <target state="translated">'{0}' üyesi {2} üzerinde var ancak {1} üzerinde yok</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
-        <source>Could not find the provided path '{0}' to load binaries from.</source>
-        <target state="translated">İkilileri yüklemek için sağlanan '{0}' yolu bulunamadı.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
-        <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
-        <target state="translated">'{0}' bütünleştirilmiş kodu için sağlanan akış, okunacak herhangi bir meta veriye sahip değil.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RightNamesAtLeastOne">
         <source>Should at least contain one right name.</source>
         <target state="translated">En az bir hak adı içermelidir.</target>
@@ -180,21 +160,6 @@
       <trans-unit id="ShouldBeGreaterThanZero">
         <source>Value should be greater than 0.</source>
         <target state="translated">Değer, 0'dan büyük olmalıdır.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldNotBeNullAndContainAtLeastOneElement">
-        <source>Should not be null and contain at least one element.</source>
-        <target state="translated">Null olmamalı ve en az bir öğe içermelidir.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldProvideValidAssemblyName">
-        <source>Should provide a valid assembly name.</source>
-        <target state="translated">Geçerli bir bütünleştirilmiş kod adı sağlanmalıdır.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="StreamPositionGreaterThanLength">
-        <source>Stream position is greater than it's length, so there are no contents available to read.</source>
-        <target state="translated">Akış konumu, akış uzunluğundan büyük olduğundan okunabilecek içerik yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">

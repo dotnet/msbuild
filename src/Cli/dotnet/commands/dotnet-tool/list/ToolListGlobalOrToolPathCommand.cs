@@ -36,8 +36,8 @@ namespace Microsoft.DotNet.Tools.Tool.List
 
         public override int Execute()
         {
-            var toolPathOption = _parseResult.GetValueForOption(ToolListCommandParser.ToolPathOption);
-            var packageIdArgument = _parseResult.GetValueForArgument(ToolListCommandParser.PackageIdArgument);
+            var toolPathOption = _parseResult.GetValue(ToolListCommandParser.ToolPathOption);
+            var packageIdArgument = _parseResult.GetValue(ToolListCommandParser.PackageIdArgument);
 
             PackageId? packageId = null;
             if (!string.IsNullOrWhiteSpace(packageIdArgument))

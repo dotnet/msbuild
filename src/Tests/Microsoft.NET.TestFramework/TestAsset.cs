@@ -13,6 +13,10 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.TestFramework
 {
+    /// <summary>
+    /// A directory wrapper around the <see cref="TestProject"/> class, or any other TestAsset type.
+    /// It manages the on-disk files of the test asset and provides additional functionality to edit projects.
+    /// </summary>
     public class TestAsset : TestDirectory
     {
         private readonly string _testAssetRoot;
@@ -21,6 +25,11 @@ namespace Microsoft.NET.TestFramework
 
         public string TestRoot => Path;
 
+        /// <summary>
+        /// The hashed test name (so file paths do not become too long) of the TestAsset owning test.
+        /// Contains the leaf folder name of any particular test's root folder.
+        /// The hashing occurs in <see cref="TestAssetsManager"/>.
+        /// </summary>
         public readonly string Name;
 
         public ITestOutputHelper Log { get; }

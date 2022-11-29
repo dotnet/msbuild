@@ -42,8 +42,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
         public override int Execute()
         {
-            var global = _parseResult.GetValueForOption(ToolAppliedOption.GlobalOption);
-            var toolPath = _parseResult.GetValueForOption(ToolAppliedOption.ToolPathOption);
+            var global = _parseResult.GetValue(ToolAppliedOption.GlobalOption);
+            var toolPath = _parseResult.GetValue(ToolAppliedOption.ToolPathOption);
 
             DirectoryPath? toolDirectoryPath = null;
             if (!string.IsNullOrWhiteSpace(toolPath))
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             var appHostSourceDirectory = ShellShimTemplateFinder.GetDefaultAppHostSourceDirectory();
             IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolDirectoryPath);
 
-            var packageId = new PackageId(_parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
+            var packageId = new PackageId(_parseResult.GetValue(ToolInstallCommandParser.PackageIdArgument));
             IToolPackage package = null;
             try
             {

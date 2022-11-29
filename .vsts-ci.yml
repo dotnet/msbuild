@@ -114,11 +114,6 @@ stages:
               _PublishArgs: ''
               _SignType: test
               _Test: -test
-            Build_Release:
-              _BuildConfig: Release
-              _PublishArgs: ''
-              _SignType: test
-              _Test: -test
 
     - template: /eng/build.yml
       parameters:

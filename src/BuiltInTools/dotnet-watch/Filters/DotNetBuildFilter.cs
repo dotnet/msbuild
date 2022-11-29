@@ -10,7 +10,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class DotNetBuildFilter : IWatchFilter
+    internal sealed class DotNetBuildFilter : IWatchFilter
     {
         private readonly IFileSetFactory _fileSetFactory;
         private readonly ProcessRunner _processRunner;

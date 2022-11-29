@@ -343,6 +343,43 @@ namespace ManifestReaderTests
                 .BeEquivalentTo("6.0.100-preview.4/iOS", "6.0.100/Android");
         }
 
+        [Fact]
+        public void ItReturnsManifestsInOrderFromIncludedWorkloadManifestsFile()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var fakeDotnetRootDirectory = Path.Combine(testDirectory, "dotnet");
+
+            //  microsoft.net.workload.mono.toolchain.net6, microsoft.net.workload.mono.toolchain.net7, microsoft.net.workload.emscripten.net6, microsoft.net.workload.emscripten.net7
+
+            var currentSdkVersion = "7.0.100";
+            var fallbackWorkloadBand = "7.0.100-rc.2";
+
+            CreateMockManifest(fakeDotnetRootDirectory, currentSdkVersion, "NotInIncudedWorkloadsFile");
+            CreateMockManifest(fakeDotnetRootDirectory, currentSdkVersion, "Microsoft.Net.Workload.Mono.Toolchain.net6");
+            CreateMockManifest(fakeDotnetRootDirectory, fallbackWorkloadBand, "Microsoft.Net.Workload.Mono.Toolchain.net7");
+            CreateMockManifest(fakeDotnetRootDirectory, fallbackWorkloadBand, "Microsoft.Net.Workload.Emscripten.net6");
+            CreateMockManifest(fakeDotnetRootDirectory, currentSdkVersion, "Microsoft.Net.Workload.Emscripten.net7");
+
+            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", currentSdkVersion, "IncludedWorkloadManifests.txt");
+            Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
+            File.WriteAllText(knownWorkloadsFilePath, @"
+Microsoft.Net.Workload.Mono.Toolchain.net6
+Microsoft.Net.Workload.Mono.Toolchain.net7
+Microsoft.Net.Workload.Emscripten.net6
+Microsoft.Net.Workload.Emscripten.net7"
+                .Trim());
+
+            var sdkDirectoryWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: currentSdkVersion, userProfileDir: null);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .Equal($"{currentSdkVersion}/Microsoft.Net.Workload.Mono.Toolchain.net6",
+                       $"{fallbackWorkloadBand}/Microsoft.Net.Workload.Mono.Toolchain.net7",
+                       $"{fallbackWorkloadBand}/Microsoft.Net.Workload.Emscripten.net6",
+                       $"{currentSdkVersion}/Microsoft.Net.Workload.Emscripten.net7",
+                       $"{currentSdkVersion}/NotInIncudedWorkloadsFile");
+        }
+
         private void CreateMockManifest(string rootDir, string version, string manifestId)
         {
             var manifestDirectory = Path.Combine(rootDir, "sdk-manifests", version);

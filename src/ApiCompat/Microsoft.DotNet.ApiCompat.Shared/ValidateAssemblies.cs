@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
@@ -15,7 +16,8 @@ namespace Microsoft.DotNet.ApiCompat
     {
         public static void Run(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
             bool generateSuppressionFile,
-            string? suppressionFile,
+            string[]? suppressionFiles,
+            string? suppressionOutputFile,
             string? noWarn,
             bool enableRuleAttributesMustMatch,
             string[]? excludeAttributesFiles,
@@ -29,12 +31,9 @@ namespace Microsoft.DotNet.ApiCompat
             (string CaptureGroupPattern, string ReplacementString)[]? leftAssembliesTransformationPatterns,
             (string CaptureGroupPattern, string ReplacementString)[]? rightAssembliesTransformationPatterns)
         {
-            // Configure the suppression engine. Ignore the passed in suppression file if it should be generated and doesn't yet exist.
-            string? suppressionFileForEngine = generateSuppressionFile && !File.Exists(suppressionFile) ? null : suppressionFile;
-
             // Initialize the service provider
             ApiCompatServiceProvider serviceProvider = new(logFactory,
-                () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
+                () => new SuppressionEngine(suppressionFiles, noWarn, generateSuppressionFile),
                 (log) => new RuleFactory(log,
                     enableRuleAttributesMustMatch,
                     excludeAttributesFiles,
@@ -87,11 +86,14 @@ namespace Microsoft.DotNet.ApiCompat
             // Execute the enqueued work item(s).
             apiCompatRunner.ExecuteWorkItems();
 
+            SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.CompatibilityLogger);
+
             if (generateSuppressionFile)
             {
                 SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
                     serviceProvider.CompatibilityLogger,
-                    suppressionFile);
+                    suppressionFiles,
+                    suppressionOutputFile);
             }
         }
 

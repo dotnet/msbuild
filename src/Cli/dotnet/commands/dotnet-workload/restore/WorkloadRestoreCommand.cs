@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
         {
             _result = result;
             _slnOrProjectArgument =
-                result.GetValueForArgument(RestoreCommandParser.SlnOrProjectArgument);
+                result.GetValue(RestoreCommandParser.SlnOrProjectArgument);
         }
 
         public override int Execute()

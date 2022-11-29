@@ -1,4 +1,6 @@
 <Project>
+  <Import Project="PublishDotnetWatch.targets"/>
+
   <Target Name="PublishVersionFile"
           BeforeTargets="Build">
 
@@ -187,20 +189,8 @@
   </Target>
 
   <Target Name="PublishBuiltInTools"
-          BeforeTargets="Build">
-
-    <PropertyGroup>
-      <DotnetWatchOutputDirectory>$(OutputPath)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchOutputDirectory>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <DotNetWatchFile Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
-    </ItemGroup>
-
-    <Copy
-      SourceFiles="@(DotNetWatchFile)"
-      DestinationFiles="$(DotnetWatchOutputDirectory)%(RecursiveDir)%(Filename)%(Extension)" />
-  </Target>
+          DependsOnTargets="PublishDotnetWatch"
+          BeforeTargets="Build" />
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
           AfterTargets="Build">

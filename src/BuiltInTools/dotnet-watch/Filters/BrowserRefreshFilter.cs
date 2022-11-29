@@ -13,7 +13,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public sealed class BrowserRefreshFilter : IWatchFilter, IAsyncDisposable
+    internal sealed class BrowserRefreshFilter : IWatchFilter, IAsyncDisposable
     {
         private readonly bool _suppressBrowserRefresh;
         private readonly IReporter _reporter;

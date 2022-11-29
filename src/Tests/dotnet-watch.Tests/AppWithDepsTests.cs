@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var programCs = File.ReadAllText(fileToChange);
             File.WriteAllText(fileToChange, programCs);
 
-            await app.HasRestarted();
+            await app.AssertRestarted();
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 Arguments
             };
 
-            command.SetHandler((ParseResult parseResult) => MSBuildCommand.Run(parseResult.GetValueForArgument(Arguments)));
+            command.SetHandler((ParseResult parseResult) => MSBuildCommand.Run(parseResult.GetValue(Arguments)));
 
             return command;
         }

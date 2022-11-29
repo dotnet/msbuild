@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli
 
         private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
         private static Func<string, IEnumerable<string>> RuntimeArgFunc = o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
-        private static CompletionDelegate RuntimeCompletions = Complete.RunTimesFromProjectFile;
+        private static Func<CompletionContext, IEnumerable<CompletionItem>> RuntimeCompletions = Complete.RunTimesFromProjectFile;
 
         public static Option<string> RuntimeOption =
             new ForwardedOption<string>(
@@ -135,9 +135,9 @@ namespace Microsoft.DotNet.Cli
             .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
         internal static string ArchOptionValue(ParseResult parseResult) =>
-            string.IsNullOrEmpty(parseResult.GetValueForOption(CommonOptions.ArchitectureOption)) ?
-                parseResult.GetValueForOption(CommonOptions.LongFormArchitectureOption) :
-                parseResult.GetValueForOption(CommonOptions.ArchitectureOption);
+            string.IsNullOrEmpty(parseResult.GetValue(CommonOptions.ArchitectureOption)) ?
+                parseResult.GetValue(CommonOptions.LongFormArchitectureOption) :
+                parseResult.GetValue(CommonOptions.ArchitectureOption);
 
         public static Option<string> OperatingSystemOption =
             new ForwardedOption<string>(

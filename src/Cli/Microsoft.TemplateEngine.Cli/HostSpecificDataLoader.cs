@@ -34,11 +34,15 @@ namespace Microsoft.TemplateEngine.Cli
         {
             IMountPoint? mountPoint = null;
 
-            if (templateInfo is ITemplateInfoHostJsonCache { HostData: JObject hostData })
+            if (templateInfo is ITemplateInfoHostJsonCache { HostData: string hostData })
             {
                 try
                 {
-                    return new HostSpecificTemplateData(hostData);
+                    if (!string.IsNullOrWhiteSpace(hostData))
+                    {
+                        JObject jObject = JObject.Parse(hostData);
+                        return new HostSpecificTemplateData(jObject);
+                    }
                 }
                 catch (Exception e)
                 {

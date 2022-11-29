@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should()
-                .Pass()
+                .Fail()
                 .And.HaveStdErr();
         }
 

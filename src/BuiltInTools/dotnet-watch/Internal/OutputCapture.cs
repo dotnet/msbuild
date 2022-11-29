@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class OutputCapture
+    internal sealed class OutputCapture
     {
         private readonly List<string> _lines = new List<string>();
         public IEnumerable<string> Lines => _lines;

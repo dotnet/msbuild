@@ -89,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// Custom parse method for template option.
         /// It is mainly required to process default if no option value cases.
         /// </summary>
-        private static ParseArgument<string> GetParseChoiceArgument(ChoiceTemplateParameter parameter)
+        private static Func<ArgumentResult, string> GetParseChoiceArgument(ChoiceTemplateParameter parameter)
         {
             return (argumentResult) =>
             {

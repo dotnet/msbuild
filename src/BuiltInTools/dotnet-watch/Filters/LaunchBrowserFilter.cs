@@ -11,7 +11,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public sealed class LaunchBrowserFilter : IWatchFilter, IAsyncDisposable
+    internal sealed class LaunchBrowserFilter : IWatchFilter, IAsyncDisposable
     {
         private static readonly Regex NowListeningRegex = new Regex(@"Now listening on: (?<url>.*)\s*$", RegexOptions.None | RegexOptions.Compiled, TimeSpan.FromSeconds(10));
         private readonly bool _runningInTest;
