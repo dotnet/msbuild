@@ -5,9 +5,13 @@ using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Shouldly;
+using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Xunit;
 
 #nullable disable
 
@@ -337,6 +341,35 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.Null(target.Returns);
             Assert.True(project.HasUnsavedChanges);
+        }
+
+        /// <summary>
+        /// Parse invalid property under target
+        /// </summary>
+        [Fact]
+        public void ReadInvalidPropertyUnderTarget()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                var error= Assert.Throws<InvalidProjectFileException>(() =>
+                {
+                    string projectFile = @"
+                    <Project>
+                        <Target Name='t'>
+                            <test>m</test>
+                        </Target>
+                    </Project>";
+
+                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
+                    ProjectCollection collection = new ProjectCollection();
+                    collection.LoadProject(file.Path).Build().ShouldBeTrue();
+                });
+                error.ErrorCode.ShouldBeLessThanOrEqualTo("MSB4070");
+            }
         }
 
         /// <summary>
