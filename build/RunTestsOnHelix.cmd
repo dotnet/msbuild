@@ -32,3 +32,5 @@ dotnet nuget list source
 REM We downloaded a special zip of files to the .nuget folder so add that as a source
 dotnet new nugetconfig
 dotnet nuget add source %DOTNET_ROOT%\.nuget --configfile nuget.config
+
+PowerShell -ExecutionPolicy ByPass "dotnet nuget locals all -l | ForEach-Object { $_.Split(' ')[1]} | Where-Object{$_ -like '*cache'} | Get-ChildItem -Recurse -File -Filter '*.dat' | Measure"
