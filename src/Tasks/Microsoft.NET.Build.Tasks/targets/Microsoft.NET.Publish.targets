@@ -980,7 +980,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       IsSelfContained="$(SelfContained)"
                       IsSingleFile="$(_IsSingleFilePublish)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
-                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"/>
+                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                      IncludeProjectsNotInAssetsFile="$(IncludeProjectsNotInAssetsFileInDepsFile)"/>
 
     <ItemGroup>
       <ResolvedFileToPublish Include="$(IntermediateDepsFilePath)">
