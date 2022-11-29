@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(LibraryTargetFrameworks);net35</TargetFrameworks>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'">$(LibraryTargetFrameworks);net35</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>true</IsPackable>
@@ -16,8 +17,8 @@
     
     <IncludeBuildOutput Condition="'$(TargetFramework)' == 'net35'">false</IncludeBuildOutput>
     <!-- Don't publish the reference assembly if the build output isn't included. -->
-    <TargetsForTfmSpecificBuildOutput Condition="'$(IncludeBuildOutput)' != 'true'" />
-    <NoWarn Condition="'$(IncludeBuildOutput)' != 'true'">$(NoWarn),NU5128</NoWarn>
+    <TargetsForTfmSpecificBuildOutput Condition="'$(IncludeBuildOutput)' == 'false'" />
+    <NoWarn Condition="'$(IncludeBuildOutput)' == 'false'">$(NoWarn),NU5128</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
