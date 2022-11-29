@@ -104,9 +104,9 @@
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.dll",
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.dll.br",
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.dll.gz",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.js",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.js.br",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.js.gz",
+  "${OutputPath}\\wwwroot\\_framework\\dotnet.js",
+  "${OutputPath}\\wwwroot\\_framework\\dotnet.js.br",
+  "${OutputPath}\\wwwroot\\_framework\\dotnet.js.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat.br",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat.gz",
@@ -144,5 +144,7 @@
   "${OutputPath}\\wwwroot\\serviceworkers\\my-service-worker.js.br",
   "${OutputPath}\\wwwroot\\serviceworkers\\my-service-worker.js.gz",
   "${OutputPath}\\wwwroot\\styles.css",
-  "${OutputPath}\\wwwroot\\wwwroot\\exampleJsInterop.js"
+  "${OutputPath}\\wwwroot\\wwwroot\\exampleJsInterop.js",
+  "${OutputPath}\\wwwroot\\_content\\RazorClassLibrary\\styles.css",
+  "${OutputPath}\\wwwroot\\_content\\RazorClassLibrary\\wwwroot\\exampleJsInterop.js"
 ]
