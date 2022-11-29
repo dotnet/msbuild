@@ -354,6 +354,12 @@ namespace Microsoft.NET.Build.Tests
         public void It_can_publish_runtime_specific_apps_with_library_dependencies_self_contained(string targetFramework)
         {
 
+            // There's a bug when using the 6.0 SDK with 17.4 but we have limited control over the VS version used in helix
+            Version.TryParse(TestContext.Current.ToolsetUnderTest.MSBuildVersion, out Version msbuildVersion);
+            Version.TryParse("17.4.0", out Version maximumVersion);
+            if (msbuildVersion >= maximumVersion)
+                return;
+
             // create a basic library and a basic app, reference the library from the app and then
             // publish the app with a RID specified and self-contained.
             // verify that no warnings about missing the --self-contained flag are emitted.
