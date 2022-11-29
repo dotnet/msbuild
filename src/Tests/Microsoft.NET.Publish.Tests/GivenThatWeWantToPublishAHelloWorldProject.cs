@@ -608,17 +608,43 @@ public static class Program
                    propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
                });
 
-            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
-
-            publishCommand
-            .Execute(configOpt)
-            .Should()
-            .Pass().And.NotHaveStdErr();
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+                .Execute(configOpt)
+                .Should()
+                .Pass().And.NotHaveStdErr();
 
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
             var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
+        }
+
+        [Theory]
+        [InlineData("net7.0")]
+        [InlineData("net8.0")]
+        public void It_publishes_with_Release_by_default_in_net_8_but_not_net_7(string tfm)
+        {
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm
+            };
+            testProject.RecordProperties("Configuration");
+            testProject.RecordProperties("DebugSymbols"); // If Configuration is set too late, it doesn't actually do anything. Check this too.
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, configuration: tfm == "net7.0" ? "Debug" : "Release");
+            var finalConfiguration = properties["Configuration"];
+            var finalDebugSymbols = properties["DebugSymbols"];
+            Assert.True(finalConfiguration == (tfm == "net7.0" ? "Debug" : "Release"));
+            Assert.True(finalDebugSymbols == (tfm == "net7.0" ? "true" : "false"));
         }
 
         [Fact]
