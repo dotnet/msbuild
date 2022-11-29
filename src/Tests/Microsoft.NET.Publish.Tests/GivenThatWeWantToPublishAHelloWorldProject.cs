@@ -442,12 +442,10 @@ public static class Program
 
             File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
-            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
-
-            publishCommand
-            .Execute()
-            .Should()
-            .Pass();
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
 
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", optedOut ? "Debug" : "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
@@ -468,12 +466,10 @@ public static class Program
                     propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
                 });
 
-            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
-
-            publishCommand
-            .Execute("-p:PublishRelease=false")
-            .Should()
-            .Pass();
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+                .Execute("-p:PublishRelease=false")
+                .Should()
+                .Pass();
 
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
@@ -528,13 +524,15 @@ public static class Program
                .WithSource()
                .Path;
 
+            var expectedError = string.Format(Strings.SolutionProjectConfigurationsConflict, "PublishRelease");
+
             new DotnetCommand(Log)
                 .WithWorkingDirectory(slnDir)
                 .Execute("dotnet", "publish")
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(Strings.SolutionProjectConfigurationsConflict);
+                .HaveStdOutContaining(expectedError);
         }
 
         [Fact]

@@ -876,8 +876,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1193: "}</comment>
   </data>
   <data name="SolutionProjectConfigurationsConflict" xml:space="preserve">
-    <value>NETSDK1194: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:
-{1}.</value>
+    <value>NETSDK1194: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:</value>
     <comment>{StrBegin="NETSDK1194: "}</comment>
   </data>
 </root>

@@ -59,13 +59,6 @@ Copyright (c) .NET Foundation. All rights reserved.
         <PackagePath>%(_ResolvedFileToPublishWithPackagePath.PackagePath)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
-
-
-    <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations. -->
-    <NETSdkError Condition="'$(_SolutionLevelPackRelease)' != '' and '$(_SolutionLevelPackRelease)' != '$(PackRelease)'"
-                  ResourceName="SolutionProjectConfigurationsConflict"
-                  FormatArguments="PackRelease;$(ProjectName)"/>
-
   </Target>
 
   <PropertyGroup>

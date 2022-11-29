@@ -141,11 +141,11 @@ namespace Microsoft.NET.Pack.Tests
             Assert.True(File.Exists(expectedAssetPath));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/27066")]
+        [Fact]
         public void It_fails_with_conflicting_PackRelease_values_in_solution_file()
         {
             var slnDir = _testAssetsManager
-               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues")
+               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues") // this also contains conflicting PackRelease values.
                .WithSource()
                .Path;
 
@@ -155,20 +155,20 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(Strings.SolutionProjectConfigurationsConflict);
+                .HaveStdOutContaining(string.Format(Strings.SolutionProjectConfigurationsConflict, "PackRelease"));
         }
 
         [Fact]
-        public void A_PackRelease_property_does_not_override_other_command_configuration()
+        public void A_PackRelease_property_does_not_affect_other_commands_besides_pack()
         {
+            var tfm = "net8.0";
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PackPropertiesHelloWorld")
+               .CopyTestAsset("HelloWorld")
                .WithSource()
-               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
+               .WithTargetFramework(tfm);
 
-            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
+            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>false</PackRelease></PropertyGroup></Project>");
 
-            // publish command should not be affected by PackRelease
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
@@ -176,8 +176,10 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
-            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
-            Assert.False(File.Exists(expectedAssetPath));
+            var unexpectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", tfm, "HelloWorld.dll");
+            Assert.False(File.Exists(unexpectedAssetPath));
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", tfm, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
         }
     }
 }
