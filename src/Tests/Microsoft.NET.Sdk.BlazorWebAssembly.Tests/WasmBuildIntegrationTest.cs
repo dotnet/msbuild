@@ -474,7 +474,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(finalPath).Should().Exist();
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
 
