@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework.FileAccess;
 
@@ -17,5 +18,7 @@ namespace Microsoft.Build.FileAccesses
         FileAccessManager.HandlerRegistration RegisterHandlers(
             Action<BuildRequest, FileAccessData> fileAccessHandler,
             Action<BuildRequest, ProcessData> processHandler);
+
+        void WaitForFileAccessReportCompletion(int globalRequestId, CancellationToken cancellationToken);
     }
 }
