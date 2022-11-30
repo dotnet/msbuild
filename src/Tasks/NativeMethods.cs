@@ -517,7 +517,8 @@ namespace Microsoft.Build.Tasks
     internal enum SymbolicLink
     {
         File = 0,
-        Directory = 1
+        Directory = 1,
+        AllowUnprivilegedCreate = 2,
     }
 
     /// <summary>
@@ -833,7 +834,14 @@ namespace Microsoft.Build.Tasks
             bool symbolicLinkCreated;
             if (NativeMethodsShared.IsWindows)
             {
-                symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, SymbolicLink.File);
+                Version osVersion = Environment.OSVersion.Version;
+                SymbolicLink flags = SymbolicLink.File;
+                if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
+                {
+                    flags |= SymbolicLink.AllowUnprivilegedCreate;
+                }
+
+                symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, flags);
                 errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
             }
             else
