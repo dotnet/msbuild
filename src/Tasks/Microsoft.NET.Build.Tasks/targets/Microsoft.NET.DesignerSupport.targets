@@ -68,6 +68,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
       TargetFramework="$(TargetFramework)"
       RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+      IncludeProjectsNotInAssetsFile="$(IncludeProjectsNotInAssetsFileInDepsFile)"
       />
 
     <ItemGroup>
