@@ -208,22 +208,22 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
       <Sha>bb01bbf4433e27289b99001b7de6a582879d1835</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.5.22579.5">
+    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.22579.16">
       <Uri>https://github.com/dotnet/razor</Uri>
-      <Sha>a63dcc15fb36a40ae74e5d3e1a0b02116e4c2f48</Sha>
+      <Sha>7654d6c9578488179e99643c12597dce78905a50</Sha>
       <SourceBuild RepoName="razor-compiler" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="7.0.0-preview.5.22579.5">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="7.0.0-preview.22579.16">
       <Uri>https://github.com/dotnet/razor</Uri>
-      <Sha>a63dcc15fb36a40ae74e5d3e1a0b02116e4c2f48</Sha>
+      <Sha>7654d6c9578488179e99643c12597dce78905a50</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="7.0.0-preview.5.22579.5">
+    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="7.0.0-preview.22579.16">
       <Uri>https://github.com/dotnet/razor</Uri>
-      <Sha>a63dcc15fb36a40ae74e5d3e1a0b02116e4c2f48</Sha>
+      <Sha>7654d6c9578488179e99643c12597dce78905a50</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.5.22579.5">
+    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.22579.16">
       <Uri>https://github.com/dotnet/razor</Uri>
-      <Sha>a63dcc15fb36a40ae74e5d3e1a0b02116e4c2f48</Sha>
+      <Sha>7654d6c9578488179e99643c12597dce78905a50</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
