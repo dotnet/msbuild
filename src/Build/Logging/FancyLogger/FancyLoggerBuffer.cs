@@ -35,6 +35,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
             // Update dimensions
             Height = Console.BufferHeight;
+            // Write "title"
+            Console.Write(""
+                + ANSIBuilder.Cursor.Home()
+                + ANSIBuilder.Formatting.Inverse("                         MSBuild                         ")
+            );
             // Write body
             Console.Write(""
                 + ANSIBuilder.Cursor.Position(2, 0)
@@ -42,15 +47,11 @@ namespace Microsoft.Build.Logging.FancyLogger
                 + "\n"
                 + ANSIBuilder.Formatting.Dim("5s sleep for demo purposes")
             );
-            // Write "title"
-            Console.Write(""
-                + ANSIBuilder.Cursor.Home()
-                + ANSIBuilder.Formatting.Inverse("                         MSBuild                         ")
-            );
+            
 
             // Write "footer"
             Console.Write(""
-                + ANSIBuilder.Cursor.Position(Height - 1, 0)
+                + ANSIBuilder.Cursor.Position(Height - 2, 0)
                 + "---------------------------------------------------------"
                 + "\n"
                 + "Build: 13%"
