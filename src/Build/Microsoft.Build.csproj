@@ -161,6 +161,8 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="Logging\FancyLogger\ANSIBuilder.cs" />
     <Compile Include="Logging\FancyLogger\FancyLogger.cs" />
+    <Compile Include="Logging\FancyLogger\FancyLoggerBuffer.cs" />
+    <Compile Include="Logging\FancyLogger\LogWriterOld.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

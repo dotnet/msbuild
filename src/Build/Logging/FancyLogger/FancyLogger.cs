@@ -1,89 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Logging;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
-    /// <summary>
-    /// Represents an identifiable line within the log
-    /// </summary>
-    public class LogLine
-    {
-        private static int IdCounter = 0;
-        public int Id { get; private set; }
-        public string Text;
-        public LogLine(string text)
-        {
-            Id = IdCounter++;
-            Text = text;
-        }
-        public int LineNumber
-        {
-            get
-            {
-                return Array.IndexOf( Log.LogLines.Keys.ToArray(), Id ) + Log.InitialCursorHeight + 1;
-            }
-        }
-    }
-    /// <summary>
-    /// Utility class for writing identifiable log lines
-    /// </summary>
-    public static class Log
-    {
-        public static int InitialCursorHeight;
-        public static Dictionary<int, LogLine> LogLines = new Dictionary<int, LogLine>();
-
-        public static LogLine WriteNewLine(string text)
-        {
-            // Get starting cursor position
-            int lineNumber = LogLines.Count + InitialCursorHeight + 1;
-            // Create, add and print line
-            LogLine line = new LogLine(text);
-            LogLines.Add(line.Id, line);
-            Console.Write(
-                "\n"
-                + ANSIBuilder.Cursor.GoToPosition(lineNumber, 0)
-                + line.Text
-                + "\x1bS"
-                + "\x1bS"
-                + "\x1bS"
-                + "\x1bS"
-            );
-            // Return line
-            return line;
-        }
-        public static void WriteInLine(string text, int lineId)
-        {
-            // Get Line id
-            LogLine line = Log.LogLines[lineId];
-            if(line != null)
-            {
-                // Replace text on line
-                line.Text = text;
-                // Write it
-                Console.Write(
-                    ANSIBuilder.Cursor.GoToPosition(line.LineNumber, 0)
-                    + ANSIBuilder.Eraser.EraseCurrentLine()
-                    + "\r"
-                    + text
-                );
-            }
-        }
-        public static void DeleteLine(int lineId)
-        {
-            return;
-        }
-    }
-
     public class FancyLogger : ILogger
     {
-        public int i = 0;
         public Dictionary<int, int> projectConsoleLines = new Dictionary<int, int>();
         public Dictionary<int, int> tasksConsoleLines = new Dictionary<int, int>();
         public Dictionary<int, int> targetConsoleLines = new Dictionary<int, int>();
@@ -114,20 +40,16 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
+            {
+                FancyLoggerBuffer.Initialize();
 
-            // TODO: Review values
-            // Console.BufferHeight = Int16.MaxValue - 10;
-            Log.InitialCursorHeight = Console.CursorTop;
-
-            Log.WriteNewLine(
-                "MSBuild Fancy Console Logger"
-            );
+                Thread.Sleep(15_000);
+            }
         }
 
         // Build
         void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
         {
-            // Console.WriteLine( LoggerFormatting.Bold("[Build]") + "\t Started");
         }
         void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
@@ -137,66 +59,21 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Project
         void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            Log.WriteNewLine(
-                ANSIBuilder.Formatting.Color(
-                    ANSIBuilder.Formatting.Bold(String.Format("Project {0} started", e.ProjectFile)), ANSIForegroundColor.Yellow
-                )
-            );
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-            // Console.WriteLine(LoggerFormatting.Bold("[Project]") + "\t Finished");
         }
-
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
-            if (e.BuildEventContext?.TargetId != null)
-            {
-                LogLine line = Log.WriteNewLine(
-                    "  " + e.TargetName 
-                );
-                targetConsoleLines[e.BuildEventContext.TargetId] = line.Id;
-
-                LogLine nextLine = Log.WriteNewLine(
-                    ANSIBuilder.Formatting.Dim("\t~~~") 
-                );
-                // Log.WriteNewLine("");
-            }
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
-            if (e.BuildEventContext?.TargetId != null)
-            {
-                int targetLineId = targetConsoleLines[e.BuildEventContext.TargetId];
-                // If succeeded
-                if (e.Succeeded)
-                {
-                    Log.WriteInLine(
-                        ANSIBuilder.Formatting.Color("✓ " + e.TargetName, ANSIForegroundColor.Green)
-                    , targetLineId);
-                }
-                /*Log.WriteInLine(
-                    ANSIBuilder.Eraser.EraseCurrentLine(), targetLineId+1
-                );*/
-            }
         }
 
         // Task
         void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
         {
-            if (e.BuildEventContext?.TargetId != null)
-            {
-                int targetLineId = targetConsoleLines[e.BuildEventContext.TargetId];
-                Log.WriteInLine(
-                    ANSIBuilder.Eraser.EraseCurrentLine() + "\t" +
-                    ANSIBuilder.Graphics.Spinner() + " " +
-                    ANSIBuilder.Graphics.ProgressBar(0.6f, 16) + "\t" +
-                    ANSIBuilder.Formatting.Dim(e.TaskName), 
-                    targetLineId + 1
-                );
-                System.Threading.Thread.Sleep(200);
-            }
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
