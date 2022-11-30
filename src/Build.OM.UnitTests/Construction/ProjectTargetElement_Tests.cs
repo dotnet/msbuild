@@ -368,7 +368,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     ProjectCollection collection = new ProjectCollection();
                     collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 });
-                error.ErrorCode.ShouldBeLessThanOrEqualTo("MSB4070");
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+                {
+                    error.ErrorCode.ShouldMatch("MSB4070");
+                }
+                else
+                {
+                    error.ErrorCode.ShouldMatch("MSB4067");
+                }
             }
         }
 
