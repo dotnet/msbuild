@@ -36,14 +36,14 @@
         <source>There are several launch profiles with case-sensitive names, which isn't permitted:
 {0}
 Make the profile names distinct.</source>
-        <target state="new">There are several launch profiles with case-sensitive names, which isn't permitted:
+        <target state="translated">Adı büyük/küçük harfe duyarlı olan birkaç başlatma profili var ama bu duruma izin verilmiyor:
 {0}
-Make the profile names distinct.</target>
+ Lütfen profil adlarını değiştirin.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileDoesNotExist">
         <source>A launch profile with the name '{0}' doesn't exist.</source>
-        <target state="new">A launch profile with the name '{0}' doesn't exist.</target>
+        <target state="translated">'{0}' adlı bir başlatma profili yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyOneProjectAllowed">
@@ -116,7 +116,7 @@ Geçerli {1}: '{2}'.</target>
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile '{0}' could not be located.</source>
-        <target state="new">The specified launch profile '{0}' could not be located.</target>
+        <target state="translated">Belirtilen başlatma profili '{0}' bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
@@ -143,7 +143,7 @@ Geçerli {1}: '{2}'.</target>
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>A profile with the specified name isn't a valid JSON object.</source>
-        <target state="needs-review-translation">Belirtilen isme sahip profil bulunamadı veya geçerli bir JSON nesnesi değil.</target>
+        <target state="translated">Belirtilen adla bir profil, geçerli bir JSON nesnesi değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

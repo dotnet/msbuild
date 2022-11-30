@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdFormatDescription">
         <source>Specifies the output format type for the list packages command.</source>
-        <target state="new">Specifies the output format type for the list packages command.</target>
+        <target state="translated">Gibt den Ausgabeformattyp für den Befehl "list packages" an.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
