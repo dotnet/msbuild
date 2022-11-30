@@ -658,7 +658,8 @@ namespace Microsoft.NET.Publish.Tests
                 var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
                     .Execute()
-                    .Should().Pass();
+                    .Should()
+                    .Pass();
             }
         }
 
