@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-watch" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-watch" "1" "2022-11-10" "" ".NET Documentation"
 .hy
 .SH dotnet watch
 .PP
@@ -47,6 +47,29 @@ While running \f[V]dotnet watch\f[R], you can force the app to rebuild and resta
 This feature is available only while the app is running.
 For example, if you run \f[V]dotnet watch\f[R] on a console app that ends before you press Ctrl+R, pressing Ctrl+R has no effect.
 However, in that case \f[V]dotnet watch\f[R] is still watching files and will restart the app if a file is updated.
+.SS Response compression
+.PP
+If \f[V]dotnet watch\f[R] runs for an app that uses response compression, the tool can\[cq]t inject the browser refresh script.
+The .NET 7 and later version of the tool displays a warning message like the following:
+.RS
+.PP
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+.PP
+Unable to configure browser refresh script injection on the response.
+This may have been caused by the response\[cq]s Content-Encoding: `br'.
+Consider disabling response compression.
+.RE
+.PP
+As an alternative to disabling response compression, manually add the browser refresh JavaScript reference to the app\[cq]s pages:
+.IP
+.nf
+\f[C]
+\[at]if (Environment.GetEnvironmentVariable(\[dq]__ASPNETCORE_BROWSER_TOOLS\[dq]) is not null)
+{
+    <script src=\[dq]/_framework/aspnetcore-browser-refresh.js\[dq]></script>
+}
+\f[R]
+.fi
 .SH ARGUMENTS
 .IP \[bu] 2
 \f[B]\f[VB]forwarded arguments\f[B]\f[R]
@@ -76,6 +99,7 @@ Suppress hot reload for supported apps.
 Runs \f[V]dotnet watch\f[R] in non-interactive mode.
 Use this option to prevent console input from being requested.
 When hot reload is enabled and a rude edit is detected, dotnet watch restarts the app.
+Available since .NET 7 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--project <PATH>\f[B]\f[R]
