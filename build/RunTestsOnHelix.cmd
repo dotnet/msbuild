@@ -38,5 +38,7 @@ dotnet nuget remove source richnav --configfile %TestExecutionDirectory%\nuget.c
 dotnet nuget remove source vs-impl --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source dotnet-libraries-transport --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source dotnet-tools-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet-libraries --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet-tools --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source dotnet-eng --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget list source --configfile %TestExecutionDirectory%\nuget.config
