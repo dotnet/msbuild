@@ -3,8 +3,6 @@
 
 using System;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -23,6 +21,6 @@ namespace Microsoft.Build.Framework
         {
             this.ResponseFilePath = responseFilePath;
         }
-        public string ResponseFilePath { set; get; }
+        public string? ResponseFilePath { set; get; }
     }
 }
