@@ -132,20 +132,5 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Equal(1, ((ConfigCache)obj).GetSmallestConfigId());
         }
-
-        [Theory]
-        [MemberData(nameof(CacheSerializationTestData))]
-        public void KeepCacheEntryWithLowestConfigId(object obj)
-        {
-            var initial = (ConfigCache)obj;
-            string cacheFile = Path.Combine(Directory.GetCurrentDirectory(), "Output.MSBuildResultsCache");
-            Assert.Null(CacheSerialization.SerializeCaches(initial, new ResultsCache(), cacheFile, IsolateProjects.Message));
-
-            var result = CacheSerialization.DeserializeCaches(cacheFile);
-            Assert.True(result.ConfigCache.HasConfiguration(1));
-            Assert.False(result.ConfigCache.HasConfiguration(2));
-            Assert.False(result.ConfigCache.HasConfiguration(3));
-            File.Delete(cacheFile);
-        }
     }
 }

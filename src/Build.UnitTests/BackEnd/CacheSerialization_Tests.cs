@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 cacheFile = FileUtilities.GetTemporaryFile("MSBuildResultsCache");
-                Assert.Null(CacheSerialization.SerializeCaches((ConfigCache)configCache, (ResultsCache)resultsCache, cacheFile));
+                Assert.Null(CacheSerialization.SerializeCaches((ConfigCache)configCache, (ResultsCache)resultsCache, cacheFile, IsolateProjects.Message));
 
                 var result = CacheSerialization.DeserializeCaches(cacheFile);
                 Assert.True(result.ConfigCache.HasConfiguration(1));
