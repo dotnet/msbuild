@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass()
                          .And.HaveStdOutContaining("This string came from the test library!");
         }
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                          .And.HaveStdOutContaining("Hello World!");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19487#issuecomment-898765210")]
+        [Fact]
         public void ItCanRunAMSBuildProjectWhenSpecifyingAFramework()
         {
             var testAppName = "MSBuildTestApp";
@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass()
                          .And.HaveStdOut("Hello World!");
         }
