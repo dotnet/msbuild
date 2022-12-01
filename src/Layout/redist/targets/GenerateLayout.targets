@@ -168,6 +168,7 @@
       <!-- https://github.com/microsoft/vstest/issues/1886 -->
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NewtonSoft.Json.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.Extensions.DependencyModel.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.Extensions.FileSystemGlobbing.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Memory.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Runtime.CompilerServices.Unsafe.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NuGet.Frameworks.dll" />
