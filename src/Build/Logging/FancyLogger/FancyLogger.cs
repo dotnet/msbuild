@@ -14,6 +14,9 @@ namespace Microsoft.Build.Logging.FancyLogger
         public Dictionary<int, FancyLoggerBufferLine> targetConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
         public Dictionary<int, FancyLoggerBufferLine> taskConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
 
+        private float existingTasks = 1;
+        private float completedTasks = 0;
+
         public string Parameters {  get; set; }
 
         public LoggerVerbosity Verbosity { get; set; }
@@ -80,7 +83,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             targetConsoleLines[e.BuildEventContext.TargetId] = FancyLoggerBuffer.WriteNewLine("\t  "
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + e.TargetName);
-            Thread.Sleep(200);
+            Thread.Sleep(10);
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
@@ -96,16 +99,20 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Task
         void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
         {
+            existingTasks++;
             if (e.BuildEventContext?.TaskId == null) return;
             taskConsoleLines[e.BuildEventContext.TaskId] = FancyLoggerBuffer.WriteNewLine("\t\t  "
                 + ANSIBuilder.Formatting.Dim("Task: ")
                 + e.TaskName
             );
-            Thread.Sleep(200);
+            Thread.Sleep(100);
+
+            FancyLoggerBuffer.WriteFooter($"Build: {(completedTasks / existingTasks) * 100}");
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
+            completedTasks++;
             if (e.BuildEventContext?.TaskId == null) return;
             int lineId = taskConsoleLines[e.BuildEventContext.TaskId].Id;
             FancyLoggerBuffer.UpdateLine(lineId, "\t\t"
@@ -113,6 +120,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 + ANSIBuilder.Formatting.Dim("Task: ")
                 + ANSIBuilder.Formatting.Color(e.TaskName, ANSIBuilder.Formatting.ForegroundColor.Green)
             );
+            FancyLoggerBuffer.WriteFooter($"Build: {(completedTasks / existingTasks) * 100}");
         }
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
@@ -136,7 +144,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 if (FancyLoggerBuffer.AutoScrollEnabled) break;
             }
-            Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
+            FancyLoggerBuffer.Terminate();
             Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
         }
     }

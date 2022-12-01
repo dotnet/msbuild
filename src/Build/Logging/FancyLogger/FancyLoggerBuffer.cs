@@ -28,19 +28,24 @@ namespace Microsoft.Build.Logging.FancyLogger
     }
     internal static class FancyLoggerBuffer
     {
+        public static bool AutoScrollEnabled = true;
+        private static bool IsTerminated = false;
+
+
+        private static Task? keysPressTask;
         private static List<FancyLoggerBufferLine> lines = new();
         private static int Height {
             get { return Console.BufferHeight; }
         }
         private static int CurrentTopLineIndex = 0;
-        public static bool AutoScrollEnabled = true;
         public static void Initialize()
         {
             // Setup event listeners
-            var arrowsPressTask = Task.Run(() =>
+            keysPressTask = Task.Run(() =>
             {
                 while (true)
                 {
+                    if (IsTerminated) return;
                     switch (Console.ReadKey().Key)
                     {
                         case ConsoleKey.UpArrow:
@@ -58,27 +63,21 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Switch to alternate buffer
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
             // Render contents
-            RenderTitleBar();
-            RenderFooter();
+            WriteTitleBar();
+            WriteFooter("This is an empty footer haha");
             ScrollToEnd();
         }
+        public static void Terminate()
+        {
+            // Switch to main buffer
+            Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
+            // Dispose event listeners
+            IsTerminated = true;
+            // Delete lines
+            lines = new();
+        }
 
-        #region Rendering and scrolling
-        private static void RenderTitleBar()
-        {
-            Console.Write(""
-                + ANSIBuilder.Cursor.Home()
-                + ANSIBuilder.Formatting.Inverse("                         MSBuild                         ")
-            );
-        }
-        private static void RenderFooter()
-        {
-            Console.Write(""
-                + ANSIBuilder.Cursor.Position(Height - 2, 0) // Position at bottom
-                + "---------------------------------------------------------\n"
-                + "Build: 13%"
-            );
-        }
+        
 
         private static void ScrollToLine(int firstLineIndex)
         {
@@ -119,7 +118,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Go to end
             Console.Write(ANSIBuilder.Cursor.Position(Height, 0));
         }
-        #endregion
 
         private static void ScrollUp()
         {
@@ -152,6 +150,22 @@ namespace Microsoft.Build.Logging.FancyLogger
             return lines[i];
         }
 
+        public static void WriteTitleBar()
+        {
+            Console.Write(""
+                + ANSIBuilder.Cursor.Home()
+                + ANSIBuilder.Formatting.Inverse("                         MSBuild                         ")
+            );
+        }
+        public static void WriteFooter(string text)
+        {
+            Console.Write(""
+                + ANSIBuilder.Cursor.Position(Height - 2, 0) // Position at bottom
+                + "---------------------------------------------------------\n"
+                + ANSIBuilder.Eraser.LineCursorToEnd()
+                + text
+            );
+        }
         public static FancyLoggerBufferLine WriteNewLine(string text)
         {
             // Create line
