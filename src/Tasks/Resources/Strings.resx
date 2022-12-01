@@ -2832,6 +2832,9 @@
   <data name="Unzip.DidNotUnzipBecauseOfFilter">
     <value>Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</value>
   </data>
+  <data name="Unzip.ZipSlipExploit">
+    <value>Entry is outside the target directory: "{0}"</value>
+  </data>
   <data name="Unzip.FileComment">
     <value>Unzipping file "{0}" to "{1}".</value>
   </data>

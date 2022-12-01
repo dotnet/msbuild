@@ -2590,6 +2590,11 @@
         <target state="translated">将文件“{0}”解压缩到“{1}”。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.ZipSlipExploit">
+        <source>Entry is outside the target directory: "{0}"</source>
+        <target state="new">Entry is outside the target directory: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: “{1}”是无效的“{0}”参数值。有效值为: {2}</target>

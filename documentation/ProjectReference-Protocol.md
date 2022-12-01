@@ -138,13 +138,12 @@ In addition to the above task and target, `.vcxproj` and `.nativeproj` projects 
 This means most projects will see an evaluation with no global properties defined, unless set by the user.
 
 ### How To Opt In
-First, set the properties `EnableDynamicPlatformResolution` and `DisableTransitiveProjectReferences` to `true` for **every project** in your solution. The easiest way to do this is by creating a `Directory.Build.props` file and placing it at the root of your project directory:
+First, set the property `EnableDynamicPlatformResolution` to `true` for **every project** in your solution. The easiest way to do this is by creating a `Directory.Build.props` file and placing it at the root of your project directory:
 
 ```xml
 <Project>
   <PropertyGroup>
     <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
-    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
   </PropertyGroup>
 </Project>
 ```

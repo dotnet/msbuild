@@ -2590,6 +2590,11 @@
         <target state="translated">파일 "{0}"의 압축을 "{1}"에 푸는 중입니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.ZipSlipExploit">
+        <source>Entry is outside the target directory: "{0}"</source>
+        <target state="new">Entry is outside the target directory: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: "{1}"은(는) "{0}" 매개 변수에 사용할 수 없는 값입니다.  유효한 값은 {2}입니다.</target>

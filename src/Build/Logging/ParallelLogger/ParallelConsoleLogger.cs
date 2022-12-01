@@ -1364,50 +1364,7 @@ namespace Microsoft.Build.BackEnd.Logging
             lock (_lockObject)
             {
                 int adjustedPrefixWidth = _prefixWidth + prefixAdjustment;
-
-                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-                {
-                    // The string may contain new lines, treat each new line as a different string to format and send to the console
-                    string[] nonNullMessages = SplitStringOnNewLines(message);
-                    for (int i = 0; i < nonNullMessages.Length; i++)
-                    {
-                        string nonNullMessage = nonNullMessages[i];
-                        // Take into account the new line char which will be added to the end or each reformatted string
-                        int bufferWidthMinusNewLine = _bufferWidth - 1;
-
-                        // If the buffer is larger then the prefix information (timestamp and key) then reformat the messages. 
-                        // If there is not enough room just print the message out and let the console do the formatting
-                        bool bufferIsLargerThanPrefix = bufferWidthMinusNewLine > adjustedPrefixWidth;
-                        bool messageAndPrefixTooLargeForBuffer = (nonNullMessage.Length + adjustedPrefixWidth) > bufferWidthMinusNewLine;
-                        if (bufferIsLargerThanPrefix && messageAndPrefixTooLargeForBuffer && _alignMessages)
-                        {
-                            // Our message may have embedded tab characters, so expand those to their space
-                            // equivalent so that wrapping works as expected.
-                            nonNullMessage = nonNullMessage.Replace("\t", consoleTab);
-
-                            // If the message and the prefix are too large for one line in the console, split the string to fit
-                            int index = 0;
-                            int messageLength = nonNullMessage.Length;
-                            // Loop until all the string has been sent to the console
-                            while (index < messageLength)
-                            {
-                                // Calculate how many chars will fit on the console buffer
-                                int amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
-                                WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), prefixAlreadyWritten && index == 0 && i == 0, adjustedPrefixWidth);
-                                index += amountToCopy;
-                            }
-                        }
-                        else
-                        {
-                            // there is not enough room just print the message out and let the console do the formatting
-                            WriteBasedOnPrefix(nonNullMessage, prefixAlreadyWritten, adjustedPrefixWidth);
-                        }
-                    }
-                }
-                else
-                {
-                    WriteHandler(_consoleOutputAligner.AlignConsoleOutput(message, prefixAlreadyWritten, adjustedPrefixWidth));
-                }
+                WriteHandler(_consoleOutputAligner.AlignConsoleOutput(message, prefixAlreadyWritten, adjustedPrefixWidth));
             }
         }
 
@@ -1793,7 +1750,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool _forceNoAlign;
         private bool _showEventId;
         // According to the documentation for ENABLE_PROCESSED_OUTPUT tab width for the console is 8 characters
-        private const string consoleTab = "        ";
         #endregion
 
         #region Per-build Members

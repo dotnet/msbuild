@@ -648,6 +648,7 @@ internal static class NativeMethods
     /// <summary>
     /// Gets a flag indicating if we are running under Linux
     /// </summary>
+    [SupportedOSPlatformGuard("linux")]
     internal static bool IsLinux
     {
 #if CLR2COMPATIBILITY
@@ -1047,7 +1048,7 @@ internal static class NativeMethods
     internal static DateTime GetLastWriteFileUtcTime(string fullPath)
     {
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-        if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+        if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
         {
             return LastWriteFileUtcTime(fullPath);
         }
@@ -1463,9 +1464,16 @@ internal static class NativeMethods
         }
     }
 
-#endregion
+    #endregion
 
-#region PInvoke
+    #region PInvoke
+    [SupportedOSPlatform("linux")]
+    [DllImport("libc", SetLastError = true)]
+    internal static extern int chmod(string pathname, int mode);
+
+    [SupportedOSPlatform("linux")]
+    [DllImport("libc", SetLastError = true)]
+    internal static extern int mkdir(string path, int mode);
 
     /// <summary>
     /// Gets the current OEM code page which is used by console apps
