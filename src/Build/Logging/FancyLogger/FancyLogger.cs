@@ -10,9 +10,9 @@ namespace Microsoft.Build.Logging.FancyLogger
 {
     public class FancyLogger : ILogger
     {
-        public Dictionary<int, int> projectConsoleLines = new Dictionary<int, int>();
-        public Dictionary<int, int> tasksConsoleLines = new Dictionary<int, int>();
+        public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
         public Dictionary<int, FancyLoggerBufferLine> targetConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
+        public Dictionary<int, FancyLoggerBufferLine> taskConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
 
         public string Parameters {  get; set; }
 
@@ -57,25 +57,37 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Project
         void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
+            if (e.BuildEventContext?.ProjectInstanceId == null) return;
+            projectConsoleLines[e.BuildEventContext.ProjectInstanceId] = FancyLoggerBuffer.WriteNewLine(" "
+                + ANSIBuilder.Formatting.Dim("Project: ")
+                + e.ProjectFile
+            );
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
+            if (e.BuildEventContext?.ProjectInstanceId == null) return;
+            int lineId = projectConsoleLines[e.BuildEventContext.ProjectInstanceId].Id;
+            FancyLoggerBuffer.UpdateLine(lineId, ""
+                + ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)
+                + ANSIBuilder.Formatting.Dim("Project: ")
+                + ANSIBuilder.Formatting.Color(e.ProjectFile ?? "", ANSIBuilder.Formatting.ForegroundColor.Green)
+            );
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
             if (e.BuildEventContext?.TargetId == null) return;
-            targetConsoleLines[e.BuildEventContext.TargetId] = FancyLoggerBuffer.WriteNewLine("  "
+            targetConsoleLines[e.BuildEventContext.TargetId] = FancyLoggerBuffer.WriteNewLine("\t  "
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + e.TargetName);
-            Thread.Sleep(500);
+            Thread.Sleep(200);
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
             if (e.BuildEventContext?.TargetId == null) return;
             int lineId = targetConsoleLines[e.BuildEventContext.TargetId].Id;
-            FancyLoggerBuffer.UpdateLine(lineId, ""
-                + ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)
+            FancyLoggerBuffer.UpdateLine(lineId, "\t"
+                + ANSIBuilder.Formatting.Color("✓ ", ANSIBuilder.Formatting.ForegroundColor.Green)
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + ANSIBuilder.Formatting.Color(e.TargetName, ANSIBuilder.Formatting.ForegroundColor.Green)
             );
@@ -84,10 +96,23 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Task
         void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
         {
+            if (e.BuildEventContext?.TaskId == null) return;
+            taskConsoleLines[e.BuildEventContext.TaskId] = FancyLoggerBuffer.WriteNewLine("\t\t  "
+                + ANSIBuilder.Formatting.Dim("Task: ")
+                + e.TaskName
+            );
+            Thread.Sleep(200);
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
+            if (e.BuildEventContext?.TaskId == null) return;
+            int lineId = taskConsoleLines[e.BuildEventContext.TaskId].Id;
+            FancyLoggerBuffer.UpdateLine(lineId, "\t\t"
+                + ANSIBuilder.Formatting.Color("✓ ", ANSIBuilder.Formatting.ForegroundColor.Green)
+                + ANSIBuilder.Formatting.Dim("Task: ")
+                + ANSIBuilder.Formatting.Color(e.TaskName, ANSIBuilder.Formatting.ForegroundColor.Green)
+            );
         }
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
@@ -106,6 +131,11 @@ namespace Microsoft.Build.Logging.FancyLogger
 
 
         public void Shutdown() {
+            // Keep open if autoscroll disabled (the user is reading info)
+            while (true)
+            {
+                if (FancyLoggerBuffer.AutoScrollEnabled) break;
+            }
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
         }

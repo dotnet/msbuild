@@ -29,8 +29,11 @@ namespace Microsoft.Build.Logging.FancyLogger
     internal static class FancyLoggerBuffer
     {
         private static List<FancyLoggerBufferLine> lines = new();
-        private static int Height = 0;
+        private static int Height {
+            get { return Console.BufferHeight; }
+        }
         private static int CurrentTopLineIndex = 0;
+        public static bool AutoScrollEnabled = true;
         public static void Initialize()
         {
             // Setup event listeners
@@ -46,19 +49,14 @@ namespace Microsoft.Build.Logging.FancyLogger
                         case ConsoleKey.DownArrow:
                             ScrollDown();
                             break;
+                        case ConsoleKey.Spacebar:
+                            ToggleAutoScroll();
+                            break;
                     }
                 }
             });
             // Switch to alternate buffer
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
-            // Update dimensions
-            Height = Console.BufferHeight;
-            // TODO: Remove. Just testing
-            for (int i = 0; i < 60; i++)
-            {
-                FancyLoggerBufferLine line = new FancyLoggerBufferLine($"Line {i}");
-                lines.Add(line);
-            }
             // Render contents
             RenderTitleBar();
             RenderFooter();
@@ -133,6 +131,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             ScrollToLine(CurrentTopLineIndex + 1);
         }
 
+        private static void ToggleAutoScroll()
+        {
+            //
+            AutoScrollEnabled = !AutoScrollEnabled;
+        }
+
         public static int GetLineIndexById(int lineId)
         {
             for (int i = 0; i < lines.Count; i++)
@@ -155,7 +159,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Add line
             lines.Add(line);
             // Update contents
-            ScrollToEnd();
+            if (AutoScrollEnabled) ScrollToEnd();
             return line;
         }
 
