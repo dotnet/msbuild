@@ -1,6 +1,4 @@
 <Project>
-  <Import Project="PublishDotnetWatch.targets"/>
-
   <Target Name="PublishVersionFile"
           BeforeTargets="Build">
 
@@ -188,10 +186,6 @@
       Projects="$(RepoRoot)/src/Layout/tool_fsharp/tool_fsc.csproj"
       Properties="Configuration=$(Configuration);PublishDir=$(OutputPath)/FSharp" />
   </Target>
-
-  <Target Name="PublishBuiltInTools"
-          DependsOnTargets="PublishDotnetWatch"
-          BeforeTargets="Build" />
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
           AfterTargets="Build">
