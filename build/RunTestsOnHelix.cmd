@@ -33,7 +33,9 @@ REM We downloaded a special zip of files to the .nuget folder so add that as a s
 dotnet new nugetconfig
 dotnet nuget add source %DOTNET_ROOT%\.nuget --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source dotnet6-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet6-internal-transport --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source dotnet7-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet7-internal-transport --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source richnav --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source vs-impl --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source dotnet-libraries-transport --configfile %TestExecutionDirectory%\nuget.config
