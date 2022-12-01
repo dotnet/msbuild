@@ -355,7 +355,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ChangeWaves.ResetStateForTests();
 
-                if (enableNewBehavior)
+                if (!enableNewBehavior)
                 {
                     env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                     BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
                 {
-                    error.ErrorCode.ShouldMatch("MSB4070");
+                    error.ErrorCode.ShouldMatch("MSB4073");
                 }
                 else
                 {

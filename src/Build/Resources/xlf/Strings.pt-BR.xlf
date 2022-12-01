@@ -329,8 +329,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PropertyOutsidePropertyGroupInTarget">
-        <source>MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</source>
-        <target state="new">MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</target>
+        <source>MSB4073: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</source>
+        <target state="new">MSB4073: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</target>
         <note>{StrBegin="MSB4070: "}</note>
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
@@ -1824,7 +1824,7 @@
       </trans-unit>
       <trans-unit id="UnrecognizedChildElement">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized.</source>
-        <target state="translated">MSB4067: O elemento &lt;{0}&gt; abaixo do elemento &lt;{1}&gt; não é reconhecido.</target>
+        <target state="needs-review-translation">MSB4067: O elemento &lt;{0}&gt; abaixo do elemento &lt;{1}&gt; não é reconhecido.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="InvalidChildElementDueToDuplication">
