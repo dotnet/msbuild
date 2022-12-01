@@ -102,6 +102,7 @@
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
 
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
+      <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.tlb" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.pdb" />
