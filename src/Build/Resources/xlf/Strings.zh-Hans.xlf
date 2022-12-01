@@ -329,8 +329,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PropertyOutsidePropertyGroupInTarget">
-        <source>MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Please define property beneath property group</source>
-        <target state="new">MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Please define property beneath property group</target>
+        <source>MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</source>
+        <target state="new">MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</target>
         <note>{StrBegin="MSB4070: "}</note>
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">

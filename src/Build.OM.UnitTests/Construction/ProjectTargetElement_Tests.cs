@@ -346,28 +346,35 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Parse invalid property under target
         /// </summary>
-        [Fact]
-        public void ReadInvalidPropertyUnderTarget()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReadInvalidPropertyUnderTarget(bool enableNewBehavior)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-                var error= Assert.Throws<InvalidProjectFileException>(() =>
+                if (enableNewBehavior)
                 {
-                    string projectFile = @"
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                }
+
+                string projectFile = @"
                     <Project>
                         <Target Name='t'>
                             <test>m</test>
                         </Target>
                     </Project>";
 
-                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-                    ProjectCollection collection = new ProjectCollection();
+                TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
+                ProjectCollection collection = new ProjectCollection();
+                var error = Assert.Throws<InvalidProjectFileException>(() =>
+                {
                     collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 });
+
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
                 {
                     error.ErrorCode.ShouldMatch("MSB4070");

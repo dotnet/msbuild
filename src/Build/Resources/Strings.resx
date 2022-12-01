@@ -1272,7 +1272,7 @@
     <comment>{StrBegin="MSB4067: "}</comment>
   </data>
   <data name="PropertyOutsidePropertyGroupInTarget" xml:space="preserve" Condition="$([MSBuild]::AreFeaturesEnabled('17.6'))">
-    <value>MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Please define property beneath property group</value>
+    <value>MSB4070: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</value>
     <comment>{StrBegin="MSB4070: "}</comment>
   </data>
   <data name="InvalidChildElementDueToDuplication" xml:space="preserve">
