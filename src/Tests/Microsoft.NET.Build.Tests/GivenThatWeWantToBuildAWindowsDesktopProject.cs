@@ -12,13 +12,14 @@ using System.Xml.Linq;
 using System.IO;
 using System.Linq;
 using System;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAWindowsDesktopProject : SdkTest
     {
         public GivenThatWeWantToBuildAWindowsDesktopProject(ITestOutputHelper log) : base(log)
-        {}
+        { }
 
         [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
         [InlineData("UseWindowsForms")]
@@ -197,6 +198,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false)]
         public void It_succeeds_if_windows_target_platform_version_does_not_have_trailing_zeros(bool setInTargetframework)
         {
+            // Skip Test if SDK is < 7.0.200
+            var sdkVersion = SemanticVersion.Parse(TestContext.Current.ToolsetUnderTest.SdkVersion);
+            if (new SemanticVersion(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch) < new SemanticVersion(7, 0, 200))
+                return; // Fixed by https://github.com/dotnet/sdk/pull/29009
+
             var testProject = new TestProject()
             {
                 Name = "ValidWindowsVersion",
@@ -403,7 +409,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + useWindowsSDKPreview + windowsSdkPackageVersion);
 
-            string referencedWindowsSdkVersion =  GetReferencedWindowsSdkVersion(testAsset);
+            string referencedWindowsSdkVersion = GetReferencedWindowsSdkVersion(testAsset);
 
             //  The patch version of the Windows SDK Ref pack will change over time, so we use a '*' in the expected version to indicate that and replace it with
             //  the 4th part of the version number of the resolved package.
