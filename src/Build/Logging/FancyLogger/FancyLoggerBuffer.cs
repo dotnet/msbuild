@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
-    internal class FancyLoggerBufferLine
+    public class FancyLoggerBufferLine
     {
         private static int counter = 0;
         public int Id;
@@ -64,6 +64,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             RenderFooter();
             ScrollToEnd();
         }
+
+        #region Rendering and scrolling
         private static void RenderTitleBar()
         {
             Console.Write(""
@@ -119,6 +121,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Go to end
             Console.Write(ANSIBuilder.Cursor.Position(Height, 0));
         }
+        #endregion
 
         private static void ScrollUp()
         {
@@ -130,7 +133,22 @@ namespace Microsoft.Build.Logging.FancyLogger
             ScrollToLine(CurrentTopLineIndex + 1);
         }
 
-        public static void WriteNewLine(string text)
+        public static int GetLineIndexById(int lineId)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (lines[i].Id == lineId) return i;
+            }
+            return -1;
+        }
+        public static FancyLoggerBufferLine? GetLineById(int lineId)
+        {
+            int i = GetLineIndexById(lineId);
+            if (i == -1) return null;
+            return lines[i];
+        }
+
+        public static FancyLoggerBufferLine WriteNewLine(string text)
         {
             // Create line
             FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
@@ -138,6 +156,17 @@ namespace Microsoft.Build.Logging.FancyLogger
             lines.Add(line);
             // Update contents
             ScrollToEnd();
+            return line;
+        }
+
+        public static FancyLoggerBufferLine? UpdateLine(int lineId, string text)
+        {
+            FancyLoggerBufferLine? line = GetLineById(lineId);
+            if (line == null) return null;
+
+            line.Text = text;
+            ScrollToLine(CurrentTopLineIndex);
+            return line;
         }
     }
 }

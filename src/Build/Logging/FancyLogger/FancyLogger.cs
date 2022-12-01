@@ -12,7 +12,7 @@ namespace Microsoft.Build.Logging.FancyLogger
     {
         public Dictionary<int, int> projectConsoleLines = new Dictionary<int, int>();
         public Dictionary<int, int> tasksConsoleLines = new Dictionary<int, int>();
-        public Dictionary<int, int> targetConsoleLines = new Dictionary<int, int>();
+        public Dictionary<int, FancyLoggerBufferLine> targetConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
 
         public string Parameters {  get; set; }
 
@@ -42,8 +42,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             {
                 FancyLoggerBuffer.Initialize();
-
-                Thread.Sleep(15_000);
             }
         }
 
@@ -66,9 +64,21 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
+            if (e.BuildEventContext?.TargetId == null) return;
+            targetConsoleLines[e.BuildEventContext.TargetId] = FancyLoggerBuffer.WriteNewLine("  "
+                + ANSIBuilder.Formatting.Dim("Target: ")
+                + e.TargetName);
+            Thread.Sleep(500);
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
+            if (e.BuildEventContext?.TargetId == null) return;
+            int lineId = targetConsoleLines[e.BuildEventContext.TargetId].Id;
+            FancyLoggerBuffer.UpdateLine(lineId, ""
+                + ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)
+                + ANSIBuilder.Formatting.Dim("Target: ")
+                + ANSIBuilder.Formatting.Color(e.TargetName, ANSIBuilder.Formatting.ForegroundColor.Green)
+            );
         }
 
         // Task
@@ -95,6 +105,9 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
 
 
-        public void Shutdown() { }
+        public void Shutdown() {
+            Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
+            Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
+        }
     }
 }
