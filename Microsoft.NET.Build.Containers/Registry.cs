@@ -1,5 +1,6 @@
-using Microsoft.VisualBasic;
 
+using NuGet.Packaging;
+using NuGet.RuntimeModel;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net;
@@ -23,7 +24,7 @@ public record struct ManifestV2(int schemaVersion, string tag, string mediaType,
 // public enum GoOS { linux, windows };
 // not a complete list, only the subset that we support
 // public enum GoArch { amd64, arm , arm64,  [JsonStringEnumMember("386")] x386 };
-public record struct PlatformInformation(string architecture, string os, string? variant, string[] features);
+public record struct PlatformInformation(string architecture, string os, string? variant, string[] features, [property:JsonPropertyName("os.version")][field: JsonPropertyName("os.version")] string? version);
 public record struct PlatformSpecificManifest(string mediaType, long size, string digest, PlatformInformation platform);
 public record struct ManifestListV2(int schemaVersion, string mediaType, PlatformSpecificManifest[] manifests);
 
@@ -34,14 +35,6 @@ public record Registry(Uri BaseUri)
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
     private const int MaxChunkSizeBytes = 1024 * 64;
-
-    public static string[] SupportedRuntimeIdentifiers = new [] {
-        "linux-x86",
-        "linux-x64",
-        "linux-arm",
-        "linux-arm64",
-        "win-x64"
-    };
 
     private string RegistryName { get; } = BaseUri.Host;
 
@@ -83,27 +76,81 @@ public record Registry(Uri BaseUri)
         }
 
         async Task<Image?> TryPickBestImageFromManifestList(ManifestListV2 manifestList, string runtimeIdentifier) {
-            // TODO: we probably need to pull in actual RID parsing code and look for 'platform' here.
-            // 'win' can take a version number and we'd break.
-            // Also, there are more specific linux RIDs (like rhel) that we should instead be looking for the correct 'family' for?
-            // we probably also need to look at the 'variant' field if the RID contains a version.
-            (string os, string arch, string? variant) = runtimeIdentifier.Split('-') switch {
-                ["linux", "x64"] => ("linux", "amd64", null),
-                ["linux", "x86"] => ("linux", "386", null),
-                ["linux", "arm"] => ("linux", "arm", "v7"),
-                ["linux", "arm64"] => ("linux", "arm64", "v8"),
-                ["win", "x64"] => ("windows", "amd64", null),
-                var parts => throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers are {Registry.SupportedRuntimeIdentifiers}.")
-            };
+            var runtimeGraph = GetRuntimeGraphForDotNet();
+            var compatibleRuntimesForUserRid = runtimeGraph.ExpandRuntime(runtimeIdentifier);
+            var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
+            var bestManifestRid = PickBestRidFromCompatibleUserRids(graphForManifestList, compatibleRuntimesForUserRid);
+            if (bestManifestRid is null) {
+                throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers for the base image {name}:{reference} are {String.Join(",", compatibleRuntimesForUserRid)}");
+            }
+            var matchingManifest = ridDict[bestManifestRid];
+            var manifestResponse = await GetManifest(matchingManifest.digest);
+            return await TryReadSingleImage(await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>());
+        }
+    }
 
-            var potentialManifest = manifestList.manifests.SingleOrDefault(manifest => manifest.platform.os == os && manifest.platform.architecture == arch && manifest.platform.variant == variant);
-            if (potentialManifest != default) {
-                var manifestResponse = await GetManifest(potentialManifest.digest);
-                return await TryReadSingleImage(await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>());
-            } else {
-                return null;
+    private string? PickBestRidFromCompatibleUserRids(RuntimeGraph graphForManifestList, IEnumerable<string> compatibleRuntimesForUserRid)
+    {
+        return compatibleRuntimesForUserRid.First(rid => graphForManifestList.Runtimes.ContainsKey(rid));
+    }
+
+    private (IReadOnlyDictionary<string, PlatformSpecificManifest>, RuntimeGraph) ConstructRuntimeGraphForManifestList(ManifestListV2 manifestList, RuntimeGraph dotnetRuntimeGraph)
+    {
+        var ridDict = new Dictionary<string, PlatformSpecificManifest>();
+        var runtimeDescriptionSet = new HashSet<RuntimeDescription>();
+        foreach (var manifest in manifestList.manifests) {
+            if (CreateRidForPlatform(manifest.platform) is { } rid)
+            {
+                if (ridDict.TryAdd(rid, manifest))
+                {
+                    AddRidAndDescendentsToSet(runtimeDescriptionSet, rid, dotnetRuntimeGraph);
+                }
             }
         }
+        
+        // todo: inheritance relationships for these RIDs?
+        var graph = new RuntimeGraph(runtimeDescriptionSet);
+        return (ridDict, graph);
+    }
+
+    private void AddRidAndDescendentsToSet(HashSet<RuntimeDescription> runtimeDescriptionSet, string rid, RuntimeGraph dotnetRuntimeGraph)
+    {
+        var R = dotnetRuntimeGraph.Runtimes[rid];
+        runtimeDescriptionSet.Add(R);
+        foreach (var r in R.InheritedRuntimes) AddRidAndDescendentsToSet(runtimeDescriptionSet, r, dotnetRuntimeGraph);
+    }
+
+    private string? CreateRidForPlatform(PlatformInformation platform)
+    {
+        var osPart = platform.os switch
+        {
+            "linux" => "linux",
+            "windows" => "win",
+            _ => null
+        };
+        // TODO: this part needs a lot of work, the RID graph isn't super precise here and version numbers (especially on windows) are _whack_
+        var versionPart = platform.version?.Split('.') switch
+        {
+            [var major, .. ] => major,
+            _ => null
+        };
+        var platformPart = platform.architecture switch
+        {
+            "amd64" => "x64",
+            "x386" => "x86",
+            "arm" => $"arm{(platform.variant != "v7" ? platform.variant : "")}",
+            "arm64" => "arm64"
+        };
+        
+        
+        if (osPart is null || platformPart is null) return null;
+        return $"{osPart}{versionPart ?? ""}-{platformPart}";
+    }
+
+    private RuntimeGraph GetRuntimeGraphForDotNet()
+    {
+        var runtimePath = Path.Combine("C:", "Program Files","dotnet", "sdk", "7.0.100", "RuntimeIdentifierGraph.json"); // how to get this at runtime?
+        return JsonRuntimeFormat.ReadRuntimeGraph(runtimePath);
     }
 
     /// <summary>
