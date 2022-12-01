@@ -10,9 +10,27 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
+    internal class FancyLoggerBufferLine
+    {
+        private static int counter = 0;
+        public int Id;
+        public string Text;
+        public FancyLoggerBufferLine()
+        {
+            Id = counter++;
+            Text = String.Empty;
+        }
+        public FancyLoggerBufferLine(string text)
+        {
+            Id = counter++;
+            Text = text;
+        }
+    }
     internal static class FancyLoggerBuffer
     {
+        private static List<FancyLoggerBufferLine> lines = new();
         private static int Height = 0;
+        private static int CurrentTopLineIndex = 0;
         public static void Initialize()
         {
             // Setup event listeners
@@ -35,37 +53,91 @@ namespace Microsoft.Build.Logging.FancyLogger
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
             // Update dimensions
             Height = Console.BufferHeight;
-            // Write "title"
+            // TODO: Remove. Just testing
+            for (int i = 0; i < 60; i++)
+            {
+                FancyLoggerBufferLine line = new FancyLoggerBufferLine($"Line {i}");
+                lines.Add(line);
+            }
+            // Render contents
+            RenderTitleBar();
+            RenderFooter();
+            ScrollToEnd();
+        }
+        private static void RenderTitleBar()
+        {
             Console.Write(""
                 + ANSIBuilder.Cursor.Home()
                 + ANSIBuilder.Formatting.Inverse("                         MSBuild                         ")
             );
-            // Write body
+        }
+        private static void RenderFooter()
+        {
             Console.Write(""
-                + ANSIBuilder.Cursor.Position(2, 0)
-                + ANSIBuilder.Formatting.Bold("FancyLogger") + " will be shown here..."
-                + "\n"
-                + ANSIBuilder.Formatting.Dim("5s sleep for demo purposes")
-            );
-            
-
-            // Write "footer"
-            Console.Write(""
-                + ANSIBuilder.Cursor.Position(Height - 2, 0)
-                + "---------------------------------------------------------"
-                + "\n"
+                + ANSIBuilder.Cursor.Position(Height - 2, 0) // Position at bottom
+                + "---------------------------------------------------------\n"
                 + "Build: 13%"
             );
         }
 
+        private static void ScrollToLine(int firstLineIndex)
+        {
+            if (firstLineIndex < 0) return;
+            if (firstLineIndex >= lines.Count) return;
+            CurrentTopLineIndex = firstLineIndex;
+            for (int i = 0; i < Height - 4; i++)
+            {
+                // If line exists
+                if (i + firstLineIndex < lines.Count)
+                {
+                    Console.Write(""
+                        + ANSIBuilder.Cursor.Position(i + 2, 0)
+                        + ANSIBuilder.Eraser.LineCursorToEnd()
+                        + lines[i + firstLineIndex].Text);
+                } else
+                {
+                    Console.Write(""
+                        + ANSIBuilder.Cursor.Position(i + 2, 0)
+                        + ANSIBuilder.Eraser.LineCursorToEnd()
+                    );
+                }
+            }
+            Console.Write(ANSIBuilder.Cursor.Position(Height, 0));
+        }
+
+        private static void ScrollToEnd()
+        {
+            // If number of lines is smaller than height
+            if (lines.Count < Height - 2)
+            {
+                ScrollToLine(0);
+            }
+            else
+            {
+                ScrollToLine(lines.Count - Height + 4);
+            }
+            // Go to end
+            Console.Write(ANSIBuilder.Cursor.Position(Height, 0));
+        }
+
         private static void ScrollUp()
         {
-            Console.WriteLine("Scroll up");
+            ScrollToLine(CurrentTopLineIndex - 1);
         }
 
         private static void ScrollDown()
         {
-            Console.WriteLine("Scroll down");
+            ScrollToLine(CurrentTopLineIndex + 1);
+        }
+
+        public static void WriteNewLine(string text)
+        {
+            // Create line
+            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
+            // Add line
+            lines.Add(line);
+            // Update contents
+            ScrollToEnd();
         }
     }
 }

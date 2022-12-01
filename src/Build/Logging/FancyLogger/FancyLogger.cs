@@ -43,7 +43,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 FancyLoggerBuffer.Initialize();
 
-                Thread.Sleep(5_000);
+                Thread.Sleep(15_000);
             }
         }
 
