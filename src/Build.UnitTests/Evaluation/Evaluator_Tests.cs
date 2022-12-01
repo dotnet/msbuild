@@ -50,6 +50,37 @@ namespace Microsoft.Build.UnitTests.Evaluation
             GC.Collect();
         }
 
+        [Theory]
+        [MemberData(nameof(ImportLoadingScenarioTestData))]
+        public void VerifyLoadingImportScenarios(string importParameter)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder existentDirectory = env.CreateFolder("realFolder");
+                TransientTestFile projectFile = env.CreateFile("project.proj", @$"
+<Project>
+  <Import {importParameter.Replace("realFolder", existentDirectory.Path)} />
+</Project>
+");
+            }
+        }
+
+        public static IEnumerable<object[]> ImportLoadingScenarioTestData
+        {
+            get
+            {
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")}"" Condition=""Exists({Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")})""" };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")}"" Condition=""true""" };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")}""" };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "*.*")}""" };
+
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist")}"" Condition=""Exists({Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")})""" };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist")}"" Condition=""true""" };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist")}""" };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "*.*")}""" };
+            }
+        }
+
         /// <summary>
         /// Verify Exist condition used in Import or ImportGroup elements will succeed when in-memory project is available inside projectCollection.
         /// </summary>
