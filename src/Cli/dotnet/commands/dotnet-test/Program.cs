@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Tools.Test
             foreach (string arg in args)
             {
                 if (!arg.StartsWith("-") &&
-                    (arg.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith("exe", StringComparison.OrdinalIgnoreCase)))
+                    (arg.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)))
                 {
                     return true;
                 }
