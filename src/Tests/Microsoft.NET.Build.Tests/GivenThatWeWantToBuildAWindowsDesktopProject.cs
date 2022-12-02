@@ -34,10 +34,11 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties[propertyName] = "true";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = "custom"; // Make sure we don't get windows implicitly set as the TPI
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
+            testProject.AdditionalProperties["TargetPlatformMoniker"] = "custom,Version="; //Make sure we avoid implicitly setting an invalid TPV
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: propertyName);
 
             var buildCommand = new BuildCommand(testAsset);
-            buildCommand.Execute()
+            buildCommand.ExecuteWithoutRestore()
                 .Should()
                 .Fail()
                 .And
