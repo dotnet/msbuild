@@ -52,16 +52,30 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [Theory]
         [MemberData(nameof(ImportLoadingScenarioTestData))]
-        public void VerifyLoadingImportScenarios(string importParameter)
+        public void VerifyLoadingImportScenarios(string importParameter, bool shouldSucceed)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                TransientTestFolder existentDirectory = env.CreateFolder("realFolder");
+                TransientTestFolder existentDirectory = env.CreateFolder(createFolder: true);
+                TransientTestFile realFile = env.CreateFile(existentDirectory, "realFile.csproj", @"<Project> </Project>");
                 TransientTestFile projectFile = env.CreateFile("project.proj", @$"
 <Project>
   <Import {importParameter.Replace("realFolder", existentDirectory.Path)} />
+
+  <Target Name=""MyTarget"">
+    <Message Text=""Target working!"" />
+  </Target>
 </Project>
 ");
+                bool result = false;
+                try
+                {
+                    Project project = new(projectFile.Path);
+                    MockLogger logger = new();
+                    result = project.Build(logger);
+                }
+                catch (InvalidProjectFileException) { }
+                result.ShouldBe(shouldSucceed);
             }
         }
 
@@ -69,15 +83,26 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             get
             {
-                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")}"" Condition=""Exists({Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")})""" };
-                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")}"" Condition=""true""" };
-                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")}""" };
-                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "*.*")}""" };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist.csproj")}"" Condition=""Exists('{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist.csproj")}')""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist.csproj")}"" Condition=""'true'""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist.csproj")}""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "*.*proj")}""", true };
 
-                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist")}"" Condition=""Exists({Path.Combine("nonexistentDirectory", "projectThatDoesNotExist")})""" };
-                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist")}"" Condition=""true""" };
-                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist")}""" };
-                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "*.*")}""" };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist.csproj")}"" Condition=""Exists('{Path.Combine("realFolder", "projectThatDoesNotExist.csproj")}')""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist.csproj")}"" Condition=""'true'""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist.csproj")}""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "*.*proj")}""", true };
+
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "realFile.csproj")}"" Condition=""Exists('{Path.Combine("realFolder", "realFile.csproj")}')""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "realFile.csproj")}"" Condition=""'true'""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "realFile.csproj")}""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "*.*proj")}""", true };
+
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "projectThatDoesNotExist.csproj")}"" Condition=""'false'""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "projectThatDoesNotExist.csproj")}"" Condition=""'true'""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "projectThatDoesNotExist.csproj")}""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "*.*proj")}""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "*.*proj")}""", true };
             }
         }
 
