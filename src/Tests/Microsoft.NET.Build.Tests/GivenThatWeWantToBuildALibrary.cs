@@ -189,7 +189,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("vb", false)]
         public void It_allows_us_to_override_the_documentation_file_name(string language, bool setGenerateDocumentationFileProperty)
         {
-            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibDoc.xml", language,  "OverrideDocFileName");
+            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibDoc.xml", language, "OverrideDocFileName");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -218,7 +218,8 @@ namespace Microsoft.NET.Build.Tests
             };
 
             // vb uses DocumentationFile relative to the IntermediateOutputPath
-            if (language != "vb") {
+            if (language != "vb")
+            {
                 expectedProjectDirectoryFiles.Add("TestLibDoc.xml");
             }
 
@@ -437,7 +438,7 @@ namespace Microsoft.NET.Build.Tests
                 });
 
             AssertDefinedConstantsOutput(testAsset, targetFramework,
-                new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER",  "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" }
+                new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" }
                 .Concat(expectedDefines).ToArray());
         }
 
@@ -934,7 +935,7 @@ class Program
                 testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = copyLocal.ToString().ToLower();
             }
 
-            var identifier = targetFramework + shouldSetRollForward + shouldCopyLocal +  (rollForwardValue == null? "Null" : rollForwardValue);
+            var identifier = targetFramework + shouldSetRollForward + shouldCopyLocal + (rollForwardValue == null ? "Null" : rollForwardValue);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: identifier);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -963,7 +964,7 @@ class Program
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
             string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
             JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
-            JToken rollForward= runtimeConfig["runtimeOptions"]["rollForward"];
+            JToken rollForward = runtimeConfig["runtimeOptions"]["rollForward"];
             if (shouldSetRollForward)
             {
                 rollForward.Value<string>().Should().Be(string.IsNullOrEmpty(rollForwardValue) ? "LatestMinor" : rollForwardValue);
@@ -1004,7 +1005,7 @@ namespace ProjectNameWithSpaces
 }");
             string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
 
-            var buildCommand = new BuildCommand(testAsset, $"{ testProject.Name}");
+            var buildCommand = new BuildCommand(testAsset, $"{testProject.Name}");
             buildCommand
                 .Execute()
                 .Should()
