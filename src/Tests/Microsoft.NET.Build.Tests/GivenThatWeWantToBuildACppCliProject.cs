@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact]
+        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
         public void It_builds_and_runs()
         {
             var testAsset = _testAssetsManager
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tests
             Assert.True(cppnProjProperties["IncludeWindowsSDKRefFrameworkReferences"] == "");
         }
 
-        [FullMSBuildOnlyFact]
+        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
         public void Given_no_restore_It_builds_cpp_project()
         {
             var testAsset = _testAssetsManager
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [FullMSBuildOnlyFact]
+        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
         public void Given_Wpf_framework_reference_It_builds_cpp_project()
         {
             var testAsset = _testAssetsManager
