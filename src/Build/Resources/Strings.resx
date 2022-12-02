@@ -1272,8 +1272,8 @@
     <comment>{StrBegin="MSB4067: "}</comment>
   </data>
   <data name="PropertyOutsidePropertyGroupInTarget" xml:space="preserve" Condition="$([MSBuild]::AreFeaturesEnabled('17.6'))">
-    <value>MSB4073: The property &lt;{0}&gt; beneath target &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</value>
-    <comment>{StrBegin="MSB4073: "}</comment>
+    <value>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. Properties must be inside a &lt;PropertyGroup&gt; element.</value>
+    <comment>{StrBegin="MSB4067: "}</comment>
   </data>
   <data name="InvalidChildElementDueToDuplication" xml:space="preserve">
     <value>MSB4173: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is invalid because a child element with that name already exists</value>

@@ -377,11 +377,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
                 {
-                    error.ErrorCode.ShouldMatch("MSB4073");
+                    error.Message.ShouldMatch("Properties must be inside a <PropertyGroup> element");
                 }
                 else
                 {
-                    error.ErrorCode.ShouldMatch("MSB4067");
+                    error.ErrorCode.ShouldNotMatch("Properties must be inside a <PropertyGroup> element");
                 }
             }
         }
