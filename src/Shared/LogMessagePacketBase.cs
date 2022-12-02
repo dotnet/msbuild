@@ -1243,9 +1243,7 @@ namespace Microsoft.Build.Shared
 
         private ResponseFileUsedEventArgs ReadResponseFileUsedEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
-            MessageImportance importance = MessageImportance.Normal;
-            translator.TranslateEnum(ref importance, (int)importance);
-            string responseFilePath = "";
+            string responseFilePath = String.Empty;
             translator.Translate(ref responseFilePath);
             ResponseFileUsedEventArgs buildEvent = new ResponseFileUsedEventArgs(responseFilePath);
             return buildEvent;

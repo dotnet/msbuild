@@ -428,13 +428,13 @@ Build
         {
             switch (e)
             {
+                case ResponseFileUsedEventArgs responseFileUsed: Write(responseFileUsed); break;
                 case TaskParameterEventArgs taskParameter: Write(taskParameter); break;
                 case ProjectImportedEventArgs projectImported: Write(projectImported); break;
                 case TargetSkippedEventArgs targetSkipped: Write(targetSkipped); break;
                 case PropertyReassignmentEventArgs propertyReassignment: Write(propertyReassignment); break;
                 case TaskCommandLineEventArgs taskCommandLine: Write(taskCommandLine); break;
                 case UninitializedPropertyReadEventArgs uninitializedPropertyRead: Write(uninitializedPropertyRead); break;
-                case ResponseFileUsedEventArgs responseFileUsed: Write(responseFileUsed); break;
                 case EnvironmentVariableReadEventArgs environmentVariableRead: Write(environmentVariableRead); break;
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: Write(propertyInitialValueSet); break;
                 case CriticalBuildMessageEventArgs criticalBuildMessage: Write(criticalBuildMessage); break;
@@ -509,8 +509,9 @@ Build
         }
         private void Write(ResponseFileUsedEventArgs e)
         {
+            // TODO: Apparently this causes the build to appear as failed on the binlogger.
+            // I assume it is because the binlogger doesn't know how to interpret it??
             Write(BinaryLogRecordKind.ResponseFileUsed);
-            WriteMessageFields(e, writeImportance: true);
             WriteDeduplicatedString(e.ResponseFilePath);
         }
         private void Write(TaskCommandLineEventArgs e)

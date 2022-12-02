@@ -270,7 +270,7 @@ namespace Microsoft.Build.Logging
             {
                 projectImportsCollector.AddFileFromMemory(metaprojectArgs.ProjectFile, metaprojectArgs.metaprojectXml);
             }
-            else if (e is ResponseFileUsedEventArgs responseFileArgs && responseFileArgs.ResponseFilePath != "")
+            else if (e is ResponseFileUsedEventArgs responseFileArgs && responseFileArgs.ResponseFilePath != null)
             {
                 projectImportsCollector.AddFile(responseFileArgs.ResponseFilePath);
             }

@@ -1340,7 +1340,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // Log a message for every response file and include it in log
-                    foreach (var responseFilePath in s_includedResponseFiles)
+                    foreach (var responseFilePath in s_includedResponseFiles.ToList())
                     {
                         messagesToLogInBuildLoggers = messagesToLogInBuildLoggers.Append(
                             new BuildManager.DeferredBuildMessage(

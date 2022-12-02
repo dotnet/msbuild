@@ -732,14 +732,8 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadResponseFileUsedEventArgs()
         {
-            var fields = ReadBuildEventArgsFields(readImportance: true);
-
             var responseFilePathName = ReadDeduplicatedString();
-
             var e = new ResponseFileUsedEventArgs(responseFilePathName);
-
-            SetCommonFields(e, fields);
-
             return e;
         }
 
