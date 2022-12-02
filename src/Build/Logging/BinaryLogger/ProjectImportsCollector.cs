@@ -131,6 +131,14 @@ namespace Microsoft.Build.Logging
             }
 
             var fileInfo = new FileInfo(filePath);
+
+#if FEATURE_SYMLINK_TARGET
+            if (fileInfo.Length == 0 && fileInfo.Exists && !string.IsNullOrEmpty(fileInfo.LinkTarget))
+            {
+                fileInfo = new FileInfo(fileInfo.LinkTarget);
+            }
+#endif
+
             if (!fileInfo.Exists || fileInfo.Length == 0)
             {
                 _processedFiles.Add(filePath);

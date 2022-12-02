@@ -207,6 +207,55 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
         }
 
+#if FEATURE_SYMLINK_TARGET
+        [Fact]
+        public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
+        {
+            string testFileName = "foobar.txt";
+            TransientTestFolder testFolder = _env.DefaultTestDirectory.CreateDirectory("TestDir");
+            TransientTestFolder testFolder2 = _env.DefaultTestDirectory.CreateDirectory("TestDir2");
+            TransientTestFile testFile = testFolder.CreateFile(testFileName, string.Join(Environment.NewLine, new[] { "123", "456" }));
+            string symlinkPath = Path.Combine(testFolder2.Path, testFileName);
+
+            File.CreateSymbolicLink(symlinkPath, testFile.Path);
+
+            using var buildManager = new BuildManager();
+            var binaryLogger = new BinaryLogger()
+            {
+                Parameters = $"LogFile={_logFile}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+            var testProjectFmt = @"
+<Project>
+    <Target Name=""Build"" Inputs=""{0}"" Outputs=""testtaskoutputfile.txt"">
+        <ReadLinesFromFile
+            File=""{0}"" >
+            <Output
+                TaskParameter=""Lines""
+                ItemName=""ItemsFromFile""/>
+        </ReadLinesFromFile>
+        <WriteLinesToFile File=""testtaskoutputfile.txt"" Lines=""@(ItemsFromFile);abc;def;ghi""/>
+        <CreateItem Include=""testtaskoutputfile.txt"">
+            <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
+        </CreateItem>
+        <CreateItem Include=""{0}"">
+            <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
+        </CreateItem>
+    </Target>
+</Project>";
+            var testProject = string.Format(testProjectFmt, symlinkPath);
+            ObjectModelHelpers.BuildProjectExpectSuccess(testProject, binaryLogger);
+            var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(testFileName));
+        }
+#endif
+
         [Fact]
         public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()
         {
