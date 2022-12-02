@@ -201,6 +201,11 @@
         <target state="translated">Rimozione dell'attributo di sola lettura da "{0}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="Copy.RetryingAsSymbolicLink">
+        <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
+        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
+        <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
+      </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
         <target state="translated">MSB3025: il file di origine "{0}" è in realtà una directory. L'attività "Copia" non supporta la copia di directory.</target>
