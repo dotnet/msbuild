@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
+    // TODO: Move to separate file
+    class FancyLoggerNode
+    {
+        public FancyLoggerNode() { }
+    }
     public class FancyLogger : ILogger
     {
         public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
@@ -15,7 +20,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public Dictionary<int, FancyLoggerBufferLine> taskConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
 
         private float existingTasks = 1;
-        private float completedTasks = 0;
+        private float completedTasks = 1;
 
         public string Parameters {  get; set; }
 

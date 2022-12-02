@@ -6,12 +6,48 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
     internal static class ANSIBuilder
     {
+        public static string ANSIRemove(string text)
+        {
+            return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
+        }
+        public static class Justification
+        {
+            public static string Center(string text)
+            {
+                string result = String.Empty;
+                string noFormatString = ANSIRemove(text);
+                int space = (Console.BufferWidth - noFormatString.Length) / 2;
+                result += new string(' ', space);
+                result += text;
+                result += new string(' ', space);
+                return result;
+            }
+            public static string Right(string text)
+            {
+                string result = String.Empty;
+                string noFormatString = ANSIRemove(text);
+                int space = Console.BufferWidth - noFormatString.Length;
+                result += new string(' ', space);
+                result += text;
+                return result;
+            }
+            public static string Left(string text)
+            {
+                string result = String.Empty;
+                string noFormatString = ANSIRemove(text);
+                int space = Console.BufferWidth - noFormatString.Length;
+                result += text;
+                result += new string(' ', space);
+                return result;
+            }
+        }
         public static class Formatting
         {
             public enum ForegroundColor
