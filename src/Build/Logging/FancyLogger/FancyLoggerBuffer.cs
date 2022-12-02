@@ -164,7 +164,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 /*+ ANSIBuilder.ANSIRemove(
                     ANSIBuilder.Formatting.Inverse("                         MSBuild                         ")
                   )*/
-                + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Justification.Center("MSBuild"))
+                + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Align.Center("MSBuild"))
             );
         }
         public static void WriteFooter(string text)

@@ -17,12 +17,13 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
         }
-        public static class Justification
+        public static class Alignment
         {
             public static string Center(string text)
             {
                 string result = String.Empty;
                 string noFormatString = ANSIRemove(text);
+                if (noFormatString.Length > Console.BufferWidth) return text;
                 int space = (Console.BufferWidth - noFormatString.Length) / 2;
                 result += new string(' ', space);
                 result += text;
@@ -33,6 +34,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 string result = String.Empty;
                 string noFormatString = ANSIRemove(text);
+                if (noFormatString.Length > Console.BufferWidth) return text;
                 int space = Console.BufferWidth - noFormatString.Length;
                 result += new string(' ', space);
                 result += text;
@@ -42,6 +44,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 string result = String.Empty;
                 string noFormatString = ANSIRemove(text);
+                if (noFormatString.Length > Console.BufferWidth) return text;
                 int space = Console.BufferWidth - noFormatString.Length;
                 result += text;
                 result += new string(' ', space);
