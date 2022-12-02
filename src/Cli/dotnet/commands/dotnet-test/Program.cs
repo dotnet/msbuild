@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
+
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             // Fix for https://github.com/Microsoft/vstest/issues/1453
             // Run dll/exe directly using the VSTestForwardingApp
-            if (ContainsBuiltTestSources(parseResult))
+            if (ContainsBuiltTestSources(args))
             {
                 return ForwardToVSTestConsole(parseResult, args, settings, testSessionCorrelationId);
             }
@@ -130,7 +131,7 @@ namespace Microsoft.DotNet.Tools.Test
                 result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()) // all msbuild-recognized tokens
                     .Concat(unMatchedNonSettingsArgs); // all tokens that the test-parser doesn't explicitly track (minus the settings tokens)
 
-            VSTestTrace.SafeWriteTrace(() => $"MSBuild args from forwarded options: {String.Join(", ", parsedArgs)}" );
+            VSTestTrace.SafeWriteTrace(() => $"MSBuild args from forwarded options: {String.Join(", ", parsedArgs)}");
             msbuildArgs.AddRange(parsedArgs);
 
             if (settings.Any())
@@ -227,13 +228,15 @@ namespace Microsoft.DotNet.Tools.Test
             }
         }
 
-        private static bool ContainsBuiltTestSources(ParseResult parseResult)
+        private static bool ContainsBuiltTestSources(string[] args)
         {
-            string commandArgument = parseResult.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
-
-            if (commandArgument is not null && (commandArgument.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || commandArgument.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)))
+            foreach (string arg in args)
             {
-                return true;
+                if (!arg.StartsWith("-") &&
+                    (arg.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith("exe", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
             }
 
             return false;
