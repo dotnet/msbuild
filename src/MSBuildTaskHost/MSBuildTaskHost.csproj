@@ -61,9 +61,6 @@
     <Compile Include="..\Framework\ITaskItem2.cs">
       <Link>ITaskItem2.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs">
-      <Link>TempFileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Framework\AssemblyUtilities.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />
