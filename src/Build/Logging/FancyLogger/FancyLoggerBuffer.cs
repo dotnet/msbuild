@@ -54,7 +54,14 @@ namespace Microsoft.Build.Logging.FancyLogger
                         case ConsoleKey.DownArrow:
                             ScrollDown();
                             break;
+                        case ConsoleKey.Home:
+                            ScrollToLine(0);
+                            break;
+                        case ConsoleKey.End:
+                            ScrollToEnd();
+                            break;
                         case ConsoleKey.Spacebar:
+                        case ConsoleKey.Escape:
                             ToggleAutoScroll();
                             break;
                     }

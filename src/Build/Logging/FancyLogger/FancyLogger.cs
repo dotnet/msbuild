@@ -83,7 +83,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             targetConsoleLines[e.BuildEventContext.TargetId] = FancyLoggerBuffer.WriteNewLine("\t  "
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + e.TargetName);
-            Thread.Sleep(10);
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
@@ -105,8 +104,6 @@ namespace Microsoft.Build.Logging.FancyLogger
                 + ANSIBuilder.Formatting.Dim("Task: ")
                 + e.TaskName
             );
-            Thread.Sleep(100);
-
             FancyLoggerBuffer.WriteFooter($"Build: {(completedTasks / existingTasks) * 100}");
         }
 
