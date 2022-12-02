@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
             ArgumentHelpName = LocalizableStrings.OutputOptionName
-        }.ForwardAsSingle(arg => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(arg)}");
+        }.ForwardAsOutputPath("OutputPath");
 
         public static readonly Option<bool> NoIncrementalOption = new Option<bool>("--no-incremental", LocalizableStrings.NoIncrementalOptionDescription);
 

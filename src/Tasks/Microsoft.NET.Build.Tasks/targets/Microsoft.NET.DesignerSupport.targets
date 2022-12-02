@@ -22,6 +22,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(DesignerRuntimeImplementationProjectOutputGroupDependsOn);
       _GenerateDesignerDepsFile;
       _GenerateDesignerRuntimeConfigFile;
+      GetCopyToOutputDirectoryItems;
       _GatherDesignerShadowCopyFiles;
     </DesignerRuntimeImplementationProjectOutputGroupDependsOn>
 
@@ -68,6 +69,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
       TargetFramework="$(TargetFramework)"
       RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+      IncludeProjectsNotInAssetsFile="$(IncludeProjectsNotInAssetsFileInDepsFile)"
       />
 
     <ItemGroup>
@@ -139,7 +141,12 @@ Copyright (c) .NET Foundation. All rights reserved.
         Include="@(_DesignerShadowCopy->'%(FullPath)')"
         TargetPath="%(_DesignerShadowCopy.DestinationSubDirectory)%(_DesignerShadowCopy.Filename)%(_DesignerShadowCopy.Extension)"
         />
-      </ItemGroup>
+
+      <!-- Include ijwhost.dll for projects that use it -->
+      <DesignerRuntimeImplementationProjectOutputGroupOutput
+        Include="@(AllItemsFullPathWithTargetPath->WithMetadataValue('Filename', '$(_DotNetIjwHostLibraryNameWithoutExtension)')->WithMetadataValue('Extension', '$(_IjwHostLibraryExtension)'))"
+        />
+    </ItemGroup>
   </Target>
 
 </Project>

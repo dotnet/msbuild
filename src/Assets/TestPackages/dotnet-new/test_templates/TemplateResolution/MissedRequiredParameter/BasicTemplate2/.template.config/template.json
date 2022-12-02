@@ -1,0 +1,28 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "Basic Template with condition",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.MissedRequiredParameter",
+  "precedence": "100",
+  "identity": "TestAssets.MissedRequiredParameter.BasicTemplate1",
+  "shortName": "basic2",
+  "sourceName": "bar",
+  "symbols": {
+    "param": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "parameter description",
+      "isRequired": "a_enabled",
+      "defaultValue": "def"
+    },
+    "a_enabled": {
+      "type": "parameter",
+      "datatype": "bool"
+    }
+  },
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/template.json",
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithRequiredParameters",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithRequiredParameters",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithRequiredParameters",
+  "shortName": "TestAssets.TemplateWithRequiredParameters",
+  "symbols": {
+    "paramA": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "parameter A description",
+      "isRequired": true,
+      "replaces": "placeholderA"
+    },
+    "paramB": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "parameter B description",
+      "isRequired": true,
+      "replaces": "placeholderB",
+      "defaultValue": "def" //ignored
+    },
+    "paramC": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "parameter C description",
+      "isRequired": "enableC == true",
+      "replaces": "placeholderC",
+      "defaultValue": "def"
+    },
+    "enableC": {
+      "type": "parameter",
+      "datatype": "bool"
+    }
+  }
+}

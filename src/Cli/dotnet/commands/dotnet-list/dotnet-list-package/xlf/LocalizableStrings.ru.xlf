@@ -12,6 +12,11 @@
         <target state="translated">Возвращает список устаревших пакетов. Не может использоваться с параметрами "--vulnerable" или "--outdated".</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="new">Specifies the output format type for the list packages command.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>

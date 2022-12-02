@@ -61,7 +61,8 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdOutputDir
-        }.ForwardAsSingle(o => $"-property:OutputPath={SurroundWithDoubleQuotes(CommandDirectoryContext.GetFullPath(o))}");
+        }
+        .ForwardAsOutputPath("OutputPath", true);
 
         public static readonly Option<string> DiagOption = new ForwardedOption<string>(new string[] { "-d", "--diag" }, LocalizableStrings.CmdPathTologFileDescription)
         {
