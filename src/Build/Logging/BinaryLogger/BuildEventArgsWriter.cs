@@ -511,8 +511,8 @@ Build
         {
             // TODO: Apparently this causes the build to appear as failed on the binlogger.
             // I assume it is because the binlogger doesn't know how to interpret it??
-            // Write(BinaryLogRecordKind.ResponseFileUsed);
-            // WriteDeduplicatedString(e.ResponseFilePath);
+            Write(BinaryLogRecordKind.ResponseFileUsed);
+            WriteDeduplicatedString(e.ResponseFilePath);
         }
         private void Write(TaskCommandLineEventArgs e)
         {
