@@ -7,19 +7,10 @@
     <Nullable>enable</Nullable>
     <!-- We need to compare ISymbols in a special way (by name) and roslyn symbol comparers take more heuristics into consideration.-->
     <NoWarn>RS1024;$(NoWarn)</NoWarn>
-    <!-- We pin the code analysis version when not in source build as we need to support running on older
-    SDKs when the OOB package is used. -->
-    <_MicrosoftCodeAnalysisVersion>4.0.1</_MicrosoftCodeAnalysisVersion>
-    <_MicrosoftCodeAnalysisVersion Condition="'$(DotNetBuildFromSource)' == 'true'">$(MicrosoftCodeAnalysisPackageVersion)</_MicrosoftCodeAnalysisVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Microsoft.DotNet.ApiSymbolExtensions\Microsoft.DotNet.ApiSymbolExtensions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(_MicrosoftCodeAnalysisVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(_MicrosoftCodeAnalysisVersion)" />
   </ItemGroup>
 
   <ItemGroup>
