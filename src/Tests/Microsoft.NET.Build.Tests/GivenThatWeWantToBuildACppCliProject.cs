@@ -24,21 +24,22 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
+        [FullMSBuildOnlyFact]
         public void It_builds_and_runs()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
 
             // build projects separately with BuildProjectReferences=false to simulate VS build behavior
             new BuildCommand(testAsset, "NETCoreCppCliTest")
-                .Execute("-p:Platform=x64")
+                .Execute("-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true")
                 .Should()
                 .Pass();
 
             new BuildCommand(testAsset, "CSConsoleApp")
-                .Execute(new string[] { "-p:Platform=x64", "-p:BuildProjectReferences=false" })
+                .Execute(new string[] { "-p:Platform=x64", "-p:BuildProjectReferences=false", "-p:EnableManagedpackageReferenceSupport=true" })
                 .Should()
                 .Pass();
 
@@ -76,28 +77,30 @@ namespace Microsoft.NET.Build.Tests
             Assert.True(cppnProjProperties["IncludeWindowsSDKRefFrameworkReferences"] == "");
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
+        [FullMSBuildOnlyFact]
         public void Given_no_restore_It_builds_cpp_project()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
 
             new BuildCommand(testAsset, "NETCoreCppCliTest")
-                .Execute("-p:Platform=x64")
+                .Execute("-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true")
                 .Should()
                 .Pass();
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
+        [FullMSBuildOnlyFact]
         public void Given_Wpf_framework_reference_It_builds_cpp_project()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CppCliLibWithWpfFrameworkReference")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
 
             new BuildCommand(testAsset)
-                .Execute("-p:Platform=x64")
+                .Execute("-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true", @"/bl:c:\repos\sdk\my.binlog")
                 .Should()
                 .Pass();
         }
