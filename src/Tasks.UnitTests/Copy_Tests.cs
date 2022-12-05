@@ -2052,7 +2052,7 @@ namespace Microsoft.Build.UnitTests
         public void CopyWithHardAndSymbolicLinks()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
-            const string temp = @"\\localhost\c$\temp";
+            const string temp = @"d:\temp";
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
 
@@ -2065,8 +2065,8 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception)
             {
-                Console.WriteLine("CopyWithHardAndSymbolicLinks test could not access the network.");
-                // Something caused us to not be able to access our "network" share, don't fail.
+                Console.WriteLine("CopyWithHardAndSymbolicLinks test could not access the detination folder.");
+                // Something caused us to not be able to access our the detination folder, don't fail.
                 return;
             }
 
