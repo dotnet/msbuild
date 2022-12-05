@@ -152,11 +152,14 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Constructor, for unit testing only.  
+        /// Initializes a new instance of the <see cref="TaskExecutionHost"/> class
+        /// for unit testing only.
         /// </summary>
         internal TaskExecutionHost()
         {
-            // do nothing
+            // These initializations are necessary to test for missing required properties.
+            _buildComponentHost = new BuildManager();
+            _buildComponentHost.BuildParameters = new BuildParameters();
         }
 
         /// <summary>
@@ -373,6 +376,7 @@ namespace Microsoft.Build.BackEnd
                 foreach (KeyValuePair<string, string> requiredParameter in requiredParameters)
                 {
                     IsolateProjects isolateProjects = _buildComponentHost.BuildParameters.IsolateProjects;
+
                     string resourceName = isolateProjects == IsolateProjects.Message ? "RequiredPropertyNotSetErrorMessagingIsolationMode" : "RequiredPropertyNotSetError";
                     ProjectErrorUtilities.VerifyThrowInvalidProject(
                         setParameters.ContainsKey(requiredParameter.Key),

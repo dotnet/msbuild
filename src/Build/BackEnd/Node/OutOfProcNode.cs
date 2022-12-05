@@ -195,10 +195,12 @@ namespace Microsoft.Build.Execution
         string IBuildComponentHost.Name => "OutOfProc";
 
         /// <summary>
-        /// Retrieves the build parameters for the current build.
+        /// Gets or sets the build parameters for the current build.
         /// </summary>
-        /// <returns>The build parameters.</returns>
-        BuildParameters IBuildComponentHost.BuildParameters => _buildParameters;
+        BuildParameters IBuildComponentHost.BuildParameters
+        {
+            get => _buildParameters; set => throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Whether the current appdomain has an out of proc node.

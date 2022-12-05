@@ -145,9 +145,9 @@ namespace Microsoft.Build.BackEnd
         string Name { get; }
 
         /// <summary>
-        /// Retrieves the BuildParameters used during the build.
+        /// Gets or sets the BuildParameters used during the build.
         /// </summary>
-        BuildParameters BuildParameters { get; }
+        BuildParameters BuildParameters { get; set; }
 
         /// <summary>
         /// The data structure which holds the data for the use of legacy threading semantics

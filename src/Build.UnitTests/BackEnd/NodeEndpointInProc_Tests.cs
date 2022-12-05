@@ -8,7 +8,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Xunit;
 
@@ -66,12 +65,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
 
+            /// <summary>
+            /// Gets or sets the build parameters.
+            /// </summary>
             public BuildParameters BuildParameters
             {
-                get
-                {
-                    return _buildParameters;
-                }
+                get => _buildParameters; set => throw new NotImplementedException();
             }
 
             #region IBuildComponentHost Members
