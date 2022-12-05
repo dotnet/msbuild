@@ -2051,6 +2051,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
         {
+            // Workaround: For some reason when this test runs with all other tests we are getting
+            // the incorrect result from CreateHardLink error message (a message associated with
+            // another test). Calling GetHRForLastWin32Error / GetExceptionForHR seems to clear
+            // out the previous message and allow us to get the right message in the Copy task.
+            int errorCode = Marshal.GetHRForLastWin32Error();
+            Marshal.GetExceptionForHR(errorCode);
+            
             string sourceFile = FileUtilities.GetTemporaryFile();
             const string temp = @"d:\\temp";
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
