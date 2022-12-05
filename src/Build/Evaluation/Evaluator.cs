@@ -1659,6 +1659,8 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
+                // If the whole fallback folder doesn't exist, short-circuit and don't
+                // bother constructing an exact file path.
                 if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
                 {
                     // Set to log an error only if the change wave is enabled.
