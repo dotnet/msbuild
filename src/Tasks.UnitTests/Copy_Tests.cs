@@ -2091,7 +2091,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(success);
 
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-                me.AssertLogContains("0x80070011");
                 me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile, String.Empty);
             }
             finally
