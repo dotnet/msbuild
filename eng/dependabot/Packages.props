@@ -16,7 +16,7 @@
     <PackageReference Update="LargeAddressAware" Version="1.0.5" />
     <PackageReference Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 
-    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
+    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4-beta1.22579.2" />
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Condition="'$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)' != ''" Version="$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)" />
 
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
