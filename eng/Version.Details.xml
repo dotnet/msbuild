@@ -10,9 +10,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>d22c6743bf6237c39b98d5d680e06e6c33e97f1c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.4.0-6.22571.4">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.4.0-6.22580.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>add2a83a8b7b07218726eb263f84cc4cf7e0fa85</Sha>
+      <Sha>d7a61210a88b584ca0827585ec6e871c6b1c5a14</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.22458.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
