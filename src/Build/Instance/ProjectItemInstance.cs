@@ -1492,8 +1492,8 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public override int GetHashCode()
             {
-                // This is ignore case to ensure that task items whose item specs differ only by 
-                // casing still have the same hash code, since this is used to determine if we have duplicates when 
+                // This is ignore case to ensure that task items whose item specs differ only by
+                // casing still have the same hash code, since this is used to determine if we have duplicates when
                 // we do duplicate removal.
                 return StringComparer.OrdinalIgnoreCase.GetHashCode(ItemSpec);
             }
@@ -1655,7 +1655,7 @@ namespace Microsoft.Build.Execution
                 var key = interner.Intern(str);
                 translator.Writer.Write(key);
             }
-            
+
             private void ReadInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
             {
                 var val = translator.Reader.ReadInt32();
@@ -1800,6 +1800,7 @@ namespace Microsoft.Build.Execution
                     .Where(item => !FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(item.Value))
                     .Select(item => new ProjectMetadataInstance(item.Key, item.Value, true /* may be built-in metadata name */));
 
+                if (DateTime.Now.Hour > 0) throw new Exception("whoooaaa");
                 _directMetadata.ImportProperties(metadata);
             }
 
