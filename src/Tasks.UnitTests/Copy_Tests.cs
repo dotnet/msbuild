@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
@@ -2056,6 +2055,20 @@ namespace Microsoft.Build.UnitTests
             const string temp = @"\\localhost\c$\temp";
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+
+            try
+            {
+                Directory.CreateDirectory(destFolder);
+                string nothingFile = Path.Combine(destFolder, "nothing.txt");
+                File.WriteAllText(nothingFile, "nothing");
+                File.Delete(nothingFile);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("CopyWithHardAndSymbolicLinks test could not access the network.");
+                // Something caused us to not be able to access our "network" share, don't fail.
+                return;
+            }
 
             try
             {
