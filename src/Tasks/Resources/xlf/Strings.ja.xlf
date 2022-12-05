@@ -3285,11 +3285,6 @@
         <target state="translated">Microsoft.Common.CurrentVersion.targets に指定されている AssemblyFolder 構成ファイル ('{0}') が無効です。エラー: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="Copy.ExactlyOneTypeOfLink">
-        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
-        <target state="translated">MSB3891: "{0}" と "{1}" の両方がプロジェクト ファイルで指定されました。いずれか 1 つを選択してください。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
         <target state="translated">MSB3492: ファイル "{0}" のコンテンツが最新であるかを判断するため、そのファイルを読み取ることができませんでした。ファイルは上書きされます。</target>

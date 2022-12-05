@@ -2053,7 +2053,7 @@ namespace Microsoft.Build.UnitTests
         public void CopyWithHardAndSymbolicLinks()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
-            string temp = Path.GetTempPath();
+            const string temp = @"\\localhost\c$\temp";
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
 
@@ -2075,10 +2075,11 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.False(success);
+                Assert.True(success);
 
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
+                me.AssertLogContains("0x80070011");
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile, String.Empty);
             }
             finally
             {

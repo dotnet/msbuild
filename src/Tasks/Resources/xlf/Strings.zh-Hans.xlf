@@ -3285,11 +3285,6 @@
         <target state="translated">Microsoft.Common.CurrentVersion.targets 中指定的 AssemblyFolder 配置文件(“{0}”)无效。错误为: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="Copy.ExactlyOneTypeOfLink">
-        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
-        <target state="translated">MSB3891: 项目文件中同时指定了“{0}”和“{1}”。请任选其一。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
         <target state="translated">MSB3492: 无法读取现有文件“{0}”以确定其内容是否是最新的。覆盖此文件。</target>

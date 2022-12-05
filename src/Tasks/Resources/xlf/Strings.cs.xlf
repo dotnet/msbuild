@@ -3285,11 +3285,6 @@
         <target state="translated">Konfigurační soubor AssemblyFolder ({0}) zadaný v Microsoft.Common.CurrentVersion.targets byl neplatný. Chyba: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="Copy.ExactlyOneTypeOfLink">
-        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
-        <target state="translated">MSB3891: V souboru projektu jste zadali jak položku {0}, tak i {1}. Zvolte buď jednu, nebo druhou.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
         <target state="translated">MSB3492: Nešlo přečíst existující soubor {0}, aby se zjistilo, jestli je jeho obsah aktuální. Přepíše se.</target>

@@ -3285,11 +3285,6 @@
         <target state="translated">Il file config AssemblyFolder ('{0}') specificato in Microsoft.Common.CurrentVersion.targets non è valido. Errore: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="Copy.ExactlyOneTypeOfLink">
-        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
-        <target state="translated">MSB3891: nel file di progetto sono stati specificati sia "{0}" che "{1}". Sceglierne uno.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
         <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
         <target state="translated">MSB3492: non è stato possibile leggere il file esistente "{0}" per determinare se il relativo contenuto è aggiornato. Verrà sovrascritto.</target>
