@@ -36,14 +36,14 @@
         <source>There are several launch profiles with case-sensitive names, which isn't permitted:
 {0}
 Make the profile names distinct.</source>
-        <target state="new">There are several launch profiles with case-sensitive names, which isn't permitted:
+        <target state="translated">Istnieje kilka profilów uruchamiania z nazwami z uwzględnieniem wielkości liter, co jest niedozwolone:
 {0}
-Make the profile names distinct.</target>
+Rozróżnij nazwy profilów.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileDoesNotExist">
         <source>A launch profile with the name '{0}' doesn't exist.</source>
-        <target state="new">A launch profile with the name '{0}' doesn't exist.</target>
+        <target state="translated">Profil uruchamiania o nazwie „{0}” nie istnieje.</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyOneProjectAllowed">
@@ -116,7 +116,7 @@ Bieżący element {1}: „{2}”.</target>
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile '{0}' could not be located.</source>
-        <target state="new">The specified launch profile '{0}' could not be located.</target>
+        <target state="translated">Nie można odnaleźć określonego profilu uruchamiania „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
@@ -143,7 +143,7 @@ Bieżący element {1}: „{2}”.</target>
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>A profile with the specified name isn't a valid JSON object.</source>
-        <target state="needs-review-translation">Nie można znaleźć profilu o określonej nazwie lub nie jest to prawidłowy obiekt JSON.</target>
+        <target state="translated">Profil o określonej nazwie nie jest prawidłowym obiektem JSON.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

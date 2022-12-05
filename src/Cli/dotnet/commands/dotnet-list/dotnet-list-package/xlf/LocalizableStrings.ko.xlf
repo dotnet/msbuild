@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdFormatDescription">
         <source>Specifies the output format type for the list packages command.</source>
-        <target state="new">Specifies the output format type for the list packages command.</target>
+        <target state="translated">목록 패키지 명령의 출력 형식 유형을 지정합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">

@@ -266,12 +266,13 @@ jobs:
                 -prepareMachine
                 -projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
                 -configuration $(_BuildConfig)
+                $(_InternalRuntimeDownloadArgs)
                 /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
                 /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
           displayName: Run AoT Tests in Helix
           env:
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-              HelixAccessToken: ''
+              HelixAccessToken: $(_HelixApiToken)
               RunAoTTests: 'true'
 
       - ${{ if eq(parameters.agentOs, 'Darwin') }}:
@@ -298,6 +299,7 @@ jobs:
                 --restore
                 --test
                 --projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
+                $(_InternalRuntimeDownloadArgs)
                 /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TestInHelix.binlog
                 /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
           displayName: Run AoT Tests in Helix
