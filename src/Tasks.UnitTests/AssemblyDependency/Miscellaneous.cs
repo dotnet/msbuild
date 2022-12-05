@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assemblies = new ITaskItem[] { xpdb },
                 AssemblyFiles = new ITaskItem[] { x },
                 SearchPaths = new string[] { "{RawFileName}" },
-        };
+            };
 
             bool success = Execute(t);
             success.ShouldBeTrue();
