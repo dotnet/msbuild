@@ -8,13 +8,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
-    // TODO: Move to separate file
-    class FancyLoggerNode
-    {
-        public FancyLoggerNode() { }
-    }
     public class FancyLogger : ILogger
     {
+
+        public FancyLoggerNode root = new FancyLoggerNode(-1, FancyLoggerNodeType.None);
+
         public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
         public Dictionary<int, FancyLoggerBufferLine> targetConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
         public Dictionary<int, FancyLoggerBufferLine> taskConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
@@ -70,6 +68,18 @@ namespace Microsoft.Build.Logging.FancyLogger
                 + ANSIBuilder.Formatting.Dim("Project: ")
                 + e.ProjectFile
             );
+            // Node on tree
+            if (e.ParentProjectBuildEventContext?.ProjectInstanceId != null)
+            {
+                // Find node
+                FancyLoggerNode? node = root.Find(e.ParentProjectBuildEventContext.ProjectInstanceId, FancyLoggerNodeType.Project);
+                if (node == null) return;
+                node.Add(e.BuildEventContext.ProjectInstanceId, FancyLoggerNodeType.Project);
+            }
+            else
+            {
+                root.Add(e.BuildEventContext.ProjectInstanceId, FancyLoggerNodeType.Project);
+            }
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
@@ -88,6 +98,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             targetConsoleLines[e.BuildEventContext.TargetId] = FancyLoggerBuffer.WriteNewLine("\t  "
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + e.TargetName);
+            // Node on tree
+            FancyLoggerNode? node = root.Find(e.BuildEventContext.ProjectInstanceId, FancyLoggerNodeType.Project);
+            if (node == null) return;
+            node.Add(e.BuildEventContext.TargetId, FancyLoggerNodeType.Target);
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
@@ -110,6 +124,10 @@ namespace Microsoft.Build.Logging.FancyLogger
                 + e.TaskName
             );
             FancyLoggerBuffer.WriteFooter($"Build: {(completedTasks / existingTasks) * 100}");
+            // Node on tree
+            FancyLoggerNode? node = root.Find(e.BuildEventContext.TargetId, FancyLoggerNodeType.Target);
+            if (node == null) return;
+            node.Add(e.BuildEventContext.TaskId, FancyLoggerNodeType.Task);
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
