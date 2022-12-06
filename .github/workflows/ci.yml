@@ -43,3 +43,6 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: ./build.sh --test
+        
+  name: connect with upterm
+      uses: lhotari/action-upterm@v1
