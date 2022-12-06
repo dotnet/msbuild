@@ -144,9 +144,7 @@ namespace Microsoft.Build.BackEnd
         /// Flag used for debugging by forcing all scheduling to go out-of-proc.
         /// </summary>
         internal bool ForceAffinityOutOfProc
-            => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? Traits.Instance.InProcNodeDisabled || _componentHost.BuildParameters.DisableInProcNode
-                : Traits.Instance.InProcNodeDisabled;
+            => Traits.Instance.InProcNodeDisabled || _componentHost.BuildParameters.DisableInProcNode;
 
         /// <summary>
         /// The path into which debug files will be written.
@@ -183,9 +181,7 @@ namespace Microsoft.Build.BackEnd
         {
             // Be careful moving these to Traits, changing the timing of reading environment variables has a breaking potential.
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? DebugUtils.DebugPath
-                : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+            _debugDumpPath = DebugUtils.DebugPath;
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
             _nodeLimitOffset = 0;
 

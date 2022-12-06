@@ -1048,7 +1048,7 @@ internal static class NativeMethods
     internal static DateTime GetLastWriteFileUtcTime(string fullPath)
     {
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-        if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+        if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
         {
             return LastWriteFileUtcTime(fullPath);
         }

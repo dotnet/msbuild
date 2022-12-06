@@ -83,6 +83,7 @@ namespace Microsoft.Build.Tasks
             public static string LogAttributeFormat;
             public static string LogTaskPropertyFormat;
             public static string NoBecauseParentReferencesFoundInGac;
+            public static string NoBecauseBadImage;
             public static string NotCopyLocalBecauseConflictVictim;
             public static string NotCopyLocalBecauseEmbedded;
             public static string NotCopyLocalBecauseFrameworksFiles;
@@ -132,6 +133,7 @@ namespace Microsoft.Build.Tasks
                 IsAWinMdFile = GetResourceFourSpaces("ResolveAssemblyReference.IsAWinMdFile");
                 LogAttributeFormat = GetResourceEightSpaces("ResolveAssemblyReference.LogAttributeFormat");
                 LogTaskPropertyFormat = GetResource("ResolveAssemblyReference.LogTaskPropertyFormat");
+                NoBecauseBadImage = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseBadImage");
                 NoBecauseParentReferencesFoundInGac = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac");
                 NotCopyLocalBecauseConflictVictim = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseConflictVictim");
                 NotCopyLocalBecauseEmbedded = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseEmbedded");
@@ -1938,6 +1940,10 @@ namespace Microsoft.Build.Tasks
 
                     case CopyLocalState.NoBecauseParentReferencesFoundInGAC:
                         Log.LogMessage(importance, Strings.NoBecauseParentReferencesFoundInGac);
+                        break;
+
+                    case CopyLocalState.NoBecauseBadImage:
+                        Log.LogMessage(importance, Strings.NoBecauseBadImage);
                         break;
 
                     default:

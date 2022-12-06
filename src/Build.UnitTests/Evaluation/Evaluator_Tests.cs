@@ -1618,7 +1618,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                           <h Include='h1'>
                             <m>1</m>
                           </h>
-                          <i Include=""@(h->'%(identity))"">
+                          <i Include=""@(h->'%(identity)')"">
                             <m>2;%(m)</m>
                           </i>
                         </ItemGroup>
@@ -1628,8 +1628,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(0).GetMetadata("m");
 
-            Assert.Equal("2;", metadatum.EvaluatedValue);
-            Assert.Null(metadatum.Predecessor);
+            Assert.Equal("2;1", metadatum.EvaluatedValue);
+            Assert.Equal("1", metadatum.Predecessor.EvaluatedValue);
         }
 
         [Fact]

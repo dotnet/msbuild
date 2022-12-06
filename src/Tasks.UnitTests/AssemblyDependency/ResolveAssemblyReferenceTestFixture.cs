@@ -546,6 +546,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Path.Combine(s_myComponentsRootPath, "V.dll"),
             Path.Combine(s_myComponents2RootPath, "W.dll"),
             Path.Combine(s_myComponentsRootPath, "X.dll"),
+            Path.Combine(s_myComponentsRootPath, "X.pdb"),
             Path.Combine(s_myComponentsRootPath, "Y.dll"),
             Path.Combine(s_myComponentsRootPath, "Z.dll"),
 
@@ -1433,6 +1434,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("D, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
+            }
+
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.pdb"), StringComparison.OrdinalIgnoreCase))
+            {
+                // return new AssemblyNameExtension("X, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
+                throw new BadImageFormatException("X.pdb is a PDB file, not a managed assembly");
             }
 
             if (String.Equals(path, @"C:\Regress714052\X86\a.dll", StringComparison.OrdinalIgnoreCase))

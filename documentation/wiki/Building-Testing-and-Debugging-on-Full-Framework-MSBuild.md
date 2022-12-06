@@ -4,7 +4,7 @@ These instructions refer to working with the `master` branch.
 
 ## Required Software
 
-**Latest Microsoft Visual Studio 2022**: You can download the Visual Studio Community edition from [https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx).
+**Latest Microsoft Visual Studio 2022**: You can download the Visual Studio Community edition from [visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/).
 
 All command lines should be executed from a Visual Studio developer command prompt.
 
@@ -31,16 +31,16 @@ The CI does two builds. In the second build, it uses the binaries from the first
 
 ## Contributing
 
-Please see [Contributing Code](https://github.com/dotnet/msbuild/blob/master/documentation/wiki/Contributing-Code.md) for details on contributing changes back to the code. Please read this carefully and engage with us early to ensure work is not wasted.
+Please see [Contributing Code](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Contributing-Code.md) for details on contributing changes back to the code. Please read this carefully and engage with us early to ensure work is not wasted.
 
 ## Walkthroughs
 
 ### Using the repository binaries to perform builds
 
 To build projects using the MSBuild binaries from the repository, you first need to do a build which produces
-a "bootstrap" directory. The "bootstrap" directory mimics a Visual Studio installation by aquiring additional
+a "bootstrap" directory. The "bootstrap" directory mimics a Visual Studio installation by acquiring additional
 dependencies (Roslyn compilers, NuGet, etc.) from packages or from your local machine (e.g. props/targets
-from Visual Studio). To produce a bootstrap build, run `.\build.cmd /p:CreateBootstrap=true` from the root of your enlistment.
+from Visual Studio). This will happen by default when running `.\build.cmd`. The bootstrap can be disabled by running `.\build.cmd /p:CreateBootstrap=false`.
 
 Now, just point `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe` at a project file.
 
@@ -49,7 +49,7 @@ Now, just point `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe`
 Sometimes it's useful to patch your copy of Visual Studio in order to test or debug your local MSBuild changes from Visual Studio. You can use the [Deploy-MSBuild script](../Deploy-MSBuild.md) for copying your locally built MSBuild binaries over the MSBuild binaries shipping with Visual Studio. Example usage:
 ```
 # bootstrap build
-.\build.cmd /p:CreateBootstrap=true
+.\build.cmd
 
 # copy the bootstrap build output over the MSBuild binaries in Visual Studio
 .\scripts\Deploy-MSBuild.ps1 -destination "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin"
