@@ -18,6 +18,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         private static int counter = 0;
         public int Id;
         public string Text;
+        public bool IsHidden;
         public FancyLoggerBufferLine()
         {
             Id = counter++;
@@ -27,6 +28,18 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             Id = counter++;
             Text = text;
+        }
+        public void Hide()
+        {
+            IsHidden = true;
+        }
+        public void Unhide()
+        {
+            IsHidden = false;
+        }
+        public int GetIndex()
+        {
+            return FancyLoggerBuffer.GetLineIndexById(Id);
         }
     }
 
@@ -96,18 +109,22 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (firstLineIndex < 0) return;
             if (firstLineIndex >= lines.Count) return;
             CurrentTopLineIndex = firstLineIndex;
-            for (int i = 0; i < Height - 4; i++)
+            int i = 0;
+            while (i < Height - 4)
             {
+                int lineIndex = i + firstLineIndex;
+                if ( lineIndex < lines.Count && lines[lineIndex].IsHidden) continue;
                 Console.Write(""
-                    + ANSIBuilder.Cursor.Position(i+2, 0)
+                    + ANSIBuilder.Cursor.Position(i + 2, 0)
                     + ANSIBuilder.Eraser.LineCursorToEnd()
-                    + ((i + firstLineIndex < lines.Count) ? lines[i + firstLineIndex].Text : "")
+                    + ((lineIndex < lines.Count) ? lines[lineIndex].Text : "")
                 );
+                i++;
             }
             Console.Write(ANSIBuilder.Cursor.Position(Height, 0));
         }
         private static void ScrollToEnd()
-        {
+        { 
             // If number of lines is smaller than height
             if (lines.Count < Height - 2)
             {
@@ -198,5 +215,20 @@ namespace Microsoft.Build.Logging.FancyLogger
             return line;
         }
         #endregion
+
+        public static void HideLine(int lineId)
+        {
+            FancyLoggerBufferLine? line = GetLineById(lineId);
+            if (line == null) return;
+            line.Hide();
+            ScrollToLine(CurrentTopLineIndex);
+        }
+        public static void UnhideLine(int lineId)
+        {
+            FancyLoggerBufferLine? line = GetLineById(lineId);
+            if (line == null) return;
+            line.Unhide();
+            ScrollToLine(CurrentTopLineIndex);
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace Microsoft.Build.Logging.FancyLogger
     public class FancyLogger : ILogger
     {
 
-        public FancyLoggerNode root = new FancyLoggerNode(-1, FancyLoggerNodeType.None);
+        // public FancyLoggerNode root = new FancyLoggerNode("-1", FancyLoggerNodeType.None);
 
         public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
         public Dictionary<int, FancyLoggerBufferLine> targetConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
@@ -64,27 +64,21 @@ namespace Microsoft.Build.Logging.FancyLogger
         void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
             if (e.BuildEventContext?.ProjectInstanceId == null) return;
-            projectConsoleLines[e.BuildEventContext.ProjectInstanceId] = FancyLoggerBuffer.WriteNewLine(" "
+            int id = e.BuildEventContext.ProjectInstanceId;
+            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine(" "
                 + ANSIBuilder.Formatting.Dim("Project: ")
                 + e.ProjectFile
             );
-            // Node on tree
-            if (e.ParentProjectBuildEventContext?.ProjectInstanceId != null)
-            {
-                // Find node
-                FancyLoggerNode? node = root.Find(e.ParentProjectBuildEventContext.ProjectInstanceId, FancyLoggerNodeType.Project);
-                if (node == null) return;
-                node.Add(e.BuildEventContext.ProjectInstanceId, FancyLoggerNodeType.Project);
-            }
-            else
-            {
-                root.Add(e.BuildEventContext.ProjectInstanceId, FancyLoggerNodeType.Project);
-            }
+            projectConsoleLines[id] = line;
+            // Node
+            FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Project);
+            node.Line = line;
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             if (e.BuildEventContext?.ProjectInstanceId == null) return;
             int lineId = projectConsoleLines[e.BuildEventContext.ProjectInstanceId].Id;
+            if(lineId == -1) return;
             FancyLoggerBuffer.UpdateLine(lineId, ""
                 + ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)
                 + ANSIBuilder.Formatting.Dim("Project: ")
@@ -95,18 +89,17 @@ namespace Microsoft.Build.Logging.FancyLogger
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
             if (e.BuildEventContext?.TargetId == null) return;
-            targetConsoleLines[e.BuildEventContext.TargetId] = FancyLoggerBuffer.WriteNewLine("\t  "
+            int id = e.BuildEventContext.TargetId;
+            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine("\t  "
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + e.TargetName);
-            // Node on tree
-            FancyLoggerNode? node = root.Find(e.BuildEventContext.ProjectInstanceId, FancyLoggerNodeType.Project);
-            if (node == null) return;
-            node.Add(e.BuildEventContext.TargetId, FancyLoggerNodeType.Target);
+            targetConsoleLines[id] = line;
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
             if (e.BuildEventContext?.TargetId == null) return;
             int lineId = targetConsoleLines[e.BuildEventContext.TargetId].Id;
+            if(lineId == -1) return;
             FancyLoggerBuffer.UpdateLine(lineId, "\t"
                 + ANSIBuilder.Formatting.Color("✓ ", ANSIBuilder.Formatting.ForegroundColor.Green)
                 + ANSIBuilder.Formatting.Dim("Target: ")
@@ -119,15 +112,12 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             existingTasks++;
             if (e.BuildEventContext?.TaskId == null) return;
-            taskConsoleLines[e.BuildEventContext.TaskId] = FancyLoggerBuffer.WriteNewLine("\t\t  "
+            int id = e.BuildEventContext.TaskId;
+            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine("\t\t  "
                 + ANSIBuilder.Formatting.Dim("Task: ")
                 + e.TaskName
             );
-            FancyLoggerBuffer.WriteFooter($"Build: {(completedTasks / existingTasks) * 100}");
-            // Node on tree
-            FancyLoggerNode? node = root.Find(e.BuildEventContext.TargetId, FancyLoggerNodeType.Target);
-            if (node == null) return;
-            node.Add(e.BuildEventContext.TaskId, FancyLoggerNodeType.Task);
+            taskConsoleLines[id] = line;
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
