@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option FormatOption = new ForwardedOption<ReportOutputFormat>("--format", LocalizableStrings.CmdFormatDescription)
         { }.ForwardAsSingle(o => $"--format:{o}");
 
-        public static readonly Option OutputVersiontOption = new ForwardedOption<int>("--output-version", LocalizableStrings.CmdOutputVersionDescription)
+        public static readonly Option OutputVersionOption = new ForwardedOption<int>("--output-version", LocalizableStrings.CmdOutputVersionDescription)
         { }.ForwardAsSingle(o => $"--output-version:{o}");
 
         private static readonly Command Command = ConstructCommand();
