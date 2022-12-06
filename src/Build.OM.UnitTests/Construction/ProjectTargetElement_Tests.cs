@@ -375,13 +375,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 });
 
+                var expectedString = "If you intended this to be a property, it must be inside a <PropertyGroup> element";
+
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
                 {
-                    error.Message.ShouldMatch("Properties must be inside a <PropertyGroup> element");
+                    error.Message.ShouldMatch(expectedString);
                 }
                 else
                 {
-                    error.ErrorCode.ShouldNotMatch("Properties must be inside a <PropertyGroup> element");
+                    error.ErrorCode.ShouldNotMatch(expectedString);
                 }
             }
         }
