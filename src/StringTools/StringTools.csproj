@@ -44,7 +44,10 @@
     <Compile Remove="SpanBasedStringBuilder.cs" />
     <Compile Remove="InternableString.cs" />
     <Compile Remove="WeakStringCache.Concurrent.cs" />
-  </ItemGroup>
+    <Compile Remove="PropertyParser.cs" />
+    <Compile Remove="InterningBinaryReader.cs" />
+    <Compile Remove="SemiColonTokenizer.cs" />
+   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
     <Compile Remove="SpanBasedStringBuilder.Simple.cs" />
     <Compile Remove="InternableString.Simple.cs" />
