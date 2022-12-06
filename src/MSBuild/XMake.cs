@@ -39,6 +39,7 @@ using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging.FancyLogger;
+using System.Runtime.InteropServices;
 
 #nullable disable
 
@@ -127,7 +128,7 @@ namespace Microsoft.Build.CommandLine
         private static readonly CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
 
         private static readonly char[] s_commaSemicolon = { ',', ';' };
-
+ 
         /// <summary>
         /// Static constructor
         /// </summary>
@@ -3223,6 +3224,7 @@ namespace Microsoft.Build.CommandLine
 
             // Choose default console logger
             bool outputSupportsFancyLogger = !Console.IsOutputRedirected && // Avoid using the FancyLogger when output is redirected to a file
+                ( RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.GetEnvironmentVariable("WT_SESSION") != "" ) && // Avoid when NOT using Windows Terminal
                 Environment.GetEnvironmentVariable("TERM") != "dumb"; // Avoid using FancyLogger when output is dumb (does not support ANSI). TODO: Check for better ways of figuring out terminals' capabilities
             if (!outputSupportsFancyLogger)
             {

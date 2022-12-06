@@ -63,9 +63,55 @@ namespace Microsoft.Build.Logging.FancyLogger
                     Id = id.ToString(); break;
             }
         }
+        public FancyLoggerNode? Find(string id)
+        {
+            // If self
+            if(Id == id) return this;
+            // If no children
+            if(Children.Count == 0) return null;
+            // Iterate
+            foreach (var child in Children)
+            {
+                FancyLoggerNode? node = child.Value.Find(id);
+                if (node != null) return node;
+            }
+            return null;
+        }
 
+        public void Add(FancyLoggerNode node)
+        {
+            Children.Add(node.Id, node);
+            node.Depth = Depth + 1;
+        }
 
-        public void Collapse(bool isRoot)
+        public int GetLastLineId()
+        {
+            // If no line
+            if (Line == null) return -1;
+            // If line and no children
+            if (Children.Count == 0) return FancyLoggerBuffer.GetLineIndexById(Line.Id);
+            // Get from children
+            int lastLineId = -1;
+            int lastLineIndex = -1;
+            foreach (var child in Children)
+            {
+                int lineIndex = child.Value.GetLastLineId();
+                if (lineIndex > lastLineIndex)
+                {
+                    lastLineIndex = lineIndex;
+                    lastLineId = Line.Id;
+                }
+            }
+            return lastLineId;
+        }
+
+        public void Write()
+        {
+            if (Line == null) return;
+            // Implement logic for printing here...
+        }
+
+        /*public void Collapse(bool isRoot)
         {
             // Children
             foreach (var child in Children)
@@ -82,8 +128,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 child.Value.Expand(false);
             }
-            // Self
-            if (!isRoot) Line?.Unhide();
+            if (isRoot) return;
         }
         public int GetRootLineId()
         {
@@ -106,6 +151,6 @@ namespace Microsoft.Build.Logging.FancyLogger
                 }
             }
             return lastLineId;
-        }
+        }*/
     }
 }
