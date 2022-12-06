@@ -1612,13 +1612,6 @@
         <target state="translated">AssemblyFoldersEx 位置:“{0}”</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
-        <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
-        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</target>
-        <note>
-      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
-    </note>
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
         <target state="translated">已考虑 AssemblyFoldersEx 位置。</target>
@@ -2595,11 +2588,6 @@
       <trans-unit id="Unzip.FileComment">
         <source>Unzipping file "{0}" to "{1}".</source>
         <target state="translated">将文件“{0}”解压缩到“{1}”。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Unzip.ZipSlipExploit">
-        <source>Entry is outside the target directory: "{0}"</source>
-        <target state="new">Entry is outside the target directory: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
