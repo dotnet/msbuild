@@ -30,6 +30,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: .\build.cmd -test
+      - name: connect with upterm
+        uses: lhotari/action-upterm@v1
 
   build:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
@@ -42,7 +44,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build
-        run: ./build.sh --test
-        
-  name: connect with upterm
-      uses: lhotari/action-upterm@v1
+        run: ./build.sh --test   
+      - name: connect with upterm
+        uses: lhotari/action-upterm@v1
