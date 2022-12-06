@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SourceOption);
             command.AddOption(InteractiveOption);
             command.AddOption(FormatOption);
-            command.AddOption(OutputVersiontOption);
+            command.AddOption(OutputVersionOption);
 
             command.SetHandler((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
 
