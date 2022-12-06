@@ -2959,7 +2959,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             };
 
             AssertProvenanceResult(expected, project, "1.foo", "B");
-            AssertProvenanceResult(new ProvenanceResultTupleList(), project, "1.foo", "NotExistant");
+            AssertProvenanceResult(new ProvenanceResultTupleList(), project, "1.foo", "NotExistent");
         }
 
         public static IEnumerable<Object[]> GetItemProvenanceByProjectItemTestData
