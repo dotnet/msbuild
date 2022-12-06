@@ -14,6 +14,7 @@ using Xunit;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit.Abstractions;
 using Shouldly;
+using Microsoft.Build.UnitTests.Shared;
 
 #nullable disable
 
@@ -92,6 +93,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         public Miscellaneous(ITestOutputHelper output) : base(output)
         {
+        }
+
+        [Fact]
+        public void VerifyPrimaryReferenceToBadImageDoesNotThrow()
+        {
+            ITaskItem x = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.dll"));
+            ITaskItem xpdb = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.pdb"));
+            ResolveAssemblyReference t = new()
+            {
+                BuildEngine = new MockEngine(),
+                AllowedRelatedFileExtensions = new string[] { ".pdb" },
+                Assemblies = new ITaskItem[] { xpdb },
+                AssemblyFiles = new ITaskItem[] { x },
+                SearchPaths = new string[] { "{RawFileName}" },
+            };
+
+            bool success = Execute(t);
+            success.ShouldBeTrue();
         }
 
         /// <summary>
