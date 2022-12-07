@@ -48,6 +48,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             {
                 FancyLoggerBuffer.Initialize();
+                FancyLoggerBufferLine rootLine = FancyLoggerBuffer.WriteNewLine($"This is root --> {ANSIBuilder.Formatting.Bold("Remove after testing")}");
+                root.Line = rootLine;
             }
         }
 
@@ -65,61 +67,56 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             if (e.BuildEventContext?.ProjectInstanceId == null) return;
             int id = e.BuildEventContext.ProjectInstanceId;
-            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine(" "
-                + ANSIBuilder.Formatting.Dim("Project: ")
-                + e.ProjectFile
-            );
-            // projectConsoleLines[id] = line;
-            // Node
+            // Create node
             FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Project);
-            node.Line = line;
-            // If has parent project
-            /* if (e.ParentProjectBuildEventContext?.ProjectInstanceId != null)
-            {
-                FancyLoggerNode? parentNode = root.Find($"project-{e.ParentProjectBuildEventContext.ProjectInstanceId}");
-                if (parentNode == null) return;
-                parentNode.Add(node);
-            } else */
-            {
-                root.Add(node);
-            }
+            node.Line = new FancyLoggerBufferLine(" " + ANSIBuilder.Formatting.Dim("Project: ") + e.ProjectFile); ;
+            root.Add(node);
+            node.Write();
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             if (e.BuildEventContext?.ProjectInstanceId == null) return;
-            int lineId = root.Find($"project-{e.BuildEventContext.ProjectInstanceId}")?.Line?.Id ?? -1;
+            FancyLoggerNode? node = root.Find($"project-{e.BuildEventContext.ProjectInstanceId}");
+            if (node == null) return;
+            int lineId = node.Line?.Id ?? -1;
             if(lineId == -1) return;
             FancyLoggerBuffer.UpdateLine(lineId, ""
                 + ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)
                 + ANSIBuilder.Formatting.Dim("Project: ")
                 + ANSIBuilder.Formatting.Color(e.ProjectFile ?? "", ANSIBuilder.Formatting.ForegroundColor.Green)
             );
+            node.Collapse();
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
             if (e.BuildEventContext?.TargetId == null) return;
             int id = e.BuildEventContext.TargetId;
-            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine("\t  "
+            // Create node
+            FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Target);
+            node.Line = new FancyLoggerBufferLine("  "
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + e.TargetName);
-            // Node
-            FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Target);
-            node.Line = line;
+            // Get parent node
             FancyLoggerNode? parentNode = root.Find($"project-{e.BuildEventContext.ProjectInstanceId}");
             if (parentNode == null) return;
+            // Add to parent node
             parentNode.Add(node);
+            node.Write();
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
             if (e.BuildEventContext?.TargetId == null) return;
-            int lineId = root.Find($"target-{e.BuildEventContext.TargetId}")?.Line?.Id ?? -1;
+            FancyLoggerNode? node = root.Find($"target-{e.BuildEventContext.TargetId}");
+            if (node == null) return;
+            int lineId = node.Line?.Id ?? -1;
             if(lineId == -1) return;
-            FancyLoggerBuffer.UpdateLine(lineId, "\t"
+            FancyLoggerBuffer.UpdateLine(lineId, ""
                 + ANSIBuilder.Formatting.Color("✓ ", ANSIBuilder.Formatting.ForegroundColor.Green)
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + ANSIBuilder.Formatting.Color(e.TargetName, ANSIBuilder.Formatting.ForegroundColor.Green)
             );
+            node.Collapse();
         }
 
         // Task
@@ -128,31 +125,34 @@ namespace Microsoft.Build.Logging.FancyLogger
             existingTasks++;
             if (e.BuildEventContext?.TaskId == null) return;
             int id = e.BuildEventContext.TaskId;
-            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine("\t\t  "
-                + ANSIBuilder.Formatting.Dim("Task: ")
-                + e.TaskName
-            );
-            // Node
+            // Create node
             FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Task);
-            node.Line = line;
+            node.Line = new FancyLoggerBufferLine("  " + ANSIBuilder.Formatting.Dim("Task: ") + e.TaskName);
+            // Get parent node
             FancyLoggerNode? parentNode = root.Find($"target-{e.BuildEventContext.TargetId}");
             if (parentNode == null) return;
+            // Add to parent node
             parentNode.Add(node);
+            node.Write();
+            // TODO: Remove
+            Thread.Sleep(500);
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
             completedTasks++;
             if (e.BuildEventContext?.TaskId == null) return;
-            // int lineId = taskConsoleLines[e.BuildEventContext.TaskId].Id;
-            int lineId = root.Find($"task-{e.BuildEventContext.TaskId}")?.Line?.Id ?? -1;
+            FancyLoggerNode? node = root.Find($"task-{e.BuildEventContext.TaskId}");
+            if(node == null) return;
+            int lineId = node.Line?.Id ?? -1;
             if (lineId == -1) return;
-            FancyLoggerBuffer.UpdateLine(lineId, "\t\t"
+            FancyLoggerBuffer.UpdateLine(lineId, ""
                 + ANSIBuilder.Formatting.Color("✓ ", ANSIBuilder.Formatting.ForegroundColor.Green)
                 + ANSIBuilder.Formatting.Dim("Task: ")
                 + ANSIBuilder.Formatting.Color(e.TaskName, ANSIBuilder.Formatting.ForegroundColor.Green)
             );
-            FancyLoggerBuffer.WriteFooter($"Build: {(completedTasks / existingTasks) * 100}");
+            FancyLoggerBuffer.WriteFooter($"Build: {ANSIBuilder.Graphics.ProgressBar(completedTasks/existingTasks)}  {(completedTasks / existingTasks) * 100}");
+            node.Collapse();
         }
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)

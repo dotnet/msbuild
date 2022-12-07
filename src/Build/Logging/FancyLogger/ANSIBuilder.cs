@@ -210,6 +210,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
             public static string ForwardTab(int n)
             {
+                if (n == 0) return "";
                 return String.Format("\x1b[{0}I", n);
             }
             public static string BackwardTab(int n)

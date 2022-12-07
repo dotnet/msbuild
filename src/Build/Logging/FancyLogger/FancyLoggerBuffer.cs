@@ -19,6 +19,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public int Id;
         public string Text;
         public bool IsHidden;
+        public int IdentationLevel = -1;
         public FancyLoggerBufferLine()
         {
             Id = counter++;
@@ -28,6 +29,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             Id = counter++;
             Text = text;
+        }
+        public FancyLoggerBufferLine(string text, int identationLevel) : this(text)
+        {
+            IdentationLevel = identationLevel;
         }
         public void Hide()
         {
@@ -106,18 +111,18 @@ namespace Microsoft.Build.Logging.FancyLogger
         #region Scrolling
         private static void ScrollToLine(int firstLineIndex)
         {
-            if (firstLineIndex < 0) return;
-            if (firstLineIndex >= lines.Count) return;
+            if (firstLineIndex < 0 || firstLineIndex >= lines.Count) return;
             CurrentTopLineIndex = firstLineIndex;
             int i = 0;
             while (i < Height - 4)
             {
                 int lineIndex = i + firstLineIndex;
-                if ( lineIndex < lines.Count && lines[lineIndex].IsHidden) continue;
+                // if (lineIndex < lines.Count && lines[lineIndex].IsHidden) continue;
                 Console.Write(""
                     + ANSIBuilder.Cursor.Position(i + 2, 0)
                     + ANSIBuilder.Eraser.LineCursorToEnd()
-                    + ((lineIndex < lines.Count) ? lines[lineIndex].Text : "")
+                    + ((lineIndex < lines.Count) ? ANSIBuilder.Tabulator.ForwardTab(lines[lineIndex].IdentationLevel) + lines[lineIndex].Text : "")
+                    + ((lineIndex < lines.Count && lines[lineIndex].IsHidden) ? " Hidden" : "")
                 );
                 i++;
             }
@@ -179,10 +184,14 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Create line
             FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
+            return WriteNewLine(line);
+        }
+        public static FancyLoggerBufferLine WriteNewLine(FancyLoggerBufferLine line)
+        {
             // Add line
             lines.Add(line);
             // Update contents
-            if (AutoScrollEnabled) ScrollToEnd();
+            if(AutoScrollEnabled) ScrollToEnd();
             return line;
         }
         public static FancyLoggerBufferLine? WriteNewLineAfter(string text, int lineId)
@@ -192,8 +201,25 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (lineIndex == -1) return null;
 
             FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
+            return WriteNewLineAfterIndex(line, lineIndex);
+        }
+
+        public static FancyLoggerBufferLine? WriteNewLineAfter(FancyLoggerBufferLine line, int lineId)
+        {
+            // get line
+            int lineIndex = GetLineIndexById(lineId);
+            if (lineIndex == -1) return null;
+
+            return WriteNewLineAfterIndex(line, lineIndex);
+        }
+
+        public static FancyLoggerBufferLine? WriteNewLineAfterIndex(FancyLoggerBufferLine line, int lineIndex)
+        {
+            if (lineIndex == -1) return null;
             lines.Insert(lineIndex + 1, line);
-            ScrollToLine(CurrentTopLineIndex);
+            // Scroll to end if lineIndex >= lines
+            if (lineIndex >= lines.Count -2 && AutoScrollEnabled) ScrollToEnd();
+            else ScrollToLine(CurrentTopLineIndex); 
             return line;
         }
 
@@ -221,7 +247,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBufferLine? line = GetLineById(lineId);
             if (line == null) return;
             line.Hide();
-            ScrollToLine(CurrentTopLineIndex);
+            // ScrollToLine(CurrentTopLineIndex);
         }
         public static void UnhideLine(int lineId)
         {

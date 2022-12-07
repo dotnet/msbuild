@@ -28,6 +28,7 @@ namespace Microsoft.Build.Logging.FancyLogger
     {
         public string Id;
         public Dictionary<string, FancyLoggerNode> Children = new Dictionary<string, FancyLoggerNode>();
+        public FancyLoggerNode? Parent;
         public FancyLoggerBufferLine? Line;
         public int Depth = 0;
         public FancyLoggerNode(string id)
@@ -82,33 +83,68 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             Children.Add(node.Id, node);
             node.Depth = Depth + 1;
+            node.Parent = this;
         }
 
-        public int GetLastLineId()
+        public int GetLastLineIndex()
         {
-            // If no line
+            // If no line, return -1
             if (Line == null) return -1;
-            // If line and no children
-            if (Children.Count == 0) return FancyLoggerBuffer.GetLineIndexById(Line.Id);
-            // Get from children
-            int lastLineId = -1;
-            int lastLineIndex = -1;
+            // Get line index and id
+            int lastLineIndex = FancyLoggerBuffer.GetLineIndexById(Line.Id);
+            int lastLineId = Line.Id;
+            if (lastLineIndex == -1) return -1;
+            // Get max of children
             foreach (var child in Children)
             {
-                int lineIndex = child.Value.GetLastLineId();
-                if (lineIndex > lastLineIndex)
+                int childLastLineIndex = child.Value.GetLastLineIndex();
+                if (childLastLineIndex > lastLineIndex)
                 {
-                    lastLineIndex = lineIndex;
-                    lastLineId = Line.Id;
+                    lastLineIndex = childLastLineIndex;
+                    lastLineId = child.Value.Line!.Id;
                 }
             }
-            return lastLineId;
+            return lastLineIndex;
         }
 
         public void Write()
         {
-            if (Line == null) return;
-            // Implement logic for printing here...
+            if (Line == null) { return; }
+            // Adjust identation
+            Line.IdentationLevel = Depth - 1;
+            // If line not in the buffer, add
+            if (FancyLoggerBuffer.GetLineIndexById(Line.Id) == -1)
+            {
+                // Get parent last line index
+                if (Parent != null)
+                {
+                    int parentLastLineId = Parent.GetLastLineIndex();
+                    if (parentLastLineId == -1) throw new Exception("Oops something went wrong");
+                    Line.Text += $"  --> {parentLastLineId}";
+                    // FancyLoggerBuffer.WriteNewLineAfter(Line, parentLastLineId);
+                    FancyLoggerBuffer.WriteNewLineAfterIndex(Line, parentLastLineId);
+                }
+            }
+        }
+
+        public void Collapse()
+        {
+            foreach (var child in Children)
+            {
+                if (child.Value.Line == null) continue;
+                FancyLoggerBuffer.HideLine(child.Value.Line.Id);
+                child.Value.Collapse();
+            }
+        }
+
+        public void Expand()
+        {
+            foreach (var child in Children)
+            {
+                if (child.Value.Line == null) continue;
+                FancyLoggerBuffer.UnhideLine(child.Value.Line.Id);
+                child.Value.Expand();
+            }
         }
 
         /*public void Collapse(bool isRoot)
