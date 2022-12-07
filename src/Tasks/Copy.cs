@@ -280,7 +280,7 @@ namespace Microsoft.Build.Tasks
             bool hardLinkCreated = false;
             string errorMessage = string.Empty;
 
-            // If we want to create hard or symbolic links, then try that first
+            // Create hard links if UseHardlinksIfPossible is true
             if (UseHardlinksIfPossible)
             {
                 TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out hardLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage));
@@ -288,6 +288,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if(UseSymboliclinksIfPossible)
                     {
+                        // This is a message for fallback to SymbolicLinks if HardLinks fail when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
                         Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.Name, destinationFileState.Name, errorMessage);
                     }
                     else
@@ -297,6 +298,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+            // Create symbolic link if UseSymboliclinksIfPossible is true and hard link is not created
             if (!hardLinkCreated && UseSymboliclinksIfPossible)
             {
                 TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));

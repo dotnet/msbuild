@@ -2054,7 +2054,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
         {
-            
+
             string sourceFile = FileUtilities.GetTemporaryFile();
             string temp = Path.GetTempPath();
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
@@ -2065,7 +2065,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
                 MockEngine me = new MockEngine(true);
-                Copy t = new Copy 
+                Copy t = new Copy
                 {
                     RetryDelayMilliseconds = 1, // speed up tests!
                     UseHardlinksIfPossible = true,
