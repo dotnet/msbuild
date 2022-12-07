@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputVersionDescription">
-        <source>Specifies the version of machine-readable output with '--format json' option</source>
-        <target state="new">Specifies the version of machine-readable output with '--format json' option</target>
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="new">Specifies the version of machine-readable output. Requires the '--format json' option.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
