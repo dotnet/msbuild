@@ -2048,41 +2048,24 @@ namespace Microsoft.Build.UnitTests
 
     public class CopyHardAndSymbolicLink_Tests
     {
+        /// <summary>
+        /// Verify build sucessfully when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true 
+        /// </summary>
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
         {
-            // Workaround: For some reason when this test runs with all other tests we are getting
-            // the incorrect result from CreateHardLink error message (a message associated with
-            // another test). Calling GetHRForLastWin32Error / GetExceptionForHR seems to clear
-            // out the previous message and allow us to get the right message in the Copy task.
-            int errorCode = Marshal.GetHRForLastWin32Error();
-            Marshal.GetExceptionForHR(errorCode);
             
             string sourceFile = FileUtilities.GetTemporaryFile();
-            const string temp = @"d:\\temp";
+            string temp = Path.GetTempPath();
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-
-            try
-            {
-                Directory.CreateDirectory(destFolder);
-                string nothingFile = Path.Combine(destFolder, "nothing.txt");
-                File.WriteAllText(nothingFile, "nothing");
-                File.Delete(nothingFile);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("CopyWithHardAndSymbolicLinks test could not access the detination folder.");
-                // Something caused us to not be able to access our the detination folder, don't fail.
-                return;
-            }
 
             try
             {
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
                 MockEngine me = new MockEngine(true);
-                Copy t = new Copy
+                Copy t = new Copy 
                 {
                     RetryDelayMilliseconds = 1, // speed up tests!
                     UseHardlinksIfPossible = true,
@@ -2096,9 +2079,8 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.True(success);
-                me.AssertLogContains("0x80070011");
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
             }
             finally
             {
