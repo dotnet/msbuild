@@ -53,7 +53,9 @@ namespace Microsoft.Build.Logging
         //   - TargetSkippedEventArgs: added OriginallySucceeded, Condition, EvaluatedCondition
         // version 14:
         //   - TargetSkippedEventArgs: added SkipReason, OriginalBuildEventContext
-        internal const int FileFormatVersion = 14;
+        // version 15:
+        //   - new record kind: ResponseFileUsedEventArgs
+        internal const int FileFormatVersion = 15;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
