@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 });
 
-                var expectedString = "If you intended this to be a property, enclose it within a <PropertyGroup> element";
+                var expectedString = "<PropertyGroup>";
 
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
                 {
