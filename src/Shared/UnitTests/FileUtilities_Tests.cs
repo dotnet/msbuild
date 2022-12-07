@@ -901,6 +901,7 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+
         /// <summary>
         /// Directory is invalid
         /// </summary>
