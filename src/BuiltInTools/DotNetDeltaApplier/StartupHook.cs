@@ -13,6 +13,9 @@ internal sealed class StartupHook
 {
     private static readonly bool LogDeltaClientMessages = Environment.GetEnvironmentVariable("HOTRELOAD_DELTA_CLIENT_LOG_MESSAGES") == "1";
 
+    /// <summary>
+    /// Invoked by the runtime when the containing assembly is listed in DOTNET_STARTUP_HOOKS.
+    /// </summary>
     public static void Initialize()
     {
         ClearHotReloadEnvironmentVariables(Environment.GetEnvironmentVariable, Environment.SetEnvironmentVariable);
@@ -77,7 +80,7 @@ internal sealed class StartupHook
             return;
         }
 
-        var initPayload = new ClientInitializationPayload { Capabilities = GetApplyUpdateCapabilities() };
+        var initPayload = new ClientInitializationPayload(hotReloadAgent.Capabilities);
         Log("Writing capabilities: " + initPayload.Capabilities);
         initPayload.Write(pipeClient);
 
@@ -88,19 +91,9 @@ internal sealed class StartupHook
 
             hotReloadAgent.ApplyDeltas(update.Deltas);
             pipeClient.WriteByte((byte)ApplyResult.Success);
-
         }
+
         Log("Stopped received delta updates. Server is no longer connected.");
-    }
-
-    private static string GetApplyUpdateCapabilities()
-    {
-        var method = typeof(System.Reflection.Metadata.MetadataUpdater).GetMethod("GetCapabilities", BindingFlags.NonPublic | BindingFlags.Static, Type.EmptyTypes);
-        if (method is null)
-        {
-            return string.Empty;
-        }
-        return (string)method.Invoke(obj: null, parameters: null)!;
     }
 
     private static void Log(string message)

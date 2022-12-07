@@ -144,7 +144,7 @@
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelOutputPath">
         <source>NETSDK1194: The "--output" option isn't supported when building a solution.</source>
-        <target state="new">NETSDK1194: The "--output" option isn't supported when building a solution.</target>
+        <target state="translated">NETSDK1194: параметр "--output" не поддерживается при создании решения.</target>
         <note>{StrBegin="NETSDK1194: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">

@@ -525,7 +525,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Missing mandatory option(s) for the template '{1}': {0}.</source>
-        <target state="needs-review-translation">テンプレート '{1}' の必須パラメーター '{0}' がありません。</target>
+        <target state="translated">テンプレート '{1}' の必須オプションがありません: {0}。</target>
         <note>{0} - comma-separated list of missing options, each option is quoted.</note>
       </trans-unit>
       <trans-unit id="MountPointFactories">
@@ -550,7 +550,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="OperationCancelled">
         <source>The operation was cancelled.</source>
-        <target state="new">The operation was cancelled.</target>
+        <target state="translated">処理が取り消されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -1064,7 +1064,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="UnexpectedResult">
         <source>Template generation ended with unexpected result: '{0}'. Details: {1}</source>
-        <target state="new">Template generation ended with unexpected result: '{0}'. Details: {1}</target>
+        <target state="translated">テンプレートの生成が予期しない結果で終了しました: '{0} '。詳細： {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">

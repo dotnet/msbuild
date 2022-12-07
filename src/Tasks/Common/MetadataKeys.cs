@@ -141,5 +141,8 @@ namespace Microsoft.NET.Build.Tasks
         public const string XmlFilePath = "XmlFilePath";
         public const string PdbExtension = ".pdb";
         public const string PdbFilePath = "PdbFilePath";
+
+        // Dependencies design time
+        public const string Resolved = "Resolved";
     }
 }

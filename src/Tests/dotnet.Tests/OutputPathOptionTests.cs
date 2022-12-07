@@ -63,7 +63,7 @@ namespace dotnet.Tests
 
             new DotnetCommand(Log)
                 .WithWorkingDirectory(slnDirectory)
-                .Execute("new", "sln")
+                .Execute("new", "sln","--debug:ephemeral-hive")
                 .Should().Pass();
 
             new DotnetCommand(Log)

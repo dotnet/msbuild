@@ -129,5 +129,18 @@ namespace Microsoft.DotNet.Watcher.Tools
             await standardInput.WriteLineAsync(inputString);
             Assert.Equal(inputString, await app.AssertOutputLineStartsWith("Echo: "));
         }
+
+        [CoreMSBuildOnlyFact]
+        public async Task TargetNet60()
+        {
+            var testAsset = _testAssetsManager.CopyTestAsset("WatchApp60")
+                .WithSource()
+                .Path;
+
+            using var app = new WatchableApp(testAsset, _logger);
+
+            await app.StartWatcherAsync();
+            await app.GetProcessIdentifier();
+        }
     }
 }
