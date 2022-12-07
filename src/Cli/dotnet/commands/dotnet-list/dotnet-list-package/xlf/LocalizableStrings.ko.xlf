@@ -32,6 +32,11 @@
         <target state="translated">최신 버전이 포함된 패키지를 나열합니다. '--deprecated' 또는 '--vulnerable' 옵션과 함께 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdOutputVersionDescription">
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="new">Specifies the version of machine-readable output. Requires the '--format json' option.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
         <source>Lists transitive and top-level packages.</source>
         <target state="translated">전이적 패키지 및 최상위 패키지를 나열합니다.</target>

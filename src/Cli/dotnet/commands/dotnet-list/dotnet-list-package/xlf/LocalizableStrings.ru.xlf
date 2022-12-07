@@ -32,6 +32,11 @@
         <target state="translated">Возвращает список пакетов, у которых есть более новые версии. Не может использоваться с параметрами "--deprecated" или "--vulnerable".</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdOutputVersionDescription">
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="new">Specifies the version of machine-readable output. Requires the '--format json' option.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
         <source>Lists transitive and top-level packages.</source>
         <target state="translated">Список транзитивных пакетов и пакетов верхнего уровня.</target>

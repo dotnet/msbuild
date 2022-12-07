@@ -63,6 +63,9 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option FormatOption = new ForwardedOption<ReportOutputFormat>("--format", LocalizableStrings.CmdFormatDescription)
         { }.ForwardAsSingle(o => $"--format:{o}");
 
+        public static readonly Option OutputVersionOption = new ForwardedOption<int>("--output-version", LocalizableStrings.CmdOutputVersionDescription)
+        { }.ForwardAsSingle(o => $"--output-version:{o}");
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -87,6 +90,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SourceOption);
             command.AddOption(InteractiveOption);
             command.AddOption(FormatOption);
+            command.AddOption(OutputVersionOption);
 
             command.SetHandler((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
 

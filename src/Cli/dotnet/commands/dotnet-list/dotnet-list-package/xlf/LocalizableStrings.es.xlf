@@ -32,6 +32,11 @@
         <target state="translated">Muestra los paquetes que tienen versiones más recientes. No se puede combinar con las opciones '--deprecated" o "--vulnerable".</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdOutputVersionDescription">
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="new">Specifies the version of machine-readable output. Requires the '--format json' option.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
         <source>Lists transitive and top-level packages.</source>
         <target state="translated">Contiene paquetes de transitivos y de nivel superior.</target>
