@@ -92,6 +92,11 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DefaultSDKResolverError">
+        <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
+        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: tentativa de criar várias substituições da mesma tarefa: {0}</target>
@@ -120,6 +125,13 @@
       <trans-unit id="ErrorWritingCacheFile">
         <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4258: a gravação do arquivo de cache do resultado de saída no caminho "{0}" encontrou um erro: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</source>
+        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -341,6 +353,11 @@
       <trans-unit id="SDKResolverFailed">
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">O resolvedor do SDK "{0}" falhou ao tentar resolver o SDK "{1}". Exceção: "{2}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null.</source>
+        <target state="new">SDK resolver "{0}" returned null.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFileContents = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
-                         <NonExistantTask Condition=""'1'=='1'""/>
+                         <NonExistentTask Condition=""'1'=='1'""/>
                          <Message Text='Made it'/>
                       </Target>
                       </Project>");
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFileContents = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
-                         <NonExistantTask Condition=""'1'=='2'""/>
+                         <NonExistentTask Condition=""'1'=='2'""/>
                          <Message Text='Made it'/>
                       </Target>
                       </Project>");

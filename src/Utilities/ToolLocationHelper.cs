@@ -106,6 +106,11 @@ namespace Microsoft.Build.Utilities
         Version48 = 14,
 
         /// <summary>
+        /// version 4.8.1
+        /// </summary>
+        Version481 = 15,
+
+        /// <summary>
         /// The latest version available at the time of major release. This
         /// value should not be updated in minor releases as it could be a
         /// breaking change. Use 'Latest' if possible, but note the
@@ -2047,9 +2052,13 @@ namespace Microsoft.Build.Utilities
 
                 case TargetDotNetFrameworkVersion.Version472:
                     return FrameworkLocationHelper.dotNetFrameworkVersion472;
+
                 case TargetDotNetFrameworkVersion.Version48:
-                case TargetDotNetFrameworkVersion.Latest: // Latest is a special value to indicate the highest version we know about.
                     return FrameworkLocationHelper.dotNetFrameworkVersion48;
+
+                case TargetDotNetFrameworkVersion.Version481:
+                case TargetDotNetFrameworkVersion.Latest: // Latest is a special value to indicate the highest version we know about.
+                    return FrameworkLocationHelper.dotNetFrameworkVersion481;
 
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedFrameworkVersion", version);
