@@ -24,7 +24,7 @@ namespace Microsoft.Build.Tasks
     /// <comment>
     /// This task executes following steps:
     ///   (1) Filter out Framework assemblies
-    ///   (2) Filter out non-existant files
+    ///   (2) Filter out non-existent files
     ///   (3) Build list of Dependencies from built items with CopyLocal=True
     ///   (4) Build list of Prerequisites from built items with CopyLocal=False
     ///   (5) Build list of Satellites from built items based on TargetCulture
