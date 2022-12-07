@@ -3226,18 +3226,18 @@ namespace Microsoft.Build.CommandLine
             bool outputSupportsFancyLogger = !Console.IsOutputRedirected && // Avoid using the FancyLogger when output is redirected to a file
                 ( RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.GetEnvironmentVariable("WT_SESSION") != "" ) && // Avoid when NOT using Windows Terminal
                 Environment.GetEnvironmentVariable("TERM") != "dumb"; // Avoid using FancyLogger when output is dumb (does not support ANSI). TODO: Check for better ways of figuring out terminals' capabilities
-            if (!outputSupportsFancyLogger)
+            if (shouldUseFancyLogger && !outputSupportsFancyLogger)
             {
                 // Add to deferredbuildmessages
             }
-            if(shouldUseFancyLogger && outputSupportsFancyLogger )
+            else if (shouldUseFancyLogger && outputSupportsFancyLogger)
             {
                 ProcessFancyLogger(noConsoleLogger, loggers);
-            } else
+            }
+            else
             {
                 ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
-
 
             ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
 

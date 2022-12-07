@@ -18,7 +18,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public Dictionary<int, FancyLoggerBufferLine> taskConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
 
         private float existingTasks = 1;
-        private float completedTasks = 1;
+        private float completedTasks = 0;
 
         public string Parameters {  get; set; }
 
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             {
                 FancyLoggerBuffer.Initialize();
-                FancyLoggerBufferLine rootLine = FancyLoggerBuffer.WriteNewLine($"This is root --> {ANSIBuilder.Formatting.Bold("Remove after testing")}");
+                FancyLoggerBufferLine rootLine = FancyLoggerBuffer.WriteNewLine("");
                 root.Line = rootLine;
             }
         }
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             parentNode.Add(node);
             node.Write();
             // TODO: Remove
-            Thread.Sleep(500);
+            Thread.Sleep(400);
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
@@ -151,13 +151,24 @@ namespace Microsoft.Build.Logging.FancyLogger
                 + ANSIBuilder.Formatting.Dim("Task: ")
                 + ANSIBuilder.Formatting.Color(e.TaskName, ANSIBuilder.Formatting.ForegroundColor.Green)
             );
-            FancyLoggerBuffer.WriteFooter($"Build: {ANSIBuilder.Graphics.ProgressBar(completedTasks/existingTasks)}  {(completedTasks / existingTasks) * 100}");
+            FancyLoggerBuffer.WriteFooter($"Build: {ANSIBuilder.Graphics.ProgressBar(completedTasks/existingTasks)}  {(completedTasks / existingTasks) * 100} \t {completedTasks}/{existingTasks}");
             node.Collapse();
         }
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
-            // Message raised
+            // Only output high importance messages
+            // if (e.Importance != MessageImportance.High) return;
+            /* if (e.BuildEventContext?.TaskId == null) return;
+            int id = e.BuildEventContext.GetHashCode();
+            FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Message);
+            node.Line = new FancyLoggerBufferLine("--Message");
+
+            FancyLoggerNode? parentNode = root.Find($"task-{e.BuildEventContext.TaskId}");
+            if (parentNode == null) return;
+
+            parentNode.Add(node);
+            node.Write(); */
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
@@ -168,6 +179,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // TODO: Try to redirect to stderr
             // Console.WriteLine("Error raised");
+            FancyLoggerBuffer.WriteNewLine("Error");
         }
 
 

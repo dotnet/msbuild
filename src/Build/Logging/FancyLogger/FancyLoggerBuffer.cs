@@ -111,21 +111,55 @@ namespace Microsoft.Build.Logging.FancyLogger
         #region Scrolling
         private static void ScrollToLine(int firstLineIndex)
         {
-            if (firstLineIndex < 0 || firstLineIndex >= lines.Count) return;
+            /* if (firstLineIndex < 0 || firstLineIndex >= lines.Count) return;
             CurrentTopLineIndex = firstLineIndex;
             int i = 0;
             while (i < Height - 4)
             {
                 int lineIndex = i + firstLineIndex;
-                // if (lineIndex < lines.Count && lines[lineIndex].IsHidden) continue;
+
+                if (lineIndex < lines.Count && lines[lineIndex].IsHidden)
+                {
+                    // Go to next line
+                    lineIndex++;
+                } else
+                {
+                    Console.Write(""
+                        + ANSIBuilder.Cursor.Position(i + 2, 0)
+                        + ANSIBuilder.Eraser.LineCursorToEnd()
+                        // + ((lineIndex < lines.Count && lines[lineIndex].IsHidden) ? " Hidden" : "")
+                        + ((lineIndex < lines.Count) ? ANSIBuilder.Tabulator.ForwardTab(lines[lineIndex].IdentationLevel) + lines[lineIndex].Text : "")
+                    );
+                }
+                
+                i++;
+            }
+            */
+            if (firstLineIndex < 0)
+            {
+                ScrollToLine(0);
+                return;
+            }
+            if (firstLineIndex >= lines.Count)
+            {
+                ScrollToLine(lines.Count - 1);
+                return;
+            }
+            CurrentTopLineIndex = firstLineIndex;
+
+            int i = 0;
+            while (i < Height - 4)
+            {
+                int lineIndex = i + firstLineIndex;
                 Console.Write(""
                     + ANSIBuilder.Cursor.Position(i + 2, 0)
                     + ANSIBuilder.Eraser.LineCursorToEnd()
+                    // + ((lineIndex < lines.Count && lines[lineIndex].IsHidden) ? " Hidden" : "")
                     + ((lineIndex < lines.Count) ? ANSIBuilder.Tabulator.ForwardTab(lines[lineIndex].IdentationLevel) + lines[lineIndex].Text : "")
-                    + ((lineIndex < lines.Count && lines[lineIndex].IsHidden) ? " Hidden" : "")
                 );
                 i++;
             }
+
             Console.Write(ANSIBuilder.Cursor.Position(Height, 0));
         }
         private static void ScrollToEnd()
@@ -247,7 +281,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBufferLine? line = GetLineById(lineId);
             if (line == null) return;
             line.Hide();
-            // ScrollToLine(CurrentTopLineIndex);
+            ScrollToLine(CurrentTopLineIndex);
         }
         public static void UnhideLine(int lineId)
         {
