@@ -28,7 +28,7 @@
     <PackageReference Update="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Update="Microsoft.Win32.Registry" Condition="'$(MicrosoftWin32RegistryVersion)' != ''" Version="$(MicrosoftWin32RegistryVersion)" />
 
-    <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Update="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Update="Newtonsoft.Json" Condition="'$(NewtonsoftJsonVersion)' != ''" Version="$(NewtonsoftJsonVersion)" />
 
     <PackageReference Update="PdbGit" Version="3.0.41" />
