@@ -2054,7 +2054,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
         {
-
             string sourceFile = FileUtilities.GetTemporaryFile();
             string temp = Path.GetTempPath();
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
