@@ -354,7 +354,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-
                 if (!enableNewBehavior)
                 {
                     env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
@@ -367,7 +366,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <test>m</test>
                         </Target>
                     </Project>";
-
                 TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
                 ProjectCollection collection = new ProjectCollection();
                 var error = Assert.Throws<InvalidProjectFileException>(() =>
@@ -375,15 +373,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 });
 
-                var expectedString = "If you intended this to be a property, enclose it within a <PropertyGroup> element";
-
+                error.ErrorCode.ShouldMatch("MSB4067");
+                var expectedString = "<PropertyGroup>";
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
                 {
                     error.Message.ShouldMatch(expectedString);
                 }
                 else
                 {
-                    error.ErrorCode.ShouldNotMatch(expectedString);
+                    error.Message.ShouldNotMatch(expectedString);
                 }
             }
         }
