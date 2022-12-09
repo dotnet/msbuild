@@ -207,7 +207,6 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
         }
 
-#if FEATURE_SYMLINK_TARGET
         [Fact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
@@ -217,7 +216,8 @@ namespace Microsoft.Build.UnitTests
             TransientTestFile testFile = testFolder.CreateFile(testFileName, string.Join(Environment.NewLine, new[] { "123", "456" }));
             string symlinkPath = Path.Combine(testFolder2.Path, testFileName);
 
-            File.CreateSymbolicLink(symlinkPath, testFile.Path);
+            string errorMessage = string.Empty;
+            Assert.True(NativeMethodsShared.MakeSymbolicLink(symlinkPath, testFile.Path, ref errorMessage), errorMessage);
 
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
@@ -254,7 +254,6 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(testFileName));
         }
-#endif
 
         [Fact]
         public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()

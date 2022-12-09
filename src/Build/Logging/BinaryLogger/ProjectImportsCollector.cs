@@ -130,16 +130,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            var fileInfo = new FileInfo(filePath);
-
-#if FEATURE_SYMLINK_TARGET
-            if (fileInfo.Length == 0 && fileInfo.Exists && !string.IsNullOrEmpty(fileInfo.LinkTarget))
-            {
-                fileInfo = new FileInfo(fileInfo.LinkTarget);
-            }
-#endif
-
-            if (!fileInfo.Exists || fileInfo.Length == 0)
+            if (!File.Exists(filePath))
             {
                 _processedFiles.Add(filePath);
                 return;
@@ -153,11 +144,9 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            using (Stream entryStream = OpenArchiveEntry(filePath))
-            using (FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
-            {
-                content.CopyTo(entryStream);
-            }
+            using FileStream content = NativeMethodsShared.OpenReadFileThroughSymlinks(filePath);
+            using Stream entryStream = OpenArchiveEntry(filePath);
+            content.CopyTo(entryStream);
         }
 
         /// <remarks>
