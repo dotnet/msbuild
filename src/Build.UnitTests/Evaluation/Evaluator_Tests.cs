@@ -50,6 +50,69 @@ namespace Microsoft.Build.UnitTests.Evaluation
             GC.Collect();
         }
 
+        [Theory]
+        [MemberData(nameof(ImportLoadingScenarioTestData))]
+        public void VerifyLoadingImportScenarios(string importParameter, bool shouldSucceed)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder existentDirectory = env.CreateFolder(createFolder: true);
+                TransientTestFile realFile = env.CreateFile(existentDirectory, "realFile.csproj", @"<Project> </Project>");
+                TransientTestFile projectFile = env.CreateFile("project.proj", @$"
+<Project>
+  <Import {importParameter.Replace("realFolder", existentDirectory.Path)} />
+
+  <Target Name=""MyTarget"">
+    <Message Text=""Target working!"" />
+  </Target>
+</Project>
+");
+                bool result = false;
+                try
+                {
+                    Project project = new(projectFile.Path);
+                    MockLogger logger = new();
+                    result = project.Build(logger);
+                }
+                catch (InvalidProjectFileException) { }
+                result.ShouldBe(shouldSucceed);
+            }
+        }
+
+        // Some of these are also tested elsewhere, but this consolidates related tests in one spot.
+        public static IEnumerable<object[]> ImportLoadingScenarioTestData
+        {
+            get
+            {
+                // This first section tests our behavior if a folder does not exist. Conditions and whether there are wildcards should affect whether it fails if it fails to find a file.
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist.csproj")}"" Condition=""Exists('{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist.csproj")}')""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist.csproj")}"" Condition=""'true'""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "projectThatDoesNotExist.csproj")}""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("nonexistentDirectory", "*.*proj")}""", true };
+
+                // This section tests if the folder does exist, but the project does not.
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist.csproj")}"" Condition=""Exists('{Path.Combine("realFolder", "projectThatDoesNotExist.csproj")}')""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist.csproj")}"" Condition=""'true'""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "projectThatDoesNotExist.csproj")}""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "*.*proj")}""", true };
+
+                // This tests if the folder and the file exist.
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "realFile.csproj")}"" Condition=""Exists('{Path.Combine("realFolder", "realFile.csproj")}')""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "realFile.csproj")}"" Condition=""'true'""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "realFile.csproj")}""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("realFolder", "*.*proj")}""", true };
+
+                // If we fail to find a particular import along one project path, we have a few properties that can be expanded in different ways, including VSToolsPath. In other words,
+                // if the property isn't defined to somewhere that exists, we may still find it in a fallback path. Error behavior in this case is more complicated, as the file may
+                // exist along one search path but not another, in which case we should not error.
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "projectThatDoesNotExist.csproj")}"" Condition=""Exists('{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "projectThatDoesNotExist.csproj")}')""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "projectThatDoesNotExist.csproj")}"" Condition=""'true'""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "projectThatDoesNotExist.csproj")}""", false };
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "nonexistentDirectory", "*.*proj")}""", true };
+                yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "*.*proj")}""", true };
+            }
+        }
+
         /// <summary>
         /// Verify Exist condition used in Import or ImportGroup elements will succeed when in-memory project is available inside projectCollection.
         /// </summary>
