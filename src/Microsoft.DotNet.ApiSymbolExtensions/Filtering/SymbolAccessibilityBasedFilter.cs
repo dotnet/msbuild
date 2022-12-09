@@ -9,13 +9,15 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
     public class SymbolAccessibilityBasedFilter : ISymbolFilter
     {
         private readonly bool _includeInternalSymbols;
+        private readonly bool _includeEffectivelyPrivateSymbols;
 
-        public SymbolAccessibilityBasedFilter(bool includeInternalSymbols)
+        public SymbolAccessibilityBasedFilter(bool includeInternalSymbols, bool includeEffectivelyPrivateSymbols = false)
         {
             _includeInternalSymbols = includeInternalSymbols;
+            _includeEffectivelyPrivateSymbols = includeEffectivelyPrivateSymbols;
         }
 
         public bool Include(ISymbol symbol) =>
-            symbol.IsVisibleOutsideOfAssembly(_includeInternalSymbols);
+            symbol.IsVisibleOutsideOfAssembly(_includeInternalSymbols, _includeEffectivelyPrivateSymbols);
     }
 }
