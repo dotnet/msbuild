@@ -19,6 +19,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public ResponseFileUsedEventArgs(string responseFilePath) : base()
         {
+            ResponseFilePath = responseFilePath;
         }
         public string? ResponseFilePath { set; get; }
     }
