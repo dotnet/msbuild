@@ -145,8 +145,11 @@ namespace Microsoft.Build.Logging
             }
 
             using FileStream content = NativeMethodsShared.OpenReadFileThroughSymlinks(filePath);
-            using Stream entryStream = OpenArchiveEntry(filePath);
-            content.CopyTo(entryStream);
+            if (content != null)
+            {
+                using Stream entryStream = OpenArchiveEntry(filePath);
+                content.CopyTo(entryStream);
+            }
         }
 
         /// <remarks>
