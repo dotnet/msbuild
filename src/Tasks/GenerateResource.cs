@@ -915,14 +915,17 @@ namespace Microsoft.Build.Tasks
         // so check to see if we should trust them before analyzing them
         private bool IsDangerous(String filename)
         {
+#if !FEATURE_APPDOMAIN
+            return false;
+#endif
+
             // If they are opted out, there's no work to do
-            if (AllowMOTW || !NativeMethodsShared.IsWindows)
+            if (AllowMOTW)
             {
                 return false;
             }
 
             // First check the zone, if they are not an untrusted zone, they aren't dangerous
-
             if (internetSecurityManager == null)
             {
                 Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
