@@ -269,6 +269,7 @@ namespace Microsoft.Build.BackEnd.Logging
             LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
             _hasLoggedErrors = true;
         }
+
         /// <summary>
         /// Logs a file to be included in the binary logger
         /// </summary>

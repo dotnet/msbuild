@@ -1340,9 +1340,10 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // Log a message for every response file and include it in log
+                    List<BuildManager.DeferredBuildMessage> messagesToBuildInLoggersList = messagesToLogInBuildLoggers.ToList();
                     foreach (var responseFilePath in s_includedResponseFiles.ToList())
                     {
-                        messagesToLogInBuildLoggers = messagesToLogInBuildLoggers.Append(
+                        messagesToBuildInLoggersList.Add(
                             new BuildManager.DeferredBuildMessage(
                                 String.Format("Included response file: {0}", responseFilePath),
                                 MessageImportance.Normal,
@@ -1351,7 +1352,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
 
-                    buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
+                    buildManager.BeginBuild(parameters, messagesToBuildInLoggersList);
 
                     Exception exception = null;
                     try

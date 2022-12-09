@@ -2880,6 +2880,7 @@ namespace Microsoft.Build.Execution
             foreach (var message in deferredBuildMessages)
             {
                 loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+
                 // If message includes a file path, include that file
                 if (message.FilePath is not null)
                 {
