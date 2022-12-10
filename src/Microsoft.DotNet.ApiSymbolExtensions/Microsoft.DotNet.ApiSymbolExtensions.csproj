@@ -11,6 +11,11 @@
     <_MicrosoftCodeAnalysisVersion Condition="'$(DotNetBuildFromSource)' == 'true'">$(MicrosoftCodeAnalysisPackageVersion)</_MicrosoftCodeAnalysisVersion>
   </PropertyGroup>
 
+  <!-- Exclude files that depend on Microsoft.Build.Framework and Microsoft.Build.Utilities.Core. These will be included by users of this package. -->
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Logging\MSBuildLog.cs</DefaultItemExcludes>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(_MicrosoftCodeAnalysisVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(_MicrosoftCodeAnalysisVersion)" />

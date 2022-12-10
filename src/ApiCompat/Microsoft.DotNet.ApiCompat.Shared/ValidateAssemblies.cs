@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.ApiCompat
 {
     internal static class ValidateAssemblies
     {
-        public static void Run(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
+        public static void Run(Func<ISuppressionEngine, ISuppressableLog> logFactory,
             bool generateSuppressionFile,
             string[]? suppressionFiles,
             string? suppressionOutputFile,
@@ -86,12 +86,12 @@ namespace Microsoft.DotNet.ApiCompat
             // Execute the enqueued work item(s).
             apiCompatRunner.ExecuteWorkItems();
 
-            SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.CompatibilityLogger);
+            SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.SuppressableLog);
 
             if (generateSuppressionFile)
             {
                 SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
-                    serviceProvider.CompatibilityLogger,
+                    serviceProvider.SuppressableLog,
                     suppressionFiles,
                     suppressionOutputFile);
             }
