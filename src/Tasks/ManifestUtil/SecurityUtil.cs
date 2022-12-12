@@ -5,6 +5,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
 #if !RUNTIME_TYPE_NETCORE
+using Microsoft.Build.Framework;
 using System.Collections.Generic;
 #endif
 using System.ComponentModel;

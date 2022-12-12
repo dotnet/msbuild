@@ -10,6 +10,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+#if FEATURE_SYSTEM_CONFIGURATION
+using System.Configuration;
+using System.Security;
+#endif
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;

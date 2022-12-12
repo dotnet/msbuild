@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+using System.Runtime.Serialization.Formatters.Binary;
 #endif
 using System.Runtime.Serialization;
 #if !FEATURE_ASSEMBLYLOADCONTEXT

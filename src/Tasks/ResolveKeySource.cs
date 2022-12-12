@@ -7,7 +7,11 @@ using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Build.Framework;
 #if FEATURE_PFX_SIGNING
+using System.Globalization;
+using System.Security.Cryptography;
 using Microsoft.Runtime.Hosting;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 #endif
 
 #nullable disable
