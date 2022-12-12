@@ -115,16 +115,29 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Log?.LogMessage("Starting garbage collection.");
                 IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands();
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
-                Dictionary<(WorkloadPackId id, string version), PackInfo> expectedWorkloadPacks = installedWorkloads
-                    .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
-                    .Distinct()
-                    .Select(pack => _workloadResolver.TryGetPackInfo(pack))
-                    .Where(pack => pack != null)
-                    .ToDictionary(p => (new WorkloadPackId(p.ResolvedPackageId), p.Version));
 
-                foreach (PackInfo expectedPack in expectedWorkloadPacks.Values)
+                var installedPacks = installedWorkloads.SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
+                    .Distinct();
+
+                var installedPackInfos = installedPacks.Select(pack => _workloadResolver.TryGetPackInfo(pack))
+                    .Where(pack => pack != null);
+
+                //  The same workload pack may be aliased from two different names, for example
+                //  Microsoft.NETCore.App.Runtime.Mono.android-arm is aliased from Microsoft.NETCore.App.Runtime.Mono.net6.android-arm and
+                //  from Microsoft.NETCore.App.Runtime.Mono.net6.android-arm64
+                HashSet<(WorkloadPackId id, string version)> expectedWorkloadPacks = new HashSet<(WorkloadPackId id, string version)>();
+                foreach (var expectedPack in installedPackInfos)
                 {
-                    Log?.LogMessage($"Expected workload pack, ID: {expectedPack.ResolvedPackageId}, version: {expectedPack.Version}.");
+                    if (!expectedPack.Id.ToString().Equals(expectedPack.ResolvedPackageId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Log?.LogMessage($"Expected workload pack, ID: {expectedPack.ResolvedPackageId}, version: {expectedPack.Version}, aliased from: {expectedPack.Id}");
+                    }
+                    else
+                    {
+                        Log?.LogMessage($"Expected workload pack, ID: {expectedPack.ResolvedPackageId}, version: {expectedPack.Version}.");
+                    }
+
+                    expectedWorkloadPacks.Add((new WorkloadPackId(expectedPack.ResolvedPackageId), expectedPack.Version));
                 }
 
                 foreach (SdkFeatureBand installedFeatureBand in installedFeatureBands)
@@ -177,7 +190,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             {
                                 // If the current SDK feature band is listed as a dependent, we can validate
                                 // the workload packs against the expected pack IDs and versions to potentially remove it.
-                                if (packRecord.InstalledPacks.All(p => !expectedWorkloadPacks.ContainsKey((p.id, p.version.ToString()))))
+                                if (packRecord.InstalledPacks.All(p => !expectedWorkloadPacks.Contains((p.id, p.version.ToString()))))
                                 {
                                     //  None of the packs installed by this MSI are necessary any longer for this feature band, so we can remove the reference count
                                     Log?.LogMessage($"Removing dependent '{dependent}' because the pack record(s) do not match any expected packs.");
