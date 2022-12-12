@@ -196,7 +196,7 @@ namespace Microsoft.NET.Build.Tests
                 targetFramework: "net7.0");
         }
 
-        [RequiresMSBuildVersionTheory("17.4.0.41702")]
+        [RequiresMSBuildVersionTheory("17.4.0.41702", Skip = "https://github.com/dotnet/msbuild/issues/8154")]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
