@@ -34,6 +34,11 @@ namespace Microsoft.Build.Experimental
         private readonly Dictionary<string, string> _serverEnvironmentVariables;
 
         /// <summary>
+        /// The console mode we had before the build.
+        /// </summary>
+        private uint? _originalConsoleMode;
+
+        /// <summary>
         /// Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.
         /// </summary>
@@ -159,33 +164,46 @@ namespace Microsoft.Build.Experimental
 #endif
 
             CommunicationsUtilities.Trace("Executing build with command line '{0}'", descriptiveCommandLine);
-            bool serverIsAlreadyRunning = ServerIsRunning();
-            if (KnownTelemetry.BuildTelemetry != null)
+
+            try
             {
-                KnownTelemetry.BuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
-            }
-            if (!serverIsAlreadyRunning)
-            {
-                CommunicationsUtilities.Trace("Server was not running. Starting server now.");
-                if (!TryLaunchServer())
+                bool serverIsAlreadyRunning = ServerIsRunning();
+                if (KnownTelemetry.BuildTelemetry != null)
                 {
-                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
+                    KnownTelemetry.BuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
+                }
+                if (!serverIsAlreadyRunning)
+                {
+                    CommunicationsUtilities.Trace("Server was not running. Starting server now.");
+                    if (!TryLaunchServer())
+                    {
+                        _exitResult.MSBuildClientExitType = (_exitResult.MSBuildClientExitType == MSBuildClientExitType.Success) ? MSBuildClientExitType.LaunchError : _exitResult.MSBuildClientExitType;
+                        return _exitResult;
+                    }
+                }
+
+                // Check that server is not busy.
+                bool serverWasBusy = ServerWasBusy();
+                if (serverWasBusy)
+                {
+                    CommunicationsUtilities.Trace("Server is busy, falling back to former behavior.");
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
+                    return _exitResult;
+                }
+
+                // Connect to server.
+                if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : 20_000))
+                {
                     return _exitResult;
                 }
             }
-
-            // Check that server is not busy.
-            bool serverWasBusy = ServerWasBusy();
-            if (serverWasBusy)
+            catch (IOException ex) when (ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace("Server is busy, falling back to former behavior.");
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
-                return _exitResult;
-            }
-
-            // Connect to server.
-            if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : 20_000))
-            {
+                // For unknown root cause, Mutex.TryOpenExisting can sometimes throw 'Connection timed out' exception preventing to obtain the build server state through it (Running or not, Busy or not).
+                // See: https://github.com/dotnet/msbuild/issues/7993
+                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
+                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return _exitResult;
             }
 
@@ -194,18 +212,23 @@ namespace Microsoft.Build.Experimental
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
-            if (!TrySendBuildCommand())
+            if (TrySendBuildCommand())
             {
-                return _exitResult;
+                _numConsoleWritePackets = 0;
+                _sizeOfConsoleWritePackets = 0;
+
+                ReadPacketsLoop(cancellationToken);
+
+                MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
+                CommunicationsUtilities.Trace("Build finished.");
             }
 
-            _numConsoleWritePackets = 0;
-            _sizeOfConsoleWritePackets = 0;
+            if (NativeMethodsShared.IsWindows && _originalConsoleMode is not null)
+            {
+                IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+                NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
+            }
 
-            ReadPacketsLoop(cancellationToken);
-
-            MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
-            CommunicationsUtilities.Trace("Build finished.");
             return _exitResult;
         }
 
@@ -353,15 +376,15 @@ namespace Microsoft.Build.Experimental
                     if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
                     {
                         bool success;
-                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING &&
-                            (consoleMode & NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN) == NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN)
+                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING)
                         {
                             // Console is already in required state
                             success = true;
                         }
                         else
                         {
-                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING | NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN;
+                            _originalConsoleMode = consoleMode;
+                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING;
                             success = NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
                         }
 
@@ -389,7 +412,7 @@ namespace Microsoft.Build.Experimental
 
             return (acceptAnsiColorCodes: acceptAnsiColorCodes, outputIsScreen: outputIsScreen);
         }
-
+        
         private int QueryConsoleBufferWidth()
         {
             int consoleBufferWidth = -1;
@@ -453,22 +476,34 @@ namespace Microsoft.Build.Experimental
         private bool TryLaunchServer()
         {
             string serverLaunchMutexName = $@"Global\msbuild-server-launch-{_handshake.ComputeHash()}";
-            using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
-            if (!mutexCreatedNew)
-            {
-                // Some other client process launching a server and setting a build request for it. Fallback to usual msbuild app build.
-                CommunicationsUtilities.Trace("Another process launching the msbuild server, falling back to former behavior.");
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
-                return false;
-            }
-
-            string[] msBuildServerOptions = new string[] {
-                "/nologo",
-                "/nodemode:8"
-            };
 
             try
             {
+                // For unknown root cause, opening mutex can sometimes throw 'Connection timed out' exception. See: https://github.com/dotnet/msbuild/issues/7993
+                using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
+
+                if (!mutexCreatedNew)
+                {
+                    // Some other client process launching a server and setting a build request for it. Fallback to usual msbuild app build.
+                    CommunicationsUtilities.Trace("Another process launching the msbuild server, falling back to former behavior.");
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
+                    return false;
+                }
+            }
+            catch (IOException ex) when (ex is not PathTooLongException)
+            {
+                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}",  ex);
+                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
+                return false;
+            }
+
+            try
+            {
+                string[] msBuildServerOptions = new string[] {
+                    "/nologo",
+                    "/nodemode:8"
+                };
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));

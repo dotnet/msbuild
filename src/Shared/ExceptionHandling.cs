@@ -47,14 +47,12 @@ namespace Microsoft.Build.Shared
 #if CLR2COMPATIBILITY || MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
                         Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
-                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                    ? DebugUtils.DebugPath
-                    : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                DebugUtils.DebugPath;
 #endif
 
             return !string.IsNullOrEmpty(debugPath)
                     ? debugPath
-                    : Path.GetTempPath();
+                    : FileUtilities.TempFileDirectory;
         }
 
         /// <summary>

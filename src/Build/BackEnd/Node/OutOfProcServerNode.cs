@@ -67,6 +67,10 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         private Exception? _shutdownException = null;
 
+        /// <summary>
+        /// Indicate that cancel has been requested and initiated.
+        /// </summary>        
+        private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
 
         public OutOfProcServerNode(BuildCallback buildFunction)
@@ -312,7 +316,12 @@ namespace Microsoft.Build.Experimental
             _shutdownEvent.Set();
         }
 
-        private static void HandleBuildCancel() => BuildManager.DefaultBuildManager.CancelAllSubmissions();
+        private void HandleBuildCancel()
+        {
+            CommunicationsUtilities.Trace("Received request to cancel build running on MSBuild Server. MSBuild server will shutdown.}");
+            _cancelRequested = true;
+            BuildManager.DefaultBuildManager.CancelAllSubmissions();
+        }
 
         private void HandleServerNodeBuildCommandAsync(ServerNodeBuildCommand command)
         {
@@ -351,6 +360,10 @@ namespace Microsoft.Build.Experimental
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
             Thread.CurrentThread.CurrentCulture = command.Culture;
             Thread.CurrentThread.CurrentUICulture = command.UICulture;
+
+            // Reconfigure static BuildParameters.StartupDirectory to have this value
+            // same as startup directory of msbuild entry client or dotnet CLI.
+            BuildParameters.StartupDirectory = command.StartupDirectory;
 
             // Configure console configuration so Loggers can change their behavior based on Target (client) Console properties.
             ConsoleConfiguration.Provider = command.ConsoleConfiguration;
@@ -411,10 +424,10 @@ namespace Microsoft.Build.Experimental
             var response = new ServerNodeBuildResult(buildResult.exitCode, buildResult.exitType);
             SendPacket(response);
 
-            _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+            // Shutdown server if cancel was requested. This is consistent with nodes behavior.
+            _shutdownReason = _cancelRequested ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
             _shutdownEvent.Set();
         }
-
         internal sealed class RedirectConsoleWriter : StringWriter
         {
             private readonly Action<string> _writeCallback;

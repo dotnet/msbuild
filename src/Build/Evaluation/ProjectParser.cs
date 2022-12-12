@@ -181,7 +181,7 @@ namespace Microsoft.Build.Construction
                         break;
 
                     case XMakeElements.itemDefinitionGroup:
-                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement));
+                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement, _project));
                         break;
 
                     case XMakeElements.choose:
@@ -709,11 +709,11 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Parse a ProjectItemDefinitionGroupElement
         /// </summary>
-        private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element)
+        private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
             ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
-            ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, _project, _project);
+            ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, parent, _project);
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
@@ -863,6 +863,10 @@ namespace Microsoft.Build.Construction
 
                     case XMakeElements.choose:
                         child = ParseProjectChooseElement(childElement, parent, nestingDepth);
+                        break;
+
+                    case XMakeElements.itemDefinitionGroup:
+                        child = ParseProjectItemDefinitionGroupElement(childElement, parent);
                         break;
 
                     default:

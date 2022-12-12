@@ -30,7 +30,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Initialize a parented ProjectItemDefinitionGroupElement
         /// </summary>
-        internal ProjectItemDefinitionGroupElement(XmlElement xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
+        internal ProjectItemDefinitionGroupElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
             ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));

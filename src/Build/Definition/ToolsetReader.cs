@@ -12,7 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
-using error = Microsoft.Build.Shared.ErrorUtilities;
+using ErrorUtils = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -366,7 +366,7 @@ namespace Microsoft.Build.Evaluation
             out string defaultOverrideToolsVersion
             )
         {
-            error.VerifyThrowArgumentNull(toolsets, "Toolsets");
+            ErrorUtils.VerifyThrowArgumentNull(toolsets, "Toolsets");
 
             ReadEachToolset(toolsets, globalProperties, initialProperties, accumulateProperties);
 
@@ -439,16 +439,43 @@ namespace Microsoft.Build.Evaluation
                     Toolset toolset = ReadToolset(toolsVersion, globalProperties, initialPropertiesClone, accumulateProperties);
 
                     // Register toolset paths into list of immutable directories
-                    //   example: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
-                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
-                    // example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
-                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
+                    // example: C:\Windows\Microsoft.NET\Framework
+                    string frameworksPathPrefix32 = existingRootOrNull(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
+                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefix32);
+                    // example: C:\Windows\Microsoft.NET\Framework64
+                    string frameworksPathPrefix64 = existingRootOrNull(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
+                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefix64);
+                    // example: C:\Windows\Microsoft.NET\FrameworkArm64
+                    string frameworksPathPrefixArm64 = existingRootOrNull(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPathArm64")?.EvaluatedValue?.Trim());
+                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefixArm64);
 
                     if (toolset != null)
                     {
                         toolsets[toolset.ToolsVersion] = toolset;
                     }
                 }
+            }
+
+            string existingRootOrNull(string path)
+            {
+                if (!string.IsNullOrEmpty(path))
+                {
+                    try
+                    {
+                        path = Directory.GetParent(FileUtilities.EnsureNoTrailingSlash(path))?.FullName;
+
+                        if (!Directory.Exists(path))
+                        {
+                            path = null;
+                        }
+                    }
+                    catch
+                    {
+                        path = null;
+                    }
+                }
+
+                return path;
             }
         }
 

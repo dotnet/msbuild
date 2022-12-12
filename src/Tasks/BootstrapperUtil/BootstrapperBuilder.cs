@@ -1645,7 +1645,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             // the .NET Framework we are targeting.  In ideal situations, bootstrapper files will be
             // pre-signed anwyay; this is a fallback in case we ever encounter a bootstrapper that is
             // not signed.  
-            System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create("System.Security.Cryptography.SHA256CryptoServiceProvider");
+            System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                "System.Security.Cryptography.SHA256CryptoServiceProvider"
+#endif
+                );
 
             using (Stream s = fi.OpenRead())
             {

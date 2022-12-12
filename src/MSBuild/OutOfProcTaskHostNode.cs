@@ -792,7 +792,7 @@ namespace Microsoft.Build.CommandLine
 
             if (_debugCommunications)
             {
-                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(Path.GetTempPath(), @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
+                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
                 {
                     writer.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
                 }

@@ -267,6 +267,58 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when nodereuse is false.");
         }
 
+        [Fact]
+        public void ServerShouldNotStartWhenBuildIsInteractive()
+        {
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -interactive", out bool success, false, _output);
+            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+
+            success.ShouldBeTrue();
+            pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when build is interactive.");
+        }
+
+        [Fact]
+        public void PropertyMSBuildStartupDirectoryOnServer()
+        {
+            string reportMSBuildStartupDirectoryProperty = @$"
+<Project>
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+	<Target Name=""DisplayMessages"">
+        <ProcessIdTask>
+            <Output PropertyName=""PID"" TaskParameter=""Pid"" />
+        </ProcessIdTask>
+        <Message Text=""Server ID is $(PID)"" Importance=""High"" />
+		<Message Text="":MSBuildStartupDirectory:$(MSBuildStartupDirectory):"" Importance=""high"" />
+	</Target> 
+</Project>";
+
+            TransientTestFile project = _env.CreateFile("testProject.proj", reportMSBuildStartupDirectoryProperty);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            // Start on current working directory
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"/t:DisplayMessages {project.Path}", out bool success, false, _output);
+            success.ShouldBeTrue();
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+            _env.WithTransientProcess(pidOfServerProcess);
+            output.ShouldContain($@":MSBuildStartupDirectory:{Environment.CurrentDirectory}:");
+
+            // Start on transient project directory
+            _env.SetCurrentDirectory(Path.GetDirectoryName(project.Path));
+            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"/t:DisplayMessages {project.Path}", out success, false, _output);
+            int pidOfNewServerProcess = ParseNumber(output, "Server ID is ");
+            if (pidOfServerProcess != pidOfNewServerProcess)
+            {
+                // Register process to clean up (be killed) after tests ends.
+                _env.WithTransientProcess(pidOfNewServerProcess);
+            }
+            pidOfNewServerProcess.ShouldBe(pidOfServerProcess);
+            output.ShouldContain($@":MSBuildStartupDirectory:{Environment.CurrentDirectory}:");
+        }
+
         private int ParseNumber(string searchString, string toFind)
         {
             Regex regex = new(@$"{toFind}(\d+)");

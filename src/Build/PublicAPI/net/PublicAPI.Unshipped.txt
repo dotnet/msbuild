@@ -19,3 +19,6 @@ Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback
 Microsoft.Build.Experimental.OutOfProcServerNode.OutOfProcServerNode(Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback buildFunction) -> void
 Microsoft.Build.Experimental.OutOfProcServerNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
 static Microsoft.Build.Experimental.MSBuildClient.ShutdownServer(System.Threading.CancellationToken cancellationToken) -> bool
+virtual Microsoft.Build.ObjectModelRemoting.ProjectLink.GlobalPropertiesContains(string key) -> bool
+virtual Microsoft.Build.ObjectModelRemoting.ProjectLink.GlobalPropertiesCount() -> int
+virtual Microsoft.Build.ObjectModelRemoting.ProjectLink.GlobalPropertiesEnumerable() -> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>>

@@ -90,7 +90,7 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty)
+                if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
                     args.BuildEventContext = envProperty.loggingContext.BuildEventContext;

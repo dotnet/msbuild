@@ -71,6 +71,11 @@ namespace Microsoft.Build.Tasks
         /// The property copyLocalDependenciesWhenParentReferenceInGac is set to false and all the parent source items were found in the GAC.
         /// </summary>
         NoBecauseParentReferencesFoundInGAC,
+
+        /// <summary>
+        /// The "assembly" should not be copied because it is a bad image—possibly not managed, possibly not an assembly at all.
+        /// </summary>
+        NoBecauseBadImage,
     }
 
     /// <remarks>
@@ -97,6 +102,7 @@ namespace Microsoft.Build.Tasks
                 case CopyLocalState.NoBecauseReferenceFoundInGAC:
                 case CopyLocalState.NoBecauseEmbedded:
                 case CopyLocalState.NoBecauseParentReferencesFoundInGAC:
+                case CopyLocalState.NoBecauseBadImage:
                     return false;
                 default:
                     throw new InternalErrorException("Unexpected CopyLocal flag.");
