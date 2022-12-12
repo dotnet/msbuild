@@ -169,7 +169,6 @@ namespace Microsoft.NET.Build.Tests
 
         [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.NextTargetFrameworkVersion)]
         [RequiresMSBuildVersionTheory("16.8")]
-        // If this test fails when updating to a new TFM, you need to update _PreviewAnalysisLevel and _LatestAnalysisLevel in .NET.SDK.Analyzers.Targets
         public void It_defaults_preview_AnalysisLevel_to_the_next_tfm(string currentTFM, string nextTFMVersionNumber)
         {
             var testProject = new TestProject
@@ -208,7 +207,7 @@ namespace Microsoft.NET.Build.Tests
             };
             var buildResult = buildCommand.Execute();
 
-            buildResult.StdErr.Should().Be(string.Empty);
+            buildResult.StdErr.Should().Be(string.Empty, "If this test fails when updating to a new TFM, you need to update _PreviewAnalysisLevel and _LatestAnalysisLevel in Microsoft.NET.SDK.Analyzers.Targets");
             var computedEffectiveAnalysisLevel = buildCommand.GetValues()[0];
             computedEffectiveAnalysisLevel.Should().Be(nextTFMVersionNumber.ToString());
         }
