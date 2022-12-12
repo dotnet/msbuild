@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
@@ -2049,6 +2048,9 @@ namespace Microsoft.Build.UnitTests
 
     public class CopyHardAndSymbolicLink_Tests
     {
+        /// <summary>
+        /// Verify build sucessfully when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true 
+        /// </summary>
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
         {
@@ -2075,10 +2077,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.False(success);
-
+                Assert.True(success);
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
             }
             finally
             {
