@@ -13,7 +13,9 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Globalization;
 using System.Linq;
+#if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
 using System.Runtime.ExceptionServices;
+#endif
 using System.Text.RegularExpressions;
 using System.Runtime.Versioning;
 

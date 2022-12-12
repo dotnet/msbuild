@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Collections.Specialized;
 #if RUNTIME_TYPE_NETCORE
 using System.Collections.Generic;
@@ -12,6 +11,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 #else
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 #endif
 
 #nullable disable
