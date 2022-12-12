@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "warningLevelConsoleApp"+tfm, targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "warningLevelConsoleApp" + tfm, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
@@ -143,7 +143,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "analysisLevelConsoleApp"+tfm, targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "analysisLevelConsoleApp" + tfm, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
@@ -154,12 +154,13 @@ namespace Microsoft.NET.Build.Tests
             };
             var buildResult = buildCommand.Execute();
 
-                buildResult.StdErr.Should().Be(string.Empty);
+            buildResult.StdErr.Should().Be(string.Empty);
             if (analysisLevel == null)
             {
                 buildCommand.GetValues().Should().BeEmpty();
             }
-            else {
+            else
+            {
                 var computedEffectiveAnalysisLevel = buildCommand.GetValues()[0];
                 computedEffectiveAnalysisLevel.Should().Be(analysisLevel.ToString());
             }
@@ -168,6 +169,7 @@ namespace Microsoft.NET.Build.Tests
 
         [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.NextTargetFrameworkVersion)]
         [RequiresMSBuildVersionTheory("16.8")]
+        // If this test fails when updating to a new TFM, you need to update _PreviewAnalysisLevel and _LatestAnalysisLevel in .NET.SDK.Analyzers.Targets
         public void It_defaults_preview_AnalysisLevel_to_the_next_tfm(string currentTFM, string nextTFMVersionNumber)
         {
             var testProject = new TestProject
@@ -195,7 +197,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties.Add("AnalysisLevel", "preview");
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "analysisLevelPreviewConsoleApp"+currentTFM, targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "analysisLevelPreviewConsoleApp" + currentTFM, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
@@ -242,7 +244,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties.Add("AnalysisLevel", analysisLevel);
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "analysisLevelPreviewConsoleApp"+ToolsetInfo.CurrentTargetFramework+analysisLevel, targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "analysisLevelPreviewConsoleApp" + ToolsetInfo.CurrentTargetFramework + analysisLevel, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,

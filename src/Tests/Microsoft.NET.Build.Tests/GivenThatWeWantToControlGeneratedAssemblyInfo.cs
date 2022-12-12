@@ -419,7 +419,7 @@ namespace Microsoft.NET.Build.Tests
 
             if (enablePreviewFeatures && generateRequiresPreviewFeaturesAttribute)
             {
-                if (targetFramework == ToolsetInfo.NextTargetFramework)
+                if (targetFramework == ToolsetInfo.CurrentTargetFramework)
                 {
                     Assert.Equal("Preview", langVersion);
                     Assert.True(contains);
