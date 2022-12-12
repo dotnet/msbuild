@@ -201,6 +201,11 @@
         <target state="translated">Se quitará el atributo de solo lectura de "{0}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="Copy.RetryingAsSymbolicLink">
+        <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
+        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
+        <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
+      </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
         <target state="translated">MSB3025: El archivo de origen "{0}" es un directorio.  La tarea "Copy" no permite copiar directorios.</target>
@@ -3285,11 +3290,6 @@
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
         <source>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</source>
         <target state="translated">El archivo de configuración ('{0}') de AssemblyFolder especificado en Microsoft.Common.CurrentVersion.targets no es válido. Error: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Copy.ExactlyOneTypeOfLink">
-        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
-        <target state="translated">MSB3891: Se especificó "{0}" y "{1}" en el archivo de proyecto. Elija solo uno de los dos.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
