@@ -26,6 +26,7 @@ namespace Microsoft.Build.FileAccesses
 
         private object _handlersWriteLock = new object();
         private Handlers[] _handlers = Array.Empty<Handlers>();
+        private string? _tempDirectory;
 
         // Keyed on global request id
         private readonly ConcurrentDictionary<int, ManualResetEventSlim> _fileAccessCompletionWaitHandles = new();
@@ -40,12 +41,14 @@ namespace Microsoft.Build.FileAccesses
         {
             _scheduler = host.GetComponent(BuildComponentType.Scheduler) as IScheduler;
             _configCache = host.GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
+            _tempDirectory = FileUtilities.EnsureNoTrailingSlash(FileUtilities.TempFileDirectory);
         }
 
         public void ShutdownComponent()
         {
             _scheduler = null;
             _configCache = null;
+            _tempDirectory = null;
             _fileAccessCompletionWaitHandles.Clear();
         }
 
@@ -61,6 +64,12 @@ namespace Microsoft.Build.FileAccesses
 
                 ManualResetEventSlim handle = _fileAccessCompletionWaitHandles.GetOrAdd(globalRequestId, static _ => new ManualResetEventSlim());
                 handle.Set();
+            }
+            else if (_tempDirectory != null && fileAccessPath.StartsWith(_tempDirectory))
+            {
+                // Ignore the temp directory as these are related to internal MSBuild functionality and not always directly related to the execution of the project itself,
+                // so should not be exposed to handlers.
+                return;
             }
             else
             {
