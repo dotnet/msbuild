@@ -58,6 +58,7 @@ namespace Microsoft.Build.Tasks
                 FileComment = Log.GetResourceMessage("Copy.FileComment");
                 HardLinkComment = Log.GetResourceMessage("Copy.HardLinkComment");
                 RetryingAsFileCopy = Log.GetResourceMessage("Copy.RetryingAsFileCopy");
+                RetryingAsSymbolicLink = Log.GetResourceMessage("Copy.RetryingAsSymbolicLink");
                 RemovingReadOnlyAttribute = Log.GetResourceMessage("Copy.RemovingReadOnlyAttribute");
                 SymbolicLinkComment = Log.GetResourceMessage("Copy.SymbolicLinkComment");
             }
@@ -68,6 +69,7 @@ namespace Microsoft.Build.Tasks
         private static string FileComment;
         private static string HardLinkComment;
         private static string RetryingAsFileCopy;
+        private static string RetryingAsSymbolicLink;
         private static string RemovingReadOnlyAttribute;
         private static string SymbolicLinkComment;
 
@@ -274,20 +276,39 @@ namespace Microsoft.Build.Tasks
                 destinationFileExists = destinationFileState.FileExists;
             }
 
-            bool linkCreated = false;
+            bool symbolicLinkCreated = false;
+            bool hardLinkCreated = false;
             string errorMessage = string.Empty;
 
-            // If we want to create hard or symbolic links, then try that first
+            // Create hard links if UseHardlinksIfPossible is true
             if (UseHardlinksIfPossible)
             {
-                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage));
-            }
-            else if (UseSymboliclinksIfPossible)
-            {
-                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
+                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out hardLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage));
+                if(!hardLinkCreated)
+                {
+                    if(UseSymboliclinksIfPossible)
+                    {
+                        // This is a message for fallback to SymbolicLinks if HardLinks fail when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                    }
+                    else
+                    {
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                    }
+                }
             }
 
-            if (ErrorIfLinkFails && !linkCreated)
+            // Create symbolic link if UseSymboliclinksIfPossible is true and hard link is not created
+            if (!hardLinkCreated && UseSymboliclinksIfPossible)
+            {
+                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
+                if(!symbolicLinkCreated)
+                {
+                    Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                }
+            }
+
+            if (ErrorIfLinkFails && !hardLinkCreated && !symbolicLinkCreated)
             {
                 Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileState.Name, destinationFileState.Name);
                 return false;
@@ -295,7 +316,7 @@ namespace Microsoft.Build.Tasks
 
             // If the link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
-            if (!linkCreated)
+            if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
@@ -339,12 +360,6 @@ namespace Microsoft.Build.Tasks
             }
 
             linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
-
-            if (!linkCreated)
-            {
-                // This is only a message since we don't want warnings when copying to network shares etc.
-                Log.LogMessage(messageImportance, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
-            }
         }
 
         /// <summary>
@@ -653,12 +668,6 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // First check if create hard or symbolic link option is selected. If both then return an error
-            if (UseHardlinksIfPossible & UseSymboliclinksIfPossible)
-            {
-                Log.LogErrorWithCodeFromResources("Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
-                return false;
-            }
 
             if (ErrorIfLinkFails && !UseHardlinksIfPossible && !UseSymboliclinksIfPossible)
             {
