@@ -1042,12 +1042,17 @@ internal static class NativeMethods
         return null;
     }
 
-    internal static bool IsSymLink(string fullPath)
+    internal static bool ExistAndHasContent(string path)
+    {
+        var fileInfo = new FileInfo(path);
+
+        return fileInfo.Exists && (fileInfo.Length > 0 || IsSymLink(fileInfo));
+    }
+
+    internal static bool IsSymLink(FileInfo fileInfo)
     {
 #if NET
-        var fileInfo = new FileInfo(fullPath);
-
-        return fileInfo.Exists && fileInfo.Length == 0 && !string.IsNullOrEmpty(fileInfo.LinkTarget);
+        return fileInfo.Exists && !string.IsNullOrEmpty(fileInfo.LinkTarget);
 #else
         if (!IsWindows)
         {
@@ -1056,54 +1061,15 @@ internal static class NativeMethods
 
         WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
 
-        return NativeMethods.GetFileAttributesEx(fullPath, 0, ref data) &&
+        return NativeMethods.GetFileAttributesEx(fileInfo.FullName, 0, ref data) &&
                (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0 &&
                (data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT;
 #endif
     }
 
-    internal static void ReadFileThroughSymlinks(string filePath, Action<FileStream> contentConsumer)
+    internal static bool IsSymLink(string path)
     {
-        filePath = Path.GetFullPath(filePath);
-
-        if (IsSymLink(filePath))
-        {
-            using SafeFileHandle handle = OpenFileThroughSymlinks(filePath);
-            if (!handle.IsInvalid)
-            {
-                using FileStream content = new FileStream(handle, FileAccess.Read);
-                contentConsumer(content);
-            }
-        }
-        else
-        {
-            using FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
-            contentConsumer(content);
-        }
-    }
-
-    /// <summary>
-    /// Opens file for reading, if the file is symlink file - it reads the target file content.
-    /// </summary>
-    /// <param name="fullPath"></param>
-    /// <returns></returns>
-    internal static FileStream OpenReadFileThroughSymlinks(string fullPath)
-    {
-        if (IsSymLink(fullPath))
-        {
-            SafeFileHandle handle = OpenFileThroughSymlinks(fullPath);
-            if (handle.IsInvalid)
-            {
-                handle.Dispose();
-                return null;
-            }
-
-            return new FileStream(handle, FileAccess.Read);
-        }
-        else
-        {
-            return new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
-        }
+        return IsSymLink(new FileInfo(path));
     }
 
     internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
