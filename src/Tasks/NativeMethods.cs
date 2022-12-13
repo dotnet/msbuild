@@ -2,20 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.Build.Shared.FileSystem;
-
-using System.Text;
-using System.Reflection;
-using Microsoft.Build.Shared;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.ExceptionServices;
-using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Text;
+using System.Text.RegularExpressions;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -802,7 +802,7 @@ namespace Microsoft.Build.Tasks
         [DllImport("libc", SetLastError = true)]
         internal static extern int link(string oldpath, string newpath);
 
-        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage)
+        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage, TaskLoggingHelper log)
         {
             bool hardLinkCreated;
             if (NativeMethodsShared.IsWindows)
@@ -813,7 +813,7 @@ namespace Microsoft.Build.Tasks
             else
             {
                 hardLinkCreated = link(exitingFileName, newFileName) == 0;
-                errorMessage = hardLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+                errorMessage = hardLinkCreated ? null : log.GetResourceMessage("Copy.LinklibraryFailedPrefix") + Marshal.GetLastWin32Error();
             }
 
             return hardLinkCreated;

@@ -186,6 +186,11 @@
         <target state="translated">MSB3893: 無法使用連結將 "{0}" 複製到 "{1}"。</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.LinklibraryFailedPrefix">
+        <source>The link() library call failed with the following error code: </source>
+        <target state="new">The link() library call failed with the following error code: </target>
+        <note />
+      </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
         <target state="translated">無法使用連結將 "{0}" 複製到 "{1}"。改為複製檔案。{2}</target>
