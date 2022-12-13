@@ -83,12 +83,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                  (
                    '$(SelfContained)' == 'true' or
                    ('$(_IsPublishing)' == 'true' and
-                    (
-                      '$(PublishReadyToRun)' == 'true' or
-                      '$(PublishSingleFile)' == 'true' or
-                      '$(PublishAot)' == 'true'
-                    )
-                  )">true</UseCurrentRuntimeIdentifier>
+                      (
+                        '$(PublishReadyToRun)' == 'true' or
+                        '$(PublishSingleFile)' == 'true' or
+                        '$(PublishAot)' == 'true'
+                      )
+                   )
+                 )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
