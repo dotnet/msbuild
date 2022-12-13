@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("UseWPF")]
         public void It_errors_when_missing_windows_target_platform(string propertyName)
         {
-            var targetFramework = ToolsetInfo.NextTargetFramework;
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             TestProject testProject = new TestProject()
             {
                 Name = "MissingTargetPlatform",
