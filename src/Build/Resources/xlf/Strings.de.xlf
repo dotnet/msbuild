@@ -340,6 +340,11 @@
         <target state="translated">Anfangswert der Eigenschaft: $({0})="{1}", Quelle: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
+        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
+        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
+        <note>{StrBegin="MSB4067: "}</note>
+      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: Das Deaktivieren des In-Process-Knotens führt zu Leistungseinbußen bei der Verwendung von Projektcache-Plug-Ins, die Proxybuildanforderungen ausgeben.</target>
@@ -1836,7 +1841,7 @@
       </trans-unit>
       <trans-unit id="UnrecognizedChildElement">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized.</source>
-        <target state="translated">MSB4067: Das &lt;{0}&gt;-Element unterhalb des &lt;{1}&gt;-Elements ist unbekannt.</target>
+        <target state="needs-review-translation">MSB4067: Das &lt;{0}&gt;-Element unterhalb des &lt;{1}&gt;-Elements ist unbekannt.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="InvalidChildElementDueToDuplication">
