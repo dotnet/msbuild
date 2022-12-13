@@ -81,6 +81,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public void Add(FancyLoggerNode node)
         {
+            if (Children.ContainsKey(node.Id)) return;
             Children.Add(node.Id, node);
             node.Depth = Depth + 1;
             node.Parent = this;

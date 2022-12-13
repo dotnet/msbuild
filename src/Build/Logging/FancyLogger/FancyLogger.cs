@@ -111,12 +111,13 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (node == null) return;
             int lineId = node.Line?.Id ?? -1;
             if(lineId == -1) return;
-            FancyLoggerBuffer.UpdateLine(lineId, ""
+            /*FancyLoggerBuffer.UpdateLine(lineId, ""
                 + ANSIBuilder.Formatting.Color("✓ ", ANSIBuilder.Formatting.ForegroundColor.Green)
                 + ANSIBuilder.Formatting.Dim("Target: ")
                 + ANSIBuilder.Formatting.Color(e.TargetName, ANSIBuilder.Formatting.ForegroundColor.Green)
             );
-            node.Collapse();
+            node.Collapse();*/
+            FancyLoggerBuffer.DeleteLine(lineId);
         }
 
         // Task

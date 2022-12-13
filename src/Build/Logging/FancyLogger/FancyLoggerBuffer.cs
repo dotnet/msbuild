@@ -57,7 +57,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static bool AutoScrollEnabled { get; private set; }
         public static bool IsTerminated { get; private set; }
         public static int CurrentTopLineIndex { get; private set; }
-        public static int Height { get { return Console.BufferHeight; } }
+        public static int Height { get { return Console.WindowHeight; } }
         // Lines to be presented by the buffer
         private static List<FancyLoggerBufferLine> lines = new();
         public static void Initialize()
@@ -111,42 +111,8 @@ namespace Microsoft.Build.Logging.FancyLogger
         #region Scrolling
         private static void ScrollToLine(int firstLineIndex)
         {
-            /* if (firstLineIndex < 0 || firstLineIndex >= lines.Count) return;
+            if (firstLineIndex < 0 || firstLineIndex >= lines.Count) return;
             CurrentTopLineIndex = firstLineIndex;
-            int i = 0;
-            while (i < Height - 4)
-            {
-                int lineIndex = i + firstLineIndex;
-
-                if (lineIndex < lines.Count && lines[lineIndex].IsHidden)
-                {
-                    // Go to next line
-                    lineIndex++;
-                } else
-                {
-                    Console.Write(""
-                        + ANSIBuilder.Cursor.Position(i + 2, 0)
-                        + ANSIBuilder.Eraser.LineCursorToEnd()
-                        // + ((lineIndex < lines.Count && lines[lineIndex].IsHidden) ? " Hidden" : "")
-                        + ((lineIndex < lines.Count) ? ANSIBuilder.Tabulator.ForwardTab(lines[lineIndex].IdentationLevel) + lines[lineIndex].Text : "")
-                    );
-                }
-                
-                i++;
-            }
-            */
-            if (firstLineIndex < 0)
-            {
-                ScrollToLine(0);
-                return;
-            }
-            if (firstLineIndex >= lines.Count)
-            {
-                ScrollToLine(lines.Count - 1);
-                return;
-            }
-            CurrentTopLineIndex = firstLineIndex;
-
             int i = 0;
             while (i < Height - 4)
             {
