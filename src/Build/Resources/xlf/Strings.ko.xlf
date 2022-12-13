@@ -340,6 +340,11 @@
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
+        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
+        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
+        <note>{StrBegin="MSB4067: "}</note>
+      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: 프록시 빌드 요청을 내보내는 프로젝트 캐시 플러그 인을 사용할 때 inproc 노드를 사용하지 않도록 설정하면 성능이 저하됩니다.</target>
@@ -1836,7 +1841,7 @@
       </trans-unit>
       <trans-unit id="UnrecognizedChildElement">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized.</source>
-        <target state="translated">MSB4067: &lt;{1}&gt; 요소 아래의 &lt;{0}&gt; 요소를 인식할 수 없습니다.</target>
+        <target state="needs-review-translation">MSB4067: &lt;{1}&gt; 요소 아래의 &lt;{0}&gt; 요소를 인식할 수 없습니다.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="InvalidChildElementDueToDuplication">
