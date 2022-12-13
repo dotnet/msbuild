@@ -44,7 +44,7 @@
     <Compile Remove="SpanBasedStringBuilder.cs" />
     <Compile Remove="InternableString.cs" />
     <Compile Remove="WeakStringCache.Concurrent.cs" />
-   </ItemGroup>
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
     <Compile Remove="SpanBasedStringBuilder.Simple.cs" />
     <Compile Remove="InternableString.Simple.cs" />
