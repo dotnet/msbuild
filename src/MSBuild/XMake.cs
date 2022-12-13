@@ -1334,17 +1334,17 @@ namespace Microsoft.Build.CommandLine
                             string.Join(" ", commandLine);
 #endif
                         messagesToLogInBuildLoggers = GetMessagesToLogInBuildLoggers(commandLineString);
-                    }
 
-                    // Log a message for every response file and include it in log
-                    foreach (var responseFilePath in s_includedResponseFiles)
-                    {
-                        messagesToLogInBuildLoggers.Add(
-                            new BuildManager.DeferredBuildMessage(
-                                String.Format("Included response file: {0}", responseFilePath),
-                                MessageImportance.Normal,
-                                responseFilePath
-                            ));
+                        // Log a message for every response file and include it in log
+                        foreach (var responseFilePath in s_includedResponseFiles)
+                        {
+                            messagesToLogInBuildLoggers.Add(
+                                new BuildManager.DeferredBuildMessage(
+                                    String.Format("Included response file: {0}", responseFilePath),
+                                    MessageImportance.Normal,
+                                    responseFilePath
+                                ));
+                        }
                     }
 
                     buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
