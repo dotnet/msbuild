@@ -67,6 +67,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SelfContained>$(PublishSelfContained)</SelfContained>
   </PropertyGroup>
 
+  <!-- Automatically infer the RuntimeIdentifier for properties that require it.
+  SelfContained without a RID is a no-op and semantically hints towards the fact that it can change the behavior of build, publish, and friends.
+  ... So, we infer the RID for SelfContained regardless of the context.
+
+  The other publish properties are specifically labelled Publish* and don't 'NEED' their RID unless we are doing a publish, so the RID inference
+  ... for these properties is limited to publishing only scenarios.
+
+  Finally, library projects and non-executable projects have awkward interactions here so they are excluded.-->
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
     <UseCurrentRuntimeIdentifier Condition="
                  '$(RuntimeIdentifier)' == '' and
@@ -74,6 +82,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  '$(IsRidAgnostic)' != 'true' and
                  ('$(_IsPublishing)' == 'true' or '$(SelfContained)' == 'true') and
                   (
+                    '$(SelfContained)' == 'true' or
                     '$(PublishReadyToRun)' == 'true' or
                     '$(PublishSingleFile)' == 'true' or
                     '$(PublishAot)' == 'true'
@@ -175,7 +184,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
 
     <!-- The following RID errors are asserts, and we don't expect them to ever occur. The error message is added as a safeguard.-->
-    <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
+    <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == '''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="SelfContained"/>
 

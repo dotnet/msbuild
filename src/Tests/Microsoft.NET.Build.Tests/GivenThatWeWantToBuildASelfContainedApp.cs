@@ -408,13 +408,13 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("--p:PublishReadyToRun=true")]
         [InlineData("-p:PublishSingleFile=true")]
         [InlineData("-p:PublishSelfContained=true")]
-        [InlineData("-p:SelfContained=true")]
+        [InlineData("-p:PublishAot=true")]
         public void It_builds_without_implicit_rid_with_RuntimeIdentifier_specific_during_publish_only_properties(string property)
         {
             var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = new TestProject()
             {
-                Name = "PublishImplicitRid",
+                IsExe = true,
                 TargetFrameworks = tfm,
             };
             testProject.RecordProperties("RuntimeIdentifier");
