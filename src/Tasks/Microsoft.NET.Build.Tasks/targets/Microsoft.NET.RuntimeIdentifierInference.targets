@@ -80,12 +80,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                  '$(RuntimeIdentifier)' == '' and
                  '$(_IsExecutable)' == 'true' and '$(IsTestProject)' != 'true' and
                  '$(IsRidAgnostic)' != 'true' and
-                 ('$(_IsPublishing)' == 'true' or '$(SelfContained)' == 'true') and
-                  (
-                    '$(SelfContained)' == 'true' or
-                    '$(PublishReadyToRun)' == 'true' or
-                    '$(PublishSingleFile)' == 'true' or
-                    '$(PublishAot)' == 'true'
+                 (
+                   '$(SelfContained)' == 'true' or
+                   ('$(_IsPublishing)' == 'true' and
+                    (
+                      '$(PublishReadyToRun)' == 'true' or
+                      '$(PublishSingleFile)' == 'true' or
+                      '$(PublishAot)' == 'true'
+                    )
                   )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
@@ -184,7 +186,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
 
     <!-- The following RID errors are asserts, and we don't expect them to ever occur. The error message is added as a safeguard.-->
-    <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == '''"
+    <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="SelfContained"/>
 

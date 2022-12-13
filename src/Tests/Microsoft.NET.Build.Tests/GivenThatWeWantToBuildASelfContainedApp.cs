@@ -405,10 +405,10 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("--p:PublishReadyToRun=true")]
-        [InlineData("-p:PublishSingleFile=true")]
-        [InlineData("-p:PublishSelfContained=true")]
-        [InlineData("-p:PublishAot=true")]
+        [InlineData("PublishReadyToRun")]
+        [InlineData("PublishSingleFile")]
+        [InlineData("PublishSelfContained")]
+        [InlineData("PublishAot")]
         public void It_builds_without_implicit_rid_with_RuntimeIdentifier_specific_during_publish_only_properties(string property)
         {
             var tfm = ToolsetInfo.CurrentTargetFramework;
@@ -417,12 +417,13 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true,
                 TargetFrameworks = tfm,
             };
+            testProject.AdditionalProperties[property] = "true";
             testProject.RecordProperties("RuntimeIdentifier");
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"ItBuildsWithoutImplicitRIDOnRIDRequiringPropertiesDuringPublish_{property}");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: property);
 
             var buildCommand = new DotnetBuildCommand(testAsset);
             buildCommand
-               .Execute(property)
+               .Execute()
                .Should()
                .Pass();
 
