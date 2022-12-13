@@ -8,7 +8,7 @@ MSBuild can be successfully built on Windows, OS X 10.13, Ubuntu 14.04, and Ubun
 
 ## Tests
 
-Follow [Running Unit Tests](Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md#running-unit-tests) section of the .NET Framework guide
+Follow [Running Unit Tests](Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md#running-unit-tests) section of the developer guide chapter for .NET Framework
 
 # Unix
 
