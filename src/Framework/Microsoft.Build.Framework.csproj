@@ -9,7 +9,6 @@
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <PackageValidationBaselineVersion>17.3.2</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <ItemGroup>
