@@ -291,7 +291,7 @@ namespace Microsoft.DotNet.Cli
                 }
                 else if (command.Name.Equals(NuGetCommandParser.GetCommand().Name))
                 {
-                    NuGetCommand.Run(helpArgs);
+                    NuGetCommand.Run(context.ParseResult);
                 }
                 else if (command.Name.Equals(MSBuildCommandParser.GetCommand().Name))
                 {

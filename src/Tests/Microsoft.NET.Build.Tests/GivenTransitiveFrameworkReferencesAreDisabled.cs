@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties["DisableTransitiveFrameworkReferenceDownloads"] = "True";
             testProject.AdditionalProperties["RestorePackagesPath"] = nugetPackagesFolder;
 
-            //  Set packs folder to nonexistant folder so the project won't use installed targeting or runtime packs
+            //  Set packs folder to nonexistent folder so the project won't use installed targeting or runtime packs
             testProject.AdditionalProperties["NetCoreTargetingPackRoot"] = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testName, identifier: referenceAspNet.ToString());
@@ -136,7 +136,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties["DisableTransitiveFrameworkReferenceDownloads"] = "True";
             testProject.AdditionalProperties["RestorePackagesPath"] = nugetPackagesFolder;
 
-            //  Set packs folder to nonexistant folder so the project won't use installed targeting or runtime packs
+            //  Set packs folder to nonexistent folder so the project won't use installed targeting or runtime packs
             testProject.AdditionalProperties["NetCoreTargetingPackRoot"] = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             testProject.ReferencedProjects.Add(referencedProject);

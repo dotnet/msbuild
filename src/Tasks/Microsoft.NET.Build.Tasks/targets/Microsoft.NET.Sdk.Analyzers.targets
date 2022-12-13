@@ -22,8 +22,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <_NoneAnalysisLevel>4.0</_NoneAnalysisLevel>
     <!-- When the base TFM of the platform bumps, these must be bumped as well. Preview should always be the 'next' TFM. -->
-    <_LatestAnalysisLevel>7.0</_LatestAnalysisLevel>
-    <_PreviewAnalysisLevel>8.0</_PreviewAnalysisLevel>
+    <_LatestAnalysisLevel>8.0</_LatestAnalysisLevel>
+    <_PreviewAnalysisLevel>9.0</_PreviewAnalysisLevel>
 
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
                               '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And

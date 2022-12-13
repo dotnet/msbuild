@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tests
             var exe = Path.Combine( //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
-                ToolsetInfo.NextTargetFramework,
+                ToolsetInfo.CurrentTargetFramework,
                 "CSConsoleApp.exe");
 
             var runCommand = new RunExeCommand(Log, exe);
@@ -60,7 +60,7 @@ namespace Microsoft.NET.Build.Tests
         [FullMSBuildOnlyFact]
         public void It_builds_and_runs_with_package_reference()
         {
-            var targetFramework = ToolsetInfo.NextTargetFramework + "-windows";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework + "-windows";
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource()

@@ -13,21 +13,21 @@ namespace Microsoft.DotNet.ApiCompat
     internal sealed class ApiCompatServiceProvider
     {
         private readonly Lazy<ISuppressionEngine> _suppressionEngine;
-        private readonly Lazy<ICompatibilityLogger> _compatibilityLogger;
+        private readonly Lazy<ISuppressableLog> _compatibilityLogger;
         private readonly Lazy<IApiCompatRunner> _apiCompatRunner;
 
-        internal ApiCompatServiceProvider(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
+        internal ApiCompatServiceProvider(Func<ISuppressionEngine, ISuppressableLog> logFactory,
             Func<ISuppressionEngine> suppressionEngineFactory,
-            Func<ICompatibilityLogger, IRuleFactory> ruleFactory)
+            Func<ISuppressableLog, IRuleFactory> ruleFactory)
         {
             _suppressionEngine = new Lazy<ISuppressionEngine>(suppressionEngineFactory);
-            _compatibilityLogger = new Lazy<ICompatibilityLogger>(() => logFactory(SuppressionEngine));
+            _compatibilityLogger = new Lazy<ISuppressableLog>(() => logFactory(SuppressionEngine));
             _apiCompatRunner = new Lazy<IApiCompatRunner>(() =>
-                new ApiCompatRunner(CompatibilityLogger, SuppressionEngine, new ApiComparerFactory(ruleFactory(CompatibilityLogger)), new AssemblySymbolLoaderFactory()));
+                new ApiCompatRunner(SuppressableLog, SuppressionEngine, new ApiComparerFactory(ruleFactory(SuppressableLog)), new AssemblySymbolLoaderFactory()));
         }
 
         public ISuppressionEngine SuppressionEngine => _suppressionEngine.Value;
-        public ICompatibilityLogger CompatibilityLogger => _compatibilityLogger.Value;
+        public ISuppressableLog SuppressableLog => _compatibilityLogger.Value;
         public IApiCompatRunner ApiCompatRunner => _apiCompatRunner.Value;
     }
 }

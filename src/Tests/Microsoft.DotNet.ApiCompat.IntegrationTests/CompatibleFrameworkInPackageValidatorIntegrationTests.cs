@@ -25,9 +25,9 @@ namespace Microsoft.DotNet.ApiCompat.IntegrationTests
         {
         }
 
-        private (TestLogger, CompatibleFrameworkInPackageValidator) CreateLoggerAndValidator()
+        private (SuppressableTestLog, CompatibleFrameworkInPackageValidator) CreateLoggerAndValidator()
         {
-            TestLogger log = new();
+            SuppressableTestLog log = new();
             CompatibleFrameworkInPackageValidator validator = new(log,
                 new ApiCompatRunner(log,
                     new SuppressionEngine(),
@@ -64,7 +64,7 @@ namespace PackageValidationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = Package.Create(packCommand.GetNuGetPackage(), null);
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 
@@ -105,7 +105,7 @@ namespace PackageValidationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = Package.Create(packCommand.GetNuGetPackage(), null);
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 
