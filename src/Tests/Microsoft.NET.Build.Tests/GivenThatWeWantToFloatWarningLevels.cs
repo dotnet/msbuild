@@ -69,10 +69,10 @@ namespace Microsoft.NET.Build.Tests
             computedWarningLevel.Should().Be(parsedWarningLevel.ToString());
         }
 
-        [InlineData(1, 1)]
-        [InlineData(null, 7)]
+        [InlineData(1, "1")]
+        [InlineData(null, ToolsetInfo.CurrentTargetFrameworkVersion)]
         [RequiresMSBuildVersionTheory("16.8")]
-        public void It_always_accepts_user_defined_WarningLevel(int? warningLevel, int expectedWarningLevel)
+        public void It_always_accepts_user_defined_WarningLevel(int? warningLevel, string expectedWarningLevel)
         {
             var testProject = new TestProject
             {
@@ -110,7 +110,7 @@ namespace Microsoft.NET.Build.Tests
             var buildResult = buildCommand.Execute();
             var computedWarningLevel = buildCommand.GetValues()[0];
             buildResult.StdErr.Should().Be(string.Empty);
-            computedWarningLevel.Should().Be(expectedWarningLevel.ToString());
+            computedWarningLevel.Should().Be(((int)float.Parse(expectedWarningLevel)).ToString());
         }
 
         [InlineData(targetFrameworkNet6, "6.0")]
