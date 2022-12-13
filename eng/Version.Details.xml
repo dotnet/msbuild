@@ -101,9 +101,9 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>9cbf44b7c192cf064a82934bbf479a93a1953c26</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.5.0-preview.3.126">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.5.0-preview.3.127">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>31f2a1cb6fe3dababe67cdb84e9d6ddb9e3ace04</Sha>
+      <Sha>45751f85596108166f5428f8fe9f05fafd52b880</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.5.0-preview-20221213-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
