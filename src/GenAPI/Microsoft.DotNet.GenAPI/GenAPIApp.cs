@@ -91,7 +91,8 @@ namespace Microsoft.DotNet.GenAPI
                 .Add<ImplicitSymbolsFilter>()
                 .Add(new SymbolAccessibilityBasedFilter(
                     context.IncludeVisibleOutsideOfAssembly,
-                    /*IncludeEffectivelyPrivateSymbols*/true));
+                    includeEffectivelyPrivateSymbols: true,
+                    includeExplicitInterfaceImplementationSymbols: true));
 
             if (context.ExcludeAttributesFiles != null)
             {

@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         {
             var compositeFilter = new CompositeFilter()
                 .Add<ImplicitSymbolsFilter>()
-                .Add(new SymbolAccessibilityBasedFilter(true, true));
+                .Add(new SymbolAccessibilityBasedFilter(true, true, true));
             _csharpFileBuilder = new CSharpFileBuilder(compositeFilter, _stringWriter, _csharpSyntaxWriter, MetadataReferences);
         }
 
@@ -585,6 +585,29 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         public override int GetHashCode() { throw null; }
                         public static bool operator ==(Car lhs, Car rhs) { throw null; }
                         public static bool operator !=(Car lhs, Car rhs) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestExplicitInterfaceImplementationMethodGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public abstract class MemoryManager : System.IDisposable
+                    {
+                        void System.IDisposable.Dispose() { }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public abstract partial class MemoryManager : System.IDisposable
+                    {
+                        void System.IDisposable.Dispose() { }
                     }
                 }
                 """);

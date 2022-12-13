@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.GenAPI
         /// </summary>
         /// <param name="namespaces">List of namespaces to be sorted.</param>
         /// <returns>Returns namespaces in sorted order.</returns>
-        public static IEnumerable<INamespaceSymbol> Order(IEnumerable<INamespaceSymbol> namespaces)
+        public static IEnumerable<INamespaceSymbol> Order(this IEnumerable<INamespaceSymbol> namespaces)
         {
             return namespaces.OrderBy(s => s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase);
         }
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.GenAPI
         /// </summary>
         /// <param name="namespaces">List of TypeMembers to be sorted.</param>
         /// <returns>Returns TypeMembers in sorted order.</returns>
-        public static IEnumerable<T> Order<T>(IEnumerable<T> symbols) where T : ITypeSymbol
+        public static IEnumerable<T> Order<T>(this IEnumerable<T> symbols) where T : ITypeSymbol
         {
             return symbols.OrderBy(s => s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase);
         }
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.GenAPI
         /// </summary>
         /// <param name="namespaces">List of Members to be sorted.</param>
         /// <returns>Returns Members in sorted order.</returns>
-        public static IEnumerable<ISymbol> Order(IEnumerable<ISymbol> members)
+        public static IEnumerable<ISymbol> Order(this IEnumerable<ISymbol> members)
         {
             if (members is IOrderedEnumerable<ITypeSymbol> orderedTypeDefinitionMembers)
             {
