@@ -1083,11 +1083,6 @@ namespace Microsoft.Build.CommandLine
         private const string msbuildLogFileName = "msbuild.log";
 
         /// <summary>
-        /// Messages to be logged into loggrers
-        /// </summary>
-        private static IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = Enumerable.Empty<BuildManager.DeferredBuildMessage>();
-
-        /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
         /// <returns>true, if build succeeds</returns>
@@ -1324,6 +1319,8 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
+                    List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
                     BuildResultCode? result = null;
@@ -1340,10 +1337,9 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // Log a message for every response file and include it in log
-                    List<BuildManager.DeferredBuildMessage> messagesToBuildInLoggersList = messagesToLogInBuildLoggers.ToList();
-                    foreach (var responseFilePath in s_includedResponseFiles.ToList())
+                    foreach (var responseFilePath in s_includedResponseFiles)
                     {
-                        messagesToBuildInLoggersList.Add(
+                        messagesToLogInBuildLoggers.Add(
                             new BuildManager.DeferredBuildMessage(
                                 String.Format("Included response file: {0}", responseFilePath),
                                 MessageImportance.Normal,
@@ -1351,8 +1347,7 @@ namespace Microsoft.Build.CommandLine
                             ));
                     }
 
-
-                    buildManager.BeginBuild(parameters, messagesToBuildInLoggersList);
+                    buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
 
                     Exception exception = null;
                     try
@@ -1504,7 +1499,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
+        private static List<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
             List<BuildManager.DeferredBuildMessage> messages = new()
             {
