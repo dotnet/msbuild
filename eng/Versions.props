@@ -199,4 +199,9 @@
     <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)/</_DotNetHiveRoot>
     <DotNetExe>$(_DotNetHiveRoot)dotnet$(ExeExtension)</DotNetExe>
   </PropertyGroup>
+
+  <!-- Workaround since arcade default version property didn't get updated when property was renamed -->
+  <PropertyGroup Condition="'$(MicrosoftTemplateEngineAuthoringTasksVersion)' == ''">
+    <MicrosoftTemplateEngineAuthoringTasksVersion>8.0.100-alpha.1.22607.1</MicrosoftTemplateEngineAuthoringTasksVersion>
+  </PropertyGroup>
 </Project>
