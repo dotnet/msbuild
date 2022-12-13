@@ -167,7 +167,8 @@
     <value>Language</value>
   </data>
   <data name="MissingRequiredParameter" xml:space="preserve">
-    <value>Mandatory option '{0}' is missing for the template '{1}'.</value>
+    <value>Missing mandatory option(s) for the template '{1}': {0}.</value>
+    <comment>{0} - comma-separated list of missing options, each option is quoted.</comment>
   </data>
   <data name="MountPointFactories" xml:space="preserve">
     <value>Mount Point Factories</value>
@@ -806,5 +807,11 @@ The header is followed by the list of parameters and their errors (might be seve
   </data>
   <data name="Generic_CommandHints_List" xml:space="preserve">
     <value>To list installed templates, run:</value>
+  </data>
+  <data name="OperationCancelled" xml:space="preserve">
+    <value>The operation was cancelled.</value>
+  </data>
+  <data name="UnexpectedResult" xml:space="preserve">
+    <value>Template generation ended with unexpected result: '{0}'. Details: {1}</value>
   </data>
 </root>

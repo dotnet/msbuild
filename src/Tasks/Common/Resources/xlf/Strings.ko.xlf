@@ -142,6 +142,11 @@
         <target state="translated">NETSDK1099: 실행 가능한 애플리케이션의 경우에만 단일 파일에 게시할 수 있습니다.</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
+      <trans-unit id="CannotHaveSolutionLevelOutputPath">
+        <source>NETSDK1194: The "--output" option isn't supported when building a solution.</source>
+        <target state="new">NETSDK1194: The "--output" option isn't supported when building a solution.</target>
+        <note>{StrBegin="NETSDK1194: "}</note>
+      </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
         <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</source>
         <target state="translated">NETSDK1134: 특정 RuntimeIdentifier를 사용한 솔루션 빌드는 지원되지 않습니다. 단일 RID에 대해 게시하려면 대신 개별 프로젝트 수준에서 RID를 지정하세요.</target>

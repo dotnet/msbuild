@@ -7,15 +7,16 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
     public class AssemblyIdentityMustMatch : IRule
     {
-        private readonly ICompatibilityLogger _log;
+        private readonly ISuppressableLog _log;
         private readonly RuleSettings _settings;
 
-        public AssemblyIdentityMustMatch(ICompatibilityLogger log,
+        public AssemblyIdentityMustMatch(ISuppressableLog log,
             RuleSettings settings,
             IRuleRegistrationContext context)
         {

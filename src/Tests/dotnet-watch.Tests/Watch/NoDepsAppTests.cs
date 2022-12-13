@@ -1,0 +1,74 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace Microsoft.DotNet.Watcher.Tests
+{
+    public class NoDepsAppTests : DotNetWatchTestBase
+    {
+        private const string AppName = "WatchNoDepsApp";
+
+        public NoDepsAppTests(ITestOutputHelper logger)
+            : base(logger)
+        {
+        }
+
+        [Fact]
+        public async Task RestartProcessOnFileChange()
+        {
+            var testAsset = TestAssets.CopyTestAsset(AppName)
+                .WithSource()
+                .Path;
+
+            await App.StartWatcherAsync(testAsset, new[] { "--no-exit" });
+            var processIdentifier = await App.ReadProcessIdentifierFromOutput();
+
+            // Then wait for it to restart when we change a file
+            var fileToChange = Path.Combine(testAsset, "Program.cs");
+            var programCs = File.ReadAllText(fileToChange);
+            File.WriteAllText(fileToChange, programCs);
+
+            await App.AssertRestarted();
+            Assert.DoesNotContain(App.Process.Output, l => l.StartsWith("Exited with error code"));
+
+            var processIdentifier2 = await App.ReadProcessIdentifierFromOutput();
+            Assert.NotEqual(processIdentifier, processIdentifier2);
+        }
+
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29046")]
+        public async Task RestartProcessThatTerminatesAfterFileChange()
+        {
+            var testAsset = TestAssets.CopyTestAsset(AppName)
+                .WithSource()
+                .Path;
+
+            await App.StartWatcherAsync(testAsset);
+            var processIdentifier = await App.ReadProcessIdentifierFromOutput();
+            await App.AssertExited(); // process should exit after run
+            await App.AssertWaitingForFileChange();
+
+            var fileToChange = Path.Combine(testAsset, "Program.cs");
+
+            try
+            {
+                File.SetLastWriteTime(fileToChange, DateTime.Now);
+                await App.AssertRestarted();
+            }
+            catch
+            {
+                // retry
+                File.SetLastWriteTime(fileToChange, DateTime.Now);
+                await App.AssertRestarted();
+            }
+
+            var processIdentifier2 = await App.ReadProcessIdentifierFromOutput();
+            Assert.NotEqual(processIdentifier, processIdentifier2);
+            await App.AssertExited(); // process should exit after run
+        }
+    }
+}

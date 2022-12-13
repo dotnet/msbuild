@@ -30,7 +30,7 @@ MVC ViewStart                                 viewstart                   [C#]  
 NuGet Config                                  nugetconfig,nuget.config                Config                          
 NUnit 3 Test Item                             nunit-test                  [C#],F#,VB  Test/NUnit                      
 NUnit 3 Test Project                          nunit                       [C#],F#,VB  Test/NUnit                      
-NUnit Playwright Test Project                 NUnit-playwright            [C#]        Test/NUnit/Playwright           
+NUnit Playwright Test Project                 nunit-playwright            [C#]        Test/NUnit/Playwright           
 Protocol Buffer File                          proto                                   Web/gRPC                        
 Razor Class Library                           razorclasslib               [C#]        Web/Razor/Library               
 Razor Component                               razorcomponent              [C#]        Web/ASP.NET                     

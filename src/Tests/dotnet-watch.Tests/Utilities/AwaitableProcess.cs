@@ -24,7 +24,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         private BufferBlock<string> _source;
         private ITestOutputHelper _logger;
         private TaskCompletionSource<int> _exited;
-        private bool _started;
         private bool _disposed;
 
         public AwaitableProcess(DotnetCommand spec, ITestOutputHelper logger)
@@ -70,7 +69,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             WriteTestOutput($"{DateTime.Now}: starting process: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
             _process.Start();
-            _started = true;
             _process.BeginErrorReadLine();
             _process.BeginOutputReadLine();
             WriteTestOutput($"{DateTime.Now}: process started: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
@@ -151,7 +149,15 @@ namespace Microsoft.DotNet.Watcher.Tools
             _process.WaitForExit();
             _source.Complete();
             _exited.TrySetResult(_process.ExitCode);
-            WriteTestOutput($"Process {_process.Id} has exited");
+
+            try
+            {
+                WriteTestOutput($"Process {_process.Id} has exited");
+            }
+            catch
+            {
+                // test might not be running anymore
+            }
         }
 
         public void Dispose()
@@ -165,18 +171,35 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             if (_process != null)
             {
-                if (_started && !_process.HasExited)
+                try
                 {
                     _process.Kill(entireProcessTree: true);
                 }
+                catch
+                {
+                }
 
-                _process.CancelErrorRead();
-                _process.CancelOutputRead();
+                try
+                {
+                    _process.CancelErrorRead();
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    _process.CancelOutputRead();
+                }
+                catch
+                {
+                }
 
                 _process.ErrorDataReceived -= OnData;
                 _process.OutputDataReceived -= OnData;
                 _process.Exited -= OnExit;
                 _process.Dispose();
+                _process = null;
             }
         }
     }

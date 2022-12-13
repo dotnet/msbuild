@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
                 }
             }
 
-            Func<ISuppressionEngine, MSBuildCompatibilityLogger> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
+            Func<ISuppressionEngine, SuppressableMSBuildLog> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
             ValidatePackage.Run(logFactory,
                 GenerateSuppressionFile,
                 SuppressionFiles,

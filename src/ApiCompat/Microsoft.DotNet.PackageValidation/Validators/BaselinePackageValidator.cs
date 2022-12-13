@@ -17,10 +17,10 @@ namespace Microsoft.DotNet.PackageValidation.Validators
     /// </summary>
     public class BaselinePackageValidator : IPackageValidator
     {
-        private readonly ICompatibilityLogger _log;
+        private readonly ISuppressableLog _log;
         private readonly IApiCompatRunner _apiCompatRunner;
 
-        public BaselinePackageValidator(ICompatibilityLogger log,
+        public BaselinePackageValidator(ISuppressableLog log,
             IApiCompatRunner apiCompatRunner)
         {
             _log = log;

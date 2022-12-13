@@ -199,7 +199,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-      <TargetPlatformVersion Condition="'@(_ValidTargetPlatformVersion)' != '' and '@(_ValidTargetPlatformVersion->Count())' == '1' and '@(_ValidTargetPlatformVersion)' != '$(TargetPlatformVersion)'">@(_ValidTargetPlatformVersion)</TargetPlatformVersion>
+      <TargetPlatformVersion Condition="'@(_ValidTargetPlatformVersion)' != '' and '@(_ValidTargetPlatformVersion->Distinct()->Count())' == '1' and '@(_ValidTargetPlatformVersion)' != '$(TargetPlatformVersion)'">@(_ValidTargetPlatformVersion->Distinct())</TargetPlatformVersion>
     </PropertyGroup>
   </Target>
 

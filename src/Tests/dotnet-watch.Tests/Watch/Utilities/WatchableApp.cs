@@ -7,12 +7,13 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.Watcher.Tools
+namespace Microsoft.DotNet.Watcher.Tests
 {
     internal sealed class WatchableApp : IDisposable
     {
@@ -24,13 +25,12 @@ namespace Microsoft.DotNet.Watcher.Tools
         private const string WaitingForFileChangeMessage = "dotnet watch ⏳ Waiting for a file to change";
         private const string WatchFileChanged = "dotnet watch ⌚ File changed:";
 
-        private readonly ITestOutputHelper _logger;
+        public readonly ITestOutputHelper Logger;
         private bool _prepared;
 
-        public WatchableApp(string sourceDirectory, ITestOutputHelper logger)
+        public WatchableApp(ITestOutputHelper logger)
         {
-            SourceDirectory = sourceDirectory;
-            _logger = logger;
+            Logger = logger;
         }
 
         public AwaitableProcess Process { get; private set; }
@@ -38,10 +38,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         public List<string> DotnetWatchArgs { get; } = new List<string>();
 
         public Dictionary<string, string> EnvironmentVariables { get; } = new Dictionary<string, string>();
-
-        public string SourceDirectory { get; }
-
-        public string WorkingDirectory { get; set; }
 
         public bool UsePollingWatcher { get; set; }
 
@@ -82,7 +78,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public async Task<string> ReadProcessIdentifierFromOutput()
             => await AssertOutputLineStartsWith("Process identifier =");
 
-        public void Start(IEnumerable<string> arguments, [CallerMemberName] string name = null)
+        public void Start(IEnumerable<string> arguments, string workingDirectory, [CallerMemberName] string name = null)
         {
             var args = new List<string>
             {
@@ -91,10 +87,11 @@ namespace Microsoft.DotNet.Watcher.Tools
             args.AddRange(DotnetWatchArgs);
             args.AddRange(arguments);
 
-            var commandSpec = new DotnetCommand(_logger, args.ToArray())
+            var commandSpec = new DotnetCommand(Logger, args.ToArray())
             {
-                WorkingDirectory = WorkingDirectory ?? SourceDirectory,
+                WorkingDirectory = workingDirectory,
             };
+
             commandSpec.WithEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "true");
             commandSpec.WithEnvironmentVariable("__DOTNET_WATCH_RUNNING_AS_TEST", "true");
 
@@ -103,39 +100,40 @@ namespace Microsoft.DotNet.Watcher.Tools
                 commandSpec.WithEnvironmentVariable(env.Key, env.Value);
             }
 
-            Process = new AwaitableProcess(commandSpec, _logger);
+            Process = new AwaitableProcess(commandSpec, Logger);
             Process.Start();
         }
 
-        public Task StartWatcherAsync([CallerMemberName] string name = null)
-            => StartWatcherAsync(Array.Empty<string>(), name);
-
-        public void Prepare()
+        public void Prepare(string projectRootPath)
         {
             if (_prepared)
             {
                 return;
             }
 
-            var buildCommand = new BuildCommand(_logger, SourceDirectory);
+            var buildCommand = new BuildCommand(Logger, projectRootPath);
             buildCommand.Execute().Should().Pass();
 
             _prepared = true;
         }
 
-        public async Task StartWatcherAsync(string[] arguments, [CallerMemberName] string name = null)
+        public async Task StartWatcherAsync(string projectRootPath, IEnumerable<string> arguments = null, string workingDirectory = null, [CallerMemberName] string name = null)
         {
-            Prepare();
+            Prepare(projectRootPath);
 
-            var args = new[] { "run", "--" }.Concat(arguments);
-            Start(args, name);
+            var args = new[] { "run", "--" };
+            if (arguments != null)
+            {
+                args = args.Concat(arguments).ToArray();
+            }
+
+            Start(args, workingDirectory ?? projectRootPath, name);
 
             await AssertOutputLineStartsWith(WatchStartedMessage);
         }
 
         public void Dispose()
         {
-            _logger?.WriteLine("Disposing WatchableApp");
             Process?.Dispose();
         }
     }

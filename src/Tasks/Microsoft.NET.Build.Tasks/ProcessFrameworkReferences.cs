@@ -610,10 +610,13 @@ namespace Microsoft.NET.Build.Tasks
                 packVersion = RuntimeFrameworkVersion;
             }
 
-            // We need to download the runtime pack
-            TaskItem runtimePackToDownload = new TaskItem(runtimePackName);
-            runtimePackToDownload.SetMetadata(MetadataKeys.Version, packVersion);
-            packagesToDownload.Add(runtimePackToDownload);
+            if (EnableRuntimePackDownload)
+            {
+                // We need to download the runtime pack
+                TaskItem runtimePackToDownload = new TaskItem(runtimePackName);
+                runtimePackToDownload.SetMetadata(MetadataKeys.Version, packVersion);
+                packagesToDownload.Add(runtimePackToDownload);
+            }
 
             var newItem = new TaskItem(runtimePackName);
             newItem.SetMetadata(MetadataKeys.NuGetPackageId, runtimePackName);

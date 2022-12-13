@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.GenAPI.Tool
                 "If specified - method bodies should throw PlatformNotSupportedException, else `throw null`.");
 
             Option<bool> includeVisibleOutsideOfAssemblyOption = new("--include-visible-outside",
-                "Include all API's not just public APIs. The default is public only.");
+                "Include internal API's. Default is false.");
 
             RootCommand rootCommand = new("Microsoft.DotNet.GenAPI")
             {
