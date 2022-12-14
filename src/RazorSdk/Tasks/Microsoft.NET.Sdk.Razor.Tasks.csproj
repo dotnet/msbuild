@@ -101,6 +101,7 @@
   </Target>
 
   <Target Name="CopyAdditionalFilesToLayout"
+          Condition="'$(TargetFramework)' == ''"
           DependsOnTargets="PrepareAdditionalFilesToLayout"
           AfterTargets="Build" Inputs="@(LayoutFile)"
           Outputs="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
