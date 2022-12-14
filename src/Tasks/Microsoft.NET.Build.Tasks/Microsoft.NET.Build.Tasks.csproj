@@ -57,6 +57,7 @@
     <ProjectReference Include="..\..\ApiCompat\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\ApiCompat\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\ApiCompat\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Microsoft.DotNet.ApiSymbolExtensions\Microsoft.DotNet.ApiSymbolExtensions.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 

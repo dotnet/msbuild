@@ -23,6 +23,7 @@
       "src\\Layout\\tool_msbuild\\tool_msbuild.csproj",
       "src\\Layout\\tool_nuget\\tool_nuget.csproj",
       "src\\Layout\\toolset-tasks\\toolset-tasks.csproj",
+      "src\\Microsoft.DotNet.ApiSymbolExtensions\\Microsoft.DotNet.ApiSymbolExtensions.csproj",
       "src\\Microsoft.DotNet.TemplateLocator\\Microsoft.DotNet.TemplateLocator.csproj",
       "src\\Microsoft.Win32.Msi\\Microsoft.Win32.Msi.csproj",
       "src\\RazorSdk\\Tasks\\Microsoft.NET.Sdk.Razor.Tasks.csproj",
