@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,7 +25,7 @@ namespace Microsoft.DotNet.GenAPI
         /// <inheritdoc />
         public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
-            node = node.WithBody(GetEmptyBody(true))
+            node = node.WithBody(GetEmptyBody())
                        .WithParameterList(node.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
             return base.VisitConstructorDeclaration(node);
         }
@@ -49,7 +48,7 @@ namespace Microsoft.DotNet.GenAPI
         public override SyntaxNode? VisitStructDeclaration(StructDeclarationSyntax node)
         {
             StructDeclarationSyntax? rs = (StructDeclarationSyntax?)base.VisitStructDeclaration(node);
-            return rs is null ? rs : VisitCommonTypeDeclaration(node);
+            return rs is null ? rs : VisitCommonTypeDeclaration(rs);
         }
 
         /// <inheritdoc />
@@ -69,16 +68,27 @@ namespace Microsoft.DotNet.GenAPI
                 rs = rs.WithExpressionBody(null);
             }
 
-            if (rs.ReturnType.ToString() != "System.Void")
+            string returnType = rs.ReturnType.ToString();
+            if (returnType != "void" && returnType != "System.Void")
             {
-                rs = rs.WithBody(GetThrowNullBody(true));
+                rs = rs.WithBody(GetThrowNullBody());
             }
             else
             {
-                rs = rs.WithBody(GetEmptyBody(true));
+                rs = rs.WithBody(GetEmptyBody());
             }
 
             return rs.WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
+        }
+
+        /// <inheritdoc />
+        public override SyntaxNode? VisitOperatorDeclaration(OperatorDeclarationSyntax node)
+        {
+            // visit subtree first to normalize type names.
+            OperatorDeclarationSyntax? rs = base.VisitOperatorDeclaration(node) as OperatorDeclarationSyntax;
+            return rs?
+                .WithBody(GetThrowNullBody())
+                .WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
         }
 
         /// <inheritdoc />
@@ -90,28 +100,34 @@ namespace Microsoft.DotNet.GenAPI
                 case SyntaxKind.SetAccessorDeclaration:
                     {
                         var accessorListSyntax = (AccessorListSyntax?)node.Parent;
-                        var propertyDeclarationSyntax = (PropertyDeclarationSyntax?)accessorListSyntax?.Parent;
+                        if (accessorListSyntax?.Parent == null) break;
 
-                        if (propertyDeclarationSyntax is null) return null;
+                        if (accessorListSyntax?.Parent is IndexerDeclarationSyntax indexerDeclarationSyntax)
+                        {
+                            var typeDeclarationSyntax = (TypeDeclarationSyntax?)indexerDeclarationSyntax.Parent;
 
-                        if (propertyDeclarationSyntax.Modifiers.Where(token => token.IsKind(SyntaxKind.AbstractKeyword)).Any())
-                        {
-                            node = node.WithSemicolonToken(node.SemicolonToken);
-                        }
-                        else
-                        {
-                            if (node.Kind() == SyntaxKind.GetAccessorDeclaration)
+                            if (indexerDeclarationSyntax.Modifiers.Where(token => token.IsKind(SyntaxKind.AbstractKeyword)).Any() ||
+                                (typeDeclarationSyntax != null && typeDeclarationSyntax.Keyword.IsKind(SyntaxKind.InterfaceKeyword)))
                             {
-                                node = node.WithBody(GetThrowNullBody(newLine: false));
+                                return node.WithSemicolonToken(node.SemicolonToken);
                             }
-                            else if (node.Kind() == SyntaxKind.SetAccessorDeclaration)
-                            {
-                                node = node.WithBody(GetEmptyBody(newLine: false));
-                            }
-                            node = node.WithSemicolonToken(default).WithKeyword(node.Keyword.WithTrailingTrivia(SyntaxFactory.Space));
+
+                            return ProcessPropertyDeclarationSyntax(node);
                         }
-                        return node;
+                        else if (accessorListSyntax?.Parent is PropertyDeclarationSyntax propertyDeclarationSyntax)
+                        {
+                            var typeDeclarationSyntax = (TypeDeclarationSyntax?)propertyDeclarationSyntax.Parent;
+
+                            if (propertyDeclarationSyntax.Modifiers.Where(token => token.IsKind(SyntaxKind.AbstractKeyword)).Any() ||
+                                (typeDeclarationSyntax != null && typeDeclarationSyntax.Keyword.IsKind(SyntaxKind.InterfaceKeyword)))
+                            {
+                                return node.WithSemicolonToken(node.SemicolonToken);
+                            }
+
+                            return ProcessPropertyDeclarationSyntax(node);
+                        }
                     }
+                    break;
             }
             return base.VisitAccessorDeclaration(node);
         }
@@ -134,7 +150,7 @@ namespace Microsoft.DotNet.GenAPI
                 // so the trailing opening brace gets put onto a new line.
                 return node
                     .WithBaseList(null)
-                    .WithIdentifier(node.Identifier.WithTrailingTrivia(node.BaseList.GetTrailingTrivia()));
+                    .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
             }
             else
             {
@@ -143,38 +159,51 @@ namespace Microsoft.DotNet.GenAPI
             }
         }
 
-        private SyntaxNode? VisitCommonTypeDeclaration<T>(T node) where T : TypeDeclarationSyntax
+        private T VisitCommonTypeDeclaration<T>(T node) where T : TypeDeclarationSyntax
         {
             node = (T)RemoveBaseType(node, "global::System.Object");
             return AddPartialModifier(node);
         }
 
-        private SyntaxNode AddPartialModifier<T>(T node) where T: TypeDeclarationSyntax
+        private T AddPartialModifier<T>(T node) where T: TypeDeclarationSyntax
         {
             if (!node.Modifiers.Any(m => m.RawKind == (int)SyntaxKind.PartialKeyword))
             {
-                return node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space));
+                return (T)node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space));
             }
             return node;
         }
 
-        private BlockSyntax GetEmptyBody(bool newLine = false)
+        private BlockSyntax GetEmptyBody()
         {
-            BlockSyntax node = GetMethodBodyFromText(SyntaxFactory.Space.ToString(), newLine);
+            BlockSyntax node = GetMethodBodyFromText(SyntaxFactory.Space.ToString());
             return node.WithOpenBraceToken(node.OpenBraceToken.WithTrailingTrivia(SyntaxFactory.Space));
         }
 
-        private BlockSyntax GetThrowNullBody(bool newLine = false)
+        private BlockSyntax GetThrowNullBody()
         {
             if (_exceptionMessage is not null)
             {
-                return GetMethodBodyFromText($" throw new PlatformNotSupportedException(\"{_exceptionMessage}\"); ", newLine);
+                return GetMethodBodyFromText($" throw new PlatformNotSupportedException(\"{_exceptionMessage}\"); ");
             }
-            return GetMethodBodyFromText(" throw null; ", newLine);
+            return GetMethodBodyFromText(" throw null; ");
+        }
+
+        private SyntaxNode? ProcessPropertyDeclarationSyntax(AccessorDeclarationSyntax node)
+        {
+            if (node.Kind() == SyntaxKind.GetAccessorDeclaration)
+            {
+                node = node.WithBody(GetThrowNullBody());
+            }
+            else if (node.Kind() == SyntaxKind.SetAccessorDeclaration)
+            {
+                node = node.WithBody(GetEmptyBody());
+            }
+            return node.WithSemicolonToken(default).WithKeyword(node.Keyword.WithTrailingTrivia(SyntaxFactory.Space));
         }
 
         private BlockSyntax GetMethodBodyFromText(string text, bool newLine = false) =>
             SyntaxFactory.Block(SyntaxFactory.ParseStatement(text))
-                         .WithTrailingTrivia(newLine ? SyntaxFactory.CarriageReturnLineFeed : SyntaxFactory.Space);
+                         .WithTrailingTrivia(SyntaxFactory.Space);
     }
 }

@@ -9,29 +9,25 @@ using Microsoft.NET.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.Watcher.Tools
+namespace Microsoft.DotNet.Watcher.Tests
 {
-    public class ProgramTests
+    public class ProgramTests : DotNetWatchTestBase
     {
         private const string AppName = "WatchKitchenSink";
-        private readonly TestAssetsManager _testAssetsManager;
-        private readonly ITestOutputHelper _output;
 
-        public ProgramTests(ITestOutputHelper output)
+        public ProgramTests(ITestOutputHelper logger)
+            : base(logger)
         {
-            _testAssetsManager = new TestAssetsManager(output);
-            _output = output;
         }
 
-        [PlatformSpecificFact(Xunit.TestPlatforms.Windows | Xunit.TestPlatforms.Linux, Skip = "https://github.com/dotnet/aspnetcore/issues/23394")]
+        [PlatformSpecificFact(TestPlatforms.Windows | TestPlatforms.Linux, Skip = "https://github.com/dotnet/aspnetcore/issues/23394")]
         public async Task ConsoleCancelKey()
         {
-            var console = new TestConsole(_output);
-            var testAsset = _testAssetsManager.CopyTestAsset(AppName)
+            var console = new TestConsole(Logger);
+            var testAsset = TestAssets.CopyTestAsset(AppName)
                 .WithSource()
                 .Path;
 
-            using var watchableApp = new WatchableApp(testAsset, _output);
             using var app = new Program(console, testAsset, "");
 
             var run = app.RunAsync(new[] { "run" });

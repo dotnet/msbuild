@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.GenAPI.Task
         public string[]? ExcludeAttributesFiles { get; set; }
 
         /// <summary>
-        /// Include all API's not just public APIs. The default is public only.
+        /// Include internal API's. Default is false.
         /// </summary>
         public bool IncludeVisibleOutsideOfAssembly { get; set; }
 
