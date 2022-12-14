@@ -1712,7 +1712,6 @@ internal static class NativeMethods
     internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
 
     [DllImport("libc", SetLastError = true)]
-    [SupportedOSPlatform("linux")]
     internal static extern int symlink(string oldpath, string newpath);
 
     #endregion
