@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputVersionDescription">
         <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
-        <target state="new">Specifies the version of machine-readable output. Requires the '--format json' option.</target>
+        <target state="translated">指定计算机可读输出的版本。需要“--format json”选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
