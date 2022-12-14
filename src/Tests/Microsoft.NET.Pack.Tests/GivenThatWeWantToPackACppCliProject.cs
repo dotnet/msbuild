@@ -25,7 +25,8 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource()
-                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"))
+                .WithProjectChanges((projectPath, project) => AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport", "true"));
 
             new PackCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest", "NETCoreCppCliTest.vcxproj"))
                 .Execute("-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true")
@@ -43,6 +44,15 @@ namespace Microsoft.NET.Build.Tests
                 itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", package),
                                                     new XAttribute("Version", version)));
 
+            }
+        }
+        private void AddBuildProperty(string projectPath, XDocument project, string property, string value)
+        {
+            if (Path.GetExtension(projectPath) == ".vcxproj")
+            {
+                XNamespace ns = project.Root.Name.Namespace;
+                XElement propertyGroup = project.Root.Descendants(ns + "PropertyGroup").First();
+                propertyGroup.Add(new XElement(ns + $"{property}", value));
             }
         }
     }
