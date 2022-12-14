@@ -102,7 +102,7 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = false,
                 TargetFrameworkVersion = targetFrameworkVersion
             };
-            auxLibraryProject.SourceFiles["Helper.cs"] = """
+            auxLibraryProject.SourceFiles["Helper.cs"] = @"
                 using System;
 
                 namespace AuxLibrary
@@ -111,11 +111,11 @@ namespace Microsoft.NET.Build.Tests
                     {
                         public static void WriteMessage()
                         {
-                            Console.WriteLine("This string came from AuxLibrary!");
+                            Console.WriteLine(""This string came from AuxLibrary!"");
                         }
                     }
                 }
-                """;
+                ";
 
             var mainLibraryProject = new TestProject("MainLibrary")
             {
@@ -123,7 +123,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworkVersion = targetFrameworkVersion
             };
             mainLibraryProject.ReferencedProjects.Add(auxLibraryProject);
-            mainLibraryProject.SourceFiles["Helper.cs"] = """
+            mainLibraryProject.SourceFiles["Helper.cs"] = @"
                 using System;
 
                 namespace MainLibrary
@@ -132,12 +132,12 @@ namespace Microsoft.NET.Build.Tests
                     {
                         public static void WriteMessage()
                         {
-                            Console.WriteLine("This string came from MainLibrary!");
+                            Console.WriteLine(""This string came from MainLibrary!"");
                             AuxLibrary.Helper.WriteMessage();
                         }
                     }
                 }
-                """;
+            ";
 
             var testAppProject = new TestProject("TestApp")
             {
@@ -146,7 +146,7 @@ namespace Microsoft.NET.Build.Tests
             };
             testAppProject.AdditionalProperties["ProduceReferenceAssembly"] = "false";
             testAppProject.ReferencedProjects.Add(mainLibraryProject);
-            testAppProject.SourceFiles["Program.cs"] = """
+            testAppProject.SourceFiles["Program.cs"] = @"
                 using System;
 
                 namespace TestApp
@@ -155,12 +155,12 @@ namespace Microsoft.NET.Build.Tests
                     {
                         public static void Main(string[] args)
                         {
-                            Console.WriteLine("TestApp --depends on--> MainLibrary --depends on--> AuxLibrary");
+                            Console.WriteLine(""TestApp --depends on--> MainLibrary --depends on--> AuxLibrary"");
                             MainLibrary.Helper.WriteMessage();
                         }
                     }
                 }
-                """;
+                ";
 
             return testAppProject;
         }

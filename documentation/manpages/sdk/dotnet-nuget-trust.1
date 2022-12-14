@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-nuget-trust" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-nuget-trust" "1" "2022-11-08" "" ".NET Documentation"
 .hy
 .SH dotnet nuget trust
 .PP
@@ -38,6 +38,11 @@ By default, NuGet accepts all authors and repositories.
 These commands allow you to specify only a specific subset of signers whose signatures will be accepted, while rejecting all others.
 For more information, see Common NuGet configurations.
 For details on what the nuget.config schema looks like, refer to the NuGet config file reference.
+.RS
+.PP
+This command requires a certificate root store that is valid for both code signing and timestamping.
+See NuGet signed package verification for details.
+.RE
 .SH OPTIONS
 .IP \[bu] 2
 \f[B]\f[VB]-?|-h|--help\f[B]\f[R]
