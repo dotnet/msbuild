@@ -598,7 +598,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void BuildResultNotPlacedInCurrentCacheIfExistsInOverrideCache()
+        public void BuildResultNotPlacedInCurrentCacheIfConfigExistsInOverrideCache()
         {
             ConfigCache overrideConfigCache = new();
             ResultsCache overrideResultsCache = new();
