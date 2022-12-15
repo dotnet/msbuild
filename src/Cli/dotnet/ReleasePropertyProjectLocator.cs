@@ -18,21 +18,34 @@ using Microsoft.DotNet.Tools.Common;
 namespace Microsoft.DotNet.Cli
 {
     /// <summary>
-    /// This class is used to enable configuration changes at the project level.
-    /// Configuration evaluation occurs before a project file is evaluated, and the project file may have dependencies on the configuration.
+    /// This class is used to enable properties that edit the Configuration property inside of a .*proj file.
+    /// Properties such as DebugSymbols are evaluated based on the Configuration set before a project file is evaluated, and the project file may have dependencies on the configuration.
     /// Because of this, it is 'impossible' for the project file to correctly influence the value of Configuration.
     /// This class allows evaluation of Configuration properties set in the project file before build time by giving back a global Configuration property to inject while building.
     /// </summary>
     class ReleasePropertyProjectLocator
     {
         private ParseResult _parseResult;
-        private string _defaultedConfigurationProperty;
+        private string _propertyToCheck;
         private IEnumerable<string> _slnOrProjectArgs;
         private Option<string> _configOption;
-        private bool _isPublishingSolution = false;
+        private bool _isHandlingSolution = false;
 
         private static string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
         private static string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
+
+        // <summary>
+        /// <param name="propertyToCheck">The boolean property to check the project for. Ex: PublishRelease, PackRelease.</param>
+        /// <param name="slnOrProjectArgs">The arguments parsed by System Command Line related to picking a solution or project file.</param>
+        /// <param name="configOption">The arguments parsed by System Command Line related to Configuration.</param>
+        /// </summary>
+        public ReleasePropertyProjectLocator(
+            ParseResult parseResult,
+            string propertyToCheck,
+            IEnumerable<string> slnOrProjectArgs,
+            Option<string> configOption
+         )
+         => (_parseResult, _propertyToCheck, _slnOrProjectArgs, _configOption) = (parseResult, propertyToCheck, slnOrProjectArgs, configOption);
 
         /// <summary>
         /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on ...
@@ -41,7 +54,7 @@ namespace Microsoft.DotNet.Cli
         /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>
         public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified()
         {
-            Debug.Assert(_defaultedConfigurationProperty == MSBuildPropertyNames.PUBLISH_RELEASE || _defaultedConfigurationProperty == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
+            Debug.Assert(_propertyToCheck == MSBuildPropertyNames.PUBLISH_RELEASE || _propertyToCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
             if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
             {
                 return Enumerable.Empty<string>();
@@ -58,38 +71,25 @@ namespace Microsoft.DotNet.Cli
 
             if (project != null)
             {
-                string releasePropertyFlag = project.GetPropertyValue(_defaultedConfigurationProperty);
-                if (!string.IsNullOrEmpty(releasePropertyFlag)) // The project set PublishRelease or PackRelease itself.
+                string releasePropertyFlag = project.GetPropertyValue(_propertyToCheck);
+                if (!string.IsNullOrEmpty(releasePropertyFlag) || GetProjectMaxModernTargetFramework(project) >= 8) 
                 {
-                    string configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE;
-                    return new List<string> {
-                        $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}",
-                        _isPublishingSolution ? $"-property:_SolutionLevel{_defaultedConfigurationProperty}=true" : "" // Allows us to spot conflicting configuration values during evaluation.
+                    var msbuildFlags = new List<string> {
+                        $"-property:{MSBuildPropertyNames.CONFIGURATION}={
+                            (
+                            !string.IsNullOrEmpty(releasePropertyFlag) ? // Did the project set PublishRelease or PackRelease itself?
+                                (releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE) // Use release if value is true, else, debug.
+                            : MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE) // The project did not set the property, but it is 8.0+ based on the condition above. For 8.0, these properties are enabled by default.
+                            }",
                     };
-                }
-                else if (GetProjectMaxModernTargetFramework(project) >= 8) // For 8.0, these properties are enabled by default.
-                {
-                    return new List<string> {
-                        $"-property:{MSBuildPropertyNames.CONFIGURATION}={MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE}",
-                        _isPublishingSolution ? $"-property:_SolutionLevel{_defaultedConfigurationProperty}=true" : ""
-                    };
+
+                    if (_isHandlingSolution) msbuildFlags.Add($"-property:_SolutionLevel{_propertyToCheck}=true"); // This will allow us to detect conflicting configuration values during evaluation.
+
+                    return msbuildFlags;
                 }
             }
             return Enumerable.Empty<string>();
         }
-
-        // <summary>
-        /// <param name="defaultedConfigurationProperty">The boolean property to check the project for. Ex: PublishRelease, PackRelease.</param>
-        /// <param name="slnOrProjectArgs">The arguments parsed by System Command Line related to picking a solution or project file.</param>
-        /// <param name="configOption">The arguments parsed by System Command Line related to Configuration.</param>
-        /// </summary>
-        public ReleasePropertyProjectLocator(
-            ParseResult parseResult,
-            string defaultedConfigurationProperty,
-            IEnumerable<string> slnOrProjectArgs,
-            Option<string> configOption
-         )
-         => (_parseResult, _defaultedConfigurationProperty, _slnOrProjectArgs, _configOption) = (parseResult, defaultedConfigurationProperty, slnOrProjectArgs, configOption);
 
         /// <param name="slnProjectPropertytoCheck">A property to enforce if we are looking into SLN files. If projects disagree on the property, throws exception.</param>
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Cli
 
                         if (!string.IsNullOrEmpty(potentialSln))
                         {
-                            return GetRandomSlnProject(potentialSln, globalProps);
+                            return GetArbitraryProjectFromSolution(potentialSln, globalProps);
                         }
                     }
                 }
@@ -121,8 +121,8 @@ namespace Microsoft.DotNet.Cli
             return null;  // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
         }
 
-        /// <returns>A random existant project in a solution file. Returns null if no projects exist.</returns>
-        public ProjectInstance GetRandomSlnProject(string slnPath, Dictionary<string, string> globalProps)
+        /// <returns>An arbitrary existant project in a solution file. Returns null if no projects exist.</returns>
+        public ProjectInstance GetArbitraryProjectFromSolution(string slnPath, Dictionary<string, string> globalProps)
         {
             SlnFile sln;
             try
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Cli
                 var projectData = TryGetProjectInstance(project.FilePath, globalProps);
                 if (projectData != null)
                 {
-                    _isPublishingSolution = true;
+                    _isHandlingSolution = true;
                     return projectData;
                 }
             };
