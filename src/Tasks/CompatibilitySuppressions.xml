@@ -54,8 +54,4 @@
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>Xamarin.XboxOne,Version=v0.0</Target>
   </Suppression>
-  <Suppression>
-    <DiagnosticId>PKV006</DiagnosticId>
-    <Target>net6.0</Target>
-  </Suppression>
 </Suppressions>
