@@ -770,7 +770,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Input cache files that MSBuild will use to read build results from.
-        /// If the isolation mode is not explicitly already set to <see cref="IsolateProjects.False"/>,
+        /// If the isolation mode is set to <see cref="IsolateProjects.False"/>,
         /// this sets the isolation mode to <see cref="IsolateProjects.True"/>.
         /// </summary>
         public string[] InputResultsCacheFiles
@@ -781,7 +781,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Output cache file where MSBuild will write the contents of its build result caches during EndBuild.
-        /// If the isolation mode is not explicitly already set to <see cref="IsolateProjects.False"/>,
+        /// If the isolation mode is set to <see cref="IsolateProjects.False"/>,
         /// this sets the isolation mode to <see cref="IsolateProjects.True"/>.
         /// </summary>
         public string OutputResultsCacheFile
