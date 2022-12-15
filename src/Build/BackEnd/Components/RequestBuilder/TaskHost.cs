@@ -343,6 +343,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Yield()
         {
+            // If file accesses are being reported we should not yield as file access will be attributed to the wrong project.
+            if (_host.BuildParameters.ReportFileAccesses)
+            {
+                return;
+            }
+
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
@@ -363,6 +369,12 @@ namespace Microsoft.Build.BackEnd
             // Release all cores on reacquire. The assumption here is that the task is done with CPU intensive work at this point and forgetting
             // to release explicitly granted cores when reacquiring the node may lead to deadlocks.
             ReleaseAllCores();
+
+            // If file accesses are being reported yielding is a no-op so reacquire should be too.
+            if (_host.BuildParameters.ReportFileAccesses)
+            {
+                return;
+            }
 
             lock (_callbackMonitor)
             {
