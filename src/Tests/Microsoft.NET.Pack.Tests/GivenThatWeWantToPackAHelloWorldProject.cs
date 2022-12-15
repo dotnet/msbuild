@@ -147,7 +147,7 @@ namespace Microsoft.NET.Pack.Tests
         public void It_packs_with_release_by_default_in_net_8_but_not_in_net_7(string tfm)
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", $"PackReleaseDefault-{tfm}")
+               .CopyTestAsset("HelloWorld", identifier: tfm)
                .WithSource()
                .WithTargetFramework(tfm);
 
