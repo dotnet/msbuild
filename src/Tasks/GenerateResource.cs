@@ -917,6 +917,10 @@ namespace Microsoft.Build.Tasks
         // so check to see if we should trust them before analyzing them
         private bool IsDangerous(String filename)
         {
+            // On Framework, we deserialize BinaryFormatter blobs in the main MSBuild process then serialize them again. On Core, we put them as-is into the .resources file,
+            // which eliminates the deserialization attack surface from MSBuild's perspective.
+            //
+            // Even on Framework, we only need to (dangerously) deserialize the .resx file if we think we might need a separate AppDomain, so FEATURE_APPDOMAIN makes sense here.
 #if !FEATURE_APPDOMAIN
             return false;
         }
