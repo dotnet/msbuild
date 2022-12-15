@@ -403,7 +403,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 """);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/arcade/issues/11937")]
         void TestDelegateGeneration()
         {
             RunTest(original: """
@@ -415,7 +415,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    public sealed delegate bool SyntaxReceiverCreator(int a, bool b);
+                    public delegate bool SyntaxReceiverCreator(int a, bool b);
                 }
                 """);
         }
@@ -426,18 +426,29 @@ namespace Microsoft.DotNet.GenAPI.Tests
             RunTest(original: """
                 namespace Foo
                 {
-                    public abstract class Events
+                    public abstract class AbstractEvents
                     {
                         public abstract event System.EventHandler<bool> TextChanged;
+                    }
+
+                    public class Events
+                    {
+                        public event System.EventHandler<string> OnNewMessage { add { } remove {} }
                     }
                 }
                 """,
                 expected: """
                 namespace Foo
                 {
-                    public abstract partial class Events
+                    public abstract partial class AbstractEvents
                     {
                         public event System.EventHandler<bool> TextChanged;
+                    }
+
+                    public partial class Events
+                    {
+                        /// add & remove accessors have a default implementation.
+                        public event System.EventHandler<string> OnNewMessage;
                     }
                 }
                 """);
@@ -590,6 +601,36 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 """);
         }
 
+        [Fact]
+        void TestNestedClassGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Car
+                    {
+                        public class Engine
+                        {
+                            public class Cylinder
+                            { }
+                        }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Car
+                    {
+                        public partial class Engine
+                        {
+                            public partial class Cylinder
+                            { }
+                        }
+                    }
+                }
+                """);
+        }
         [Fact]
         void TestExplicitInterfaceImplementationMethodGeneration()
         {

@@ -1,9 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editing;
 
@@ -66,7 +67,15 @@ namespace Microsoft.DotNet.GenAPI
                 }
             }
 
-            return syntaxGenerator.Declaration(symbol);
+            try
+            {
+                return syntaxGenerator.Declaration(symbol);
+            }
+            catch (ArgumentException ex)
+            {
+                // re-throw the ArgumentException with the specified symbol that caused it.
+                throw new ArgumentException(ex.Message, symbol.ToDisplayString());
+            }
         }
 
         // TODO: Temporary solution till corresponding Roslyn API is added: https://github.com/dotnet/arcade/issues/11895.

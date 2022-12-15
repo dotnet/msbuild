@@ -112,7 +112,6 @@ namespace Microsoft.DotNet.GenAPI
 
         private SyntaxNode Visit(SyntaxNode namedTypeNode, INamedTypeSymbol namedType)
         {
-            namedTypeNode = VisitInnerNamedTypes(namedTypeNode, namedType);
             IEnumerable<ISymbol> members = namedType.GetMembers().Where(_symbolFilter.Include);
 
             foreach (ISymbol member in members.Order())
@@ -125,22 +124,12 @@ namespace Microsoft.DotNet.GenAPI
                     memberDeclaration = _syntaxGenerator.AddAttributes(memberDeclaration, _syntaxGenerator.Attribute(attribute));
                 }
 
+                if (member is INamedTypeSymbol nestedTypeSymbol)
+                {
+                    memberDeclaration = Visit(memberDeclaration, nestedTypeSymbol);
+                }
+
                 namedTypeNode = _syntaxGenerator.AddMembers(namedTypeNode, memberDeclaration);
-            }
-
-            return namedTypeNode;
-        }
-
-        private SyntaxNode VisitInnerNamedTypes(SyntaxNode namedTypeNode, INamedTypeSymbol namedType)
-        {
-            IEnumerable<INamedTypeSymbol> innerNamedTypes = namedType.GetTypeMembers().Where(_symbolFilter.Include);
-
-            foreach (INamedTypeSymbol innerNamedType in innerNamedTypes.Order())
-            {
-                SyntaxNode typeDeclaration = _syntaxGenerator.DeclarationExt(innerNamedType);
-                typeDeclaration = Visit(typeDeclaration, innerNamedType);
-
-                namedTypeNode = _syntaxGenerator.AddMembers(namedTypeNode, typeDeclaration);
             }
 
             return namedTypeNode;
