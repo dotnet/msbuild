@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
+
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             // Fix for https://github.com/Microsoft/vstest/issues/1453
             // Run dll/exe directly using the VSTestForwardingApp
-            if (ContainsBuiltTestSources(parseResult))
+            if (ContainsBuiltTestSources(args))
             {
                 return ForwardToVSTestConsole(parseResult, args, settings, testSessionCorrelationId);
             }
@@ -118,28 +119,28 @@ namespace Microsoft.DotNet.Tools.Test
                 "-nologo"
             };
 
-            msbuildArgs.AddRange(result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()));
+            // Extra msbuild properties won't be parsed and so end up in the UnmatchedTokens list. In addition to those
+            // properties, all the test settings properties are also considered as unmatched but we don't want to forward
+            // these as-is to msbuild. So we filter out the test settings properties from the unmatched tokens,
+            // by only taking values until the first item after `--`. (`--` is not present in the UnmatchedTokens).
+            var unMatchedNonSettingsArgs = settings.Length > 1
+                ? result.UnmatchedTokens.TakeWhile(x => x != settings[1])
+                : result.UnmatchedTokens;
+
+            var parsedArgs =
+                result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()) // all msbuild-recognized tokens
+                    .Concat(unMatchedNonSettingsArgs); // all tokens that the test-parser doesn't explicitly track (minus the settings tokens)
+
+            VSTestTrace.SafeWriteTrace(() => $"MSBuild args from forwarded options: {String.Join(", ", parsedArgs)}");
+            msbuildArgs.AddRange(parsedArgs);
 
             if (settings.Any())
             {
-                //workaround for correct -- logic
-                var commandArgument = result.GetValue(TestCommandParser.SlnOrProjectArgument);
-                if(!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
-                {
-                    msbuildArgs.Add(result.GetValue(TestCommandParser.SlnOrProjectArgument));
-                }
-
                 // skip '--' and escape every \ to be \\ and every " to be \" to survive the next hop
                 string[] escaped = settings.Skip(1).Select(s => s.Replace("\\", "\\\\").Replace("\"", "\\\"")).ToArray();
 
                 string runSettingsArg = string.Join(";", escaped);
                 msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
-            }
-            else
-            {
-                var argument = result.GetValue(TestCommandParser.SlnOrProjectArgument);
-                if(!string.IsNullOrWhiteSpace(argument))
-                    msbuildArgs.Add(argument);
             }
 
             string verbosityArg = result.ForwardedOptionValues<IReadOnlyCollection<string>>(TestCommandParser.GetCommand(), "--verbosity")?.SingleOrDefault() ?? null;
@@ -227,13 +228,15 @@ namespace Microsoft.DotNet.Tools.Test
             }
         }
 
-        private static bool ContainsBuiltTestSources(ParseResult parseResult)
+        private static bool ContainsBuiltTestSources(string[] args)
         {
-            string commandArgument = parseResult.GetValue(TestCommandParser.SlnOrProjectArgument);
-
-            if (commandArgument is not null && (commandArgument.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || commandArgument.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)))
+            foreach (string arg in args)
             {
-                return true;
+                if (!arg.StartsWith("-") &&
+                    (arg.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
             }
 
             return false;

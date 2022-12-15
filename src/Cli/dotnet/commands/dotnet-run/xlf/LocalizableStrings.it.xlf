@@ -36,14 +36,14 @@
         <source>There are several launch profiles with case-sensitive names, which isn't permitted:
 {0}
 Make the profile names distinct.</source>
-        <target state="new">There are several launch profiles with case-sensitive names, which isn't permitted:
+        <target state="translated">Esistono diversi profili di avvio con nomi con distinzione tra maiuscole e minuscole, che non sono consentiti:
 {0}
-Make the profile names distinct.</target>
+Rendi distinti i nomi dei profili.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileDoesNotExist">
         <source>A launch profile with the name '{0}' doesn't exist.</source>
-        <target state="new">A launch profile with the name '{0}' doesn't exist.</target>
+        <target state="translated">Non esiste un profilo di avvio con il nome '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyOneProjectAllowed">
@@ -116,7 +116,7 @@ Il valore corrente di {1} è '{2}'.</target>
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile '{0}' could not be located.</source>
-        <target state="new">The specified launch profile '{0}' could not be located.</target>
+        <target state="translated">Il profilo di avvio specificato '{0}' non è stato trovato.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
@@ -143,7 +143,7 @@ Il valore corrente di {1} è '{2}'.</target>
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>A profile with the specified name isn't a valid JSON object.</source>
-        <target state="needs-review-translation">Non è stato possibile trovare alcun profilo con il nome specificato oppure il profilo non è un oggetto JSON valido.</target>
+        <target state="translated">Un profilo con il nome specificato non è un oggetto JSON valido.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

@@ -36,14 +36,14 @@
         <source>There are several launch profiles with case-sensitive names, which isn't permitted:
 {0}
 Make the profile names distinct.</source>
-        <target state="new">There are several launch profiles with case-sensitive names, which isn't permitted:
+        <target state="translated">有多个启动配置文件具有区分大小写的名称，这是不允许的:
 {0}
-Make the profile names distinct.</target>
+使配置文件具有不同的名称。</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileDoesNotExist">
         <source>A launch profile with the name '{0}' doesn't exist.</source>
-        <target state="new">A launch profile with the name '{0}' doesn't exist.</target>
+        <target state="translated">名为“{0}”的启动配置文件不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyOneProjectAllowed">
@@ -116,7 +116,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile '{0}' could not be located.</source>
-        <target state="new">The specified launch profile '{0}' could not be located.</target>
+        <target state="translated">找不到指定的启动配置文件“{0}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
@@ -143,7 +143,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>A profile with the specified name isn't a valid JSON object.</source>
-        <target state="needs-review-translation">找不到具有指定名称的配置文件或该配置文件不是有效的 JSON 对象。</target>
+        <target state="translated">具有指定名称的配置文件不是有效的 JSON 对象。</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

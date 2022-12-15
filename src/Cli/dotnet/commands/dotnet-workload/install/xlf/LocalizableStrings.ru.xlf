@@ -364,7 +364,7 @@
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
-        <target state="translated">Доступны обновления рабочей нагрузки. Для получения дополнительных сведений запустите "список рабочих нагрузок DotNet".</target>
+        <target state="translated">Доступны обновления рабочей нагрузки. Для получения дополнительных сведений запустите `dotnet workload list`.</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingPackInstallRecordMessage">

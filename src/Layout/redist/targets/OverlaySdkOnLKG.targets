@@ -48,8 +48,7 @@
           DestinationFiles="@(OverlaySDK->'$(RedistLayoutPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <PropertyGroup>
-      <SdkOutputDirectory>$(RedistLayoutPath)/sdk/$(Version)</SdkOutputDirectory>
-      <DotnetWatchOutputDirectory>$(SdkOutputDirectory)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchOutputDirectory>
+      <SdkOutputDirectory>$(RedistLayoutPath)sdk\$(Version)</SdkOutputDirectory>
     </PropertyGroup>
 
     <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
@@ -68,18 +67,6 @@
 
     <Copy SourceFiles="@(ToolsetToOverlay)"
           DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-    <ItemGroup>
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
-      <!-- To reduce the size of the SDK, we use the compiler dependencies that are located in the `Roslyn/bincore` location
-      instead of shipping our own copies in the dotnet-watch tool. These assemblies will be resolved by path in the
-      dotnet-watch executable. -->
-      <DotNetWatchOverlay Remove="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\Microsoft.CodeAnalysis.CSharp.dll" />
-      <DotNetWatchOverlay Remove="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\Microsoft.CodeAnalysis.dll" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(DotNetWatchOverlay)"
-          DestinationFiles="$(DotnetWatchOutputDirectory)\%(RecursiveDir)%(DotNetWatchOverlay.TargetDir)\%(Filename)%(Extension)" />
 
     <!-- Run "dotnet new" (which will just display usage and available templates) in order to print first time
          use message so that it doesn't interfere with tests which check the output of commands. -->

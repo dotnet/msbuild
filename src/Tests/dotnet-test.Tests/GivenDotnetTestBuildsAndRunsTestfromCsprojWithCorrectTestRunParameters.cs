@@ -34,12 +34,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .WithWorkingDirectory(testProjectDirectory)
                                         .Execute(ConsoleLoggerOutputNormal.Concat(new[] {
                                             "--",
-                                            "TestRunParameters.Parameter(name=\"myParam\",",
-                                            "value=\"value\")",
-                                            "TestRunParameters.Parameter(name=\"myParam2\",",
-                                            "value=\"value", 
-                                            "with", 
-                                            "space\")"
+                                            "TestRunParameters.Parameter(name=\"myParam\",value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",value=\"value with space\")"
                                         }));
 
             // Verify
@@ -72,12 +68,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .Execute(ConsoleLoggerOutputNormal.Concat(new[] {
                                             outputDll,
                                             "--",
-                                            "TestRunParameters.Parameter(name=\"myParam\",",
-                                            "value=\"value\")",
-                                            "TestRunParameters.Parameter(name=\"myParam2\",",
-                                            "value=\"value",
-                                            "with",
-                                            "space\")"
+                                            "TestRunParameters.Parameter(name=\"myParam\",value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",value=\"value with space\")"
                                         }));
 
             // Verify

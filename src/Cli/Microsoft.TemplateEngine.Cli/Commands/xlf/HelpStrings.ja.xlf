@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="Text_Required">
         <source>Required: *true*</source>
-        <target state="new">Required: *true*</target>
+        <target state="translated">必須: *true*</target>
         <note>Indication that parameter is always required, do not translate "true".</note>
       </trans-unit>
       <trans-unit id="Text_RequiredCondition">
