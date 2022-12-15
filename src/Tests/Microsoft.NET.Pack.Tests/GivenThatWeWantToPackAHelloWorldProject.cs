@@ -99,7 +99,7 @@ namespace Microsoft.NET.Pack.Tests
             }
 
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", $"PackReleaseBasicTest-Opted-Out-{optedOut}")
+               .CopyTestAsset("HelloWorld", identifier: optedOut)
                .WithSource();
 
             File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
