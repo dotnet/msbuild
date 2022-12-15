@@ -1,9 +1,10 @@
 # SDK PR Guide
 
 ## Branching
+See the [versions](https://learn.microsoft.com/en-us/dotnet/core/porting/versioning-sdk-msbuild-vs#lifecycle) document for more details on how SDK versions map to MSBuild and Visual Studio.
 
 ### Major releases
-The .NET SDK has yearly major releases aligning with the .NET runtime in November.  These releases will be of the form N.0.1xx. The feature work for major releases will be done in `main`. 
+The .NET SDK has yearly major releases aligning with the .NET Runtime in November.  These releases will be of the form N.0.1xx. The feature work for major releases will be done in `main`. 
 Typically, previews for each major release start in February of each year.  For each preview, we will snap a new branch off of main approximately midway through the prior month.
 For .NET 7 for example, the preview branches were created typically around the 21st of each month prior with the later previews forking earlier to provide more time for stabilization and codeflow.
 Main branch has moved to be the next year's release branch in August.
@@ -25,6 +26,9 @@ The servicing branches are locked from the time of code complete to the next bra
 | Major        | Yearly (Nov) | RC2               | Mid-September            |
 | Minor        | Quarterly    | Preview 3         | End of the month prior to preview 3 (~7 weeks prior to release) |
 | Servicing    | Monthly      | N/A               | Third Tuesday of prior month (signoff is ~28th of each month) |
+
+### Tactics approval
+Even releases that are in lockdown can still take changes as long as they are approved and the final build isn't complete. To break a change through tactics, mark it with the label servicing-consider and update the description to include 5 sections (Description, Customer Impact, Regression?, Risk, Testing). See previously approved bugs for examples by looking for the [servicing-approved](https://github.com/dotnet/sdk/pulls?q=is%3Apr+label%3AServicing-approved+is%3Aclosed) label
 
 ## External contributions
 External contributions are encouraged and welcome. There are so many teams working in this repo that it can be hard to track.
