@@ -431,26 +431,20 @@ public static class Program
         [InlineData(false)]
         public void It_publishes_on_release_if_PublishRelease_property_set(bool optedOut)
         {
-            if (optedOut)
-            {
-                Environment.SetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, "true");
-            }
-
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", $"PublishRelease-Basic-{optedOut}")
+               .CopyTestAsset("HelloWorld", $"{optedOut}")
                .WithSource();
 
             File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
             new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+                .WithEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, optedOut.ToString())
                 .Execute()
                 .Should()
                 .Pass();
 
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", optedOut ? "Debug" : "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
-
-            Environment.SetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, null);
         }
 
         [Fact]

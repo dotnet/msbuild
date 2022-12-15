@@ -93,13 +93,8 @@ namespace Microsoft.NET.Pack.Tests
         [InlineData(false)]
         public void It_packs_with_release_if_PackRelease_property_set(bool optedOut)
         {
-            if (optedOut)
-            {
-                Environment.SetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, "true");
-            }
-
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", identifier: optedOut)
+               .CopyTestAsset("HelloWorld", identifier: optedOut.ToString())
                .WithSource();
 
             File.WriteAllText(Path.Combine(helloWorldAsset.Path, "Directory.Build.props"), "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
@@ -107,14 +102,13 @@ namespace Microsoft.NET.Pack.Tests
             var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
 
             packCommand
+                .WithEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, optedOut.ToString())
                 .Execute()
                 .Should()
                 .Pass();
 
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", optedOut ? "Debug" : "Release", "HelloWorld.1.0.0.nupkg");
             Assert.True(File.Exists(expectedAssetPath));
-
-            Environment.SetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, null);
         }
 
         [Fact]
@@ -179,8 +173,8 @@ namespace Microsoft.NET.Pack.Tests
                 .Pass();
 
             var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: "net7.0", configuration: "Release"); // this will fail if configuration is debug and TFM code didn't work.
-            var finalConfiguration = properties["Configuration"];
-            finalConfiguration.Should().Equal("Release");
+            string finalConfiguration = properties["Configuration"];
+            finalConfiguration.Should().BeEquivalentTo("Release");
         }
 
         [Fact]
