@@ -102,7 +102,7 @@ namespace Microsoft.NET.Pack.Tests
                .CopyTestAsset("HelloWorld", identifier: optedOut)
                .WithSource();
 
-            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
+            File.WriteAllText(Path.Combine(helloWorldAsset.Path, "Directory.Build.props"), "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
 
             var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
 
