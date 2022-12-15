@@ -28,9 +28,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     {
         internal const string ItemWithIncludeAndExclude = @"
                     <Project>
-                        <ItemGroup>
-                            <i Include='{0}' Exclude='{1}'/>
-                        </ItemGroup>
+                        <Target Name=""Test"">
+                            <ItemGroup>
+                                <i Include='{0}' Exclude='{1}'/>
+                            </ItemGroup>
+                        </Target>
                     </Project>
                 ";
 
