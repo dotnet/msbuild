@@ -674,17 +674,17 @@ class Program
 
             if (useSolution)
             {
-                var dotnetCommand = new DotnetCommand(Log)
-                {
-                    WorkingDirectory = testAsset.TestRoot
-                };
-
-                dotnetCommand.Execute("new", "sln", "--debug:ephemeral-hive")
+                new DotnetNewCommand(Log)
+                    .WithVirtualHive()
+                    .WithWorkingDirectory(testAsset.TestRoot)
+                    .Execute("sln")
                     .Should()
                     .Pass();
 
                 var relativePathToProject = Path.Combine(testProject.Name, testProject.Name + ".csproj");
-                dotnetCommand.Execute($"sln", "add", relativePathToProject)
+                new DotnetCommand(Log)
+                    .WithWorkingDirectory(testAsset.TestRoot)
+                    .Execute($"sln", "add", relativePathToProject)
                     .Should()
                     .Pass();
 

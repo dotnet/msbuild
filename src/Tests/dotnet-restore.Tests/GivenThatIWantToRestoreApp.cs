@@ -141,7 +141,8 @@ namespace Microsoft.DotNet.Restore.Test
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
             string[] newArgs = new[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new","--debug:ephemeral-hive")
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()
@@ -164,7 +165,8 @@ namespace Microsoft.DotNet.Restore.Test
             var rootPath = _testAssetsManager.CreateTestDirectory().Path;
 
             string[] newArgs = new[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new", "--debug:ephemeral-hive")
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()

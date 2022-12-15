@@ -154,9 +154,10 @@ namespace Microsoft.NET.Build.Tests
         public void It_builds_successfully_when_targeting_net_framework()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
-            var newCommand = new DotnetCommand(Log, "new", "wpf", "--no-restore");
-            newCommand.WorkingDirectory = testDirectory;
-            newCommand.Execute()
+            new DotnetNewCommand(Log, "wpf", "--no-restore")
+                .WithVirtualHive()
+                .WithWorkingDirectory(testDirectory)
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -257,10 +258,12 @@ namespace Microsoft.NET.Build.Tests
         {
             var testDir = _testAssetsManager.CreateTestDirectory();
 
-            var newCommand = new DotnetCommand(Log);
-            newCommand.WorkingDirectory = testDir.Path;
-
-            newCommand.Execute("new", "wpf", "--debug:ephemeral-hive").Should().Pass();
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
+                .WithWorkingDirectory(testDir.Path)
+                .Execute("wpf")
+                .Should()
+                .Pass();
 
             var projectPath = Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj");
 

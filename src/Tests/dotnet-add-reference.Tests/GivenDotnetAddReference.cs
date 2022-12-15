@@ -81,7 +81,8 @@ Commands:
 
             try
             {
-                new DotnetCommand(Log, "new", "classlib", "-o", projDir.Path, "--debug:ephemeral-hive",  "--no-restore")
+                new DotnetNewCommand(Log, "classlib", "-o", projDir.Path, "--no-restore")
+                    .WithVirtualHive()
                     .WithWorkingDirectory(projDir.Path)
                     .Execute()
                 .Should().Pass();
