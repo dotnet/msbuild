@@ -180,7 +180,7 @@ namespace Microsoft.NET.Pack.Tests
 
             var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: "net7.0", configuration: "Release"); // this will fail if configuration is debug and TFM code didn't work.
             var finalConfiguration = properties["Configuration"];
-            Assert.True(finalConfiguration == "Release");
+            finalConfiguration.Should().Equal("Release");
         }
 
         [Fact]
