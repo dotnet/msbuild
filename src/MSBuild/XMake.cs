@@ -1085,6 +1085,11 @@ namespace Microsoft.Build.CommandLine
         private const string msbuildLogFileName = "msbuild.log";
 
         /// <summary>
+        /// List of messages to be sent to the logger when it is attached
+        /// </summary>
+        private static List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
+
+        /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
         /// <returns>true, if build succeeds</returns>
@@ -1321,7 +1326,7 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+                    // List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
@@ -1335,7 +1340,7 @@ namespace Microsoft.Build.CommandLine
 #else
                             string.Join(" ", commandLine);
 #endif
-                        messagesToLogInBuildLoggers = GetMessagesToLogInBuildLoggers(commandLineString);
+                        messagesToLogInBuildLoggers.Concat(GetMessagesToLogInBuildLoggers(commandLineString));
 
                         // Log a message for every response file and include it in log
                         foreach (var responseFilePath in s_includedResponseFiles)
@@ -3420,7 +3425,9 @@ namespace Microsoft.Build.CommandLine
             // If output is redirected
             if (Console.IsOutputRedirected)
             {
-                // Add to deferred build messages
+                messagesToLogInBuildLoggers.Add(
+                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is being redirected to a file.", MessageImportance.High)
+                );
                 return false;
             }
             // If terminal is dumb
@@ -3429,7 +3436,9 @@ namespace Microsoft.Build.CommandLine
                 || Environment.GetEnvironmentVariable("TERM") == "dumb"
             )
             {
-                // Add to deferred build messages
+                messagesToLogInBuildLoggers.Add(
+                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is not supported.", MessageImportance.High)
+                );
                 return false;
             }
             return true;
