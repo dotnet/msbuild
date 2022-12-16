@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new DotnetTestCommand(Log, ConsoleLoggerOutputNormal)
                .WithWorkingDirectory(projectDirectory)
-               .Execute("--framework", "netcoreapp3.0")
+               .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                .Should().Pass();
         }
 

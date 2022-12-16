@@ -14,60 +14,59 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-new-list" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-new-list" "1" "2022-11-08" "" ".NET Documentation"
 .hy
 .SH dotnet new list
 .PP
 \f[B]This article applies to:\f[R] \[u2714]\[uFE0F] .NET Core 3.1 SDK and later versions
 .SH NAME
 .PP
-dotnet-new---list - Lists available templates to be run using dotnet-new.
+dotnet-new-list - Lists available templates to be run using dotnet-new.
 .SH SYNOPSIS
 .IP
 .nf
 \f[C]
-dotnet new [<TEMPLATE_NAME>] -l|--list [--author <AUTHOR>] [-lang|--language {\[dq]C#\[dq]|\[dq]F#\[dq]|VB}]
+dotnet new list [<TEMPLATE_NAME>] [--author <AUTHOR>] [-lang|--language {\[dq]C#\[dq]|\[dq]F#\[dq]|VB}]
     [--tag <TAG>] [--type <TYPE>] [--columns <COLUMNS>] [--columns-all]
+    [-o|--output <output>] [--project <project>] [--ignore-constraints]
+    [-d|--diagnostics] [--verbosity <LEVEL>] [-h|--help]
 \f[R]
 .fi
 .SH DESCRIPTION
 .PP
-The \f[V]dotnet new --list\f[R] option lists available templates to use with \f[V]dotnet new\f[R].
+The \f[V]dotnet new list\f[R] command lists available templates to use with \f[V]dotnet new\f[R].
 If the is specified, lists templates containing the specified name.
 This option lists only default and installed templates.
-To find templates in NuGet that you can install locally, use the \f[V]--search\f[R] option.
+To find templates in NuGet that you can install locally, use the \f[V]search\f[R] command.
+.PP
+Starting with .NET SDK 7.0.100, the \f[V]list\f[R] command might not show all the templates installed on the machine.
+It takes the result of template constraints into account, and the templates that can\[cq]t be used won\[cq]t be shown.
+To force show all the templates, use the \f[V]--ignore-constraints\f[R] option.
 .RS
 .PP
 .RE
 .PP
-Starting with .NET SDK 7.0.100 Preview 2, the \f[V]dotnet new\f[R] syntax has changed:
+Starting with the .NET 7 SDK, the \f[V]dotnet new\f[R] syntax has changed:
 .IP \[bu] 2
 The \f[V]--list\f[R], \f[V]--search\f[R], \f[V]--install\f[R], and \f[V]--uninstall\f[R] options became \f[V]list\f[R], \f[V]search\f[R], \f[V]install\f[R] and \f[V]uninstall\f[R] subcommands.
 .IP \[bu] 2
 The \f[V]--update-apply\f[R] option became the \f[V]update\f[R] subcommand.
 .IP \[bu] 2
-to use \f[V]--update-check\f[R], use the \f[V]update\f[R] subcommand with the \f[V]--check\f[R] option.
+To use \f[V]--update-check\f[R], use the \f[V]update\f[R] subcommand with the \f[V]--check-only\f[R] option.
 .PP
 Other options that were available before are still available to use with their respective subcommands.
 Separate help for each subcommand is available via the \f[V]-h\f[R] or \f[V]--help\f[R] option: \f[V]dotnet new <subcommand> --help\f[R] lists all supported options for the subcommand.
 .PP
 Additionally, tab completion is now available for \f[V]dotnet new\f[R].
-It supports completion for installed template names, as well as completion for the options a selected template provides.
+It supports completion for installed template names and for the options a selected template provides.
 To activate tab completion for the .NET SDK, see Enable tab completion.
-> > Examples of the new syntax: > > - Show help for \f[V]list\f[R] subcommand > > \f[V]dotnetcli >   dotnet new list --help >\f[R] > > - List all templates matching the we substring that support the F# language.
-> > \f[V]dotnetcli >   dotnet new list we --language \[dq]F#\[dq] >\f[R]
+> > Examples of the old syntax: > > - List all Single Page Application (SPA) templates: > - since .NET SDK 6.0.100 > > \f[V]dotnetcli >   dotnet new --list spa >\f[R] > > - before .NET SDK 6.0.100 > > \f[V]dotnetcli >   dotnet new spa --list >\f[R]
 .SH ARGUMENTS
 .IP \[bu] 2
 \f[B]\f[VB]TEMPLATE_NAME\f[B]\f[R]
 .RS 2
 .PP
 If the argument is specified, only the templates containing \f[V]<TEMPLATE_NAME>\f[R] in template name or short name will be shown.
-.RS
-.PP
-Starting with .NET SDK 6.0.100, you can put the \f[V]<TEMPLATE_NAME>\f[R] argument after the \f[V]--list\f[R] option.
-For example, \f[V]dotnet new --list web\f[R] provides the same result as \f[V]dotnet new web --list\f[R].
-Using more than one argument is not allowed.
-.RE
 .RE
 .SH OPTIONS
 .IP \[bu] 2
@@ -76,7 +75,7 @@ Using more than one argument is not allowed.
 .PP
 Filters templates based on template author.
 Partial match is supported.
-Available since .NET Core 5.0.300 SDK.
+Available since .NET SDK 5.0.300.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--columns <COLUMNS>\f[B]\f[R]
@@ -96,14 +95,35 @@ The supported columns are:
 The template name and short name are always shown.
 The default list of columns is template name, short name, language, and tags.
 This list is equivalent to specifying \f[V]--columns=language,tags\f[R].
-Available since .NET Core 5.0.300 SDK.
+Available since .NET SDK 5.0.300.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--columns-all\f[B]\f[R]
 .RS 2
 .PP
 Displays all columns in the output.
-Available since .NET Core 5.0.300 SDK.
+Available since .NET SDK 5.0.300.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-d|--diagnostics\f[B]\f[R]
+.RS 2
+.PP
+Enables diagnostic output.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-h|--help\f[B]\f[R]
+.RS 2
+.PP
+Prints out help for the list command.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]--ignore-constraints\f[B]\f[R]
+.RS 2
+.PP
+Disables checking if the template meets the constraints to be run.
+Available since .NET SDK 7.0.100.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]-lang|--language {C#|F#|VB}\f[B]\f[R]
@@ -120,12 +140,29 @@ For example, \f[V]dotnet new --list --language \[dq]F#\[dq]\f[R].
 .RE
 .RE
 .IP \[bu] 2
+\f[B]\f[VB]-o|--output <OUTPUT_DIRECTORY>\f[B]\f[R]
+.RS 2
+.PP
+Location to place the generated output.
+The default is the current directory.
+For the list command, it might be necessary to specify the output directory to correctly evaluate constraints for the template.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]--project <PROJECT_PATH>\f[B]\f[R]
+.RS 2
+.PP
+The project that the template is added to.
+For the list command, it might be needed to specify the project the template is being added to to correctly evaluate constraints for the template.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
 \f[B]\f[VB]--tag <TAG>\f[B]\f[R]
 .RS 2
 .PP
 Filters templates based on template tags.
 To be selected, a template must have at least one tag that exactly matches the criteria.
-Available since .NET Core 5.0.300 SDK.
+Available since .NET SDK 5.0.300.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--type <TYPE>\f[B]\f[R]
@@ -134,6 +171,14 @@ Available since .NET Core 5.0.300 SDK.
 Filters templates based on template type.
 Predefined values are \f[V]project\f[R], \f[V]item\f[R], and \f[V]solution\f[R].
 .RE
+.IP \[bu] 2
+\f[B]\f[VB]-v|--verbosity <LEVEL>\f[B]\f[R]
+.RS 2
+.PP
+Sets the verbosity level of the command.
+Allowed values are \f[V]q[uiet]\f[R], \f[V]m[inimal]\f[R], \f[V]n[ormal]\f[R], and \f[V]diag[nostic]\f[R].
+Available since .NET SDK 7.0.100.
+.RE
 .SH EXAMPLES
 .IP \[bu] 2
 List all templates
@@ -141,47 +186,27 @@ List all templates
 .IP
 .nf
 \f[C]
-dotnet new --list
+dotnet new list
 \f[R]
 .fi
 .RE
 .IP \[bu] 2
 List all Single Page Application (SPA) templates:
 .RS 2
-.IP \[bu] 2
-since .NET SDK 6.0.100
 .IP
 .nf
 \f[C]
-dotnet new --list spa
-\f[R]
-.fi
-.IP \[bu] 2
-before .NET SDK 6.0.100
-.IP
-.nf
-\f[C]
-dotnet new spa --list
+dotnet new list spa
 \f[R]
 .fi
 .RE
 .IP \[bu] 2
 List all templates matching the \f[I]we\f[R] substring.
 .RS 2
-.IP \[bu] 2
-since .NET SDK 6.0.100
 .IP
 .nf
 \f[C]
-dotnet new --list we
-\f[R]
-.fi
-.IP \[bu] 2
-before .NET SDK 6.0.100
-.IP
-.nf
-\f[C]
-dotnet new we --list
+dotnet new list we
 \f[R]
 .fi
 .RE
@@ -191,7 +216,7 @@ List all templates matching the \f[I]we\f[R] substring that support the F# langu
 .IP
 .nf
 \f[C]
-dotnet new --list we --language \[dq]F#\[dq]
+dotnet new list we --language \[dq]F#\[dq]
 \f[R]
 .fi
 .RE
@@ -201,7 +226,7 @@ List all item templates.
 .IP
 .nf
 \f[C]
-dotnet new --list --type item
+dotnet new list --type item
 \f[R]
 .fi
 .RE
@@ -211,7 +236,7 @@ List all C# templates, showing the author and the type in the output.
 .IP
 .nf
 \f[C]
-dotnet new --list --language \[dq]C#\[dq] --columns \[dq]author,type\[dq]
+dotnet new list --language \[dq]C#\[dq] --columns \[dq]author,type\[dq]
 \f[R]
 .fi
 .RE
@@ -219,6 +244,6 @@ dotnet new --list --language \[dq]C#\[dq] --columns \[dq]author,type\[dq]
 .IP \[bu] 2
 dotnet new command
 .IP \[bu] 2
-dotnet new \[en]search option
+dotnet new search command
 .IP \[bu] 2
 Custom templates for dotnet new
