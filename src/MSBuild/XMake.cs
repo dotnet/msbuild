@@ -3437,7 +3437,7 @@ namespace Microsoft.Build.CommandLine
             )
             {
                 messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is not supported.", MessageImportance.lOW)
+                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is not supported.", MessageImportance.Low)
                 );
                 return false;
             }
