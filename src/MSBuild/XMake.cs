@@ -3426,7 +3426,7 @@ namespace Microsoft.Build.CommandLine
             if (Console.IsOutputRedirected)
             {
                 messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is being redirected to a file.", MessageImportance.High)
+                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is being redirected to a file.", MessageImportance.Low)
                 );
                 return false;
             }
@@ -3437,7 +3437,7 @@ namespace Microsoft.Build.CommandLine
             )
             {
                 messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is not supported.", MessageImportance.High)
+                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is not supported.", MessageImportance.lOW)
                 );
                 return false;
             }
