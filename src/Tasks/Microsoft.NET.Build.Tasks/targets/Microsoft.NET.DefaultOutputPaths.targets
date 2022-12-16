@@ -11,29 +11,47 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-   <!--
-    Apply the same default output paths as Microsoft.Common.targets now since we're running before them,
-    but need to adjust them and/or make decisions in terms of them.
-
-    Also note that common targets only set a default OutputPath if neither configuration nor
+  <!--
+    Note that common targets only set a default OutputPath if neither configuration nor
     platform were set by the user. This was used to validate that a valid configuration is passed,
     assuming the convention maintained by VS that every Configuration|Platform combination had
     an explicit OutputPath. Since we now want to support leaner project files with less
-    duplication and more automatic defaults, we always set a default OutputPath and can no
-    longer depend on that convention for validation. Getting validation re-enabled with a
-    different mechanism is tracked by https://github.com/dotnet/sdk/issues/350
+    duplication and more automatic defaults, we always set a default OutputPath.
    -->
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
-    <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
-    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
 
+  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
+       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
+  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
+    <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <!-- Set UseArtifactsOutput if not set and TargetFramework >= .NET 8 -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == '' and
+                            '$(TargetFrameworks)' == '' and
+                            '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                            $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 8.0))">
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+  </PropertyGroup>
+
+  <!-- Set BaseOutputPath for artifacts format if it wasn't set in Sdk.props -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
+    <BaseArtifactsPath Condition="'$(BaseArtifactsPath)' == ''">artifacts\</BaseArtifactsPath>
+    <BaseArtifactsPath>$([MSBuild]::EnsureTrailingSlash($(BaseArtifactsPath)))</BaseArtifactsPath>
+
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseArtifactsPath)bin\</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true'">
     <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">bin\</BaseOutputPath>
     <BaseOutputPath Condition="!HasTrailingSlash('$(BaseOutputPath)')">$(BaseOutputPath)\</BaseOutputPath>
     <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' == 'AnyCPU'">$(BaseOutputPath)$(Configuration)\</OutputPath>
     <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' != 'AnyCPU'">$(BaseOutputPath)$(PlatformName)\$(Configuration)\</OutputPath>
     <OutputPath Condition="!HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
+  </PropertyGroup>
 
+  <!-- If "UseArtifactsOutput" wasn't set when the MSBuild project extensions .props files were imported, then use "obj" for the intermediate output path
+         instead of artifacts.  To have the intermediate output path in the artifacts folder, "UseArtifactsOutput" should be set in Directory.Build.props-->
+  <PropertyGroup Condition="'$(UseArtifactsIntermediateOutput)' != 'true'">
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">obj\</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
     <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' and '$(PlatformName)' == 'AnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
@@ -42,8 +60,72 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- Set the package output path (for nuget pack target) now, before the TargetFramework is appended -->
-  <PropertyGroup>
-    <PackageOutputPath Condition="'$(PackageOutputPath)' == ''">$(OutputPath)</PackageOutputPath>
+  <PropertyGroup Condition="'$(PackageOutputPath)' == ''">
+    <PackageOutputPath Condition="'$(UseArtifactsOutput)' != 'true'">$(OutputPath)</PackageOutputPath>
+    <PackageOutputPath Condition="'$(UseArtifactsOutput)' == 'true'">$(BaseArtifactsPath)\package\</PackageOutputPath>
   </PropertyGroup>
 
+  <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
+       of these properties before the TargetFramework is appended, so that if these values are specified
+       in the project file, the specified value will be used for the exclude. -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true'">
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(OutputPath)/**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(BaseArtifactsPath)/**</DefaultItemExcludes>
+
+    <!-- Exclude bin and obj folders even when using artifacts output format, so that when a project is changed
+         to use artifacts format (for example by retargeting to .NET 8, it doesn't suddenly pick up files from
+         bin and obj. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin/**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!--
+    Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
+    targets.
+   -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true' and
+                            '$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
+    <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseArtifactsIntermediateOutput)' != 'true' and
+                            '$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
+    <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
+    <_ArtifactPivots>$(Configuration.ToLowerInvariant())</_ArtifactPivots>
+
+    <!-- Check if TargetFramework is a global property by trying to overwrite it -->
+    <_TargetFrameworkBackup>$(TargetFramework)</_TargetFrameworkBackup>
+    <TargetFramework></TargetFramework>
+    <TargetFrameworkIsGlobal>false</TargetFrameworkIsGlobal>
+    <TargetFrameworkIsGlobal Condition="'$(TargetFramework)' == '$(_TargetFrameworkBackup)'">true</TargetFrameworkIsGlobal>
+    <TargetFramework>$(_TargetFrameworkBackup)</TargetFramework>
+
+    <_ArtifactPivots Condition="'$(TargetFrameworks)' != '' Or
+                                '$(TargetFrameworkIsGlobal)' == 'true'"
+                     >$(_ArtifactPivots)_$(TargetFramework.ToLowerInvariant())</_ArtifactPivots>
+
+    <!-- This targets file is evaluated before RuntimeIdentifierInference.targets, so this will only include the
+         RuntimeIdentifier in the path if it was explicitly specified, not if it was inferred.  This is the
+         behavior we want. -->
+    <_ArtifactPivots Condition="'$(RuntimeIdentifier)' != ''"
+                     >$(_ArtifactPivots)_$(RuntimeIdentifier.ToLowerInvariant())</_ArtifactPivots>
+
+    <OutputPath Condition="'$(OutputPath)' == ''">$(BaseOutputPath)$(_ArtifactPivots)\</OutputPath>
+
+    <!-- Publish path -->
+    <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(BaseArtifactsPath)$(PublishDirName)\$(_ArtifactPivots)\</PublishDir>
+    
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' and '$(UseArtifactsIntermediateOutput)' == 'true'">
+    <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' ">$(BaseIntermediateOutputPath)$(_ArtifactPivots)\</IntermediateOutputPath>
+  </PropertyGroup>
 </Project>

@@ -224,33 +224,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="InvalidTargetPlatformVersion"
                  FormatArguments="$(TargetPlatformVersion);$(TargetPlatformIdentifier);$(_ValidTargetPlatformVersions)" />
   </Target>
-
-  <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
-       of these properties before the TargetFramework is appended, so that if these values are specified
-       in the project file, the specified value will be used for the exclude. -->
-  <PropertyGroup>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(OutputPath)/**</DefaultItemExcludes>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
-  </PropertyGroup>
-
-  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
-       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
-  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
-    <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
-
+  
   <PropertyGroup>
     <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true') and '$(MSBuildProjectExtension)' != '.fsproj'" >true</ProduceReferenceAssembly>
     <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 7.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true') and '$(MSBuildProjectExtension)' == '.fsproj'" >true</ProduceReferenceAssembly>
-  </PropertyGroup>
-
-  <!--
-    Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
-    targets.
-   -->
-  <PropertyGroup Condition="'$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
-    <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
-    <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
   </PropertyGroup>
 
 </Project>

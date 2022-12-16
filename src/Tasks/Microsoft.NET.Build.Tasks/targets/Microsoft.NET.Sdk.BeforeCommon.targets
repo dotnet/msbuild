@@ -31,8 +31,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
 
-  <!-- Set default intermediate and output paths -->
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
+  <!--
+    Apply the same default output paths as Microsoft.Common.targets now since we're running before them,
+    but need to adjust them and/or make decisions in terms of them.
+   -->
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+    <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
+    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
+  </PropertyGroup>
 
   <!-- Before any additional SDK targets are imported, import the publish profile.
        This allows the publish profile to set properties like RuntimeIdentifier and them be
@@ -45,6 +52,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     and adjust intermediate and output paths to include it.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.TargetFrameworkInference.targets" />
+
+  <!-- Set default intermediate and output paths -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
 
   <!-- Related issue: https://github.com/dotnet/sdk/issues/12324-->
   <PropertyGroup>
@@ -115,8 +125,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateDependencyFile Condition="'$(GenerateDependencyFile)' == ''">$(PreserveCompilationContext)</GenerateDependencyFile>
   </PropertyGroup>
 
-  <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there. -->
-  <PropertyGroup>
+  <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there.
+       If using Artifacts output format, PublishDir is already set in Microsoft.NET.DefaultOutputPaths.targets -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true'">
     <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
     <!-- ensure the PublishDir is RID specific-->
     <PublishDir Condition="'$(PublishDir)' == '' and

@@ -32,6 +32,42 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UsingNETSdkDefaults>true</UsingNETSdkDefaults>
   </PropertyGroup>
 
+
+  
+  <!-- We need to put the UseArtifactsOutput logic after the import of Directory.Build.props, but before the MSBuild Project Extensions .props import.
+       However, both of these things happen in Microsoft.Common.props with no opportunity to insert logic in between them.
+
+       So what we do here is duplicate the Directory.Build.props import logic from Microsoft.Common.props, and then set ImportDirectoryBuildProps to
+       false so that it doesn't get imported twice.
+
+       Alternatively, we could add a hook in MSBuild to define a file to import at the right location, to avoid duplicating the logic here.
+       -->
+  <PropertyGroup>
+    <ImportDirectoryBuildProps Condition="'$(ImportDirectoryBuildProps)' == ''">true</ImportDirectoryBuildProps>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ImportDirectoryBuildProps)' == 'true' and '$(DirectoryBuildPropsPath)' == ''">
+    <_DirectoryBuildPropsFile Condition="'$(_DirectoryBuildPropsFile)' == ''">Directory.Build.props</_DirectoryBuildPropsFile>
+    <_DirectoryBuildPropsBasePath Condition="'$(_DirectoryBuildPropsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectoryBuildPropsFile)'))</_DirectoryBuildPropsBasePath>
+    <DirectoryBuildPropsPath Condition="'$(_DirectoryBuildPropsBasePath)' != '' and '$(_DirectoryBuildPropsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectoryBuildPropsBasePath)', '$(_DirectoryBuildPropsFile)'))</DirectoryBuildPropsPath>
+  </PropertyGroup>
+
+  <Import Project="$(DirectoryBuildPropsPath)" Condition="'$(ImportDirectoryBuildProps)' == 'true' and exists('$(DirectoryBuildPropsPath)')"/>
+
+  <PropertyGroup>
+    <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+  </PropertyGroup>
+
+  <!-- Set up base artifacts folders if UseArtifactsOutput is set -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
+    <UseArtifactsIntermediateOutput Condition="'$(UseArtifactsIntermediateOutput)' == ''">true</UseArtifactsIntermediateOutput>
+    
+    <BaseArtifactsPath Condition="'$(BaseArtifactsPath)' == ''">artifacts\</BaseArtifactsPath>
+    <BaseArtifactsPath>$([MSBuild]::EnsureTrailingSlash($(BaseArtifactsPath)))</BaseArtifactsPath>
+
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseArtifactsPath)bin\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(BaseArtifactsPath)intermediates\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(MSBuildProjectFullPath)' == '$(ProjectToOverrideProjectExtensionsPath)'">
     <MSBuildProjectExtensionsPath>$(ProjectExtensionsPathForSpecifiedProject)</MSBuildProjectExtensionsPath>
   </PropertyGroup>
