@@ -168,7 +168,7 @@ namespace Microsoft.NET.Build.Tests
         private string VerifyAppBuilds(TestAsset testAsset, string prefix)
         {
             var buildCommand = new BuildCommand(testAsset, "TestApp");
-            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory();
 
             buildCommand
                 .Execute()

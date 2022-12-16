@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tests
         public GivenThatWeHaveAPpContentFile(ITestOutputHelper log) : base(log)
         {}
 
-        [Fact]
+        [Fact(Skip = "https://github.com/NuGet/Home/issues/12323")]
         public void It_copies_to_output_successfully()
         {
             var packageReference = GetPackageReference();

@@ -927,7 +927,6 @@ public static class Program
                 .Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(
-                testProject.TargetFrameworks,
                 runtimeIdentifier: testProject.RuntimeIdentifier);
             return Path.Combine(outputDirectory.FullName, testProject.Name + ".dll");
         }

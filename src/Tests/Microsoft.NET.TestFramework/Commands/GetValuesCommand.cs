@@ -54,7 +54,7 @@ namespace Microsoft.NET.TestFramework.Commands
             : base(testAsset, "WriteValuesToFile", relativePathToProject: null)
         {
 
-            _targetFramework = targetFramework ?? testAsset.TestProject?.TargetFrameworks;
+            _targetFramework = targetFramework ?? OutputPathCalculator.FromTestAsset(ProjectFile, testAsset).TryGetTargetFramework();
             _targetFramework = _targetFramework.Contains(";") ? "" : _targetFramework;
 
             _valueName = valueName;
@@ -119,7 +119,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
 
             File.WriteAllText(injectTargetPath, injectTargetContents);
 
-            var outputDirectory = GetOutputDirectory(_targetFramework);
+            var outputDirectory = GetValuesDirectory(_targetFramework);
             outputDirectory.Create();
 
             return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(TargetName, newArgs);
@@ -133,7 +133,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
         public List<(string value, Dictionary<string, string> metadata)> GetValuesWithMetadata()
         {
             string outputFilename = $"{_valueName}Values.txt";
-            var outputDirectory = GetOutputDirectory(_targetFramework, Configuration ?? "Debug");
+            var outputDirectory = GetValuesDirectory(_targetFramework, Configuration ?? "Debug");
             string fullFileName = Path.Combine(outputDirectory.FullName, outputFilename);
 
             if (File.Exists(fullFileName))
@@ -165,6 +165,18 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
             {
                 return new List<(string value, Dictionary<string, string> metadata)>();
             }
+        }
+
+        DirectoryInfo GetValuesDirectory(string targetFramework = "", string configuration = "Debug")
+        {
+            //  Use a consistent directory format to put the values text file in, so we don't have to worry about
+            //  whether the project uses the artifacts output format or not
+
+            targetFramework = targetFramework ?? string.Empty;
+            configuration = configuration ?? string.Empty;
+
+            string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework);
+            return new DirectoryInfo(output);
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Microsoft.NET.Build.Tests
         void VerifyAppBuilds(TestAsset testAsset)
         {
             var buildCommand = new BuildCommand(testAsset, "TestApp");
-            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory();
 
             buildCommand
                 .Execute()
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDir = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDir = buildCommand.GetOutputDirectory();
 
             var commandResult = new DotnetCommand(Log, Path.Combine(outputDir.FullName, "TestApp.dll"))
                 .Execute();
@@ -150,7 +150,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory();
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",

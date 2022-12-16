@@ -119,7 +119,7 @@ public class ReferencedExeProgram
             {
                 var publishCommand = new PublishCommand(testProjectInstance);
 
-                outputDirectory = publishCommand.GetOutputDirectory(MainProject.TargetFrameworks, runtimeIdentifier: MainProject.RuntimeIdentifier).FullName;
+                outputDirectory = publishCommand.GetOutputDirectory(runtimeIdentifier: MainProject.RuntimeIdentifier).FullName;
 
                 buildOrPublishCommand = publishCommand;
             }
@@ -127,7 +127,7 @@ public class ReferencedExeProgram
             {
                 var buildCommand = new BuildCommand(testProjectInstance);
 
-                outputDirectory = buildCommand.GetOutputDirectory(MainProject.TargetFrameworks, runtimeIdentifier: MainProject.RuntimeIdentifier).FullName;
+                outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: MainProject.RuntimeIdentifier).FullName;
 
                 buildOrPublishCommand = buildCommand;
             }

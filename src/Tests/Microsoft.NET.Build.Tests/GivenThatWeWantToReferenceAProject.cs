@@ -285,9 +285,9 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var contentPath = Path.Combine(testAsset.Path, testProjectC.Name, "bin", "Debug", targetFramework, "a.txt");
+            var contentPath = Path.Combine(testProjectC.GetOutputDirectory(testAsset.Path), "a.txt");
             File.Exists(contentPath).Should().BeTrue();
-            var binDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProjectC.Name, "bin"));
+            var binDir = new DirectoryInfo(Path.GetDirectoryName(contentPath));
             binDir.Delete(true);
 
             buildCommand

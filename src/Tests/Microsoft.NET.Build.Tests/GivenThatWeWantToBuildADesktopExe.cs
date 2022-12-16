@@ -878,7 +878,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            var outputDirectory = buildCommand.GetOutputDirectory();
 
             // this xml is coming from ref folder
             outputDirectory.Should().HaveFile("System.Diagnostics.Debug.xml");
@@ -913,7 +913,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            var outputDirectory = buildCommand.GetOutputDirectory();
 
             HelperCheckPdbAndDocumentation(outputDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
         }
@@ -956,7 +956,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(libraryProject.TargetFrameworks);
+            var outputDirectory = buildCommand.GetOutputDirectory();
 
             HelperCheckPdbAndDocumentation(outputDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
         }
@@ -997,7 +997,7 @@ class Program
                 .Should()
             .Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            var publishDirectory = publishCommand.GetOutputDirectory();
 
             HelperCheckPdbAndDocumentation(publishDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
         }
@@ -1033,9 +1033,9 @@ class Program
                 .Should()
             .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            var outputDirectory = buildCommand.GetOutputDirectory();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            var publishDirectory = publishCommand.GetOutputDirectory();
 
             outputDirectory.Should().HaveFile("Microsoft.Build.xml");
             publishDirectory.Should().NotHaveFile("Microsoft.Build.xml");

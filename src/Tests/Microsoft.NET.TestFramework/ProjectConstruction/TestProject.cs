@@ -49,6 +49,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public string TargetFrameworkProfile { get; set; }
 
+        public bool? UseArtifactsOutput { get; set; }
+
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 
         public List<string> References { get; } = new List<string>();
@@ -498,6 +500,17 @@ namespace {safeThisName}
         {
             var referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(targetFrameworkVersion);
             return referenceAssemblies != null;
+        }
+
+        private OutputPathCalculator GetOutputPathCalculator(string testRoot)
+        {
+            return OutputPathCalculator.FromTestProject(Path.Combine(testRoot, Name, Name + ".csproj"), this);
+        }
+
+        public string GetOutputDirectory(string testRoot, string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
+        {
+            return GetOutputPathCalculator(testRoot)
+                .GetOutputDirectory(targetFramework, configuration, runtimeIdentifier);
         }
     }
 }

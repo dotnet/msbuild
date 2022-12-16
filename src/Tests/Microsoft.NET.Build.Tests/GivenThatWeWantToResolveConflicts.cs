@@ -222,7 +222,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            var outputDirectory = buildCommand.GetOutputDirectory();
 
             outputDirectory.Should().NotHaveFile("Microsoft.Extensions.DependencyInjection.Abstractions.dll");
         }

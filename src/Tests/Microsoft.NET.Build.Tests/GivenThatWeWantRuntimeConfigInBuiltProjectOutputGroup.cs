@@ -32,9 +32,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithTargetFramework(targetFramework);
 
             var command = new GetValuesCommand(
-                Log,
-                testAsset.TestRoot,
-                targetFramework,
+                testAsset,
                 "BuiltProjectOutputGroupOutput",
                 GetValuesCommand.ValueType.Item)
             {
@@ -44,7 +42,8 @@ namespace Microsoft.NET.Build.Tests
 
             command.Execute().Should().Pass();
 
-            var outputDirectory = command.GetOutputDirectory(targetFramework);
+            var outputDirectory = command.GetOutputDirectory();
+
             var runtimeConfigFile = outputDirectory.File("HelloWorld.runtimeconfig.json");
             var (_, metadata) = command.GetValuesWithMetadata().Single(i => i.value == runtimeConfigFile.FullName);
 
@@ -65,12 +64,14 @@ namespace Microsoft.NET.Build.Tests
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            new BuildCommand(testAsset)
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
 
-            var configFile = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Release", testProject.TargetFrameworks, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+            var configFile = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release").FullName, testProject.Name + ".runtimeconfig.json");
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().NotContain("\"System.Runtime.TieredCompilation\"");
@@ -120,12 +121,14 @@ namespace Microsoft.NET.Build.Tests
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "3"));
             });
 
-            new BuildCommand(testAsset)
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
 
-            var configFile = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Release", testProject.TargetFrameworks, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+            var configFile = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release").FullName, testProject.Name + ".runtimeconfig.json");
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredCompilation\": true");

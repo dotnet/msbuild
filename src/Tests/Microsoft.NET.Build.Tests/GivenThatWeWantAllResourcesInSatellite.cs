@@ -44,6 +44,14 @@ namespace Microsoft.NET.Build.Tests
                 testAsset = testAsset.WithProjectChanges(projectChanges);
             }
 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                //  Also target desktop on Windows to get more test coverage:
+                //    * Desktop requires satellites to have same public key as parent whereas coreclr does not.
+                //    * Reference path handling of satellite assembly generation used to be incorrect for desktop.
+                testAsset = testAsset.WithTargetFrameworks($"{ToolsetInfo.CurrentTargetFramework};net46");
+            }
+
             var buildCommand = new BuildCommand(testAsset);
 
             if (setup != null)

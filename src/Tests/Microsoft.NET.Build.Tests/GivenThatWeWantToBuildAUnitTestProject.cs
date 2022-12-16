@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory();
             outputDirectory.Should().HaveFile(@"XUnitTestProject.runtimeconfig.json");
         }
 

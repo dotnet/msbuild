@@ -144,7 +144,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier);
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
             string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
@@ -406,7 +406,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory();
             outputDirectory.Should().NotHaveFile("hostfxr.dll"); // This file will only appear if SelfContained. 
         }
 

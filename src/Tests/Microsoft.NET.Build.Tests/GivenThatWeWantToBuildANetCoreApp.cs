@@ -365,7 +365,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier ?? "").FullName;
+            string outputFolder = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier ?? "").FullName;
 
             new DotnetCommand(Log, Path.Combine(outputFolder, project.Name + ".dll"))
                 .Execute()
@@ -423,7 +423,7 @@ public static class Program
 
             var buildCommand = new BuildCommand(_testAssetsManager.CreateTestProject(proj, identifier: targetFramework));
             var runtimeconfigFile = Path.Combine(
-                buildCommand.GetOutputDirectory(targetFramework).FullName,
+                buildCommand.GetOutputDirectory().FullName,
                 $"{proj.Name}.runtimeconfig.dev.json");
 
             // GenerateRuntimeConfigDevFile overrides default behavior
@@ -487,7 +487,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks).FullName;
+            string outputFolder = buildCommand.GetOutputDirectory().FullName;
 
             using (var depsJsonFileStream = File.OpenRead(Path.Combine(outputFolder, $"{project.Name}.deps.json")))
             {
@@ -526,7 +526,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier).FullName;
+            string outputFolder = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier).FullName;
 
             using var depsJsonFileStream = File.OpenRead(Path.Combine(outputFolder, $"{project.Name}.deps.json"));
             var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
@@ -607,13 +607,21 @@ public static class Program
                 .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase)
                 ;
 
+            if (crossTarget)
+            {
+                //  Let the GetOutputDirectory logic know that this project doesn't use the artifacts output format
+                testProject.UseArtifactsOutput = false;
+            }
+
             var outputDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().NotHaveFile("Humanizer.resources.dll");
             outputDirectory.Should().HaveFile(Path.Combine("fr", "Humanizer.resources.dll"));
         }
 
-        [Fact]
-        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path(bool useArtifactsOutput)
         {
             var testProject = new TestProject()
             {
@@ -624,28 +632,40 @@ public static class Program
 
             string[] extraArgs = new[] { $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework.ToUpper()}" };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: useArtifactsOutput.ToString());
 
             var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
+                .WithEnvironmentVariable("UseArtifactsOutput", useArtifactsOutput.ToString())
                 .Execute(extraArgs)
                 .Should()
                 .Pass();
 
-            string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
+            if (useArtifactsOutput)
+            {
+                string outputFolder = Path.Combine(buildCommand.ProjectRootPath, "artifacts", "bin", $"debug_{ToolsetInfo.CurrentTargetFramework}");
+                new DirectoryInfo(outputFolder).Should().Exist();
 
-            Directory.GetDirectories(outputFolderWithConfiguration)
-                .Select(Path.GetFileName)
-                .Should()
-                .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
+                string intermediateFolder = Path.Combine(buildCommand.ProjectRootPath, "artifacts", "intermediates", $"debug_{ToolsetInfo.CurrentTargetFramework}");
+                new DirectoryInfo(intermediateFolder).Should().Exist();
+            }
+            else
+            {
+                string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
 
-            string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+                Directory.GetDirectories(outputFolderWithConfiguration)
+                    .Select(Path.GetFileName)
+                    .Should()
+                    .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
 
-            Directory.GetDirectories(intermediateFolderWithConfiguration)
-                .Select(Path.GetFileName)
-                .Should()
-                .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
+                string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+
+                Directory.GetDirectories(intermediateFolderWithConfiguration)
+                    .Select(Path.GetFileName)
+                    .Should()
+                    .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
+            }
         }
 
         [Fact]
@@ -832,7 +852,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputPath = buildCommand.GetOutputDirectory(targetFramework: TFM, runtimeIdentifier: runtimeIdentifier).FullName;
+            var outputPath = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier).FullName;
             var depsFilePath = Path.Combine(outputPath, $"{testProject.Name}.deps.json");
             var runtimeConfigPath = Path.Combine(outputPath, $"{testProject.Name}.runtimeconfig.json");
 

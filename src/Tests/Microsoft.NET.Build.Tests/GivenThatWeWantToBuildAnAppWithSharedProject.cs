@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputPath = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputPath = buildCommand.GetOutputDirectory();
 
             outputPath.Should().NotHaveFile("TextFile1.txt");
 
