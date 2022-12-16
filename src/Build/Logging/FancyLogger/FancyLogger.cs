@@ -5,17 +5,23 @@ using Microsoft.Build.Framework;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
     public class FancyLogger : ILogger
     {
+        // TODO: Move somewhere else
+        public string GetUnambiguousPath(string path)
+        {
+            // Get last part of path
+            return Path.GetFileName(path);
+        }
+
 
         public FancyLoggerNode root = new FancyLoggerNode(-1, FancyLoggerNodeType.None);
 
         public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
-        public Dictionary<int, FancyLoggerBufferLine> targetConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
-        public Dictionary<int, FancyLoggerBufferLine> taskConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
 
         private float existingTasks = 1;
         private float completedTasks = 0;
@@ -35,22 +41,19 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Started
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
             eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
-            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
-            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
+            // eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
+            // eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
             // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
-            eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
-            eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
+            // eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
+            // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
             // Raised
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
-            {
-                FancyLoggerBuffer.Initialize();
-                FancyLoggerBufferLine rootLine = FancyLoggerBuffer.WriteNewLine("");
-                root.Line = rootLine;
-            }
+            // Initialize FancyLoggerBuffer
+            FancyLoggerBuffer.Initialize();
         }
 
         // Build
@@ -65,111 +68,69 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Project
         void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            if (e.BuildEventContext?.ProjectInstanceId == null) return;
-            int id = e.BuildEventContext.ProjectInstanceId;
-            // Create node
-            FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Project);
-            node.Line = new FancyLoggerBufferLine(" " + ANSIBuilder.Formatting.Dim("Project: ") + e.ProjectFile); ;
-            root.Add(node);
-            node.Write();
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            // If id already exists...
+            if (projectConsoleLines.ContainsKey(id)) return;
+            // Create line
+            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine(
+                ANSIBuilder.Alignment.SpaceBetween(
+                    $"{ANSIBuilder.Graphics.Spinner()} {ANSIBuilder.Formatting.Dim("Project - ")} {GetUnambiguousPath(e.ProjectFile!)}",
+                    "(5 targets completed)",
+                    Console.WindowWidth
+                )
+            );
+
+            projectConsoleLines.Add(id, line);
+            Thread.Sleep(400);
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-            if (e.BuildEventContext?.ProjectInstanceId == null) return;
-            FancyLoggerNode? node = root.Find($"project-{e.BuildEventContext.ProjectInstanceId}");
-            if (node == null) return;
-            int lineId = node.Line?.Id ?? -1;
-            if(lineId == -1) return;
-            FancyLoggerBuffer.UpdateLine(lineId, ""
-                + ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)
-                + ANSIBuilder.Formatting.Dim("Project: ")
-                + ANSIBuilder.Formatting.Color(e.ProjectFile ?? "", ANSIBuilder.Formatting.ForegroundColor.Green)
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            // If id does not exist
+            if (!projectConsoleLines.ContainsKey(id)) return;
+            // Get line id
+            FancyLoggerBufferLine line = projectConsoleLines[id];
+            // Update line
+            FancyLoggerBuffer.UpdateLine(line.Id,
+                ANSIBuilder.Alignment.SpaceBetween(
+                    $"{ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)} {ANSIBuilder.Formatting.Dim("Project - ")} {ANSIBuilder.Formatting.Color(GetUnambiguousPath(e.ProjectFile!), ANSIBuilder.Formatting.ForegroundColor.Green)}",
+                    "(5 targets completed)",
+                    Console.WindowWidth
+                )
             );
-            node.Collapse();
+            /*// TODO
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            var line = projectConsoleLines[id];
+            FancyLoggerBuffer.UpdateLine(line.Id, ""
+                + "D"
+                + " "
+                + ANSIBuilder.Formatting.Dim("Project - ")
+                + GetUnambiguousPath(e.ProjectFile)
+            );*/
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
-            if (e.BuildEventContext?.TargetId == null) return;
-            int id = e.BuildEventContext.TargetId;
-            // Create node
-            FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Target);
-            node.Line = new FancyLoggerBufferLine("  "
-                + ANSIBuilder.Formatting.Dim("Target: ")
-                + e.TargetName);
-            // Get parent node
-            FancyLoggerNode? parentNode = root.Find($"project-{e.BuildEventContext.ProjectInstanceId}");
-            if (parentNode == null) return;
-            // Add to parent node
-            parentNode.Add(node);
-            node.Write();
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
-            if (e.BuildEventContext?.TargetId == null) return;
-            FancyLoggerNode? node = root.Find($"target-{e.BuildEventContext.TargetId}");
-            if (node == null) return;
-            int lineId = node.Line?.Id ?? -1;
-            if(lineId == -1) return;
-            /*FancyLoggerBuffer.UpdateLine(lineId, ""
-                + ANSIBuilder.Formatting.Color("✓ ", ANSIBuilder.Formatting.ForegroundColor.Green)
-                + ANSIBuilder.Formatting.Dim("Target: ")
-                + ANSIBuilder.Formatting.Color(e.TargetName, ANSIBuilder.Formatting.ForegroundColor.Green)
-            );
-            node.Collapse();*/
-            FancyLoggerBuffer.DeleteLine(lineId);
         }
 
         // Task
         void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
         {
             existingTasks++;
-            if (e.BuildEventContext?.TaskId == null) return;
-            int id = e.BuildEventContext.TaskId;
-            // Create node
-            FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Task);
-            node.Line = new FancyLoggerBufferLine("  " + ANSIBuilder.Formatting.Dim("Task: ") + e.TaskName);
-            // Get parent node
-            FancyLoggerNode? parentNode = root.Find($"target-{e.BuildEventContext.TargetId}");
-            if (parentNode == null) return;
-            // Add to parent node
-            parentNode.Add(node);
-            node.Write();
-            // TODO: Remove
-            Thread.Sleep(400);
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
             completedTasks++;
-            if (e.BuildEventContext?.TaskId == null) return;
-            FancyLoggerNode? node = root.Find($"task-{e.BuildEventContext.TaskId}");
-            if(node == null) return;
-            int lineId = node.Line?.Id ?? -1;
-            if (lineId == -1) return;
-            FancyLoggerBuffer.UpdateLine(lineId, ""
-                + ANSIBuilder.Formatting.Color("✓ ", ANSIBuilder.Formatting.ForegroundColor.Green)
-                + ANSIBuilder.Formatting.Dim("Task: ")
-                + ANSIBuilder.Formatting.Color(e.TaskName, ANSIBuilder.Formatting.ForegroundColor.Green)
-            );
-            FancyLoggerBuffer.WriteFooter($"Build: {ANSIBuilder.Graphics.ProgressBar(completedTasks/existingTasks)}  {(completedTasks / existingTasks) * 100} \t {completedTasks}/{existingTasks}");
-            node.Collapse();
         }
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
-            // Only output high importance messages
-            // if (e.Importance != MessageImportance.High) return;
-            /* if (e.BuildEventContext?.TaskId == null) return;
-            int id = e.BuildEventContext.GetHashCode();
-            FancyLoggerNode node = new FancyLoggerNode(id, FancyLoggerNodeType.Message);
-            node.Line = new FancyLoggerBufferLine("--Message");
-
-            FancyLoggerNode? parentNode = root.Find($"task-{e.BuildEventContext.TaskId}");
-            if (parentNode == null) return;
-
-            parentNode.Add(node);
-            node.Write(); */
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {

@@ -89,7 +89,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                     }
                 }
             });
-            // Switch to alternate buffer
+            // Switch to alternate
+            Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
             // Settings
             AutoScrollEnabled = true;
@@ -191,7 +192,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Add line
             lines.Add(line);
             // Update contents
-            if(AutoScrollEnabled) ScrollToEnd();
+            if (AutoScrollEnabled) ScrollToEnd();
+            else ScrollToLine(CurrentTopLineIndex);
             return line;
         }
         public static FancyLoggerBufferLine? WriteNewLineAfter(string text, int lineId)
@@ -218,8 +220,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (lineIndex == -1) return null;
             lines.Insert(lineIndex + 1, line);
             // Scroll to end if lineIndex >= lines
-            if (lineIndex >= lines.Count -2 && AutoScrollEnabled) ScrollToEnd();
-            else ScrollToLine(CurrentTopLineIndex); 
+            // if (lineIndex >= lines.Count -2 && AutoScrollEnabled) ScrollToEnd();
+            // else ScrollToLine(CurrentTopLineIndex);
+            ScrollToEnd();
             return line;
         }
 

@@ -3192,7 +3192,7 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
-            bool shouldUseFancyLogger, 
+            bool fancyLoggerCommandLineOptIn, 
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3223,14 +3223,7 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
-            bool outputSupportsFancyLogger = !Console.IsOutputRedirected && // Avoid using the FancyLogger when output is redirected to a file
-                ( RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.GetEnvironmentVariable("WT_SESSION") != "" ) && // Avoid when NOT using Windows Terminal
-                Environment.GetEnvironmentVariable("TERM") != "dumb"; // Avoid using FancyLogger when output is dumb (does not support ANSI). TODO: Check for better ways of figuring out terminals' capabilities
-            if (shouldUseFancyLogger && !outputSupportsFancyLogger)
-            {
-                // Add to deferredbuildmessages
-            }
-            else if (shouldUseFancyLogger && outputSupportsFancyLogger)
+            if ((fancyLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true") && DoesEnvironmentSupportFancyLogger())
             {
                 ProcessFancyLogger(noConsoleLogger, loggers);
             }
@@ -3410,13 +3403,33 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
+        private static bool DoesEnvironmentSupportFancyLogger()
+        {
+            // If output is redirected
+            if (Console.IsOutputRedirected)
+            {
+                // Add to deferred build messages
+                return false;
+            }
+            // If terminal is dumb
+            if (
+                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.GetEnvironmentVariable("WT_SESSION") == "")
+                || Environment.GetEnvironmentVariable("TERM") == "dumb"
+            )
+            {
+                // Add to deferred build messages
+                return false;
+            }
+            return true;
+        }
+
         private static void ProcessFancyLogger(
             bool noConsoleLogger,
             List<ILogger> loggers
         )
         {
             // Check for flags and env variables
-            if (true && !noConsoleLogger)
+            if (!noConsoleLogger)
             {
                 FancyLogger l = new FancyLogger();
                 loggers.Add(l);

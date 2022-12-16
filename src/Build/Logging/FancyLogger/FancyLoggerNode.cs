@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
-{
+{ 
     // TODO: Maybe remove
     public enum FancyLoggerNodeType
     {
@@ -120,8 +120,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                 if (Parent != null)
                 {
                     int parentLastLineId = Parent.GetLastLineIndex();
-                    if (parentLastLineId == -1) throw new Exception("Oops something went wrong");
-                    Line.Text += $"  --> {parentLastLineId}";
+                    // if (parentLastLineId == -1) throw new Exception("Oops something went wrong");
+                    if (parentLastLineId == -1) return;
                     // FancyLoggerBuffer.WriteNewLineAfter(Line, parentLastLineId);
                     FancyLoggerBuffer.WriteNewLineAfterIndex(Line, parentLastLineId);
                 }

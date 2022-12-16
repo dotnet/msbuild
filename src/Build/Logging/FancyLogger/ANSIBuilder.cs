@@ -50,6 +50,18 @@ namespace Microsoft.Build.Logging.FancyLogger
                 result += new string(' ', space);
                 return result;
             }
+            public static string SpaceBetween(string leftText, string rightText, int width)
+            {
+                string result = String.Empty;
+                string leftNoFormatString = ANSIRemove(leftText);
+                string rightNoFormatString = ANSIRemove(rightText);
+                if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth) return leftText + rightText;
+                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length) - 1;
+                result += leftText;
+                result += new string(' ', space);
+                result += rightText;
+                return result;
+            }
         }
         public static class Formatting
         {
@@ -134,7 +146,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             public static string Hyperlink(string text, string url)
             {
                 // return String.Format("\x1b[]8;;{0}\x1b\\{1}\x1b[]8;\x1b\\", text, url);
-                return $"\x1b[]8;;{url}\x1b[\\{text}\x1b[]8;;\x1b[\\";
+                // return $"\x1b[]8;;{url}\x1b[\\{text}\x1b[]8;;\x1b[\\";
+                return url.Replace("\\", "/");
             }
             public static string DECLineDrawing(string text)
             {
