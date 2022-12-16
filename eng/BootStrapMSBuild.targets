@@ -36,6 +36,7 @@
         <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGet.'))' == 'True'" />
         <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Newtonsoft.Json'))' == 'True'" />
         <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.Extensions.'))' == 'True'" />
 
         <!-- NuGet.targets will be in the ResolvedRuntimeTargets ItemGroup -->
         <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'True'" />
@@ -56,6 +57,7 @@
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'True'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'True'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'True'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'True'" />
     </ItemGroup>
   </Target>
 
@@ -102,6 +104,7 @@
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
 
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
+      <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.tlb" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.pdb" />

@@ -1321,11 +1321,12 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
+                    List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
                     BuildResultCode? result = null;
 
-                    IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
                         var commandLineString =
@@ -1335,6 +1336,17 @@ namespace Microsoft.Build.CommandLine
                             string.Join(" ", commandLine);
 #endif
                         messagesToLogInBuildLoggers = GetMessagesToLogInBuildLoggers(commandLineString);
+
+                        // Log a message for every response file and include it in log
+                        foreach (var responseFilePath in s_includedResponseFiles)
+                        {
+                            messagesToLogInBuildLoggers.Add(
+                                new BuildManager.DeferredBuildMessage(
+                                    String.Format("Included response file: {0}", responseFilePath),
+                                    MessageImportance.Normal,
+                                    responseFilePath
+                                ));
+                        }
                     }
 
                     buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
@@ -1489,7 +1501,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
+        private static List<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
             List<BuildManager.DeferredBuildMessage> messages = new()
             {

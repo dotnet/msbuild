@@ -29,6 +29,7 @@ namespace Microsoft.Build.Logging
         PropertyInitialValueSet,
         NameValueList,
         String,
-        TaskParameter
+        TaskParameter,
+        ResponseFileUsed, 
     }
 }
