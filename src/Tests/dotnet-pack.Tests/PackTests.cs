@@ -249,7 +249,8 @@ namespace Microsoft.DotNet.Pack.Tests
 
             string dir = "pkgs";
 
-            new DotnetCommand(Log, "new", "console", "-o", rootPath, "--no-restore", "--debug:ephemeral-hive")
+            new DotnetNewCommand(Log, "console", "-o", rootPath, "--no-restore")
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute()
                 .Should()

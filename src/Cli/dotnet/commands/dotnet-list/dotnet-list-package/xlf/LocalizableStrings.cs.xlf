@@ -32,6 +32,11 @@
         <target state="translated">Vypíše balíčky, které mají novější verze. Nedá se kombinovat s možností --deprecated ani --vulnerable.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdOutputVersionDescription">
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="translated">Určuje verzi strojově čitelného výstupu. Vyžaduje možnost --format json.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
         <source>Lists transitive and top-level packages.</source>
         <target state="translated">Vypíše seznam přenosných balíčků a balíčků nejvyšší úrovně.</target>

@@ -17,6 +17,16 @@ cp -a $HELIX_CORRELATION_PAYLOAD/t/TestExecutionDirectoryFiles/. $TestExecutionD
 # call dotnet new so the first run message doesn't interfere with the first test
 dotnet new --debug:ephemeral-hive
 # We downloaded a special zip of files to the .nuget folder so add that as a source
-dotnet new nugetconfig
-dotnet nuget add source $DOTNET_ROOT/.nuget --configfile nuget.config
-dotnet nuget list source
+dotnet nuget add source $DOTNET_ROOT/.nuget --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget list source --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source dotnet6-transport --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source dotnet6-internal-transport --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source dotnet7-transport --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source dotnet7-internal-transport --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source richnav --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source vs-impl --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source dotnet-libraries-transport --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source dotnet-tools-transport --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source dotnet-libraries --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget remove source dotnet-eng --configfile $TestExecutionDirectory/nuget.config
+dotnet nuget list source --configfile $TestExecutionDirectory/nuget.config

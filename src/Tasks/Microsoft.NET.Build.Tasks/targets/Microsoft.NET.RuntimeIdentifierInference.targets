@@ -67,17 +67,29 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SelfContained>$(PublishSelfContained)</SelfContained>
   </PropertyGroup>
 
+  <!-- Automatically infer the RuntimeIdentifier for properties that require it.
+  SelfContained without a RID is a no-op and semantically hints towards the fact that it can change the behavior of build, publish, and friends.
+  ... So, we infer the RID for SelfContained regardless of the context.
+
+  The other publish properties are specifically labelled Publish* and don't 'NEED' their RID unless we are doing a publish, so the RID inference
+  ... for these properties is limited to publishing only scenarios.
+
+  Finally, library projects and non-executable projects have awkward interactions here so they are excluded.-->
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
     <UseCurrentRuntimeIdentifier Condition="
                  '$(RuntimeIdentifier)' == '' and
                  '$(_IsExecutable)' == 'true' and '$(IsTestProject)' != 'true' and
                  '$(IsRidAgnostic)' != 'true' and
-                  (
-                    '$(SelfContained)' == 'true' or
-                    '$(PublishReadyToRun)' == 'true' or
-                    '$(PublishSingleFile)' == 'true' or
-                    '$(PublishAot)' == 'true'
-                  )">true</UseCurrentRuntimeIdentifier>
+                 (
+                   '$(SelfContained)' == 'true' or
+                   ('$(_IsPublishing)' == 'true' and
+                      (
+                        '$(PublishReadyToRun)' == 'true' or
+                        '$(PublishSingleFile)' == 'true' or
+                        '$(PublishAot)' == 'true'
+                      )
+                   )
+                 )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
@@ -87,7 +99,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and '$(PublishRuntimeIdentifier)' != ''">
     <RuntimeIdentifier>$(PublishRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(PlatformTarget)' == ''">
     <_UsingDefaultPlatformTarget>true</_UsingDefaultPlatformTarget>
   </PropertyGroup>
@@ -179,15 +191,15 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="SelfContained"/>
 
-    <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == ''"
+    <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="PublishReadyToRun"/>
 
-    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == ''"
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                 FormatArguments="PublishSingleFile"/>
 
-    <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' == ''"
+    <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                 FormatArguments="PublishAot"/>
 

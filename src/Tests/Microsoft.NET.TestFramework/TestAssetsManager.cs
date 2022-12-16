@@ -59,6 +59,7 @@ namespace Microsoft.NET.TestFramework
         /// <param name="callingMethod">Defaults to the name of the caller function (presumably the test).
         /// Used to prevent file collisions on tests which share the same test project.</param>
         /// <param name="identifier">Use this for theories.
+        /// Pass in the unique theory parameters that can indentify that theory from others.
         /// The Identifier is used to distinguish between theory child tests.  Generally it should be created using a combination of all of the theory parameter values.
         /// This is distinct from the test project name and is used to prevent file collisions between theory tests that use the same test project.</param>
         /// <param name="targetExtension">The extension type of the desired test project, e.g. .csproj, or .fsproj.</param>

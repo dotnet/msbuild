@@ -25,7 +25,7 @@
     for Mac and other VS scenarios. During source-build, we only have access to
     the latest version, which targets net7.0. -->
     <PropertyGroup>
-      <MSBuildPathInPackage>$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net6.0\MSBuild.dll</MSBuildPathInPackage>
+      <MSBuildPathInPackage>$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net7.0\MSBuild.dll</MSBuildPathInPackage>
       <MSBuildPathInPackage Condition="'$(DotNetBuildFromSource)' == 'true'">$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net7.0\MSBuild.dll</MSBuildPathInPackage>
     </PropertyGroup>
     <Error Condition="!Exists('$(MSBuildPathInPackage)')" Text="Something moved around in Microsoft.Build.Runtime, adjust code here accordingly." />
