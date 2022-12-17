@@ -1340,7 +1340,7 @@ namespace Microsoft.Build.CommandLine
 #else
                             string.Join(" ", commandLine);
 #endif
-                        messagesToLogInBuildLoggers.Concat(GetMessagesToLogInBuildLoggers(commandLineString));
+                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLineString));
 
                         // Log a message for every response file and include it in log
                         foreach (var responseFilePath in s_includedResponseFiles)
