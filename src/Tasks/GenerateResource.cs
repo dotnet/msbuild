@@ -905,7 +905,7 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
         }
 
-#if FEATURE_APPDOMAIN
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
 
         private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
@@ -917,11 +917,7 @@ namespace Microsoft.Build.Tasks
         // so check to see if we should trust them before analyzing them
         private bool IsDangerous(String filename)
         {
-            // On Framework, we deserialize BinaryFormatter blobs in the main MSBuild process then serialize them again. On Core, we put them as-is into the .resources file,
-            // which eliminates the deserialization attack surface from MSBuild's perspective.
-            //
-            // Even on Framework, we only need to (dangerously) deserialize the .resx file if we think we might need a separate AppDomain, so FEATURE_APPDOMAIN makes sense here.
-#if !FEATURE_APPDOMAIN
+#if !FEATURE_RESXREADER_LIVEDESERIALIZATION
             return false;
         }
 #else
