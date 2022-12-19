@@ -95,7 +95,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             AutoScrollEnabled = true;
             // Render contents
             WriteTitleBar();
-            WriteFooter("This is an empty footer haha");
+            WriteFooter("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             ScrollToEnd();
         }
         public static void Terminate()

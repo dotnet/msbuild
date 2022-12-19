@@ -21,7 +21,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             return Path.GetFileName(path);
         }
 
-
         public FancyLoggerNode root = new FancyLoggerNode(-1, FancyLoggerNodeType.None);
 
         public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
@@ -85,16 +84,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             );
 
             projectConsoleLines.Add(id, line);
-            Thread.Sleep(400);
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            // If id does not exist
-            if (!projectConsoleLines.ContainsKey(id)) return;
-            // Get line id
-            FancyLoggerBufferLine line = projectConsoleLines[id];
+            if(!projectConsoleLines.TryGetValue(id, out FancyLoggerBufferLine line)) return;
             // Update line
             FancyLoggerBuffer.UpdateLine(line.Id,
                 ANSIBuilder.Alignment.SpaceBetween(
@@ -103,15 +98,6 @@ namespace Microsoft.Build.Logging.FancyLogger
                     Console.WindowWidth
                 )
             );
-            /*// TODO
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            var line = projectConsoleLines[id];
-            FancyLoggerBuffer.UpdateLine(line.Id, ""
-                + "D"
-                + " "
-                + ANSIBuilder.Formatting.Dim("Project - ")
-                + GetUnambiguousPath(e.ProjectFile)
-            );*/
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
@@ -137,13 +123,11 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
-            // Console.WriteLine("Warning raised");
-            FancyLoggerBuffer.WriteNewLine("Warning!");
+            FancyLoggerBuffer.WriteNewLine("Warning");
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
         {
             // TODO: Try to redirect to stderr
-            // Console.WriteLine("Error raised");
             FancyLoggerBuffer.WriteNewLine("Error");
         }
 

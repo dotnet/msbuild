@@ -147,47 +147,5 @@ namespace Microsoft.Build.Logging.FancyLogger
                 child.Value.Expand();
             }
         }
-
-        /*public void Collapse(bool isRoot)
-        {
-            // Children
-            foreach (var child in Children)
-            {
-                child.Value.Collapse(false);
-            }
-            // Self
-            if (!isRoot) Line?.Hide();
-        }
-
-        public void Expand(bool isRoot)
-        {
-            foreach (var child in Children)
-            {
-                child.Value.Expand(false);
-            }
-            if (isRoot) return;
-        }
-        public int GetRootLineId()
-        {
-            if (Line == null) return -1;
-            return FancyLoggerBuffer.GetLineIndexById(Line.Id);
-        }
-        public int GetLastLineId()
-        {
-            if (Line == null) return -1;
-            if (Children.Count == 0) return FancyLoggerBuffer.GetLineIndexById(Line.Id);
-            int lastLineId = -1;
-            int lastLineIndex = -1;
-            foreach (var child in Children)
-            {
-                int lineIndex = child.Value.GetLastLineId();
-                if (lineIndex > lastLineIndex)
-                {
-                    lastLineIndex = lineIndex;
-                    lastLineId = Line.Id;
-                }
-            }
-            return lastLineId;
-        }*/
     }
 }

@@ -17,6 +17,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
         }
+
         public static class Alignment
         {
             public static string Center(string text)
@@ -30,6 +31,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 result += new string(' ', space);
                 return result;
             }
+
             public static string Right(string text)
             {
                 string result = String.Empty;
@@ -40,6 +42,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 result += text;
                 return result;
             }
+
             public static string Left(string text)
             {
                 string result = String.Empty;
@@ -50,6 +53,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 result += new string(' ', space);
                 return result;
             }
+
             public static string SpaceBetween(string leftText, string rightText, int width)
             {
                 string result = String.Empty;
@@ -62,7 +66,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                 result += rightText;
                 return result;
             }
+
         }
+
         public static class Formatting
         {
             public enum ForegroundColor
@@ -77,6 +83,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 White = 37,
                 Default = 39
             };
+
             public enum BackgroundColor
             {
                 Black = 40,
@@ -89,72 +96,84 @@ namespace Microsoft.Build.Logging.FancyLogger
                 White = 47,
                 Default = 49
             }
+
             public static string Color(string text, ForegroundColor color)
             {
                 return String.Format("\x1b[{0}m{1}\x1b[0m", (int)color, text);
             }
+
             public static string Color(string text, BackgroundColor color)
             {
                 return String.Format("\x1b[{0}m{1}\x1b[0m", (int)color, text);
             }
+
             public static string Color(string text, BackgroundColor backgrdoundColor, ForegroundColor foregroundColor)
             {
                 return String.Format("\x1b[{0};{1}m{2}\x1b[0m", (int)backgrdoundColor, (int)foregroundColor, text);
             }
+
             public static string Bold(string text)
             {
                 return String.Format("\x1b[1m{0}\x1b[22m", text);
             }
+
             public static string Dim(string text)
             {
                 return String.Format("\x1b[2m{0}\x1b[22m", text);
             }
+
             public static string Italic(string text)
             {
                 return String.Format("\x1b[3m{0}\x1b[23m", text);
             }
+
             public static string Underlined(string text)
             {
                 return String.Format("\x1b[4m{0}\x1b[24m", text);
             }
+
             public static string DoubleUnderlined(string text)
             {
                 return String.Format("\x1b[21m{0}\x1b[24m", text);
             }
+
             public static string Blinking(string text)
             {
                 return String.Format("\x1b[5m{0}\x1b[25m", text);
             }
+
             public static string Inverse(string text)
             {
                 return String.Format("\x1b[7m{0}\x1b[27m", text);
             }
+
             public static string Invisible(string text)
             {
                 return String.Format("\x1b[8m{0}\x1b[28m", text);
             }
+
             public static string CrossedOut(string text)
             {
                 return String.Format("\x1b[9m{0}\x1b[29m", text);
             }
+
             public static string Overlined(string text)
             {
                 return String.Format("\x1b[53m{0}\x1b[55m", text);
             }
-            // TODO: Review
-            // TODO: Test outside of Windows Terminal (eg, terminal.app)
+
+            // TODO: Right now only replaces \ with /. Needs review to make sure it works on all or most terminal emulators.
             public static string Hyperlink(string text, string url)
             {
                 // return String.Format("\x1b[]8;;{0}\x1b\\{1}\x1b[]8;\x1b\\", text, url);
-                // return $"\x1b[]8;;{url}\x1b[\\{text}\x1b[]8;;\x1b[\\";
                 return url.Replace("\\", "/");
             }
+
             public static string DECLineDrawing(string text)
             {
                 return String.Format("\x1b(0{0}\x1b(B", text);
             }
         }
-
 
         public static class Cursor
         {
@@ -178,6 +197,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 return String.Format("\x1b[{0}A", n);
             }
+
             public static string UpAndScroll(int n)
             {
                 string result = "";
@@ -186,30 +206,37 @@ namespace Microsoft.Build.Logging.FancyLogger
                 }
                 return result;
             }
+
             public static string Down(int n = 1)
             {
                 return String.Format("\x1b[{0}B", n);
             }
+
             public static string Forward(int n = 1)
             {
                 return String.Format("\x1b[{0}C", n);
             }
+
             public static string Backward(int n = 1)
             {
                 return String.Format("\x1b[{0}D", n);
             }
+
             public static string Home()
             {
                 return String.Format("\x1b[H");
             }
+
             public static string Position(int row, int column)
             {
                 return String.Format("\x1b[{0};{1}H", row, column);
             }
+
             public static string SavePosition()
             {
                 return String.Format("\x1b[s");
             }
+
             public static string RestorePosition() {
                 return String.Format("\x1b[u");
             }
@@ -221,19 +248,23 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 return String.Format("\x1bH");
             }
+
             public static string ForwardTab(int n)
             {
                 if (n == 0) return "";
                 return String.Format("\x1b[{0}I", n);
             }
+
             public static string BackwardTab(int n)
             {
                 return String.Format("\x1b[{0}Z", n);
             }
+
             public static string UnsetStop()
             {
                 return String.Format("\x1b[0g");
             }
+
             public static string UnserAlStops()
             {
                 return String.Format("\x1b[3g");
@@ -246,18 +277,22 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 return String.Format("\x1b[{0}T", n);
             }
+
             public static string ScrollUp(int n)
             {
                 return String.Format("\x1b[{0}S", n);
             }
+
             public static string SetScrollingRegion(int start, int end)
             {
                 return String.Format("\x1b[{0};{1}r", start, end);
             }
+
             public static string PrependLines(int n)
             {
                 return String.Format("\x1b[{0}L", n);
             }
+
             public static string DeleteLines(int n)
             {
                 return String.Format("\x1b[{0}M", n);
@@ -270,22 +305,27 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 return String.Format("\x1b[0J");
             }
+
             public static string DisplayStartToCursor()
             {
                 return String.Format("\x1b[1J");
             }
+
             public static string Display()
             {
                 return String.Format("\x1b[2J");
             }
+
             public static string LineCursorToEnd()
             {
                 return String.Format("\x1b[0K");
             }
+
             public static string LineStartToCursor()
             {
                 return String.Format("\x1b[1K");
             }
+
             public static string Line()
             {
                 return String.Format("\x1b[2k");
@@ -299,14 +339,16 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 return Spinner(spinnerCounter++);
             }
+
             public static string Spinner(int n)
             {
                 char[] chars = { '\\', '|', '/', '-'};
                 return chars[n % (chars.Length - 1)].ToString();
             }
+
             public static string ProgressBar(float percentage, int width = 10, char completedChar = '█', char remainingChar = '░')
             {
-                string result = "";
+                string result = String.Empty;
                 for (int i = 0; i < (int)Math.Floor(width * percentage); i++)
                 {
                     result += completedChar;
@@ -317,6 +359,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 }
                 return result;
             }
+
             public static string Bell()
             {
                 return String.Format("\x07");
@@ -329,10 +372,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 return String.Format("\x1b#8");
             }
+
             public static string UseAlternateBuffer()
             {
                 return "\x1b[?1049h";
             }
+
             public static string UseMainBuffer()
             {
                 return "\x1b[?1049l";
