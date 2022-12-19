@@ -13,7 +13,9 @@ using Microsoft.Build.Shared.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Linq;
 using System.Threading;
 
