@@ -69,6 +69,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                     if (IsTerminated) return;
                     switch (Console.ReadKey().Key)
                     {
+                        case ConsoleKey.Q:
+                            IsTerminated = true;
+                        break;
                         case ConsoleKey.UpArrow:
                             ScrollToLine(CurrentTopLineIndex - 1);
                             break;
