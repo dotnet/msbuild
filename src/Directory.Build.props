@@ -56,6 +56,7 @@
     <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
 
+    <!-- This should be unconditional but helps until https://github.com/dotnet/msbuild/pull/8236 gets us a Roslyn dependency-dll fix. -->
     <EnforceCodeStyleInBuild Condition="'$(MSBuildRuntimeType)' == 'Core'">true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
