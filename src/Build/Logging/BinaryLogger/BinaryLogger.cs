@@ -52,7 +52,9 @@ namespace Microsoft.Build.Logging
         //   - TargetSkippedEventArgs: added OriginallySucceeded, Condition, EvaluatedCondition
         // version 14:
         //   - TargetSkippedEventArgs: added SkipReason, OriginalBuildEventContext
-        internal const int FileFormatVersion = 14;
+        // version 15:
+        //   - new record kind: ResponseFileUsedEventArgs
+        internal const int FileFormatVersion = 15;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -268,6 +270,10 @@ namespace Microsoft.Build.Logging
             else if (e is MetaprojectGeneratedEventArgs metaprojectArgs)
             {
                 projectImportsCollector.AddFileFromMemory(metaprojectArgs.ProjectFile, metaprojectArgs.metaprojectXml);
+            }
+            else if (e is ResponseFileUsedEventArgs responseFileArgs && responseFileArgs.ResponseFilePath != null)
+            {
+                projectImportsCollector.AddFile(responseFileArgs.ResponseFilePath);
             }
         }
 
