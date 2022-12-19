@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--framework", "netcoreapp")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--framework", "net")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -362,11 +362,10 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string[] actualFiles = Directory.GetFiles(workingDirectory);
 
             return Task.WhenAll(
-                actualFiles.Select(
+                actualFiles.Where(f => Path.GetExtension(f).Equals(".txt")).Select(
                     async (file) =>
                     await VerifyFile(file)
                     .UseMethodName($"CanInstantiateTemplate_ConditionalProcessing_{Path.GetFileName(file)}")
-                    .UseExtension("txt")
                     ));
         }
 

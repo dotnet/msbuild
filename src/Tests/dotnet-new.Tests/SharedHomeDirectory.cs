@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             {
                 workingDirectory = Directory.GetCurrentDirectory();
             }
-            var args = new List<string> { "-i", packageName, };
+            List<string> args = new() { "install", packageName };
             if (!string.IsNullOrWhiteSpace(nugetSource))
             {
                 args.AddRange(new[] { "--nuget-source", nugetSource });
@@ -65,15 +65,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetNewCommand(Log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates31Path)
-                .WithCustomHive(HomeDirectory)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr();
-
-            new DotnetNewCommand(Log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates50Path)
+            new DotnetNewCommand(Log, "install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates60Path)
                 .WithCustomHive(HomeDirectory)
                 .Execute()
                 .Should()
