@@ -4,8 +4,8 @@
 using System;
 #if !BUILDINGAPPXTASKS && DEBUG
 using System.Resources;
-#endif
 using System.Diagnostics;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.ComponentModel;
