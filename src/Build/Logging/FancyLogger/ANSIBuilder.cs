@@ -66,7 +66,6 @@ namespace Microsoft.Build.Logging.FancyLogger
                 result += rightText;
                 return result;
             }
-
         }
 
         public static class Formatting

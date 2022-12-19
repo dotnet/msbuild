@@ -89,7 +89,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if(!projectConsoleLines.TryGetValue(id, out FancyLoggerBufferLine line)) return;
+            if(!projectConsoleLines.TryGetValue(id, out FancyLoggerBufferLine? line)) return;
             // Update line
             FancyLoggerBuffer.UpdateLine(line.Id,
                 ANSIBuilder.Alignment.SpaceBetween(
