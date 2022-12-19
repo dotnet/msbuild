@@ -100,7 +100,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             else if (overrideConfigCache == null)
             {
-
                 throw new ArgumentNullException($"Attempted to create an override cache with a null {nameof(overrideConfigCache)}.");
             }
             else

@@ -495,7 +495,7 @@ BuildEngine5.BuildProjectFilesInParallel(
 </Project>
 ".Cleanup()).Path;
 
-            Assert.Equal(IsolateProjects.True, _buildParametersPrototype.IsolateProjects);
+            _buildParametersPrototype.IsolateProjects.ShouldBe(IsolateProjects.True);
             var buildParameters = _buildParametersPrototype.Clone();
 
             using (var buildManagerSession = new Helpers.BuildManagerSession(_env, buildParameters))
