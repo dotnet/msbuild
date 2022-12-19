@@ -71,19 +71,23 @@ namespace Microsoft.DotNet.Cli
 
             if (project != null)
             {
-                string releasePropertyFlag = project.GetPropertyValue(_propertyToCheck);
-                if (!string.IsNullOrEmpty(releasePropertyFlag) || GetProjectMaxModernTargetFramework(project) >= 8) 
+                string propertyToCheckValue = project.GetPropertyValue(_propertyToCheck);
+                if (!string.IsNullOrEmpty(propertyToCheckValue) || GetProjectMaxModernTargetFramework(project) >= 8)
                 {
                     var msbuildFlags = new List<string> {
                         $"-property:{MSBuildPropertyNames.CONFIGURATION}={
                             (
-                            !string.IsNullOrEmpty(releasePropertyFlag) ? // Did the project set PublishRelease or PackRelease itself?
-                                (releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE) // Use release if value is true, else, debug.
+                            !string.IsNullOrEmpty(propertyToCheckValue) ? // Did the project set PublishRelease or PackRelease itself?
+                                (propertyToCheckValue.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)
                             : MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE) // The project did not set the property, but it is 8.0+ based on the condition above. For 8.0, these properties are enabled by default.
                             }",
                     };
 
-                    if (_isHandlingSolution) msbuildFlags.Add($"-property:_SolutionLevel{_propertyToCheck}=true"); // This will allow us to detect conflicting configuration values during evaluation.
+                    var globallyResolvedPropertyToCheckValue = !string.IsNullOrEmpty(propertyToCheckValue) ? propertyToCheckValue : "true"; // true is defaulted for TFM 8+. 
+                    if (_isHandlingSolution) // This will allow us to detect conflicting configuration values during evaluation.
+                    {
+                        msbuildFlags.Add($"-property:_SolutionLevel{_propertyToCheck}={globallyResolvedPropertyToCheckValue}");
+                    }
 
                     return msbuildFlags;
                 }
