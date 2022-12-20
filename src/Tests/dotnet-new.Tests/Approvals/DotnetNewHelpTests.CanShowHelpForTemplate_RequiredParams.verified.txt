@@ -25,3 +25,4 @@ Template options:
                            Type: string
                            Default: def
   -e, --enableC            Type: bool
+                           Default: False

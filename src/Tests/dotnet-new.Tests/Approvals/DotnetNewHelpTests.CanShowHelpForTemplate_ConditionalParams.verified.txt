@@ -21,4 +21,6 @@ Template options:
                           Type: string
                           Default: placeholderB
   -A, --A_enabled         Type: bool
+                          Default: False
   -B, --B_enabled         Type: bool
+                          Default: False
