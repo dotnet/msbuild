@@ -375,9 +375,9 @@ namespace Microsoft.Build.BackEnd
                 // See if any required properties were not set
                 foreach (KeyValuePair<string, string> requiredParameter in requiredParameters)
                 {
-                    IsolateProjects isolateProjects = _buildComponentHost.BuildParameters.IsolateProjects;
+                    ProjectIsolationMode isolateProjects = _buildComponentHost.BuildParameters.ProjectIsolationMode;
 
-                    string resourceName = isolateProjects == IsolateProjects.Message ? "RequiredPropertyNotSetErrorMessagingIsolationMode" : "RequiredPropertyNotSetError";
+                    string resourceName = isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation ? "RequiredPropertyNotSetErrorMessagingIsolationMode" : "RequiredPropertyNotSetError";
                     ProjectErrorUtilities.VerifyThrowInvalidProject(
                         setParameters.ContainsKey(requiredParameter.Key),
                         _taskLocation,

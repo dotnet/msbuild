@@ -212,7 +212,7 @@ namespace Microsoft.Build.Execution
 
         private bool _interactive;
 
-        private IsolateProjects _isolateProjects;
+        private ProjectIsolationMode _projectIsolationMode;
 
         private string[] _inputResultsCacheFiles;
 
@@ -298,7 +298,7 @@ namespace Microsoft.Build.Execution
             WarningsAsMessages = other.WarningsAsMessages == null ? null : new HashSet<string>(other.WarningsAsMessages, StringComparer.OrdinalIgnoreCase);
             _projectLoadSettings = other._projectLoadSettings;
             _interactive = other._interactive;
-            _isolateProjects = other._isolateProjects;
+            _projectIsolationMode = other.ProjectIsolationMode;
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
             DiscardBuildResults = other.DiscardBuildResults;
@@ -762,16 +762,24 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets a value indicating the isolation mode to use.
         /// </summary>
-        public IsolateProjects IsolateProjects
+        /// <remarks>
+        /// Kept for API backwards compatibility.
+        /// </remarks>
+        public bool IsolateProjects
         {
-            get => _isolateProjects;
-            set => _isolateProjects = value;
+            get => ProjectIsolationMode == ProjectIsolationMode.True;
+            set => ProjectIsolationMode = value ? ProjectIsolationMode.True : ProjectIsolationMode.False;
         }
 
         /// <summary>
+        /// Gets or sets a value indicating the isolation mode to use.
+        /// </summary>
+        public ProjectIsolationMode ProjectIsolationMode { get => _projectIsolationMode; set => _projectIsolationMode = value; }
+
+        /// <summary>
         /// Input cache files that MSBuild will use to read build results from.
-        /// If the isolation mode is set to <see cref="IsolateProjects.False"/>,
-        /// this sets the isolation mode to <see cref="IsolateProjects.True"/>.
+        /// If the isolation mode is set to <see cref="ProjectIsolationMode.False"/>,
+        /// this sets the isolation mode to <see cref="ProjectIsolationMode.True"/>.
         /// </summary>
         public string[] InputResultsCacheFiles
         {
@@ -781,8 +789,8 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Output cache file where MSBuild will write the contents of its build result caches during EndBuild.
-        /// If the isolation mode is set to <see cref="IsolateProjects.False"/>,
-        /// this sets the isolation mode to <see cref="IsolateProjects.True"/>.
+        /// If the isolation mode is set to <see cref="ProjectIsolationMode.False"/>,
+        /// this sets the isolation mode to <see cref="ProjectIsolationMode.True"/>.
         /// </summary>
         public string OutputResultsCacheFile
         {
@@ -830,7 +838,7 @@ namespace Microsoft.Build.Execution
 
         internal bool UsesInputCaches() => InputResultsCacheFiles != null;
 
-        internal bool SkippedResultsDoNotCauseCacheMiss() => IsolateProjects == IsolateProjects.True;
+        internal bool SkippedResultsDoNotCauseCacheMiss() => ProjectIsolationMode == ProjectIsolationMode.True;
 
         /// <summary>
         /// Implementation of the serialization mechanism.
@@ -863,7 +871,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _logInitialPropertiesAndItems);
             translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
             translator.Translate(ref _interactive);
-            translator.TranslateEnum(ref _isolateProjects, (int)_isolateProjects);
+            translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

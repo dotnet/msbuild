@@ -1019,7 +1019,7 @@ namespace Microsoft.Build.UnitTests
                                         profilerLogger: null,
                                         enableProfiler: false,
                                         interactive: false,
-                                        isolateProjects: IsolateProjects.False,
+                                        isolateProjects: ProjectIsolationMode.False,
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         inputResultsCaches: null,

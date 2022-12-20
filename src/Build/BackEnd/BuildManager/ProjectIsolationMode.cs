@@ -6,7 +6,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// The isolation mode to use.
     /// </summary>
-    public enum IsolateProjects
+    public enum ProjectIsolationMode
     {
         /// <summary>
         /// Do not enable isolation.
@@ -16,7 +16,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enable isolation and log isolation violations as messages.
         /// </summary>
-        Message,
+        MessageUponIsolationViolation,
 
         /// <summary>
         /// Enable isolation and log isolation violations as errors.

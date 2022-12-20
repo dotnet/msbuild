@@ -1961,13 +1961,13 @@ namespace Microsoft.Build.BackEnd
         {
             emitNonErrorLogs = _ => { };
 
-            IsolateProjects isolateProjects = _componentHost.BuildParameters.IsolateProjects;
+            ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
             var configCache = (IConfigCache) _componentHost.GetComponent(BuildComponentType.ConfigCache);
 
             // do not check root requests as nothing depends on them
-            if (isolateProjects == IsolateProjects.False || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
+            if (isolateProjects == ProjectIsolationMode.False || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
             {
-                bool logComment = ((isolateProjects == IsolateProjects.True || isolateProjects == IsolateProjects.Message) && request.SkipStaticGraphIsolationConstraints);
+                bool logComment = ((isolateProjects == ProjectIsolationMode.True || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation) && request.SkipStaticGraphIsolationConstraints);
                 if (logComment)
                 {
                     // retrieving the configs is not quite free, so avoid computing them eagerly
@@ -2054,7 +2054,7 @@ namespace Microsoft.Build.BackEnd
         {
             // Record these results to the cache only if their config isn't in the
             // override cache, which can happen if we are building in isolation mode
-            // (IsolateProjects.Message), and the received result was built by an
+            // (ProjectIsolationMode.MessageUponIsolationViolation), and the received result was built by an
             // isolation-violating dependency project.
             if (_configCache is not ConfigCacheWithOverride
                 || !((ConfigCacheWithOverride)_configCache).HasConfigurationInOverrideCache(result.ConfigurationId))

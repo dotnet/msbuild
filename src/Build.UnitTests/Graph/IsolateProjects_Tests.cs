@@ -146,7 +146,7 @@ BuildEngine5.BuildProjectFilesInParallel(
             _buildParametersPrototype = new BuildParameters
             {
                 EnableNodeReuse = false,
-                IsolateProjects = IsolateProjects.True,
+                ProjectIsolationMode = ProjectIsolationMode.True,
                 DisableInProcNode = disableInProcNode
             };
         }
@@ -239,7 +239,7 @@ BuildEngine5.BuildProjectFilesInParallel(
                     logger.AssertLogDoesntContain("MSB4260");
                 },
                 excludeReferencesFromConstraints: true,
-                isolateProjects: IsolateProjects.False);
+                isolateProjects: ProjectIsolationMode.False);
         }
 
         [Fact]
@@ -254,13 +254,13 @@ BuildEngine5.BuildProjectFilesInParallel(
                     logger.ErrorCount.ShouldBe(0);
                     logger.Errors.ShouldBeEmpty();
 
-                    // The references got built because the isolation mode is set to IsolateProjects.Message.
+                    // The references got built because the isolation mode is set to ProjectIsolationMode.MessageUponIsolationViolation.
                     logger.AssertMessageCount("Message from reference", 2);
                     logger.AllBuildEvents.OfType<ProjectStartedEventArgs>().Count().ShouldBe(3);
 
                     logger.AssertMessageCount("MSB4260", 2);
                 },
-                isolateProjects: IsolateProjects.Message);
+                isolateProjects: ProjectIsolationMode.MessageUponIsolationViolation);
         }
 
         [Theory]
@@ -406,7 +406,7 @@ BuildEngine5.BuildProjectFilesInParallel(
             bool buildUndeclaredReference = false,
             bool addContinueOnError = false,
             bool excludeReferencesFromConstraints = false,
-            IsolateProjects isolateProjects = IsolateProjects.True,
+            ProjectIsolationMode isolateProjects = ProjectIsolationMode.True,
             Func<string, string> projectReferenceModifier = null,
             Func<string, string> msbuildOnDeclaredReferenceModifier = null)
         {
@@ -432,7 +432,7 @@ BuildEngine5.BuildProjectFilesInParallel(
             File.WriteAllText(undeclaredReferenceFile, _undeclaredReference);
 
             var buildParameters = _buildParametersPrototype.Clone();
-            buildParameters.IsolateProjects = isolateProjects;
+            buildParameters.ProjectIsolationMode = isolateProjects;
 
             using (var buildManagerSession = new Helpers.BuildManagerSession(_env, buildParameters))
             {
@@ -495,7 +495,7 @@ BuildEngine5.BuildProjectFilesInParallel(
 </Project>
 ".Cleanup()).Path;
 
-            _buildParametersPrototype.IsolateProjects.ShouldBe(IsolateProjects.True);
+            _buildParametersPrototype.ProjectIsolationMode.ShouldBe(ProjectIsolationMode.True);
             var buildParameters = _buildParametersPrototype.Clone();
 
             using (var buildManagerSession = new Helpers.BuildManagerSession(_env, buildParameters))

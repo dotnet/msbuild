@@ -527,9 +527,9 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
-                if (_buildParameters.UsesCachedResults() && parameters.IsolateProjects == IsolateProjects.False)
+                if (_buildParameters.UsesCachedResults() && parameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
-                    _buildParameters.IsolateProjects = IsolateProjects.True;
+                    _buildParameters.ProjectIsolationMode = ProjectIsolationMode.True;
                 }
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.Execution
 
             void SerializeCaches()
             {
-                string errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile, _buildParameters.IsolateProjects);
+                string errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
 
                 if (!string.IsNullOrEmpty(errorMessage))
                 {

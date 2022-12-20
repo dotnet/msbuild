@@ -1034,8 +1034,8 @@ namespace Microsoft.Build.BackEnd
 
         private List<string> GetUndeclaredProjects(MSBuild msbuildTask)
         {
-            IsolateProjects isolateProjects = _componentHost.BuildParameters.IsolateProjects;
-            if (isolateProjects == IsolateProjects.False || isolateProjects == IsolateProjects.Message)
+            ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
+            if (isolateProjects == ProjectIsolationMode.False || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation)
             {
                 return null;
             }

@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// If no resource string is passed to ErrorFromResources and
-        /// the isolation mode is set to IsolateProjects.Message, then
+        /// the isolation mode is set to ProjectIsolationMode.MessageUponIsolationViolation, then
         /// we should error because a required parameter is missing and
         /// note that this may be due to a target's referenced property
         /// being cached.
@@ -376,7 +376,7 @@ namespace Microsoft.Build.UnitTests
             var logger = new MockLogger();
             _ = Helpers.BuildProjectContentUsingBuildManager(projectContents, logger, new BuildParameters()
             {
-                IsolateProjects = IsolateProjects.Message,
+                ProjectIsolationMode = ProjectIsolationMode.MessageUponIsolationViolation,
             });
             logger.AssertLogContains("MSB4047");
         }
