@@ -49,20 +49,6 @@ public record Registry(Uri BaseUri)
             var unknownMediaType => throw new NotImplementedException($"The manifest for {name}:{reference} from registry {BaseUri} was an unknown type: {unknownMediaType}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.")
         };
 
-        async Task<HttpResponseMessage> GetManifest(string reference) {
-            var client = GetClient();
-            var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
-            response.EnsureSuccessStatusCode();
-            return response;
-        }
-
-        async Task<HttpResponseMessage> GetBlob(string digest) {
-            var client = GetClient();
-            var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{digest}"));
-            response.EnsureSuccessStatusCode();
-            return response;
-        }
-
         async Task<Image?> TryReadSingleImage(ManifestV2 manifest) {
             var config = manifest.config;
             string configSha = config.digest;
@@ -76,48 +62,53 @@ public record Registry(Uri BaseUri)
         }
 
         async Task<Image?> TryPickBestImageFromManifestList(ManifestListV2 manifestList, string runtimeIdentifier) {
-            var runtimeGraph = GetRuntimeGraphForDotNet();
-            var compatibleRuntimesForUserRid = runtimeGraph.ExpandRuntime(runtimeIdentifier);
-            var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
-            var bestManifestRid = PickBestRidFromCompatibleUserRids(graphForManifestList, compatibleRuntimesForUserRid);
+            var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList);
+            var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, runtimeIdentifier);
             if (bestManifestRid is null) {
-                throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers for the base image {name}:{reference} are {String.Join(",", compatibleRuntimesForUserRid)}");
+                throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers for the base image {name}:{reference} are {String.Join(",", graphForManifestList.Runtimes.Keys)}");
             }
             var matchingManifest = ridDict[bestManifestRid];
             var manifestResponse = await GetManifest(matchingManifest.digest);
             return await TryReadSingleImage(await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>());
         }
+
+        async Task<HttpResponseMessage> GetManifest(string reference)
+        {
+            var client = GetClient();
+            var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
+            response.EnsureSuccessStatusCode();
+            return response;
+        }
+
+        async Task<HttpResponseMessage> GetBlob(string digest)
+        {
+            var client = GetClient();
+            var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{digest}"));
+            response.EnsureSuccessStatusCode();
+            return response;
+        }
     }
 
-    private string? PickBestRidFromCompatibleUserRids(RuntimeGraph graphForManifestList, IEnumerable<string> compatibleRuntimesForUserRid)
+    private string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, string userRid)
     {
-        return compatibleRuntimesForUserRid.First(rid => graphForManifestList.Runtimes.ContainsKey(rid));
+        graphForManifestList.Runtimes.TryGetValue(userRid, out var runtimeInfo);
+        return runtimeInfo?.RuntimeIdentifier;
     }
 
-    private (IReadOnlyDictionary<string, PlatformSpecificManifest>, RuntimeGraph) ConstructRuntimeGraphForManifestList(ManifestListV2 manifestList, RuntimeGraph dotnetRuntimeGraph)
+    private (IReadOnlyDictionary<string, PlatformSpecificManifest>, RuntimeGraph) ConstructRuntimeGraphForManifestList(ManifestListV2 manifestList)
     {
         var ridDict = new Dictionary<string, PlatformSpecificManifest>();
         var runtimeDescriptionSet = new HashSet<RuntimeDescription>();
         foreach (var manifest in manifestList.manifests) {
             if (CreateRidForPlatform(manifest.platform) is { } rid)
             {
-                if (ridDict.TryAdd(rid, manifest))
-                {
-                    AddRidAndDescendentsToSet(runtimeDescriptionSet, rid, dotnetRuntimeGraph);
-                }
+                ridDict.TryAdd(rid, manifest);
+                runtimeDescriptionSet.Add(new RuntimeDescription(rid));
             }
         }
         
-        // todo: inheritance relationships for these RIDs?
         var graph = new RuntimeGraph(runtimeDescriptionSet);
         return (ridDict, graph);
-    }
-
-    private void AddRidAndDescendentsToSet(HashSet<RuntimeDescription> runtimeDescriptionSet, string rid, RuntimeGraph dotnetRuntimeGraph)
-    {
-        var R = dotnetRuntimeGraph.Runtimes[rid];
-        runtimeDescriptionSet.Add(R);
-        foreach (var r in R.InheritedRuntimes) AddRidAndDescendentsToSet(runtimeDescriptionSet, r, dotnetRuntimeGraph);
     }
 
     private string? CreateRidForPlatform(PlatformInformation platform)
@@ -129,6 +120,7 @@ public record Registry(Uri BaseUri)
             _ => null
         };
         // TODO: this part needs a lot of work, the RID graph isn't super precise here and version numbers (especially on windows) are _whack_
+        // TODO: we _may_ need OS-specific version parsing. Need to do more research on what the field looks like across more manifest lists.
         var versionPart = platform.version?.Split('.') switch
         {
             [var major, .. ] => major,
@@ -139,18 +131,12 @@ public record Registry(Uri BaseUri)
             "amd64" => "x64",
             "x386" => "x86",
             "arm" => $"arm{(platform.variant != "v7" ? platform.variant : "")}",
-            "arm64" => "arm64"
+            "arm64" => "arm64",
+            _ => null
         };
-        
         
         if (osPart is null || platformPart is null) return null;
         return $"{osPart}{versionPart ?? ""}-{platformPart}";
-    }
-
-    private RuntimeGraph GetRuntimeGraphForDotNet()
-    {
-        var runtimePath = Path.Combine("C:", "Program Files","dotnet", "sdk", "7.0.100", "RuntimeIdentifierGraph.json"); // how to get this at runtime?
-        return JsonRuntimeFormat.ReadRuntimeGraph(runtimePath);
     }
 
     /// <summary>
