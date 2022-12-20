@@ -66,7 +66,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update spinner
             UpdateLine();
             // Update target line
-            FancyLoggerBuffer.UpdateLine(CurrentTargetLine!.Id, $"   `- {ANSIBuilder.Formatting.Bold(args.TargetName)}");
+            FancyLoggerBuffer.UpdateLine(CurrentTargetLine!.Id, $"   `- {ANSIBuilder.Formatting.Dim(args.TargetName)}");
 
             /* FancyLoggerTargetNode targetNode = new FancyLoggerTargetNode(args);
             FancyLoggerBuffer.WriteNewLineAfter(
@@ -85,5 +85,28 @@ namespace Microsoft.Build.Logging.FancyLogger
             Id = args.BuildEventContext!.TargetId;
             TargetName = args.TargetName;
         }
+    }
+
+    public class FancyLoggerTaskNode
+    {
+        public int Id;
+        public string TaskName;
+        public FancyLoggerTaskNode(TaskStartedEventArgs args)
+        {
+            Id = args.BuildEventContext!.TaskId;
+            TaskName = args.TaskName;
+        }
+    }
+
+    public class FancyLoggerWarningNode
+    {
+    }
+
+    public class FancyLoggerMessageNode
+    {
+    }
+
+    public class FancyLoggerErrorNode
+    {
     }
 }
