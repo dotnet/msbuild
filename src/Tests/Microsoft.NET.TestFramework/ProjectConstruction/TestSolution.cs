@@ -24,15 +24,18 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public TestSolution(ITestOutputHelper log, string newSolutionPath, List<TestAsset> solutionProjects, [CallerMemberName] string name = null)
         {
             Name = name;
-            SolutionPath = Path.Combine(newSolutionPath, name, ".sln");
+            SolutionPath = Path.Combine(newSolutionPath, $"{ name + ".sln"}");
+            Projects = new List<TestAsset>();
             ProjectPaths = new List<string>();
 
             var slnCreator = new DotnetNewCommand(log, "sln", "-o", $"{newSolutionPath}", "-n", $"{name}");
-            slnCreator.Execute();
+            slnCreator
+                .WithVirtualHive()
+                .Execute();
 
             foreach (var project in solutionProjects)
             {
-                var slnProjectAdder = new DotnetCommand(log, "sln", $"{SolutionPath}", "add", project.Path);
+                var slnProjectAdder = new DotnetCommand(log, "sln", $"{SolutionPath}", "add", Path.Combine(project.Path, project.TestProject.Name));
                 slnProjectAdder.Execute();
                 ProjectPaths.Add(project.Path);
                 Projects.Add(project);
@@ -54,11 +57,48 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         /// </summary>
         public List<string> ProjectPaths { get; set; }
 
+
+        /// <summary>
+        ///  The internal list of projects that contain actual testAssets.
+        ///  Not exposed publically to avoid incorrectly adding to this list or editing it without editing the solution file.
+        /// </summary>
         internal List<TestAsset> Projects { get; set; }
 
-        public List<string> ProjectProperties()
+        /// <summary>
+        ///  Gives the property values for each project in the test solution.
+        ///  Can throw exceptions if the path to the project provided by tfm and configuration is not correct.
+        /// </summary>
+        /// <param name="targetFrameworksAndConfigurationsInOrderPerProject">A pair, first starting with the targetframework of the designated project.
+        /// The second item should be the Configuration expected of the second project.
+        /// This should match the order in which projects were added to the solution.
+        /// </param>
+        /// <returns>A dictionary of property -> value mappings for every subproject in the solution.</returns>
+        public List<Dictionary<string, string>> ProjectProperties(List<Tuple<string, string>> targetFrameworksAndConfigurationsInOrderPerProject = null)
         {
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            var properties = new List<Dictionary<string, string>>();
+            int i = 0;
+
+            foreach(var testAsset in Projects)
+            {
+                TestProject testProject = testAsset.TestProject;
+
+                var tfm = ToolsetInfo.CurrentTargetFramework;
+                var config = "Debug";
+
+                if (targetFrameworksAndConfigurationsInOrderPerProject != null)
+                {
+                    var tfmAndConfiguration = targetFrameworksAndConfigurationsInOrderPerProject.ElementAtOrDefault(i);
+                    if (tfmAndConfiguration != null)
+                    {
+                        tfm = tfmAndConfiguration.Item1;
+                        config = tfmAndConfiguration.Item2;
+                    }
+                }
+
+                properties.Add(testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, configuration: config));
+                ++i;
+            }
+            return properties;
 
         }
 
