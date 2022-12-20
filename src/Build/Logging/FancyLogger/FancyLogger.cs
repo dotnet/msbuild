@@ -21,9 +21,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             return Path.GetFileName(path);
         }
         
-        public FancyLoggerNode root = new FancyLoggerNode(-1, FancyLoggerNodeType.None);
-
         public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
+        public Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
 
         private float existingTasks = 1;
         private float completedTasks = 0;
@@ -44,7 +43,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
             eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
             eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
-            // eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
+            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
             // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
