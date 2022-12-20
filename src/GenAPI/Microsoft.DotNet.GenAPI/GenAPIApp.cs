@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiSymbolExtensions;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.GenAPI
 {
@@ -76,7 +77,7 @@ namespace Microsoft.DotNet.GenAPI
         /// <summary>
         /// Initialize and run Roslyn-based GenAPI tool.
         /// </summary>
-        public static void Run(Context context)
+        public static void Run(ILog logger, Context context)
         {
             bool resolveAssemblyReferences = context.AssemblyReferences?.Length > 0;
 
@@ -116,7 +117,21 @@ namespace Microsoft.DotNet.GenAPI
                 fileBuilder.WriteAssembly(assemblySymbol);
             }
 
-            // TODO: Add logging for the assembly symbol loading failure".
+            if (loader.HasRoslynDiagnostics(out IReadOnlyList<Diagnostic> roslynDiagnostics))
+            {
+                foreach (Diagnostic warning in roslynDiagnostics)
+                {
+                    logger.LogWarning(warning.Id, $"RoslynDiagnostic: '{warning.ToString()}'");
+                }
+            }
+
+            if (loader.HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> loadWarnings))
+            {
+                foreach (AssemblyLoadWarning warning in loadWarnings)
+                {
+                    logger.LogWarning(warning.DiagnosticId, $"AssemblyLoadWarning: '{warning.Message}'");
+                }
+            }
         }
 
         /// <summary>

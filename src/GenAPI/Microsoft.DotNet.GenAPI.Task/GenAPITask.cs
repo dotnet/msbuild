@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.NET.Build.Tasks;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.GenAPI.Task
 {
@@ -50,7 +51,7 @@ namespace Microsoft.DotNet.GenAPI.Task
 
         protected override void ExecuteCore()
         {
-            GenAPIApp.Run(new GenAPIApp.Context(
+            GenAPIApp.Run(new MSBuildLog(Log), new GenAPIApp.Context(
                 Assemblies!,
                 AssemblyReferences,
                 OutputPath,

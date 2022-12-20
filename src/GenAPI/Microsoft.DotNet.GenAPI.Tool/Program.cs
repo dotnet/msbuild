@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.GenAPI.Tool
 {
@@ -65,7 +66,7 @@ namespace Microsoft.DotNet.GenAPI.Tool
 
             rootCommand.SetHandler((InvocationContext context) =>
             {
-                GenAPIApp.Run(new GenAPIApp.Context(
+                GenAPIApp.Run(new ConsoleLog(MessageImportance.Normal), new GenAPIApp.Context(
                     context.ParseResult.GetValue(assembliesOption)!,
                     context.ParseResult.GetValue(assemblyReferencesOption),
                     context.ParseResult.GetValue(outputPathOption),
