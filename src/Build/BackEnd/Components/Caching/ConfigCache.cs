@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -198,14 +197,6 @@ namespace Microsoft.Build.BackEnd
 
                 _configurations = new Dictionary<int, BuildRequestConfiguration>();
                 _configurationIdsByMetadata = new Dictionary<ConfigurationMetadata, int>();
-            }
-        }
-
-        public int GetLowestConfigId()
-        {
-            lock (_lockObject)
-            {
-                return _configurations.OrderBy(kvp => kvp.Key).FirstOrDefault().Key;
             }
         }
 
