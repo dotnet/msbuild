@@ -310,7 +310,7 @@ namespace Microsoft.NET.Publish.Tests
                     .Execute().Should().Pass()
                     .And.HaveStdOutContaining("Hello World");
 
-                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, ExplicitPackageVersion);
+                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, rid, ExplicitPackageVersion);
             }
         }
 
@@ -413,7 +413,7 @@ namespace Microsoft.NET.Publish.Tests
                 File.Exists(publishedDll).Should().BeFalse();
                 File.Exists(publishedExe).Should().BeTrue();
 
-                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, ExplicitPackageVersion);
+                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, rid, ExplicitPackageVersion);
             }
         }
 
@@ -705,14 +705,14 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        private void CheckIlcVersions(string projectPath, string targetFramework, string expectedVersion)
+        private void CheckIlcVersions(string projectPath, string targetFramework, string rid, string expectedVersion)
         {
             // Compiler version matches expected version
             var ilcToolsPathCommand = new GetValuesCommand(Log, projectPath, targetFramework, "IlcToolsPath")
             {
                 DependsOnTargets = "WriteIlcRspFileForCompilation"
             };
-            ilcToolsPathCommand.Execute().Should().Pass();
+            ilcToolsPathCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
             var ilcToolsPath = ilcToolsPathCommand.GetValues()[0];
             var ilcVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(ilcToolsPath)));
             ilcVersion.Should().Be(ExplicitPackageVersion);
@@ -722,7 +722,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 DependsOnTargets = "WriteIlcRspFileForCompilation"
             };
-            ilcReferenceCommand.Execute().Should().Pass();
+            ilcReferenceCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
             var ilcReference = ilcReferenceCommand.GetValues();
             var corelibReference = ilcReference.Where(r => Path.GetFileName(r).Equals("System.Private.CoreLib.dll")).Single();
             var ilcReferenceVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(corelibReference)));
