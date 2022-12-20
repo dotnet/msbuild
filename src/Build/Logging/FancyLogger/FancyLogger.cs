@@ -21,9 +21,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             return Path.GetFileName(path);
         }
 
-        public FancyLoggerNode root = new FancyLoggerNode(-1, FancyLoggerNodeType.None);
-
         public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
+
+        public Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
 
         private float existingTasks = 1;
         private float completedTasks = 0;
@@ -43,7 +43,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Started
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
             eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
-            // eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
+            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
             // eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
             // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
@@ -73,35 +73,28 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             // If id already exists...
-            if (projectConsoleLines.ContainsKey(id)) return;
-            // Create line
-            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine(
-                ANSIBuilder.Alignment.SpaceBetween(
-                    $"{ANSIBuilder.Graphics.Spinner()} {ANSIBuilder.Formatting.Dim("Project - ")} {GetUnambiguousPath(e.ProjectFile!)}",
-                    "(5 targets completed)",
-                    Console.WindowWidth
-                )
-            );
-
-            projectConsoleLines.Add(id, line);
+            if (projects.ContainsKey(id)) return;
+            // Add project
+            FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
+            node.WriteStart();
+            projects[id] = node;
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if(!projectConsoleLines.TryGetValue(id, out FancyLoggerBufferLine? line)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update line
-            FancyLoggerBuffer.UpdateLine(line.Id,
-                ANSIBuilder.Alignment.SpaceBetween(
-                    $"{ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)} {ANSIBuilder.Formatting.Dim("Project - ")} {ANSIBuilder.Formatting.Color(GetUnambiguousPath(e.ProjectFile!), ANSIBuilder.Formatting.ForegroundColor.Green)}",
-                    "(5 targets completed)",
-                    Console.WindowWidth
-                )
-            );
+            node.WriteEnd();
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.WriteTarget(e);
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
@@ -110,6 +103,12 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Task
         void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
         {
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.UpdateLine();
+
             existingTasks++;
         }
 
@@ -134,9 +133,9 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public void Shutdown() {
             // Keep open if autoscroll disabled (the user is reading info)
-            while (FancyLoggerBuffer.AutoScrollEnabled || !FancyLoggerBuffer.IsTerminated)
+            /*while (FancyLoggerBuffer.AutoScrollEnabled || !FancyLoggerBuffer.IsTerminated)
             {
-            }
+            }*/
             FancyLoggerBuffer.Terminate();
             Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
         }

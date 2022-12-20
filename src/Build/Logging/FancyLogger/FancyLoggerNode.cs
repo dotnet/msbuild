@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,141 +12,73 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
 { 
-    // TODO: Maybe remove
-    public enum FancyLoggerNodeType
+    public class FancyLoggerProjectNode
     {
-        None,
-        Build,
-        Project,
-        Target,
-        Task,
-        Message,
-        Warning,
-        Error
+        private static string GetUnambiguousPath(string path)
+        {
+            return Path.GetFileName(path);
+        }
+        public int Id;
+        public string ProjectPath;
+        public FancyLoggerBufferLine? Line;
+
+        public FancyLoggerProjectNode(ProjectStartedEventArgs args)
+        {
+            Id = args.ProjectId;
+            ProjectPath = args.ProjectFile!;
+        }
+
+        public void UpdateLine()
+        {
+            if (Line == null) return;
+            FancyLoggerBuffer.UpdateLine(Line.Id,
+                ANSIBuilder.Alignment.SpaceBetween(
+                    $"{ANSIBuilder.Graphics.Spinner()} {ANSIBuilder.Formatting.Dim("Project - ")} {GetUnambiguousPath(ProjectPath)}",
+                    $"({ANSIBuilder.Formatting.Italic("n")} targets completed)",
+                    Console.WindowWidth
+                )
+            );
+        }
+
+        public void WriteStart()
+        {
+            Line = FancyLoggerBuffer.WriteNewLine("");
+            UpdateLine();
+        }
+        public void WriteEnd()
+        {
+            if (Line == null) return;
+            FancyLoggerBuffer.UpdateLine(Line.Id,
+                ANSIBuilder.Alignment.SpaceBetween(
+                    $"{ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)} {ANSIBuilder.Formatting.Dim("Project - ")} {ANSIBuilder.Formatting.Color(GetUnambiguousPath(ProjectPath), ANSIBuilder.Formatting.ForegroundColor.Green)}",
+                    "(All targets complete)",
+                    Console.WindowWidth
+                )
+            );
+        }
+
+        public void WriteTarget(TargetStartedEventArgs args)
+        {
+            if (Line == null) return;
+            // Update spinner
+            UpdateLine();
+            // Create target node
+            /* FancyLoggerTargetNode targetNode = new FancyLoggerTargetNode(args);
+            FancyLoggerBuffer.WriteNewLineAfter(
+                $"-- Target {targetNode.TargetName}",
+                Line.Id
+            ); */
+        }
     }
 
-    public class FancyLoggerNode
+    public class FancyLoggerTargetNode
     {
-        public string Id;
-        public Dictionary<string, FancyLoggerNode> Children = new Dictionary<string, FancyLoggerNode>();
-        public FancyLoggerNode? Parent;
-        public FancyLoggerBufferLine? Line;
-        public int Depth = 0;
-        public FancyLoggerNode(string id)
+        public int Id;
+        public string TargetName;
+        public FancyLoggerTargetNode(TargetStartedEventArgs args)
         {
-            Id = id;
-        }
-        public FancyLoggerNode(int id, FancyLoggerNodeType type)
-        {
-            switch (type)
-            {
-                case FancyLoggerNodeType.Build:
-                    Id = $"build-{id}";
-                    break;
-                case FancyLoggerNodeType.Project:
-                    Id = $"project-{id}";
-                    break;
-                case FancyLoggerNodeType.Target:
-                    Id = $"target-{id}";
-                    break;
-                case FancyLoggerNodeType.Task:
-                    Id = $"task-{id}";
-                    break;
-                case FancyLoggerNodeType.Message:
-                    Id = $"message-{id}";
-                    break;
-                case FancyLoggerNodeType.Warning:
-                    Id = $"warning-{id}";
-                    break;
-                case FancyLoggerNodeType.Error:
-                    Id = $"error-{id}";
-                    break;
-                default:
-                    Id = id.ToString(); break;
-            }
-        }
-        public FancyLoggerNode? Find(string id)
-        {
-            // If self
-            if(Id == id) return this;
-            // If no children
-            if(Children.Count == 0) return null;
-            // Iterate
-            foreach (var child in Children)
-            {
-                FancyLoggerNode? node = child.Value.Find(id);
-                if (node != null) return node;
-            }
-            return null;
-        }
-
-        public void Add(FancyLoggerNode node)
-        {
-            if (Children.ContainsKey(node.Id)) return;
-            Children.Add(node.Id, node);
-            node.Depth = Depth + 1;
-            node.Parent = this;
-        }
-
-        public int GetLastLineIndex()
-        {
-            // If no line, return -1
-            if (Line == null) return -1;
-            // Get line index and id
-            int lastLineIndex = FancyLoggerBuffer.GetLineIndexById(Line.Id);
-            int lastLineId = Line.Id;
-            if (lastLineIndex == -1) return -1;
-            // Get max of children
-            foreach (var child in Children)
-            {
-                int childLastLineIndex = child.Value.GetLastLineIndex();
-                if (childLastLineIndex > lastLineIndex)
-                {
-                    lastLineIndex = childLastLineIndex;
-                    lastLineId = child.Value.Line!.Id;
-                }
-            }
-            return lastLineIndex;
-        }
-
-        public void Write()
-        {
-            if (Line == null) { return; }
-            // Adjust identation
-            Line.IdentationLevel = Depth - 1;
-            // If line not in the buffer, add
-            if (FancyLoggerBuffer.GetLineIndexById(Line.Id) == -1)
-            {
-                // Get parent last line index
-                if (Parent != null)
-                {
-                    int parentLastLineId = Parent.GetLastLineIndex();
-                    // if (parentLastLineId == -1) throw new Exception("Oops something went wrong");
-                    if (parentLastLineId == -1) return;
-                    // FancyLoggerBuffer.WriteNewLineAfter(Line, parentLastLineId);
-                    FancyLoggerBuffer.WriteNewLineAfterIndex(Line, parentLastLineId);
-                }
-            }
-        }
-
-        public void Collapse()
-        {
-            foreach (var child in Children)
-            {
-                if (child.Value.Line == null) continue;
-                FancyLoggerBuffer.HideLine(child.Value.Line.Id);
-                child.Value.Collapse();
-            }
-        }
-
-        public void Expand()
-        {
-            foreach (var child in Children)
-            {
-                if (child.Value.Line == null) continue;
-                FancyLoggerBuffer.UnhideLine(child.Value.Line.Id);
-                child.Value.Expand();
-            }
+            Id = args.BuildEventContext!.TargetId;
+            TargetName = args.TargetName;
         }
     }
 }

@@ -222,9 +222,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (lineIndex == -1) return null;
             lines.Insert(lineIndex + 1, line);
             // Scroll to end if lineIndex >= lines
-            // if (lineIndex >= lines.Count -2 && AutoScrollEnabled) ScrollToEnd();
-            // else ScrollToLine(CurrentTopLineIndex);
-            ScrollToEnd();
+            if (lineIndex >= lines.Count -2 && AutoScrollEnabled) ScrollToEnd();
+            else ScrollToLine(CurrentTopLineIndex);
             return line;
         }
 
