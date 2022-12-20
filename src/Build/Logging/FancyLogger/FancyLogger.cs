@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -20,10 +20,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get last part of path
             return Path.GetFileName(path);
         }
+        
+        public FancyLoggerNode root = new FancyLoggerNode(-1, FancyLoggerNodeType.None);
 
         public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
-
-        public Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
 
         private float existingTasks = 1;
         private float completedTasks = 0;
@@ -109,7 +109,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.UpdateLine();
-
             existingTasks++;
         }
 

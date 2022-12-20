@@ -3,6 +3,7 @@
 <Project>
   <PropertyGroup>
     <VersionPrefix>17.5.0</VersionPrefix>
+    <PackageValidationBaselineVersion>17.4.0</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -27,9 +28,9 @@
   <PropertyGroup>
     <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>6.0.0</SystemConfigurationConfigurationManagerVersion>
-    <!-- 
+    <!--
         Modifying the version of System.Memory is very high impact and causes downstream breaks in third-party tooling that uses the MSBuild API.
-        When updating the version of System.Memory file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+ 
+        When updating the version of System.Memory file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+
         and follow the guidelines written here (internal-link): https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1796/How-to-add-a-Known-Issue
     -->
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
@@ -50,7 +51,7 @@
     <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.22601.5</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.4.0-2.22458.3</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.5.0-2.22608.26</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.5.0-preview.3.126</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemTextJsonVersion>6.0.0</SystemTextJsonVersion>
