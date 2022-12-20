@@ -1,1 +1,0 @@
-Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.Version481 = 15 -> Microsoft.Build.Utilities.TargetDotNetFrameworkVersion
