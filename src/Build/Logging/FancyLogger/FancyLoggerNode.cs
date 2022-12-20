@@ -56,6 +56,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                     Console.WindowWidth
                 )
             );
+            if (CurrentTargetLine == null) return;
+            FancyLoggerBuffer.DeleteLine(CurrentTargetLine!.Id);
         }
 
         public void WriteTarget(TargetStartedEventArgs args)
@@ -63,7 +65,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (Line == null) return;
             // Update spinner
             UpdateLine();
-            // Create target node
+            // Update target line
+            FancyLoggerBuffer.UpdateLine(CurrentTargetLine!.Id, $"   `- {ANSIBuilder.Formatting.Bold(args.TargetName)}");
 
             /* FancyLoggerTargetNode targetNode = new FancyLoggerTargetNode(args);
             FancyLoggerBuffer.WriteNewLineAfter(
