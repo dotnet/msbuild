@@ -23,6 +23,8 @@ dotnet gitignore file                         gitignore                       Co
 Dotnet local tool manifest file               tool-manifest                   Config                          
 EditorConfig file                             editorconfig                    Config                          
 global.json file                              globaljson                      Config                          
+MSBuild Directory.Build.props file            buildprops                      MSBuild/props                   
+MSBuild Directory.Build.targets file          buildtargets                    MSBuild/props                   
 MSTest Test Project                           mstest              [C#],F#,VB  Test/MSTest                     
 MVC ViewImports                               viewimports         [C#]        Web/ASP.NET                     
 MVC ViewStart                                 viewstart           [C#]        Web/ASP.NET                     
