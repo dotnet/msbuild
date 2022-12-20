@@ -21,7 +21,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public int Id;
         public string ProjectPath;
         public FancyLoggerBufferLine? Line;
-
+        public FancyLoggerBufferLine? CurrentTargetLine;
         public FancyLoggerProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
@@ -43,6 +43,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void WriteStart()
         {
             Line = FancyLoggerBuffer.WriteNewLine("");
+            CurrentTargetLine = FancyLoggerBuffer.WriteNewLine("   `- Target and task information will be shown here...");
             UpdateLine();
         }
         public void WriteEnd()
@@ -63,6 +64,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update spinner
             UpdateLine();
             // Create target node
+
             /* FancyLoggerTargetNode targetNode = new FancyLoggerTargetNode(args);
             FancyLoggerBuffer.WriteNewLineAfter(
                 $"-- Target {targetNode.TargetName}",
