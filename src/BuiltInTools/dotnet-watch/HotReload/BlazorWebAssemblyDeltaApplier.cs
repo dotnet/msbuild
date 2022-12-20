@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             public int[] UpdatedTypes { get; init; }
         }
 
-        public readonly struct HotReloadDiagnostics
+        private readonly struct HotReloadDiagnostics
         {
             public string Type => "HotReloadDiagnosticsv1";
 

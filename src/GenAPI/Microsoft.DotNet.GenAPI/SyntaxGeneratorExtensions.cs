@@ -1,9 +1,10 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Immutable;
+using System;
 using System.Linq;
-using System.Xml.Linq;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editing;
 
@@ -52,31 +53,72 @@ namespace Microsoft.DotNet.GenAPI
                         break;
                 }
 
-                /// this is copy/paste from private method `SyntaxGenerator.WithTypeParametersAndConstraints`
                 if (declaration != null)
                 {
-                    if (type.TypeParameters.Length > 0)
-                    {
-                        declaration = syntaxGenerator.WithTypeParameters(declaration, type.TypeParameters.Select(tp => tp.Name));
-
-                        foreach (var tp in type.TypeParameters)
-                        {
-                            if (tp.HasConstructorConstraint || tp.HasReferenceTypeConstraint || tp.HasValueTypeConstraint || tp.ConstraintTypes.Length > 0)
-                            {
-                                declaration = syntaxGenerator.WithTypeConstraint(declaration, tp.Name,
-                                    kinds: (tp.HasConstructorConstraint ? SpecialTypeConstraintKind.Constructor : SpecialTypeConstraintKind.None)
-                                           | (tp.HasReferenceTypeConstraint ? SpecialTypeConstraintKind.ReferenceType : SpecialTypeConstraintKind.None)
-                                           | (tp.HasValueTypeConstraint ? SpecialTypeConstraintKind.ValueType : SpecialTypeConstraintKind.None),
-                                    types: tp.ConstraintTypes.Select(t => syntaxGenerator.TypeExpression(t)));
-                            }
-                        }
-                    }
-
-                    return declaration;
+                    return syntaxGenerator.WithTypeParametersAndConstraintsCopyExt(declaration, type.TypeParameters);
+                }
+            }
+            else if (symbol.Kind == SymbolKind.Method)
+            {
+                var method = (IMethodSymbol)symbol;
+                if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation)
+                {
+                    return syntaxGenerator.ExplicitInterfaceImplementationMethodDeclaration(method, method.Name);
                 }
             }
 
-            return syntaxGenerator.Declaration(symbol);
+            try
+            {
+                return syntaxGenerator.Declaration(symbol);
+            }
+            catch (ArgumentException ex)
+            {
+                // re-throw the ArgumentException with the specified symbol that caused it.
+                throw new ArgumentException(ex.Message, symbol.ToDisplayString());
+            }
+        }
+
+        // TODO: Temporary solution till corresponding Roslyn API is added: https://github.com/dotnet/arcade/issues/11895.
+        private static SyntaxNode ExplicitInterfaceImplementationMethodDeclaration(this SyntaxGenerator syntaxGenerator, IMethodSymbol method, string name, IEnumerable<SyntaxNode>? statements = null)
+        {
+            var decl = syntaxGenerator.MethodDeclaration(
+                name,
+                parameters: method.Parameters.Select(p => syntaxGenerator.ParameterDeclaration(p)),
+                returnType: method.ReturnType?.SpecialType == SpecialType.System_Void ? null : syntaxGenerator.TypeExpression(method.ReturnType!),
+                modifiers: DeclarationModifiers.From(method),
+                statements: statements);
+
+            if (!method.TypeParameters.IsEmpty)
+            {
+                decl = syntaxGenerator.WithTypeParametersAndConstraintsCopyExt(decl, method.TypeParameters);
+            }
+
+            return decl;
+        }
+
+        // this is copy/paste from private method `SyntaxGenerator.WithTypeParametersAndConstraints`
+        private static SyntaxNode WithTypeParametersAndConstraintsCopyExt(this SyntaxGenerator syntaxGenerator, SyntaxNode declaration, ImmutableArray<ITypeParameterSymbol> typeParameters)
+        {
+            if (typeParameters.IsEmpty)
+            {
+                return declaration;
+            }
+
+            declaration = syntaxGenerator.WithTypeParameters(declaration, typeParameters.Select(tp => tp.Name));
+
+            foreach (var tp in typeParameters)
+            {
+                if (tp.HasConstructorConstraint || tp.HasReferenceTypeConstraint || tp.HasValueTypeConstraint || tp.ConstraintTypes.Length > 0)
+                {
+                    declaration = syntaxGenerator.WithTypeConstraint(declaration, tp.Name,
+                        kinds: (tp.HasConstructorConstraint ? SpecialTypeConstraintKind.Constructor : SpecialTypeConstraintKind.None)
+                                | (tp.HasReferenceTypeConstraint ? SpecialTypeConstraintKind.ReferenceType : SpecialTypeConstraintKind.None)
+                                | (tp.HasValueTypeConstraint ? SpecialTypeConstraintKind.ValueType : SpecialTypeConstraintKind.None),
+                        types: tp.ConstraintTypes.Select(t => syntaxGenerator.TypeExpression(t)));
+                }
+            }
+
+            return declaration;
         }
     }
 }

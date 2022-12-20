@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> OuputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
             ArgumentHelpName = LocalizableStrings.OutputOption
-        }.ForwardAsSingle(o => $"-property:PublishDir={CommandDirectoryContext.GetFullPath(o)}");
+        }.ForwardAsOutputPath("PublishDir");
 
         public static readonly Option<IEnumerable<string>> ManifestOption = new ForwardedOption<IEnumerable<string>>("--manifest", LocalizableStrings.ManifestOptionDescription)
         {

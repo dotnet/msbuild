@@ -87,6 +87,11 @@
         <target state="translated">(옵션 없음)</target>
         <note />
       </trans-unit>
+      <trans-unit id="Text_Required">
+        <source>Required: *true*</source>
+        <target state="translated">필수: *true*</target>
+        <note>Indication that parameter is always required, do not translate "true".</note>
+      </trans-unit>
       <trans-unit id="Text_RequiredCondition">
         <source>Required if: {0}</source>
         <target state="translated">다음 경우에 필요: {0}</target>

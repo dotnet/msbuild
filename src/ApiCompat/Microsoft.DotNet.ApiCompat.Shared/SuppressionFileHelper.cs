@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.ApiCompat
 {
@@ -12,7 +13,7 @@ namespace Microsoft.DotNet.ApiCompat
         /// Write the suppression file to disk and throw if a path isn't provided.
         /// </summary>
         public static void GenerateSuppressionFile(ISuppressionEngine suppressionEngine,
-            ICompatibilityLogger log,
+            ISuppressableLog log,
             string[]? suppressionFiles,
             string? suppressionOutputFile)
         {
@@ -30,6 +31,28 @@ namespace Microsoft.DotNet.ApiCompat
             if (suppressionEngine.WriteSuppressionsToFile(suppressionOutputFile))
             {
                 log.LogMessage(MessageImportance.High, CommonResources.WroteSuppressions, suppressionOutputFile);
+            }
+        }
+
+        /// <summary>
+        /// Log whether or not we found breaking changes. If we are writing to a suppression file, no need to log anything.
+        /// </summary>
+        public static void LogApiCompatSuccessOrFailure(bool generateSuppressionFile, ISuppressableLog compatibilityLogger)
+        {
+            if (compatibilityLogger.SuppressionWasLogged)
+            {
+                if (!generateSuppressionFile)
+                {
+                    compatibilityLogger.LogMessage(
+                    MessageImportance.High,
+                    CommonResources.BreakingChangesFound);
+                }
+            }
+            else
+            {
+                compatibilityLogger.LogMessage(
+                    MessageImportance.Normal,
+                    CommonResources.NoBreakingChangesFound);
             }
         }
     }

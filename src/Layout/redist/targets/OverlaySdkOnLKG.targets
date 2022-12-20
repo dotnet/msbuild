@@ -26,7 +26,7 @@
     <Error Text="SDK Stage 0 has more than one folder with templates: @(TemplatesFolderPath->'%(FolderName)')" Condition="@(TemplatesFolderPath->Count()) > 1"></Error>
 
     <!--Prepare Microsoft.DotNet.Common.*.nupkg and pack them directly to target <redist root>\templates\<runtime version> folder. -->
-    <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.7.0 --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\" />
+    <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.8.0 --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\" />
     <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ItemTemplates --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\"  />
 
     <!-- 2. Other template packages will be included from SDK Stage 0. -->
@@ -48,8 +48,7 @@
           DestinationFiles="@(OverlaySDK->'$(RedistLayoutPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <PropertyGroup>
-      <SdkOutputDirectory>$(RedistLayoutPath)/sdk/$(Version)</SdkOutputDirectory>
-      <DotnetWatchOutputDirectory>$(SdkOutputDirectory)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchOutputDirectory>
+      <SdkOutputDirectory>$(RedistLayoutPath)sdk\$(Version)</SdkOutputDirectory>
     </PropertyGroup>
 
     <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
@@ -68,18 +67,6 @@
 
     <Copy SourceFiles="@(ToolsetToOverlay)"
           DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-    <ItemGroup>
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
-      <!-- To reduce the size of the SDK, we use the compiler dependencies that are located in the `Roslyn/bincore` location
-      instead of shipping our own copies in the dotnet-watch tool. These assemblies will be resolved by path in the
-      dotnet-watch executable. -->
-      <DotNetWatchOverlay Remove="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\Microsoft.CodeAnalysis.CSharp.dll" />
-      <DotNetWatchOverlay Remove="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\Microsoft.CodeAnalysis.dll" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(DotNetWatchOverlay)"
-          DestinationFiles="$(DotnetWatchOutputDirectory)\%(RecursiveDir)%(DotNetWatchOverlay.TargetDir)\%(Filename)%(Extension)" />
 
     <!-- Run "dotnet new" (which will just display usage and available templates) in order to print first time
          use message so that it doesn't interfere with tests which check the output of commands. -->

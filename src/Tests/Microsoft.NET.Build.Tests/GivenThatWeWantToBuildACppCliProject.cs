@@ -1,14 +1,20 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 using FluentAssertions;
+using Microsoft.Build.Evaluation;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
@@ -19,12 +25,14 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact]
         public void It_builds_and_runs()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"))
+                .WithProjectChanges((projectPath, project) => AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport", "true"));
 
             // build projects separately with BuildProjectReferences=false to simulate VS build behavior
             new BuildCommand(testAsset, "NETCoreCppCliTest")
@@ -40,7 +48,7 @@ namespace Microsoft.NET.Build.Tests
             var exe = Path.Combine( //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
-                "net5.0",
+                ToolsetInfo.CurrentTargetFramework,
                 "CSConsoleApp.exe");
 
             var runCommand = new RunExeCommand(Log, exe);
@@ -52,12 +60,33 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("Hello, World!");
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact]
+        public void It_builds_and_runs_with_package_reference()
+        {
+            var targetFramework = ToolsetInfo.CurrentTargetFramework + "-windows";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => ConfigureProject(projectPath, project, "NewtonSoft.Json", "13.0.1", targetFramework, new string[] { "_EnablePackageReferencesInVCProjects", "IncludeWindowsSDKRefFrameworkReferences" }));
+
+            new BuildCommand(testAsset, "NETCoreCppCliTest")
+                .Execute("-p:Platform=x64")
+                .Should()
+                .Pass();
+
+            var cppnProjProperties = GetPropertyValues(testAsset.TestRoot, "NETCoreCppCliTest", targetFramework: targetFramework);
+            Assert.True(cppnProjProperties["_EnablePackageReferencesInVCProjects"] == "true");
+            Assert.True(cppnProjProperties["IncludeWindowsSDKRefFrameworkReferences"] == "");
+        }
+
+        [FullMSBuildOnlyFact]
         public void Given_no_restore_It_builds_cpp_project()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"))
+                .WithProjectChanges((projectPath, project) => AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport", "True")); ;
 
             new BuildCommand(testAsset, "NETCoreCppCliTest")
                 .Execute("-p:Platform=x64")
@@ -65,12 +94,13 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact]
         public void Given_Wpf_framework_reference_It_builds_cpp_project()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CppCliLibWithWpfFrameworkReference")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
 
             new BuildCommand(testAsset)
                 .Execute("-p:Platform=x64")
@@ -78,7 +108,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
+        [FullMSBuildOnlyFact]
         public void It_fails_with_error_message_on_EnableComHosting()
         {
             var testAsset = _testAssetsManager
@@ -106,7 +136,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.NoSupportCppEnableComHosting);
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
+        [FullMSBuildOnlyFact]
         public void It_fails_with_error_message_on_fullframework()
         {
             var testAsset = _testAssetsManager
@@ -123,7 +153,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.NETFrameworkWithoutUsingNETSdkDefaults);
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
+        [FullMSBuildOnlyFact]
         public void It_fails_with_error_message_on_tfm_lower_than_3_1()
         {
             var testAsset = _testAssetsManager
@@ -140,7 +170,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.CppRequiresTFMVersion31);
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
+        [FullMSBuildOnlyFact]
         public void When_run_with_selfcontained_It_fails_with_error_message()
         {
             var testAsset = _testAssetsManager
@@ -165,6 +195,85 @@ namespace Microsoft.NET.Build.Tests
                                             .Descendants(ns + "TargetFramework")
                                             .Single().Value = targetFramework;
             }
+        }
+
+        private void ConfigureProject(string projectPath, XDocument project, string package, string version, string targetFramework, string[] properties)
+        {
+            AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport","true");
+            ChangeTargetFramework(projectPath, project, targetFramework);
+            AddPackageReference(projectPath, project, package, version);
+            RecordProperties(projectPath, project, properties);
+        }
+
+        private void AddPackageReference(string projectPath, XDocument project, string package, string version)
+        {
+            if (Path.GetExtension(projectPath) == ".vcxproj")
+            {
+                XNamespace ns = project.Root.Name.Namespace;
+                XElement itemGroup = project.Root.Descendants(ns + "ItemGroup").First();
+                itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", package),
+                                                    new XAttribute("Version", version)));
+
+            }
+        }
+        private void AddBuildProperty(string projectPath, XDocument project, string property, string value)
+        {
+            if (Path.GetExtension(projectPath) == ".vcxproj")
+            {
+                XNamespace ns = project.Root.Name.Namespace;
+                XElement propertyGroup = project.Root.Descendants(ns + "PropertyGroup").First();
+                propertyGroup.Add(new XElement(ns + $"{property}", value));
+            }
+        }
+        private void RecordProperties(string projectPath, XDocument project, string[] properties)
+        {
+            if (Path.GetExtension(projectPath) == ".vcxproj")
+            {
+                string propertiesTextElements = "";
+                XNamespace ns = project.Root.Name.Namespace;
+                foreach (var propertyName in properties)
+                {
+                    propertiesTextElements += $"      <LinesToWrite Include='{propertyName}: $({propertyName})'/>" + Environment.NewLine;
+                }
+
+                string target = $@"<Target Name='WritePropertyValues' BeforeTargets='AfterBuild'>
+                    <ItemGroup>
+                {propertiesTextElements}
+                    </ItemGroup>
+                    <WriteLinesToFile
+                      File='$(BaseIntermediateOutputPath)\$(Configuration)\$(TargetFramework)\PropertyValues.txt'
+                      Lines='@(LinesToWrite)'
+                      Overwrite='true'
+                      Encoding='Unicode'
+                      />
+                  </Target>";
+                XElement newNode = XElement.Parse(target);
+                foreach (var element in newNode.DescendantsAndSelf())
+                {
+                    element.Name = ns + element.Name.LocalName;
+                }
+                project.Root.AddFirst(newNode);
+            }
+        }
+
+        public Dictionary<string, string> GetPropertyValues(string testRoot, string project, string configuration = "Debug", string targetFramework = null)
+        {
+            var propertyValues = new Dictionary<string, string>();
+
+            string intermediateOutputPath = Path.Combine(testRoot, project, "obj", configuration, targetFramework ?? "foo");
+
+            foreach (var line in File.ReadAllLines(Path.Combine(intermediateOutputPath, "PropertyValues.txt")))
+            {
+                int colonIndex = line.IndexOf(':');
+                if (colonIndex > 0)
+                {
+                    string propertyName = line.Substring(0, colonIndex);
+                    string propertyValue = line.Length == colonIndex + 1 ? "" : line.Substring(colonIndex + 2);
+                    propertyValues[propertyName] = propertyValue;
+                }
+            }
+
+            return propertyValues;
         }
     }
 }

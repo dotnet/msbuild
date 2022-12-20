@@ -983,7 +983,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mandatory option &apos;{0}&apos; is missing for the template &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Missing mandatory option(s) for the template &apos;{1}&apos;: {0}..
         /// </summary>
         internal static string MissingRequiredParameter {
             get {
@@ -1024,6 +1024,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string NoTemplatesFound {
             get {
                 return ResourceManager.GetString("NoTemplatesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation was cancelled..
+        /// </summary>
+        internal static string OperationCancelled {
+            get {
+                return ResourceManager.GetString("OperationCancelled", resourceCulture);
             }
         }
         
@@ -1906,6 +1915,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string UnableToSetPermissions {
             get {
                 return ResourceManager.GetString("UnableToSetPermissions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template generation ended with unexpected result: &apos;{0}&apos;. Details: {1}.
+        /// </summary>
+        internal static string UnexpectedResult {
+            get {
+                return ResourceManager.GetString("UnexpectedResult", resourceCulture);
             }
         }
         

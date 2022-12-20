@@ -92,7 +92,7 @@ namespace Microsoft.NET.Publish.Tests
                                                      runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29602")]
         public void Incremental_add_single_file()
         {
             var testProject = new TestProject()
@@ -678,9 +678,10 @@ class C
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeDefault)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeNative)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeAllContent)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeDefault)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeNative)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeAllContent)]
+        // https://github.com/dotnet/sdk/issues/29602
+        //[InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeDefault)]
+        //[InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeNative)]
+        //[InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeAllContent)]
         public void It_runs_single_file_apps(string targetFramework, bool selfContained, string bundleOption)
         {
             var testProject = new TestProject()
@@ -841,7 +842,7 @@ class C
             uncompressedSize.Should().Be(compressedSize);
         }
 
-        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29602")]
         public void User_can_get_bundle_info_before_bundling()
         {
             var testProject = new TestProject()

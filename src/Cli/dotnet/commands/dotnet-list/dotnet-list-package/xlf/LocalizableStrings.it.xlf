@@ -12,6 +12,11 @@
         <target state="translated">Elenca i pacchetti che sono stati deprecati. Non può essere combinato con l'opzione '--vulnerable' o '--outdated'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="translated">Specificare il tipo di formato di output per il comando list packages.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>

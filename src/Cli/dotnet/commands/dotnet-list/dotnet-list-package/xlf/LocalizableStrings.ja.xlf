@@ -12,6 +12,11 @@
         <target state="translated">非推奨化されたパッケージを一覧表示します。'--vulnerable' または '--outdated' オプションと組み合わせることはできません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="translated">list packages コマンドの出力形式の種類を指定します。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>

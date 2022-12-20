@@ -370,9 +370,9 @@ namespace Microsoft.NET.Build.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(true, true, "net5.0")]
-        [InlineData(true, true, ToolsetInfo.NextTargetFramework)]
-        [InlineData(true, false, ToolsetInfo.NextTargetFramework)]
-        [InlineData(false, false, ToolsetInfo.NextTargetFramework)]
+        [InlineData(true, true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(true, false, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, false, ToolsetInfo.CurrentTargetFramework)]
         public void TestPreviewFeatures(bool enablePreviewFeatures, bool generateRequiresPreviewFeaturesAttribute, string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -419,7 +419,7 @@ namespace Microsoft.NET.Build.Tests
 
             if (enablePreviewFeatures && generateRequiresPreviewFeaturesAttribute)
             {
-                if (targetFramework == ToolsetInfo.NextTargetFramework)
+                if (targetFramework == ToolsetInfo.CurrentTargetFramework)
                 {
                     Assert.Equal("Preview", langVersion);
                     Assert.True(contains);

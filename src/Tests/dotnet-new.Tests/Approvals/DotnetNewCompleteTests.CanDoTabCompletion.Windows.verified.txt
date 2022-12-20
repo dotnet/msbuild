@@ -14,16 +14,14 @@ mstest-playwright
 mvc
 nugetconfig
 nunit
-NUnit-playwright
+nunit-playwright
 nunit-test
 page
 proto
-razor
 razorclasslib
 razorcomponent
 react
 sln
-solution
 tool-manifest
 viewimports
 viewstart

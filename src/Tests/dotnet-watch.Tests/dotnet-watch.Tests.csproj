@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(RepoRoot)\src\Layout\redist\targets\PublishDotnetWatch.targets"/>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <RootNamespace>Microsoft.DotNet.Watcher.Tools</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,4 +16,11 @@
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
   </ItemGroup>
 
+  <!--
+  Tests are running dotnet.exe from redist artifacts. Publish the dotnet-watch binaries to the redist directory
+  before running them so that changes take effect without rebuilding the entire redist layout.
+  -->
+  <Target Name="PublishToRedist"
+          DependsOnTargets="PublishDotnetWatch"
+          BeforeTargets="AfterBuild" />
 </Project>

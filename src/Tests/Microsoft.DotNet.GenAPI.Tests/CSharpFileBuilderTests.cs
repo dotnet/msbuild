@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         {
             var compositeFilter = new CompositeFilter()
                 .Add<ImplicitSymbolsFilter>()
-                .Add(new SymbolAccessibilityBasedFilter(true));
+                .Add(new SymbolAccessibilityBasedFilter(true, true, true));
             _csharpFileBuilder = new CSharpFileBuilder(compositeFilter, _stringWriter, _csharpSyntaxWriter, MetadataReferences);
         }
 
@@ -91,14 +91,14 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    public partial class PublicClass { }
-
                     internal partial class InternalClass { }
-
-                    public sealed partial class PublicSealedClass { }
 
                     /// `partial` keyword is not added!
                     public partial class ProtectedPartialClass { }
+
+                    public partial class PublicClass { }
+
+                    public sealed partial class PublicSealedClass { }
                 }
                 """);
         }
@@ -129,21 +129,21 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    public partial struct PublicStruct { }
-
                     internal partial struct InternalStruct { }
 
-                    internal partial struct ReadonlyStruct { }
+                    public partial struct PublicReadonlyRefStruct { }
 
                     public partial struct PublicReadonlyStruct { }
 
-                    internal partial struct RecordStruct : System.IEquatable<RecordStruct> { }
+                    public partial struct PublicRefStruct { }
+
+                    public partial struct PublicStruct { }
 
                     internal partial struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct> { }
 
-                    public partial struct PublicRefStruct { }
+                    internal partial struct ReadonlyStruct { }
 
-                    public partial struct PublicReadonlyRefStruct { }
+                    internal partial struct RecordStruct : System.IEquatable<RecordStruct> { }
                 }
                 """);
         }
@@ -170,8 +170,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     public partial interface IPoint
                     {
                         // Property signatures:
-                        int X { get { throw null; } set { } }
-                        int Y { get { throw null; } set { } }
+                        int X { get; set; }
+                        int Y { get; set; }
                         
                         double CalculateDistance(IPoint p);
                     }
@@ -214,8 +214,10 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public class Car
                     {
-                        public int? Wheels { get; }
+                        public int? Drivers { get; }
+                        public int Wheels { get => 4; }
                         public bool IsRunning { get; set; }
+                        public bool Is4x4 { get => false; set { } }
                     }
                 }
                 """,
@@ -224,8 +226,10 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public partial class Car
                     {
-                        public int? Wheels { get { throw null; } }
+                        public int? Drivers { get { throw null; } }
+                        public bool Is4x4 { get { throw null; } set { } }
                         public bool IsRunning { get { throw null; } set { } }
+                        public int Wheels { get { throw null; } }
                     }
                 }
                 """);
@@ -249,8 +253,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     internal abstract partial class Car
                     {
-                        protected abstract int? Wheels { get; }
                         public abstract bool IsRunning { get; set; }
+                        protected abstract int? Wheels { get; }
                     }
                 }
                 """);
@@ -295,7 +299,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public void Paint()
                         {
-                            throw null;
                         }
                     }
                 }
@@ -393,14 +396,14 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public readonly bool BoolMember;
                         public readonly Kind KindMember;
-                        public Options(Kind kindVal) { }
                         public Options(Kind kindVal, bool boolVal) { }
+                        public Options(Kind kindVal) { }
                     }
                 }
                 """);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/arcade/issues/11937")]
         void TestDelegateGeneration()
         {
             RunTest(original: """
@@ -412,7 +415,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    public sealed delegate bool SyntaxReceiverCreator(int a, bool b);
+                    public delegate bool SyntaxReceiverCreator(int a, bool b);
                 }
                 """);
         }
@@ -423,18 +426,29 @@ namespace Microsoft.DotNet.GenAPI.Tests
             RunTest(original: """
                 namespace Foo
                 {
-                    public abstract class Events
+                    public abstract class AbstractEvents
                     {
                         public abstract event System.EventHandler<bool> TextChanged;
+                    }
+
+                    public class Events
+                    {
+                        public event System.EventHandler<string> OnNewMessage { add { } remove {} }
                     }
                 }
                 """,
                 expected: """
                 namespace Foo
                 {
-                    public abstract partial class Events
+                    public abstract partial class AbstractEvents
                     {
                         public event System.EventHandler<bool> TextChanged;
+                    }
+
+                    public partial class Events
+                    {
+                        /// add & remove accessors have a default implementation.
+                        public event System.EventHandler<string> OnNewMessage;
                     }
                 }
                 """);
@@ -504,7 +518,137 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         [AnimalType(Animal.Cat)]
                         [System.Diagnostics.Conditional("DEBUG")]
                         [System.Diagnostics.Conditional("TEST1")]
-                        public void SayHello() { throw null; }
+                        public void SayHello() { }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestFullyQualifiedNamesForDefaultEnumParameters()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public enum Animal
+                    {
+                        Dog = 1,
+                        Cat = 2,
+                        Bird = 3
+                    }
+
+                    public class AnimalProperty {
+                        public Animal _animal;
+
+                        public AnimalProperty(Animal animal = Animal.Cat)
+                        {
+                            _animal = animal;
+                        }
+
+                        public int Execute(int p = 42) { return p; }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public enum Animal
+                    {
+                        Dog = 1,
+                        Cat = 2,
+                        Bird = 3
+                    }
+                
+                    public partial class AnimalProperty {
+                        public Animal _animal;
+
+                        public AnimalProperty(Animal animal = Animal.Cat) { }
+
+                        public int Execute(int p = 42) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestCustomComparisonOperatorGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Car : System.IEquatable<Car>
+                    {
+                        public bool Equals(Car c) { return true; }
+                        public override bool Equals(object o) { return true; }
+                        public override int GetHashCode() => 0;
+                        public static bool operator ==(Car lhs, Car rhs) { return true; }
+                        public static bool operator !=(Car lhs, Car rhs) { return false; }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Car : System.IEquatable<Car>
+                    {
+                        public bool Equals(Car c) { throw null; }
+                        public override bool Equals(object o) { throw null; }
+                        public override int GetHashCode() { throw null; }
+                        public static bool operator ==(Car lhs, Car rhs) { throw null; }
+                        public static bool operator !=(Car lhs, Car rhs) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestNestedClassGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Car
+                    {
+                        public class Engine
+                        {
+                            public class Cylinder
+                            { }
+                        }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Car
+                    {
+                        public partial class Engine
+                        {
+                            public partial class Cylinder
+                            { }
+                        }
+                    }
+                }
+                """);
+        }
+        [Fact]
+        void TestExplicitInterfaceImplementationMethodGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public abstract class MemoryManager : System.IDisposable
+                    {
+                        void System.IDisposable.Dispose() { }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public abstract partial class MemoryManager : System.IDisposable
+                    {
+                        void System.IDisposable.Dispose() { }
                     }
                 }
                 """);

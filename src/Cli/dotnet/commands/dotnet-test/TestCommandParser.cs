@@ -17,12 +17,6 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-test";
 
-        public static readonly Argument<string> SlnOrProjectArgument = new Argument<string>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
-        {
-            Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
-            Arity = ArgumentArity.ZeroOrOne
-        };
-
         public static readonly Option<string> SettingsOption = new ForwardedOption<string>(new string[] { "-s", "--settings" }, LocalizableStrings.CmdSettingsDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdSettingsFile
@@ -61,7 +55,8 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdOutputDir
-        }.ForwardAsSingle(o => $"-property:OutputPath={SurroundWithDoubleQuotes(CommandDirectoryContext.GetFullPath(o))}");
+        }
+        .ForwardAsOutputPath("OutputPath", true);
 
         public static readonly Option<string> DiagOption = new ForwardedOption<string>(new string[] { "-d", "--diag" }, LocalizableStrings.CmdPathTologFileDescription)
         {
@@ -134,7 +129,9 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new DocumentedCommand("test", DocsLink, LocalizableStrings.AppFullName);
             command.TreatUnmatchedTokensAsErrors = false;
-            command.AddArgument(SlnOrProjectArgument);
+
+            // We are on purpose not capturing the solution, project or directory here. We want to pass it to the
+            // MSBuild command so we are letting it flow.
 
             command.AddOption(SettingsOption);
             command.AddOption(ListTestsOption);

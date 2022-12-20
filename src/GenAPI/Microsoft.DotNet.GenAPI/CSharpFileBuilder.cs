@@ -7,8 +7,10 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Simplification;
 using Microsoft.DotNet.ApiSymbolExtensions;
 
@@ -56,7 +58,7 @@ namespace Microsoft.DotNet.GenAPI
             IEnumerable<INamespaceSymbol> namespaceSymbols = EnumerateNamespaces(assembly).Where(_symbolFilter.Include);
             List<SyntaxNode> namespaceSyntaxNodes = new();
 
-            foreach (INamespaceSymbol namespaceSymbol in namespaceSymbols)
+            foreach (INamespaceSymbol namespaceSymbol in namespaceSymbols.Order())
             {
                 SyntaxNode? syntaxNode = Visit(namespaceSymbol);
 
@@ -74,8 +76,9 @@ namespace Microsoft.DotNet.GenAPI
 
             Document document = project.AddDocument(assembly.Name, compilationUnit);
             document = Simplifier.ReduceAsync(document).Result;
-            compilationUnit = document.GetSyntaxRootAsync().Result!;
+            document = Formatter.FormatAsync(document, DefineFormattingOptions()).Result;
 
+            compilationUnit = document.GetSyntaxRootAsync().Result!;
             compilationUnit.WriteTo(_textWriter);
         }
 
@@ -89,7 +92,7 @@ namespace Microsoft.DotNet.GenAPI
                 return null;
             }
 
-            foreach (INamedTypeSymbol typeMember in typeMembers)
+            foreach (INamedTypeSymbol typeMember in typeMembers.Order())
             {
                 SyntaxNode typeDeclaration = _syntaxGenerator.DeclarationExt(typeMember);
 
@@ -109,8 +112,9 @@ namespace Microsoft.DotNet.GenAPI
 
         private SyntaxNode Visit(SyntaxNode namedTypeNode, INamedTypeSymbol namedType)
         {
-            namedTypeNode = VisitInnerNamedTypes(namedTypeNode, namedType);
-            foreach (ISymbol member in namedType.GetMembers().Where(_symbolFilter.Include))
+            IEnumerable<ISymbol> members = namedType.GetMembers().Where(_symbolFilter.Include);
+
+            foreach (ISymbol member in members.Order())
             {
                 SyntaxNode memberDeclaration = _syntaxGenerator.DeclarationExt(member);
 
@@ -120,22 +124,12 @@ namespace Microsoft.DotNet.GenAPI
                     memberDeclaration = _syntaxGenerator.AddAttributes(memberDeclaration, _syntaxGenerator.Attribute(attribute));
                 }
 
+                if (member is INamedTypeSymbol nestedTypeSymbol)
+                {
+                    memberDeclaration = Visit(memberDeclaration, nestedTypeSymbol);
+                }
+
                 namedTypeNode = _syntaxGenerator.AddMembers(namedTypeNode, memberDeclaration);
-            }
-
-            return namedTypeNode;
-        }
-
-        private SyntaxNode VisitInnerNamedTypes(SyntaxNode namedTypeNode, INamedTypeSymbol namedType)
-        {
-            IEnumerable<INamedTypeSymbol> innerNamedTypes = namedType.GetTypeMembers().Where(_symbolFilter.Include);
-
-            foreach (INamedTypeSymbol innerNamedType in innerNamedTypes)
-            {
-                SyntaxNode typeDeclaration = _syntaxGenerator.DeclarationExt(innerNamedType);
-                typeDeclaration = Visit(typeDeclaration, innerNamedType);
-
-                namedTypeNode = _syntaxGenerator.AddMembers(namedTypeNode, typeDeclaration);
             }
 
             return namedTypeNode;
@@ -146,15 +140,35 @@ namespace Microsoft.DotNet.GenAPI
             Stack<INamespaceSymbol> stack = new();
             stack.Push(assemblySymbol.GlobalNamespace);
 
-            while (stack.TryPop(out var current))
+            while (stack.Count > 0)
             {
+                INamespaceSymbol current = stack.Pop();
+
                 yield return current;
 
-                foreach (var subNamespace in current.GetNamespaceMembers())
+                foreach (INamespaceSymbol subNamespace in current.GetNamespaceMembers())
                 {
                     stack.Push(subNamespace);
                 }
             }
+        }
+
+        private OptionSet DefineFormattingOptions()
+        {
+            /// TODO: consider to move configuration into file.
+            return _adhocWorkspace.Options
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInTypes, true)
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInMethods, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInProperties, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAccessors, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAnonymousMethods, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInControlBlocks, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAnonymousTypes, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInObjectCollectionArrayInitializers, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInLambdaExpressionBody, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLineForMembersInObjectInit, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLineForMembersInAnonymousTypes, false)
+                .WithChangedOption(CSharpFormattingOptions.NewLineForClausesInQuery, false);
         }
 
         /// <inheritdoc />

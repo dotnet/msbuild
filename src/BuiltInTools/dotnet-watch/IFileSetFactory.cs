@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public interface IFileSetFactory
+    internal interface IFileSetFactory
     {
         Task<FileSet> CreateAsync(CancellationToken cancellationToken);
     }

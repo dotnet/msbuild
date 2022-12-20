@@ -12,6 +12,8 @@
 - Branding -- https://github.com/dotnet/sdk/pull/20212
 - Blazor baselines -- https://github.com/dotnet/sdk/pull/20859/commits/564908ede75bfe0e5575ac8246c5e409b9c044ec
 - 7.0 feeds -- https://github.com/dotnet/sdk/pull/19824/commits/c26b43e3e20269d04892847c4cbf6641a042b658
+- updating template packages -- https://github.com/dotnet/sdk/pull/27486
+
 
 **Interesting user commits to installer**
 

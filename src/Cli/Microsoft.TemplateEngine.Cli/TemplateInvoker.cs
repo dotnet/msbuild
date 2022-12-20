@@ -207,17 +207,18 @@ namespace Microsoft.TemplateEngine.Cli
 
                     return HandlePostActions(instantiateResult, templateArgs);
                 case CreationResultStatus.CreateFailed:
+                case CreationResultStatus.CondtionsEvaluationMismatch:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
                     return NewCommandStatus.CreateFailed;
-                //this is unlikely case as these errors are caught on parse level now
                 //TODO: discuss if we need better handling here, then enhance core to return canonical names as array and not parse them from error message
+                //https://github.com/dotnet/templating/issues/4225
                 case CreationResultStatus.MissingMandatoryParam:
                     if (!string.IsNullOrWhiteSpace(instantiateResult.ErrorMessage))
                     {
-                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' })
+                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' }, StringSplitOptions.TrimEntries)
                             .Select(x => templateArgs.TryGetAliasForCanonicalName(x, out string? alias) ? alias! : x)
                             .ToList();
-                        string fixedMessage = string.Join(", ", missingParamNamesCanonical);
+                        string fixedMessage = string.Join(", ", missingParamNamesCanonical.Select(n => $"'{n}'"));
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
                     }
                     return NewCommandStatus.MissingRequiredOption;
@@ -285,7 +286,11 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Error.WriteLine(instantiateResult.ErrorMessage.Bold().Red());
                     }
                     return NewCommandStatus.TemplateIssueDetected;
+                case CreationResultStatus.Cancelled:
+                    Reporter.Error.WriteLine(LocalizableStrings.OperationCancelled.Bold().Red());
+                    return NewCommandStatus.Cancelled;
                 default:
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnexpectedResult, Enum.GetName(typeof(CreationResultStatus), instantiateResult.Status), instantiateResult.ErrorMessage).Bold().Red());
                     return NewCommandStatus.Unexpected;
             }
         }

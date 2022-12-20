@@ -554,8 +554,15 @@ public static class Program
                .WithSource()
                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
 
-            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
-            .Execute("-f", "net7.0")
+            new BuildCommand(helloWorldAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+            .Execute("-f", ToolsetInfo.CurrentTargetFramework)
             .Should()
             .Pass().And.NotHaveStdErr();
         }

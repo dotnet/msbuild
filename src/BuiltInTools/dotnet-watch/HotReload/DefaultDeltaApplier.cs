@@ -74,16 +74,11 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            var payload = new UpdatePayload
-            {
-                Deltas = ImmutableArray.CreateRange(solutionUpdate, c => new UpdateDelta
-                {
-                    ModuleId = c.ModuleId,
-                    ILDelta = c.ILDelta.ToArray(),
-                    MetadataDelta = c.MetadataDelta.ToArray(),
-                    UpdatedTypes = c.UpdatedTypes.ToArray(),
-                }),
-            };
+            var payload = new UpdatePayload(ImmutableArray.CreateRange(solutionUpdate, c => new UpdateDelta(
+                c.ModuleId,
+                metadataDelta: c.MetadataDelta.ToArray(),
+                ilDelta: c.ILDelta.ToArray(),
+                c.UpdatedTypes.ToArray())));
 
             await payload.WriteAsync(_pipe, cancellationToken);
             await _pipe.FlushAsync(cancellationToken);
@@ -141,14 +136,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             _pipe?.Dispose();
         }
 
-        public readonly struct HotReloadDiagnostics
+        private readonly struct HotReloadDiagnostics
         {
             public string Type => "HotReloadDiagnosticsv1";
 
             public IEnumerable<string> Diagnostics { get; init; }
         }
 
-        public readonly struct AspNetCoreHotReloadApplied
+        private readonly struct AspNetCoreHotReloadApplied
         {
             public string Type => "AspNetCoreHotReloadApplied";
         }

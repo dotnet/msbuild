@@ -12,6 +12,11 @@
         <target state="translated">Muestra los paquetes que han quedado en desuso. No se puede combinar con las opciones "--outdated" o "--vulnerable".</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="translated">Especifica el tipo de formato de salida para el comando Enumerar paquetes.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>

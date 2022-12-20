@@ -87,6 +87,11 @@
         <target state="translated">(沒有選項)</target>
         <note />
       </trans-unit>
+      <trans-unit id="Text_Required">
+        <source>Required: *true*</source>
+        <target state="translated">必要: *true*</target>
+        <note>Indication that parameter is always required, do not translate "true".</note>
+      </trans-unit>
       <trans-unit id="Text_RequiredCondition">
         <source>Required if: {0}</source>
         <target state="translated">必要時間: {0}</target>

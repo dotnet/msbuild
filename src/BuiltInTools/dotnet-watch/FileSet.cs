@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public class FileSet : IEnumerable<FileItem>
+    internal sealed class FileSet : IEnumerable<FileItem>
     {
         private readonly Dictionary<string, FileItem> _files;
 
