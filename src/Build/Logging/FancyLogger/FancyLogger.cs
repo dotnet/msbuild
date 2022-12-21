@@ -47,7 +47,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
-            // eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
+            eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
             // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
             // Raised
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
@@ -75,8 +75,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (projects.ContainsKey(id)) return;
             // Add project
             FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
-            node.WriteStart();
             projects[id] = node;
+            // Log
+            node.Log();
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
@@ -84,7 +85,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             int id = e.BuildEventContext!.ProjectInstanceId;
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update line
-            node.WriteEnd();
+            node.Finished = true;
+            node.Log();
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
@@ -93,10 +95,17 @@ namespace Microsoft.Build.Logging.FancyLogger
             int id = e.BuildEventContext!.ProjectInstanceId;
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
-            node.WriteTarget(e);
+            node.AddTarget(e);
+            node.Log();
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.FinishedTargets++;
+            node.Log();
         }
 
         // Task
@@ -107,7 +116,8 @@ namespace Microsoft.Build.Logging.FancyLogger
 
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
-            node.UpdateLine();
+            node.AddTask(e);
+            node.Log();
             existingTasks++;
         }
 
@@ -136,6 +146,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
             }*/
             FancyLoggerBuffer.Terminate();
+            Console.Clear();
             Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
         }
     }

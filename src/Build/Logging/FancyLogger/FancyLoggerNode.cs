@@ -18,61 +18,60 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             return Path.GetFileName(path);
         }
+
         public int Id;
         public string ProjectPath;
+        public bool Finished;
+        // Line to display project info
         public FancyLoggerBufferLine? Line;
+        // Targets
+        public int FinishedTargets;
         public FancyLoggerBufferLine? CurrentTargetLine;
+        public FancyLoggerTargetNode? CurrentTargetNode;
+
         public FancyLoggerProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
             ProjectPath = args.ProjectFile!;
+            Finished = false;
+            FinishedTargets = 0;
         }
 
-        public void UpdateLine()
+        public void Log()
         {
-            if (Line == null) return;
-            FancyLoggerBuffer.UpdateLine(Line.Id,
-                ANSIBuilder.Alignment.SpaceBetween(
-                    $"{ANSIBuilder.Graphics.Spinner()} {ANSIBuilder.Formatting.Dim("Project - ")} {GetUnambiguousPath(ProjectPath)}",
-                    $"({ANSIBuilder.Formatting.Italic("n")} targets completed)",
-                    Console.WindowWidth
-                )
+            string lineContents = ANSIBuilder.Alignment.SpaceBetween(
+                $"{(Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner())} {ANSIBuilder.Formatting.Dim("Project - ")} {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}",
+                $"({FinishedTargets} targets completed)",
+                Console.WindowWidth
             );
+            // Create or update line
+            if (Line == null) Line = FancyLoggerBuffer.WriteNewLine(lineContents);
+            else FancyLoggerBuffer.UpdateLine(Line.Id, lineContents);
+            // If current target
+            if (CurrentTargetNode == null) return;
+            // Create or update
+            if (Finished && CurrentTargetLine != null)
+            {
+                FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                return;
+            }
+            string currentTargetLineContents = $"\t  └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? "Something"}";
+            if (CurrentTargetLine == null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(currentTargetLineContents, Line.Id);
+            else FancyLoggerBuffer.UpdateLine(CurrentTargetLine.Id, currentTargetLineContents);
         }
 
-        public void WriteStart()
+        public void AddTarget(TargetStartedEventArgs args)
         {
-            Line = FancyLoggerBuffer.WriteNewLine("");
-            CurrentTargetLine = FancyLoggerBuffer.WriteNewLine("   `- Target and task information will be shown here...");
-            UpdateLine();
+            CurrentTargetNode = new FancyLoggerTargetNode(args);
         }
-        public void WriteEnd()
+        public void AddTask(TaskStartedEventArgs args)
         {
-            if (Line == null) return;
-            FancyLoggerBuffer.UpdateLine(Line.Id,
-                ANSIBuilder.Alignment.SpaceBetween(
-                    $"{ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)} {ANSIBuilder.Formatting.Dim("Project - ")} {ANSIBuilder.Formatting.Color(GetUnambiguousPath(ProjectPath), ANSIBuilder.Formatting.ForegroundColor.Green)}",
-                    "(All targets complete)",
-                    Console.WindowWidth
-                )
-            );
-            if (CurrentTargetLine == null) return;
-            FancyLoggerBuffer.DeleteLine(CurrentTargetLine!.Id);
-        }
-
-        public void WriteTarget(TargetStartedEventArgs args)
-        {
-            if (Line == null) return;
-            // Update spinner
-            UpdateLine();
-            // Update target line
-            FancyLoggerBuffer.UpdateLine(CurrentTargetLine!.Id, $"   `- {ANSIBuilder.Formatting.Dim(args.TargetName)}");
-
-            /* FancyLoggerTargetNode targetNode = new FancyLoggerTargetNode(args);
-            FancyLoggerBuffer.WriteNewLineAfter(
-                $"-- Target {targetNode.TargetName}",
-                Line.Id
-            ); */
+            // Get target id
+            int targetId = args.BuildEventContext!.TargetId;
+            if (CurrentTargetNode?.Id == targetId)
+            {
+                CurrentTargetNode.AddTask(args);
+            }
         }
     }
 
@@ -80,10 +79,15 @@ namespace Microsoft.Build.Logging.FancyLogger
     {
         public int Id;
         public string TargetName;
+        public FancyLoggerTaskNode? CurrentTaskNode;
         public FancyLoggerTargetNode(TargetStartedEventArgs args)
         {
             Id = args.BuildEventContext!.TargetId;
             TargetName = args.TargetName;
+        }
+        public void AddTask(TaskStartedEventArgs args)
+        {
+            CurrentTaskNode = new FancyLoggerTaskNode(args);
         }
     }
 
