@@ -23,13 +23,6 @@
         <Error Condition="'$(_IsSDKContainerAllowedVersion)' != 'true'" Code="CONTAINER002" Text="The current .NET SDK ($(NETCoreSdkVersion)) doesn't support containerization. Please use version 7.0.100 or higher to enable containerization." />
     </Target>
 
-    <Target Name="_ContainerVerifyRuntime"
-        Condition="'$(WebPublishMethod)' == 'Container' or '$(PublishProfile)' == 'DefaultContainer'"
-        BeforeTargets="AfterPublish">
-        <!-- https://github.com/dotnet/sdk-container-builds/issues/91 -->
-        <Error Condition="'$(RuntimeIdentifier)' != 'linux-x64'" Code="CONTAINER006" Text="The Microsoft.NET.Build.Containers package does not (yet) support publishing for $([MSBuild]::ValueOrDefault('$(RuntimeIdentifier)', 'portable or no-RuntimeIdentifier-defined scenarios')). Please specify a runtime of &quot;linux-x64&quot;" />
-    </Target>
-
     <Target Name="ComputeContainerConfig">
         <!-- Reference data about this project -->
         <PropertyGroup>
@@ -51,6 +44,8 @@
             <ContainerRegistry Condition="'$(RegistryUrl)' != ''">$(RegistryUrl)</ContainerRegistry>
             <!-- PublishImageTag is used by existing VS targets for Docker builds - this lets us fill that void -->
             <ContainerImageTag Condition="'$(PublishImageTag)' != ''">$(PublishImageTag)</ContainerImageTag>
+            <!-- This line is a compatibility shim for VS support - the VS container targets define a container tag using this property and format. This lets us be a drop-in replacement for them. -->
+            <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true'">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
         </PropertyGroup>
 
         <!-- Container Defaults -->
@@ -64,9 +59,11 @@
             <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
             <!-- Only default a tag name if no tag names at all are provided -->
             <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
-            <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true'">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
             <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
-            <!-- Could be semicolon-delimited -->
+            <!-- The Container RID should default to the RID used for the entire build (to ensure things run on the platform they are built for), but the user knows best and so should be able to set it explicitly.
+                 For builds that have a RID, we default to that RID. Otherwise, we default to the RID of the currently-executing SDK. -->
+            <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' and '$(IsRidAgnostic)' == 'true'">$(RuntimeIdentifier)</ContainerRuntimeIdentifier>
+            <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' ">$(NETCoreSdkPortableRuntimeIdentifier)</ContainerRuntimeIdentifier>
         </PropertyGroup>
 
         <ItemGroup Label="Entrypoint Assignment">
@@ -77,6 +74,7 @@
         </ItemGroup>
 
         <ItemGroup Label="Conventional Label assignment">
+            <!-- TODO: This impacts build reproducibility - it should probably be settable/conditioned on a property -->
             <ContainerLabel Include="org.opencontainers.image.created" Value="$([System.DateTime]::UtcNow.ToString('o'))" />
         </ItemGroup>
 
@@ -108,7 +106,6 @@
     <PropertyGroup>
         <PublishContainerDependsOn>
             _ContainerVerifySDKVersion;
-            _ContainerVerifyRuntime;
             ComputeContainerConfig
         </PublishContainerDependsOn>
     </PropertyGroup>
@@ -137,7 +134,7 @@
                         Labels="@(ContainerLabel)"
                         ExposedPorts="@(ContainerPort)"
                         ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)"
-                        ContainerRuntimeIdentifier="$(RuntimeIdentifier)">
+                        ContainerRuntimeIdentifier="$(ContainerRuntimeIdentifier)">
             <Output TaskParameter="GeneratedContainerManifest" PropertyName="GeneratedContainerManifest" />
             <Output TaskParameter="GeneratedContainerConfiguration" PropertyName="GeneratedContainerConfiguration" />
         </CreateNewImage>
