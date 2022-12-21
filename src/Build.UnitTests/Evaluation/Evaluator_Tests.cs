@@ -112,6 +112,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 yield return new object[] { $@"Project=""{Path.Combine("$(VSToolsPath)", "*.*proj")}""", true };
             }
         }
+        
+                [Fact]
+        public void TestNuGetSdkResolverThroughEvaluate()
+        {
+            string projContents = @"
+<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+</Project>
+";
+            Project project = new(XmlReader.Create(new StringReader(projContents)));
+            project.ReevaluateIfNecessary();
+        }
+
 
         /// <summary>
         /// Verify Exist condition used in Import or ImportGroup elements will succeed when in-memory project is available inside projectCollection.
