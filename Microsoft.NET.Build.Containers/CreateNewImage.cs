@@ -88,7 +88,6 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
 
     public override bool Execute()
     {
-        System.Diagnostics.Debugger.Launch();
         if (!Directory.Exists(PublishDirectory))
         {
             Log.LogError("{0} '{1}' does not exist", nameof(PublishDirectory), PublishDirectory);
