@@ -2,12 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using VerifyTests.DiffPlex;
+
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     public class VerifySettingsFixture : IDisposable
     {
+        private static bool _called;
+
         public VerifySettingsFixture()
         {
+            if (_called)
+            {
+                return;
+            }
+            _called = true;
             Verifier.DerivePathInfo(
                 (_, _, type, method) => new(
                     directory: "Approvals",
