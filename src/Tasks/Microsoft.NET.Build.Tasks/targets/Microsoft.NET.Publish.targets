@@ -15,6 +15,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
     <IsPublishable Condition="'$(IsPublishable)' == ''">true</IsPublishable>
+    <!-- PublishAot depends on PublishTrimmed. This must be set early enough for the KnownILLinkPack to be restored. -->
+    <PublishTrimmed Condition="'$(PublishTrimmed)' == '' And '$(PublishAot)' == 'true'">true</PublishTrimmed>
+    <_IsTrimmingEnabled Condition="'$(_IsTrimmingEnabled)' == '' And ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true')">true</_IsTrimmingEnabled>
+    <_IsTrimmingEnabled Condition="'$(_IsTrimmingEnabled)' == ''">false</_IsTrimmingEnabled>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -357,6 +361,17 @@ Copyright (c) .NET Foundation. All rights reserved.
                             GeneratePublishDependencyFile;
                             GenerateSingleFileBundle">
   </Target>
+
+  <!--
+    ============================================================
+                                        ILLink
+
+    Initially an empty placeholder target. When trimming, this
+    will be redefined to invoke ILLink to perform IL trimming.
+    The placeholder exists to allow other targets to depend on it for ordering purposes.
+    ============================================================
+    -->
+  <Target Name="ILLink" />
 
   <PropertyGroup>
     <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
