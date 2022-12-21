@@ -40,7 +40,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void Log()
         {
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
-                $"{(Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner())} {ANSIBuilder.Formatting.Dim("Project - ")} {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}",
+                $"{(Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner())} {ANSIBuilder.Formatting.Dim("Project: ")} {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}",
                 $"({FinishedTargets} targets completed)",
                 Console.WindowWidth
             );
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
                 return;
             }
-            string currentTargetLineContents = $"\t  └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
+            string currentTargetLineContents = $"   └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
             if (CurrentTargetLine == null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(currentTargetLineContents, Line.Id);
             else FancyLoggerBuffer.UpdateLine(CurrentTargetLine.Id, currentTargetLineContents);
         }

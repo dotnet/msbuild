@@ -220,18 +220,24 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static FancyLoggerBufferLine? WriteNewLineAfterIndex(FancyLoggerBufferLine line, int lineIndex)
         {
             if (lineIndex == -1) return null;
+            // Get Id of currentTopLineIndex
+            int currentTopLineId = lines[CurrentTopLineIndex].Id;
             lines.Insert(lineIndex + 1, line);
-            // Scroll to end if lineIndex >= lines
-            if (lineIndex >= lines.Count -2 && AutoScrollEnabled) ScrollToEnd();
-            else ScrollToLine(CurrentTopLineIndex);
-            return line;
+            // Get new current top line index
+            CurrentTopLineIndex = GetLineIndexById(currentTopLineId);
+            ScrollToLine(CurrentTopLineIndex);
+            return line; 
         }
 
         public static void DeleteLine(int lineId)
         {
             int lineIndex = GetLineIndexById(lineId);
             if (lineIndex == -1) return;
+            // Get Id of currentTopLineIndex
+            int currentTopLineId = lines[CurrentTopLineIndex].Id;
             lines.RemoveAt(lineIndex);
+            //
+            CurrentTopLineIndex = GetLineIndexById(currentTopLineId);
             ScrollToLine(CurrentTopLineIndex);
         }
 
