@@ -78,7 +78,7 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
             throw new ArgumentException("Don't know how to pull images from local daemons at the moment");
         } else {
             var reg = new Registry(ContainerHelpers.TryExpandRegistryToUri(BaseRegistry));
-            return reg.GetImageManifest(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier).Result;
+            return reg.GetImageManifest(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier, RuntimeIdentifierGraphPath).Result;
         }
     }
 
@@ -88,6 +88,7 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
 
     public override bool Execute()
     {
+        System.Diagnostics.Debugger.Launch();
         if (!Directory.Exists(PublishDirectory))
         {
             Log.LogError("{0} '{1}' does not exist", nameof(PublishDirectory), PublishDirectory);

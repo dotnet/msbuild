@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 public static class ContainerBuilder
 {
-    public static async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string[] entrypointArgs, string imageName, string[] imageTags, string outputRegistry, string[] labels, Port[] exposedPorts, string[] envVars, string containerRuntimeIdentifier)
+    public static async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string[] entrypointArgs, string imageName, string[] imageTags, string outputRegistry, string[] labels, Port[] exposedPorts, string[] envVars, string containerRuntimeIdentifier, string ridGraphPath)
     {
         var isDockerPull = String.IsNullOrEmpty(registryName);
         if (isDockerPull) {
@@ -15,7 +15,7 @@ public static class ContainerBuilder
         }
         Registry baseRegistry = new Registry(ContainerHelpers.TryExpandRegistryToUri(registryName));
 
-        var img = await baseRegistry.GetImageManifest(baseName, baseTag, containerRuntimeIdentifier);
+        var img = await baseRegistry.GetImageManifest(baseName, baseTag, containerRuntimeIdentifier, ridGraphPath);
         if (img is null) {
             throw new ArgumentException($"Could not find image {baseName}:{baseTag} in registry {registryName} matching RuntimeIdentifier {containerRuntimeIdentifier}");
         }

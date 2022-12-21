@@ -99,12 +99,18 @@ partial class CreateNewImage
     [Required]
     public string ContainerRuntimeIdentifier { get; set; }
 
+    /// <summary>
+    /// The path to the runtime identifier graph file. This is used to compute RID compatibility for Image Manifest List entries.
+    /// </summary>
+    [Required]
+    public string RuntimeIdentifierGraphPath { get; set; }
 
     [Output]
     public string GeneratedContainerManifest { get; set; }
 
     [Output]
     public string GeneratedContainerConfiguration { get; set; }
+
 
     public CreateNewImage()
     {
@@ -125,6 +131,7 @@ partial class CreateNewImage
         ExposedPorts = Array.Empty<ITaskItem>();
         ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
         ContainerRuntimeIdentifier = "";
+        RuntimeIdentifierGraphPath = "";
 
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";

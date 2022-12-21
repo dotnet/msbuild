@@ -38,7 +38,7 @@ public record Registry(Uri BaseUri)
 
     private string RegistryName { get; } = BaseUri.Host;
 
-    public async Task<Image?> GetImageManifest(string name, string reference, string runtimeIdentifier)
+    public async Task<Image?> GetImageManifest(string name, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath)
     {
         var client = GetClient();
         var initialManifestResponse = await GetManifest(reference);
@@ -62,7 +62,8 @@ public record Registry(Uri BaseUri)
         }
 
         async Task<Image?> TryPickBestImageFromManifestList(ManifestListV2 manifestList, string runtimeIdentifier) {
-            var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList);
+            var runtimeGraph = GetRuntimeGraphForDotNet(runtimeIdentifierGraphPath);
+            var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
             var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, runtimeIdentifier);
             if (bestManifestRid is null) {
                 throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers for the base image {name}:{reference} are {String.Join(",", graphForManifestList.Runtimes.Keys)}");
@@ -89,21 +90,18 @@ public record Registry(Uri BaseUri)
         }
     }
 
-    private string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, string userRid)
-    {
-        graphForManifestList.Runtimes.TryGetValue(userRid, out var runtimeInfo);
-        return runtimeInfo?.RuntimeIdentifier;
-    }
+    private string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, string userRid) => graphForManifestList.Runtimes.FirstOrDefault(kvp => graphForManifestList.AreCompatible(kvp.Key, userRid)).Key;
 
-    private (IReadOnlyDictionary<string, PlatformSpecificManifest>, RuntimeGraph) ConstructRuntimeGraphForManifestList(ManifestListV2 manifestList)
+    private (IReadOnlyDictionary<string, PlatformSpecificManifest>, RuntimeGraph) ConstructRuntimeGraphForManifestList(ManifestListV2 manifestList, RuntimeGraph dotnetRuntimeGraph)
     {
         var ridDict = new Dictionary<string, PlatformSpecificManifest>();
         var runtimeDescriptionSet = new HashSet<RuntimeDescription>();
         foreach (var manifest in manifestList.manifests) {
             if (CreateRidForPlatform(manifest.platform) is { } rid)
             {
-                ridDict.TryAdd(rid, manifest);
-                runtimeDescriptionSet.Add(new RuntimeDescription(rid));
+                if (ridDict.TryAdd(rid, manifest)) {
+                    AddRidAndDescendantsToSet(runtimeDescriptionSet, rid, dotnetRuntimeGraph);
+                }
             }
         }
         
@@ -137,6 +135,15 @@ public record Registry(Uri BaseUri)
         
         if (osPart is null || platformPart is null) return null;
         return $"{osPart}{versionPart ?? ""}-{platformPart}";
+    }
+
+    private RuntimeGraph GetRuntimeGraphForDotNet(string ridGraphPath) => JsonRuntimeFormat.ReadRuntimeGraph(ridGraphPath);
+
+    private void AddRidAndDescendantsToSet(HashSet<RuntimeDescription> runtimeDescriptionSet, string rid, RuntimeGraph dotnetRuntimeGraph)
+    {
+        var R = dotnetRuntimeGraph.Runtimes[rid];
+        runtimeDescriptionSet.Add(R);
+        foreach (var r in R.InheritedRuntimes) AddRidAndDescendantsToSet(runtimeDescriptionSet, r, dotnetRuntimeGraph);
     }
 
     /// <summary>
