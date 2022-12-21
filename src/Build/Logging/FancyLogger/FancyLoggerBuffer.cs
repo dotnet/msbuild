@@ -232,7 +232,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static void DeleteLine(int lineId)
         {
             int lineIndex = GetLineIndexById(lineId);
-            if (lineIndex == -1) return;
+            if (lineIndex <= -1) return;
             // Get Id of currentTopLineIndex
             int currentTopLineId = lines[CurrentTopLineIndex].Id;
             lines.RemoveAt(lineIndex);
