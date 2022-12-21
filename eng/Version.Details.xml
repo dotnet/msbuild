@@ -109,9 +109,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>dccbd304b11103e08b97abf4cf4bcc1499d9235a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.5.0-preview-20221214-01">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.5.0-release-20221220-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>d7b66728d22dd5cdee5fb1e2bc385f9f2cd03171</Sha>
+      <Sha>be79eb4393631df7c6431ed1c0aa14c1bbaca731</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.22579.2">
       <Uri>https://github.com/dotnet/linker</Uri>
