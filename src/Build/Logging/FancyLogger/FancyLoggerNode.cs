@@ -28,7 +28,8 @@ namespace Microsoft.Build.Logging.FancyLogger
         public int FinishedTargets;
         public FancyLoggerBufferLine? CurrentTargetLine;
         public FancyLoggerTargetNode? CurrentTargetNode;
-
+        // Messages, errors and warnings
+        List<Object> AdditionalDetails = new();
         public FancyLoggerProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
@@ -73,6 +74,19 @@ namespace Microsoft.Build.Logging.FancyLogger
                 CurrentTargetNode.AddTask(args);
             }
         }
+        public void AddMessage(BuildMessageEventArgs args)
+        {
+            if (args.Importance != MessageImportance.High) return;
+            AdditionalDetails.Add(new FancyLoggerMessageNode(args));
+        }
+        public void AddWarning(BuildWarningEventArgs args)
+        {
+            AdditionalDetails.Add(new FancyLoggerWarningNode(args));
+        }
+        public void AddError(BuildErrorEventArgs args)
+        {
+            AdditionalDetails.Add(new FancyLoggerErrorNode(args));
+        }
     }
 
     public class FancyLoggerTargetNode
@@ -104,13 +118,22 @@ namespace Microsoft.Build.Logging.FancyLogger
 
     public class FancyLoggerWarningNode
     {
+        public FancyLoggerWarningNode(BuildWarningEventArgs args)
+        {
+        }
     }
 
     public class FancyLoggerMessageNode
     {
+        public FancyLoggerMessageNode(BuildMessageEventArgs args)
+        {
+        }
     }
 
     public class FancyLoggerErrorNode
     {
+        public FancyLoggerErrorNode(BuildErrorEventArgs args)
+        {
+        }
     }
 }

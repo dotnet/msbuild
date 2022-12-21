@@ -128,15 +128,30 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.AddMessage(e);
+            node.Log();
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
-            FancyLoggerBuffer.WriteNewLine("Warning");
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.AddWarning(e);
+            node.Log();
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
         {
-            // TODO: Try to redirect to stderr
-            FancyLoggerBuffer.WriteNewLine("Error");
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.AddError(e);
+            node.Log();
         }
 
 
