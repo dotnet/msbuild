@@ -128,5 +128,44 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                  .ExitWith(103)
                  .And.HaveStdOutContaining("[Debug] [Template Engine] => [Execute]: Execute started");
         }
+
+        [Fact]
+        public void CanUseDebugPathWhenEnvVarIsSet_Instantiate()
+        {
+            string cliHomePath = CreateTemporaryFolder(folderName: "CLI_HOME_TEST_FOLDER");
+            string home = CreateTemporaryFolder(folderName: "Home");
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--dry-run")
+                .WithDebug()
+                .WithCustomHive(home)
+                .WithEnvironmentVariable("DOTNET_CLI_HOME", cliHomePath)
+                .Execute();
+
+            commandResult
+                .Should()
+                .HaveStdOutContaining($"Settings Location: {home}")
+                .And
+                .NotHaveStdOutContaining($"Settings Location: {cliHomePath}")
+                .And
+                .Pass();
+        }
+
+        [Fact]
+        public void CanUseEnvVarPathWhenDebugPathIsNotSet_Instantiate()
+        {
+            string cliHomePath = CreateTemporaryFolder(folderName: "CLI_HOME_TEST_FOLDER");
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--dry-run")
+                .WithDebug()
+                .WithoutCustomHive()
+                .WithEnvironmentVariable("DOTNET_CLI_HOME", cliHomePath)
+                .Execute();
+
+            commandResult
+                .Should()
+                .HaveStdOutContaining($"Settings Location: {cliHomePath}")
+                .And
+                .Pass();
+        }
     }
 }
