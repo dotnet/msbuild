@@ -61,9 +61,10 @@ namespace dotnet.Tests
 
             Log.WriteLine($"Test root: {slnDirectory}");
 
-            new DotnetCommand(Log)
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(slnDirectory)
-                .Execute("new", "sln","--debug:ephemeral-hive")
+                .Execute("sln")
                 .Should().Pass();
 
             new DotnetCommand(Log)

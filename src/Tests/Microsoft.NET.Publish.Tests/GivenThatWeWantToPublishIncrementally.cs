@@ -168,9 +168,12 @@ namespace Microsoft.NET.Publish.Tests
             var testDir = _testAssetsManager.CreateTestDirectory();
             var assetName = "MVCPublishProject";
             var runtimeId = "win-x86";
-            var newCommand = new DotnetCommand(Log);
-            newCommand.WorkingDirectory = testDir.Path;
-            newCommand.Execute("new", "mvc", "-n", assetName, "--debug:ephemeral-hive").Should().Pass();
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
+                .WithWorkingDirectory(testDir.Path)
+                .Execute("mvc", "-n", assetName)
+                .Should()
+                .Pass();
 
             var expectedRegularFiles = new string[] { ".dll", ".deps.json", ".runtimeconfig.json" }
                 .Select(ending => assetName + ending);

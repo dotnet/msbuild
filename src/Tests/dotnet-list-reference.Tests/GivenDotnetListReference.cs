@@ -233,7 +233,8 @@ Commands:
 
             try
             {
-                new DotnetCommand(Log, "new", "classlib", "-o", dir.Path, "--debug:ephemeral-hive", "--no-restore")
+                new DotnetNewCommand(Log, "classlib", "-o", dir.Path, "--no-restore")
+                    .WithVirtualHive()
                     .WithWorkingDirectory(dir.Path)
                     .Execute()
                 .Should().Pass();

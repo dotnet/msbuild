@@ -405,6 +405,33 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
+        [InlineData("PublishReadyToRun")]
+        [InlineData("PublishSingleFile")]
+        [InlineData("PublishSelfContained")]
+        [InlineData("PublishAot")]
+        public void It_builds_without_implicit_rid_with_RuntimeIdentifier_specific_during_publish_only_properties(string property)
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm,
+            };
+            testProject.AdditionalProperties[property] = "true";
+            testProject.RecordProperties("RuntimeIdentifier");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: property);
+
+            var buildCommand = new DotnetBuildCommand(testAsset);
+            buildCommand
+               .Execute()
+               .Should()
+               .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
+            properties["RuntimeIdentifier"].Should().Be("");
+        }
+
+        [Theory]
         [InlineData("net7.0")]
         public void It_builds_a_runnable_output_with_Prefer32Bit(string targetFramework)
         {
