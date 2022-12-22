@@ -295,7 +295,9 @@ public class ReferencedExeProgram
 
             CreateProjects();
 
-            RunTest();
+            RunTest(callingMethod: System.Reflection.MethodBase.GetCurrentMethod().ToString()
+                .Replace("Void ","")
+                .Replace("Boolean",referenceExeInCode.ToString()));
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]

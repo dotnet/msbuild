@@ -1,5 +1,19 @@
 ﻿[
   {
+    Label: buildprops,
+    Kind: Value,
+    SortText: buildprops,
+    InsertText: buildprops,
+    Documentation: An empty Directory.Build.props file which can be used to specify MSBuild properties for an entire folder
+  },
+  {
+    Label: buildtargets,
+    Kind: Value,
+    SortText: buildtargets,
+    InsertText: buildtargets,
+    Documentation: An empty Directory.Build.targets file which can be used to specify MSBuild tasks and targets for an entire folder
+  },
+  {
     Label: classlib,
     Kind: Value,
     SortText: classlib,

@@ -14,46 +14,77 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-new-uninstall" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-new-uninstall" "1" "2022-11-08" "" ".NET Documentation"
 .hy
 .SH dotnet new uninstall
 .PP
 \f[B]This article applies to:\f[R] \[u2714]\[uFE0F] .NET Core 3.1 SDK and later versions
 .SH NAME
 .PP
-dotnet-new---uninstall - uninstalls a template package.
+dotnet-new-uninstall - uninstalls a template package.
 .SH SYNOPSIS
 .IP
 .nf
 \f[C]
-dotnet new --uninstall <PATH|NUGET_ID>
+dotnet new uninstall <PATH|NUGET_ID> 
+    [-d|--diagnostics] [--verbosity <LEVEL>] [-h|--help]
 \f[R]
 .fi
 .SH DESCRIPTION
 .PP
-The \f[V]dotnet new --uninstall\f[R] command uninstalls a template package at the \f[V]PATH\f[R] or \f[V]NUGET_ID\f[R] provided.
+The \f[V]dotnet new uninstall\f[R] command uninstalls a template package at the \f[V]PATH\f[R] or \f[V]NUGET_ID\f[R] provided.
 When the \f[V]<PATH|NUGET_ID>\f[R] value isn\[cq]t specified, all currently installed template packages and their associated templates are displayed.
 When specifying \f[V]NUGET_ID\f[R], don\[cq]t include the version number.
 .RS
 .PP
 .RE
 .PP
-Starting with .NET SDK 7.0.100 Preview 2, the \f[V]dotnet new\f[R] syntax has changed:
+Starting with the .NET 7 SDK, the \f[V]dotnet new\f[R] syntax has changed:
 .IP \[bu] 2
 The \f[V]--list\f[R], \f[V]--search\f[R], \f[V]--install\f[R], and \f[V]--uninstall\f[R] options became \f[V]list\f[R], \f[V]search\f[R], \f[V]install\f[R] and \f[V]uninstall\f[R] subcommands.
 .IP \[bu] 2
 The \f[V]--update-apply\f[R] option became the \f[V]update\f[R] subcommand.
 .IP \[bu] 2
-to use \f[V]--update-check\f[R], use the \f[V]update\f[R] subcommand with the \f[V]--check\f[R] option.
+To use \f[V]--update-check\f[R], use the \f[V]update\f[R] subcommand with the \f[V]--check-only\f[R] option.
 .PP
 Other options that were available before are still available to use with their respective subcommands.
 Separate help for each subcommand is available via the \f[V]-h\f[R] or \f[V]--help\f[R] option: \f[V]dotnet new <subcommand> --help\f[R] lists all supported options for the subcommand.
 .PP
 Additionally, tab completion is now available for \f[V]dotnet new\f[R].
-It supports completion for installed template names, as well as completion for the options a selected template provides.
+It supports completion for installed template names and for the options a selected template provides.
 To activate tab completion for the .NET SDK, see Enable tab completion.
-> > Examples of the new syntax: > > - Show help for the \f[V]uninstall\f[R] subcommand.
-> > \f[V]dotnetcli >   dotnet new uninstall --help >\f[R] > > - List the installed templates and details about them, including how to uninstall them: > > \f[V]dotnetcli >   dotnet new uninstall >\f[R] > > - Uninstall the Azure web jobs project template package: > > \f[V]dotnetcli >   dotnet new uninstall Microsoft.Azure.WebJobs.ProjectTemplates >\f[R]
+> > Examples of the old syntax: > > - List the installed templates and details about them, including how to uninstall them: > > \f[V]dotnetcli >   dotnet new --uninstall >\f[R] > > - Uninstall the Azure web jobs project template package: > > \f[V]dotnetcli >   dotnet new --uninstall Microsoft.Azure.WebJobs.ProjectTemplates >\f[R]
+.SH ARGUMENTS
+.IP \[bu] 2
+\f[B]\f[VB]<PATH|NUGET_ID>\f[B]\f[R]
+.RS 2
+.PP
+The folder on the file system or the NuGet package identifier the package was installed from.
+Note that the version for the NuGet package should not be specified.
+.RE
+.SH OPTIONS
+.IP \[bu] 2
+\f[B]\f[VB]-d|--diagnostics\f[B]\f[R]
+.RS 2
+.PP
+Enables diagnostic output.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-h|--help\f[B]\f[R]
+.RS 2
+.PP
+Prints out help for the uninstall command.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-v|--verbosity <LEVEL>\f[B]\f[R]
+.RS 2
+.PP
+Sets the verbosity level of the command.
+Allowed values are \f[V]q[uiet]\f[R], \f[V]m[inimal]\f[R], \f[V]n[ormal]\f[R], and \f[V]diag[nostic]\f[R].
+Available since .NET SDK 7.0.100.
+.RE
 .SH EXAMPLES
 .IP \[bu] 2
 List the installed templates and details about them, including how to uninstall them:
@@ -61,7 +92,7 @@ List the installed templates and details about them, including how to uninstall 
 .IP
 .nf
 \f[C]
-dotnet new --uninstall
+dotnet new uninstall
 \f[R]
 .fi
 .RE
@@ -71,7 +102,7 @@ Uninstall the SPA templates for ASP.NET Core:
 .IP
 .nf
 \f[C]
-dotnet new --uninstall Microsoft.DotNet.Web.Spa.ProjectTemplates
+dotnet new uninstall Microsoft.DotNet.Web.Spa.ProjectTemplates
 \f[R]
 .fi
 .RE
@@ -79,8 +110,8 @@ dotnet new --uninstall Microsoft.DotNet.Web.Spa.ProjectTemplates
 .IP \[bu] 2
 dotnet new command
 .IP \[bu] 2
-dotnet new \[en]list option
+dotnet new list command
 .IP \[bu] 2
-dotnet new \[en]search option
+dotnet new search command
 .IP \[bu] 2
 Custom templates for dotnet new
