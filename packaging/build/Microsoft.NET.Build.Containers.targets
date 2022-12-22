@@ -63,8 +63,8 @@
             <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
             <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
             <!-- Only default a tag name if no tag names at all are provided -->
-            <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and @(ContainerImageTags->Count()) == 0">$(Version)</ContainerImageTag>
-            <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true' and @(ContainerImageTags->Count()) == 0">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
+            <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
+            <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true' and '$(ContainerImageTags)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
             <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
             <!-- Could be semicolon-delimited -->
         </PropertyGroup>
@@ -92,7 +92,7 @@
                                   ContainerRegistry="$(ContainerRegistry)"
                                   ContainerImageName="$(ContainerImageName)"
                                   ContainerImageTag="$(ContainerImageTag)"
-                                  ContainerImageTags="@(ContainerImageTags)"
+                                  ContainerImageTags="$(ContainerImageTags)"
                                   ContainerEnvironmentVariables="@(ContainerEnvironmentVariable)">
 
             <Output TaskParameter="ParsedContainerRegistry" PropertyName="ContainerBaseRegistry" />
