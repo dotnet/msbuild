@@ -485,11 +485,11 @@ namespace Microsoft.Build.BackEnd
                                 // We coerce the failing result to a successful result.
                                 taskResult = new WorkUnitResult(WorkUnitResultCode.Success, taskResult.ActionCode, taskResult.Exception);
                             }
-                        }
 
-                        if (MSBuildEventSource.Log.IsEnabled())
-                        {
-                            MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                            if (MSBuildEventSource.Log.IsEnabled())
+                            {
+                                MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                            }
                         }
                     }
                 }
