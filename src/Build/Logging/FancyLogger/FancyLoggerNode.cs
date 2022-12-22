@@ -161,7 +161,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void Log()
         {
             if (Line == null) return;
-            FancyLoggerBuffer.UpdateLine(Line.Id, $"   {ANSIBuilder.Formatting.Italic(Message)}");
+            FancyLoggerBuffer.UpdateLine(Line.Id, $"   └── {ANSIBuilder.Formatting.Italic(Message)}");
         }
     }
 }
