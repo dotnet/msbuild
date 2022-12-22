@@ -12,14 +12,14 @@
       "type": "parameter",
       "datatype": "string",
       "description": "parameter A description",
-      "isEnabled": "A_enabled == true",
+      "isEnabled": "A_enabled",
       "isRequired": true,
       "replaces": "placeholderA"
     },
     "paramB": {
       "type": "parameter",
       "datatype": "string",
-      "isEnabled": "B_enabled == true",
+      "isEnabled": "B_enabled",
       "description": "parameter B description",
       "replaces": "placeholderB"
     },
