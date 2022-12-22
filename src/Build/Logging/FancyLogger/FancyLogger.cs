@@ -48,7 +48,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
             eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
-            // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
+            eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
             // Raised
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
@@ -124,6 +124,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
             completedTasks++;
+            FancyLoggerBuffer.WriteFooter($"Build: {ANSIBuilder.Graphics.ProgressBar(completedTasks / existingTasks)}");
         }
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)

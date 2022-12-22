@@ -148,9 +148,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 Message = "Message was undefined";
             }
-            else if (args.Message.Length > 80)
+            else if (args.Message.Length > Console.WindowWidth - 6)
             {
-                Message = args.Message.Substring(0, 80);
+                Message = args.Message.Substring(0, Console.WindowWidth - 6);
             }
             else
             {
