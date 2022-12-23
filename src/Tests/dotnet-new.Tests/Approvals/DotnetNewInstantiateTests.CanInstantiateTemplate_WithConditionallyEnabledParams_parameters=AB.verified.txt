@@ -2,4 +2,10 @@
 // value of paramA: placeholderA
 // value of paramB: placeholderB
 
+// paramA is disabled
 
+// paramA is evaluated as false
+
+// paramB is disabled
+
+// paramB is evaluated as false
