@@ -3006,8 +3006,7 @@ namespace Microsoft.Build.Tasks
                     {
                         // Exactly one TargetFrameworkDirectory, so assume it's related to this
                         // InstalledAssemblyTable.
-
-                        frameworkDirectory = TargetFrameworkDirectories[0];
+                        frameworkDirectory = FileUtilities.EnsureTrailingSlash(TargetFrameworkDirectories[0]);
                     }
                 }
                 else
