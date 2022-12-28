@@ -144,6 +144,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerBufferLine? Line;
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
+            // TODO: Replace
             if (args.Message == null)
             {
                 Message = "Message was undefined";

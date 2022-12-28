@@ -158,9 +158,10 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public void Shutdown() {
             // Keep open if autoscroll disabled (the user is reading info)
-            /*while (FancyLoggerBuffer.AutoScrollEnabled || !FancyLoggerBuffer.IsTerminated)
+            // TODO: Find more efficient way of keeping logger open? 
+            while (FancyLoggerBuffer.AutoScrollEnabled || !FancyLoggerBuffer.IsTerminated)
             {
-            }*/
+            }
             FancyLoggerBuffer.Terminate();
             Console.Clear();
             Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
