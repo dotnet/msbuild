@@ -211,7 +211,8 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_lockObject)
             {
-                return _configurations.OrderBy(kvp => kvp.Key).FirstOrDefault().Key;
+                ErrorUtilities.VerifyThrow(_configurations.Count > 0, "No configurations exist from which to obtain the smallest configuration id.");
+                return _configurations.OrderBy(kvp => kvp.Key).First().Key;
             }
         }
     
