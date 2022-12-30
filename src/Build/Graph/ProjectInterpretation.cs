@@ -105,12 +105,12 @@ namespace Microsoft.Build.Graph
                 var requesterPlatform = "";
                 var requesterPlatformLookupTable = "";
 
-                if ( !projectReferenceItem.HasMetadata(SetPlatformMetadataName) && ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
+                if (!projectReferenceItem.HasMetadata(SetPlatformMetadataName) && ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
                 {
                     requesterPlatform = requesterInstance.GetPropertyValue("Platform");
                     requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
 
-                    var  projectInstance = _projectInstanceFactory(
+                    var projectInstance = _projectInstanceFactory(
                         projectReferenceFullPath,
                         null, // Platform negotiation requires an evaluation with no global properties first
                         _projectCollection);
@@ -175,9 +175,7 @@ namespace Microsoft.Build.Graph
             {
                 ProjectGraphNode outerBuild = node.Value.GraphNode;
 
-                if (GetProjectType(outerBuild.ProjectInstance) == ProjectType.OuterBuild
-                    && outerBuild.ProjectReferences.Count != 0
-                    && outerBuild.ReferencingProjects.Count != 0)
+                if (GetProjectType(outerBuild.ProjectInstance) == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
                 {
                     foreach (ProjectGraphNode innerBuild in outerBuild.ProjectReferences)
                     {
