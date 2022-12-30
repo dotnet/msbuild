@@ -29,5 +29,10 @@ namespace Microsoft.Build.Tasks
             : base(info, context)
         {
         }
+
+        /// <summary>
+        /// Gets a message that describes the exception.
+        /// </summary>
+        public override string Message => (InnerException == null) ? Message : $"{Message} {InnerException.Message}";
     }
 }
