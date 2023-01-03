@@ -2998,21 +2998,15 @@ namespace Microsoft.Build.Tasks
                 // Whidbey behavior was to accept a single TargetFrameworkDirectory, and multiple
                 // InstalledAssemblyTables, under the assumption that all of the InstalledAssemblyTables
                 // were related to the single TargetFrameworkDirectory.  If inputs look like the Whidbey
-                // case, let's make sure we behave the same way.
-
+                // case, let's make sure we behave the same way. Otherwise, use non-empty metadata.
                 if (String.IsNullOrEmpty(frameworkDirectory))
                 {
                     if (TargetFrameworkDirectories?.Length == 1)
                     {
                         // Exactly one TargetFrameworkDirectory, so assume it's related to this
                         // InstalledAssemblyTable.
-                        frameworkDirectory = FileUtilities.EnsureTrailingSlash(TargetFrameworkDirectories[0]);
+                        frameworkDirectory = TargetFrameworkDirectories[0];
                     }
-                }
-                else
-                {
-                    // The metadata on the item was non-empty, so use it.
-                    frameworkDirectory = FileUtilities.EnsureTrailingSlash(frameworkDirectory);
                 }
 
                 tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory);
