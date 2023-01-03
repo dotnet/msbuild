@@ -826,6 +826,11 @@ namespace Microsoft.Build.Tasks
                                     LogDiagnostic("Retrying on ERROR_ACCESS_DENIED because MSBUILDALWAYSRETRY = 1");
                                 }
                             }
+                            else if (code == NativeMethods.ERROR_INVALID_FILENAME)
+                            {
+                                // Invalid characters used in file name, no point retrying.
+                                throw;
+                            }
 
                             if (e is UnauthorizedAccessException)
                             {
