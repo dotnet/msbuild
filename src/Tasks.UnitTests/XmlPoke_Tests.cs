@@ -86,13 +86,13 @@ namespace Microsoft.Build.UnitTests
             XmlDocument xmlDocument = ExecuteXmlPoke(query: query, value: value);
 
             List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
-
+            
             nodes.ShouldNotBeNull($"There should be <class /> elements with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
             nodes.Count.ShouldBe(1, $"There should be 1 <class /> element with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
             nodes[0].Value.ShouldBe(value);
-        }
+        }   
 
         [Fact]
         public void PokeChildren()
@@ -172,6 +172,23 @@ namespace Microsoft.Build.UnitTests
                     Should.NotThrow(() => p.Execute());
                 }
             }
+        }
+
+        [Fact]
+        // https://github.com/dotnet/msbuild/issues/5814
+        public void PokeWithEmptyValue()
+        {
+            string xmlInputPath;
+            Prepare(_xmlFileNoNs, out xmlInputPath);
+            string projectContents = @"
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                <Target Name='Poke'>
+                    <XmlPoke Value='' Query='//class/variable/@Name' XmlInputPath='{0}'/>
+                </Target>
+                </Project>";
+            projectContents = string.Format(projectContents, xmlInputPath);
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
         }
 
         [Fact]
