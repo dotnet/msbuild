@@ -13,15 +13,7 @@ using System.IO;
 namespace Microsoft.Build.Logging.FancyLogger
 {
     public class FancyLogger : ILogger
-    {
-        // TODO: Move somewhere else
-        public string GetUnambiguousPath(string path)
-        {
-            // Get last part of path
-            return Path.GetFileName(path);
-        }
-        
-        public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
+    {   
         public Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
 
         private float existingTasks = 1;
