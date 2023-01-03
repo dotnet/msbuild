@@ -758,13 +758,13 @@ namespace Microsoft.Build.UnitTests
                 logger.AssertLogContains("iout3=[]");
                 logger.AssertLogContains("iout4=[]");
                 logger.AssertLogContains("iout5=[a/b.foo]");
-                logger.AssertLogContains("iout6=[a\\b.foo]");
+                logger.AssertLogContains($"iout6=[a{Path.DirectorySeparatorChar}b.foo]");
                 logger.AssertLogContains("iin1=[]");
                 logger.AssertLogContains("iin2=[]");
                 logger.AssertLogContains("iin3=[]");
                 logger.AssertLogContains("iin4=[]");
                 logger.AssertLogContains("iin5=[a/b.foo]");
-                logger.AssertLogContains("iin6=[a\\b.foo]");
+                logger.AssertLogContains($"iin6=[a{Path.DirectorySeparatorChar}b.foo]");
             }
             finally
             {
