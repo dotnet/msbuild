@@ -25,6 +25,10 @@ To run the unit tests from Visual Studio:
 
 To build MSBuild and run all unit tests from the command line, use `.\build.cmd -test`.
 
+Some tests are creating symlinks to test associated functionality - in order for them to succeed you have two options:
+* Enable [Development Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) on your machine.
+* Or run those tests elevated
+
 To mimic our CI job use `eng\CIBuild.cmd`. Be aware that this command may delete your local NuGet cache.
 
 The CI does two builds. In the second build, it uses the binaries from the first build to build the repository again.
