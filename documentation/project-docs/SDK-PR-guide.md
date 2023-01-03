@@ -17,7 +17,7 @@ Minor releases lock down after preview 3 for each release.  Preview 3 is typical
 
 ### Servicing releases
 The .NET SDK has monthly servicing releases aligning with the .NET Runtime servicing releases. These are for top fixes and security updates only to limit risk.
-Any servicing release is open for checkins from the day the branding PRs are merged (~1st of each month) and when code complete is (typically two weeks later).
+Any servicing release is open for checkins from the day the [branding PRs](https://github.com/dotnet/sdk/pulls?q=is%3Apr+branding) are merged (~1st of each month) and when code complete is (typically two weeks later).
 The servicing branches are locked from the time of code complete to the next branding in case we need to respin any monthly release. Final signoffs are typically in the last week of each month.
 
 ### Schedule
