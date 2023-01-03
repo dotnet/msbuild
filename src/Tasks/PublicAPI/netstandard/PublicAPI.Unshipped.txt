@@ -1,24 +1,3 @@
-Microsoft.Build.Tasks.BuildUri
-Microsoft.Build.Tasks.BuildUri.BuildUri() -> void
-Microsoft.Build.Tasks.BuildUri.InputUri.get -> Microsoft.Build.Framework.ITaskItem[]
-Microsoft.Build.Tasks.BuildUri.InputUri.set -> void
-Microsoft.Build.Tasks.BuildUri.OutputUri.get -> Microsoft.Build.Framework.ITaskItem[]
-Microsoft.Build.Tasks.BuildUri.UriFragment.get -> string
-Microsoft.Build.Tasks.BuildUri.UriFragment.set -> void
-Microsoft.Build.Tasks.BuildUri.UriHost.get -> string
-Microsoft.Build.Tasks.BuildUri.UriHost.set -> void
-Microsoft.Build.Tasks.BuildUri.UriPassword.get -> string
-Microsoft.Build.Tasks.BuildUri.UriPassword.set -> void
-Microsoft.Build.Tasks.BuildUri.UriPath.get -> string
-Microsoft.Build.Tasks.BuildUri.UriPath.set -> void
-Microsoft.Build.Tasks.BuildUri.UriPort.get -> int
-Microsoft.Build.Tasks.BuildUri.UriPort.set -> void
-Microsoft.Build.Tasks.BuildUri.UriQuery.get -> string
-Microsoft.Build.Tasks.BuildUri.UriQuery.set -> void
-Microsoft.Build.Tasks.BuildUri.UriScheme.get -> string
-Microsoft.Build.Tasks.BuildUri.UriScheme.set -> void
-Microsoft.Build.Tasks.BuildUri.UriUserName.get -> string
-Microsoft.Build.Tasks.BuildUri.UriUserName.set -> void
 Microsoft.Build.Tasks.SetRidAgnosticValueForProjects
 Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Projects.get -> Microsoft.Build.Framework.ITaskItem[]
 Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Projects.set -> void
@@ -27,5 +6,4 @@ Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.UpdatedProjects.get -> Micr
 Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.UpdatedProjects.set -> void
 Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.get -> bool
 Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.set -> void
-override Microsoft.Build.Tasks.BuildUri.Execute() -> bool
 override Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Execute() -> bool
