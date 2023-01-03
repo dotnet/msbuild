@@ -10,6 +10,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Threading;
 
 using Microsoft.Build.Shared;
@@ -200,9 +201,16 @@ internal static class NativeMethods
         Unknown
     }
 
-#endregion
+    internal enum SymbolicLink
+    {
+        File = 0,
+        Directory = 1,
+        AllowUnprivilegedCreate = 2,
+    }
 
-#region Structs
+    #endregion
+
+    #region Structs
 
     /// <summary>
     /// Structure that contain information about the system on which we are running
@@ -1035,6 +1043,123 @@ internal static class NativeMethods
         return null;
     }
 
+    internal static bool ExistAndHasContent(string path)
+    {
+        var fileInfo = new FileInfo(path);
+
+        // File exist and has some content
+        return fileInfo.Exists &&
+               (fileInfo.Length > 0 ||
+                    // Or final destination of the link is nonempty file
+                    (
+                        IsSymLink(fileInfo) &&
+                        TryGetFinalLinkTarget(fileInfo, out string finalTarget, out _) &&
+                        File.Exists(finalTarget) &&
+                        new FileInfo(finalTarget).Length > 0
+                    )
+               );
+    }
+
+    internal static bool IsSymLink(FileInfo fileInfo)
+    {
+#if NET
+        return fileInfo.Exists && !string.IsNullOrEmpty(fileInfo.LinkTarget);
+#else
+        if (!IsWindows)
+        {
+            return false;
+        }
+
+        WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+
+        return NativeMethods.GetFileAttributesEx(fileInfo.FullName, 0, ref data) &&
+               (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0 &&
+               (data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT;
+#endif
+    }
+
+    internal static bool IsSymLink(string path)
+    {
+        return IsSymLink(new FileInfo(path));
+    }
+
+    internal static bool TryGetFinalLinkTarget(FileInfo fileInfo, out string finalTarget, out string errorMessage)
+    {
+        if (!IsWindows)
+        {
+            errorMessage = null;
+#if NET
+            while(!string.IsNullOrEmpty(fileInfo.LinkTarget))
+            {
+                fileInfo = new FileInfo(fileInfo.LinkTarget);
+            }
+            finalTarget = fileInfo.FullName;
+            return true;
+#else
+
+            finalTarget = null;
+            return false;
+#endif
+        }
+
+        using SafeFileHandle handle = OpenFileThroughSymlinks(fileInfo.FullName);
+        if (handle.IsInvalid)
+        {
+            // Link is broken.
+            errorMessage = Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+            finalTarget = null;
+            return false;
+        }
+
+        const int initialBufferSize = 4096;
+        char[] targetPathBuffer = new char[initialBufferSize];
+        uint result = GetFinalPathNameByHandle(handle, targetPathBuffer);
+
+        // Buffer too small
+        if (result > targetPathBuffer.Length)
+        {
+            targetPathBuffer = new char[(int)result];
+            result = GetFinalPathNameByHandle(handle, targetPathBuffer);
+        }
+
+        // Error
+        if (result == 0)
+        {
+            errorMessage = Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+            finalTarget = null;
+            return false;
+        }
+
+        // Normalize \\?\ and \??\ syntax.
+        finalTarget = new string(targetPathBuffer, 0, (int)result).TrimStart(new char[] { '\\', '?' });
+        errorMessage = null;
+        return true;
+    }
+
+    internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
+    {
+        bool symbolicLinkCreated;
+        if (IsWindows)
+        {
+            Version osVersion = Environment.OSVersion.Version;
+            SymbolicLink flags = SymbolicLink.File;
+            if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
+            {
+                flags |= SymbolicLink.AllowUnprivilegedCreate;
+            }
+
+            symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, flags);
+            errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+        }
+        else
+        {
+            symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
+            errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+        }
+
+        return symbolicLinkCreated;
+    }
+
     /// <summary>
     /// Get the last write time of the fullpath to the file.
     /// </summary>
@@ -1112,6 +1237,23 @@ internal static class NativeMethods
     }
 
     /// <summary>
+    /// Get the SafeFileHandle for a file, while skipping reparse points (going directly to target file).
+    /// </summary>
+    /// <param name="fullPath">Full path to the file in the filesystem</param>
+    /// <returns>the SafeFileHandle for a file (target file in case of symlinks)</returns>
+    [SupportedOSPlatform("windows")]
+    private static SafeFileHandle OpenFileThroughSymlinks(string fullPath)
+    {
+        return CreateFile(fullPath,
+            GENERIC_READ,
+            FILE_SHARE_READ,
+            IntPtr.Zero,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL, /* No FILE_FLAG_OPEN_REPARSE_POINT; read through to content */
+            IntPtr.Zero);
+    }
+
+    /// <summary>
     /// Get the last write time of the content pointed to by a file path.
     /// </summary>
     /// <param name="fullPath">Full path to the file in the filesystem</param>
@@ -1125,14 +1267,7 @@ internal static class NativeMethods
     {
         DateTime fileModifiedTime = DateTime.MinValue;
 
-        using (SafeFileHandle handle =
-            CreateFile(fullPath,
-                GENERIC_READ,
-                FILE_SHARE_READ,
-                IntPtr.Zero,
-                OPEN_EXISTING,
-                FILE_ATTRIBUTE_NORMAL, /* No FILE_FLAG_OPEN_REPARSE_POINT; read through to content */
-                IntPtr.Zero))
+        using (SafeFileHandle handle = OpenFileThroughSymlinks(fullPath))
         {
             if (!handle.IsInvalid)
             {
@@ -1635,9 +1770,31 @@ internal static class NativeMethods
     [SupportedOSPlatform("windows")]
     internal static extern bool SetThreadErrorMode(int newMode, out int oldMode);
 
-#endregion
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.I1)]
+    [SupportedOSPlatform("windows")]
+    internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
 
-#region helper methods
+    [DllImport("libc", SetLastError = true)]
+    internal static extern int symlink(string oldpath, string newpath);
+
+    internal const uint FILE_NAME_NORMALIZED = 0x0;
+
+    [SupportedOSPlatform("windows")]
+    static uint GetFinalPathNameByHandle(SafeFileHandle fileHandle, char[] filePath) =>
+        GetFinalPathNameByHandle(fileHandle, filePath, (uint) filePath.Length, FILE_NAME_NORMALIZED);
+
+    [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    [SupportedOSPlatform("windows")]
+    static extern uint GetFinalPathNameByHandle(
+        SafeFileHandle hFile,
+        [Out] char[] lpszFilePath,
+        uint cchFilePath,
+        uint dwFlags);
+
+    #endregion
+
+    #region helper methods
 
     internal static bool DirectoryExists(string fullPath)
     {
