@@ -24,6 +24,8 @@ namespace Microsoft.DotNet.Cli
 
         private static void ApplyOverrideToCurrentProcess(CultureInfo language)
         {
+            CultureInfo.CurrentUICulture = language;
+            CultureInfo.DefaultThreadCurrentCulture = language;
             CultureInfo.DefaultThreadCurrentUICulture = language;
         }
 
