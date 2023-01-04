@@ -15,7 +15,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-pack" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-pack" "1" "2022-10-10" "" ".NET Documentation"
 .hy
 .SH dotnet pack
 .PP
@@ -65,17 +65,10 @@ The build can also fail if there is a locked file or other issue.
 You can provide MSBuild properties to the \f[V]dotnet pack\f[R] command for the packing process.
 For more information, see NuGet pack target properties and the MSBuild Command-Line Reference.
 The Examples section shows how to use the MSBuild \f[V]-p\f[R] switch for a couple of different scenarios.
+.RS
 .PP
-Web projects aren\[cq]t packable by default.
-To override the default behavior, add the following property to your \f[I].csproj\f[R] file:
-.IP
-.nf
-\f[C]
-<PropertyGroup>
-   <IsPackable>true</IsPackable>
-</PropertyGroup>
-\f[R]
-.fi
+Web projects aren\[cq]t packable.
+.RE
 .SS Implicit restore
 .PP
 You don\[cq]t have to run \f[V]dotnet restore\f[R] because it\[cq]s run implicitly by all commands that require a restore to occur, such as \f[V]dotnet new\f[R], \f[V]dotnet build\f[R], \f[V]dotnet run\f[R], \f[V]dotnet test\f[R], \f[V]dotnet publish\f[R], and \f[V]dotnet pack\f[R].
