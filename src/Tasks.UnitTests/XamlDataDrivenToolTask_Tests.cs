@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         {
             string projectFile = @"
                       <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
-                        <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
+                        <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
                           <Task>
                             <![CDATA[
                               <ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         {
             string projectFile = @"
                       <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
-                        <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
+                        <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
                           <Task>
                             <![CDATA[
                               <ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -346,7 +346,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         {
             string projectFile = @"
                       <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
-                        <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
+                        <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
                           <Task>
                             <![CDATA[
                               <ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
