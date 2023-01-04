@@ -28,14 +28,11 @@ If you set a value here, you should set the fully-qualified name of the image to
 
 This property controls the destination registry - the place that the newly-created image will be pushed to.
 
-Be default, we push to the local Docker daemon (annotated by `docker://`), but for this release you can specify any _unauthenticated_ registry. For example:
+Be default, we push to the local Docker daemon (annotated by `docker://`), but you can also specify a remote registry. Interacting with that registry may require authentication, see [Authenticating to container registries](./RegistryAuthentication.md) for more details.
 
 ```xml
 <ContainerRegistry>registry.mycorp.com:1234</ContainerRegistry>
 ```
-
-> **Note**
-> There is no authentication currently supported - that [will come in a future release](https://github.com/dotnet/sdk-container-builds/issues/70) - so make sure you're pointing to a local Docker daemon
 
 ## ContainerImageName
 
@@ -48,7 +45,7 @@ By default, the value used will be the `AssemblyName` of the project.
 ```
 
 > **Note**
-> Image names can only contain lowercase alphanumeric characters, periods, underscores, and dashes, and must start with a letter or number - any other characters will result in an error being thrown.
+> Image names consist of one or more slash-delimited segments, each of which can only contain lowercase alphanumeric characters, periods, underscores, and dashes, and must start with a letter or number - any other characters will result in an error being thrown.
 
 ## ContainerImageTag(s)
 
