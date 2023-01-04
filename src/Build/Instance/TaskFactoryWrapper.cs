@@ -327,7 +327,7 @@ namespace Microsoft.Build.Execution
                             _namesOfPropertiesWithAllowEmptyStringAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         }
 
-                        // we have a output attribute defined, keep a record of that
+                        // we have a allowEmptyString attribute defined, keep a record of that
                         _namesOfPropertiesWithAllowEmptyStringAttribute[propertyInfo.Name] = String.Empty;
                     }
                 }
