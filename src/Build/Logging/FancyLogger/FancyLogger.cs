@@ -46,7 +46,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Initialize FancyLoggerBuffer
-            // FancyLoggerBuffer.Initialize();
             FancyLoggerBuffer.Initialize();
         }
 

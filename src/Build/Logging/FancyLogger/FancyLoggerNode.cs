@@ -14,6 +14,11 @@ namespace Microsoft.Build.Logging.FancyLogger
 { 
     public class FancyLoggerProjectNode
     {
+        /// <summary>
+        /// Given a list of paths, this method will get the shortest not ambiguous path for a project.
+        /// Example: for `/users/documents/foo/project.csproj` and `/users/documents/bar/project.csproj`, the respective non ambiguous paths would be `foo/project.csproj` and `bar/project.csproj`
+        /// Still work in progress...
+        /// </summary>
         private static string GetUnambiguousPath(string path)
         {
             return Path.GetFileName(path);
@@ -21,6 +26,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public int Id;
         public string ProjectPath;
+        public string TargetFramework;
         public bool Finished;
         // Line to display project info
         public FancyLoggerBufferLine? Line;
@@ -36,13 +42,21 @@ namespace Microsoft.Build.Logging.FancyLogger
             ProjectPath = args.ProjectFile!;
             Finished = false;
             FinishedTargets = 0;
+            if (args.GlobalProperties != null && args.GlobalProperties.ContainsKey("TargetFramework"))
+            {
+                TargetFramework = args.GlobalProperties["TargetFramework"];
+            }
+            else
+            {
+                TargetFramework = "";
+            }
         }
 
         public void Log()
         {
             // Project details
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
-                $"{(Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner())} {ANSIBuilder.Formatting.Dim("Project: ")} {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}",
+                $"{(Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner())} {ANSIBuilder.Formatting.Dim("Project: ")} {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework}]",
                 $"({FinishedTargets} targets completed)",
                 Console.WindowWidth
             );
