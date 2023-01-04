@@ -230,7 +230,8 @@ namespace Microsoft.Build.Tasks
                     infos[i].Name,
                     infos[i].PropertyType,
                     infos[i].GetCustomAttributes(typeof(OutputAttribute), false).Length > 0,
-                    infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Length > 0);
+                    infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Length > 0,
+                    infos[i].GetCustomAttributes(typeof(AllowEmptyStringAttribute), false).Length > 0);
             }
 
             return propertyInfos;

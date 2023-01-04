@@ -32,7 +32,7 @@ namespace Microsoft.Build.Execution
         /// <param name="taskPropertyInfo">The original property info that generated this instance.</param>
         /// <param name="taskType">The type to reflect over to get the reflection propertyinfo later.</param>
         internal ReflectableTaskPropertyInfo(TaskPropertyInfo taskPropertyInfo, Type taskType)
-            : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required)
+            : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required, taskPropertyInfo.AllowEmptyString)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
             _taskType = taskType;
@@ -47,7 +47,8 @@ namespace Microsoft.Build.Execution
             propertyInfo.Name,
             propertyInfo.PropertyType,
             propertyInfo.GetCustomAttributes(typeof(OutputAttribute), true).Any(),
-            propertyInfo.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
+            propertyInfo.GetCustomAttributes(typeof(RequiredAttribute), true).Any(),
+            propertyInfo.GetCustomAttributes(typeof(AllowEmptyStringAttribute), true).Any())
         {
             _propertyInfo = propertyInfo;
         }
@@ -57,12 +58,13 @@ namespace Microsoft.Build.Execution
         /// used with MetadataLoadContext, as these parameters cannot be computed for the property type passed in directly but
         /// rather the relevant base type.
         /// </summary>
-        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, bool isAssignableToITaskItemType)
+        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required,bool allowEmptyString, bool isAssignableToITaskItemType)
             : base(
             propertyInfo.Name,
             propertyInfo.PropertyType,
             output,
-            required)
+            required,
+            allowEmptyString)
         {
             _propertyInfo = propertyInfo;
             IsAssignableToITask = isAssignableToITaskItemType;

@@ -333,6 +333,7 @@ namespace Microsoft.Build.BackEnd
             // "required" so that we can keep track of whether or not they all get set.
             var setParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             IDictionary<string, string> requiredParameters = GetNamesOfPropertiesWithRequiredAttribute();
+            IDictionary<string, string> allowEmptyStringParameters = GetNamesOfPropertiesWithAllowEmptyStringAttribute();
 
             // look through all the attributes of the task element
             foreach (KeyValuePair<string, (string, ElementLocation)> parameter in parameters)
@@ -342,7 +343,7 @@ namespace Microsoft.Build.BackEnd
 
                 try
                 {
-                    success = SetTaskParameter(parameter.Key, parameter.Value.Item1, parameter.Value.Item2, requiredParameters.ContainsKey(parameter.Key), out taskParameterSet);
+                    success = SetTaskParameter(parameter.Key, parameter.Value.Item1, parameter.Value.Item2, requiredParameters.ContainsKey(parameter.Key), allowEmptyStringParameters.ContainsKey(parameter.Key), out taskParameterSet);
                 }
                 catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
                 {
@@ -1007,6 +1008,7 @@ namespace Microsoft.Build.BackEnd
             string parameterValue,
             ElementLocation parameterLocation,
             bool isRequired,
+            bool allowEmptyString,
             out bool parameterSet
         )
         {
@@ -1064,6 +1066,7 @@ namespace Microsoft.Build.BackEnd
                             parameterType,
                             parameterValue,
                             parameterLocation,
+                            allowEmptyString,
                             out parameterSet
                             );
                     }
@@ -1109,7 +1112,7 @@ namespace Microsoft.Build.BackEnd
                     // flag an error if we find a parameter that has no .NET property equivalent
                     _taskLoggingContext.LogError
                         (
-                        new BuildEventFileInfo( parameterLocation ),
+                        new BuildEventFileInfo(parameterLocation),
                         "UnexpectedTaskAttribute",
                         parameterName,
                         _taskName,
@@ -1151,6 +1154,7 @@ namespace Microsoft.Build.BackEnd
             Type parameterType,
             string parameterValue,
             ElementLocation parameterLocation,
+            bool allowEmptyString,
             out bool taskParameterSet
         )
         {
@@ -1169,6 +1173,11 @@ namespace Microsoft.Build.BackEnd
                     if (finalTaskItems.Count == 0)
                     {
                         success = true;
+                        if (allowEmptyString)
+                        {
+                            success = SetTaskItemParameter(parameter, new TaskItem(parameterValue, parameterLocation.LocationString, allowEmptyString));
+                            taskParameterSet = true;
+                        }
                     }
                     else
                     {
@@ -1605,6 +1614,31 @@ namespace Microsoft.Build.BackEnd
             }
 
             return requiredParameters;
+        }
+
+        /// <summary>
+        /// Finds all the task properties that are allowEmptyString.
+        /// Returns them as keys in a dictionary.
+        /// </summary>
+        /// <returns>Gets a list of properties which are allowEmptyString.</returns>
+        private IDictionary<string, string> GetNamesOfPropertiesWithAllowEmptyStringAttribute()
+        {
+            ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Expected taskFactoryWrapper to not be null");
+            IDictionary<string, string> allowEmptyStringParameters = null;
+
+            try
+            {
+                allowEmptyStringParameters = _taskFactoryWrapper.GetNamesOfPropertiesWithAllowEmptyStringAttribute;
+            }
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
+            {
+                // Reflection related exception
+                _targetLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "AttributeTypeLoadError", _taskName, e.Message);
+
+                ProjectErrorUtilities.VerifyThrowInvalidProject(false, _taskLocation, "TaskDeclarationOrUsageError", _taskName);
+            }
+
+            return allowEmptyStringParameters;
         }
 
         /// <summary>

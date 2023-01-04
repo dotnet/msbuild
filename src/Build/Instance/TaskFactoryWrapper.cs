@@ -30,6 +30,11 @@ namespace Microsoft.Build.Execution
         private IDictionary<string, string> _namesOfPropertiesWithRequiredAttribute;
 
         /// <summary>
+        /// Cache of names of allowEmptyString properties on this type
+        /// </summary>
+        private IDictionary<string, string> _namesOfPropertiesWithAllowEmptyStringAttribute;
+
+        /// <summary>
         /// Cache of names of output properties on this type
         /// </summary>
         private IDictionary<string, string> _namesOfPropertiesWithOutputAttribute;
@@ -146,6 +151,15 @@ namespace Microsoft.Build.Execution
             get
             {
                 return _factoryIdentityParameters;
+            }
+        }
+
+        public IDictionary<string, string> GetNamesOfPropertiesWithAllowEmptyStringAttribute {
+            get
+            {
+                PopulatePropertyInfoCacheIfNecessary();
+
+                return _namesOfPropertiesWithAllowEmptyStringAttribute;
             }
         }
 
@@ -305,6 +319,17 @@ namespace Microsoft.Build.Execution
                         // we have a output attribute defined, keep a record of that
                         _namesOfPropertiesWithOutputAttribute[propertyInfo.Name] = String.Empty;
                     }
+
+                    if (propertyInfos[i].AllowEmptyString)
+                    {
+                        if (_namesOfPropertiesWithAllowEmptyStringAttribute == null)
+                        {
+                            _namesOfPropertiesWithAllowEmptyStringAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        }
+
+                        // we have a output attribute defined, keep a record of that
+                        _namesOfPropertiesWithAllowEmptyStringAttribute[propertyInfo.Name] = String.Empty;
+                    }
                 }
 
                 _propertyInfoCache ??= ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
@@ -312,6 +337,7 @@ namespace Microsoft.Build.Execution
                 _namesOfPropertiesWithRequiredAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
                 _namesOfPropertiesWithOutputAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
                 _namesOfPropertiesWithAmbiguousMatches ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithAllowEmptyStringAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
             }
         }
         #endregion

@@ -79,6 +79,7 @@ namespace Microsoft.Build.Shared
             {
                 bool outputAttribute = false;
                 bool requiredAttribute = false;
+                bool allowEmptyStringAttribute = false;
                 foreach (CustomAttributeData attr in CustomAttributeData.GetCustomAttributes(props[i]))
                 {
                     if (attr.AttributeType.Name.Equals(nameof(OutputAttribute)))
@@ -88,6 +89,10 @@ namespace Microsoft.Build.Shared
                     else if (attr.AttributeType.Name.Equals(nameof(RequiredAttribute)))
                     {
                         requiredAttribute = true;
+                    }
+                    else if (attr.AttributeType.Name.Equals(nameof(AllowEmptyStringAttribute)))
+                    {
+                        allowEmptyStringAttribute = true;
                     }
                 }
 
@@ -100,7 +105,7 @@ namespace Microsoft.Build.Shared
 
                 bool isAssignableToITask = iTaskItemType.IsAssignableFrom(pt);
 
-                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
+                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, allowEmptyStringAttribute, isAssignableToITask);
                 if (loadedViaMetadataLoadContext)
                 {
                     PropertyAssemblyQualifiedNames[i] = Properties[i].PropertyType.AssemblyQualifiedName;

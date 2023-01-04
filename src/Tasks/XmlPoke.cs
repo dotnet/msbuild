@@ -70,6 +70,7 @@ namespace Microsoft.Build.Tasks
         /// The value to be inserted into the specified location.
         /// </summary>
         [Required]
+        [AllowEmptyString]
         public ITaskItem Value
         {
             get

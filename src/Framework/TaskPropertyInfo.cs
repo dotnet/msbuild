@@ -21,7 +21,8 @@ namespace Microsoft.Build.Framework
         /// <param name="typeOfParameter">The actual type of the parameter</param>
         /// <param name="output">True if the parameter is both an output and input parameter. False if the parameter is only an input parameter</param>
         /// <param name="required">True if the parameter must be supplied to each invocation of the task.</param>
-        public TaskPropertyInfo(string name, Type typeOfParameter, bool output, bool required)
+        /// <param name="allowEmptyString"></param>
+        public TaskPropertyInfo(string name, Type typeOfParameter, bool output, bool required, bool allowEmptyString = false)
         {
             Name = name;
             PropertyType = typeOfParameter;
@@ -30,6 +31,7 @@ namespace Microsoft.Build.Framework
             Type elementType = typeOfParameter.IsArray ? typeOfParameter.GetElementType() : typeOfParameter;
             IsValueTypeOutputParameter = elementType.GetTypeInfo().IsValueType || elementType.FullName.Equals("System.String");
             IsAssignableToITask = typeof(ITaskItem).IsAssignableFrom(elementType);
+            AllowEmptyString = allowEmptyString;
         }
 
         /// <summary>
@@ -51,6 +53,11 @@ namespace Microsoft.Build.Framework
         /// This task parameter is required (analogous to the [Required] attribute)
         /// </summary>
         public bool Required { get; private set; }
+
+        /// <summary>
+        /// This task parameter is required (analogous to the [Required] attribute)
+        /// </summary>
+        public bool AllowEmptyString { get; private set; }
 
         /// <summary>
         /// This task parameter should be logged when LogTaskInputs is set. Defaults to true.

@@ -781,8 +781,8 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Creates an instance of this class given the item-spec.
             /// </summary>
-            internal TaskItem(string includeEscaped, string definingFileEscaped)
-                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped)
+            internal TaskItem(string includeEscaped, string definingFileEscaped, bool allowEmptyString = false)
+                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped, allowEmptyString)
             {
             }
 
@@ -797,11 +797,15 @@ namespace Microsoft.Build.Execution
                               List<ProjectItemDefinitionInstance> itemDefinitions,
                               string projectDirectory,
                               bool immutable,
-                              string definingFileEscaped // the actual project file (or import) that defines this item.
+                              string definingFileEscaped, // the actual project file (or import) that defines this item.
+                              bool allowEmptyString = false
                               )
             {
-                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, nameof(includeEscaped));
-                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, nameof(includeBeforeWildcardExpansionEscaped));
+                if (!allowEmptyString)
+                {
+                    ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, nameof(includeEscaped));
+                    ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, nameof(includeBeforeWildcardExpansionEscaped));
+                }
 
                 _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
                 _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
@@ -1137,7 +1141,7 @@ namespace Microsoft.Build.Execution
 
             IEnumerable<ProjectMetadataInstance> IItem<ProjectMetadataInstance>.Metadata => MetadataCollection;
 
-#region Operators
+            #region Operators
 
             /// <summary>
             /// This allows an explicit typecast from a "TaskItem" to a "string", returning the ItemSpec for this item.
@@ -1178,7 +1182,7 @@ namespace Microsoft.Build.Execution
                 return !(left == right);
             }
 
-#endregion
+            #endregion
 
             /// <summary>
             /// Produce a string representation.
@@ -1200,7 +1204,7 @@ namespace Microsoft.Build.Execution
             }
 #endif
 
-#region IItem and ITaskItem2 Members
+            #region IItem and ITaskItem2 Members
 
             /// <summary>
             /// Returns the metadata with the specified key.
@@ -1451,9 +1455,9 @@ namespace Microsoft.Build.Execution
                 return clonedMetadata;
             }
 
-#endregion
+            #endregion
 
-#region INodePacketTranslatable Members
+            #region INodePacketTranslatable Members
 
             /// <summary>
             /// Reads or writes the packet to the serializer.
@@ -1483,9 +1487,9 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-#endregion
+            #endregion
 
-#region IEquatable<TaskItem> Members
+            #region IEquatable<TaskItem> Members
 
             /// <summary>
             /// Override of GetHashCode.
@@ -1594,7 +1598,7 @@ namespace Microsoft.Build.Execution
                 return thisNames.Count == 0;
             }
 
-#endregion
+            #endregion
 
             /// <summary>
             /// Returns true if a particular piece of metadata is defined on this item (even if
@@ -1655,7 +1659,7 @@ namespace Microsoft.Build.Execution
                 var key = interner.Intern(str);
                 translator.Writer.Write(key);
             }
-            
+
             private void ReadInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
             {
                 var val = translator.Reader.ReadInt32();
