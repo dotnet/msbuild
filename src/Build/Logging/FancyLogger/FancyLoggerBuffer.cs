@@ -34,7 +34,7 @@ namespace Microsoft.Build.Logging.FancyLogger
     {
         private static List<FancyLoggerBufferLine> Lines = new();
         private static int TopLineIndex = 0;
-        // private static bool AutoScrollEnabled = true;
+        private static bool AutoScrollEnabled = true;
         public static void Initialize()
         {
             // Use alternate buffer
@@ -59,11 +59,11 @@ namespace Microsoft.Build.Logging.FancyLogger
                             if (TopLineIndex > 0) TopLineIndex--;
                             break;
                         case ConsoleKey.DownArrow:
-                            if (TopLineIndex < Lines.Count) TopLineIndex++;
+                            if (TopLineIndex < Console.BufferHeight - 3) TopLineIndex++;
                             break;
                         case ConsoleKey.Spacebar:
                         case ConsoleKey.Escape:
-                            // AutoScrollEnabled = !AutoScrollEnabled;
+                            AutoScrollEnabled = !AutoScrollEnabled;
                             break;
                     }
                 }
