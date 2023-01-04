@@ -69,6 +69,8 @@ namespace Microsoft.TemplateEngine.Cli
         public string? HostConfigPlace => _templateInfo.HostConfigPlace;
 
         public string? ThirdPartyNotices => _templateInfo.ThirdPartyNotices;
+        
+        public bool PreferDefaultName => _templateInfo.PreferDefaultName;
 
         public IReadOnlyDictionary<string, IBaselineInfo> BaselineInfo => _templateInfo.BaselineInfo;
 
