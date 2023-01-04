@@ -46,6 +46,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Initialize FancyLoggerBuffer
+            // FancyLoggerBuffer.Initialize();
             FancyLoggerBuffer.Initialize();
         }
 
@@ -124,8 +125,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             int id = e.BuildEventContext!.ProjectInstanceId;
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
-            node.AddMessage(e);
-            node.Log();
+            // node.AddMessage(e);
+            // node.Log();
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {

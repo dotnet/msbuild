@@ -65,13 +65,13 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Current target details
             if (CurrentTargetNode == null) return;
             string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
-            if (CurrentTargetLine == null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(currentTargetLineContents, Line.Id);
+            if (CurrentTargetLine == null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
             else FancyLoggerBuffer.UpdateLine(CurrentTargetLine.Id, currentTargetLineContents);
 
             // Messages, warnings and errors
             foreach (FancyLoggerMessageNode node in AdditionalDetails)
             {
-                if (node.Line == null) node.Line = FancyLoggerBuffer.WriteNewLineAfter("", Line.Id);
+                if (node.Line == null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
                 node.Log();
             }
         }
