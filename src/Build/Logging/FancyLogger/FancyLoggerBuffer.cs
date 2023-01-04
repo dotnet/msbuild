@@ -41,10 +41,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
-            Task.Run(() => {
+            Task.Run(async () => {
                 while (true)
                 {
-                    Thread.Sleep(500 / 60);
+                    await Task.Delay(500 / 60);
                     Render();
                 }
             });
