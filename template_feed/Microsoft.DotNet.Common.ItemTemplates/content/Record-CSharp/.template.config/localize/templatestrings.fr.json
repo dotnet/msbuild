@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Record",
-  "description": "Creates a new C# record"
+  "name": "Enregistrement",
+  "description": "Crée un struct C#"
 }

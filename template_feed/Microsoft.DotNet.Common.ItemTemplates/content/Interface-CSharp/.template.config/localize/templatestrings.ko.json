@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Interface",
-  "description": "Creates a new C# interface"
+  "name": "인터페이스",
+  "description": "새 C# 인터페이스를 만듭니다."
 }

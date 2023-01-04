@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Struct",
-  "description": "Creates a new C# struct"
+  "name": "구조체",
+  "description": "새 C# 구조체를 만듭니다."
 }

@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Record",
-  "description": "Creates a new C# record"
+  "name": "記錄",
+  "description": "建立新 C# 記錄"
 }

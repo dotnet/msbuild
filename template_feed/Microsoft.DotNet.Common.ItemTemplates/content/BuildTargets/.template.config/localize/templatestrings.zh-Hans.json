@@ -1,7 +1,7 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "MSBuild Directory.Build.props file",
-  "description": "An empty Directory.Build.props file which can be used to specify MSBuild properties for an entire folder",
-  "symbols/inherit/displayName": "inherit",
-  "symbols/inherit/description": "If true, adds an Import for any Directory.Build.props in the parent directory. Directory.Build.props don't inherit by default, so doing this allows you to build up a set of customizations folder-by-folder."
+  "name": "MSBuild Directory.Build.targets 文件",
+  "description": "一个空的 Directory.Build.targets 文件，可用于为整个文件夹指定 MSBuild 任务和目标",
+  "symbols/inherit/displayName": "继承",
+  "symbols/inherit/description": "如果为 true，则为文件系统目录层次结构中最近的 Directory.Build.targets 添加 Import。默认情况下，Directory.Build.targets 不会继承，因此这样做可以按文件夹生成一组自定义项。"
 }
