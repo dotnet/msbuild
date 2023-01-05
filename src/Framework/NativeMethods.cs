@@ -1101,6 +1101,7 @@ internal static class NativeMethods
 #endif
     }
 
+    [SupportedOSPlatform("windows")]
     private static bool IsSymLinkFileInternal(string path)
     {
         using SafeFileHandle handle = CreateFile(path,
