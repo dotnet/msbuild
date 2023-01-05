@@ -333,7 +333,8 @@ namespace Microsoft.Build.BackEnd
             // "required" so that we can keep track of whether or not they all get set.
             var setParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             IDictionary<string, string> requiredParameters = GetNamesOfPropertiesWithRequiredAttribute();
-            IDictionary<string, string> allowEmptyStringParameters = GetNamesOfPropertiesWithAllowEmptyStringAttribute();
+
+            IList<string> allowEmptyStringParameters = GetNamesOfPropertiesWithAllowEmptyStringAttribute();
 
             // look through all the attributes of the task element
             foreach (KeyValuePair<string, (string, ElementLocation)> parameter in parameters)
@@ -343,7 +344,7 @@ namespace Microsoft.Build.BackEnd
 
                 try
                 {
-                    success = SetTaskParameter(parameter.Key, parameter.Value.Item1, parameter.Value.Item2, requiredParameters.ContainsKey(parameter.Key), allowEmptyStringParameters.ContainsKey(parameter.Key), out taskParameterSet);
+                    success = SetTaskParameter(parameter.Key, parameter.Value.Item1, parameter.Value.Item2, requiredParameters.ContainsKey(parameter.Key), allowEmptyStringParameters.Contains(parameter.Key), out taskParameterSet);
                 }
                 catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
                 {
@@ -1618,13 +1619,13 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Finds all the task properties that are allowEmptyString.
-        /// Returns them as keys in a dictionary.
+        /// Returns them in a list.
         /// </summary>
         /// <returns>Gets a list of properties which are allowEmptyString.</returns>
-        private IDictionary<string, string> GetNamesOfPropertiesWithAllowEmptyStringAttribute()
+        private IList<string> GetNamesOfPropertiesWithAllowEmptyStringAttribute()
         {
             ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Expected taskFactoryWrapper to not be null");
-            IDictionary<string, string> allowEmptyStringParameters = null;
+            IList<string> allowEmptyStringParameters = null;
 
             try
             {

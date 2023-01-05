@@ -32,7 +32,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Cache of names of allowEmptyString properties on this type
         /// </summary>
-        private IDictionary<string, string> _namesOfPropertiesWithAllowEmptyStringAttribute;
+        private IList<string> _namesOfPropertiesWithAllowEmptyStringAttribute;
 
         /// <summary>
         /// Cache of names of output properties on this type
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        public IDictionary<string, string> GetNamesOfPropertiesWithAllowEmptyStringAttribute {
+        public IList<string> GetNamesOfPropertiesWithAllowEmptyStringAttribute {
             get
             {
                 PopulatePropertyInfoCacheIfNecessary();
@@ -324,11 +324,9 @@ namespace Microsoft.Build.Execution
                     {
                         if (_namesOfPropertiesWithAllowEmptyStringAttribute == null)
                         {
-                            _namesOfPropertiesWithAllowEmptyStringAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            _namesOfPropertiesWithAllowEmptyStringAttribute = new List<string>();
                         }
-
-                        // we have a allowEmptyString attribute defined, keep a record of that
-                        _namesOfPropertiesWithAllowEmptyStringAttribute[propertyInfo.Name] = String.Empty;
+                        _namesOfPropertiesWithAllowEmptyStringAttribute.Add(propertyInfo.Name);
                     }
                 }
 
@@ -337,7 +335,7 @@ namespace Microsoft.Build.Execution
                 _namesOfPropertiesWithRequiredAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
                 _namesOfPropertiesWithOutputAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
                 _namesOfPropertiesWithAmbiguousMatches ??= ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithAllowEmptyStringAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithAllowEmptyStringAttribute ??= new List<string>();
             }
         }
         #endregion

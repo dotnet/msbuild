@@ -58,7 +58,7 @@ namespace Microsoft.Build.Execution
         /// used with MetadataLoadContext, as these parameters cannot be computed for the property type passed in directly but
         /// rather the relevant base type.
         /// </summary>
-        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required,bool allowEmptyString, bool isAssignableToITaskItemType)
+        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, bool allowEmptyString, bool isAssignableToITaskItemType)
             : base(
             propertyInfo.Name,
             propertyInfo.PropertyType,

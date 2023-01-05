@@ -21,8 +21,26 @@ namespace Microsoft.Build.Framework
         /// <param name="typeOfParameter">The actual type of the parameter</param>
         /// <param name="output">True if the parameter is both an output and input parameter. False if the parameter is only an input parameter</param>
         /// <param name="required">True if the parameter must be supplied to each invocation of the task.</param>
-        /// <param name="allowEmptyString"></param>
-        public TaskPropertyInfo(string name, Type typeOfParameter, bool output, bool required, bool allowEmptyString = false)
+        public TaskPropertyInfo(string name, Type typeOfParameter, bool output, bool required)
+        {
+            Name = name;
+            PropertyType = typeOfParameter;
+            Output = output;
+            Required = required;
+            Type elementType = typeOfParameter.IsArray ? typeOfParameter.GetElementType() : typeOfParameter;
+            IsValueTypeOutputParameter = elementType.GetTypeInfo().IsValueType || elementType.FullName.Equals("System.String");
+            IsAssignableToITask = typeof(ITaskItem).IsAssignableFrom(elementType);
+        }
+
+        /// <summary>
+        /// Encapsulates a list of parameters declared in the UsingTask
+        /// </summary>
+        /// <param name="name">Name of the parameter</param>
+        /// <param name="typeOfParameter">The actual type of the parameter</param>
+        /// <param name="output">True if the parameter is both an output and input parameter. False if the parameter is only an input parameter</param>
+        /// <param name="required">True if the parameter must be supplied to each invocation of the task.</param>
+        /// <param name="allowEmptyString">True if the parameter can be empty of the task.</param>
+        public TaskPropertyInfo(string name, Type typeOfParameter, bool output, bool required, bool allowEmptyString)
         {
             Name = name;
             PropertyType = typeOfParameter;
@@ -55,7 +73,7 @@ namespace Microsoft.Build.Framework
         public bool Required { get; private set; }
 
         /// <summary>
-        /// This task parameter is required (analogous to the [Required] attribute)
+        /// This task parameter is emtpy (analogous to the [AllowEmptyString] attribute)
         /// </summary>
         public bool AllowEmptyString { get; private set; }
 
