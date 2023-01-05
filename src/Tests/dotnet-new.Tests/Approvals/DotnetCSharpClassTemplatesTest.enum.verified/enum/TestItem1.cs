@@ -1,5 +1,7 @@
-﻿namespace ClassLib;
-public enum TestItem1
+﻿namespace ClassLib
 {
+    public enum TestItem1
+    {
 
+    }
 }

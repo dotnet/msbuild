@@ -1,1 +1,3 @@
-﻿The template "Struct" was created successfully.
+﻿Warning: Failed to evaluate bind symbol 'langVersion', it will be skipped.
+Warning: Failed to evaluate bind symbol 'langVersion', it will be skipped.
+The template "Struct" was created successfully.
