@@ -1105,7 +1105,7 @@ internal static class NativeMethods
     private static bool IsSymLinkFileInternal(string path)
     {
         using SafeFileHandle handle = CreateFile(path,
-            GENERIC_READ,
+            FILE_READ_ATTRIBUTES,
             FILE_SHARE_READ,
             IntPtr.Zero,
             OPEN_EXISTING,
@@ -1800,6 +1800,7 @@ internal static class NativeMethods
     public static extern int CoWaitForMultipleHandles(COWAIT_FLAGS dwFlags, int dwTimeout, int cHandles, [MarshalAs(UnmanagedType.LPArray)] IntPtr[] pHandles, out int pdwIndex);
 
     internal const uint GENERIC_READ = 0x80000000;
+    internal const uint FILE_READ_ATTRIBUTES = 0x80;
     internal const uint FILE_SHARE_READ = 0x1;
     internal const uint FILE_ATTRIBUTE_NORMAL = 0x80;
     internal const uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
