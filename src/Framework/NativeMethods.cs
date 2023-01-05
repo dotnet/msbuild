@@ -1682,10 +1682,11 @@ internal static class NativeMethods
     [SupportedOSPlatform("windows")]
     static bool GetFileAttributeTagInfoByHandle(SafeFileHandle fileHandle, out FileAttributeTagInfo fileAttributeTagInfo)
     {
-        IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(FileAttributeTagInfo)));
+        int typeSize = Marshal.SizeOf(typeof(FileAttributeTagInfo));
+        IntPtr ptr = Marshal.AllocHGlobal(typeSize);
         try
         {
-            bool ret = GetFileInformationByHandleEx(fileHandle, FileInfoByHandleClass.FileAttributeTagInfo, ptr, Marshal.SizeOf(typeof(FileAttributeTagInfo)));
+            bool ret = GetFileInformationByHandleEx(fileHandle, FileInfoByHandleClass.FileAttributeTagInfo, ptr, typeSize);
             if (ret)
             {
                 fileAttributeTagInfo = (FileAttributeTagInfo)Marshal.PtrToStructure(ptr, typeof(FileAttributeTagInfo));
