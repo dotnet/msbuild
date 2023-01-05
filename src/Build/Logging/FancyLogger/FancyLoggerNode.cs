@@ -12,7 +12,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
 { 
-    public class FancyLoggerProjectNode
+    internal class FancyLoggerProjectNode
     {
         /// <summary>
         /// Given a list of paths, this method will get the shortest not ambiguous path for a project.

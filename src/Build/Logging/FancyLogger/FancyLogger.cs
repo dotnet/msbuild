@@ -14,7 +14,9 @@ namespace Microsoft.Build.Logging.FancyLogger
 {
     public class FancyLogger : ILogger
     {   
-        public Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
+        private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
+
+        private bool Succeeded;
 
         private float existingTasks = 1;
         private float completedTasks = 0;
@@ -55,6 +57,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
         void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
+            Succeeded = e.Succeeded;
             // Console.WriteLine(LoggerFormatting.Bold("[Build]") + "\t Finished");
         }
 
@@ -124,8 +127,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             int id = e.BuildEventContext!.ProjectInstanceId;
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
-            // node.AddMessage(e);
-            // node.Log();
+            node.AddMessage(e);
+            node.Log();
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
@@ -147,14 +150,23 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
 
 
-        public void Shutdown() {
-            // Keep open if autoscroll disabled (the user is reading info)
-            /*while (FancyLoggerBuffer.AutoScrollEnabled || !FancyLoggerBuffer.IsTerminated)
-            {
-            }*/
+        public void Shutdown()
+        {
             FancyLoggerBuffer.Terminate();
+            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
-            Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
+            // Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
+            if (Succeeded)
+            {
+                Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
+                Console.WriteLine("\t0 Warning(s)");
+            }
+            else
+            {
+                Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
+                Console.WriteLine("\tX Warnings(s)");
+                Console.WriteLine("\tX Errors(s)");
+            }
         }
     }
 }
