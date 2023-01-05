@@ -516,13 +516,6 @@ namespace Microsoft.Build.Tasks
         public int dwThreadId;
     }
 
-    internal enum SymbolicLink
-    {
-        File = 0,
-        Directory = 1,
-        AllowUnprivilegedCreate = 2,
-    }
-
     /// <summary>
     /// Interop methods.
     /// </summary>
@@ -819,40 +812,6 @@ namespace Microsoft.Build.Tasks
             }
 
             return hardLinkCreated;
-        }
-
-        //------------------------------------------------------------------------------
-        // CreateSymbolicLink
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
-
-        [DllImport("libc", SetLastError = true)]
-        internal static extern int symlink(string oldpath, string newpath);
-
-        internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
-        {
-            bool symbolicLinkCreated;
-            if (NativeMethodsShared.IsWindows)
-            {
-                Version osVersion = Environment.OSVersion.Version;
-                SymbolicLink flags = SymbolicLink.File;
-                if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
-                {
-                    flags |= SymbolicLink.AllowUnprivilegedCreate;
-                }
-
-                symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, flags);
-                errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
-            }
-            else
-            {
-                symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
-                errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
-            }
-
-            return symbolicLinkCreated;
         }
 
         //------------------------------------------------------------------------------
