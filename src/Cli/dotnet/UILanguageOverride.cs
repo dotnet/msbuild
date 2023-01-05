@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Text;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -27,6 +28,8 @@ namespace Microsoft.DotNet.Cli
             CultureInfo.CurrentUICulture = language;
             CultureInfo.DefaultThreadCurrentCulture = language;
             CultureInfo.DefaultThreadCurrentUICulture = language;
+            var correspondingEncoding = Encoding.GetEncoding(language.TextInfo.OEMCodePage);
+            Console.OutputEncoding = correspondingEncoding;
         }
 
         private static void FlowOverrideToChildProcesses(CultureInfo language)
