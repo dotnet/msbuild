@@ -588,7 +588,7 @@ internal static class NativeMethods
     /// Use only when calling GetFileInformationByHandleEx.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal class FileAttributeTagInfo
+    internal struct FileAttributeTagInfo
     {
         internal int fileAttributes;
         internal int reparseTag;
@@ -1681,27 +1681,12 @@ internal static class NativeMethods
         int dwBufferSize);
 
     [SupportedOSPlatform("windows")]
-    static bool GetFileAttributeTagInfoByHandle(SafeFileHandle fileHandle, out FileAttributeTagInfo fileAttributeTagInfo)
+    static unsafe bool GetFileAttributeTagInfoByHandle(SafeFileHandle fileHandle, out FileAttributeTagInfo fileAttributeTagInfo)
     {
-        int typeSize = Marshal.SizeOf(typeof(FileAttributeTagInfo));
-        IntPtr ptr = Marshal.AllocHGlobal(typeSize);
-        try
+        fileAttributeTagInfo = new FileAttributeTagInfo();
+        fixed (FileAttributeTagInfo* ptr = &fileAttributeTagInfo)
         {
-            bool ret = GetFileInformationByHandleEx(fileHandle, FileInfoByHandleClass.FileAttributeTagInfo, ptr, typeSize);
-            if (ret)
-            {
-                fileAttributeTagInfo = (FileAttributeTagInfo)Marshal.PtrToStructure(ptr, typeof(FileAttributeTagInfo));
-            }
-            else
-            {
-                fileAttributeTagInfo = new FileAttributeTagInfo();
-            }
-
-            return ret;
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
+            return GetFileInformationByHandleEx(fileHandle, FileInfoByHandleClass.FileAttributeTagInfo, (IntPtr)ptr, sizeof(FileAttributeTagInfo));
         }
     }
         
