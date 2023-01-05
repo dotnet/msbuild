@@ -45,6 +45,8 @@ internal static class NativeMethods
     internal const int FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
     internal const int FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400;
 
+    internal const uint IO_REPARSE_TAG_SYMLINK = 0xA000000C;
+
     /// <summary>
     /// Default buffer size to use when dealing with the Windows API.
     /// </summary>
@@ -206,6 +208,12 @@ internal static class NativeMethods
         File = 0,
         Directory = 1,
         AllowUnprivilegedCreate = 2,
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ne-minwinbase-file_info_by_handle_class
+    private enum FileInfoByHandleClass : int
+    {
+        FileAttributeTagInfo = 9
     }
 
     #endregion
@@ -573,6 +581,17 @@ internal static class NativeMethods
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// Receives the requested file attribute information. Used for any handles.
+    /// Use only when calling GetFileInformationByHandleEx.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal class FileAttributeTagInfo
+    {
+        internal int fileAttributes;
+        internal int reparseTag;
     }
 
 #endregion
@@ -1072,10 +1091,36 @@ internal static class NativeMethods
 
         WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
 
-        return NativeMethods.GetFileAttributesEx(fileInfo.FullName, 0, ref data) &&
-               (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0 &&
-               (data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT;
+        return
+            NativeMethods.GetFileAttributesEx(fileInfo.FullName, 0, ref data) &&
+            (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0 &&
+            // This is fast but unspecific check - there are multiple types of reparse points.
+            (data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT &&
+            // Specific check for a symlink.
+            IsSymLinkFileInternal(fileInfo.FullName);
 #endif
+    }
+
+    private static bool IsSymLinkFileInternal(string path)
+    {
+        using SafeFileHandle handle = CreateFile(path,
+            GENERIC_READ,
+            FILE_SHARE_READ,
+            IntPtr.Zero,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OPEN_REPARSE_POINT,
+            IntPtr.Zero);
+
+        if (handle.IsInvalid)
+        {
+            // Link is broken. Details can be obtained via GetLastError.
+            return false;
+        }
+
+        return
+            GetFileAttributeTagInfoByHandle(handle, out FileAttributeTagInfo attributes) &&
+            (attributes.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT &&
+            (attributes.reparseTag & NativeMethods.IO_REPARSE_TAG_SYMLINK) == NativeMethods.IO_REPARSE_TAG_SYMLINK;
     }
 
     internal static bool IsSymLink(string path)
@@ -1624,6 +1669,40 @@ internal static class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     [SupportedOSPlatform("windows")]
     internal static extern bool GetFileAttributesEx(String name, int fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [SupportedOSPlatform("windows")]
+    private static extern bool GetFileInformationByHandleEx(
+        SafeFileHandle fileHandle,
+        FileInfoByHandleClass fileInfoByHandleClass,
+        [Out] IntPtr lpFileInformation,
+        int dwBufferSize);
+
+    [SupportedOSPlatform("windows")]
+    static bool GetFileAttributeTagInfoByHandle(SafeFileHandle fileHandle, out FileAttributeTagInfo fileAttributeTagInfo)
+    {
+        IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(FileAttributeTagInfo)));
+        try
+        {
+            bool ret = GetFileInformationByHandleEx(fileHandle, FileInfoByHandleClass.FileAttributeTagInfo, ptr, Marshal.SizeOf(typeof(FileAttributeTagInfo)));
+            if (ret)
+            {
+                fileAttributeTagInfo = (FileAttributeTagInfo)Marshal.PtrToStructure(ptr, typeof(FileAttributeTagInfo));
+            }
+            else
+            {
+                fileAttributeTagInfo = new FileAttributeTagInfo();
+            }
+
+            return ret;
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(ptr);
+        }
+    }
+        
 
     [DllImport("kernel32.dll", PreserveSig = true, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
