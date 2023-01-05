@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
     public class GivenThatWeWantToBuildAWindowsDesktopProject : SdkTest
     {
         public GivenThatWeWantToBuildAWindowsDesktopProject(ITestOutputHelper log) : base(log)
-        {}
+        { }
 
         [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
         [InlineData("UseWindowsForms")]
@@ -417,7 +417,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + useWindowsSDKPreview + windowsSdkPackageVersion);
 
-            string referencedWindowsSdkVersion =  GetReferencedWindowsSdkVersion(testAsset);
+            string referencedWindowsSdkVersion = GetReferencedWindowsSdkVersion(testAsset);
 
             //  The patch version of the Windows SDK Ref pack will change over time, so we use a '*' in the expected version to indicate that and replace it with
             //  the 4th part of the version number of the resolved package.
