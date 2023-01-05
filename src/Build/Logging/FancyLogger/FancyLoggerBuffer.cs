@@ -38,6 +38,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static void Initialize()
         {
             // Use alternate buffer
+            // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
@@ -72,6 +73,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public static void Terminate()
         {
+            // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Eraser.Display());
             Lines = new();
@@ -88,6 +90,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")) +
                 // Write footer
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
+                // TODO: Remove and replace with actual footer
                 new string('-', Console.BufferWidth) + '\n' + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             );
             // Write lines
