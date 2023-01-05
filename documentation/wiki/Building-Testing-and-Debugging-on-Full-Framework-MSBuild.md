@@ -33,6 +33,25 @@ To mimic our CI job use `eng\CIBuild.cmd`. Be aware that this command may delete
 
 The CI does two builds. In the second build, it uses the binaries from the first build to build the repository again.
 
+### Unit testing inside virtualized environment 
+
+In case you develop on Windows OS, but need to run/debug tests on other platforms - unit tests can be run and debugged on a local virtualized environment supported by [Visual Studio Remote Testing](https://learn.microsoft.com/en-us/visualstudio/test/remote-testing?view=vs-2022).
+Initial configurations have been added for `WSL` and net 7.0 linux docker via [`testenvironments.json`](../../testenvironments.json).
+Upon opening the Tests Explorer the advanced environments are available in the GUI: 
+
+![TestExplorrerEnvironments](TestExplorerEnvironments.png)
+
+This readme will not discuss definitive list of details for proper setup of the environments instead we defer reader to the following information sources and warn about particular gotchas:
+
+ * WSL runs
+   * Install [WSL](https://learn.microsoft.com/en-us/windows/wsl/about).
+   * Install the [distribution](https://aka.ms/wslstore) of your choice.
+   * [Install .NET Runtime](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu)
+ * Docker runs
+   * Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+   * First run of docker scenario might need elevation ([Test project does not reference any .NET NuGet adapter](https://developercommunity.visualstudio.com/t/test-project-does-not-reference-any-net-nuget-adap/1311698) error)  
+ * Third party test runners might not support this feature. Use [Visual Studio Test Explorer](https://learn.microsoft.com/en-us/visualstudio/test/run-unit-tests-with-test-explorer).
+
 ## Contributing
 
 Please see [Contributing Code](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Contributing-Code.md) for details on contributing changes back to the code. Please read this carefully and engage with us early to ensure work is not wasted.
