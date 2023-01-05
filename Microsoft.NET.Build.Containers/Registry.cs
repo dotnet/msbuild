@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -13,13 +14,50 @@ using System.Xml.Linq;
 
 namespace Microsoft.NET.Build.Containers;
 
-public record struct Registry(Uri BaseUri)
+public struct Registry
 {
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
-    private const int MaxChunkSizeBytes = 1024 * 64;
 
-    private string RegistryName { get; } = BaseUri.Host;
+    private Uri BaseUri { get; init; }
+    private string RegistryName => BaseUri.Host;
+
+    public Registry(Uri baseUri)
+    {
+        BaseUri = baseUri;
+        _client = CreateClient();
+    }
+
+    /// <summary>
+    /// The max chunk size for patch blob uploads. By default the size is 64 KB.
+    /// Amazon Elasic Container Registry (ECR) requires patch chunk size to be 5 MB except for the last chunk.
+    /// </summary>
+    public readonly int MaxChunkSizeBytes => IsAmazonECRRegistry ? 5248080 : 1024 * 64;
+
+    /// <summary>
+    /// Check to see if the registry is for Amazon Elastic Container Registry (ECR).
+    /// </summary>
+    public readonly bool IsAmazonECRRegistry
+    {
+        get
+        {
+            // If this the registry is to public ECR the name will contain "public.ecr.aws".
+            if (RegistryName.Contains("public.ecr.aws"))
+            {
+                return true;
+            }
+
+            // If the registry is to a private ECR the registry will start with an account id which is a 12 digit number and will container either
+            // ".ecr." or ".ecr-" if pushed to a FIPS endpoint.
+            var accountId = RegistryName.Split('.')[0];
+            if ((RegistryName.Contains(".ecr.") || RegistryName.Contains(".ecr-")) && accountId.Length == 12 && long.TryParse(accountId, out _))
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
 
     public async Task<Image> GetImageManifest(string name, string reference)
     {
@@ -118,7 +156,7 @@ public record struct Registry(Uri BaseUri)
 
         if (pushResponse.StatusCode != HttpStatusCode.Accepted)
         {
-            string errorMessage = $"Failed to upload blob to {pushUri}; recieved {pushResponse.StatusCode} with detail {await pushResponse.Content.ReadAsStringAsync()}";
+            string errorMessage = $"Failed to upload blob to {pushUri}; received {pushResponse.StatusCode} with detail {await pushResponse.Content.ReadAsStringAsync()}";
             throw new ApplicationException(errorMessage);
         }
 
@@ -162,9 +200,10 @@ public record struct Registry(Uri BaseUri)
 
             HttpResponseMessage patchResponse = await client.PatchAsync(patchUri, content);
 
-            if (patchResponse.StatusCode != HttpStatusCode.Accepted)
+            // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
+            if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
             {
-                string errorMessage = $"Failed to upload blob to {patchUri}; recieved {patchResponse.StatusCode} with detail {await patchResponse.Content.ReadAsStringAsync()}";
+                string errorMessage = $"Failed to upload blob to {patchUri}; received {patchResponse.StatusCode} with detail {await patchResponse.Content.ReadAsStringAsync()}";
                 throw new ApplicationException(errorMessage);
             }
 
@@ -194,7 +233,7 @@ public record struct Registry(Uri BaseUri)
 
         if (finalizeResponse.StatusCode != HttpStatusCode.Created)
         {
-            string errorMessage = $"Failed to finalize upload to {putUri}; recieved {finalizeResponse.StatusCode} with detail {await finalizeResponse.Content.ReadAsStringAsync()}";
+            string errorMessage = $"Failed to finalize upload to {putUri}; received {finalizeResponse.StatusCode} with detail {await finalizeResponse.Content.ReadAsStringAsync()}";
             throw new ApplicationException(errorMessage);
         }
     }
@@ -211,16 +250,22 @@ public record struct Registry(Uri BaseUri)
         return false;
     }
 
-    private static HttpClient _client = CreateClient();
+    private HttpClient _client;
 
-    private static HttpClient GetClient()
+    private HttpClient GetClient()
     {
         return _client;
     }
 
-    private static HttpClient CreateClient()
+    private HttpClient CreateClient()
     {
-        var clientHandler = new AuthHandshakeMessageHandler(new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.FromMilliseconds(10 /* total guess */) });
+        HttpMessageHandler clientHandler = new AuthHandshakeMessageHandler(new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.FromMilliseconds(10 /* total guess */) });
+
+        if(IsAmazonECRRegistry)
+        {
+            clientHandler = new AmazonECRMessageHandler(clientHandler);
+        }
+
         HttpClient client = new(clientHandler);
 
         client.DefaultRequestHeaders.Accept.Clear();
@@ -242,7 +287,9 @@ public record struct Registry(Uri BaseUri)
 
         HttpClient client = GetClient();
         var reg = this;
-        await Task.WhenAll(x.LayerDescriptors.Select(async descriptor => {
+
+        Func<Descriptor, Task> uploadLayerFunc = async (descriptor) =>
+        {
             string digest = descriptor.Digest;
             logProgressMessage($"Uploading layer {digest} to {reg.RegistryName}");
             if (await reg.BlobAlreadyUploaded(name, digest, client))
@@ -269,7 +316,21 @@ public record struct Registry(Uri BaseUri)
                 await reg.Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
                 logProgressMessage($"Finished uploading layer {digest} to {reg.RegistryName}");
             }
-        }));
+        };
+
+        // Pushing to ECR uses a much larger chunk size. To avoid getting too many socket disconnects trying to do too many
+        // parallel uploads be more conservative and upload one layer at a time.
+        if(IsAmazonECRRegistry)
+        {
+            foreach(var descriptor in x.LayerDescriptors)
+            {
+                await uploadLayerFunc(descriptor);
+            }
+        }
+        else
+        {
+            await Task.WhenAll(x.LayerDescriptors.Select(descriptor => uploadLayerFunc(descriptor)));
+        }
 
         using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(x.config.ToJsonString())))
         {
