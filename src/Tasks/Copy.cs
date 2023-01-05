@@ -301,7 +301,7 @@ namespace Microsoft.Build.Tasks
             // Create symbolic link if UseSymboliclinksIfPossible is true and hard link is not created
             if (!hardLinkCreated && UseSymboliclinksIfPossible)
             {
-                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
+                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage, Log.FormatResourceString("Copy.LinklibraryFailedPrefix", "symlink()")));
                 if (!symbolicLinkCreated)
                 {
                     Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);

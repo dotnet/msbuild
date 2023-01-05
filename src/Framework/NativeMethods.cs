@@ -1136,7 +1136,7 @@ internal static class NativeMethods
         return true;
     }
 
-    internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
+    internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage, string errorMessagePrefix = "")
     {
         bool symbolicLinkCreated;
         if (IsWindows)
@@ -1154,7 +1154,7 @@ internal static class NativeMethods
         else
         {
             symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
-            errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+            errorMessage = symbolicLinkCreated ? null : errorMessagePrefix + Marshal.GetLastWin32Error();
         }
 
         return symbolicLinkCreated;

@@ -187,8 +187,8 @@
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.LinklibraryFailedPrefix">
-        <source>The link() library call failed with the following error code: </source>
-        <target state="new">The link() library call failed with the following error code: </target>
+        <source>The {0} library call failed with the following error code: </source>
+        <target state="new">The {0} library call failed with the following error code: </target>
         <note />
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
