@@ -16,7 +16,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class CacheSerialization_Tests
     {
-        public static IEnumerable<object[]> CacheData {
+        public static IEnumerable<object[]> CacheData
+        {
             get
             {
                 var configCache = new ConfigCache();
@@ -41,7 +42,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var resultsCache = new ResultsCache();
                 var request1 = new BuildRequest(1, 0, 1, new string[] { "target1" }, null, BuildEventContext.Invalid, null);
                 var request2 = new BuildRequest(2, 0, 2, new string[] { "target2" }, null, BuildEventContext.Invalid, null);
-                var request3 = new BuildRequest(2, 0, 2, new string[] { "target2" }, null, BuildEventContext.Invalid, null);
+                var request3 = new BuildRequest(3, 0, 3, new string[] { "target3" }, null, BuildEventContext.Invalid, null);
 
                 resultsCache.AddResult(new BuildResult(request1));
                 resultsCache.AddResult(new BuildResult(request2));
