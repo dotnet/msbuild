@@ -409,23 +409,21 @@ namespace Microsoft.Build.Tasks
                 {
                     reference.AddRemapping(pair.From, pair.To);
                 }
-
-                if ((referenceGoingToBeReplaced.IsResolved || referenceGoingToBeReplaced.IsUnresolvable) &&
-                    (!reference.IsUnresolvable && !reference.IsResolved))
-                {
-                    referencesToResolve.Add(assemblyName, reference);
-                }
-                else if ((reference.IsUnresolvable || reference.IsResolved) &&
-                    (!referenceGoingToBeReplaced.IsUnresolvable && !referenceGoingToBeReplaced.IsResolved))
-                {
-                    referencesToResolve.Remove(assemblyName);
-                }
             }
 
             if (reference.FullPath.Length > 0)
             {
                 // Saves effort and makes deduplication possible downstream
                 reference.NormalizeFullPath();
+            }
+
+            if (!reference.IsUnresolvable && !reference.IsResolved)
+            {
+                referencesToResolve[assemblyName] = reference;
+            }
+            else if (reference.IsUnresolvable || reference.IsResolved)
+            {
+                referencesToResolve.Remove(assemblyName);
             }
 
             References[assemblyName] = reference;
@@ -1366,7 +1364,6 @@ namespace Microsoft.Build.Tasks
             catch (BadImageFormatException e)
             {
                 reference.AddError(new DependencyResolutionException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
 
             // Update the list of assemblies considered and rejected.
@@ -1376,7 +1373,6 @@ namespace Microsoft.Build.Tasks
             if (resolvedPath != null)
             {
                 reference.FullPath = FileUtilities.NormalizePath(resolvedPath);
-                referencesToResolve.Remove(reference);
                 reference.ResolvedSearchPath = resolvedSearchPath;
                 reference.UserRequestedSpecificFile = userRequestedSpecificFile;
             }
@@ -1392,7 +1388,6 @@ namespace Microsoft.Build.Tasks
                             null
                         )
                     );
-                    referencesToResolve.Remove(reference);
                 }
             }
         }
@@ -1420,10 +1415,13 @@ namespace Microsoft.Build.Tasks
                     subsetName = String.Empty;
                 }
 
+                referencesToResolve.Clear();
+
                 // Go through each of the references, we go through this table because in general it will be considerably smaller than the blacklist. (10's of references vs 100's of black list items)
-                foreach (AssemblyNameExtension assemblyName in References.Keys)
+                foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
                 {
-                    Reference assemblyReference = References[assemblyName];
+                    AssemblyNameExtension assemblyName = assembly.Key;
+                    Reference assemblyReference = assembly.Value;
 
                     AddToDependencyGraph(dependencyGraph, assemblyName, assemblyReference);
 
@@ -1441,6 +1439,10 @@ namespace Microsoft.Build.Tasks
                             if (!removedReferences.Contains(assemblyReference))
                             {
                                 goodReferences[assemblyName] = assemblyReference;
+                                if (!assemblyReference.IsResolved && !assemblyReference.IsUnresolvable)
+                                {
+                                    referencesToResolve[assemblyName] = assemblyReference;
+                                }
                             }
                         }
                         else
@@ -1469,6 +1471,10 @@ namespace Microsoft.Build.Tasks
                             if (!removedReferences.Contains(assemblyReference))
                             {
                                 goodReferences[assemblyName] = assemblyReference;
+                                if (!assemblyReference.IsResolved && !assemblyReference.IsUnresolvable)
+                                {
+                                    referencesToResolve[assemblyName] = assemblyReference;
+                                }
                             }
                         }
 
@@ -1486,7 +1492,7 @@ namespace Microsoft.Build.Tasks
                 // dependencies of them.
                 foreach (Reference reference in removedReferences)
                 {
-                    RemoveDependencies(reference, goodReferences, dependencyGraph);
+                    RemoveDependencies(reference, goodReferences, dependencyGraph, referencesToResolve);
                 }
 
                 // Replace the references table with the list only containing good references.
@@ -1554,6 +1560,7 @@ namespace Microsoft.Build.Tasks
                         {
                             removedReferences.Add(primaryAssemblyReference);
                             goodReferences.Remove(primaryAssemblyName);
+                            referencesToResolve.Remove(primaryAssemblyName);
                         }
 
                         if (!removeOnlyNoWarning)
@@ -1585,12 +1592,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal AssemblyNameExtension GetReferenceFromItemSpec(string itemSpec)
         {
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
-                Reference assemblyReference = References[assemblyName];
+                Reference assemblyReference = assembly.Value;
                 if (assemblyReference.IsPrimary && assemblyReference.PrimarySourceItem.ItemSpec.Equals(itemSpec, StringComparison.OrdinalIgnoreCase))
                 {
-                    return assemblyName;
+                    return assembly.Key;
                 }
             }
 
@@ -1604,7 +1611,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="removedReference">Reference to remove dependencies for</param>
         /// <param name="referenceList">Reference list which contains reference to be used in unification and returned as resolved items</param>
         /// <param name="dependencyList"> A dictionary (Key: Reference Value: List of dependencies and their assembly name)</param>
-        private static void RemoveDependencies(Reference removedReference, Dictionary<AssemblyNameExtension, Reference> referenceList, Dictionary<Reference, List<ReferenceAssemblyExtensionPair>> dependencyList)
+        private static void RemoveDependencies(Reference removedReference, Dictionary<AssemblyNameExtension, Reference> referenceList, Dictionary<Reference, List<ReferenceAssemblyExtensionPair>> dependencyList, Dictionary<AssemblyNameExtension, Reference> referencesToResolve)
         {
             // See if the reference has a list of dependencies
             if (!dependencyList.TryGetValue(removedReference, out List<ReferenceAssemblyExtensionPair> dependencies))
@@ -1632,9 +1639,10 @@ namespace Microsoft.Build.Tasks
                 if (reference.GetDependees().Count == 0)
                 {
                     referenceList.Remove(dependency.Value);
+                    referencesToResolve.Remove(dependency.Value);
 
                     // Recurse using the current refererence so that we remove the next set of dependencies.
-                    RemoveDependencies(reference, referenceList, dependencyList);
+                    RemoveDependencies(reference, referenceList, dependencyList, referencesToResolve);
                 }
             }
         }
@@ -1661,6 +1669,7 @@ namespace Microsoft.Build.Tasks
             MSBuildEventSource.Log.RarComputeClosureStart();
             {
                 References.Clear();
+                referencesToResolve.Clear();
                 _externallyResolvedPrimaryReferences.Clear();
                 SkippedFindingExternallyResolvedDependencies = false;
 
@@ -1677,50 +1686,21 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ComputeClosure()
         {
-            while (referencesToResolve.Count > 0)
-            {
-                Reference r = referencesToResolve.First();
-                ResolveReference();
-            }
-            bool moreResolvable;
-            int moreResolvableIterations = 0;
             const int maxIterations = 100000; // Wait for a ridiculously large number of iterations before bailing out.
-
+            int iteration = 0;
             do
             {
-                bool moreDependencies;
-
-                int dependencyIterations = 0;
-                do
+                KeyValuePair<AssemblyNameExtension, Reference>[] references = referencesToResolve.ToArray();
+                foreach (KeyValuePair<AssemblyNameExtension, Reference> reference in references)
                 {
-                    // Resolve all references.
-                    ResolveAssemblyFilenames();
-
-                    // Find prerequisites.
-                    moreDependencies = FindAssociatedFiles();
-
-                    ++dependencyIterations;
-                    ErrorUtilities.VerifyThrow(dependencyIterations < maxIterations, "Maximum iterations exceeded while looking for dependencies.");
-                } while (moreDependencies);
-
-                // If everything is either resolved or unresolvable, then we can quit.
-                // Otherwise, loop again.
-                moreResolvable = false;
-                foreach (Reference reference in References.Values)
-                {
-                    if (!reference.IsResolved)
-                    {
-                        if (!reference.IsUnresolvable)
-                        {
-                            moreResolvable = true;
-                            break;
-                        }
-                    }
+                    ResolveReference(reference.Key, null, reference.Value);
                 }
 
-                ++moreResolvableIterations;
-                ErrorUtilities.VerifyThrow(moreResolvableIterations < maxIterations, "Maximum iterations exceeded while looking for resolvable references.");
-            } while (moreResolvable);
+                FindAssociatedFiles();
+
+                iteration++;
+                ErrorUtilities.VerifyThrow(iteration < maxIterations, "Maximum iterations exceeded while looking for dependencies.");
+            } while (referencesToResolve.Count > 0);
         }
 
         /// <summary>
@@ -1809,7 +1789,6 @@ namespace Microsoft.Build.Tasks
                     {
                         // If the directory path is too long then record the error and move on.
                         reference.AddError(new DependencyResolutionException(e.Message, e));
-                        referencesToResolve.Remove(reference);
                     }
                 }
             }
@@ -1829,14 +1808,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ResolveAssemblyFilenames()
         {
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
-                Reference reference = GetReference(assemblyName);
+                Reference reference = assembly.Value;
 
                 // Has this reference been resolved to a file name?
                 if (!reference.IsResolved && !reference.IsUnresolvable)
                 {
-                    ResolveReference(assemblyName, null, reference);
+                    ResolveReference(assembly.Key, null, reference);
                 }
             }
         }
@@ -3213,10 +3192,11 @@ namespace Microsoft.Build.Tasks
             bool anyMarkedReference = false;
             ListOfExcludedAssemblies = new List<string>();
 
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
+                AssemblyNameExtension assemblyName = assembly.Key;
                 string assemblyFullName = assemblyName.FullName;
-                Reference reference = GetReference(assemblyName);
+                Reference reference = assembly.Value;
                 reference.ReferenceVersion = assemblyName.Version;
 
                 MarkReferenceWithHighestVersionInCurrentRedistList(assemblyName, reference);

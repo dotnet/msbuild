@@ -1069,10 +1069,11 @@ namespace Microsoft.Build.Tasks
                 if (!Silent)
                 {
                     // First, loop over primaries and display information.
-                    foreach (AssemblyNameExtension assemblyName in dependencyTable.References.Keys)
+                    foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
-                        Reference primaryCandidate = dependencyTable.GetReference(assemblyName);
+                        Reference primaryCandidate = assembly.Value;
 
                         if (primaryCandidate.IsPrimary && !(primaryCandidate.IsConflictVictim && primaryCandidate.IsCopyLocal))
                         {
