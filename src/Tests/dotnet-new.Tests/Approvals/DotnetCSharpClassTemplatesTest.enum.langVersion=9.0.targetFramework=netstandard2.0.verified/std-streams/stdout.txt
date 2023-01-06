@@ -1,0 +1,1 @@
+﻿The template "Enum" was created successfully.

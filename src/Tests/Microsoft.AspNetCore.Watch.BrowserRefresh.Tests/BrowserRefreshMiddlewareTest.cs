@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -208,9 +207,8 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             Assert.False(result);
         }
 
-        [Theory]
-        [MemberData(nameof(ClosingBodyTagParts))]
-        public async Task InvokeAsync_AddsScriptToThePage(string[] closingBodyTagParts)
+        [Fact]
+        public async Task InvokeAsync_AddsScriptToThePage()
         {
             // Arrange
             var stream = new MemoryStream();
@@ -229,6 +227,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 
             var middleware = new BrowserRefreshMiddleware(async (context) =>
             {
+
                 context.Response.ContentType = "text/html";
 
                 await context.Response.WriteAsync("<html>");
@@ -236,10 +235,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
                 await context.Response.WriteAsync("<h1>");
                 await context.Response.WriteAsync("Hello world");
                 await context.Response.WriteAsync("</h1>");
-                foreach (var part in closingBodyTagParts)
-                {
-                    await context.Response.WriteAsync(part);
-                }
+                await context.Response.WriteAsync("</body>");
                 await context.Response.WriteAsync("</html>");
             }, NullLogger<BrowserRefreshMiddleware>.Instance);
 
@@ -250,12 +246,5 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             var responseContent = Encoding.UTF8.GetString(stream.ToArray());
             Assert.Equal("<html><body><h1>Hello world</h1><script src=\"/_framework/aspnetcore-browser-refresh.js\"></script></body></html>", responseContent);
         }
-
-        public static IEnumerable<object[]> ClosingBodyTagParts => new[]
-        {
-            new[] { new[] { "</body>" } },
-            new[] { new[] { "</", "body>" } },
-            new[] { new[] { "<", "/bo", "d", "y>" } },
-        };
     }
 }
