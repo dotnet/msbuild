@@ -23,7 +23,7 @@
         <FolderName>$([System.IO.Path]::GetFileName(`%(Identity)`))</FolderName>
       </TemplatesFolderPath>
     </ItemGroup>
-    <Error Text="SDK Stage 0 has more than one folder with templates: @(TemplatesFolderPath->'%(FolderName)')" Condition="@(TemplatesFolderPath->Count()) > 1"></Error>
+    <Error Text="SDK Stage 0 has more than one folder with templates: @(TemplatesFolderPath->'%(Identity)'). Please delete all but one and rebuild" Condition="@(TemplatesFolderPath->Count()) > 1"></Error>
 
     <!--Prepare Microsoft.DotNet.Common.*.nupkg and pack them directly to target <redist root>\templates\<runtime version> folder. -->
     <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.8.0 --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\" />
