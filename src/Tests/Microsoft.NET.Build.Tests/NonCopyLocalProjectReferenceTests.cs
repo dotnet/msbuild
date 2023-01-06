@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
 
             using var stream = File.OpenRead(outputDirectory.File("MainProject.deps.json").FullName);
             using var reader = new DependencyContextJsonReader();

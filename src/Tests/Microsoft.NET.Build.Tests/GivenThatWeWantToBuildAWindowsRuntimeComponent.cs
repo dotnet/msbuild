@@ -195,7 +195,7 @@ class Program
                 .Pass();
 
             //  Make sure the app can run successfully
-            var exePath = Path.Combine(buildCommand.GetOutputDirectory().FullName, consoleApp.Name + ".exe");
+            var exePath = Path.Combine(buildCommand.GetOutputDirectory(consoleApp.TargetFrameworks).FullName, consoleApp.Name + ".exe");
             new RunExeCommand(Log, exePath)
                 .Execute()
                 .Should()

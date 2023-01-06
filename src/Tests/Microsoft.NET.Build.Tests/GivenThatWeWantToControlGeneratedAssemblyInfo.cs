@@ -83,7 +83,7 @@ namespace Microsoft.NET.Build.Tests
 
             expectedInfo.Add("TargetFrameworkAttribute", $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}");
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, "Release").FullName, "HelloWorld.dll");
             var actualInfo = AssemblyInfo.Get(assemblyPath);
 
             actualInfo.Should().Equal(expectedInfo);
@@ -398,7 +398,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory().FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, "HelloWorld.dll");
 
             var parameterlessAttributes = AssemblyInfo.GetParameterlessAttributes(assemblyPath);
             bool contains = false;
@@ -457,7 +457,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory().FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).FullName, "HelloWorld.dll");
 
             var parameterlessAttributes = AssemblyInfo.GetParameterlessAttributes(assemblyPath);
             bool contains = false;
@@ -686,7 +686,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory().FullName, testTestProject.Name + ".dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testTestProject.TargetFrameworks).FullName, testTestProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["UserSecretsIdAttribute"].Should().Be("SecretsIdValue");
         }
@@ -718,7 +718,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory().FullName, testProject.Name + ".dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
         }
@@ -745,7 +745,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory().FullName, testProject.Name + ".dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, testProject.Name + ".dll");
 
             if (containsAttribute)
             {

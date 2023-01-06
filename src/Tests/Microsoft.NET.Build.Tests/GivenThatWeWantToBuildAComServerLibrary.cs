@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
@@ -102,7 +102,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: rid);
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: rid);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",

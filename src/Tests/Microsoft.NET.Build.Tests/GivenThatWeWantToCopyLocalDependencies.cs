@@ -51,7 +51,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
             var expectedFiles = new []
             {
@@ -93,7 +93,7 @@ namespace Microsoft.NET.Build.Tests
 
             buildCommand.Execute().Should().Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{ProjectName}{Constants.ExeSuffix}",
                 $"{ProjectName}.deps.json",
@@ -131,7 +131,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: rid);
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: testProject.TargetFrameworks, runtimeIdentifier: rid);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{ProjectName}{Constants.ExeSuffix}",
@@ -169,7 +169,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
@@ -202,7 +202,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
@@ -342,7 +342,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: rid);
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: testProject.TargetFrameworks, runtimeIdentifier: rid);
 
             outputDirectory.Should().HaveFiles(new[] {
                 $"{ProjectName}{Constants.ExeSuffix}",

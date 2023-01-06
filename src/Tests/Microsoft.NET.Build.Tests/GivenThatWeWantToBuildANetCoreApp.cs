@@ -365,7 +365,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            string outputFolder = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier ?? "").FullName;
+            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier ?? "").FullName;
 
             new DotnetCommand(Log, Path.Combine(outputFolder, project.Name + ".dll"))
                 .Execute()
@@ -423,7 +423,7 @@ public static class Program
 
             var buildCommand = new BuildCommand(_testAssetsManager.CreateTestProject(proj, identifier: targetFramework));
             var runtimeconfigFile = Path.Combine(
-                buildCommand.GetOutputDirectory().FullName,
+                buildCommand.GetOutputDirectory(targetFramework).FullName,
                 $"{proj.Name}.runtimeconfig.dev.json");
 
             // GenerateRuntimeConfigDevFile overrides default behavior
@@ -487,7 +487,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            string outputFolder = buildCommand.GetOutputDirectory().FullName;
+            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks).FullName;
 
             using (var depsJsonFileStream = File.OpenRead(Path.Combine(outputFolder, $"{project.Name}.deps.json")))
             {
@@ -526,7 +526,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            string outputFolder = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier).FullName;
+            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier).FullName;
 
             using var depsJsonFileStream = File.OpenRead(Path.Combine(outputFolder, $"{project.Name}.deps.json"));
             var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
@@ -852,7 +852,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputPath = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier).FullName;
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: TFM, runtimeIdentifier: runtimeIdentifier).FullName;
             var depsFilePath = Path.Combine(outputPath, $"{testProject.Name}.deps.json");
             var runtimeConfigPath = Path.Combine(outputPath, $"{testProject.Name}.runtimeconfig.json");
 

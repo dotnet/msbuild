@@ -138,7 +138,8 @@ namespace Microsoft.NET.Build.Tests
                .Should()
                .Pass();
 
-            string outputFolder = buildCommand.GetOutputDirectory(runtimeIdentifier: testProject.RuntimeIdentifier).FullName;
+            string outputFolder = buildCommand.GetOutputDirectory(testProject.TargetFrameworks,
+                runtimeIdentifier: testProject.RuntimeIdentifier).FullName;
 
             string depsJsonPath = Path.Combine(outputFolder, $"{testProject.Name}.deps.json");
 
@@ -177,7 +178,8 @@ namespace Microsoft.NET.Build.Tests
                .Should()
                .Pass();
 
-            string outputFolder = buildCommand.GetOutputDirectory(runtimeIdentifier: testProject.RuntimeIdentifier).FullName;
+            string outputFolder = buildCommand.GetOutputDirectory(testProject.TargetFrameworks,
+                runtimeIdentifier: testProject.RuntimeIdentifier).FullName;
 
             string depsJsonPath = Path.Combine(outputFolder, $"{testProject.Name}.deps.json");
 

@@ -42,8 +42,7 @@ namespace Microsoft.NET.Build.Tests
 
             command.Execute().Should().Pass();
 
-            var outputDirectory = command.GetOutputDirectory();
-
+            var outputDirectory = command.GetOutputDirectory(targetFramework);
             var runtimeConfigFile = outputDirectory.File("HelloWorld.runtimeconfig.json");
             var (_, metadata) = command.GetValuesWithMetadata().Single(i => i.value == runtimeConfigFile.FullName);
 

@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tests
         void VerifyAppBuilds(TestAsset testAsset)
         {
             var buildCommand = new BuildCommand(testAsset, "TestApp");
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             buildCommand
                 .Execute()
@@ -84,7 +84,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",

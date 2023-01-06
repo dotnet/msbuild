@@ -60,7 +60,7 @@ namespace FrameworkReferenceTest
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
@@ -173,7 +173,7 @@ namespace FrameworkReferenceTest
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
@@ -702,7 +702,7 @@ namespace FrameworkReferenceTest
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
@@ -755,7 +755,7 @@ namespace FrameworkReferenceTest
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
@@ -1005,7 +1005,7 @@ namespace FrameworkReferenceTest
 
             if (selfContained)
             {
-                var outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: testProject.RuntimeIdentifier);
+                var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks, runtimeIdentifier: testProject.RuntimeIdentifier);
 
                 //  The output directory should have the DLLs which are not referenced at compile time but are
                 //  still part of the shared framework.
@@ -1116,7 +1116,7 @@ namespace FrameworkReferenceTest
                 .Should()
                 .Pass();
 
-            var outputDirectory = command.GetOutputDirectory(runtimeIdentifier: testProject.RuntimeIdentifier);
+            var outputDirectory = command.GetOutputDirectory(testProject.TargetFrameworks, runtimeIdentifier: testProject.RuntimeIdentifier);
             var resolvedVersions = ResolvedVersionInfo.ParseFrom(Path.Combine(outputDirectory.FullName, "resolvedversions.txt"));
 
             return resolvedVersions;

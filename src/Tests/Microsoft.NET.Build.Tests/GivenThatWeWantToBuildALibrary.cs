@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestLibrary.dll",
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory("netstandard1.5");
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestLibrary.dll",
@@ -200,7 +200,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory("netstandard1.5");
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestLibrary.dll",
@@ -891,7 +891,7 @@ class Program
                 .Pass();
 
             string runtimeConfigName = $"{testProj.Name}.runtimeconfig.json";
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProj.TargetFrameworks);
             outputDirectory.Should().HaveFile(runtimeConfigName);
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
@@ -946,7 +946,7 @@ class Program
                 .Pass();
 
             string runtimeConfigName = $"{testProject.Name}.runtimeconfig.json";
-            var outputDirectory = buildCommand.GetOutputDirectory();
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().HaveFiles(new[] {
                 runtimeConfigName,
                 $"{testProject.Name}.runtimeconfig.json"
