@@ -213,7 +213,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("KitchenSink", identifier: $"{expectAppDocPublished}_{expectLibProjectDocPublished}")
                 .WithSource();
             
-            var publishCommand = new PublishCommand(Log, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
+            var publishCommand = new PublishCommand(kitchenSinkAsset, "TestApp");
             var publishArgs = properties.Split(';').Select(p => $"/p:{p}").ToArray();
             var publishResult = publishCommand.Execute(publishArgs);
 
@@ -269,10 +269,9 @@ namespace Microsoft.NET.Publish.Tests
             };
 
             var appAsset = _testAssetsManager.CreateTestProject(appProject, identifier: identifier);
-            var appSourcePath  = Path.Combine(appAsset.TestRoot, "TestApp");
 
             new RestoreCommand(appAsset, "TestApp").Execute().Should().Pass();
-            var appPublishCommand = new PublishCommand(Log, appSourcePath);
+            var appPublishCommand = new PublishCommand(appAsset);
             var appPublishResult = appPublishCommand.Execute("/p:" + property);
             appPublishResult.Should().Pass();
 

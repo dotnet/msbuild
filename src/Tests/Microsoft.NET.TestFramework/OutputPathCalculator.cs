@@ -15,7 +15,7 @@ using Xunit.Sdk;
 
 namespace Microsoft.NET.TestFramework
 {
-    class OutputPathCalculator
+    public class OutputPathCalculator
     {
         public string ProjectPath { get; set; }
         public string TargetFramework { get; set; }
@@ -26,9 +26,9 @@ namespace Microsoft.NET.TestFramework
         public bool IsSdkProject { get; set; } = true;
 
 
-        public static OutputPathCalculator FromTestAsset(string projectPath, TestAsset testAsset)
+        public static OutputPathCalculator FromTestAsset(string projectPath, TestAsset testAsset = null)
         {
-            if (testAsset.TestProject != null)
+            if (testAsset?.TestProject != null)
             {
                 return FromTestProject(projectPath, testAsset.TestProject);
             }
@@ -119,7 +119,7 @@ namespace Microsoft.NET.TestFramework
             if (UsesArtifactsFolder())
             {
                 string pivot = configuration.ToLowerInvariant();
-                if (!string.IsNullOrEmpty(targetFramework))
+                if (TryGetTargetFramework().Contains(';') && !string.IsNullOrEmpty(targetFramework))
                 {
                     pivot += "_" + targetFramework;
                 }
@@ -153,7 +153,7 @@ namespace Microsoft.NET.TestFramework
             if (UsesArtifactsFolder())
             {
                 string pivot = configuration.ToLowerInvariant();
-                if (!string.IsNullOrEmpty(targetFramework))
+                if (TryGetTargetFramework().Contains(';') && !string.IsNullOrEmpty(targetFramework))
                 {
                     pivot += "_" + targetFramework;
                 }

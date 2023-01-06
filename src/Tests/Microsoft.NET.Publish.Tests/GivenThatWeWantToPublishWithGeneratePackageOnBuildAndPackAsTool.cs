@@ -26,8 +26,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]
-        [InlineData(true, false)]
-        [InlineData(true, true)]
+        [InlineData(true, false, Skip = "https://github.com/NuGet/Home/issues/12323")]
+        [InlineData(true, true, Skip = "https://github.com/NuGet/Home/issues/12323")]
         public void It_publishes_successfully(bool generatePackageOnBuild, bool packAsTool)
         {
             Console.WriteLine(generatePackageOnBuild.ToString() + packAsTool.ToString());
@@ -54,8 +54,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]
-        [InlineData(true, false)]
-        [InlineData(true, true)]
+        [InlineData(true, false, Skip = "https://github.com/NuGet/Home/issues/12323")]
+        [InlineData(true, true, Skip = "https://github.com/NuGet/Home/issues/12323")]
         public void It_builds_with_GeneratePackageOnBuild_successfully(bool generatePackageOnBuild, bool packAsTool)
         {
             TestAsset testAsset = _testAssetsManager

@@ -53,7 +53,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass()
@@ -96,7 +96,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "false";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass()
@@ -144,7 +144,7 @@ namespace Microsoft.NET.Publish.Tests
                     // <RuntimeHostConfigurationOption Include="key1" Value="value1" />
                     .WithProjectChanges(project => AddRuntimeConfigOption(project));
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass();
@@ -202,7 +202,7 @@ namespace Microsoft.NET.Publish.Tests
                     // <RuntimeHostConfigurationOption Include="key1" Value="value1" />
                     .WithProjectChanges(project => AddRuntimeConfigOption(project));
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass();
@@ -294,7 +294,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand= new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass()
@@ -348,7 +348,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
@@ -380,7 +380,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
@@ -411,7 +411,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass()
@@ -446,7 +446,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
@@ -569,7 +569,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute()
                     .Should().Pass()
@@ -614,7 +614,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute()
                     .Should().Pass()
@@ -653,7 +653,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["SelfContained"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute()
                     .Should().Pass();
@@ -686,7 +686,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["SelfContained"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute()
                     .Should().Pass();
