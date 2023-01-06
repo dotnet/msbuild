@@ -1672,9 +1672,13 @@ namespace Microsoft.Build.Tasks
             do
             {
                 KeyValuePair<AssemblyNameExtension, Reference>[] references = referencesToResolve.ToArray();
+                referencesToResolve.Clear();
                 foreach (KeyValuePair<AssemblyNameExtension, Reference> reference in references)
                 {
-                    ResolveReference(reference.Key, null, reference.Value);
+                    if (!reference.Value.IsResolved && !reference.Value.IsUnresolvable)
+                    {
+                        ResolveReference(reference.Key, null, reference.Value);
+                    }
                 }
 
                 FindAssociatedFiles();
