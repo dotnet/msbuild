@@ -496,19 +496,16 @@ namespace Microsoft.Build.Tasks
                     (
                         new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
                     );
-                    referencesToResolve.Remove(reference);
                 }
             }
             catch (BadImageFormatException e)
             {
                 reference.AddError(new DependencyResolutionException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
             catch (UnauthorizedAccessException e)
             {
                 // If this isn't a valid assembly, then record the exception and continue on
                 reference.AddError(new DependencyResolutionException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
 
             // If couldn't resolve the assemly name then just use the simple name extracted from
@@ -599,7 +596,6 @@ namespace Microsoft.Build.Tasks
 
             // Create the reference.
             var reference = new Reference(_isWinMDFile, _fileExists, _getRuntimeVersion);
-            referencesToResolve.Add(reference);
             reference.MakePrimaryAssemblyReference(referenceAssemblyName, wantSpecificVersion, executableExtension);
 
             // Escape simple names.
@@ -689,23 +685,19 @@ namespace Microsoft.Build.Tasks
             {
                 // If this isn't a valid assembly, then record the exception and continue on
                 reference.AddError(new BadImageReferenceException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
             catch (FileNotFoundException e) // Why isn't this covered in NotExpectedException?
             {
                 reference.AddError(new BadImageReferenceException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
             catch (FileLoadException e)
             {
                 // Managed assembly was found but could not be loaded.
                 reference.AddError(new BadImageReferenceException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 reference.AddError(new BadImageReferenceException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
 
             // If there is still no assembly name then this is a case where the assembly metadata
@@ -1141,7 +1133,6 @@ namespace Microsoft.Build.Tasks
                       (
                           new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
                       );
-                referencesToResolve.Remove(reference);
 
                 return;
             }
@@ -1182,7 +1173,6 @@ namespace Microsoft.Build.Tasks
 
                         var newEntry = new KeyValuePair<AssemblyNameExtension, Reference>(unifiedDependency.PostUnified, newReference);
                         newEntries.Add(newEntry);
-                        referencesToResolve.Add(newReference);
                     }
                     else
                     {
@@ -1198,11 +1188,6 @@ namespace Microsoft.Build.Tasks
                             // Now, add new information to the reference.
                             existingReference.AddSourceItems(reference.GetSourceItems());
                             existingReference.AddDependee(reference);
-
-                            if (!existingReference.IsResolved && !existingReference.IsUnresolvable)
-                            {
-                                referencesToResolve.Add(existingReference);
-                            }
 
                             if (unifiedDependency.IsUnified)
                             {
@@ -1222,28 +1207,23 @@ namespace Microsoft.Build.Tasks
             catch (FileNotFoundException e) // Why isn't this covered in NotExpectedException?
             {
                 reference.AddError(new DependencyResolutionException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
             catch (FileLoadException e)
             {
                 // Managed assembly was found but could not be loaded.
                 reference.AddError(new DependencyResolutionException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
             catch (BadImageFormatException e)
             {
                 reference.AddError(new DependencyResolutionException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
             catch (System.Runtime.InteropServices.COMException e)
             {
                 reference.AddError(new DependencyResolutionException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 reference.AddError(new DependencyResolutionException(e.Message, e));
-                referencesToResolve.Remove(reference);
             }
         }
 
@@ -1611,6 +1591,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="removedReference">Reference to remove dependencies for</param>
         /// <param name="referenceList">Reference list which contains reference to be used in unification and returned as resolved items</param>
         /// <param name="dependencyList"> A dictionary (Key: Reference Value: List of dependencies and their assembly name)</param>
+        /// <param name="referencesToResolve">List of unresolved references that should be kept updated.</param>
         private static void RemoveDependencies(Reference removedReference, Dictionary<AssemblyNameExtension, Reference> referenceList, Dictionary<Reference, List<ReferenceAssemblyExtensionPair>> dependencyList, Dictionary<AssemblyNameExtension, Reference> referencesToResolve)
         {
             // See if the reference has a list of dependencies
