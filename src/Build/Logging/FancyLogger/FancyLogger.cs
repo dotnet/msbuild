@@ -154,12 +154,13 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             FancyLoggerBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
-            Console.Clear();
+            // Console.Clear();
             // Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
             if (Succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
                 Console.WriteLine("\t0 Warning(s)");
+                Console.WriteLine("\t0 Error(s)");
             }
             else
             {

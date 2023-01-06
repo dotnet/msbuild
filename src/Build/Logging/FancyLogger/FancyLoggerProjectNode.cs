@@ -69,10 +69,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (Finished)
             {
                 if (CurrentTargetLine != null) FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
-                foreach (FancyLoggerMessageNode node in AdditionalDetails)
+                foreach (FancyLoggerMessageNode node in AdditionalDetails.ToList())
                 {
+                    // Only delete high priority messages
+                    if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
                     if (node.Line != null) FancyLoggerBuffer.DeleteLine(node.Line.Id);
-                    node.Line = null;
+                    AdditionalDetails.Remove(node);
                 }
             }
 

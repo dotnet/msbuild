@@ -39,7 +39,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Use alternate buffer
             // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
-            Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
+            // Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
             Task.Run(async () => {
@@ -74,8 +74,9 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static void Terminate()
         {
             // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
+            Console.Clear();
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.Write(ANSIBuilder.Eraser.Display());
+            Console.Clear();
             Lines = new();
         }
 

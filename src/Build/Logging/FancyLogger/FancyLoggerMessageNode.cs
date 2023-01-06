@@ -15,11 +15,23 @@ namespace Microsoft.Build.Logging.FancyLogger
 
     public class FancyLoggerMessageNode
     {
+        public enum MessageType
+        {
+            HighPriorityMessage,
+            Warning,
+            Error
+        }
+
         public string Message;
         public FancyLoggerBufferLine? Line;
-
+        public MessageType Type;
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
+            // Get type
+            if (args is BuildMessageEventArgs) Type = MessageType.HighPriorityMessage;
+            else if (args is BuildWarningEventArgs) Type = MessageType.Warning;
+            else if (args is BuildErrorEventArgs) Type = MessageType.Error;
+
             // TODO: Replace
             if (args.Message == null)
             {
@@ -38,7 +50,13 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void Log()
         {
             if (Line == null) return;
-            FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Italic(Message)}");
+            // Get color
+            ANSIBuilder.Formatting.ForegroundColor foregroundColor = ANSIBuilder.Formatting.ForegroundColor.Default;
+            if (Type == MessageType.HighPriorityMessage) foregroundColor = ANSIBuilder.Formatting.ForegroundColor.Default;
+            else if (Type == MessageType.Warning) foregroundColor = ANSIBuilder.Formatting.ForegroundColor.Yellow;
+            else if (Type == MessageType.Error) foregroundColor = ANSIBuilder.Formatting.ForegroundColor.Red;
+
+            FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Italic(Message), foregroundColor)}");
         }
     }
 }
