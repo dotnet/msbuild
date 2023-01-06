@@ -159,7 +159,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (Succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine("\t0 Warning(s)");
+                Console.WriteLine("\tX Warning(s)");
             }
             else
             {
