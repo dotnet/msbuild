@@ -36,6 +36,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerTargetNode? CurrentTargetNode;
         // Messages, errors and warnings
         List<FancyLoggerMessageNode> AdditionalDetails = new();
+        // Count messages, warnings and errors
+        public int MessageCount = 0;
+        public int WarningCount = 0;
+        public int ErrorCount = 0;
         public FancyLoggerProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
@@ -56,8 +60,13 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Project details
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
-                $"{(Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner())} {ANSIBuilder.Formatting.Dim("Project: ")} {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework}]",
-                $"({FinishedTargets} targets completed)",
+                // Show indicator
+                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner()) +
+                // Project
+                ANSIBuilder.Formatting.Dim("Project: ") +
+                // Project file path with color
+                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework}]",
+                $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
                 Console.WindowWidth
             );
 
@@ -108,14 +117,17 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void AddMessage(BuildMessageEventArgs args)
         {
             if (args.Importance != MessageImportance.High) return;
+            MessageCount++;
             AdditionalDetails.Add(new FancyLoggerMessageNode(args));
         }
         public void AddWarning(BuildWarningEventArgs args)
         {
+            WarningCount++;
             AdditionalDetails.Add(new FancyLoggerMessageNode(args));
         }
         public void AddError(BuildErrorEventArgs args)
         {
+            ErrorCount++;
             AdditionalDetails.Add(new FancyLoggerMessageNode(args));
         }
     }

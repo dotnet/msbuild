@@ -51,12 +51,23 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             if (Line == null) return;
             // Get color
-            ANSIBuilder.Formatting.ForegroundColor foregroundColor = ANSIBuilder.Formatting.ForegroundColor.Default;
-            if (Type == MessageType.HighPriorityMessage) foregroundColor = ANSIBuilder.Formatting.ForegroundColor.Default;
-            else if (Type == MessageType.Warning) foregroundColor = ANSIBuilder.Formatting.ForegroundColor.Yellow;
-            else if (Type == MessageType.Error) foregroundColor = ANSIBuilder.Formatting.ForegroundColor.Red;
-
-            FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Italic(Message), foregroundColor)}");
+            if (Type == MessageType.HighPriorityMessage)
+            {
+                FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Italic(Message)}");
+            }
+            else if (Type == MessageType.Warning)
+            {
+                FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Color(
+                    ANSIBuilder.Formatting.Italic($"{ANSIBuilder.Formatting.Dim("Warning:")} {Message}"),
+                    ANSIBuilder.Formatting.ForegroundColor.Yellow
+                )}");
+            } else if (Type == MessageType.Error)
+            {
+                FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Color(
+                    ANSIBuilder.Formatting.Italic($"{ANSIBuilder.Formatting.Dim("Error:")} {Message}"),
+                    ANSIBuilder.Formatting.ForegroundColor.Red
+                )}");
+            }
         }
     }
 }
