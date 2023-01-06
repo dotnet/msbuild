@@ -174,15 +174,6 @@ ContainerEntrypointArg items have one property:
 </ItemGroup>
 ```
 
-## ASP.NET Core customizations
-
-ASP.NET Core applications have certain defaults that are set to make containers more 'plug and play'.
-
-* A ContainerPort item is set to expose TCP port 80
-* The ASPNETCORE_URLS environment variable is set to `http://+:80` to match that port value.
-
-Both of these will be skipped if a custom value is set.
-
 ## Default container labels
 
 Labels are often used to provide consistent metadata on container images. This package provides some default labels to encourage better maintainability of the generated images.
