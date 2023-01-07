@@ -57,6 +57,12 @@ namespace Microsoft.Build.BackEnd
             this.MaximumConfigurationId = BuildRequestConfiguration.InvalidConfigurationId;
         }
 
+        public PlanConfigData GetConfiguration(int configId)
+        {
+            _configPathToData.TryGetValue(_configCache[configId].ProjectFullPath, out PlanConfigData data);
+            return data;
+        }
+
         /// <summary>
         /// Returns true if a valid plan was read, false otherwise.
         /// </summary>
@@ -201,14 +207,6 @@ namespace Microsoft.Build.BackEnd
         public int GetConfigWithGreatestNumberOfReferences(IEnumerable<int> configsToSchedule)
         {
             return GetConfigWithComparison(configsToSchedule, delegate (PlanConfigData left, PlanConfigData right) { return Comparer<int>.Default.Compare(left.ReferencesCount, right.ReferencesCount); });
-        }
-
-        /// <summary>
-        /// Given a list of real configuration IDs, returns the id of the config with the largest plan time.
-        /// </summary>
-        public int GetConfigWithGreatestPlanTime(IEnumerable<int> realConfigsToSchedule)
-        {
-            return GetConfigWithComparison(realConfigsToSchedule, delegate (PlanConfigData left, PlanConfigData right) { return Comparer<double>.Default.Compare(left.TotalPlanTime, right.TotalPlanTime); });
         }
 
         /// <summary>
@@ -578,7 +576,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The data associated with a config as read from a build plan.
         /// </summary>
-        private class PlanConfigData
+        internal class PlanConfigData
         {
             /// <summary>
             /// The configuration id.
