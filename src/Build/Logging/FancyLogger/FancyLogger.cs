@@ -158,6 +158,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 foreach (var message in project.Value.AdditionalDetails)
                 {
                     Console.WriteLine(message.Message);
+                    // TODO: Update to show complete formatting. Maybe add a member to `FancyLoggerMessageNode` to store the contents. 
                 }
             }
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
