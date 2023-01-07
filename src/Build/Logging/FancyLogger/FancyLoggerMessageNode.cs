@@ -21,19 +21,36 @@ namespace Microsoft.Build.Logging.FancyLogger
             Warning,
             Error
         }
-
         public string Message;
         public FancyLoggerBufferLine? Line;
         public MessageType Type;
+        //
+        public string? Code;
+        public string? FilePath;
+        public int? LineNumber;
+        public int? ColumnNumber;
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             // Get type
-            if (args is BuildMessageEventArgs) Type = MessageType.HighPriorityMessage;
-            else if (args is BuildWarningEventArgs) Type = MessageType.Warning;
-            else if (args is BuildErrorEventArgs) Type = MessageType.Error;
+            if (args is BuildMessageEventArgs message)
+            {
+                Type = MessageType.HighPriorityMessage;
+            }
+            else if (args is BuildWarningEventArgs warning)
+            {
+                Type = MessageType.Warning;
+            }
+            else if (args is BuildErrorEventArgs error)
+            {
+                Type = MessageType.Error;
+                Code = error.Code;
+                FilePath = error.File;
+                LineNumber = error.LineNumber;
+                ColumnNumber = error.ColumnNumber;
+            }
 
-            // TODO: Replace
-            if (args.Message == null)
+                // TODO: Replace
+                if (args.Message == null)
             {
                 Message = string.Empty;
             }
@@ -64,7 +81,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             } else if (Type == MessageType.Error)
             {
                 FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Color(
-                    ANSIBuilder.Formatting.Italic($"{ANSIBuilder.Formatting.Dim("Error:")} {Message}"),
+                    ANSIBuilder.Formatting.Italic($"Error {Code}: {FilePath}({LineNumber},{ColumnNumber}) {Message}"),
                     ANSIBuilder.Formatting.ForegroundColor.Red
                 )}");
             }

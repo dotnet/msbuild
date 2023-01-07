@@ -35,7 +35,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerBufferLine? CurrentTargetLine;
         public FancyLoggerTargetNode? CurrentTargetNode;
         // Messages, errors and warnings
-        List<FancyLoggerMessageNode> AdditionalDetails = new();
+        public List<FancyLoggerMessageNode> AdditionalDetails = new();
         // Count messages, warnings and errors
         public int MessageCount = 0;
         public int WarningCount = 0;
@@ -61,11 +61,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Project details
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
                 // Show indicator
-                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner()) +
+                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner())) +
                 // Project
                 ANSIBuilder.Formatting.Dim("Project: ") +
                 // Project file path with color
-                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework}]",
+                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework ?? "*"}]",
                 $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
                 Console.WindowWidth
             );
@@ -83,7 +83,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                     // Only delete high priority messages
                     if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
                     if (node.Line != null) FancyLoggerBuffer.DeleteLine(node.Line.Id);
-                    AdditionalDetails.Remove(node);
+                    // AdditionalDetails.Remove(node);
                 }
             }
 
@@ -96,6 +96,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Messages, warnings and errors
             foreach (FancyLoggerMessageNode node in AdditionalDetails)
             {
+                if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
                 if (node.Line == null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
                 node.Log();
             }
@@ -114,21 +115,27 @@ namespace Microsoft.Build.Logging.FancyLogger
                 CurrentTargetNode.AddTask(args);
             }
         }
-        public void AddMessage(BuildMessageEventArgs args)
+        public FancyLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
         {
-            if (args.Importance != MessageImportance.High) return;
+            if (args.Importance != MessageImportance.High) return null;
             MessageCount++;
-            AdditionalDetails.Add(new FancyLoggerMessageNode(args));
+            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            AdditionalDetails.Add(node);
+            return node;
         }
-        public void AddWarning(BuildWarningEventArgs args)
+        public FancyLoggerMessageNode? AddWarning(BuildWarningEventArgs args)
         {
             WarningCount++;
-            AdditionalDetails.Add(new FancyLoggerMessageNode(args));
+            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            AdditionalDetails.Add(node);
+            return node;
         }
-        public void AddError(BuildErrorEventArgs args)
+        public FancyLoggerMessageNode? AddError(BuildErrorEventArgs args)
         {
             ErrorCount++;
-            AdditionalDetails.Add(new FancyLoggerMessageNode(args));
+            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            AdditionalDetails.Add(node);
+            return node;
         }
     }
 }
