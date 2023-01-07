@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -169,6 +170,22 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+#if NET5_0_OR_GREATER // UnsupportedPlatformAttributes are not available in net 472.
+        [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+        [System.Runtime.Versioning.UnsupportedOSPlatform("android")]
+        [System.Runtime.Versioning.UnsupportedOSPlatform("ios")]
+        [System.Runtime.Versioning.UnsupportedOSPlatform("tvos")] // InputEncoding is unavailable in these OS.
+        public AndConstraint<CommandResultAssertions> HaveEncodingEquivalentTo(Encoding desiredEncoding)
+        {
+            Execute.Assertion.ForCondition(_commandResult.StartInfo.StandardOutputEncoding == desiredEncoding &&
+                _commandResult.StartInfo.StandardInputEncoding == desiredEncoding)
+                .FailWith(AppendDiagnosticsTo($"The Output Encoding: {_commandResult.StartInfo.StandardOutputEncoding.EncodingName} and" +
+                $"Input Encoding: {_commandResult.StartInfo.StandardInputEncoding.EncodingName} aren't equivalent to the desired encoding:" +
+                $"{desiredEncoding.EncodingName}."));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+#endif
+
         private string AppendDiagnosticsTo(string s)
         {
             return s + $"{Environment.NewLine}" +
@@ -221,7 +238,7 @@ namespace Microsoft.NET.TestFramework.Assertions
 
         }
 
-        private string ReadNuPkg(string nupkgPath, params string[] filePaths) 
+        private string ReadNuPkg(string nupkgPath, params string[] filePaths)
         {
             if (nupkgPath == null)
             {
@@ -251,7 +268,7 @@ namespace Microsoft.NET.TestFramework.Assertions
             if (expected == null)
             {
                 throw new ArgumentNullException(nameof(expected));
-            }    
+            }
 
             new FileInfo(nuspecPath).Should().Exist();
             var content = File.ReadAllText(nuspecPath);
@@ -272,7 +289,7 @@ namespace Microsoft.NET.TestFramework.Assertions
             if (expected == null)
             {
                 throw new ArgumentNullException(nameof(expected));
-            }    
+            }
 
             new FileInfo(nuspecPath).Should().Exist();
             var content = File.ReadAllText(nuspecPath);
