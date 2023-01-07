@@ -911,23 +911,39 @@ namespace Microsoft.Build.BackEnd
         {
             foreach (int idleNodeId in idleNodes)
             {
-                Dictionary<int, SchedulableRequest> configsWhichCanBeScheduledToThisNode = new Dictionary<int, SchedulableRequest>();
+                SchedulingPlan.PlanConfigData bestConfig = null;
+                SchedulableRequest bestRequest = null;
 
                 // Find the most expensive request in the plan to schedule from among the ones available.
                 foreach (SchedulableRequest request in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
                 {
                     if (CanScheduleRequestToNode(request, idleNodeId))
                     {
-                        configsWhichCanBeScheduledToThisNode[request.BuildRequest.ConfigurationId] = request;
+
+                        SchedulingPlan.PlanConfigData configToConsider = _schedulingPlan.GetConfiguration(request.BuildRequest.ConfigurationId);
+                        if (configToConsider is null)
+                        {
+                            // By default we assume configs we don't know about aren't as important, and will only schedule them
+                            // if nothing else is suitable
+                            if (bestRequest is null)
+                            {
+                                bestRequest = request;
+                            }
+                        }
+                        else
+                        {
+                            if (bestConfig == null || bestConfig.ReferencesCount < configToConsider.ReferencesCount)
+                            {
+                                bestConfig = configToConsider;
+                                bestRequest = request;
+                            }
+                        }
                     }
                 }
 
-                if (configsWhichCanBeScheduledToThisNode.Count > 0)
+                if (bestRequest is not null)
                 {
-                    int configToSchedule = _schedulingPlan.GetConfigWithGreatestNumberOfReferences(configsWhichCanBeScheduledToThisNode.Keys);
-
-                    ErrorUtilities.VerifyThrow(configToSchedule != BuildRequestConfiguration.InvalidConfigurationId, "No configuration returned even though there are some available.");
-                    AssignUnscheduledRequestToNode(configsWhichCanBeScheduledToThisNode[configToSchedule], idleNodeId, responses);
+                    AssignUnscheduledRequestToNode(bestRequest, idleNodeId, responses);
                 }
             }
         }

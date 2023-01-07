@@ -200,16 +200,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Given a list of configuration IDs, returns the id of the config with the greatest number of immediate references.
-        /// </summary>
-        /// <param name="configsToSchedule">The set of configurations to consider.</param>
-        /// <returns>The id of the configuration with the most immediate references.</returns>
-        public int GetConfigWithGreatestNumberOfReferences(IEnumerable<int> configsToSchedule)
-        {
-            return GetConfigWithComparison(configsToSchedule, delegate (PlanConfigData left, PlanConfigData right) { return Comparer<int>.Default.Compare(left.ReferencesCount, right.ReferencesCount); });
-        }
-
-        /// <summary>
         /// Gets the name of the plan file for a specified submission.
         /// </summary>
         private string GetPlanName(SchedulableRequest rootRequest)
@@ -220,39 +210,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return _configCache[rootRequest.BuildRequest.ConfigurationId].ProjectFullPath + ".buildplan";
-        }
-
-        /// <summary>
-        /// Returns the config id with the greatest value according to the comparer.
-        /// </summary>
-        private int GetConfigWithComparison(IEnumerable<int> realConfigsToSchedule, Comparison<PlanConfigData> comparer)
-        {
-            PlanConfigData bestConfig = null;
-            int bestRealConfigId = BuildRequestConfiguration.InvalidConfigurationId;
-
-            foreach (int realConfigId in realConfigsToSchedule)
-            {
-                PlanConfigData configToConsider;
-                if (!_configPathToData.TryGetValue(_configCache[realConfigId].ProjectFullPath, out configToConsider))
-                {
-                    // By default we assume configs we don't know about aren't as important, and will only schedule them
-                    // if nothing else is suitable
-                    if (bestRealConfigId == BuildRequestConfiguration.InvalidConfigurationId)
-                    {
-                        bestRealConfigId = realConfigId;
-                    }
-
-                    continue;
-                }
-
-                if (bestConfig == null || (comparer(bestConfig, configToConsider) < 0))
-                {
-                    bestConfig = configToConsider;
-                    bestRealConfigId = realConfigId;
-                }
-            }
-
-            return bestRealConfigId;
         }
 
         /// <summary>
