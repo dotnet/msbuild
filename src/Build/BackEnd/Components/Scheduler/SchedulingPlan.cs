@@ -210,62 +210,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Determines how many references a config with a particular path has.
-        /// </summary>
-        public int GetReferencesCountForConfigByPath(string configFullPath)
-        {
-            PlanConfigData data;
-            if (!_configPathToData.TryGetValue(configFullPath, out data))
-            {
-                return 0;
-            }
-
-            return data.ReferencesCount;
-        }
-
-        /// <summary>
-        /// Advances the state of the plan by removing the specified config from all paths
-        /// </summary>
-        public void VisitConfig(string configName)
-        {
-            PlanConfigData data;
-            if (!_configPathToData.TryGetValue(configName, out data))
-            {
-                return;
-            }
-
-            // UNDONE: Parallelize
-            foreach (List<Stack<PlanConfigData>> paths in _configIdToPaths.Values)
-            {
-                foreach (Stack<PlanConfigData> path in paths)
-                {
-                    if (path.Count > 0 && path.Peek() == data)
-                    {
-                        path.Pop();
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Advances the state of the plan by zeroing out the time spend on the config.
-        /// </summary>
-        public void CompleteConfig(string configName)
-        {
-            PlanConfigData data;
-            if (!_configPathToData.TryGetValue(configName, out data))
-            {
-                return;
-            }
-
-            ErrorUtilities.VerifyThrow(data.AccumulatedTimeOfReferences < 0.00001, "Unexpected config completed before references were completed.");
-
-            // Recursively subtract the amount of time from this config's referrers.
-            data.RecursivelyApplyReferenceTimeToReferrers(-data.AccumulatedTime);
-            data.AccumulatedTime = 0;
-        }
-
-        /// <summary>
         /// Gets the name of the plan file for a specified submission.
         /// </summary>
         private string GetPlanName(SchedulableRequest rootRequest)
