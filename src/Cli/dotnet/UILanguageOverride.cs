@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
         private const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
         private const string VSLANG = nameof(VSLANG);
         private const string PreferredUILang = nameof(PreferredUILang);
-        private static Encoding DefaultMultilingualEncoding = Encoding.UTF8;
+        private static Encoding DefaultMultilingualEncoding = Encoding.UTF8; // We choose UTF8 as the default encoding as opposed to specific language encodings because it supports emojis & other chars in .NET.
 
         public static void Setup()
         {
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli
             // https://learn.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture?redirectedfrom=MSDN&view=net-7.0#remarks
             CultureInfo.CurrentUICulture = language;
 
-            if (OperatingSystem.IsWindows()) // Encoding is only an issue on Windows.
+            if (OperatingSystem.IsWindows() && Environment.OSVersion.Version.Major >= 10) // Encoding is only an issue on Windows, UTF-8 is only officially supported on 10+.
             {
                 Console.OutputEncoding = DefaultMultilingualEncoding;
                 Console.InputEncoding = DefaultMultilingualEncoding; // Setting both encodings causes a change in the CHCP, making it so we dont need to P-Invoke ourselves.
