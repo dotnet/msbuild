@@ -11,6 +11,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using System.Transactions;
 
 #nullable disable
 
@@ -111,11 +112,11 @@ namespace Microsoft.Build.BackEnd
                     Dictionary<int, double> accumulatedTimeByConfiguration = new Dictionary<int, double>();
                     RecursiveAccumulateConfigurationTimes(rootRequest, accumulatedTimeByConfiguration);
 
-                    List<int> configurationsInOrder = new List<int>(accumulatedTimeByConfiguration.Keys);
-                    configurationsInOrder.Sort();
-                    foreach (int configId in configurationsInOrder)
+                    List<KeyValuePair<int, double>> configurationsInOrder = new(accumulatedTimeByConfiguration);
+                    configurationsInOrder.Sort((KeyValuePair<int, double> l, KeyValuePair<int, double> r) => Comparer<int>.Default.Compare(l.Key, r.Key));
+                    foreach (KeyValuePair<int, double> configuration in configurationsInOrder)
                     {
-                        file.WriteLine(String.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", configId, accumulatedTimeByConfiguration[configId], _configCache[configId].ProjectFullPath));
+                        file.WriteLine(String.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", configuration.Key, configuration.Value, _configCache[configuration.Key].ProjectFullPath));
                     }
 
                     file.WriteLine();
@@ -234,12 +235,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void DetermineConfigsWithGreatestPlanTime()
         {
-            List<int> projectsInOrderOfTotalPlanTime = new List<int>(_configIdToData.Keys);
-            projectsInOrderOfTotalPlanTime.Sort(delegate (int left, int right) { return -Comparer<double>.Default.Compare(_configIdToData[left].TotalPlanTime, _configIdToData[right].TotalPlanTime); });
-            foreach (int configId in projectsInOrderOfTotalPlanTime)
+            List<KeyValuePair<int, PlanConfigData>> projectsInOrderOfTotalPlanTime = new(_configIdToData);
+            projectsInOrderOfTotalPlanTime.Sort((left, right) => Comparer<double>.Default.Compare(right.Value.TotalPlanTime, left.Value.TotalPlanTime));
+            foreach (KeyValuePair<int, PlanConfigData> configuration in projectsInOrderOfTotalPlanTime)
             {
-                PlanConfigData config = _configIdToData[configId];
-                Console.WriteLine("{0}: {1} ({2} referrers) {3}", configId, config.TotalPlanTime, config.ReferrerCount, config.ConfigFullPath);
+                PlanConfigData config = configuration.Value;
+                Console.WriteLine("{0}: {1} ({2} referrers) {3}", configuration.Key, config.TotalPlanTime, config.ReferrerCount, config.ConfigFullPath);
                 foreach (PlanConfigData referrer in config.Referrers)
                 {
                     Console.WriteLine("     {0} {1}", referrer.ConfigId, referrer.ConfigFullPath);
@@ -257,11 +258,11 @@ namespace Microsoft.Build.BackEnd
         private void DetermineConfigsWithTheMostImmediateReferences()
         {
             Console.WriteLine("Projects with the most immediate children:");
-            List<int> projectsInOrderOfImmediateChildCount = new List<int>(_configIdToData.Keys);
-            projectsInOrderOfImmediateChildCount.Sort(delegate (int left, int right) { return -Comparer<int>.Default.Compare(_configIdToData[left].ReferencesCount, _configIdToData[right].ReferencesCount); });
-            foreach (int configId in projectsInOrderOfImmediateChildCount)
+            List<KeyValuePair<int, PlanConfigData>> projectsInOrderOfImmediateChildCount = new(_configIdToData);
+            projectsInOrderOfImmediateChildCount.Sort((left, right) => Comparer<int>.Default.Compare(right.Value.ReferencesCount, left.Value.ReferencesCount));
+            foreach (KeyValuePair<int, PlanConfigData> configuration in projectsInOrderOfImmediateChildCount)
             {
-                Console.WriteLine("{0}: {1} {2}", configId, _configIdToData[configId].ReferencesCount, _configIdToData[configId].ConfigFullPath);
+                Console.WriteLine("{0}: {1} {2}", configuration.Key, configuration.Value.ReferencesCount, configuration.Value.ConfigFullPath);
             }
 
             Console.WriteLine();

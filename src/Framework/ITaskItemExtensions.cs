@@ -39,26 +39,9 @@ namespace Microsoft.Build.Framework
             var list = new KeyValuePair<string, string>[customMetadata.Count];
             int i = 0;
 
-            foreach (string metadataName in customMetadata.Keys)
+            foreach (KeyValuePair<string, string> metadatum in customMetadata)
             {
-                string valueOrError;
-
-                try
-                {
-                    valueOrError = taskItem.GetMetadata(metadataName);
-                }
-                // Temporarily try catch all to mitigate frequent NullReferenceExceptions in
-                // the logging code until CopyOnWritePropertyDictionary is replaced with
-                // ImmutableDictionary. Calling into Debug.Fail to crash the process in case
-                // the exception occurres in Debug builds.
-                catch (Exception e)
-                {
-                    valueOrError = e.Message;
-                    Debug.Fail(e.ToString());
-                }
-
-                list[i] = new KeyValuePair<string, string>(metadataName, valueOrError);
-                i += 1;
+                list[i++] = new KeyValuePair<string, string>(metadatum.Key, metadatum.Value);
             }
 
             return list;
