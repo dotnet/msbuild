@@ -12,21 +12,92 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
+    /*public class FancyLoggerBufferLine
+    {
+        private static int Counter = 0;
+        public int Id;
+        public FancyLoggerBufferLine? NextLine;
+        public string Text = string.Empty;
+        private string _rawText = string.Empty;
+        public string RawText
+        {
+            get => _rawText;
+            set
+            {
+                _rawText = value;
+                if (Text.Length > Console.BufferWidth)
+                {
+                    Text = value.Substring(0, Console.BufferWidth);
+                }
+                else
+                {
+                    Text = value;
+                }
+            }
+        }
+        public FancyLoggerBufferLine()
+        {
+            Id = Counter++;
+            RawText = String.Empty;
+        }
+        public FancyLoggerBufferLine(string text)
+            : this()
+        {
+            RawText = text;
+        }
+    }*/
+
     public class FancyLoggerBufferLine
     {
         private static int Counter = 0;
         public int Id;
         public string Text;
+        public FancyLoggerBufferLine? NextLine;
+
+        private string _fullText;
+        public string FullText
+        {
+            get => _fullText;
+            set
+            {
+                // Assign value
+                _fullText = value;
+                // Delete next line if exists
+                if (NextLine is not null)
+                {
+                    FancyLoggerBuffer.DeleteLine(NextLine.Id);
+                    NextLine = null;
+                }
+                // If text overflows
+                if (value.Length > Console.BufferWidth)
+                {
+                    // Get breakpoints
+                    int breakpoint = ANSIBuilder.ANSIBreakpoint(value, Console.BufferWidth);
+                    // Text
+                    Text = value.Substring(0, breakpoint);
+                    // Next line
+                    if (breakpoint + 1 < value.Length)
+                    {
+                        NextLine = new FancyLoggerBufferLine(value.Substring(breakpoint + 1));
+                    }
+                }
+                else
+                {
+                    Text = value;
+                }
+            }
+        }
 
         public FancyLoggerBufferLine()
         {
             Id = Counter++;
-            Text = String.Empty;
+            Text = string.Empty;
+            _fullText = string.Empty;
         }
         public FancyLoggerBufferLine(string text)
             : this()
         {
-            Text = text;
+            FullText = text;
         }
     }
 
@@ -172,7 +243,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get line
             FancyLoggerBufferLine? line = GetLineById(lineId);
             if (line == null) return null;
-            line.Text = text;
+            line.FullText = text;
             // Return
             return line;
         }
