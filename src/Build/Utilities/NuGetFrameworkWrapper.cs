@@ -78,6 +78,10 @@ namespace Microsoft.Build.Evaluation
         public string GetTargetPlatformVersion(string tfm, int minVersionPartCount)
         {
             var version = PlatformVersionProperty.GetValue(Parse(tfm)) as Version;
+            if (version?.Major >= 5 && tfm.StartsWith("netcoreapp"))
+            {
+                throw new InternalErrorException($"`netcoreapp` was replaced with `net` since v5: https://learn.microsoft.com/en-us/dotnet/standard/frameworks#supported-target-frameworks. Use net{version.Major}.{version.Minor}."));
+            }
             return GetNonZeroVersionParts(version, minVersionPartCount);
         }
 
