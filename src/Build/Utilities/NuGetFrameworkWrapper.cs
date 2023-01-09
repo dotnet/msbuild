@@ -80,7 +80,7 @@ namespace Microsoft.Build.Evaluation
             var version = PlatformVersionProperty.GetValue(Parse(tfm)) as Version;
             if (version?.Major >= 5 && tfm.StartsWith("netcoreapp"))
             {
-                throw new InternalErrorException($"`netcoreapp` was replaced with `net` since v5: https://learn.microsoft.com/en-us/dotnet/standard/frameworks#supported-target-frameworks. Use net{version.Major}.{version.Minor}."));
+                throw new InternalErrorException($"`netcoreapp` was replaced with `net` since v5: https://learn.microsoft.com/en-us/dotnet/standard/frameworks#supported-target-frameworks. Use net{version.Major}.{version.Minor} instead of {tfm}."));
             }
             return GetNonZeroVersionParts(version, minVersionPartCount);
         }
