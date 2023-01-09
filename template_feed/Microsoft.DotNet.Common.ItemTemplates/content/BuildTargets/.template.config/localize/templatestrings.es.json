@@ -1,7 +1,7 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "MSBuild Directory.Build.props file",
-  "description": "An empty Directory.Build.props file which can be used to specify MSBuild properties for an entire folder",
-  "symbols/inherit/displayName": "inherit",
-  "symbols/inherit/description": "If true, adds an Import for any Directory.Build.props in the parent directory. Directory.Build.props don't inherit by default, so doing this allows you to build up a set of customizations folder-by-folder."
+  "name": "Archivo Directory.Build.targets de MSBuild",
+  "description": "Un archivo Directory.Build.targets vacío que se puede usar para especificar tareas y destinos de MSBuild para una carpeta completa",
+  "symbols/inherit/displayName": "Heredar",
+  "symbols/inherit/description": "Si es true, agrega una importación para el archivo Directory.Build.targets más cercano en la jerarquía de directorios del sistema de archivos. Directory.Build.targets no hereda de forma predeterminada, por lo que esto le permite crear un conjunto de personalizaciones carpeta por carpeta."
 }
