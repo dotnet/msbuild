@@ -310,7 +310,7 @@ namespace Microsoft.Build.Graph
         private static PropertyDictionary<ProjectPropertyInstance> GetGlobalPropertiesForItem(
             ProjectItemInstance projectReference,
             PropertyDictionary<ProjectPropertyInstance> requesterGlobalProperties,
-            bool DynamicPlatformEnabled,
+            bool dynamicPlatformEnabled,
             IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers = null)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectReference, nameof(projectReference));
