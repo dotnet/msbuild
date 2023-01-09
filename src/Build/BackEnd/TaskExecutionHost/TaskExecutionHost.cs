@@ -334,8 +334,6 @@ namespace Microsoft.Build.BackEnd
             var setParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             IDictionary<string, string> requiredParameters = GetNamesOfPropertiesWithRequiredAttribute();
 
-            IList<string> allowEmptyStringParameters = GetNamesOfPropertiesWithAllowEmptyStringAttribute();
-
             // look through all the attributes of the task element
             foreach (KeyValuePair<string, (string, ElementLocation)> parameter in parameters)
             {
@@ -344,7 +342,7 @@ namespace Microsoft.Build.BackEnd
 
                 try
                 {
-                    success = SetTaskParameter(parameter.Key, parameter.Value.Item1, parameter.Value.Item2, requiredParameters.ContainsKey(parameter.Key), allowEmptyStringParameters.Contains(parameter.Key), out taskParameterSet);
+                    success = SetTaskParameter(parameter.Key, parameter.Value.Item1, parameter.Value.Item2, requiredParameters.ContainsKey(parameter.Key), out taskParameterSet);
                 }
                 catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
                 {
@@ -1009,7 +1007,6 @@ namespace Microsoft.Build.BackEnd
             string parameterValue,
             ElementLocation parameterLocation,
             bool isRequired,
-            bool allowEmptyString,
             out bool parameterSet
         )
         {
@@ -1067,7 +1064,6 @@ namespace Microsoft.Build.BackEnd
                             parameterType,
                             parameterValue,
                             parameterLocation,
-                            allowEmptyString,
                             out parameterSet
                             );
                     }
@@ -1155,7 +1151,6 @@ namespace Microsoft.Build.BackEnd
             Type parameterType,
             string parameterValue,
             ElementLocation parameterLocation,
-            bool allowEmptyString,
             out bool taskParameterSet
         )
         {
@@ -1167,16 +1162,18 @@ namespace Microsoft.Build.BackEnd
             {
                 if (parameterType == typeof(ITaskItem))
                 {
-                    // We don't know how many items we're going to end up with, but we'll
+                    // We don't know how many items we're going to end up with, but we'll 
                     // keep adding them to this arraylist as we find them.
                     IList<TaskItem> finalTaskItems = _batchBucket.Expander.ExpandIntoTaskItemsLeaveEscaped(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
 
                     if (finalTaskItems.Count == 0)
                     {
                         success = true;
-                        if (allowEmptyString)
+                        var allowEmptyString = parameter.AllowEmptyString;
+                        string expanedParameterValue = _batchBucket.Expander.ExpandIntoStringLeaveEscaped(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
+                        if (allowEmptyString && string.IsNullOrEmpty(expanedParameterValue))
                         {
-                            success = SetTaskItemParameter(parameter, new TaskItem(parameterValue, parameterLocation.LocationString, allowEmptyString));
+                            success = SetTaskItemParameter(parameter, new TaskItem(expanedParameterValue, parameterLocation.File, allowEmptyString));
                             taskParameterSet = true;
                         }
                     }
@@ -1615,31 +1612,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return requiredParameters;
-        }
-
-        /// <summary>
-        /// Finds all the task properties that are allowEmptyString.
-        /// Returns them in a list.
-        /// </summary>
-        /// <returns>Gets a list of properties which are allowEmptyString.</returns>
-        private IList<string> GetNamesOfPropertiesWithAllowEmptyStringAttribute()
-        {
-            ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Expected taskFactoryWrapper to not be null");
-            IList<string> allowEmptyStringParameters = null;
-
-            try
-            {
-                allowEmptyStringParameters = _taskFactoryWrapper.GetNamesOfPropertiesWithAllowEmptyStringAttribute;
-            }
-            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
-            {
-                // Reflection related exception
-                _targetLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "AttributeTypeLoadError", _taskName, e.Message);
-
-                ProjectErrorUtilities.VerifyThrowInvalidProject(false, _taskLocation, "TaskDeclarationOrUsageError", _taskName);
-            }
-
-            return allowEmptyStringParameters;
         }
 
         /// <summary>
