@@ -19,8 +19,8 @@ public struct Registry
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
-    private Uri BaseUri { get; init; }
-    private string RegistryName => BaseUri.Host;
+    private readonly Uri BaseUri { get; init; }
+    private readonly string RegistryName => BaseUri.Host;
 
     public Registry(Uri baseUri)
     {
@@ -250,9 +250,9 @@ public struct Registry
         return false;
     }
 
-    private HttpClient _client;
+    private readonly HttpClient _client;
 
-    private HttpClient GetClient()
+    private readonly HttpClient GetClient()
     {
         return _client;
     }
