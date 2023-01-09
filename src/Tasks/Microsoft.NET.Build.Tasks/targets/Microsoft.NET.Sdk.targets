@@ -474,6 +474,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(UseSystemResourceKeys)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported"
+                                    Condition="'$(DynamicCodeSupport)' != ''"
+                                    Value="$(DynamicCodeSupport)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.BuiltInComInterop.IsSupported"
                                     Condition="'$(BuiltInComInteropSupport)' != ''"
                                     Value="$(BuiltInComInteropSupport)"

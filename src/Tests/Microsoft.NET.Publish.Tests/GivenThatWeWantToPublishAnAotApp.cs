@@ -17,6 +17,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.NET.Publish.Tests.PublishTestUtils;
@@ -703,6 +704,31 @@ namespace Microsoft.NET.Publish.Tests
                     .Should()
                     .Pass();
             }
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void It_builds_with_dynamiccodesupport_false_when_publishaot_true(string targetFramework)
+        {
+            var projectName = "DynamicCodeSupportFalseApp";
+            var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+            testProject.AdditionalProperties["PublishAot"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string outputDirectory = buildCommand.GetOutputDirectory(targetFramework: targetFramework).FullName;
+            string runtimeConfigFile = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            JToken configProperties = runtimeConfig["runtimeOptions"]["configProperties"];
+            configProperties["System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported"].Value<bool>()
+                .Should().BeFalse();
         }
 
         private void CheckIlcVersions(string projectPath, string targetFramework, string rid, string expectedVersion)

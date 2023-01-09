@@ -25,6 +25,7 @@
     <NullabilityInfoContextSupport>false</NullabilityInfoContextSupport>
     <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <DynamicCodeSupport>true</DynamicCodeSupport>
     <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
     <_EnableConsumingManagedCodeFromNativeHosting>false</_EnableConsumingManagedCodeFromNativeHosting>
     <EnableCppCLIHostActivation>false</EnableCppCLIHostActivation>
