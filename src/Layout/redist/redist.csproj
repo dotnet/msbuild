@@ -65,6 +65,9 @@
     <Content Include="trustedroots\codesignctl.pem">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="trustedroots\timestampctl.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <!-- We will reference newer analyzer packages that what can be referenced by the SDK we build with
