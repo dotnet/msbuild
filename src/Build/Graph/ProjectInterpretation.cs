@@ -324,7 +324,7 @@ namespace Microsoft.Build.Graph
 
             var globalPropertyParts = globalPropertyModifiers?.Aggregate(defaultParts, (currentProperties, modifier) => modifier(currentProperties, projectReference)) ?? defaultParts;
 
-            if (globalPropertyParts.AllEmpty() && !DynamicPlatformEnabled)
+            if (globalPropertyParts.AllEmpty() && !dynamicPlatformEnabled)
             {
                 return requesterGlobalProperties;
             }
