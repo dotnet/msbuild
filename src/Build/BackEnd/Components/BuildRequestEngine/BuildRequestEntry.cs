@@ -9,6 +9,7 @@ using Microsoft.Build.Execution;
 using System.Diagnostics;
 
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
+using System.Linq;
 
 #nullable disable
 
@@ -290,15 +291,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string[] GetActiveTargets()
         {
-            var activeTargets = new string[RequestConfiguration.ActivelyBuildingTargets.Count];
-
-            int index = 0;
-            foreach (string target in RequestConfiguration.ActivelyBuildingTargets.Keys)
-            {
-                activeTargets[index++] = target;
-            }
-
-            return activeTargets;
+            return RequestConfiguration.ActivelyBuildingTargets.Keys.ToArray();
         }
 
         /// <summary>
