@@ -3392,6 +3392,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // There should have been one warning about the exception.
             Assert.Equal(1, engine.Warnings);
+            engine.AssertLogContains("MSB3246");
+
+            // There should have been no ugly callstack dumped
+            engine.AssertLogDoesntContain("Microsoft.Build.UnitTests");
+
+            // But it should contain the message from the BadImageFormatException, something like
+            //     WARNING MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. The format of the file 'C:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\BadImage.dll' is invalid
+            engine.AssertLogContains("'C:\\WINNT\\Microsoft.NET\\Framework\\v2.0.MyVersion\\BadImage.dll'"); // just search for the un-localized part
         }
 
         /// <summary>
@@ -3429,6 +3437,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // There should have been no warning about the exception because it's only a dependency
             Assert.Equal(0, engine.Warnings);
+        
+            // There should have been no ugly callstack dumped
+            engine.AssertLogDoesntContain("Microsoft.Build.UnitTests");
         }
 
         /// <summary>

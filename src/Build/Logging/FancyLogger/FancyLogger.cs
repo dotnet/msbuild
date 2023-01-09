@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -10,17 +10,10 @@ using System.IO;
 namespace Microsoft.Build.Logging.FancyLogger
 {
     public class FancyLogger : ILogger
-    {
-        // TODO: Move somewhere else
-        public string GetUnambiguousPath(string path)
-        {
-            // Get last part of path
-            return Path.GetFileName(path);
-        }
+    {   
+        private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
 
-        public FancyLoggerNode root = new FancyLoggerNode(-1, FancyLoggerNodeType.None);
-
-        public Dictionary<int, FancyLoggerBufferLine> projectConsoleLines = new Dictionary<int, FancyLoggerBufferLine>();
+        private bool Succeeded;
 
         private float existingTasks = 1;
         private float completedTasks = 0;
@@ -40,12 +33,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Started
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
             eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
-            // eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
-            // eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
+            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
+            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
             // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
-            // eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
+            eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
             // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
             // Raised
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
@@ -61,6 +54,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
         void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
+            Succeeded = e.Succeeded;
             // Console.WriteLine(LoggerFormatting.Bold("[Build]") + "\t Finished");
         }
 
@@ -70,43 +64,52 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             // If id already exists...
-            if (projectConsoleLines.ContainsKey(id)) return;
-            // Create line
-            FancyLoggerBufferLine line = FancyLoggerBuffer.WriteNewLine(
-                ANSIBuilder.Alignment.SpaceBetween(
-                    $"{ANSIBuilder.Graphics.Spinner()} {ANSIBuilder.Formatting.Dim("Project - ")} {GetUnambiguousPath(e.ProjectFile!)}",
-                    "(5 targets completed)",
-                    Console.WindowWidth
-                )
-            );
-
-            projectConsoleLines.Add(id, line);
+            if (projects.ContainsKey(id)) return;
+            // Add project
+            FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
+            projects[id] = node;
+            // Log
+            node.Log();
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if(!projectConsoleLines.TryGetValue(id, out FancyLoggerBufferLine? line)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update line
-            FancyLoggerBuffer.UpdateLine(line.Id,
-                ANSIBuilder.Alignment.SpaceBetween(
-                    $"{ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green)} {ANSIBuilder.Formatting.Dim("Project - ")} {ANSIBuilder.Formatting.Color(GetUnambiguousPath(e.ProjectFile!), ANSIBuilder.Formatting.ForegroundColor.Green)}",
-                    "(5 targets completed)",
-                    Console.WindowWidth
-                )
-            );
+            node.Finished = true;
+            node.Log();
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.AddTarget(e);
+            node.Log();
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.FinishedTargets++;
+            node.Log();
         }
 
         // Task
         void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
         {
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.AddTask(e);
+            node.Log();
             existingTasks++;
         }
 
@@ -117,25 +120,50 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.AddMessage(e);
+            node.Log();
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
-            FancyLoggerBuffer.WriteNewLine("Warning");
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.AddWarning(e);
+            node.Log();
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
         {
-            // TODO: Try to redirect to stderr
-            FancyLoggerBuffer.WriteNewLine("Error");
+            // Get project id
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            // Update
+            node.AddError(e);
+            node.Log();
         }
 
 
-        public void Shutdown() {
-            // Keep open if autoscroll disabled (the user is reading info)
-            while (FancyLoggerBuffer.AutoScrollEnabled || !FancyLoggerBuffer.IsTerminated)
-            {
-            }
+        public void Shutdown()
+        {
             FancyLoggerBuffer.Terminate();
-            Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
+            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
+            Console.Clear();
+            // Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
+            if (Succeeded)
+            {
+                Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
+                Console.WriteLine("\tX Warning(s)");
+            }
+            else
+            {
+                Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
+                Console.WriteLine("\tX Warnings(s)");
+                Console.WriteLine("\tX Errors(s)");
+            }
         }
     }
 }
