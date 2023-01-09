@@ -29,10 +29,13 @@ public struct Registry
     }
 
     /// <summary>
-    /// The max chunk size for patch blob uploads. By default the size is 64 KB.
-    /// Amazon Elasic Container Registry (ECR) requires patch chunk size to be 5 MB except for the last chunk.
+    /// The max chunk size for patch blob uploads. By default the size is 5 MB.
     /// </summary>
-    public readonly int MaxChunkSizeBytes => IsAmazonECRRegistry ? 5248080 : 1024 * 64;
+    /// <remarks>
+    /// 5 MB is chosen because it's the limit that works with all registries we tested - 
+    /// notably Amazon Elastic Container Registry requires 5MB chunks for all but the last chunk.
+    /// </remarks>
+    public readonly int MaxChunkSizeBytes => 5 * 1024 * 1024;
 
     /// <summary>
     /// Check to see if the registry is for Amazon Elastic Container Registry (ECR).
