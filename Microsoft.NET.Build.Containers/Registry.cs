@@ -35,7 +35,7 @@ public struct Registry
     /// 5 MB is chosen because it's the limit that works with all registries we tested - 
     /// notably Amazon Elastic Container Registry requires 5MB chunks for all but the last chunk.
     /// </remarks>
-    public readonly int MaxChunkSizeBytes => 5 * 1024 * 1024;
+    public readonly int MaxChunkSizeBytes => 5248080; //5 * 1024 * 1024;
 
     /// <summary>
     /// Check to see if the registry is for Amazon Elastic Container Registry (ECR).
