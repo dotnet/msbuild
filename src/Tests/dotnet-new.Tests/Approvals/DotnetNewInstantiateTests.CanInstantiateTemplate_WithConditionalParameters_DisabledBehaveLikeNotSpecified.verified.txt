@@ -1,6 +1,6 @@
 ﻿
 // value of paramA: true
-// value of paramB: 
+// value of paramB: placeholderB
 
 // A is enabled
 
