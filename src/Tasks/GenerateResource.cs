@@ -23,9 +23,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+using System.Runtime.Serialization.Formatters.Binary;
 #endif
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 #if !FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Versioning;
 using System.Security;

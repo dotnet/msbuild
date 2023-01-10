@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+#if !BUILDINGAPPXTASKS && DEBUG
 using System.Resources;
 using System.Diagnostics;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.ComponentModel;

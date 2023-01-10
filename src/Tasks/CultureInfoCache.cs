@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+#if NET5_0_OR_GREATER
 using System.Linq;
 using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Shared;
 
 #nullable disable

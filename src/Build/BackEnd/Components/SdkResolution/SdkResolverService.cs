@@ -14,7 +14,6 @@ using System.Reflection;
 using Microsoft.Build.Eventing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 
 #nullable disable
 

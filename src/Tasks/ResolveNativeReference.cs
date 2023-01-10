@@ -5,7 +5,9 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
