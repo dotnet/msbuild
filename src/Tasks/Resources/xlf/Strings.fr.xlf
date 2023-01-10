@@ -201,11 +201,6 @@
         <target state="translated">Suppression de l'attribut de lecture seule de "{0}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="Copy.RetryingAsSymbolicLink">
-        <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
-        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
-        <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
-      </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
         <target state="translated">MSB3025: Le fichier source "{0}" est en fait un répertoire.  La tâche "Copy" ne prend pas en charge la copie des répertoires.</target>
@@ -1367,14 +1362,9 @@
         <note>{StrBegin="MSB3981: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
-        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
-        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
+        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' metadata set. It will be built without a specified platform.</source>
+        <target state="translated">MSB3982: EnableDynamicPlatformResolution a la valeur true, mais le projet référencé '{0}' n’a pas de métadonnées ’Platforms’ définies. Il sera généré sans une plateforme spécifiée.</target>
         <note>{StrBegin="MSB3982: "}</note>
-      </trans-unit>
-      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
-        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
-        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
-        <note />
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
         <source>ProjectReference and current project have the same platform.</source>
@@ -1557,11 +1547,6 @@
         <target state="translated">MSB3216: Impossible d'inscrire l'assembly "{0}", car l'accès est refusé. Assurez-vous d'exécuter l'application comme administrateur. {1}</target>
         <note>{StrBegin="MSB3216: "}</note>
       </trans-unit>
-      <trans-unit id="RemoveDir.EmptyPath">
-        <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
-        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
-        <note>{StrBegin="MSB3232: "}</note>
-      </trans-unit>
       <trans-unit id="RemoveDir.Error">
         <source>MSB3231: Unable to remove directory "{0}". {1}</source>
         <target state="translated">MSB3231: Impossible de supprimer le répertoire "{0}". {1}</target>
@@ -1616,13 +1601,6 @@
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">Emplacement d'AssemblyFoldersEx : "{0}"</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
-        <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
-        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</target>
-        <note>
-      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
-    </note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
@@ -2602,11 +2580,6 @@
         <target state="translated">Décompression du fichier "{0}" dans "{1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="Unzip.ZipSlipExploit">
-        <source>Entry is outside the target directory: "{0}"</source>
-        <target state="new">Entry is outside the target directory: "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: "{1}" n'est pas une valeur valide pour le paramètre "{0}". Les valeurs valides sont : {2}</target>
@@ -3290,6 +3263,11 @@
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
         <source>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</source>
         <target state="translated">Le fichier config AssemblyFolder ('{0}') spécifié dans Microsoft.Common.CurrentVersion.targets est non valide. Erreur : {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Copy.ExactlyOneTypeOfLink">
+        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
+        <target state="translated">MSB3891: "{0}" et "{1}" ont été spécifiés dans le fichier projet. Choisissez l'un ou l'autre.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
