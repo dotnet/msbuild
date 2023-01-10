@@ -12,41 +12,6 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
-    /*public class FancyLoggerBufferLine
-    {
-        private static int Counter = 0;
-        public int Id;
-        public FancyLoggerBufferLine? NextLine;
-        public string Text = string.Empty;
-        private string _rawText = string.Empty;
-        public string RawText
-        {
-            get => _rawText;
-            set
-            {
-                _rawText = value;
-                if (Text.Length > Console.BufferWidth)
-                {
-                    Text = value.Substring(0, Console.BufferWidth);
-                }
-                else
-                {
-                    Text = value;
-                }
-            }
-        }
-        public FancyLoggerBufferLine()
-        {
-            Id = Counter++;
-            RawText = String.Empty;
-        }
-        public FancyLoggerBufferLine(string text)
-            : this()
-        {
-            RawText = text;
-        }
-    }*/
-
     public class FancyLoggerBufferLine
     {
         private static int Counter = 0;
@@ -78,7 +43,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                     // Next line
                     if (breakpoint + 1 < value.Length)
                     {
-                        NextLine = new FancyLoggerBufferLine(value.Substring(breakpoint + 1));
+                        NextLine = new FancyLoggerBufferLine(value.Substring(breakpoint));
                     }
                 }
                 else
@@ -98,6 +63,17 @@ namespace Microsoft.Build.Logging.FancyLogger
             : this()
         {
             FullText = text;
+        }
+
+        public List<FancyLoggerBufferLine> NextLines()
+        {
+            List<FancyLoggerBufferLine> results = new();
+            if (NextLine is not null)
+            {
+                results.Add(NextLine);
+                results.AddRange(NextLine.NextLines());
+            }
+            return results;
         }
     }
 
@@ -165,17 +141,30 @@ namespace Microsoft.Build.Logging.FancyLogger
                 new string('-', Console.BufferWidth) + '\n' + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             );
             // Write lines
+            // TODO: Update to make more efficient (store nextlines as lists instead of nested, add cache, etc)
+            List<FancyLoggerBufferLine> linesWithWrappings = GetLinesWithWrappings();
             for (int i = 0; i < Console.BufferHeight - 3; i++)
             {
                 int lineIndex = i + TopLineIndex;
                 Console.Write(
                     ANSIBuilder.Cursor.Position(i + 2, 0) +
                     ANSIBuilder.Eraser.LineCursorToEnd() + 
-                    (lineIndex < Lines.Count ? Lines[lineIndex].Text : String.Empty)
+                    (lineIndex < linesWithWrappings.Count ? linesWithWrappings[lineIndex].Text : String.Empty)
                 );
             }
         }
         #endregion
+
+        public static List<FancyLoggerBufferLine> GetLinesWithWrappings()
+        {
+            List<FancyLoggerBufferLine> result = new();
+            foreach (FancyLoggerBufferLine line in Lines)
+            {
+                result.Add(line);
+                result.AddRange(line.NextLines());
+            }
+            return result;
+        }
 
         #region Line identification
         public static int GetLineIndexById(int lineId)
@@ -202,15 +191,22 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
             return WriteNewLineAfter(lineId, line);
         }
-        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line)
+        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line, bool overrideOverflowLines = false)
         {
-            // Get line index
-            int lineIndex = GetLineIndexById(lineId);
-            if (lineIndex == -1) return null;
-            // Save top line
-            int topLineId = Lines[TopLineIndex].Id;
-            // Add
-            Lines.Insert(lineIndex + 1, line);
+            // Save top line (current if no lines)
+            int topLineId = Lines.Count > 0 ? Lines[TopLineIndex].Id : line.Id;
+            if (lineId != -1)
+            {
+                // Get line index
+                int lineIndex = GetLineIndexById(lineId);
+                if (lineIndex == -1) return null;
+                // Get line end index
+                Lines.Insert(lineIndex, line);
+            }
+            else
+            {
+                Lines.Add(line);
+            }
             // Get updated top line index
             TopLineIndex = GetLineIndexById(topLineId);
             // Return
@@ -224,17 +220,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
         public static FancyLoggerBufferLine? WriteNewLine(FancyLoggerBufferLine line)
         {
-            // Get last id
-            if (Lines.Count > 0)
-            {
-                int lineId = Lines.Last().Id;
-                return WriteNewLineAfter(lineId, line);
-            }
-            else
-            {
-                Lines.Add(line);
-                return line;
-            }
+            return WriteNewLineAfter(Lines.Count > 0 ? Lines.Last().Id : -1, line);
         }
 
         // Update line

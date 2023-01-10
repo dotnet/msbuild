@@ -49,6 +49,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
+            // TODO: Fix. First line does not appear at top. Leaving empty line for now
+            FancyLoggerBuffer.WriteNewLine("");
         }
 
         // Build

@@ -74,7 +74,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 string leftNoFormatString = ANSIRemove(leftText);
                 string rightNoFormatString = ANSIRemove(rightText);
                 if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth) return leftText + rightText;
-                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length) - 1;
+                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length);
                 result += leftText;
                 result += new string(' ', space);
                 result += rightText;
