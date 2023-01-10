@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Interface",
-  "description": "Creates a new C# interface"
+  "name": "Rozhraní",
+  "description": "Vytvoří nové rozhraní jazyka C#."
 }

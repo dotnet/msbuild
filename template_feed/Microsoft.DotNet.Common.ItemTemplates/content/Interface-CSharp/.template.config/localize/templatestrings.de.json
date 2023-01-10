@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Interface",
-  "description": "Creates a new C# interface"
+  "name": "Schnittstelle",
+  "description": "Erstellt eine neue C#-Schnittstelle"
 }
