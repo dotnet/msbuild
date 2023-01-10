@@ -195,5 +195,17 @@ namespace Microsoft.NET.TestFramework
             string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "obj", configuration, targetFramework, runtimeIdentifier);
             return output;
         }
+
+        public string GetPackageDirectory(string configuration = "Debug")
+        {
+            if (UsesArtifactsFolder())
+            {
+                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "artifacts", "package", configuration.ToLowerInvariant());
+            }
+            else
+            {
+                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration);
+            }
+        }
     }
 }

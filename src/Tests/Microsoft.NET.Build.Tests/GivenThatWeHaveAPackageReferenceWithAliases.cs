@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
         public GivenThatWeHaveAPackageReferenceWithAliases(ITestOutputHelper log) : base(log)
         { }
 
-        [RequiresMSBuildVersionFact("16.8.0", Skip = "https://github.com/NuGet/Home/issues/12323")]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithPackageReferencesWithConflictingTypes()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [RequiresMSBuildVersionFact("16.8.0", Skip = "https://github.com/NuGet/Home/issues/12323")]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithMultiplePackageReferencesWithAliases()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [RequiresMSBuildVersionFact("16.8.0", Skip = "https://github.com/NuGet/Home/issues/12323")]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithAPackageReferenceWithMultipleAliases()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
@@ -154,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
         private TestPackageReference GetPackageReference(string targetFramework, string packageName, string projectFileContent, [CallerMemberName] string callingMethod = "", string identifier = null)
         {
             var project = GetProject(targetFramework, packageName, projectFileContent);
-            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier).TestRoot, packageName);
+            var packCommand = new PackCommand(_testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier));
 
             packCommand
                 .Execute()

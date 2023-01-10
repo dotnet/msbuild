@@ -105,6 +105,17 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
+        public DirectoryInfo GetPackageDirectory(string configuration = "Debug")
+        {
+            if (TestAsset != null)
+            {
+                return new DirectoryInfo(OutputPathCalculator.FromTestAsset(ProjectFile, TestAsset).GetPackageDirectory(configuration));
+            }
+
+            string output = Path.Combine(ProjectRootPath, "bin", configuration);
+            return new DirectoryInfo(output);
+        }
+
         public virtual DirectoryInfo GetNonSDKOutputDirectory(string configuration = "Debug")
         {
             configuration = configuration ?? string.Empty;

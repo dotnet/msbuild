@@ -62,7 +62,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Set the package output path (for nuget pack target) now, before the TargetFramework is appended -->
   <PropertyGroup Condition="'$(PackageOutputPath)' == ''">
     <PackageOutputPath Condition="'$(UseArtifactsOutput)' != 'true'">$(OutputPath)</PackageOutputPath>
-    <PackageOutputPath Condition="'$(UseArtifactsOutput)' == 'true'">$(BaseArtifactsPath)\package\</PackageOutputPath>
+    <PackageOutputPath Condition="'$(UseArtifactsOutput)' == 'true'">$(BaseArtifactsPath)\package\$(Configuration.ToLowerInvariant())\</PackageOutputPath>
   </PropertyGroup>
 
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
@@ -100,15 +100,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
     <_ArtifactPivots>$(Configuration.ToLowerInvariant())</_ArtifactPivots>
 
-    <!-- Check if TargetFramework is a global property by trying to overwrite it -->
-    <_TargetFrameworkBackup>$(TargetFramework)</_TargetFrameworkBackup>
-    <TargetFramework></TargetFramework>
-    <TargetFrameworkIsGlobal>false</TargetFrameworkIsGlobal>
-    <TargetFrameworkIsGlobal Condition="'$(TargetFramework)' == '$(_TargetFrameworkBackup)'">true</TargetFrameworkIsGlobal>
-    <TargetFramework>$(_TargetFrameworkBackup)</TargetFramework>
-
-    <_ArtifactPivots Condition="'$(TargetFrameworks)' != '' Or
-                                '$(TargetFrameworkIsGlobal)' == 'true'"
+    <!-- Per the design, we should include the TargetFramework in the pivots if TargetFrameworks is defined, or if TargetFramework is a global property.
+         However, basing this on whether TargetFramework is a global property currently breaks "dotnet pack": https://github.com/NuGet/Home/issues/12323
+         Because of this, for now we will only include the TargetFramework in the pivots if TargetFrameworks is defined, and won't look at whether
+         TargetFramework is a global property or not. -->
+    <_ArtifactPivots Condition="'$(TargetFrameworks)' != ''"
                      >$(_ArtifactPivots)_$(TargetFramework.ToLowerInvariant())</_ArtifactPivots>
 
     <!-- This targets file is evaluated before RuntimeIdentifierInference.targets, so this will only include the

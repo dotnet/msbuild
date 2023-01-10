@@ -712,7 +712,7 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.NETCore.App");
         }
 
-        [Fact(Skip = "https://github.com/NuGet/Home/issues/12323")]
+        [Fact]
         public void TransitiveFrameworkReferenceFromPackageReference()
         {
             var referencedPackage = new TestProject()
@@ -724,13 +724,13 @@ namespace FrameworkReferenceTest
 
             var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage);
 
-            var packCommand = new PackCommand(Log, packageAsset.TestRoot, referencedPackage.Name);
+            var packCommand = new PackCommand(packageAsset);
 
             packCommand.Execute()
                 .Should()
                 .Pass();
 
-            var nupkgFolder = packCommand.GetOutputDirectory(null);
+            var nupkgFolder = packCommand.GetPackageDirectory();
 
             var testProject = new TestProject()
             {
