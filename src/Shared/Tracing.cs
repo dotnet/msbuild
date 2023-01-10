@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+#if DEBUG
 using System.Reflection;
+#endif
 
 #nullable disable
 

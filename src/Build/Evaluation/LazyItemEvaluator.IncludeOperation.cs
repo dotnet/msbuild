@@ -6,7 +6,6 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis.Collections;
 using System;
 using System.Collections.Generic;

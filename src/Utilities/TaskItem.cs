@@ -5,9 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security;
 #if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
+using System.Security;
 #endif
 
 using Microsoft.Build.Framework;
