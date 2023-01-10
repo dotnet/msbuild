@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Record",
-  "description": "Creates a new C# record"
+  "name": "Kayıt",
+  "description": "Yeni bir C# kaydı oluşturur"
 }

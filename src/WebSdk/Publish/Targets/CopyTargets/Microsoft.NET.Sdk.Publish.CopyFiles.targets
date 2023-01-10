@@ -20,6 +20,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _CopyFilesToPublishIntermediateOutputPath;
       _CopyAspNetCoreFilesToIntermediateOutputPath;
       _CopyWebJobFilesToIntermediateOutputPath;
+      _CopyConsoleFilesToIntermediateOutputPath;
     </_DotNetPublishCopyFiles>
   </PropertyGroup>
 
@@ -90,7 +91,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
   </Target>
 
-   <!--********************************************************************-->
+  <!--********************************************************************-->
   <!-- Target _CopyWebJobFilesToIntermediateOutputPath -->
   <!--********************************************************************-->
   <PropertyGroup>
@@ -112,6 +113,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_PrepareForWebJobPublish">
     <PropertyGroup>
       <PublishDir>$(PublishIntermediateOutputPath)\app_data\Jobs\$(WebJobType)\$(WebJobName)\</PublishDir>
+      <Configuration>$(PublishConfiguration)</Configuration>
+    </PropertyGroup>
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- Target _CopyConsoleFilesToIntermediateOutputPath -->
+  <!--********************************************************************-->
+  <PropertyGroup>
+    <_CopyConsoleFilesToIntermediateOutputPathDependsOn>
+      $(_CopyConsoleFilesToIntermediateOutputPathDependsOn);
+      _PrepareForConsolePublish;
+      Publish;
+    </_CopyConsoleFilesToIntermediateOutputPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_CopyConsoleFilesToIntermediateOutputPath"
+    Condition="'$(_PublishProjectType)' == 'Console'"
+    DependsOnTargets="$(_CopyConsoleFilesToIntermediateOutputPathDependsOn)">
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- Target _PrepareForConsolePublish -->
+  <!--********************************************************************-->
+  <Target Name="_PrepareForConsolePublish">
+    <PropertyGroup>
+      <PublishDir>$(PublishIntermediateOutputPath)</PublishDir>
       <Configuration>$(PublishConfiguration)</Configuration>
     </PropertyGroup>
   </Target>

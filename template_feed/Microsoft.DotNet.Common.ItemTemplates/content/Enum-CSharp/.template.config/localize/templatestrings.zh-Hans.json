@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Enum",
-  "description": "Creates a new C# enum"
+  "name": "枚举",
+  "description": "创建新的 C# 枚举"
 }

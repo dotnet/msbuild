@@ -1,5 +1,5 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Record",
-  "description": "Creates a new C# record"
+  "name": "レコード",
+  "description": "新しい C# レコードを作成します"
 }
