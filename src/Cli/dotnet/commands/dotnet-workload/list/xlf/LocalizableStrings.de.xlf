@@ -17,9 +17,9 @@
         <target state="translated">Verwenden Sie „dotnet workload search“, um zusätzliche zu installierende Workloads zu finden.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">Dieser Befehl führt nur Workloads auf, die über „dotnet workload install“ in dieser SDK-Version installiert wurden, und nicht die Workloads, die über Visual Studio installiert wurden.</target>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">Installationsquelle</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

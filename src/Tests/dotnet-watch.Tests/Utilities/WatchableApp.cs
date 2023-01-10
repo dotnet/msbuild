@@ -1,10 +1,11 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -18,8 +19,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private const string StartedMessage = "Started";
         private const string ExitingMessage = "Exiting";
-        private const string WatchExitedMessage = "watch : Exited";
-        private const string WaitingForFileChangeMessage = "watch : Waiting for a file to change";
+        private const string WatchStartedMessage = "dotnet watch 🚀 Started";
+        private const string WatchExitedMessage = "dotnet watch ⌚ Exited";
+        private const string WaitingForFileChangeMessage = "dotnet watch ⏳ Waiting for a file to change";
+        private const string WatchFileChanged = "dotnet watch ⌚ File changed:";
 
         private readonly ITestOutputHelper _logger;
         private bool _prepared;
@@ -38,6 +41,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public string SourceDirectory { get; }
 
+        public string WorkingDirectory { get; set; }
+
         public Task HasRestarted()
             => HasRestarted(DefaultMessageTimeOut);
 
@@ -53,6 +58,11 @@ namespace Microsoft.DotNet.Watcher.Tools
         public Task IsWaitingForFileChange()
         {
             return Process.GetOutputLineStartsWithAsync(WaitingForFileChangeMessage, DefaultMessageTimeOut);
+        }
+
+        public Task HasFileChanged()
+        {
+            return Process.GetOutputLineStartsWithAsync(WatchFileChanged, DefaultMessageTimeOut);
         }
 
         public bool UsePollingWatcher { get; set; }
@@ -76,7 +86,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var commandSpec = new DotnetCommand(_logger, args.ToArray())
             {
-                WorkingDirectory = SourceDirectory,
+                WorkingDirectory = WorkingDirectory ?? SourceDirectory,
             };
             commandSpec.WithEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "true");
             commandSpec.WithEnvironmentVariable("__DOTNET_WATCH_RUNNING_AS_TEST", "true");
@@ -115,7 +125,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             // Make this timeout long because it depends much on the MSBuild compilation speed.
             // Slow machines may take a bit to compile and boot test apps
-            await Process.GetOutputLineAsync(StartedMessage, TimeSpan.FromMinutes(2));
+            await Process.GetOutputLineAsync(WatchStartedMessage, TimeSpan.FromMinutes(2));
         }
 
         public void Dispose()

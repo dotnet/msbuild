@@ -46,11 +46,10 @@ namespace Microsoft.DotNet.Cli
 
         public static RestoreActionConfig ToRestoreActionConfig(this ParseResult parseResult)
         {
-            return new RestoreActionConfig(
-                DisableParallel: parseResult.HasOption(DisableParallelOption) ? parseResult.ValueForOption<bool>(DisableParallelOption) : parseResult.ValueForOption<bool>(HiddenDisableParallelOption),
-                NoCache: parseResult.HasOption(NoCacheOption) ? parseResult.ValueForOption<bool>(NoCacheOption) : parseResult.ValueForOption<bool>(HiddenNoCacheOption),
-                IgnoreFailedSources: parseResult.HasOption(IgnoreFailedSourcesOption) ? parseResult.ValueForOption<bool>(IgnoreFailedSourcesOption) : parseResult.ValueForOption<bool>(HiddenIgnoreFailedSourcesOption),
-                Interactive: parseResult.HasOption(InteractiveRestoreOption) ? parseResult.ValueForOption<bool>(InteractiveRestoreOption) : parseResult.ValueForOption<bool>(HiddenInteractiveRestoreOption));
+            return new RestoreActionConfig(DisableParallel: parseResult.GetValueForOption(DisableParallelOption),
+                NoCache: parseResult.GetValueForOption(NoCacheOption),
+                IgnoreFailedSources: parseResult.GetValueForOption(IgnoreFailedSourcesOption),
+                Interactive: parseResult.GetValueForOption(InteractiveRestoreOption));
         }
 
         public static void AddWorkloadCommandNuGetRestoreActionConfigOptions(this Command command, bool Hide = false)

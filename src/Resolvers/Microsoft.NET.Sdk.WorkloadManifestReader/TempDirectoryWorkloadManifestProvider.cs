@@ -23,7 +23,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _sdkVersionBand = sdkVersion;
         }
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)>
+        public IEnumerable<ReadableWorkloadManifest>
             GetManifests()
         {
             foreach (var workloadManifestDirectory in GetManifestDirectories())
@@ -37,7 +37,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     manifestId = manifestId.Substring(0, index);
                 }
 
-                yield return (
+                yield return new(
                     manifestId,
                     workloadManifestPath,
                     () => File.OpenRead(workloadManifestPath),

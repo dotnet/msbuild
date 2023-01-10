@@ -43,12 +43,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm-minimal.dll")).Should().Exist();
         }
 
-        [Fact]
-        public void Build_Works()
+        [Theory]
+        [InlineData("blazor")]
+        [InlineData("blazor spaces")]
+        public void Build_Works(string identifier)
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName, identifier: identifier);
 
             var buildCommand = new BuildCommand(testInstance, "blazorwasm");
             buildCommand.Execute()

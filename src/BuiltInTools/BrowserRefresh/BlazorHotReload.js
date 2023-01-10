@@ -8,7 +8,7 @@ async function receiveHotReloadAsync() {
   if (cache) {
     headers = { 'if-none-match' : cache.etag };
   }
-  const response = await fetch('_framework/blazor-hotreload', { headers });
+  const response = await fetch('/_framework/blazor-hotreload', { headers });
   if (response.status === 200) {
     const deltas = await response.json();
     if (deltas) {

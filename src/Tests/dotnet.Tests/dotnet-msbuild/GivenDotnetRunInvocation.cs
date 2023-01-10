@@ -4,9 +4,11 @@
 using FluentAssertions;
 using Xunit;
 using Microsoft.DotNet.Tools.Run;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetRunInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private static readonly string WorkingDirectory =

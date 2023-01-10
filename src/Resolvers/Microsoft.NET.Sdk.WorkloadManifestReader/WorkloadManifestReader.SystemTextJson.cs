@@ -13,7 +13,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class WorkloadManifestReader
     {
-        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, Stream? localizationStream, string? informationalPath = null)
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, Stream? localizationStream, string manifestPath)
         {
             var readerOptions = new JsonReaderOptions
             {
@@ -24,7 +24,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             var localizationCatalog = ReadLocalizationCatalog(localizationStream, readerOptions);
             var manifestReader = new Utf8JsonStreamReader(manifestStream, readerOptions);
 
-            return ReadWorkloadManifest(manifestId, informationalPath, localizationCatalog, ref manifestReader);
+            return ReadWorkloadManifest(manifestId, manifestPath, localizationCatalog, ref manifestReader);
         }
 
         private static LocalizationCatalog? ReadLocalizationCatalog(Stream? localizationStream, JsonReaderOptions readerOptions)

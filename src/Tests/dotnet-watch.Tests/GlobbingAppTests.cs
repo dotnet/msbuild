@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -47,6 +47,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var programCs = File.ReadAllText(fileToChange);
             File.WriteAllText(fileToChange, programCs);
 
+            await app.HasFileChanged().TimeoutAfter(DefaultTimeout);
             await app.HasRestarted().TimeoutAfter(DefaultTimeout);
             types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
             Assert.Equal(2, types);
@@ -128,9 +129,9 @@ namespace Microsoft.DotNet.Watcher.Tools
             var changedFile = Path.Combine(app.SourceDirectory, "exclude", "Baz.cs");
             File.WriteAllText(changedFile, "");
 
-            var restart = app.HasRestarted();
-            var finished = await Task.WhenAny(Task.Delay(TimeSpan.FromSeconds(5)), restart);
-            Assert.NotSame(restart, finished);
+            var fileChanged = app.HasFileChanged();
+            var finished = await Task.WhenAny(Task.Delay(TimeSpan.FromSeconds(5)), fileChanged);
+            Assert.NotSame(fileChanged, finished);
         }
 
         [Fact]

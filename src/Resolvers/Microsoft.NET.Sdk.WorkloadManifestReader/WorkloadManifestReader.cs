@@ -17,8 +17,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class WorkloadManifestReader
     {
-        public static WorkloadManifest ReadWorkloadManifest(string manifestId, System.IO.Stream manifestStream, string? informationalPath = null)
-            => ReadWorkloadManifest(manifestId, manifestStream, null, informationalPath);
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, System.IO.Stream manifestStream, string manifestPath)
+            => ReadWorkloadManifest(manifestId, manifestStream, null, manifestPath);
 
         private static void ConsumeToken(ref Utf8JsonStreamReader reader, JsonTokenType expected)
         {
@@ -85,7 +85,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             => throw new WorkloadManifestFormatException(Strings.DuplicateKeyAtOffset, key?.ToString() ?? throw new ArgumentNullException (nameof(key)), reader.TokenStartIndex);
 
         private static WorkloadManifest ReadWorkloadManifest(
-            string id, string? informationalPath,
+            string id, string manifestPath,
             LocalizationCatalog? localizationCatalog,
             ref Utf8JsonStreamReader reader)
         {
@@ -180,7 +180,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             id,
                             version,
                             description,
-                            informationalPath,
+                            manifestPath,
                             workloads ?? new Dictionary<WorkloadId, BaseWorkloadDefinition> (),
                             packs ?? new Dictionary<WorkloadPackId, WorkloadPack> (),
                             dependsOn

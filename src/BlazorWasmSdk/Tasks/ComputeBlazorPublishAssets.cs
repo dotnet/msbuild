@@ -171,7 +171,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                             nativeStaticWebAssets.Add(newAsset);
                             filesToRemove.Add(existing);
                             updateMap.Add(asset.ItemSpec, newAsset);
-                            Log.LogMessage("Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
+                            Log.LogMessage(MessageImportance.Low, "Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
                         }
                         else
                         {
@@ -197,12 +197,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         newDotNetJs.SetMetadata("RelativePath", $"_framework/{$"dotnet.{DotNetJsVersion}.{FileHasher.GetFileHash(aotDotNetJs.ItemSpec)}.js"}");
 
                         updateMap.Add(asset.ItemSpec, newDotNetJs);
-                        Log.LogMessage("Replacing asset '{0}' with AoT version '{1}'", asset.ItemSpec, newDotNetJs.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Replacing asset '{0}' with AoT version '{1}'", asset.ItemSpec, newDotNetJs.ItemSpec);
                     }
                     else
                     {
                         newDotNetJs = new TaskItem(asset);
-                        Log.LogMessage("Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
                     }
 
                     ApplyPublishProperties(newDotNetJs);
@@ -223,12 +223,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         newDotNetWasm = new TaskItem(Path.GetFullPath(aotDotNetWasm.ItemSpec), asset.CloneCustomMetadata());
                         newDotNetWasm.SetMetadata("OriginalItemSpec", aotDotNetWasm.ItemSpec);
                         updateMap.Add(asset.ItemSpec, newDotNetWasm);
-                        Log.LogMessage("Replacing asset '{0}' with AoT version '{1}'", asset.ItemSpec, newDotNetWasm.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Replacing asset '{0}' with AoT version '{1}'", asset.ItemSpec, newDotNetWasm.ItemSpec);
                     }
                     else
                     {
                         newDotNetWasm = new TaskItem(asset);
-                        Log.LogMessage("Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
                     }
 
                     ApplyPublishProperties(newDotNetWasm);
@@ -282,7 +282,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         symbolStaticWebAssets.Add(newAsset);
                         updateMap.Add(newAsset.ItemSpec, newAsset);
                         filesToRemove.Add(existing);
-                        Log.LogMessage("Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
                     }
                     else
                     {
@@ -377,13 +377,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         {
                             newAsemblyAsset = new TaskItem(linked.GetMetadata("FullPath"), asset.CloneCustomMetadata());
                             newAsemblyAsset.SetMetadata("OriginalItemSpec", linked.ItemSpec);
-                            Log.LogMessage("Replacing asset '{0}' with linked version '{1}'",
+                            Log.LogMessage(MessageImportance.Low, "Replacing asset '{0}' with linked version '{1}'",
                                 asset.ItemSpec,
                                 newAsemblyAsset.ItemSpec);
                         }
                         else
                         {
-                            Log.LogMessage("Linked asset not found for asset '{0}'", asset.ItemSpec);
+                            Log.LogMessage(MessageImportance.Low, "Linked asset not found for asset '{0}'", asset.ItemSpec);
                             newAsemblyAsset = new TaskItem(asset);
                         }
                         ApplyPublishProperties(newAsemblyAsset);
@@ -395,7 +395,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         var dependentAsset = new TaskItem(asset);
                         ApplyPublishProperties(dependentAsset);
                         UpdateRelatedAssetProperty(asset, dependentAsset, updatedAssetsMap);
-                        Log.LogMessage("Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
 
                         updatedAssetsMap.Add(asset.ItemSpec, dependentAsset);
                         break;
@@ -420,14 +420,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 {
                     if (!updatedAssets.ContainsKey(relatedAsset))
                     {
-                        Log.LogMessage("Related assembly for '{0}' was not updated and the compressed asset can be reused.", relatedAsset);
+                        Log.LogMessage(MessageImportance.Low, "Related assembly for '{0}' was not updated and the compressed asset can be reused.", relatedAsset);
                         var newCompressedAsset = new TaskItem(compressedAsset);
                         ApplyPublishProperties(newCompressedAsset);
                         additionalAssetsToUpdate.Add(newCompressedAsset);
                     }
                     else
                     {
-                        Log.LogMessage("Related assembly for '{0}' was updated and the compressed asset will be discarded.", relatedAsset);
+                        Log.LogMessage(MessageImportance.Low, "Related assembly for '{0}' was updated and the compressed asset will be discarded.", relatedAsset);
                     }
 
                     processed.Add(kvp.Key);
@@ -525,14 +525,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             {
                 if (ComputeBlazorBuildAssets.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
                 {
-                    Log.LogMessage("Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
+                    Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                     if (!resolvedFilesToPublishToRemove.ContainsKey(candidate.ItemSpec))
                     {
                         resolvedFilesToPublishToRemove.Add(candidate.ItemSpec, candidate);
                     }
                     else
                     {
-                        Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
                     }
                     continue;
                 }
@@ -552,7 +552,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         }
                         else
                         {
-                            Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                            Log.LogMessage(MessageImportance.Low, "Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
                         }
                         continue;
                     }
@@ -564,7 +564,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     }
                     else
                     {
-                        Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
                     }
 
                     continue;
@@ -579,7 +579,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     }
                     else
                     {
-                        Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
                     }
 
                     continue;
@@ -596,7 +596,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     }
                     else
                     {
-                        Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
                     }
                     continue;
                 }

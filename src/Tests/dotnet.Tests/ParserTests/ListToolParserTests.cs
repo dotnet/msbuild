@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool list -g");
 
-            result.ValueForOption<bool>(ToolListCommandParser.GlobalOption).Should().Be(true);
+            result.GetValueForOption<bool>(ToolListCommandParser.GlobalOption).Should().Be(true);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool list --local");
 
-            result.ValueForOption<bool>(ToolListCommandParser.LocalOption).Should().Be(true);
+            result.GetValueForOption<bool>(ToolListCommandParser.LocalOption).Should().Be(true);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool list --tool-path C:\Tools ");
 
-            result.ValueForOption<string>(ToolListCommandParser.ToolPathOption).Should().Be(@"C:\Tools");
+            result.GetValueForOption<string>(ToolListCommandParser.ToolPathOption).Should().Be(@"C:\Tools");
         }
     }
 }

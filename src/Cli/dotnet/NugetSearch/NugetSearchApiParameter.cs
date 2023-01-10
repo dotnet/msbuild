@@ -29,11 +29,11 @@ namespace Microsoft.DotNet.NugetSearch
 
         public NugetSearchApiParameter(ParseResult parseResult)
         {
-            var searchTerm = parseResult.ValueForArgument<string>(ToolSearchCommandParser.SearchTermArgument);
+            var searchTerm = parseResult.GetValueForArgument(ToolSearchCommandParser.SearchTermArgument);
 
             var skip = GetParsedResultAsInt(parseResult, ToolSearchCommandParser.SkipOption);
             var take = GetParsedResultAsInt(parseResult, ToolSearchCommandParser.TakeOption);
-            var prerelease = parseResult.ValueForOption<bool>(ToolSearchCommandParser.PrereleaseOption);
+            var prerelease = parseResult.GetValueForOption(ToolSearchCommandParser.PrereleaseOption);
 
             SearchTerm = searchTerm;
             Skip = skip;
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.NugetSearch
 
         private static int? GetParsedResultAsInt(ParseResult parseResult, Option<string> alias)
         {
-            var valueFromParser = parseResult.ValueForOption<string>(alias);
+            var valueFromParser = parseResult.GetValueForOption(alias);
             if (string.IsNullOrWhiteSpace(valueFromParser))
             {
                 return null;

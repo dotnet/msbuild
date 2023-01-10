@@ -82,6 +82,58 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Errors.Should().BeNullOrEmpty();
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void ItUsesProjectDirectoryIfSolutionFilePathIsNullOrWhitespace(string solutionFilePath)
+        {
+            const string version = "99.0.0";
+
+            var environment = new TestEnvironment(_testAssetsManager, identifier: solutionFilePath ?? "NULL");
+            environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", version);
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, version),
+                new MockContext { ProjectFileDirectory = environment.TestDirectory, SolutionFilePath = solutionFilePath },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().StartWith(environment.TestDirectory.FullName);
+            result.AdditionalPaths.Should().BeNull();
+            result.Version.Should().Be(version);
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
+        [Theory]
+        [InlineData(null, null)]
+        [InlineData("", null)]
+        [InlineData("", "")]
+        [InlineData(null, "")]
+        public void ItUsesCurrentDirectoryIfSolutionFilePathAndProjectFilePathIsNullOrWhitespace(string solutionFilePath, string projectFilePath)
+        {
+            const string version = "99.0.0";
+
+            var environment = new TestEnvironment(_testAssetsManager, identifier: $"{solutionFilePath ?? "NULL"}-{projectFilePath ?? "NULL"}");
+            environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", version);
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, version),
+                new MockContext { ProjectFilePath = projectFilePath, SolutionFilePath = solutionFilePath },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().StartWith(environment.TestDirectory.FullName);
+            result.AdditionalPaths.Should().BeNull();
+            result.Version.Should().Be(version);
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
         [Fact]
         public void ItReturnsNullIfTheVersionFoundDoesNotSatisfyTheMinVersion()
         {

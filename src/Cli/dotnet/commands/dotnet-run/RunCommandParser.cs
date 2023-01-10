@@ -4,18 +4,23 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.DotNet.Tools.Run;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class RunCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-run";
+
         public static readonly Option<string> ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
 
         public static readonly Option<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
 
-        public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
+        public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption;
 
         public static readonly Option<string> ProjectOption = new Option<string>("--project", LocalizableStrings.CommandOptionProjectDescription);
 
@@ -29,21 +34,28 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.CommandOptionNoBuildDescription);
 
-        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption();
+        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
 
-        public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveMsBuildForwardOption();
+        public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveMsBuildForwardOption;
 
-        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption();
+        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption;
 
-        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
+        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
         {
-            var command = new Command("run", LocalizableStrings.AppFullName);
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new DocumentedCommand("run", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddOption(ConfigurationOption);
             command.AddOption(FrameworkOption);
-            command.AddOption(RuntimeOption);
+            command.AddOption(RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(ProjectOption);
             command.AddOption(PropertyOption);
             command.AddOption(LaunchProfileOption);
@@ -53,10 +65,12 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoRestoreOption);
             command.AddOption(SelfContainedOption);
             command.AddOption(NoSelfContainedOption);
-            command.AddOption(CommonOptions.VerbosityOption());
-            command.AddOption(CommonOptions.ArchitectureOption());
-            command.AddOption(CommonOptions.OperatingSystemOption());
+            command.AddOption(CommonOptions.VerbosityOption);
+            command.AddOption(CommonOptions.ArchitectureOption);
+            command.AddOption(CommonOptions.OperatingSystemOption);
             command.TreatUnmatchedTokensAsErrors = false;
+
+            command.SetHandler(RunCommand.Run);
 
             return command;
         }

@@ -3,9 +3,9 @@
 
 using System;
 
-namespace Microsoft.DotNet.Workloads.Workload.Install
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    internal struct ManifestId : IEquatable<ManifestId>, IComparable<ManifestId>
+    public struct ManifestId : IEquatable<ManifestId>, IComparable<ManifestId>
     {
         private string _id;
 
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return string.Compare(ToString(), other.ToString(), StringComparison.Ordinal);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is ManifestId id && Equals(id);
         }

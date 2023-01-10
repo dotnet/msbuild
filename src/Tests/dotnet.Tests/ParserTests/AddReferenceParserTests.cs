@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet add reference my.csproj");
 
-            result.ValueForArgument<string>(AddCommandParser.ProjectArgument)
+            result.GetValueForArgument<string>(AddCommandParser.ProjectArgument)
                 .Should()
                 .BeEquivalentTo(
                     PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet add reference my.csproj --interactive");
 
-            result.ValueForOption<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
+            result.GetValueForOption<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
                 .Should().BeTrue();
         }
 
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet add reference my.csproj");
 
-            result.ValueForOption<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
+            result.GetValueForOption<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
                 .Should().BeFalse();
         }
 

@@ -29,11 +29,6 @@ namespace Microsoft.DotNet.Installer.Windows
     internal class MsiPackageCache : InstallerBase
     {
         /// <summary>
-        /// <see langword="true"/> if the executing command has a valid AuthentiCode signature; <see langword="false"/> otherwise.
-        /// </summary>
-        private static readonly bool s_IsDotNetSigned;
-
-        /// <summary>
         /// Default inheritance to apply to directory ACLs.
         /// </summary>
         private static readonly InheritanceFlags s_DefaultInheritance = InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit;
@@ -54,7 +49,7 @@ namespace Microsoft.DotNet.Installer.Windows
         private static readonly SecurityIdentifier s_LocalSystemSid = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
 
         /// <summary>
-        /// SID mathcing built-in user accounts.
+        /// SID matching built-in user accounts.
         /// </summary>
         private static readonly SecurityIdentifier s_UsersSid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
 
@@ -88,7 +83,7 @@ namespace Microsoft.DotNet.Installer.Windows
         public readonly string PackageCacheRoot;
 
         public MsiPackageCache(InstallElevationContextBase elevationContext, ISetupLogger logger,
-            string packageCacheRoot = null) : base(elevationContext, logger)
+            bool verifySignatures, string packageCacheRoot = null) : base(elevationContext, logger, verifySignatures)
         {
             PackageCacheRoot = string.IsNullOrWhiteSpace(packageCacheRoot)
                 ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dotnet", "workloads")
@@ -240,10 +235,10 @@ namespace Microsoft.DotNet.Installer.Windows
         /// Verifies the AuthentiCode signature of an MSI package if the executing command itself is running
         /// from a signed module.
         /// </summary>
-        /// <param name="msiPath">The pathof the MSI to verify.</param>
+        /// <param name="msiPath">The path of the MSI to verify.</param>
         private void VerifyPackageSignature(string msiPath)
         {
-            if (s_IsDotNetSigned)
+            if (VerifySignatures)
             {
                 bool isAuthentiCodeSigned = AuthentiCode.IsSigned(msiPath);
 
@@ -292,7 +287,7 @@ namespace Microsoft.DotNet.Installer.Windows
             }
             else
             {
-                Log?.LogMessage($"Command is not signed, skipping signature verification for {msiPath}.");
+                Log?.LogMessage($"Skipping signature verification for {msiPath}.");
             }
         }
 
@@ -310,11 +305,6 @@ namespace Microsoft.DotNet.Installer.Windows
             directorySecurity.SetAccessRule(s_LocalSystemRule);
             directorySecurity.SetAccessRule(s_UsersRule);
             directoryInfo.SetAccessControl(directorySecurity);
-        }
-
-        static MsiPackageCache()
-        {
-            s_IsDotNetSigned = AuthentiCode.IsSigned(Assembly.GetExecutingAssembly().Location);
         }
     }
 }

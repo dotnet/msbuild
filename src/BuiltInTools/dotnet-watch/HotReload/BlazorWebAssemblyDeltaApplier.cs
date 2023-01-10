@@ -10,11 +10,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
-using Microsoft.Extensions.HotReload;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -22,6 +20,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     internal class BlazorWebAssemblyDeltaApplier : IDeltaApplier
     {
         private static Task<ImmutableArray<string>>? _cachedCapabilties;
+        private static readonly ImmutableArray<string> _baselineCapabilities = ImmutableArray.Create<string>("Baseline");
         private readonly IReporter _reporter;
         private int _sequenceId;
 
@@ -48,7 +47,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 if (context.BrowserRefreshServer is null)
                 {
-                    return ImmutableArray<string>.Empty;
+                    return _baselineCapabilities;
                 }
 
                 await context.BrowserRefreshServer.WaitForClientConnectionAsync(cancellationToken);
@@ -58,14 +57,14 @@ namespace Microsoft.DotNet.Watcher.Tools
                 var buffer = ArrayPool<byte>.Shared.Rent(32 * 1024);
                 try
                 {
-                    // We'll query the browser and ask it send capabilities. If the browser does not respond in 10s, we'll assume something is amiss and return
-                    // no capabilities. This should give you baseline hot reload capabilties.
+                    // We'll query the browser and ask it send capabilities. If the browser does not respond in a short duration, we'll assume something is amiss and return
+                    // baseline capabilities.
                     var response = await context.BrowserRefreshServer.ReceiveAsync(buffer, cancellationToken)
                         .AsTask()
-                        .WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+                        .WaitAsync(TimeSpan.FromSeconds(15), cancellationToken);
                     if (!response.HasValue || !response.Value.EndOfMessage || response.Value.MessageType != WebSocketMessageType.Text)
                     {
-                        return ImmutableArray<string>.Empty;
+                        return _baselineCapabilities;
                     }
 
                     var values = Encoding.UTF8.GetString(buffer.AsSpan(0, response.Value.Count));
@@ -83,7 +82,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     ArrayPool<byte>.Shared.Return(buffer);
                 }
 
-                return ImmutableArray<string>.Empty;
+                return _baselineCapabilities;
             }
         }
 

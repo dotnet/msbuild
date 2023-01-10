@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.CommandLine;
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         [Theory]
         [InlineData(new[] { "run" }, new[] { "run" })]
-        [InlineData(new[] { "run", "--", "subarg" }, new[] { "run", "--", "subarg" })]
+        [InlineData(new[] { "run", "--", "subarg" }, new[] { "run", "subarg" })]
         [InlineData(new[] { "--", "run", "--", "subarg" }, new[] { "run", "--", "subarg" })]
         [InlineData(new[] { "--unrecognized-arg" }, new[] { "--unrecognized-arg" })]
         public async Task ParsesRemainingArgs(string[] args, string[] expected)
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public async Task ShortFormForProjectArgumentPrintsWarning()
         {
             var reporter = new Mock<Extensions.Tools.Internal.IReporter>();
-            reporter.Setup(r => r.Warn(Resources.Warning_ProjectAbbreviationDeprecated)).Verifiable();
+            reporter.Setup(r => r.Warn(Resources.Warning_ProjectAbbreviationDeprecated, It.IsAny<string>())).Verifiable();
             CommandLineOptions options = null;
             var rootCommand = Program.CreateRootCommand(c => { options = c; return Task.FromResult(0); }, reporter.Object);
 
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await rootCommand.InvokeAsync(new[] { "--project", "MyProject.csproj" }, _console);
 
-            reporter.Verify(r => r.Warn(It.IsAny<string>()), Times.Never());
+            reporter.Verify(r => r.Warn(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
             Assert.NotNull(options);
             Assert.Equal("MyProject.csproj", options.Project);
         }

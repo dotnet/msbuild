@@ -129,8 +129,8 @@
   <data name="DownloadVersionFailed" xml:space="preserve">
     <value>Downloading {0} version {1} failed.</value>
   </data>
-  <data name="SkipNuGetpackageSigningValidationSDKNotFirstParty" xml:space="preserve">
-    <value>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</value>
+  <data name="NuGetPackageSignatureVerificationSkipped" xml:space="preserve">
+    <value>Skipping NuGet package signature verification.</value>
   </data>
   <data name="SkipNuGetpackageSigningValidationmacOSLinux" xml:space="preserve">
     <value>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</value>

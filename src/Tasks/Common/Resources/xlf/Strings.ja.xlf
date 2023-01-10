@@ -224,7 +224,7 @@
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
         <source>NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="translated">NETSDK1176: 単一ファイル バンドルの圧縮は、内臓アプリケーションの発行時にのみサポートされます。</target>
+        <target state="translated">NETSDK1176: 単一ファイル バンドルの圧縮は、内蔵アプリケーションの発行時にのみサポートされます。</target>
         <note>{StrBegin="NETSDK1176: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: Visual Studio 2019 で .NET 6.0 をターゲットにすることはサポートされていません。</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: Visual Studio 2019 では .NET 6.0 以降をターゲットにすることはできません。</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -750,11 +750,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1179: '--runtime' を使用する場合は、'--self-contained' または '--no-self-contained' オプションのいずれかが必要です。</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: ランタイム識別子 '{0}'' を指定する場合、Windows 7 との互換性があることを意味します。単一ファイルの発行は、Windows 7 と互換性がありません。</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
-      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: 'AdditionalProbingPaths' が GenerateRuntimeConfigurationFiles に指定されましたが、'RuntimeConfigDevPath' が空であるためスキップされます。</target>
@@ -914,10 +909,10 @@ You may need to build the project on another operating system or architecture, o
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
+To install these workloads, run the following command: dotnet workload restore</source>
         <target state="translated">NETSDK1147: このプロジェクトをビルドするには、次のワークロードをインストールする必要があります: {0}
-これらのワークロードをインストールするには、次のコマンドを実行します: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+これらのワークロードをインストールするには、次のコマンドを実行します: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

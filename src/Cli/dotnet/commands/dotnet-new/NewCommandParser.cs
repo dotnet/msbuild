@@ -3,11 +3,16 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.New;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class NewCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-new";
+
         public static readonly Argument Argument = new Argument<IEnumerable<string>>() { Arity = ArgumentArity.ZeroOrMore };
 
         public static readonly Option ListOption = new Option<bool>(new string[] { "-l", "--list" });
@@ -38,9 +43,16 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option ColumnsOption = new Option<bool>("--columns");
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
         {
-            var command = new Command("new");
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new DocumentedCommand("new", DocsLink);
 
             command.AddArgument(Argument);
             command.AddOption(ListOption);
@@ -57,6 +69,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(UpdateCheckOption);
             command.AddOption(UpdateApplyOption);
             command.AddOption(ColumnsOption);
+
+            command.SetHandler((ParseResult parseResult) => NewCommandShim.Run(parseResult.GetArguments()));
 
             return command;
         }

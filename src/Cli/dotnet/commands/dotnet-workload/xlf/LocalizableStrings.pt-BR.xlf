@@ -17,6 +17,11 @@
         <target state="translated">Comando de instalação do .NET</target>
         <note />
       </trans-unit>
+      <trans-unit id="SkipSignCheckInvalidOption">
+        <source>Unable to bypass signature verification. The specified option conflicts with a global policy.</source>
+        <target state="translated">Não é possível ignorar a verificação de assinatura. A opção especificada está em conflito com uma política global.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WasmToolsDescription">
         <source>.NET WebAssembly build tools</source>
         <target state="translated">Ferramentas de build do .NET WebAssembly</target>

@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class TelemetryCommandTests : SdkTest
     {
         private readonly FakeRecordEventNameTelemetry _fakeTelemetry;
@@ -374,12 +375,6 @@ namespace Microsoft.DotNet.Tests
                 .LogEntries.Should()
                 .Contain(e => e.EventName == "install/reportsuccess" && e.Properties.ContainsKey("exeName") &&
                               e.Properties["exeName"] == Sha256Hasher.Hash("DOTNET-SDK-LATEST-WIN-X64.EXE"));
-        }
-
-        [Fact]
-        public void InternalreportinstallsuccessCommandIsRegisteredInBuiltIn()
-        {
-            BuiltInCommandsCatalog.Commands.Should().ContainKey("internal-reportinstallsuccess");
         }
 
         [Fact]

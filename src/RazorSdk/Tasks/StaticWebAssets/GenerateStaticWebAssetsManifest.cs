@@ -96,17 +96,17 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             if (!fileExists)
             {
-                Log.LogMessage($"Creating manifest because manifest file '{ManifestPath}' does not exist.");
+                Log.LogMessage(MessageImportance.Low, $"Creating manifest because manifest file '{ManifestPath}' does not exist.");
                 File.WriteAllBytes(ManifestPath, data);
             }
             else if (!string.Equals(manifest.Hash, existingManifestHash, StringComparison.Ordinal))
             {
-                Log.LogMessage($"Updating manifest because manifest version '{manifest.Hash}' is different from existing manifest hash '{existingManifestHash}'.");
+                Log.LogMessage(MessageImportance.Low, $"Updating manifest because manifest version '{manifest.Hash}' is different from existing manifest hash '{existingManifestHash}'.");
                 File.WriteAllBytes(ManifestPath, data);
             }
             else
             {
-                Log.LogMessage($"Skipping manifest updated because manifest version '{manifest.Hash}' has not changed.");
+                Log.LogMessage(MessageImportance.Low, $"Skipping manifest updated because manifest version '{manifest.Hash}' has not changed.");
             }
         }
     }

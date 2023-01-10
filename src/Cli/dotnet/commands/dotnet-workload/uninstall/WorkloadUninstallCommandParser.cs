@@ -4,6 +4,9 @@
 using System.CommandLine;
 using System.Collections.Generic;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Uninstall.LocalizableStrings;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload.Uninstall;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -11,14 +14,21 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly Argument<IEnumerable<string>> WorkloadIdArgument = WorkloadInstallCommandParser.WorkloadIdArgument;
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
-        
         public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
         {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
             Command command = new Command("uninstall", LocalizableStrings.CommandDescription);
             command.AddArgument(WorkloadIdArgument);
+
+            command.SetHandler((parseResult) => new WorkloadUninstallCommand(parseResult).Execute());
 
             return command;
         }

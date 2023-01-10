@@ -17,9 +17,9 @@
         <target state="translated">Используйте "Поиск рабочей нагрузки DotNet", чтобы найти дополнительные рабочие нагрузки для установки.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">Эта команда выводит только рабочие нагрузки, которые были установлены с помощью команды "Устаовка рабочей нагрузки DotNet" в этой версии пакета SDK, а не те, которые были установлены с помощью Visual Studio.</target>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">Источник установки</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

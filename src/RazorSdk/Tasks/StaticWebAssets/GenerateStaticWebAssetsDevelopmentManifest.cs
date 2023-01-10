@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             {
                 if (Assets.Length == 0 && DiscoveryPatterns.Length == 0)
                 {
-                    Log.LogMessage("Skipping manifest generation because no assets nor discovery patterns were found.");
+                    Log.LogMessage(MessageImportance.Low, "Skipping manifest generation because no assets nor discovery patterns were found.");
                     return true;
                 }
 
@@ -86,13 +86,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
                 if (asset == null)
                 {
-                    Log.LogMessage("Skipping candidate asset '{0}' because it is a 'Publish' asset.", group.Key);
+                    Log.LogMessage(MessageImportance.Low, "Skipping candidate asset '{0}' because it is a 'Publish' asset.", group.Key);
                     continue;
                 }
 
                 if (asset.HasSourceId(Source) && !StaticWebAssetsManifest.ManifestModes.ShouldIncludeAssetInCurrentProject(asset, StaticWebAssetsManifest.ManifestModes.Root))
                 {
-                    Log.LogMessage("Skipping candidate asset '{0}' because asset mode is '{1}'",
+                    Log.LogMessage(MessageImportance.Low, "Skipping candidate asset '{0}' because asset mode is '{1}'",
                         asset.Identity,
                         asset.AssetMode);
 
@@ -114,12 +114,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             if (!fileExists)
             {
-                Log.LogMessage("Creating manifest because manifest file '{0}' does not exist.", ManifestPath);
+                Log.LogMessage(MessageImportance.Low, "Creating manifest because manifest file '{0}' does not exist.", ManifestPath);
                 File.WriteAllBytes(ManifestPath, data);
             }
             else if (!currentHash.SequenceEqual(existingManifestHash))
             {
                 Log.LogMessage(
+                    MessageImportance.Low,
                     "Updating manifest because manifest version '{0}' is different from existing manifest hash '{1}'.",
                     Convert.ToBase64String(currentHash),
                     Convert.ToBase64String(existingManifestHash));
@@ -128,6 +129,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             else
             {
                 Log.LogMessage(
+                    MessageImportance.Low,
                     "Skipping manifest update because manifest version '{0}' has not changed.",
                     Convert.ToBase64String(currentHash));
             }

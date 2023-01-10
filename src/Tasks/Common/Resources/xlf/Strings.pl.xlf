@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: Platforma docelowa .NET 6.0 w usłudze Visual Studio 2019 nie jest obsługiwana.</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: Platforma docelowa .NET 6.0 lub nowsza w usłudze Visual Studio 2019 nie jest obsługiwana.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -750,11 +750,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1179: Jedna z opcji „--self-contained” lub „--no-self-contained” jest wymagana, gdy jest używany element „--runtime”.</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: Określony identyfikator środowiska uruchomieniowego „{0}” oznacza zgodność systemu Windows 7. Publikowanie pojedynczych plików nie jest zgodne z systemem Windows 7.</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
-      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: Dla elementu GenerateRuntimeConfigurationFiles określono ścieżki AdditionalProbingPaths, ale są one pomijane, ponieważ element „RuntimeConfigDevPath” jest pusty.</target>
@@ -914,10 +909,10 @@ Może być konieczne skompilowanie projektu w innym systemie operacyjnym lub arc
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
-        <target state="translated">NETSDK1147: aby zbudować ten projekt, muszą być zainstalowane następujące pakiety robocze: {0}
-Aby zainstalować te pakiety robocze, uruchom następujące polecenie: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+To install these workloads, run the following command: dotnet workload restore</source>
+        <target state="translated">NETSDK1147: aby utworzyć ten projekt, muszą być zainstalowane następujące pakiety robocze: {0}
+Aby zainstalować te pakiety robocze, uruchom następujące polecenie: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

@@ -4,6 +4,7 @@
 #nullable disable
 
 using System.Text;
+using System;
 
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
@@ -225,7 +226,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 return false;
             }
 
-            int majorSeparator = fxVersionString.IndexOf(".");
+            int majorSeparator = fxVersionString.IndexOf(".", StringComparison.Ordinal);
             if (majorSeparator == -1)
             {
                 return false;
@@ -244,7 +245,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             int minorStart = majorSeparator + 1;
-            int minorSeparator = fxVersionString.IndexOf(".", minorStart);
+            int minorSeparator = fxVersionString.IndexOf(".", minorStart, StringComparison.Ordinal);
             if (minorSeparator == -1)
             {
                 return false;
@@ -292,7 +293,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             int preStart = patchSeparator;
-            int preSeparator = fxVersionString.IndexOf("+", preStart);
+            int preSeparator = fxVersionString.IndexOf("+", preStart, StringComparison.Ordinal);
 
             string pre = (preSeparator == -1) ? fxVersionString.Substring(preStart) : fxVersionString.Substring(preStart, preSeparator - preStart);
 

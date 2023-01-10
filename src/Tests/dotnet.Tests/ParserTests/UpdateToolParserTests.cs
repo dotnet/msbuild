@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool update -g console.test.app");
 
-            var packageId = result.ValueForArgument<string>(ToolUpdateCommandParser.PackageIdArgument);
+            var packageId = result.GetValueForArgument<string>(ToolUpdateCommandParser.PackageIdArgument);
 
             packageId.Should().Be("console.test.app");
         }
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool update -g console.test.app");
 
-            result.ValueForOption<bool>(ToolUpdateCommandParser.GlobalOption).Should().Be(true);
+            result.GetValueForOption<bool>(ToolUpdateCommandParser.GlobalOption).Should().Be(true);
         }
 
         [Fact]
@@ -46,8 +46,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 Parser.Instance.Parse(
                     @"dotnet tool update -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
 
-            result.ValueForOption<string>(ToolUpdateCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
-            result.ValueForOption<string>(ToolUpdateCommandParser.FrameworkOption).Should().Be("netcoreapp2.0");
+            result.GetValueForOption<string>(ToolUpdateCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
+            result.GetValueForOption<string>(ToolUpdateCommandParser.FrameworkOption).Should().Be("netcoreapp2.0");
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse($"dotnet tool update -g --add-source {expectedSourceValue} console.test.app");
 
-            result.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption).First().Should().Be(expectedSourceValue);
+            result.GetValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption).First().Should().Be(expectedSourceValue);
         }
 
         [Fact]
@@ -73,8 +73,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
                     $"--add-source {expectedSourceValue1} " +
                     $"--add-source {expectedSourceValue2} console.test.app");
 
-            result.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
-            result.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
+            result.GetValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
+            result.GetValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse($"dotnet tool update -g --verbosity:{expectedVerbosityLevel} console.test.app");
 
-            Enum.GetName(result.ValueForOption<VerbosityOptions>(ToolUpdateCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
+            Enum.GetName(result.GetValueForOption<VerbosityOptions>(ToolUpdateCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update --tool-path C:\TestAssetLocalNugetFeed console.test.app");
 
-            result.ValueForOption<string>(ToolUpdateCommandParser.ToolPathOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
+            result.GetValueForOption<string>(ToolUpdateCommandParser.ToolPathOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
         }
 
         [Fact]
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update -g console.test.app --version 1.2");
 
-            result.ValueForOption<string>(ToolUpdateCommandParser.VersionOption).Should().Be("1.2");
+            result.GetValueForOption<string>(ToolUpdateCommandParser.VersionOption).Should().Be("1.2");
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update --local console.test.app");
 
-            result.ValueForOption<bool>(ToolUpdateCommandParser.LocalOption).Should().Be(true);
+            result.GetValueForOption<bool>(ToolUpdateCommandParser.LocalOption).Should().Be(true);
         }
 
         [Fact]
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update --tool-manifest folder/my-manifest.format console.test.app");
 
-            result.ValueForOption<string>(ToolUpdateCommandParser.ToolManifestOption).Should().Be(@"folder/my-manifest.format");
+            result.GetValueForOption<string>(ToolUpdateCommandParser.ToolManifestOption).Should().Be(@"folder/my-manifest.format");
         }
     }
 }

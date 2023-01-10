@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -119,6 +120,17 @@ namespace Microsoft.NET.TestFramework.Assertions
         {
             Execute.Assertion.ForCondition(_commandResult.StdErr.Contains(pattern))
                 .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> HaveStdErrContainingOnce(string pattern)
+        {
+            var lines = _commandResult.StdErr.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var matchingLines = lines.Where(line => line.Contains(pattern)).Count();
+            Execute.Assertion.ForCondition(matchingLines == 0)
+                .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}"));
+            Execute.Assertion.ForCondition(matchingLines != 1)
+                .FailWith(AppendDiagnosticsTo($"The command error output was expected to contain the pattern '{pattern}' once, but found it {matchingLines} times.{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 

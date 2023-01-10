@@ -32,7 +32,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 var originalItemSpec = asset.GetMetadata("OriginalItemSpec");
                 if (File.Exists(originalItemSpec))
                 {
-                    Log.LogMessage("Asset '{0}' found at OriginalItemSpec '{1}' and will be used for compressing the asset",
+                    Log.LogMessage(MessageImportance.Low, "Asset '{0}' found at OriginalItemSpec '{1}' and will be used for compressing the asset",
                         asset.ItemSpec,
                         originalItemSpec);
 
@@ -40,7 +40,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 }
                 else if (File.Exists(asset.ItemSpec))
                 {
-                    Log.LogMessage("Asset '{0}' found at '{1}' and will be used for compressing the asset",
+                    Log.LogMessage(MessageImportance.Low, "Asset '{0}' found at '{1}' and will be used for compressing the asset",
                         asset.ItemSpec,
                         asset.ItemSpec);
 

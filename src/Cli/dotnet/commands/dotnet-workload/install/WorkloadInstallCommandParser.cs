@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload.Install;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -12,7 +15,8 @@ namespace Microsoft.DotNet.Cli
         public static readonly Argument<IEnumerable<string>> WorkloadIdArgument =
             new Argument<IEnumerable<string>>(LocalizableStrings.WorkloadIdArgumentName)
             {
-                Arity = ArgumentArity.OneOrMore, Description = LocalizableStrings.WorkloadIdArgumentDescription
+                Arity = ArgumentArity.OneOrMore,
+                Description = LocalizableStrings.WorkloadIdArgumentDescription
             };
 
         public static readonly Option<string> ConfigOption =
@@ -29,6 +33,12 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> PrintDownloadLinkOnlyOption =
             new Option<bool>("--print-download-link-only", LocalizableStrings.PrintDownloadLinkOnlyDescription)
+            {
+                IsHidden = true
+            };
+
+        public static readonly Option<bool> SkipSignCheckOption =
+            new Option<bool>("--skip-sign-check", LocalizableStrings.SkipSignCheckOptionDescription)
             {
                 IsHidden = true
             };
@@ -59,19 +69,26 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> TempDirOption = new Option<string>("--temp-dir", LocalizableStrings.TempDirOptionDescription);
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
-
         public static readonly Option<string> FromRollbackFileOption = new Option<string>("--from-rollback-file", Microsoft.DotNet.Workloads.Workload.Update.LocalizableStrings.FromRollbackDefinitionOptionDescription)
         {
             IsHidden = true
         };
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("install", LocalizableStrings.CommandDescription);
 
             command.AddArgument(WorkloadIdArgument);
             AddWorkloadInstallCommandOptions(command);
+
+            command.SetHandler((parseResult) => new WorkloadInstallCommand(parseResult).Execute());
 
             return command;
         }
@@ -88,8 +105,9 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(IncludePreviewOption);
             command.AddOption(TempDirOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
-            command.AddOption(VerbosityOption);
+            command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(FromRollbackFileOption);
+            command.AddOption(SkipSignCheckOption);
         }
     }
 }

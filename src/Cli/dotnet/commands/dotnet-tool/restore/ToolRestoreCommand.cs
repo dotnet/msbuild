@@ -61,9 +61,9 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
 
-            _configFilePath = result.ValueForOption<string>(ToolRestoreCommandParser.ConfigOption);
-            _sources = result.ValueForOption<string[]>(ToolRestoreCommandParser.AddSourceOption);
-            _verbosity = Enum.GetName(result.ValueForOption<VerbosityOptions>(ToolRestoreCommandParser.VerbosityOption));
+            _configFilePath = result.GetValueForOption(ToolRestoreCommandParser.ConfigOption);
+            _sources = result.GetValueForOption(ToolRestoreCommandParser.AddSourceOption);
+            _verbosity = Enum.GetName(result.GetValueForOption(ToolRestoreCommandParser.VerbosityOption));
         }
 
         public override int Execute()
@@ -244,7 +244,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
 
         private FilePath? GetCustomManifestFileLocation()
         {
-            string customFile = _parseResult.ValueForOption<string>(ToolRestoreCommandParser.ToolManifestOption);
+            string customFile = _parseResult.GetValueForOption(ToolRestoreCommandParser.ToolManifestOption);
             FilePath? customManifestFileLocation;
             if (!string.IsNullOrEmpty(customFile))
             {

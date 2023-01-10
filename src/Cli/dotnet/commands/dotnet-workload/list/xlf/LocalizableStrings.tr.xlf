@@ -17,9 +17,9 @@
         <target state="translated">Yüklenecek ek iş yüklerini bulmak için `dotnet workload search` kullanın.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">Bu komut yalnızca SDK'nın bu sürümünde `dotnet workload install` aracılığıyla yüklenen iş yüklerini listeler, Visual Studio aracılığıyla yüklenen iş yüklerini listelemez.</target>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">Yükleme Kaynağı</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

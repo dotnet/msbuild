@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         {
             try
             {
-                Log.LogMessage("Using path prefix '{0}'", PathPrefix);
+                Log.LogMessage(MessageImportance.Low, "Using path prefix '{0}'", PathPrefix);
                 AssetsWithTargetPath = new TaskItem[Assets.Length];
 
                 for (var i = 0; i < Assets.Length; i++)

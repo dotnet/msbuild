@@ -147,15 +147,13 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_errors_when_publishing_single_file_with_win7()
+        public void It_generates_publishing_single_file_with_win7()
         {
             const string rid = "win7-x86";
             GetPublishCommand()
                 .Execute($"/p:RuntimeIdentifier={rid}", PublishSingleFile)
                 .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(string.Format(Strings.SingleFileWin7Incompatible, rid));
+                .Pass();
         }
 
         [Fact]
