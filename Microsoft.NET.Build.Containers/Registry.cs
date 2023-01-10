@@ -198,16 +198,7 @@ public struct Registry
                 throw new ApplicationException(errorMessage);
             }
 
-            if (patchResponse.Headers.Location is { IsAbsoluteUri: true })
-            {
-                localUploadUri = new UriBuilder(patchResponse.Headers.Location);
-            }
-            else
-            {
-                // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
-                // Uri constructor does this on our behalf.
-                localUploadUri = new UriBuilder(new Uri(BaseUri, patchResponse.Headers.Location?.OriginalString ?? ""));
-            }
+           localUploadUri = GetNextLocation(patchResponse);
 
             patchUri = localUploadUri.Uri;
 
@@ -217,13 +208,26 @@ public struct Registry
         return new UriBuilder(patchUri);
     }
 
+    private readonly UriBuilder GetNextLocation(HttpResponseMessage response) {
+        if (response.Headers.Location is {IsAbsoluteUri: true })
+        {
+            return new UriBuilder(response.Headers.Location);
+        }
+        else
+        {
+            // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
+            // Uri constructor does this on our behalf.
+            return new UriBuilder(new Uri(BaseUri, response.Headers.Location?.OriginalString ?? ""));
+        }
+    }
+
     private readonly async Task<UriBuilder> UploadBlobWhole(string name, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
         StreamContent content = new StreamContent(contents);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         content.Headers.ContentLength = contents.Length;
         HttpResponseMessage putResponse = await client.PutAsync(uploadUri.Uri, content);
         putResponse.EnsureSuccessStatusCode();
-        return new UriBuilder(putResponse.Headers.Location ?? uploadUri.Uri);
+        return GetNextLocation(putResponse);
     }
 
     private readonly async Task<UriBuilder> StartUploadSession(string name, string digest, HttpClient client) {
@@ -237,21 +241,12 @@ public struct Registry
             throw new ApplicationException(errorMessage);
         }
 
-        if (pushResponse.Headers.Location is {IsAbsoluteUri: true })
-        {
-            return new UriBuilder(pushResponse.Headers.Location);
-        }
-        else
-        {
-            // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
-            // Uri constructor does this on our behalf.
-            return new UriBuilder(new Uri(BaseUri, pushResponse.Headers.Location?.OriginalString ?? ""));
-        }
+        return GetNextLocation(pushResponse);
     }
 
     private readonly async Task<UriBuilder> UploadBlobContents(string name, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
-        if (SupportsChunkedUpload) return await UploadBlobWhole(name, digest, contents, client, uploadUri);
-        else return await UploadBlobChunked(name, digest, contents, client, uploadUri);
+        if (SupportsChunkedUpload) return await UploadBlobChunked(name, digest, contents, client, uploadUri);
+        else return await UploadBlobWhole(name, digest, contents, client, uploadUri);
     }
 
     private readonly async Task FinishUploadSession(string digest, HttpClient client, UriBuilder uploadUri) {
