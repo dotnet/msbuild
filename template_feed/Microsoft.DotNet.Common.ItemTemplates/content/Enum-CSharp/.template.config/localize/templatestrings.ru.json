@@ -1,5 +1,5 @@
-{
-  "author": "Microsoft",
-  "name": "Enum",
-  "description": "Creates a new C# enum"
+﻿{
+  "author": "Майкрософт",
+  "name": "Перечисление",
+  "description": "Создает новое перечисление C#"
 }

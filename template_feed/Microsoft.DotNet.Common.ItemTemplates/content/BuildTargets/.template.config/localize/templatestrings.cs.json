@@ -1,7 +1,7 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "MSBuild Directory.Build.props file",
-  "description": "An empty Directory.Build.props file which can be used to specify MSBuild properties for an entire folder",
-  "symbols/inherit/displayName": "inherit",
-  "symbols/inherit/description": "If true, adds an Import for any Directory.Build.props in the parent directory. Directory.Build.props don't inherit by default, so doing this allows you to build up a set of customizations folder-by-folder."
+  "name": "Soubor MSBuild Directory.Build.targets",
+  "description": "Prázdný soubor Directory.Build.targets, který lze použít k určení úkolů a cílů nástroje MSBuild pro celou složku",
+  "symbols/inherit/displayName": "Zdědit",
+  "symbols/inherit/description": "Při hodnotě true přidá import pro nejbližší soubor Directory.Build.targets v hierarchii adresářů systému souborů. Directory.Build.targets ve výchozím nastavení nedědí, takže můžete vytvořit sadu přizpůsobení pro každou složku zvlášť."
 }
