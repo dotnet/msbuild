@@ -470,7 +470,7 @@
    <value>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     If -IsolateProjects is set to False, this sets it to True.
+                     If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </value>
     <comment>
@@ -482,7 +482,7 @@
   <data name="HelpMessage_InputCachesFiles" UESanitized="false" Visibility="Public">
    <value>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will read build results from. If -IsolateProjects is set
+                     will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </value>
     <comment>
