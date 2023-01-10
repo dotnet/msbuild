@@ -14,6 +14,8 @@ variables:
     value: Roslyn-Project-System
   - name: _DotNetPublishToBlobFeed
     value: false
+  - name: _CIBuild
+    value: -restore -build -sign -pack -ci
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
