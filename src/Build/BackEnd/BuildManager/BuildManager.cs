@@ -1055,8 +1055,12 @@ namespace Microsoft.Build.Execution
 
             void SerializeCaches()
             {
-                string errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
-
+                string errorMessage = CacheSerialization.SerializeCaches(
+                    _configCache,
+                    _resultsCache,
+                    _buildParameters.OutputResultsCacheFile,
+                    _buildParameters.ProjectIsolationMode,
+                    _buildParameters.Targets);
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     LogErrorAndShutdown(errorMessage);

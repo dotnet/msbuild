@@ -481,6 +481,21 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Keep the results for specific targets only.
+        /// </summary>
+        /// <param name="targets">The targets whose results should be kept.</param>
+        public void KeepResultsForSpecificTargets(HashSet<string> targets)
+        {
+            foreach (string target in _resultsByTarget.Keys)
+            {
+                if (!targets.Contains(target))
+                {
+                    _ = _resultsByTarget.TryRemove(target, out _);
+                }
+            }
+        }
+
+        /// <summary>
         /// Merges the specified results with the results contained herein.
         /// </summary>
         /// <param name="results">The results to merge in.</param>

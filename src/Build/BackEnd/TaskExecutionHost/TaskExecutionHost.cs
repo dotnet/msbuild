@@ -157,9 +157,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal TaskExecutionHost()
         {
-            // These initializations are necessary to test for missing required properties.
-            _buildComponentHost = new BuildManager();
-            _buildComponentHost.BuildParameters = new BuildParameters();
+            // do nothing
         }
 
         /// <summary>
@@ -375,13 +373,10 @@ namespace Microsoft.Build.BackEnd
                 // See if any required properties were not set
                 foreach (KeyValuePair<string, string> requiredParameter in requiredParameters)
                 {
-                    ProjectIsolationMode isolateProjects = _buildComponentHost.BuildParameters.ProjectIsolationMode;
-
-                    string resourceName = isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation ? "RequiredPropertyNotSetErrorMessagingIsolationMode" : "RequiredPropertyNotSetError";
                     ProjectErrorUtilities.VerifyThrowInvalidProject(
                         setParameters.ContainsKey(requiredParameter.Key),
                         _taskLocation,
-                        resourceName,
+                        "RequiredPropertyNotSetError",
                         _taskName,
                         requiredParameter.Key);
                 }

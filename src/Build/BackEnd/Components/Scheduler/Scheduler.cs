@@ -2052,9 +2052,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="result">The result to potentially record in the current cache.</param>
         internal void RecordResultToCurrentCacheIfConfigNotInOverrideCache(BuildResult result)
         {
-            // Record these results to the cache only if their config isn't in the
-            // override cache, which can happen if we are building in isolation mode
-            // (ProjectIsolationMode.MessageUponIsolationViolation), and the received result was built by an
+            // Record these results to the current cache only if their config isn't in the
+            // override cache, which can happen if we are building in the project isolation mode
+            // ProjectIsolationMode.MessageUponIsolationViolation, and the received result was built by an
             // isolation-violating dependency project.
             if (_configCache is not ConfigCacheWithOverride
                 || !((ConfigCacheWithOverride)_configCache).HasConfigurationInOverrideCache(result.ConfigurationId))

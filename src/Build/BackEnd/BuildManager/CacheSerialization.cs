@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
@@ -13,7 +14,12 @@ namespace Microsoft.Build.Execution
 {
     internal static class CacheSerialization
     {
-        public static string SerializeCaches(IConfigCache configCache, IResultsCache resultsCache, string outputCacheFile, IsolateProjects isolateProjects)
+        public static string SerializeCaches(
+            IConfigCache configCache,
+            IResultsCache resultsCache,
+            string outputCacheFile,
+            ProjectIsolationMode projectIsolationMode,
+            HashSet<string> targets)
         {
             ErrorUtilities.VerifyThrowInternalNull(outputCacheFile, nameof(outputCacheFile));
 
@@ -81,6 +87,17 @@ namespace Microsoft.Build.Execution
                         var tempResultsCacheToSerialize = new ResultsCache();
                         tempResultsCacheToSerialize.AddResult(resultsCacheToSerialize.GetResultsForConfiguration(smallestCacheConfigId));
                         resultsCacheToSerialize = tempResultsCacheToSerialize;
+                    }
+
+                    if (projectIsolationMode == ProjectIsolationMode.MessageUponIsolationViolation)
+                    {
+                        // In MessageUponIsolationViolation mode, only keep the TargetResults for
+                        // targets in the targets set, which should usually just contain the
+                        // top-level targets. This is to mitigate the chances of an isolation-
+                        // violating target on a dependency project using incorrect state
+                        // due to its dependency on a cached target whose side effects would
+                        // not be taken into account. (E.g., the definition of a property.)
+                        resultsCacheToSerialize.GetResultsForConfiguration(configCacheToSerialize.GetSmallestConfigId()).KeepResultsForSpecificTargets(targets);
                     }
 
                     translator.Translate(ref configCacheToSerialize);
