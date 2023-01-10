@@ -225,9 +225,13 @@ public struct Registry
         StreamContent content = new StreamContent(contents);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         content.Headers.ContentLength = contents.Length;
-        HttpResponseMessage putResponse = await client.PutAsync(uploadUri.Uri, content);
-        putResponse.EnsureSuccessStatusCode();
-        return GetNextLocation(putResponse);
+        HttpResponseMessage patchResponse = await client.PatchAsync(uploadUri.Uri, content);
+        if (patchResponse.StatusCode != HttpStatusCode.Accepted)
+        {
+            string errorMessage = $"Failed to upload to {uploadUri}; received {patchResponse.StatusCode} with detail {await patchResponse.Content.ReadAsStringAsync()}";
+            throw new ApplicationException(errorMessage);
+        }
+        return GetNextLocation(patchResponse);
     }
 
     private readonly async Task<UriBuilder> StartUploadSession(string name, string digest, HttpClient client) {
