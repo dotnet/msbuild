@@ -18,6 +18,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
         }
 
+        // TODO: Refine
         public static int ANSIBreakpoint(string text, int position)
         {
             if (position >= text.Length) return text.Length;
@@ -32,6 +33,19 @@ namespace Microsoft.Build.Logging.FancyLogger
             return newPosition;
         }
 
+        public static List<string> ANSIWrap(string text, int position)
+        {
+            // string text = ANSIRemove(text);
+            List<string> result = new();
+            while (text.Length > position)
+            {
+                result.Add(text.Substring(0, position));
+                text = text.Substring(position);
+            }
+            result.Add(text);
+            return result;
+        }
+
         public static class Alignment
         {
             public static string Center(string text)
@@ -42,7 +56,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 int space = (Console.BufferWidth - noFormatString.Length) / 2;
                 result += new string(' ', space);
                 result += text;
-                result += new string(' ', space + 1);
+                result += new string(' ', space);
                 return result;
             }
 
