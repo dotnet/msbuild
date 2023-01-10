@@ -30,4 +30,18 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.targets" />
 
+  <!--
+  ============================================================
+    DefaultRuntimeHostConfigurationOptions
+  Defaults @(RuntimeHostConfigurationOption) items based on MSBuild properties.
+  ============================================================
+  -->
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="Microsoft.AspNetCore.EnsureJsonTrimmability"
+                                    Condition="'$(EnsureAspNetCoreJsonTrimmability)' != ''"
+                                    Value="$(EnsureAspNetCoreJsonTrimmability)"
+                                    Trim="true" />
+  </ItemGroup>
+
 </Project>

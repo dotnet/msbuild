@@ -46,6 +46,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableUnsafeBinaryFormatterSerialization Condition="'$(EnableUnsafeBinaryFormatterSerialization)' == ''">false</EnableUnsafeBinaryFormatterSerialization>
   </PropertyGroup>
 
+
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' Or '$(PublishAot)' == 'true'">
+    <!-- Runtime feature defaults to trim unnecessary code -->
+    <EnsureAspNetCoreJsonTrimmability Condition="'$(EnsureAspNetCoreJsonTrimmability)' == ''">true</EnsureAspNetCoreJsonTrimmability>
+  </PropertyGroup>
+
   <!--
     Newer versions of Visual Studio ship the designtime related properties in a targets file and all future design time only elements should be added there. If that file does not
     exist, it falls back to the default set of values defined here.
