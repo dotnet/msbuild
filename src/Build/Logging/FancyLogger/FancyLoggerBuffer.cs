@@ -15,8 +15,18 @@ namespace Microsoft.Build.Logging.FancyLogger
     public class FancyLoggerBufferLine
     {
         private static int Counter = 0;
+        private string _text = string.Empty;
+        public List<string> WrappedText { get; private set; } = new();
         public int Id;
-        public string Text;
+        public string Text
+        {
+            get => _text;
+            set
+            {
+                _text = value;
+                WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth + 1);
+            }
+        }
 
         public FancyLoggerBufferLine()
         {
@@ -95,9 +105,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             );
             // Get lines with wrappings
             List<string> lineContents = new();
-            foreach (var line in Lines)
+            int lineCount = Lines.Count;
+            for (int i = 0; i < lineCount; i++)
             {
-                lineContents.AddRange(ANSIBuilder.ANSIWrap(line.Text, Console.BufferWidth));
+                lineContents.AddRange(Lines[i].WrappedText);
             }
             // Print lines
             for (int i = 0; i < Console.BufferHeight - 3; i++)
@@ -112,18 +123,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             Console.Out.FlushAsync();
         }
         #endregion
-
-        /* public static List<string> UpdateLinesWIthWrappings()
-        {
-            List<string> result = new();
-            int lineCount = Lines.Count;
-            for (int i = 0; i < lineCount; i++)
-            {
-                result.AddRange(ANSIBuilder.ANSIWrap(Lines[i].Text, 10));
-            }
-            return result;
-        } */
-
         #region Line identification
         public static int GetLineIndexById(int lineId)
         {

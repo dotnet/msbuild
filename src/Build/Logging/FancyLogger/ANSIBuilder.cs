@@ -35,12 +35,12 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public static List<string> ANSIWrap(string text, int position)
         {
-            // string text = ANSIRemove(text);
+            int breakpoint = ANSIBreakpoint(text, position);
             List<string> result = new();
-            while (text.Length > position)
+            while (text.Length > breakpoint)
             {
-                result.Add(text.Substring(0, position));
-                text = text.Substring(position);
+                result.Add(text.Substring(0, breakpoint));
+                text = text.Substring(breakpoint);
             }
             result.Add(text);
             return result;

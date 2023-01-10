@@ -51,11 +51,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
             FancyLoggerBuffer.WriteNewLine("");
-            /*for (int i = 0; i < 200; i++)
-            {
-                FancyLoggerBuffer.WriteNewLine($"{i} ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ");
-                FancyLoggerBuffer.WriteNewLine("===");
-            }*/
         }
 
         // Build
@@ -65,7 +60,6 @@ namespace Microsoft.Build.Logging.FancyLogger
         void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
             Succeeded = e.Succeeded;
-            // Console.WriteLine(LoggerFormatting.Bold("[Build]") + "\t Finished");
         }
 
         // Project
