@@ -1,8 +1,12 @@
 <Project>
-  <Target Name="_PublishDotnetWatch_InputsOutputs">
+  <Target Name="GetDotnetWatchRedistOutputDirectory">
     <PropertyGroup>
-      <_DotnetWatchOutputDirectory>$(ArtifactsDir)bin\redist\$(Configuration)\dotnet\sdk\$(Version)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</_DotnetWatchOutputDirectory>
+      <DotnetWatchRedistOutputDirectory>$(ArtifactsDir)bin\redist\$(Configuration)\dotnet\sdk\$(Version)\DotnetTools\dotnet-watch\</DotnetWatchRedistOutputDirectory>
+      <DotnetWatchRedistOutputSubdirectory>$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchRedistOutputSubdirectory>
     </PropertyGroup>
+  </Target>
+
+  <Target Name="_PublishDotnetWatchToRedist_Inputs">
     <ItemGroup>
       <_DotnetWatchBuildOutput Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**"/>
       
@@ -19,12 +23,12 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="PublishDotnetWatch"
-          DependsOnTargets="_PublishDotnetWatch_InputsOutputs"
+  <Target Name="PublishDotnetWatchToRedist"
+          DependsOnTargets="GetDotnetWatchRedistOutputDirectory;_PublishDotnetWatchToRedist_Inputs"
           Inputs="@(_DotnetWatchInputFile)"
-          Outputs="@(_DotnetWatchInputFile->'$(_DotnetWatchOutputDirectory)%(RecursiveDir)%(Filename)%(Extension)')">
+          Outputs="@(_DotnetWatchInputFile->'$(DotnetWatchRedistOutputDirectory)$(DotnetWatchRedistOutputSubdirectory)%(RecursiveDir)%(Filename)%(Extension)')">
 
-    <Copy SourceFiles="@(_DotnetWatchInputFile)" DestinationFiles="$(_DotnetWatchOutputDirectory)%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_DotnetWatchInputFile)" DestinationFiles="$(DotnetWatchRedistOutputDirectory)$(DotnetWatchRedistOutputSubdirectory)%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
 
     <ItemGroup>
       <FileWrites Include="@(_DotnetWatchOutputFile)" />
