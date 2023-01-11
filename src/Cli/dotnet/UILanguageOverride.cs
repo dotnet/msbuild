@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli
 
         public static void Setup()
         {
-            CultureInfo language = GetOverriddenUIOrSystemLanguage();
+            CultureInfo language = GetOverriddenUILanguage();
             if (language != null)
             {
                 ApplyOverrideToCurrentProcess(language);
@@ -50,12 +50,11 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <summary>
-        /// Look first at UI Language Overrides. (DOTNET_CLI_UI_LANGUAGE and VSLANG).
-        /// Then, see if the system language is set to a language besides English.
+        /// Look first at UI Language Overrides. (DOTNET_CLI_UI_LANGUAGE and VSLANG). Does NOT check System Locale or OS Display Language.
         /// </summary>
-        /// <returns>The custom language (or not english language) that was set by the user.
-        /// DOTNET_CLI_UI_LANGUAGE > VSLANG > System Language (Not English.) Returns null if none are set to another language.</returns>
-        private static CultureInfo GetOverriddenUIOrSystemLanguage()
+        /// <returns>The custom language that was set by the user.
+        /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns null if none are set.</returns>
+        private static CultureInfo GetOverriddenUILanguage()
         {
             // DOTNET_CLI_UI_LANGUAGE=<culture name> is the main way for users to customize the CLI's UI language.
             string dotnetCliLanguage = Environment.GetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE);
