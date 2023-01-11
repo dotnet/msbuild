@@ -193,6 +193,38 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
+        public void TransitivePackageReferenceAndPublishFalse()
+        {
+            var testLibraryProject = new TestProject()
+            {
+                Name = "TestLibrary",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
+            };
+
+            testLibraryProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+
+            var testProject = new TestProject()
+            {
+                Name = "TestApp",
+                IsExe = true,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", publish: "false"));
+
+            testProject.ReferencedProjects.Add(testLibraryProject);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute().Should().Pass();
+            var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            publishDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+        }
+
+        [Fact]
         public void It_does_not_exclude_packages_depended_on_by_non_privateassets_references()
         {
             var testProject = new TestProject()
