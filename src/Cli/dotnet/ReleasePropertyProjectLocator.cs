@@ -68,11 +68,12 @@ namespace Microsoft.DotNet.Cli
                 return Enumerable.Empty<string>();
 
             ProjectInstance project = GetTargetedProject(globalProperties);
+            //NuGetFramework.Parse("");
 
             if (project != null)
             {
                 string propertyToCheckValue = project.GetPropertyValue(_propertyToCheck);
-                if (!string.IsNullOrEmpty(propertyToCheckValue) || GetProjectMaxModernTargetFramework(project) >= 8)
+                if (!string.IsNullOrEmpty(propertyToCheckValue) || GetPublishTargetFramework(project) >= 8)
                 {
                     var msbuildFlags = new List<string> {
                         $"-property:{MSBuildPropertyNames.CONFIGURATION}={
@@ -178,31 +179,26 @@ namespace Microsoft.DotNet.Cli
         /// <returns>
         /// Returns the target framework of the project.
         /// This will return 0 if there are no TFM of the form netX.0.
-        /// If the project is multi-targeted, it will return the maximum target framework number (e.g. 8 for net8.0) of all modern TFMS in the project.
+        /// This ignores multitargeting. This is because for dotnet publish you must specify a target framework.
+        /// If the target framework for publish is not specified, the app will fail later, so what we do doesn't matter.
         /// </returns>
         /// <remarks>If the naming schema of TFM changes, this will not work. Yeah, it's not great.</remarks>
-        private float GetProjectMaxModernTargetFramework(ProjectInstance targetProject)
+        private float GetPublishTargetFramework(ProjectInstance targetProject)
         {
-            string multiTargetingFrameworks = targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORKS);
+            // if TFM given by g lobal properties or framework option, does that reflect in the evaluated project or no? I think it should, but maybe globalprp doesnt contain
+            // The TargetFramework Config Option (-f) is Forwarded to a Global Option in the parseResult.
+            // The global properties given to MsBuild + The forwarded options are  given to the project evaluator class
+            // So any custom targetframework would be respected in the project itself.
+            // Thus, there is no need to check any framework option.
+
+            // shows up this isnt being called.
             string targetFramework = targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORK);
-            if (!string.IsNullOrEmpty(multiTargetingFrameworks))
+            if (!string.IsNullOrEmpty(targetFramework))
             {
-                foreach (string tfm in multiTargetingFrameworks.Split(";").OrderByDescending(s => s))
-                {
-                    string numericPartition = string.Concat(tfm.Where(tf => char.IsNumber(tf) || tf == '.'));
-                    string nonNumericPartition = string.Concat(tfm.Where(tf => !char.IsNumber(tf)));
-                    if (nonNumericPartition.ToLowerInvariant() == "net." && numericPartition.Contains('.'))
-                    {
-                        return float.Parse(numericPartition);
-                    }
-                }
-            }
-            else if (!string.IsNullOrEmpty(targetFramework))
-            {
-                if (targetFramework.StartsWith("net", StringComparison.OrdinalIgnoreCase) && targetFramework.EndsWith(".0")) // dont return non modern .net versions. e.g.: net48 < net8.0, but 48 > 8
+                if (targetProject.GetPropertyValue("TargetFrameworkIdentifier") == "NETCoreApp")
                     return float.Parse(targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORK_NUMERIC_VERSION));
             }
-            return 0;  // There is no modern TFM, OR there's no TFM. The project will not build or publish without a TFM, what we do here is irrelevant.
+            return 0;  // There is no modern TFM, OR there's no TFM. The project will not publish without a TFM, what we do here is irrelevant.
         }
 
         /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>
