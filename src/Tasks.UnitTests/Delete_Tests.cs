@@ -42,6 +42,7 @@ namespace Microsoft.Build.UnitTests
         /// Retry Delete
         /// </summary>
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void DeleteWithRetries()
         {
             string source = FileUtilities.GetTemporaryFile();
