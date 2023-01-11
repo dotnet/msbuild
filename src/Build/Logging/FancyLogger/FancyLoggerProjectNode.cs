@@ -102,18 +102,17 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
-        public void AddTarget(TargetStartedEventArgs args)
+        public FancyLoggerTargetNode AddTarget(TargetStartedEventArgs args)
         {
             CurrentTargetNode = new FancyLoggerTargetNode(args);
+            return CurrentTargetNode;
         }
-        public void AddTask(TaskStartedEventArgs args)
+        public FancyLoggerTaskNode? AddTask(TaskStartedEventArgs args)
         {
             // Get target id
             int targetId = args.BuildEventContext!.TargetId;
-            if (CurrentTargetNode?.Id == targetId)
-            {
-                CurrentTargetNode.AddTask(args);
-            }
+            if (CurrentTargetNode?.Id == targetId) return CurrentTargetNode.AddTask(args);
+            else return null;
         }
         public FancyLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
         {

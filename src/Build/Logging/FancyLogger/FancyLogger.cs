@@ -153,16 +153,16 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void Shutdown()
         {
             FancyLoggerBuffer.Terminate();
+            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
+            Console.Clear();
+            Console.Out.Flu
             foreach (var project in projects)
             {
                 foreach (var message in project.Value.AdditionalDetails)
                 {
-                    Console.WriteLine(message.Message);
-                    // TODO: Update to show complete formatting. Maybe add a member to `FancyLoggerMessageNode` to store the contents. 
+                    Console.WriteLine(message.ToANSIString());
                 }
             }
-            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
-            // Console.Clear();
             // Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
             if (Succeeded)
             {

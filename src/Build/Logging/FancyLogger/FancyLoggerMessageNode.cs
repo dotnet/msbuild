@@ -39,6 +39,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             else if (args is BuildWarningEventArgs warning)
             {
                 Type = MessageType.Warning;
+                Code = warning.Code;
+                FilePath = warning.File;
+                LineNumber = warning.LineNumber;
+                ColumnNumber = warning.ColumnNumber;
             }
             else if (args is BuildErrorEventArgs error)
             {
@@ -64,27 +68,28 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
+        public string ToANSIString()
+        {
+            switch (Type)
+            {
+                case MessageType.Warning:
+                    return $"⚠️ {ANSIBuilder.Formatting.Color(
+                        $"Warning {Code}: {FilePath}({LineNumber},{ColumnNumber}) {Message}",
+                        ANSIBuilder.Formatting.ForegroundColor.Yellow)}";
+                case MessageType.Error:
+                    return $"❌ {ANSIBuilder.Formatting.Color(
+                        $"Error {Code}: {FilePath}({LineNumber},{ColumnNumber}) {Message}",
+                        ANSIBuilder.Formatting.ForegroundColor.Red)}";
+                case MessageType.HighPriorityMessage:
+                default:
+                    return $"ℹ️ {ANSIBuilder.Formatting.Italic(Message)}";
+            }
+        }
+
         public void Log()
         {
             if (Line == null) return;
-            // Get color
-            if (Type == MessageType.HighPriorityMessage)
-            {
-                FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Italic(Message)}");
-            }
-            else if (Type == MessageType.Warning)
-            {
-                FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Color(
-                    ANSIBuilder.Formatting.Italic($"{ANSIBuilder.Formatting.Dim("Warning:")} {Message}"),
-                    ANSIBuilder.Formatting.ForegroundColor.Yellow
-                )}");
-            } else if (Type == MessageType.Error)
-            {
-                FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ANSIBuilder.Formatting.Color(
-                    ANSIBuilder.Formatting.Italic($"Error {Code}: {FilePath}({LineNumber},{ColumnNumber}) {Message}"),
-                    ANSIBuilder.Formatting.ForegroundColor.Red
-                )}");
-            }
+            FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ToANSIString()}");
         }
     }
 }

@@ -23,9 +23,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             Id = args.BuildEventContext!.TargetId;
             TargetName = args.TargetName;
         }
-        public void AddTask(TaskStartedEventArgs args)
+        public FancyLoggerTaskNode AddTask(TaskStartedEventArgs args)
         {
             CurrentTaskNode = new FancyLoggerTaskNode(args);
+            return CurrentTaskNode;
         }
     }
 }

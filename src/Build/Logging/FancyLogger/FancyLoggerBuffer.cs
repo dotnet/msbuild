@@ -40,6 +40,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Use alternate buffer
             // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
             // Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
+            Console.OutputEncoding = Encoding.UTF8;
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
             Task.Run(async () => {
