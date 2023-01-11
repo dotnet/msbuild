@@ -10,8 +10,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
-using System.Threading;
 
 using Microsoft.Build.Shared;
 using Microsoft.Win32;

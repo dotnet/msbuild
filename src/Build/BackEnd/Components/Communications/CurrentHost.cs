@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if RUNTIME_TYPE_NETCORE || MONO
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Shared;
+#endif
 
 #nullable disable
 
