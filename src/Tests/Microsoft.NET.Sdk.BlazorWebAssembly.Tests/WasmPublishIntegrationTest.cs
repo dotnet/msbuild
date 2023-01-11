@@ -310,7 +310,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             });
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute().Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
@@ -371,7 +371,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             });
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.Execute().Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);

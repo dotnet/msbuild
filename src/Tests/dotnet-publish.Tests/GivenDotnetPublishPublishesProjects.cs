@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
-            return new DirectoryInfo(Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid ?? "", "publish"));
+            return new DirectoryInfo(OutputPathCalculator.FromTestAsset(testProjectDirectory).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid));
         }
 
         [Fact]

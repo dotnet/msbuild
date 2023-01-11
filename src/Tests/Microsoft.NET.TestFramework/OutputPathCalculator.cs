@@ -33,6 +33,11 @@ namespace Microsoft.NET.TestFramework
                 return FromTestProject(projectPath, testAsset.TestProject);
             }
 
+            if (!File.Exists(projectPath) && Directory.Exists(projectPath))
+            {
+                projectPath = Directory.GetFiles(projectPath, "*.*proj").FirstOrDefault();
+            }
+
             var calculator = new OutputPathCalculator()
             {
                 ProjectPath = projectPath,
@@ -69,7 +74,11 @@ namespace Microsoft.NET.TestFramework
                 var targetFrameworksElement = propertyGroup.Element(ns + "TargetFrameworks");
                 if (targetFrameworksElement != null)
                 {
-                    targetFramework = targetFrameworksElement.Value;
+                    string targetFrameworks = targetFrameworksElement.Value;
+                    if (!targetFrameworks.Contains(';'))
+                    {
+                        targetFramework = targetFrameworks;
+                    }
                 }
                 else
                 {
@@ -78,6 +87,28 @@ namespace Microsoft.NET.TestFramework
                 }
             }
             return targetFramework ?? "";
+        }
+
+        public bool IsMultiTargeted()
+        {
+            if (!string.IsNullOrEmpty(TargetFramework) && TargetFramework.Contains(';'))
+            { 
+                return true;
+            }
+            var project = XDocument.Load(ProjectPath);
+
+            var ns = project.Root.Name.Namespace;
+
+            var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+            var targetFrameworksElement = propertyGroup.Element(ns + "TargetFrameworks");
+            if (targetFrameworksElement != null)
+            {
+                string targetFrameworks = targetFrameworksElement.Value;
+                return !string.IsNullOrEmpty(targetFrameworks);
+            }
+
+            return false;
+
         }
 
         private bool UsesArtifactsFolder()
@@ -94,7 +125,12 @@ namespace Microsoft.NET.TestFramework
 
             string targetFramework = TryGetTargetFramework();
 
-            if (targetFramework == null || targetFramework.Contains(';'))
+            if (targetFramework == null)
+            {
+                return false;
+            }
+
+            if (IsMultiTargeted())
             {
                 return false;
             }
@@ -119,7 +155,7 @@ namespace Microsoft.NET.TestFramework
             if (UsesArtifactsFolder())
             {
                 string pivot = configuration.ToLowerInvariant();
-                if (TryGetTargetFramework().Contains(';') && !string.IsNullOrEmpty(targetFramework))
+                if (IsMultiTargeted() && !string.IsNullOrEmpty(targetFramework))
                 {
                     pivot += "_" + targetFramework;
                 }
@@ -153,7 +189,7 @@ namespace Microsoft.NET.TestFramework
             if (UsesArtifactsFolder())
             {
                 string pivot = configuration.ToLowerInvariant();
-                if (TryGetTargetFramework().Contains(';') && !string.IsNullOrEmpty(targetFramework))
+                if (IsMultiTargeted() && !string.IsNullOrEmpty(targetFramework))
                 {
                     pivot += "_" + targetFramework;
                 }

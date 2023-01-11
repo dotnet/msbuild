@@ -81,7 +81,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             Directory.Delete(Path.Combine(projectDirectory.Path, "Views"), recursive: true);
 
-            var publish = new PublishCommand(Log, projectDirectory.TestRoot);
+            var publish = new PublishCommand(projectDirectory);
             publish.Execute("/p:RazorCompileOnPublish=false").Should().Pass();
 
             var publishOutputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
