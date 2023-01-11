@@ -22,23 +22,23 @@ namespace Microsoft.DotNet.Cli
                 ApplyOverrideToCurrentProcess(language);
                 FlowOverrideToChildProcesses(language);
             }
-        }
 
-        private static void ApplyOverrideToCurrentProcess(CultureInfo language)
-        {
-
-            CultureInfo.DefaultThreadCurrentUICulture = language;
-
-            // The CurrentUICulture can be supposedly be left incorrectly unchanged even when DefaultThreadCurrentUICulture is changed:
-            // https://learn.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture?redirectedfrom=MSDN&view=net-7.0#remarks
-            CultureInfo.CurrentUICulture = language;
-
-            if (OperatingSystem.IsWindows() && Environment.OSVersion.Version.Major >= 10) // Encoding is only an issue on Windows, UTF-8 is only officially supported on 10+.
+            if (
+                OperatingSystem.IsWindows() && // Encoding is only an issue on Windows
+                !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase) &&
+                Environment.OSVersion.Version.Major >= 10 // UTF-8 is only officially supported on 10+.
+                )
             {
                 Console.OutputEncoding = DefaultMultilingualEncoding;
                 Console.InputEncoding = DefaultMultilingualEncoding; // Setting both encodings causes a change in the CHCP, making it so we dont need to P-Invoke ourselves.
                 // If the InputEncoding is not set, the encoding will work in CMD but not in Powershell, as the raw CHCP page won't be changed.
             }
+        }
+
+        private static void ApplyOverrideToCurrentProcess(CultureInfo language)
+        {
+            CultureInfo.DefaultThreadCurrentUICulture = language;
+            // We don't need to change CurrentUICulture, as it will be changed by DefaultThreadCurrentUICulture on NET Core (but not Framework) apps. 
         }
 
         private static void FlowOverrideToChildProcesses(CultureInfo language)
@@ -79,11 +79,6 @@ namespace Microsoft.DotNet.Cli
                 }
                 catch (ArgumentOutOfRangeException) { }
                 catch (CultureNotFoundException) { }
-            }
-
-            if (!CultureInfo.InstalledUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return CultureInfo.InstalledUICulture;
             }
 
             return null;
