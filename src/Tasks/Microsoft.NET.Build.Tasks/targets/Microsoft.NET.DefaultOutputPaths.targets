@@ -109,8 +109,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- This targets file is evaluated before RuntimeIdentifierInference.targets, so this will only include the
          RuntimeIdentifier in the path if it was explicitly specified, not if it was inferred.  This is the
-         behavior we want. -->
-    <_ArtifactPivots Condition="'$(RuntimeIdentifier)' != ''"
+         behavior we want.
+
+         The BlazorWebAssembly .props file sets the RuntimeIdentifier to blazor-wasm, so treat that as a special case.
+         -->
+    
+    <_ArtifactPivots Condition="'$(RuntimeIdentifier)' != '' And !('$(RuntimeIdentifier)' == 'browser-wasm' And '$(AppendRuntimeIdentifierToOutputPath)' == 'false')"
                      >$(_ArtifactPivots)_$(RuntimeIdentifier.ToLowerInvariant())</_ArtifactPivots>
 
     <OutputPath Condition="'$(OutputPath)' == ''">$(BaseOutputPath)$(_ArtifactPivots)\</OutputPath>
