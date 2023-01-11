@@ -70,10 +70,20 @@ namespace Microsoft.Build.UnitTests
 
                 // Do retries
                 ((MockEngine)t.BuildEngine).AssertLogContains("MSB3062");
+
+                File.SetAttributes(source, FileAttributes.Normal);
+                t = new Delete
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    Files = sourceFiles,
+                    Retries = 1,
+                };
+                t.Execute().ShouldBe(true);
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3062");
             }
             finally
             {
-                File.SetAttributes(source, FileAttributes.Normal);
                 File.Delete(source);
             }
         }

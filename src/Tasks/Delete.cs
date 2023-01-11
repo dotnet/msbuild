@@ -121,11 +121,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", file.ItemSpec);
                             }
-
-                            // keep a running list of the files that were actually deleted
-                            // note that we include in this list files that did not exist
-                            ITaskItem deletedFile = new TaskItem(file);
-                            deletedFilesList.Add(deletedFile);
+                            break;
                         }
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -144,9 +140,14 @@ namespace Microsoft.Build.Tasks
                             break;
                         }
                     }
-                    // Add even on failure to avoid reattempting
-                    deletedFilesSet.Add(file.ItemSpec);
                 }
+                // keep a running list of the files that were actually deleted
+                // note that we include in this list files that did not exist
+                ITaskItem deletedFile = new TaskItem(file);
+                deletedFilesList.Add(deletedFile);
+
+                // Add even on failure to avoid reattempting
+                deletedFilesSet.Add(file.ItemSpec);
             }
             // convert the list of deleted files into an array of ITaskItems
             DeletedFiles = deletedFilesList.ToArray();
