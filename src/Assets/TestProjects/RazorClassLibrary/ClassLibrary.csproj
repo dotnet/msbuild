@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <TargetFramework>$(AspNetTestTfm)</TargetFramework>
     <Copyright>© Microsoft</Copyright>
     <Product>Razor Test</Product>

@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(OutputPathCalculator.FromTestAsset(testProjectDirectory).GetPublishDirectory(configuration: configuration), $"{testAppName}.dll");
 
             new DotnetCommand(Log)
                 .Execute(outputDll)
@@ -331,7 +331,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
-            var outputProgram = Path.Combine(rootDir, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(OutputPathCalculator.FromTestAsset(rootDir).GetPublishDirectory(configuration: configuration), $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
@@ -383,7 +383,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
-            var outputProgram = Path.Combine(rootPath, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid, "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(OutputPathCalculator.FromTestAsset(rootPath).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid), $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()

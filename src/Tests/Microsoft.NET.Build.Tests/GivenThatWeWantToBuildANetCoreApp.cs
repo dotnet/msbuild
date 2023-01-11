@@ -626,7 +626,8 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "OutputPathCasing",
-                TargetFrameworks = "ignored",
+                //  Force the actual TargetFramework to be included in the artifact pivots
+                TargetFrameworks = "ignored;ignored2",
                 IsExe = true
             };
 

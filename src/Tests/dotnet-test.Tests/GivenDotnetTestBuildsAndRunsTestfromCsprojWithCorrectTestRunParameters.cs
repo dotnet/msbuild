@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "VSTestTestRunParameters.dll");
+            var outputDll = Path.Combine(OutputPathCalculator.FromTestAsset(testProjectDirectory).GetOutputDirectory(configuration: configuration), "VSTestTestRunParameters.dll");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)
