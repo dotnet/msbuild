@@ -20,3 +20,4 @@ Template options:
                        Type: string
                        Default: def
   -a_, --a_enabled     Type: bool
+                       Default: False

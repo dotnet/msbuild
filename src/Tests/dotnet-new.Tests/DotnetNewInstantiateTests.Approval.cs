@@ -685,8 +685,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Theory]
-        //[InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|valA|--A_enabled", "A")]
-        [InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|valA|--paramB|valB|--A_enabled|--B_enabled", "AB")]
+        [InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|true|--A_enabled", "A_Aenabled")]
+        [InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|true", "A")]
+        [InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|true|--paramB|true", "AB")]
+        [InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|true|--paramB|true|--A_enabled", "AB_Aenabled")]
+        [InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|true|--paramB|true|--A_enabled|--B_enabled", "AB_ABenabled")]
         public Task CanInstantiateTemplate_WithConditionallyEnabledParams(string parameters, string setName)
         {
             string workingDirectory = CreateTemporaryFolder();
@@ -728,29 +731,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .Fail();
 
             return Verify(commandResult.FormatOutputStreams())
-                .UseParameters(setName);
-        }
-
-        [Theory]
-        [InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|valA", "A")]
-        [InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|valA|--paramB|valB", "AB")]
-        //[InlineData("TestAssets.TemplateWithConditionalParameters|--paramA|valA|--paramB|valB|--A_enabled", "AB")]
-        public Task CannotInstantiateTemplate_WithDisabledParams(string parameters, string setName)
-        {
-            string workingDirectory = CreateTemporaryFolder();
-            string homeDirectory = CreateTemporaryFolder();
-            InstallTestTemplate("TemplateWithConditionalParameters", _log, homeDirectory, workingDirectory);
-
-            CommandResult commandResult = new DotnetNewCommand(_log, parameters.Split("|"))
-                .WithCustomHive(homeDirectory)
-                .WithWorkingDirectory(workingDirectory)
-                .Execute();
-
-            commandResult
-                 .Should()
-                 .Pass();
-
-            return Verify(File.ReadAllText(Path.Combine(workingDirectory, "Test.cs")))
                 .UseParameters(setName);
         }
     }
