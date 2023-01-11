@@ -15,6 +15,12 @@ These quarterly releases should avoid breaking changes if at all possible. Break
 
 Minor releases lock down after preview 3 for each release.  Preview 3 is typically 1 month prior to GA and locks down by the end of the month before the preview release.
 
+#### Transition from minor release to servicing
+After the minor release locks down, it transitions into servicing mode. This typically happens around the preview 3 release to allow time for any late public changes we want feedback on. The next release after preview 3 is typically GA and done as a servicing release. The following steps are done when transitioning from minor release previews to servicing
+- [ ] Follow the new branch check list for creating a new minor release (steps listed on internal OneNote)
+- [ ] Set stabilize branding to true
+- [ ] Enable internal runtime darc subscriptions and trigger them
+
 ### Servicing releases
 The .NET SDK has monthly servicing releases aligning with the .NET Runtime servicing releases. These are for top fixes and security updates only to limit risk.
 Any servicing release is open for checkins from the day the [branding PRs](https://github.com/dotnet/sdk/pulls?q=is%3Apr+branding) are merged (~1st of each month) and when code complete is (typically two weeks later).
