@@ -3,12 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-
 using Microsoft.Build.Framework;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.IO;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {

@@ -4,7 +4,9 @@
 #if FEATURE_APPDOMAIN
 
 using System;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
