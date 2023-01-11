@@ -176,7 +176,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29111")]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29111 https://github.com/dotnet/sdk/issues/28429")]
         public void StaticWebAssets_HostedApp_ReferencingNetStandardLibrary_Works()
         {
             // Arrange
