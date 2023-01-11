@@ -154,9 +154,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <!-- Default the value of PackRelease for 8.0+ TFMs. Note that this is pre-evaluated by the CLI in an evaluation before evaluation (see ReleasePropertyProjectLocator.cs).-->
-  <PropertyGroup Condition="'$(PackRelease)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '8.0'">
+  <PropertyGroup Condition="'$(PackRelease)' == ''">
     <PackRelease>true</PackRelease>
-    <_PackReleaseAutomaticallyInferred>true</_PackReleaseAutomaticallyInferred>
   </PropertyGroup>
 
   <!-- This verifies that the configuration between projects in a solution set by PackRelease agree.
@@ -166,9 +165,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="PrepareForBuild"
           Condition="'$(_IsPacking)' == 'true'">
     <NETSdkError Condition="'$(_SolutionLevelPackRelease)' != '' and
-                            '$(_SolutionLevelPackRelease)' != '$(PackRelease)' and
-                            '$(PackRelease)' != '' and
-                            '$(_PackReleaseAutomaticallyInferred)' != 'true'"
+                            '$(_SolutionLevelPackRelease)' != '$(PackRelease)'"
           ResourceName="SolutionProjectConfigurationsConflict"
           FormatArguments="PackRelease"/>
   </Target>
