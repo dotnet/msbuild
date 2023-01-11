@@ -341,6 +341,29 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             Assert.Equal($"{string.Format(expectedCommandFormat, "bar")}{expectedEol}bar{expectedEol}baz{expectedEol}", File.ReadAllText(testFile));
         }
 
+        [Theory]
+        [InlineData("", "theDefaultName.cs")]
+        [InlineData("newName", "newName.cs")]
+        public void CanInstantiateTemplate_WithDefaultName(string name, string expectedFileName)
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate("TemplateWithPreferDefaultName", _log, home, workingDirectory);
+
+            workingDirectory = CreateTemporaryFolder();
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithPreferDefaultName", "-n", name)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"TemplateWithPreferDefaultName\" was created successfully.");
+
+            string testFile = Path.Combine(workingDirectory, expectedFileName);
+            Assert.True(File.Exists(testFile));
+        }
+
         [Fact]
         public void DoesNotReportErrorOnDefaultUpdateCheckOfLocalPackageDuringInstantiation()
         {
