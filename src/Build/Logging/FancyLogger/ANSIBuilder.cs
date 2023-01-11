@@ -15,7 +15,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
         }
 
-        // TODO: Refine
         public static int ANSIBreakpoint(string text, int position)
         {
             if (position >= text.Length) return text.Length;
@@ -25,19 +24,21 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get length difference
             int difference = substring.Length - substringWithoutANSI.Length;
             int newPosition = position + difference;
-            // If new position is npot inside the string
+            // If new position is not inside the string
             if (newPosition > text.Length) return text.Length;
             return newPosition;
         }
 
         public static List<string> ANSIWrap(string text, int position)
         {
-            int breakpoint = ANSIBreakpoint(text, position);
+            // Using spans to improve efficiency of substring operations
+            ReadOnlySpan<char> textSpan = text.AsSpan();
             List<string> result = new();
-            while (text.Length > breakpoint)
+            int breakpoint = ANSIBreakpoint(text, position);
+            while(textSpan.Length > breakpoint)
             {
-                result.Add(text.Substring(0, breakpoint));
-                text = text.Substring(breakpoint);
+                result.Add(textSpan.Slice(0, breakpoint).ToString());
+                textSpan = textSpan.Slice(breakpoint);
             }
             result.Add(text);
             return result;
