@@ -27,7 +27,6 @@ namespace Microsoft.DotNet.Cli
         private static void ApplyOverrideToCurrentProcess(CultureInfo language)
         {
 
-            CultureInfo.DefaultThreadCurrentCulture = language;
             CultureInfo.DefaultThreadCurrentUICulture = language;
 
             // The CurrentUICulture can be supposedly be left incorrectly unchanged even when DefaultThreadCurrentUICulture is changed:
