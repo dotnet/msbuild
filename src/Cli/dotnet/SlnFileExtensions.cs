@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Tools.Common
             Dictionary<string, string> projectPlatforms,
             string defaultProjectPlatform)
         {
-            var pair = solutionConfigKey.Split(new char[] {'|'}, 2);
+            var pair = solutionConfigKey.Split(new char[] { '|' }, 2);
             if (pair.Length != 2)
             {
                 return null;
@@ -269,7 +269,9 @@ namespace Microsoft.DotNet.Tools.Common
                 while (nestedProjects.ContainsKey(id))
                 {
                     id = nestedProjects[id];
-                    var parentSlnProject = solutionFolderProjects.Where(p => p.Id == id).Single();
+                    var parentSlnProject = solutionFolderProjects.Where(p => p.Id == id).SingleOrDefault();
+                    if(parentSlnProject == null) // see: https://github.com/dotnet/sdk/pull/28811
+                        throw new GracefulException(CommonLocalizableStrings.CorruptSolutionProjectFolderStructure, slnFile.FullPath, id);
                     path = Path.Combine(parentSlnProject.FilePath, path);
                 }
 
