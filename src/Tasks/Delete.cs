@@ -121,6 +121,10 @@ namespace Microsoft.Build.Tasks
                             {
                                 Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", file.ItemSpec);
                             }
+                            // keep a running list of the files that were actually deleted
+                            // note that we include in this list files that did not exist
+                            ITaskItem deletedFile = new TaskItem(file);
+                            deletedFilesList.Add(deletedFile);
                             break;
                         }
                     }
@@ -141,10 +145,6 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
-                // keep a running list of the files that were actually deleted
-                // note that we include in this list files that did not exist
-                ITaskItem deletedFile = new TaskItem(file);
-                deletedFilesList.Add(deletedFile);
 
                 // Add even on failure to avoid reattempting
                 deletedFilesSet.Add(file.ItemSpec);
