@@ -8,6 +8,7 @@ using System.Xml.XPath;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -68,16 +69,10 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// The value to be inserted into the specified location.
-        /// </summary>
-        [Required]
+        /// </summary>        
         public ITaskItem Value
         {
-            get
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(_value, nameof(Value));
-                return _value;
-            }
-
+            get => _value;
             set => _value = value;
         }
 
@@ -95,8 +90,12 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
-            ErrorUtilities.VerifyThrowArgumentNull(_value, "Value");
             ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, "XmlInputPath");
+            if (_value == null)
+            {
+                // When Value is null, it means Value is not set or empty. Here we treat them all as empty.
+                _value = new TaskItem(String.Empty);
+            }
 
             // Load the XPath Document
             XmlDocument xmlDoc = new XmlDocument();

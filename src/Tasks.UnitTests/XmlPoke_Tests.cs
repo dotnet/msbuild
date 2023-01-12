@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNs, out xmlInputPath);
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
             {
                 XmlPoke p = new XmlPoke();
                 p.BuildEngine = engine;
@@ -157,13 +157,8 @@ namespace Microsoft.Build.UnitTests
                     p.Query = "//variable/@Name";
                 }
 
-                if ((i & 4) == 4)
-                {
-                    p.Value = new TaskItem("Mert");
-                }
-
-                // "Expecting argumentnullexception for the first 7 tests"
-                if (i < 7)
+                // "Expecting argumentnullexception for the first 3 tests"
+                if (i < 3)
                 {
                     Should.Throw<ArgumentNullException>(() => p.Execute());
                 }
@@ -172,6 +167,23 @@ namespace Microsoft.Build.UnitTests
                     Should.NotThrow(() => p.Execute());
                 }
             }
+        }
+
+        [Fact]
+        // https://github.com/dotnet/msbuild/issues/5814
+        public void XmlPokeWithEmptyValue()
+        {
+            string xmlInputPath;
+            Prepare(_xmlFileNoNs, out xmlInputPath);
+            string projectContents = @"
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                <Target Name='Poke'>
+                    <XmlPoke Value='' Query='//class/variable/@Name' XmlInputPath='{0}'/>
+                </Target>
+                </Project>";
+            projectContents = string.Format(projectContents, xmlInputPath);
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
         }
 
         [Fact]
