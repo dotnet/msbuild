@@ -73,9 +73,11 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm, "Release");
 
+            var webConfig = new BuildCommand(testInstance, "blazorwasm").GetOutputDirectory(configuration: "Release").File("web.config");
+
             // Verify web.config
-            new FileInfo(Path.Combine(publishDirectory.ToString(), "..", "web.config")).Should().Exist();
-            new FileInfo(Path.Combine(publishDirectory.ToString(), "..", "web.config")).Should().Contain(webConfigContents);
+            webConfig.Should().Exist();
+            webConfig.Should().Contain(webConfigContents);
         }
 
         [RequiresMSBuildVersionFact("17.0.0")]
