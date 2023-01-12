@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
