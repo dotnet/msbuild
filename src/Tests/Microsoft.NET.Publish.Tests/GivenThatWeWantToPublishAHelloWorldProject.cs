@@ -75,11 +75,6 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
-            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
-            {
-                return;
-            }
-
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var helloWorldAsset = _testAssetsManager
