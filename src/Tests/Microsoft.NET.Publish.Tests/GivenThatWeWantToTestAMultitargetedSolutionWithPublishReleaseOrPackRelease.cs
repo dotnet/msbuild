@@ -42,7 +42,7 @@ namespace Microsoft.NET.Publish.Tests
             };
             _testProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
             _testProject.AdditionalProperties[PReleaseProperty] = firstProjPReleaseValue;
-            var mainProject = _testAssetsManager.CreateTestProject(_testProject, testPath);
+            var mainProject = _testAssetsManager.CreateTestProject(_testProject, callingMethod: testPath, identifier: PReleaseProperty);
 
             var _referencedProject = new TestProject("ReferencedProject")
             {
@@ -51,7 +51,7 @@ namespace Microsoft.NET.Publish.Tests
             };
             _referencedProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
             _testProject.AdditionalProperties[PReleaseProperty] = secondProjPReleaseValue;
-            var secondProject = _testAssetsManager.CreateTestProject(_referencedProject, testPath);
+            var secondProject = _testAssetsManager.CreateTestProject(_referencedProject, callingMethod: testPath, identifier: PReleaseProperty);
 
             List<TestAsset> projects = new List<TestAsset> { mainProject, secondProject };
 
