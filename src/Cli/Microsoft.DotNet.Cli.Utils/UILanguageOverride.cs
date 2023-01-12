@@ -4,11 +4,11 @@
 using System;
 using System.Globalization;
 
-namespace Microsoft.DotNet.Cli
+namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class UILanguageOverride
     {
-        private const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
+        internal const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
         private const string VSLANG = nameof(VSLANG);
         private const string PreferredUILang = nameof(PreferredUILang);
 
