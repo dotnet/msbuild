@@ -50,6 +50,7 @@ namespace Microsoft.DotNet.Cli
         public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified()
         {
             // Setup
+#nullable enable
             Debug.Assert(_propertyToCheck == MSBuildPropertyNames.PUBLISH_RELEASE || _propertyToCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
             var nothing = Enumerable.Empty<string>();
             if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
@@ -67,7 +68,7 @@ namespace Microsoft.DotNet.Cli
                 return nothing;
 
             // Determine the project being acted upon
-            ProjectInstance project = GetTargetedProject(globalProperties);
+            ProjectInstance? project = GetTargetedProject(globalProperties);
 
             // Determine the correct value to return
             if (project != null)
@@ -118,7 +119,7 @@ namespace Microsoft.DotNet.Cli
                     }
                     catch (GracefulException)  // Fall back to looking for a solution if multiple project files are found, or there's no project in the directory.
                     {
-                        string potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        string? potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
 
                         if (!string.IsNullOrEmpty(potentialSln))
                         {
@@ -171,6 +172,7 @@ namespace Microsoft.DotNet.Cli
                 Reporter.Error.WriteLine(e.Message);
             }
             return null;
+#nullable disable
         }
 
         /// <returns>Returns true if the path exists and is a project file type.</returns> 
