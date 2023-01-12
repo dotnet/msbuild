@@ -22,7 +22,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 _text = value;
                 // TODO: Replace with console.bufferwidth
-                WrappedText = ANSIBuilder.ANSIWrap(value, 80);
+                WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
             }
         }
 
@@ -50,13 +50,13 @@ namespace Microsoft.Build.Logging.FancyLogger
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
-            Task.Run(async () => {
+            /*Task.Run(async () => {
                 while (true)
                 {
                     await Task.Delay((1/60)/1000);
                     Render();
                 }
-            });
+            });*/
 
             Task.Run(() =>
             {
@@ -66,9 +66,11 @@ namespace Microsoft.Build.Logging.FancyLogger
                     {
                         case ConsoleKey.UpArrow:
                             if (TopLineIndex > 0) TopLineIndex--;
+                            Render();
                             break;
                         case ConsoleKey.DownArrow:
                             TopLineIndex++;
+                            Render();
                             break;
                         case ConsoleKey.Spacebar:
                         case ConsoleKey.Escape:
@@ -88,7 +90,6 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
 
         #region Rendering
-        // private static List<string> lineContents = new();
         public static void Render()
         {
             // Write Header
@@ -99,28 +100,29 @@ namespace Microsoft.Build.Logging.FancyLogger
                 // Write footer
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
                 // TODO: Remove and replace with actual footer
-                new string('-', Console.BufferWidth) + '\n' + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                // new string('-', Console.BufferWidth) + '\n' + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" + TopLineIndex
+                new string('-', Console.BufferWidth) +$"\nBuild progress: XX%\tTopLineIndex={TopLineIndex}"
             );
             if (Lines.Count == 0) return;
-
-            // Get lines with wrappings
-            List<string> lineContents = new();
-            int lineCount = Lines.Count;
-            for (int i = 0; i < lineCount; i++)
+            // Iterate over lines and display on terminal
+            // TODO: Try to improve performance when scrolling
+            int accumulatedLineCount = 0;
+            foreach (FancyLoggerBufferLine line in Lines)
             {
-                lineContents.AddRange(Lines[i].WrappedText);
+                // Skip for lines that are not visible in the scroll area
+                if (accumulatedLineCount + line.WrappedText.Count < TopLineIndex) continue;
+                foreach (string s in line.WrappedText) {
+                    // Get line index relative to scroll area
+                    int lineIndex = accumulatedLineCount - TopLineIndex;
+                    if (lineIndex >= 0 && lineIndex < Console.BufferHeight - 3)
+                    {
+                        Console.Write(ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s);
+                    }
+                    // Stop when exceeding buffer height
+                    if (lineIndex > Console.BufferHeight - 3) return;
+                    accumulatedLineCount++;
+                }
             }
-            // Print lines
-            for (int i = 0; i < Console.BufferHeight - 3; i++)
-            {
-                int lineIndex = i + TopLineIndex;
-                Console.Write(
-                    ANSIBuilder.Cursor.Position(i + 2, 0) +
-                    ANSIBuilder.Eraser.LineCursorToEnd() + 
-                    (lineIndex < Lines.Count ? Lines[lineIndex].Text : String.Empty)
-                );
-            }
-            Console.Out.Flush();
         }
         #endregion
         #region Line identification
@@ -167,6 +169,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get updated top line index
             // TopLineIndex = GetLineIndexById(topLineId);
             // Return
+            // ??
             return line;
         }
 
