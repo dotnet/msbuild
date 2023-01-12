@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 //
 
-using System;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -15,19 +14,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
-            // TODO: Replace
-            if (args.Message == null)
-            {
-                Message = string.Empty;
-            }
-            else if (args.Message.Length > Console.WindowWidth - 1)
-            {
-                Message = args.Message.Substring(0, Console.WindowWidth - 1);
-            }
-            else
-            {
-                Message = args.Message;
-            }
+            Message = args.Message ?? string.Empty;
         }
 
         public void Log()

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -46,7 +47,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
             FancyLoggerBuffer.WriteNewLine("");
-            // FancyLoggerBuffer.WriteNewLine("Hello, this is some text... Lorem ipsum dolor sit amet. ABCDEFGHIJKLMNOPQRSTUVWXYZ-ABCDEFGHIJKLMNOPQRSTUVWXYZ-ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+            // for (int i = 0; i < 120; i++) FancyLoggerBuffer.WriteNewLine( new string(Convert.ToString(i, 16)[0], 200) );
+            FancyLoggerBuffer.Render();
         }
 
         // Build
@@ -149,6 +151,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public void Shutdown()
         {
+            Thread.Sleep(15_000);
             FancyLoggerBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();

@@ -21,7 +21,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             set
             {
                 _text = value;
-                // TODO: Replace with console.bufferwidth
                 WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
             }
         }
@@ -100,26 +99,22 @@ namespace Microsoft.Build.Logging.FancyLogger
                 // Write footer
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
                 // TODO: Remove and replace with actual footer
-                // new string('-', Console.BufferWidth) + '\n' + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" + TopLineIndex
                 new string('-', Console.BufferWidth) +$"\nBuild progress: XX%\tTopLineIndex={TopLineIndex}"
             );
             if (Lines.Count == 0) return;
             // Iterate over lines and display on terminal
-            // TODO: Try to improve performance when scrolling
+            // TODO: Delimit range to improve performance 
             int accumulatedLineCount = 0;
             foreach (FancyLoggerBufferLine line in Lines)
             {
-                // Skip for lines that are not visible in the scroll area
-                if (accumulatedLineCount + line.WrappedText.Count < TopLineIndex) continue;
                 foreach (string s in line.WrappedText) {
                     // Get line index relative to scroll area
                     int lineIndex = accumulatedLineCount - TopLineIndex;
+                    // Print if line in scrolling area
                     if (lineIndex >= 0 && lineIndex < Console.BufferHeight - 3)
                     {
                         Console.Write(ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s);
                     }
-                    // Stop when exceeding buffer height
-                    if (lineIndex > Console.BufferHeight - 3) return;
                     accumulatedLineCount++;
                 }
             }
@@ -169,7 +164,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get updated top line index
             // TopLineIndex = GetLineIndexById(topLineId);
             // Return
-            // ??
             return line;
         }
 
