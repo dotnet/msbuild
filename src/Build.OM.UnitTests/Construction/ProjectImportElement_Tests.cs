@@ -163,12 +163,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                file1 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file1 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                 ProjectRootElement importProject1 = ProjectRootElement.Create();
                 importProject1.AddProperty("p", "v1");
                 importProject1.Save(file1);
 
-                file2 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file2 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                 ProjectRootElement importProject2 = ProjectRootElement.Create();
                 importProject2.AddProperty("p", "v2");
                 importProject2.Save(file2);
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                 ProjectRootElement importProject = ProjectRootElement.Create();
                 importProject.AddProperty("p", "v1");
                 importProject.Save(file);

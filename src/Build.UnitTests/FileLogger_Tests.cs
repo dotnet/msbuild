@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
 
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 FileLogger fl = new FileLogger();
                 EventSourceSink es = new EventSourceSink();
                 fl.Parameters = "verbosity=diagnostic;logfile=" + log;  // diagnostic specific setting
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
 
                 try
                 {
-                    log = GetTempFilename();
+                    log = FileUtilities.GetTemporaryFileName();
                     FileLogger fl = new FileLogger();
                     EventSourceSink es = new EventSourceSink();
                     fl.Parameters = "encoding=foo;logfile=" + log;
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 SetUpFileLoggerAndLogMessage("encoding=utf-16;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 byte[] content = ReadRawBytes(log);
 
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 SetUpFileLoggerAndLogMessage("encoding=utf-8;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 byte[] content = ReadRawBytes(log);
 
@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 WriteContentToFile(log);
                 SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 WriteContentToFile(log);
                 SetUpFileLoggerAndLogMessage("append;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "existing content\nmessage here");
@@ -404,17 +404,6 @@ namespace Microsoft.Build.UnitTests
                     Assert.DoesNotContain(message, log);
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets a filename for a nonexistent temporary file.
-        /// </summary>
-        /// <returns></returns>
-        private string GetTempFilename()
-        {
-            string path = FileUtilities.GetTemporaryFile();
-            File.Delete(path);
-            return path;
         }
 
         /// <summary>

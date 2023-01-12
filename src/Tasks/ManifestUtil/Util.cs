@@ -510,7 +510,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string WriteTempFile(Stream s)
         {
             // May throw IO-related exceptions
-            string path = FileUtilities.GetTemporaryFile();
+            string path = FileUtilities.GetTemporaryFileName();
 
             WriteFile(path, s);
             return path;
@@ -519,7 +519,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string WriteTempFile(string s)
         {
             // May throw IO-related exceptions
-            string path = FileUtilities.GetTemporaryFile();
+            string path = FileUtilities.GetTemporaryFileName();
 
             WriteFile(path, s);
             return path;
