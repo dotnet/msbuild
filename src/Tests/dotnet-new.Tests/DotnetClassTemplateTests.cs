@@ -89,11 +89,82 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .ConfigureAwait(false);
         }
 
+        [Theory]
+        [InlineData("class")]
+        [InlineData("class", "11.0", "net7.0")]
+        [InlineData("class", "10.0", "net6.0")]
+        [InlineData("class", "9.0", "netstandard2.0")]
+        [InlineData("enum")]
+        [InlineData("enum", "10", "net6.0")]
+        [InlineData("enum", "", "net7.0")]
+        [InlineData("enum", "9.0", "netstandard2.0")]
+        [InlineData("struct")]
+        [InlineData("struct", "10")]
+        [InlineData("struct", "10", "net6.0")]
+        [InlineData("struct", "9.0", "netstandard2.0")]
+        [InlineData("interface")]
+        [InlineData("interface", "11.0", "net7.0")]
+        [InlineData("interface", "10.0", "net6.0")]
+        [InlineData("interface", "9", "netstandard2.0")]
+        public async void DotnetVisualBasicClassTemplatesTest(
+            string templateShortName,
+            string langVersion = "",
+            string targetFramework = "")
+        {
+            // prevents logging a welcome message from sdk installation
+            Dictionary<string, string> environmentUnderTest = new() { ["DOTNET_NOLOGO"] = false.ToString() };
+            TestContext.Current.AddTestEnvironmentVariables(environmentUnderTest);
+
+            string folderName = GetFolderName(templateShortName, langVersion, targetFramework);
+            string workingDir = CreateTemporaryFolder($"{nameof(DotnetVisualBasicClassTemplatesTest)}.{folderName}");
+            string projectName = CreateTestProject(workingDir, langVersion, targetFramework, "VB");
+
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
+            {
+                SnapshotsDirectory = "Approvals",
+                VerifyCommandOutput = true,
+                TemplateSpecificArgs = new[] { "--name", "TestItem1", "--language", "VB" },
+                VerificationExcludePatterns = new[]
+                {
+                    "*/stderr.txt",
+                    "*\\stderr.txt",
+                    // restored files in obj folder
+                    $"*{projectName}.vbproj.*",
+                    "*project.*.*"
+                },
+                SettingsDirectory = _fixture.HomeDirectory,
+                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
+                DoNotAppendTemplateArgsToScenarioName = true,
+                DoNotPrependTemplateNameToScenarioName = true,
+                ScenarioName = folderName,
+                OutputDirectory = workingDir,
+                EnsureEmptyOutputDirectory = false
+            }
+            .WithCustomEnvironment(environmentUnderTest);
+
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options)
+                .ConfigureAwait(false);
+        }
+
         private string CreateTestProject(
             string workingDir,
             string langVersion,
-            string targetFramework)
+            string targetFramework,
+            string language = "")
         {
+            IDictionary<string, string> languageToProjectExtMap = new Dictionary<string, string>
+            {
+                { "VB", ".vbproj" },
+                { "", ".csproj" }
+            };
+
+            IDictionary<string, string> languageToClassExtMap = new Dictionary<string, string>
+            {
+                { "VB", ".vb" },
+                { "", ".cs" }
+            };
+
             IList<string> projectArgs = new List<string>() { "classlib", "-o", workingDir, "--name", "ClassLib" };
             if (!string.IsNullOrEmpty(langVersion))
             {
@@ -102,6 +173,10 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             if (!string.IsNullOrEmpty(targetFramework))
             {
                 projectArgs.AddRange(new[] { "--framework", targetFramework });
+            }
+            if (!string.IsNullOrEmpty(language))
+            {
+                projectArgs.AddRange(new[] { "--language", language });
             }
 
             new DotnetNewCommand(Log, projectArgs.ToArray())
@@ -112,12 +187,13 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .Pass()
                 .And.NotHaveStdErr();
 
-            foreach (string classFile in Directory.GetFiles(workingDir, "*.cs"))
+            foreach (string classFile in Directory.GetFiles(workingDir, $"*{languageToClassExtMap[language]}"))
             {
                 File.Delete(classFile);
             }
 
-            return Path.GetFileNameWithoutExtension(Directory.GetFiles(workingDir, "*.csproj")?.FirstOrDefault() ?? string.Empty);
+            return Path.GetFileNameWithoutExtension(Directory
+                .GetFiles(workingDir, $"*{languageToProjectExtMap[language]}")?.FirstOrDefault() ?? string.Empty);
         }
 
         private string GetFolderName(string templateShortName, string langVersion, string targetFramework)

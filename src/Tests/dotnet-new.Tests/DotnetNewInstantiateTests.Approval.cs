@@ -11,7 +11,6 @@ using Microsoft.TemplateEngine.TestHelper;
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public partial class DotnetNewInstantiateTests
     {
         [Fact]
