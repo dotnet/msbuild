@@ -94,35 +94,107 @@ namespace Microsoft.NET.Publish.Tests
             Assert.Equal(expectedConfiguration, finalPropertyResults.ElementAt(1)["Configuration"]);
         }
 
-        /*
-        ["PublishRelease"]
-        ["PackRelease"]
+        
+        [Fact]
+        public void ItWorksWithASpecificSolutionPathGiven()
+        {
+
+        }
+
         [Theory]
-        public void ItUsesDebugIfNet8PlusDefinesFalseAndNet7DefinesNothing(string releaseProperty)
+        public void ItPublishesReleaseWithATargetFrameworkOptionNet8ForNet6AndNet7MultitargetingProjectWithPublishReleaseUndefined
+        {
+        // property and option theory
+
+        }
+
+        [Theory]
+        public void ItPublishesDebugWithATargetFrameworkOptionNet7ForNet8Net7ProjectAndNet7Net6ProjectSolutionWithPublishReleaseUndefined
+        {
+        // property and option theory
+
+        }
+
+        [Fact]
+        public void ItPacksDebugWithMutlitargetingWhereNet8AndNet7ProjectDefinePackReleaseFalse
         {
 
         }
 
         [Fact]
-        public void ItWorksWithASpecificSolutionPathGiven()
+        public void ItPacksDebugWithSolutionWithNet8ProjectAndNet8tNet6ProjectThatDefinePackReleaseFalse
         {
+
         }
 
-        ["PublishRelease"]
-        ["PackRelease"]
+        [Fact]
+        public void ItFailsToPackWithMultiProjectSolutionWithConflictingPackRelease
+        {
+
+        }
+
+        [Fact]
+        public void ItPacksReleaseWithANet8ProjectAndNet7ProjectSolutionWherePackReleaseUndefined
+        {
+
+        }
+
+        [Fact]
+        public void ItPacksReleaseWithNet8Net7MultitargetProjectWithPackReleaseUndefined
+        {
+
+        }
+
         [Theory]
-        public void ItFailsIfNet7DefinesReleasePropertyFalseButNet8PlusDefinesNone(string releaseProperty)
+        public void ItDoesntErrorIfEnvironmentVariableOptOutEnabledButReleaseConflicts
         {
-
+            // publish and pack theory
         }
 
-        ["PublishRelease"]
-        ["PackRelease"]
         [Theory]
-        public void ItUsesReleaseIfNet7DefinesReleasePropertyAndNet8PlusDfinesNothing(string releaseProperty)
+        public void ItDoesntErrorIfReleaseConflictsInVisualStudio
+        {
+            // publish and pack theory
+
+        }
+
+        [Fact]
+        public void ItPublishesWithReleaseWhenNet8ProjectWithNothingAndNet7ProjectWithPublishReleaseDefinitionUsed
         {
 
         }
-        */
+
+        [Theory]
+        public void ItFailsWhenNet8ProjectWithPublishReleaseDefinedButNet7ProjectDoesNotDefine
+        {
+            // true and false theory
+        }   
+
+
+        [Fact]
+        public void ItDoesNotErrorWhenNet7AndNet6ProjectDontDefinePublishRelease
+        {
+
+        }
+
+        [Theory]
+        public void ItFailsWithNet8ProjectAndNet7ProjectSolutionWithPublishReleaseUndefined
+        {
+            // net 8 defines publishrelease none, true and false
+
+        }
+
+        [Fact]
+        public void ItFailsIfNet7DefinesPublishReleaseFalseButNet8PlusDefinesNone
+        {
+
+        }
+
+        [Fact]
+        public void ItPublishesReleaseIfNet7DefinesPublishReleaseTrueNet8PlusDfinesNothing
+        {
+
+        }
+        
     }
 }

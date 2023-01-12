@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli
          => (_parseResult, _propertyToCheck, _slnOrProjectArgs) = (parseResult, propertyToCheck, parseResult.GetValue(PublishCommandParser.SlnOrProjectArgument));
 
         /// <summary>
-        /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on ...
+        /// Return dotnet CLI command-line parameters (or an empty list) to change configuration based on ...
         /// ... a boolean that may or may not exist in the targeted project.
         /// </summary>
         /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>

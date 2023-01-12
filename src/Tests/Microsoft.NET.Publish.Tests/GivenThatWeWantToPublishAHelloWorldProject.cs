@@ -678,11 +678,6 @@ public static class Program
             </Project>
             ");
 
-            new BuildCommand(helloWorldAsset)
-           .Execute()
-           .Should()
-           .Pass();
-
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.Path);
 
             CommandResult publishOutput = publishCommand

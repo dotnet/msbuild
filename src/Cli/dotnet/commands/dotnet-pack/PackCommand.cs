@@ -37,14 +37,14 @@ namespace Microsoft.DotNet.Tools.Pack
             var msbuildArgs = new List<string>()
             {
                 "-target:pack",
-                "--property:_IsPacking=true"
+                "--property:_IsPacking=true" // This property will not hold true for MSBuild /t:Publish or in VS.
             };
 
             IEnumerable<string> slnOrProjectArgs = parseResult.GetValue(PackCommandParser.SlnOrProjectArgument);
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
             ReleasePropertyProjectLocator projectLocator = new ReleasePropertyProjectLocator(parseResult, MSBuildPropertyNames.PACK_RELEASE);
-            msbuildArgs.AddRange(projectLocator.GetCustomDefaultConfigurationValueIfSpecified() ?? Array.Empty<string>());
+            msbuildArgs.AddRange(projectLocator.GetCustomDefaultConfigurationValueIfSpecified());
             msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PackCommandParser.NoRestoreOption) || parseResult.HasOption(PackCommandParser.NoBuildOption);
