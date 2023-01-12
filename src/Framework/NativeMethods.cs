@@ -1134,7 +1134,7 @@ internal static class NativeMethods
         return true;
     }
 
-    internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage, string errorMessagePrefix = "")
+    internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
     {
         bool symbolicLinkCreated;
         if (IsWindows)
@@ -1152,7 +1152,7 @@ internal static class NativeMethods
         else
         {
             symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
-            errorMessage = symbolicLinkCreated ? null : errorMessagePrefix + Marshal.GetLastWin32Error();
+            errorMessage = symbolicLinkCreated ? null : Marshal.GetLastWin32Error().ToString();
         }
 
         return symbolicLinkCreated;

@@ -221,8 +221,8 @@
 
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
-  <data name="Copy.LinklibraryFailedPrefix">
-    <value>The {0} library call failed with the following error code: </value>
+  <data name="Copy.NonWindowsLinkErrorMessage">
+    <value>The {0} library call failed with the following error code: {1}.</value>
   </data>
   <data name="Copy.CreatesDirectory">
     <value>Creating directory "{0}".</value>
