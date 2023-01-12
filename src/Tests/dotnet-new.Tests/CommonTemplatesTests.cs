@@ -17,6 +17,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
+    [Collection("Verify Tests")]
     public class CommonTemplatesTests : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _fixture;
@@ -49,6 +50,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("EditorConfig file", "editorconfig", new[] { "--empty" })]
         [InlineData("EditorConfig file", ".editorconfig", null)]
         [InlineData("EditorConfig file", ".editorconfig", new[] { "--empty" })]
+        [InlineData("MSBuild Directory.Build.props file", "buildprops", new[] { "--inherit" })]
+        [InlineData("MSBuild Directory.Build.targets file", "buildtargets", new[] { "--inherit" })]
         public async void AllCommonItemsCreate(string expectedTemplateName, string templateShortName, string[]? args)
         {
             Dictionary<string, string> environmentUnderTest = new() { ["DOTNET_NOLOGO"] = false.ToString() };

@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "MSBuild Directory.Build.targets 文件",
+  "description": "一个空的 Directory.Build.targets 文件，可用于为整个文件夹指定 MSBuild 任务和目标",
+  "symbols/inherit/displayName": "继承",
+  "symbols/inherit/description": "如果为 true，则为文件系统目录层次结构中最近的 Directory.Build.targets 添加 Import。默认情况下，Directory.Build.targets 不会继承，因此这样做可以按文件夹生成一组自定义项。"
+}

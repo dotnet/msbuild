@@ -474,6 +474,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(UseSystemResourceKeys)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported"
+                                    Condition="'$(DynamicCodeSupport)' != ''"
+                                    Value="$(DynamicCodeSupport)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.BuiltInComInterop.IsSupported"
                                     Condition="'$(BuiltInComInteropSupport)' != ''"
                                     Value="$(BuiltInComInteropSupport)"
@@ -1182,7 +1187,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.targets" Condition="'$(Language)' == 'F#'" />
   <Import Project="$(ILCompilerTargetsPath)" Condition="'$(PublishAot)' == 'true'"/>
-  <Import Project="$(ILLinkTargetsPath)" Condition="'$(Language)' != 'C++'" />
+  <Import Project="$(ILLinkTargetsPath)" Condition="'$(ILLinkTargetsPath)' != '' And '$(Language)' != 'C++'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.Analyzers.targets" Condition="'$(Language)' == 'C#' or '$(Language)' == 'VB'" />
 
   <!-- Import WindowsDesktop targets if necessary -->

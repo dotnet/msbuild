@@ -39,12 +39,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected IEngineEnvironmentSettings CreateEnvironmentSettings(GlobalArgs args, ParseResult parseResult)
         {
-            IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
-                _hostBuilder(parseResult),
-                settingsLocation: args.DebugCustomSettingsLocation,
+            ITemplateEngineHost host = _hostBuilder(parseResult);
+            IEnvironment environment = new CliEnvironment();
+
+            return new EngineEnvironmentSettings(
+                host,
                 virtualizeSettings: args.DebugVirtualizeSettings,
-                environment: new CliEnvironment());
-            return environmentSettings;
+                environment: environment,
+                pathInfo: new CliPathInfo(host, environment, args.DebugCustomSettingsLocation));
         }
     }
 

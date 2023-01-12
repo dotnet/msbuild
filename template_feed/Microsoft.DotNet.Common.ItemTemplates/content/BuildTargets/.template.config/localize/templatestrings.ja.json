@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "MSBuild Directory.Build.targets ファイル",
+  "description": "フォルダー全体の MSBuild タスクとターゲットを指定するために使用できる空の Directory.Build.targets ファイル",
+  "symbols/inherit/displayName": "継承する",
+  "symbols/inherit/description": "true の場合、ファイル システム ディレクトリ階層内の最も近い Directory.Build.targets のインポートを追加します。Directory.Build.targets は既定では継承されないため、これを行うと、フォルダーごとにカスタマイズのセットをビルドできます。"
+}

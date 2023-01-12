@@ -187,6 +187,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 {
                     packageReferenceElement.Add(new XAttribute("Aliases", packageReference.Aliases));
                 }
+                if (packageReference.Publish != null)
+                {
+                    packageReferenceElement.Add(new XAttribute("Publish", packageReference.Publish));
+                }
                 packageReferenceItemGroup.Add(packageReferenceElement);
             }
 

@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "MSBuild Directory.Build.targets 檔案",
+  "description": "空的 Directory.Build.targets 檔案，可用來指定整個資料夾的 MSBuild 工作和目標",
+  "symbols/inherit/displayName": "繼承",
+  "symbols/inherit/description": "若為 True，則會為檔案系統目錄階層中最近的 Directory.Build.targets 新增 Import。Directory.Build.targets 預設不會繼承，因此這麼做可讓您建置一組按資料夾的自訂項目。"
+}

@@ -131,17 +131,17 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     internal partial struct InternalStruct { }
 
-                    public partial struct PublicReadonlyRefStruct { }
+                    public readonly partial struct PublicReadonlyRefStruct { }
 
-                    public partial struct PublicReadonlyStruct { }
+                    public readonly partial struct PublicReadonlyStruct { }
 
                     public partial struct PublicRefStruct { }
 
                     public partial struct PublicStruct { }
 
-                    internal partial struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct> { }
+                    internal readonly partial struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct> { }
 
-                    internal partial struct ReadonlyStruct { }
+                    internal readonly partial struct ReadonlyStruct { }
 
                     internal partial struct RecordStruct : System.IEquatable<RecordStruct> { }
                 }
@@ -392,7 +392,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         Disable = 1
                     }
 
-                    public partial struct Options
+                    public readonly partial struct Options
                     {
                         public readonly bool BoolMember;
                         public readonly Kind KindMember;

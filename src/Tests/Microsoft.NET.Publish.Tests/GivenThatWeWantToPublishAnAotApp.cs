@@ -17,6 +17,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.NET.Publish.Tests.PublishTestUtils;
@@ -310,7 +311,7 @@ namespace Microsoft.NET.Publish.Tests
                     .Execute().Should().Pass()
                     .And.HaveStdOutContaining("Hello World");
 
-                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, ExplicitPackageVersion);
+                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, rid, ExplicitPackageVersion);
             }
         }
 
@@ -413,7 +414,7 @@ namespace Microsoft.NET.Publish.Tests
                 File.Exists(publishedDll).Should().BeFalse();
                 File.Exists(publishedExe).Should().BeTrue();
 
-                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, ExplicitPackageVersion);
+                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, rid, ExplicitPackageVersion);
             }
         }
 
@@ -697,21 +698,47 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
                     .Execute()
-                    .Should().Pass();
+                    .Should()
+                    .Pass();
             }
         }
 
-        private void CheckIlcVersions(string projectPath, string targetFramework, string expectedVersion)
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void It_builds_with_dynamiccodesupport_false_when_publishaot_true(string targetFramework)
+        {
+            var projectName = "DynamicCodeSupportFalseApp";
+            var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+            testProject.AdditionalProperties["PublishAot"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string outputDirectory = buildCommand.GetOutputDirectory(targetFramework: targetFramework).FullName;
+            string runtimeConfigFile = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            JToken configProperties = runtimeConfig["runtimeOptions"]["configProperties"];
+            configProperties["System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported"].Value<bool>()
+                .Should().BeFalse();
+        }
+
+        private void CheckIlcVersions(string projectPath, string targetFramework, string rid, string expectedVersion)
         {
             // Compiler version matches expected version
             var ilcToolsPathCommand = new GetValuesCommand(Log, projectPath, targetFramework, "IlcToolsPath")
             {
                 DependsOnTargets = "WriteIlcRspFileForCompilation"
             };
-            ilcToolsPathCommand.Execute().Should().Pass();
+            ilcToolsPathCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
             var ilcToolsPath = ilcToolsPathCommand.GetValues()[0];
             var ilcVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(ilcToolsPath)));
             ilcVersion.Should().Be(ExplicitPackageVersion);
@@ -721,7 +748,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 DependsOnTargets = "WriteIlcRspFileForCompilation"
             };
-            ilcReferenceCommand.Execute().Should().Pass();
+            ilcReferenceCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
             var ilcReference = ilcReferenceCommand.GetValues();
             var corelibReference = ilcReference.Where(r => Path.GetFileName(r).Equals("System.Private.CoreLib.dll")).Single();
             var ilcReferenceVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(corelibReference)));

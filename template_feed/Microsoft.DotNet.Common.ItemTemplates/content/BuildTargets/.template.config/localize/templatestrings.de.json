@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Datei \"MSBuild Directory.Build.targets\"",
+  "description": "Eine leere \"Directory.Build.targets\"-Datei, die zum Angeben von MSBuild-Eigenschaften für einen gesamten Ordner verwendet werden kann.",
+  "symbols/inherit/displayName": "Erben",
+  "symbols/inherit/description": "Bei \"true\" wird ein Import für die nächstgelegene Datei \"Directory.Build.targets\" in der Verzeichnishierarchie des Dateisystems hinzugefügt. \"Directory.Build.targets\" erbt nicht standardmäßig. Auf diese Weise können Sie einen Satz von Anpassungen für einzelne Ordner erstellen."
+}

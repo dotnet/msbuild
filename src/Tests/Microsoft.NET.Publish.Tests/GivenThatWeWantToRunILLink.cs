@@ -132,7 +132,31 @@ namespace Microsoft.NET.Publish.Tests
                 var command = new RunExeCommand(Log, exe)
                     .Execute().Should().Pass()
                     .And.HaveStdOutContaining("Hello world");
+
+                CheckILLinkVersion(testAsset, targetFramework);
             }
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void ILLink_fails_when_no_matching_pack_is_found(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
+                .WithProjectChanges(project => {
+                    var ns = project.Root.Name.Namespace;
+                    project.Root.Add(new XElement(ns + "ItemGroup",
+                        new XElement("KnownILLinkPack",
+                            new XAttribute("Remove", "Microsoft.NET.ILLink.Tasks"))));
+                });
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true")
+                .Should().Fail()
+                .And.HaveStdOutContaining("error NETSDK1195");
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -1645,7 +1669,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_warns_when_targetting_netcoreapp_2_x_illink()
+        public void It_warns_when_targeting_netcoreapp_2_x_illink()
         {
             var testProject = new TestProject()
             {
@@ -2057,6 +2081,26 @@ public class ClassLib
 ";
 
             return testProject;
+        }
+
+        private void CheckILLinkVersion(TestAsset testAsset, string targetFramework)
+        {
+            var getKnownPacks = new GetValuesCommand(testAsset, "KnownILLinkPack", GetValuesCommand.ValueType.Item, targetFramework) {
+                MetadataNames = new List<string> { "TargetFramework", "ILLinkPackVersion" }
+            };
+            getKnownPacks.Execute().Should().Pass();
+            var knownPacks = getKnownPacks.GetValuesWithMetadata();
+            var expectedVersion = knownPacks
+                .Where(i => i.metadata["TargetFramework"] == targetFramework)
+                .Select(i => i.metadata["ILLinkPackVersion"])
+                .Single();
+
+            var illinkTargetsCommand = new GetValuesCommand(testAsset, "ILLinkTargetsPath", targetFramework: targetFramework);
+            illinkTargetsCommand.Properties.Add("PublishTrimmed", "true");
+            illinkTargetsCommand.Execute().Should().Pass();
+            var illinkTargetsPath = illinkTargetsCommand.GetValues()[0];
+            var illinkVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(illinkTargetsPath)));
+            illinkVersion.Should().Be(expectedVersion);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.DependencyModel;
@@ -964,7 +965,6 @@ public static class Program
         [InlineData("--p:PublishReadyToRun=true")]
         [InlineData("-p:PublishSingleFile=true")]
         [InlineData("-p:PublishSelfContained=true")]
-        [InlineData("")]
         public void It_publishes_with_implicit_rid_with_rid_specific_properties(string executeOptionsAndProperties)
         {
             var testProject = new TestProject()
@@ -975,7 +975,7 @@ public static class Program
             testProject.AdditionalProperties.Add("IsPublishable", "false");
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: executeOptionsAndProperties);
 
-            var publishCommand = new PublishCommand(testAsset);
+            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand
                .Execute(executeOptionsAndProperties)
                .Should()

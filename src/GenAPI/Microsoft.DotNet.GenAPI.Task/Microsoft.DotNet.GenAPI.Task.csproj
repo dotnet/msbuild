@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
@@ -9,7 +9,7 @@
     <!-- This package doesn't contain any lib or ref assemblies because it's a tooling package.-->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <Nullable>enable</Nullable>
-    <_MicrosoftCodeAnalysisVersion>4.5.0-3.22601.3</_MicrosoftCodeAnalysisVersion>
+    <_MicrosoftCodeAnalysisVersion>$(MicrosoftCodeAnalysisWorkspacesGenAPIPackageVersion)</_MicrosoftCodeAnalysisVersion>
     <_MicrosoftCodeAnalysisVersion Condition="'$(DotNetBuildFromSource)' == 'true'">$(MicrosoftCodeAnalysisPackageVersion)</_MicrosoftCodeAnalysisVersion>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddBuildOutputToPackageCore;_AddBuildOutputToPackageDesktop</TargetsForTfmSpecificContentInPackage>
     <PackageDescription>MSBuild tasks and targets to emit Roslyn based source code from input assemblies.</PackageDescription>

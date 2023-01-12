@@ -73,4 +73,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <SdkContainerSupportPackageVersion>0.2.7</SdkContainerSupportPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true'">
+    <PackageReference Include="Microsoft.NET.Build.Containers" Version="$(SdkContainerSupportPackageVersion)" IsImplicitlyDefined="true" />
+  </ItemGroup>
+
 </Project>

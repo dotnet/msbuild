@@ -425,7 +425,8 @@
                             PublishSdks;
                             ChmodPublishDir;
                             DeleteSymbolsFromPublishDir;
-                            RetargetTools"
+                            RetargetTools;
+                            GetDotnetWatchRedistOutputDirectory"
           AfterTargets="Build">
     <PropertyGroup>
       <LayoutDirectory>$(BaseOutputPath)$(Configuration)\layouts\</LayoutDirectory>
@@ -436,18 +437,24 @@
     <ItemGroup>
       <ToolsetLayoutInput Include="$(OutputPath)/**/*" />
       <ToolsetLanguagePackInput Include="$(OutputPath)/**/*.resources.dll" />
+
+      <!--
+        Include redist outputs published by dotnet-watch.csproj build.
+      -->
+      <ToolsetLayoutInput Include="$(DotnetWatchRedistOutputDirectory)/**/*" LayoutSubdirectory="DotnetTools\dotnet-watch\"/>
+      <ToolsetLanguagePackInput Include="$(DotnetWatchRedistOutputDirectory)/**/*.resources.dll" LayoutSubdirectory="DotnetTools\dotnet-watch\"/>
     </ItemGroup>
 
     <!-- Set up Items Defining Layouts for easy change -->
     <ItemGroup>
       <LayoutDefinition Include="Sdk">
         <InputFiles>@(ToolsetLayoutInput)</InputFiles>
-        <OutputFiles>@(ToolsetLayoutInput -> '$(SdkLayoutOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
+        <OutputFiles>@(ToolsetLayoutInput -> '$(SdkLayoutOutputDirectory)\%(LayoutSubdirectory)%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
       </LayoutDefinition>
 
       <LayoutDefinition Include="SdkLanguagePack">
         <InputFiles>@(ToolsetLanguagePackInput)</InputFiles>
-        <OutputFiles>@(ToolsetLanguagePackInput -> '$(SdkLanguagePackOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
+        <OutputFiles>@(ToolsetLanguagePackInput -> '$(SdkLanguagePackOutputDirectory)\%(LayoutSubdirectory)%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
       </LayoutDefinition>
     </ItemGroup>
 

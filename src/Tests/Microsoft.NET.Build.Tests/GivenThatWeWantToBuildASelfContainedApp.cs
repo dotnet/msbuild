@@ -349,10 +349,16 @@ namespace Microsoft.NET.Build.Tests
             testRuntimePack.metadata["NuGetPackageVersion"].Should().Be("1.0.42-abc");
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.51802")]
         [InlineData("net6.0")]
         public void It_can_publish_runtime_specific_apps_with_library_dependencies_self_contained(string targetFramework)
         {
+
+            // There's a bug when using the 6.0 SDK with 17.4 but we have limited control over the VS version used in helix
+            Version.TryParse(TestContext.Current.ToolsetUnderTest.MSBuildVersion, out Version msbuildVersion);
+            Version.TryParse("17.4.0", out Version maximumVersion);
+            if (msbuildVersion >= maximumVersion)
+                return;
 
             // create a basic library and a basic app, reference the library from the app and then
             // publish the app with a RID specified and self-contained.
@@ -402,6 +408,33 @@ namespace Microsoft.NET.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
             outputDirectory.Should().NotHaveFile("hostfxr.dll"); // This file will only appear if SelfContained. 
+        }
+
+        [Theory]
+        [InlineData("PublishReadyToRun")]
+        [InlineData("PublishSingleFile")]
+        [InlineData("PublishSelfContained")]
+        [InlineData("PublishAot")]
+        public void It_builds_without_implicit_rid_with_RuntimeIdentifier_specific_during_publish_only_properties(string property)
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm,
+            };
+            testProject.AdditionalProperties[property] = "true";
+            testProject.RecordProperties("RuntimeIdentifier");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: property);
+
+            var buildCommand = new DotnetBuildCommand(testAsset);
+            buildCommand
+               .Execute()
+               .Should()
+               .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
+            properties["RuntimeIdentifier"].Should().Be("");
         }
 
         [Theory]
