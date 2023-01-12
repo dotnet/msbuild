@@ -40,7 +40,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 result.Add(textSpan.Slice(0, breakpoint).ToString());
                 textSpan = textSpan.Slice(breakpoint);
             }
-            result.Add(text);
+            result.Add(textSpan.ToString());
             return result;
         }
 

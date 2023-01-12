@@ -21,7 +21,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             set
             {
                 _text = value;
-                WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth + 1);
+                // TODO: Replace with console.bufferwidth
+                WrappedText = ANSIBuilder.ANSIWrap(value, 80);
             }
         }
 
@@ -52,7 +53,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             Task.Run(async () => {
                 while (true)
                 {
-                    await Task.Delay(500 / 60);
+                    await Task.Delay((1/60)/1000);
                     Render();
                 }
             });
@@ -87,9 +88,9 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
 
         #region Rendering
+        // private static List<string> lineContents = new();
         public static void Render()
         {
-            if (Lines.Count == 0) return;
             // Write Header
             Console.Write(
                 // Write header
@@ -100,6 +101,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                 // TODO: Remove and replace with actual footer
                 new string('-', Console.BufferWidth) + '\n' + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             );
+            if (Lines.Count == 0) return;
+
             // Get lines with wrappings
             List<string> lineContents = new();
             int lineCount = Lines.Count;
@@ -114,10 +117,10 @@ namespace Microsoft.Build.Logging.FancyLogger
                 Console.Write(
                     ANSIBuilder.Cursor.Position(i + 2, 0) +
                     ANSIBuilder.Eraser.LineCursorToEnd() + 
-                    (lineIndex < lineContents.Count ? lineContents[lineIndex] : String.Empty)
+                    (lineIndex < Lines.Count ? Lines[lineIndex].Text : String.Empty)
                 );
             }
-            Console.Out.FlushAsync();
+            Console.Out.Flush();
         }
         #endregion
         #region Line identification
