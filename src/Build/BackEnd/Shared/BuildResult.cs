@@ -481,11 +481,18 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Keep the results for specific targets only.
+        /// Keep the results only for <paramref name="targets"/>.
+        /// If <paramref name="targets"/> is empty, keep the results only for
+        /// <see cref="DefaultTargets"/>.
         /// </summary>
         /// <param name="targets">The targets whose results should be kept.</param>
-        public void KeepResultsForSpecificTargets(HashSet<string> targets)
+        internal void KeepResultsForSpecificTargets(ICollection<string> targets)
         {
+            if (targets.Count == 0)
+            {
+                targets = _defaultTargets;
+            }
+
             foreach (string target in _resultsByTarget.Keys)
             {
                 if (!targets.Contains(target))

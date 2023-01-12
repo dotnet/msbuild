@@ -49,6 +49,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var buildResult2 = new BuildResult(request2);
                 var buildResult3 = new BuildResult(request3);
 
+                buildResult1.DefaultTargets = new List<string> { "target1" };
+
                 buildResult1.AddResultsForTarget(
                     "target1",
                     new TargetResult(
@@ -134,6 +136,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult buildResult = result.ResultsCache.GetResultsForConfiguration(1);
                 Assert.True(buildResult.HasResultsForTarget("target1"));
                 Assert.True(buildResult.HasResultsForTarget("target2"));
+                Assert.False(buildResult.HasResultsForTarget("target3"));
+            }
+            finally
+            {
+                File.Delete(cacheFile);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CacheData))]
+        public void OnlySerializeResultsForDefaultTargets(object configCache, object resultsCache)
+        {
+            string cacheFile = null;
+            try
+            {
+                cacheFile = FileUtilities.GetTemporaryFile("MSBuildResultsCache");
+                Assert.Null(CacheSerialization.SerializeCaches(
+                    (ConfigCache)configCache,
+                    (ResultsCache)resultsCache,
+                    cacheFile,
+                    ProjectIsolationMode.MessageUponIsolationViolation,
+                    new HashSet<string>() { }));
+
+                var result = CacheSerialization.DeserializeCaches(cacheFile);
+                Assert.True(result.ConfigCache.HasConfiguration(1));
+                BuildResult buildResult = result.ResultsCache.GetResultsForConfiguration(1);
+                Assert.True(buildResult.HasResultsForTarget("target1"));
+                Assert.False(buildResult.HasResultsForTarget("target2"));
                 Assert.False(buildResult.HasResultsForTarget("target3"));
             }
             finally
