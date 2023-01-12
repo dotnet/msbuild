@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Cli
         private ParseResult _parseResult;
         private string _propertyToCheck;
         private IEnumerable<string> _slnOrProjectArgs;
-        private Option<string> _configOption;
         private bool _isHandlingSolution = false;
 
         private static string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
@@ -36,16 +35,12 @@ namespace Microsoft.DotNet.Cli
 
         // <summary>
         /// <param name="propertyToCheck">The boolean property to check the project for. Ex: PublishRelease, PackRelease.</param>
-        /// <param name="slnOrProjectArgs">The arguments parsed by System Command Line related to picking a solution or project file.</param>
-        /// <param name="configOption">The arguments parsed by System Command Line related to Configuration.</param>
         /// </summary>
         public ReleasePropertyProjectLocator(
             ParseResult parseResult,
-            string propertyToCheck,
-            IEnumerable<string> slnOrProjectArgs,
-            Option<string> configOption
+            string propertyToCheck
          )
-         => (_parseResult, _propertyToCheck, _slnOrProjectArgs, _configOption) = (parseResult, propertyToCheck, slnOrProjectArgs, configOption);
+         => (_parseResult, _propertyToCheck, _slnOrProjectArgs) = (parseResult, propertyToCheck, parseResult.GetValue(PublishCommandParser.SlnOrProjectArgument));
 
         /// <summary>
         /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on ...
@@ -54,46 +49,47 @@ namespace Microsoft.DotNet.Cli
         /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>
         public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified()
         {
+            // Setup
             Debug.Assert(_propertyToCheck == MSBuildPropertyNames.PUBLISH_RELEASE || _propertyToCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
+            var nothing = Enumerable.Empty<string>();
             if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
             {
-                return Enumerable.Empty<string>();
+                return nothing;
             }
 
-            var globalProperties = GetGlobalPropertiesFromUserArgs();
+            // Analyze Global Properties
+            var globalProperties = GetUserSpecifiedExplicitMSBuildProperties();
+            globalProperties = InjectTargetFrameworkIntoGlobalProperties(globalProperties);
 
             // Configuration doesn't work in a .proj file, but it does as a global property.
             // Detect either A) --configuration option usage OR /p:Configuration=Foo, if so, don't use these properties.
-            if (_parseResult.HasOption(_configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
-                return Enumerable.Empty<string>();
+            if (_parseResult.HasOption(PublishCommandParser.ConfigurationOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
+                return nothing;
 
+            // Determine the project being acted upon
             ProjectInstance project = GetTargetedProject(globalProperties);
-            //NuGetFramework.Parse("");
 
+            // Determine the correct value to return
             if (project != null)
             {
                 string propertyToCheckValue = project.GetPropertyValue(_propertyToCheck);
-                if (!string.IsNullOrEmpty(propertyToCheckValue) || GetPublishTargetFramework(project) >= 8)
+                if (!string.IsNullOrEmpty(propertyToCheckValue))
                 {
-                    var msbuildFlags = new List<string> {
+                    var newConfigurationArgs = new List<string> {
                         $"-property:{MSBuildPropertyNames.CONFIGURATION}={
-                            (
-                            !string.IsNullOrEmpty(propertyToCheckValue) ? // Did the project set PublishRelease or PackRelease itself?
-                                (propertyToCheckValue.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)
-                            : MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE) // The project did not set the property, but it is 8.0+ based on the condition above. For 8.0, these properties are enabled by default.
-                            }",
+                            (propertyToCheckValue.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)
+                        }"
                     };
 
-                    var globallyResolvedPropertyToCheckValue = !string.IsNullOrEmpty(propertyToCheckValue) ? propertyToCheckValue : "true"; // true is defaulted for TFM 8+. 
                     if (_isHandlingSolution) // This will allow us to detect conflicting configuration values during evaluation.
                     {
-                        msbuildFlags.Add($"-property:_SolutionLevel{_propertyToCheck}={globallyResolvedPropertyToCheckValue}");
+                        newConfigurationArgs.Add($"-property:_SolutionLevel{_propertyToCheck}={propertyToCheckValue}");
                     }
 
-                    return msbuildFlags;
+                    return newConfigurationArgs;
                 }
             }
-            return Enumerable.Empty<string>();
+            return nothing;
         }
 
         /// <param name="slnProjectPropertytoCheck">A property to enforce if we are looking into SLN files. If projects disagree on the property, throws exception.</param>
@@ -175,34 +171,8 @@ namespace Microsoft.DotNet.Cli
             return File.Exists(path) && Path.GetExtension(path).EndsWith("proj");
         }
 
-        /// <param name="targetProject">The project which we want to get the potential modern (NET 5.0/Core+) TFM of.</param>
-        /// <returns>
-        /// Returns the target framework of the project.
-        /// This will return 0 if there are no TFM of the form netX.0.
-        /// This ignores multitargeting. This is because for dotnet publish you must specify a target framework.
-        /// If the target framework for publish is not specified, the app will fail later, so what we do doesn't matter.
-        /// </returns>
-        /// <remarks>If the naming schema of TFM changes, this will not work. Yeah, it's not great.</remarks>
-        private float GetPublishTargetFramework(ProjectInstance targetProject)
-        {
-            // if TFM given by g lobal properties or framework option, does that reflect in the evaluated project or no? I think it should, but maybe globalprp doesnt contain
-            // The TargetFramework Config Option (-f) is Forwarded to a Global Option in the parseResult.
-            // The global properties given to MsBuild + The forwarded options are  given to the project evaluator class
-            // So any custom targetframework would be respected in the project itself.
-            // Thus, there is no need to check any framework option.
-
-            // shows up this isnt being called.
-            string targetFramework = targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORK);
-            if (!string.IsNullOrEmpty(targetFramework))
-            {
-                if (targetProject.GetPropertyValue("TargetFrameworkIdentifier") == "NETCoreApp")
-                    return float.Parse(targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORK_NUMERIC_VERSION));
-            }
-            return 0;  // There is no modern TFM, OR there's no TFM. The project will not publish without a TFM, what we do here is irrelevant.
-        }
-
         /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>
-        private Dictionary<string, string> GetGlobalPropertiesFromUserArgs()
+        private Dictionary<string, string> GetUserSpecifiedExplicitMSBuildProperties()
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -214,6 +184,26 @@ namespace Microsoft.DotNet.Cli
                 globalProperties[keyValuePair[0]] = keyValuePair[1];
             }
             return globalProperties;
+        }
+
+        /// <summary>
+        /// Because command-line-forwarded properties aren't in the global arguments from Properties, we need to add the TFM to the collection.
+        /// The TFM is the only property besides Configuration that isn't an MSBuild property that could affect the pre-evaluation.
+        /// This allows the pre-evaluation to correctly deduce its Publish or PackRelease value because it will know the actual TFM being used.
+        /// </summary>
+        /// <param name="oldGlobalProperties">The set of MSBuild properties that were specified explicitly like -p:Property=Foo or in other syntax sugars.</param>
+        /// <returns>The same set of global properties for the project, but with the new potential TFM based on -f or --framework.</returns>
+        private Dictionary<string, string> InjectTargetFrameworkIntoGlobalProperties(Dictionary<string, string> oldGlobalProperties)
+        {
+            if (_parseResult.HasOption(PublishCommandParser.FrameworkOption))
+            {
+                string givenFrameworkOption = _parseResult.GetValue(PublishCommandParser.FrameworkOption);
+
+                // Note: dotnet -f FRAMEWORK_1 --property:TargetFramework=FRAMEWORK_2 will use FRAMEWORK_1.
+                // So we can replace the value in the globals non-dubiously if it exists.
+                oldGlobalProperties[MSBuildPropertyNames.TARGET_FRAMEWORK] = givenFrameworkOption;
+            }
+            return oldGlobalProperties;
         }
     }
 }
