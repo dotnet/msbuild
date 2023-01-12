@@ -1062,14 +1062,10 @@ namespace Microsoft.Build.BackEnd
                     !(declaredProjects.Contains(normalizedMSBuildProject)
                       || _buildRequestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(normalizedMSBuildProject)))
                 {
-                    if (undeclaredProjects == null)
-                    {
-                        undeclaredProjects = new List<string>(projectReferenceItems.Count);
-                    }
-
-                            undeclaredProjects.Add(normalizedMSBuildProject);
-                        }
+                    undeclaredProjects ??= new List<string>(projectReferenceItems.Count);
+                    undeclaredProjects.Add(normalizedMSBuildProject);
                 }
+            }
 
             return undeclaredProjects;
         }
