@@ -151,7 +151,6 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public void Shutdown()
         {
-            Thread.Sleep(15_000);
             FancyLoggerBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
