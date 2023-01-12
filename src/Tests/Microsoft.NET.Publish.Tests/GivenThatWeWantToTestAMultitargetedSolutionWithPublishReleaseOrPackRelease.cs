@@ -103,6 +103,11 @@ namespace Microsoft.NET.Publish.Tests
 
         }
 
+        [Fact]
+        public void ItWorksWithASpecificSolutionPathGiven()
+        {
+        }
+
         ["PublishRelease"]
         ["PackRelease"]
         [Theory]

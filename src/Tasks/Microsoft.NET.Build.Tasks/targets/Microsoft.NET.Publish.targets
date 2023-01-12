@@ -113,9 +113,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
     <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations. -->
-    <NETSdkError Condition="$(_IsPublishing)' == 'true' and
-                             '$(_SolutionLevelPublishRelease)' != '' and
-                             '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
+    <NETSdkError Condition="'$(_IsPublishing)' == 'true' and
+                            '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE) != 'true' and
+                            '$(_SolutionLevelPublishRelease)' != '' and
+                            '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
                  ResourceName="SolutionProjectConfigurationsConflict"
                  FormatArguments="PublishRelease" />
 

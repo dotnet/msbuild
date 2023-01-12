@@ -92,9 +92,13 @@ namespace Microsoft.DotNet.Cli
             return nothing;
         }
 
-        /// <param name="slnProjectPropertytoCheck">A property to enforce if we are looking into SLN files. If projects disagree on the property, throws exception.</param>
-        /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
-        public ProjectInstance GetTargetedProject(Dictionary<string, string> globalProps)
+
+        /// <summary>
+        /// Mirror the MSBuild logic for discovering a project or a solution and find that item.
+        /// </summary>
+        /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.
+        /// Will return an arbitrary project in the solution if one exists in the solution and there's no project targeted.</returns>
+        public ProjectInstance? GetTargetedProject(Dictionary<string, string> globalProps)
         {
             foreach (string arg in _slnOrProjectArgs.Append(Directory.GetCurrentDirectory()))
             {
@@ -102,13 +106,17 @@ namespace Microsoft.DotNet.Cli
                 {
                     return TryGetProjectInstance(arg, globalProps);
                 }
-                else if (Directory.Exists(arg)) // We should get here if the user did not provide a .proj or a .sln
+                else if(IsValidSlnFilePath(arg))
                 {
-                    try
+                    return GetArbitraryProjectFromSolution(arg, globalProps);
+                }
+                else if (Directory.Exists(arg)) // Get here if the user did not provide a .proj or a .sln. (See CWD appended to args above)
+                {
+                    try // First, look for a project in the directory.
                     {
                         return TryGetProjectInstance(MsbuildProject.GetProjectFileFromDirectory(arg).FullName, globalProps);
                     }
-                    catch (GracefulException)  // Fall back to looking for a solution if multiple project files are found.
+                    catch (GracefulException)  // Fall back to looking for a solution if multiple project files are found, or there's no project in the directory.
                     {
                         string potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
 
@@ -123,7 +131,7 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <returns>An arbitrary existant project in a solution file. Returns null if no projects exist.</returns>
-        public ProjectInstance GetArbitraryProjectFromSolution(string slnPath, Dictionary<string, string> globalProps)
+        public ProjectInstance? GetArbitraryProjectFromSolution(string slnPath, Dictionary<string, string> globalProps)
         {
             SlnFile sln;
             try
@@ -152,7 +160,7 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails.</returns>
-        private ProjectInstance TryGetProjectInstance(string projectPath, Dictionary<string, string> globalProperties)
+        private ProjectInstance? TryGetProjectInstance(string projectPath, Dictionary<string, string> globalProperties)
         {
             try
             {
@@ -169,6 +177,12 @@ namespace Microsoft.DotNet.Cli
         private bool IsValidProjectFilePath(string path)
         {
             return File.Exists(path) && Path.GetExtension(path).EndsWith("proj");
+        }
+
+        /// <returns>Returns true if the path exists and is a sln file type.</returns> 
+        private bool IsValidSlnFilePath(string path)
+        {
+            return File.Exists(path) && Path.GetExtension(path).EndsWith("sln");
         }
 
         /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>

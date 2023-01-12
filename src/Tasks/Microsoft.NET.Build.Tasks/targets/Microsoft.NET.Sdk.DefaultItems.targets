@@ -158,7 +158,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PackRelease>true</PackRelease>
   </PropertyGroup>
 
-
   <!-- Default the value of PublishRelease for 8.0+ TFMs. Note that this is pre-evaluated by the CLI in an evaluation before evaluation (see ReleasePropertyProjectLocator.cs).-->
   <PropertyGroup Condition="'$(PublishRelease)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '8.0'">
     <PublishRelease>true</PublishRelease>
@@ -169,7 +168,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   _IsPacking will only be set if packing in the CLI, so that's fine here. The pack targets are all outside of the SDK, which is why this is here.-->
   <Target Name="_VerifyPackReleaseConfigurations"
           BeforeTargets="PrepareForBuild"
-          Condition="'$(_IsPacking)' == 'true'">
+          Condition="'$(_IsPacking)' == 'true' and '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE)' != 'true'">
     <NETSdkError Condition="'$(_SolutionLevelPackRelease)' != '' and
                             '$(_SolutionLevelPackRelease)' != '$(PackRelease)'"
           ResourceName="SolutionProjectConfigurationsConflict"
