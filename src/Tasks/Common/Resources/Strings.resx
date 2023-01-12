@@ -879,13 +879,12 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1194: The "--output" option isn't supported when building a solution.</value>
     <comment>{StrBegin="NETSDK1194: "}</comment>
   </data>
-<<<<<<< HEAD
-   <data name="SolutionProjectConfigurationsConflict" xml:space="preserve">
-    <value>NETSDK1195: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:</value>
-=======
   <data name="ILLinkNoValidRuntimePackageError" xml:space="preserve">
     <value>NETSDK1195: Unable to optimize assemblies for size: a valid runtime package was not found. Either set the PublishTrimmed property to false, or use a supported target framework when publishing.</value>
->>>>>>> primary/main
     <comment>{StrBegin="NETSDK1195: "}</comment>
+  </data>
+  <data name="SolutionProjectConfigurationsConflict" xml:space="preserve">
+    <value>NETSDK1196: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:</value>
+      <comment>{StrBegin="NETSDK1196: "}</comment>
   </data>
 </root>
