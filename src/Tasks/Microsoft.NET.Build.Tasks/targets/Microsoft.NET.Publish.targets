@@ -112,17 +112,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
-    <!-- Default the value of PublishRelease for 8.0+ TFMs. Note that this is pre-evaluated by the CLI in an evaluation before evaluation (see ReleasePropertyProjectLocator.cs).-->
-    <PropertyGroup Condition="'$(PublishRelease)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '8.0'">
-      <PublishRelease>true</PublishRelease>
-      <_PublishReleaseAutomaticallyInferred>true</_PublishReleaseAutomaticallyInferred>
-    </PropertyGroup>
-
     <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations. -->
     <NETSdkError  Condition="'$(_SolutionLevelPublishRelease)' != '' and
-                             '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)' and
-                             '$(PublishRelease)' != '' and
-                             '$(_PublishReleaseAutomaticallyInferred)' != 'true'"
+                             '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
                  ResourceName="SolutionProjectConfigurationsConflict"
                  FormatArguments="PublishRelease" />
 

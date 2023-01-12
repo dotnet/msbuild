@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly string PACK_RELEASE = "PackRelease";
         public static readonly string CONFIGURATION = "Configuration";
         public static readonly string TARGET_FRAMEWORK = "TargetFramework";
-        public static readonly string TARGET_FRAMEWORK_NUMERIC_VERSION = "_TargetFrameworkVersionWithoutV";
+        public static readonly string TARGET_FRAMEWORK_NUMERIC_VERSION = "TargetFrameworkVersion";
         public static readonly string TARGET_FRAMEWORKS = "TargetFrameworks";
         public static readonly string CONFIGURATION_RELEASE_VALUE = "Release";
         public static readonly string CONFIGURATION_DEBUG_VALUE = "Debug";
