@@ -1142,13 +1142,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 tfm.Name = "TargetFrameworks";
                 tfm.FirstNode.ReplaceWith(tfm.FirstNode.ToString() + ";netstandard2.1");
 
-                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Parent.Remove();
-                document.Descendants("FrameworkReference").SingleOrDefault()?.Parent.Remove();
+                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Remove();
+                document.Descendants("FrameworkReference").SingleOrDefault()?.Remove();
             });
 
             Directory.Delete(Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "Components"), recursive: true);
 
-            var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
+            var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
             var result = pack.Execute("/bl");
 
@@ -1183,17 +1183,17 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 tfm.Name = "TargetFrameworks";
                 tfm.FirstNode.ReplaceWith(tfm.FirstNode.ToString() + ";netstandard2.1");
 
-                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Parent.Remove();
-                document.Descendants("FrameworkReference").SingleOrDefault()?.Parent.Remove();
+                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Remove();
+                document.Descendants("FrameworkReference").SingleOrDefault()?.Remove();
             });
 
             Directory.Delete(Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "Components"), recursive: true);
 
-            var build = new BuildCommand(Log, projectDirectory.Path, "PackageLibraryDirectDependency");
+            var build = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             build.WithWorkingDirectory(projectDirectory.Path);
             var buildResult = build.Execute("/bl");
 
-            var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
+            var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
             var result = pack.Execute("/p:NoBuild=true", "/bl");
 
@@ -1228,8 +1228,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 tfm.Name = "TargetFrameworks";
                 tfm.FirstNode.ReplaceWith(tfm.FirstNode.ToString() + ";netstandard2.1");
 
-                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Parent.Remove();
-                document.Descendants("FrameworkReference").SingleOrDefault()?.Parent.Remove();
+                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Remove();
+                document.Descendants("FrameworkReference").SingleOrDefault()?.Remove();
             });
 
             Directory.Delete(Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "Components"), recursive: true);
@@ -1238,7 +1238,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             build.WithWorkingDirectory(projectDirectory.Path);
             var buildResult = build.Execute("/bl");
 
-            var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
+            var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
             var result = pack.Execute("/p:NoBuild=true", "/bl");
 
@@ -1271,13 +1271,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 tfm.Name = "TargetFrameworks";
                 tfm.FirstNode.ReplaceWith(tfm.FirstNode.ToString() + ";netstandard2.1");
 
-                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Parent.Remove();
-                document.Descendants("FrameworkReference").SingleOrDefault()?.Parent.Remove();
+                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Remove();
+                document.Descendants("FrameworkReference").SingleOrDefault()?.Remove();
             });
 
             Directory.Delete(Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "Components"), recursive: true);
 
-            var build = new BuildCommand(Log, projectDirectory.Path, "PackageLibraryDirectDependency");
+            var build = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             build.WithWorkingDirectory(projectDirectory.Path);
             var result = build.Execute("/p:GeneratePackageOnBuild=true", "/bl");
 
@@ -1312,13 +1312,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 tfm.Name = "TargetFrameworks";
                 tfm.FirstNode.ReplaceWith(tfm.FirstNode.ToString() + ";netstandard2.1");
 
-                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Parent.Remove();
-                document.Descendants("FrameworkReference").SingleOrDefault()?.Parent.Remove();
+                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Remove();
+                document.Descendants("FrameworkReference").SingleOrDefault()?.Remove();
             });
 
             Directory.Delete(Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "Components"), recursive: true);
 
-            var build = new BuildCommand(Log, projectDirectory.Path, "PackageLibraryDirectDependency");
+            var build = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             build.WithWorkingDirectory(projectDirectory.Path);
             var result = build.Execute("/p:GeneratePackageOnBuild=true", "/bl");
 
@@ -2421,13 +2421,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 tfm.Name = "TargetFrameworks";
                 tfm.FirstNode.ReplaceWith(tfm.FirstNode.ToString() + ";netstandard2.1");
 
-                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Parent.Remove();
-                document.Descendants("FrameworkReference").SingleOrDefault()?.Parent.Remove();
+                document.Descendants("AddRazorSupportForMvc").SingleOrDefault()?.Remove();
+                document.Descendants("FrameworkReference").SingleOrDefault()?.Remove();
             });
 
             Directory.Delete(Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "Components"), recursive: true);
 
-            var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
+            var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
             var result = pack.Execute("/bl");
 
