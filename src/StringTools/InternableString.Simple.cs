@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Text;
 
 namespace System
@@ -34,12 +31,12 @@ namespace Microsoft.NET.StringTools
     /// <remarks>
     /// This is a simple and inefficient implementation compatible with .NET Framework 3.5.
     /// </remarks>
-    internal ref struct InternableString
+    internal struct InternableString
     {
         /// <summary>
         /// Enumerator for the top-level struct. Enumerates characters of the string.
         /// </summary>
-        public ref struct Enumerator
+        public struct Enumerator
         {
             /// <summary>
             /// The InternableString being enumerated.
@@ -51,7 +48,7 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             private int _charIndex;
 
-            public Enumerator(ref InternableString spanBuilder)
+            public Enumerator(InternableString spanBuilder)
             {
                 _string = spanBuilder;
                 _charIndex = -1;
@@ -127,7 +124,7 @@ namespace Microsoft.NET.StringTools
         /// <returns>The enumerator.</returns>
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(ref this);
+            return new Enumerator(this);
         }
 
         /// <summary>

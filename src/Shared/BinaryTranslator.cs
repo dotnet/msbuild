@@ -9,7 +9,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Globalization;
-using System.Reflection;
 
 #nullable disable
 

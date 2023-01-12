@@ -7,9 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
-#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using Microsoft.Build.Shared;

@@ -11,9 +11,6 @@ using System.Runtime.ConstrainedExecution;
 #endif
 using System.Security;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
-#endif
 #if FEATURE_RESOURCE_EXPOSURE
 using System.Runtime.Versioning;
 #endif

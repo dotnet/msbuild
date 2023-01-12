@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 
 using Microsoft.Build.Shared.FileSystem;
 
@@ -61,6 +63,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Version dotNetFrameworkVersion471 = new Version(4, 7, 1);
         internal static readonly Version dotNetFrameworkVersion472 = new Version(4, 7, 2);
         internal static readonly Version dotNetFrameworkVersion48 = new Version(4, 8);
+        internal static readonly Version dotNetFrameworkVersion481 = new Version(4, 8, 1);
 
         // visual studio versions.
         internal static readonly Version visualStudioVersion100 = new Version(10, 0);
@@ -217,6 +220,9 @@ namespace Microsoft.Build.Shared
 
             // v4.8
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion48, visualStudioVersion150),
+
+            // v4.8.1
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion481, visualStudioVersion170),
         };
 
         /// <summary>
@@ -327,6 +333,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion471,
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
+                dotNetFrameworkVersion481,
             }),
         });
 
@@ -373,6 +380,18 @@ namespace Microsoft.Build.Shared
             { (dotNetFrameworkVersion471, visualStudioVersion160), (dotNetFrameworkVersion47, visualStudioVersion160) },
             { (dotNetFrameworkVersion472, visualStudioVersion160), (dotNetFrameworkVersion471, visualStudioVersion160) },
             { (dotNetFrameworkVersion48, visualStudioVersion160), (dotNetFrameworkVersion472, visualStudioVersion160) },
+
+            // VS 17
+            { (dotNetFrameworkVersion451, visualStudioVersion170), (dotNetFrameworkVersion45, visualStudioVersion170) },
+            { (dotNetFrameworkVersion452, visualStudioVersion170), (dotNetFrameworkVersion451, visualStudioVersion170) },
+            { (dotNetFrameworkVersion46, visualStudioVersion170), (dotNetFrameworkVersion451, visualStudioVersion170) },
+            { (dotNetFrameworkVersion461, visualStudioVersion170), (dotNetFrameworkVersion46, visualStudioVersion170) },
+            { (dotNetFrameworkVersion462, visualStudioVersion170), (dotNetFrameworkVersion461, visualStudioVersion170) },
+            { (dotNetFrameworkVersion47, visualStudioVersion170), (dotNetFrameworkVersion462, visualStudioVersion170) },
+            { (dotNetFrameworkVersion471, visualStudioVersion170), (dotNetFrameworkVersion47, visualStudioVersion170) },
+            { (dotNetFrameworkVersion472, visualStudioVersion170), (dotNetFrameworkVersion471, visualStudioVersion170) },
+            { (dotNetFrameworkVersion48, visualStudioVersion170), (dotNetFrameworkVersion472, visualStudioVersion170) },
+            { (dotNetFrameworkVersion481, visualStudioVersion170), (dotNetFrameworkVersion48, visualStudioVersion170) },
         };
 #endif // FEATURE_WIN32_REGISTRY
 
@@ -1212,7 +1231,11 @@ namespace Microsoft.Build.Shared
             {
                 string sdkVersionFolder = "4.6"; // Default for back-compat
 
-                if (dotNetSdkVersion == dotNetFrameworkVersion48)
+                if (dotNetSdkVersion == dotNetFrameworkVersion481)
+                {
+                    sdkVersionFolder = "4.8.1";
+                }
+                else if (dotNetSdkVersion == dotNetFrameworkVersion48)
                 {
                     sdkVersionFolder = "4.8";
                 }
@@ -1380,10 +1403,14 @@ namespace Microsoft.Build.Shared
                                     Directory.GetDirectories,
                                     architecture);
 
-                // .net was improperly uninstalled: msbuild.exe isn't there
+                // Assume if either MSBuild.exe or Microsoft.Build.dll are shipped, there is a valid install.
+                // Note: net481 did not ship an ARM64 MSBuild.exe, so checking its dll's is the fallback for a valid install.
+                // Context: https://github.com/dotnet/msbuild/pull/7689
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
-                    !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")))
+                    (!FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
+                     !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll")))
+                    )
                 {
                     return null;
                 }

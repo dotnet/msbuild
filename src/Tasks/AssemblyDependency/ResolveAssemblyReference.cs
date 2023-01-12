@@ -83,6 +83,7 @@ namespace Microsoft.Build.Tasks
             public static string LogAttributeFormat;
             public static string LogTaskPropertyFormat;
             public static string NoBecauseParentReferencesFoundInGac;
+            public static string NoBecauseBadImage;
             public static string NotCopyLocalBecauseConflictVictim;
             public static string NotCopyLocalBecauseEmbedded;
             public static string NotCopyLocalBecauseFrameworksFiles;
@@ -132,6 +133,7 @@ namespace Microsoft.Build.Tasks
                 IsAWinMdFile = GetResourceFourSpaces("ResolveAssemblyReference.IsAWinMdFile");
                 LogAttributeFormat = GetResourceEightSpaces("ResolveAssemblyReference.LogAttributeFormat");
                 LogTaskPropertyFormat = GetResource("ResolveAssemblyReference.LogTaskPropertyFormat");
+                NoBecauseBadImage = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseBadImage");
                 NoBecauseParentReferencesFoundInGac = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac");
                 NotCopyLocalBecauseConflictVictim = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseConflictVictim");
                 NotCopyLocalBecauseEmbedded = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseEmbedded");
@@ -1689,7 +1691,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (itemError is BadImageReferenceException)
                 {
-                    message = Log.FormatResourceString("ResolveAssemblyReference.FailedWithException", itemError.InnerException?.ToString() ?? itemError.ToString());
+                    message = Log.FormatResourceString("ResolveAssemblyReference.FailedWithException", itemError.Message);
                     helpKeyword = "MSBuild.ResolveAssemblyReference.FailedWithException";
                     dependencyProblem = false;
                 }
@@ -1938,6 +1940,10 @@ namespace Microsoft.Build.Tasks
 
                     case CopyLocalState.NoBecauseParentReferencesFoundInGAC:
                         Log.LogMessage(importance, Strings.NoBecauseParentReferencesFoundInGac);
+                        break;
+
+                    case CopyLocalState.NoBecauseBadImage:
+                        Log.LogMessage(importance, Strings.NoBecauseBadImage);
                         break;
 
                     default:
@@ -2992,22 +2998,15 @@ namespace Microsoft.Build.Tasks
                 // Whidbey behavior was to accept a single TargetFrameworkDirectory, and multiple
                 // InstalledAssemblyTables, under the assumption that all of the InstalledAssemblyTables
                 // were related to the single TargetFrameworkDirectory.  If inputs look like the Whidbey
-                // case, let's make sure we behave the same way.
-
+                // case, let's make sure we behave the same way. Otherwise, use non-empty metadata.
                 if (String.IsNullOrEmpty(frameworkDirectory))
                 {
                     if (TargetFrameworkDirectories?.Length == 1)
                     {
                         // Exactly one TargetFrameworkDirectory, so assume it's related to this
                         // InstalledAssemblyTable.
-
                         frameworkDirectory = TargetFrameworkDirectories[0];
                     }
-                }
-                else
-                {
-                    // The metadata on the item was non-empty, so use it.
-                    frameworkDirectory = FileUtilities.EnsureTrailingSlash(frameworkDirectory);
                 }
 
                 tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory);

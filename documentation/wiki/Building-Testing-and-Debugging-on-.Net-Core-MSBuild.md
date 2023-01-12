@@ -6,6 +6,10 @@ MSBuild can be successfully built on Windows, OS X 10.13, Ubuntu 14.04, and Ubun
 
 `build.cmd -msbuildEngine dotnet`
 
+## Tests
+
+Follow [Running Unit Tests](Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#running-unit-tests) section of the developer guide chapter for .NET Framework
+
 # Unix
 
 ## The easy way
@@ -28,19 +32,19 @@ If you encounter errors, see [Something's wrong in my build](Something's-wrong-i
 
 `./build.sh --test`
 
-## Getting .Net Core MSBuild binaries without building the code
+# Getting .Net Core MSBuild binaries without building the code
 
 The best way to get .NET Core MSBuild is by installing the [.NET Core SDK](https://github.com/dotnet/core-sdk), which redistributes us. This will get you the latest released version of MSBuild for .NET Core. After installing it, you can use MSBuild through `dotnet build` or by manual invocation of the `MSBuild.dll` in the dotnet distribution.
 
-## Debugging
+# Debugging
 
-### Wait in Main
+## Wait in Main
 
 Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the process manually after it starts.
 
-### Using the repository binaries to perform builds
+## Using the repository binaries to perform builds
 
-To build projects using the MSBuild binaries from the repository, you first need to do a build (command: `build.cmd /p:CreateBootstrap=true`) which produces a bootstrap directory mimicking a Visual Studio (full framework flavor) or dotnet CLI (.net core flavor) installation.
+To build projects using the MSBuild binaries from the repository, you first need to do a build (command: `build.cmd`) which produces a bootstrap directory mimicking a Visual Studio (full framework flavor) or dotnet CLI (.net core flavor) installation.
 
 Now, just point `dotnet ./artifacts/bin/bootstrap/<TARGET_FRAMEWORK>/MSBuild/MSBuild.dll` at a project file. (Change <TARGET_FRAMEWORK> to current target framework, for example net7.0, net8.0) 
 

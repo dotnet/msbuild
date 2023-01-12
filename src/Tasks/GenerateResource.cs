@@ -23,9 +23,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+using System.Runtime.Serialization.Formatters.Binary;
 #endif
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 #if !FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Versioning;
 using System.Security;
@@ -1974,7 +1974,6 @@ namespace Microsoft.Build.Tasks
             // Return true to err on the side of caution. Error will appear later.
             return true;
         }
-#endif
 
         /// <summary>
         /// Deserializes a base64 block from a resx in order to figure out if its type is in the GAC.
@@ -1995,6 +1994,7 @@ namespace Microsoft.Build.Tasks
                 return result != null;
             }
         }
+#endif
 
         /// <summary>
         /// Chars that should be ignored in the nicely justified block of base64

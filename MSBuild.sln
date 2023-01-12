@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 17.0.31903.59
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4900B3B8-4310-4D5B-B1F7-2FDF9199765F}"
 	ProjectSection(SolutionItems) = preProject
 		NuGet.Config = NuGet.Config
+		testenvironments.json = testenvironments.json
 		src\Shared\UnitTests\xunit.runner.json = src\Shared\UnitTests\xunit.runner.json
 	EndProjectSection
 EndProject

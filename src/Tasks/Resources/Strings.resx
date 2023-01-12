@@ -251,6 +251,10 @@
     <value>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</value>
     <comment>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</comment>
   </data>
+  <data name="Copy.RetryingAsSymbolicLink">
+    <value>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</value>
+    <comment>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</comment>
+  </data>
   <data name="Copy.NeedsDestination">
     <value>MSB3023: No destination specified for Copy. Please supply either "{0}" or "{1}".</value>
     <comment>{StrBegin="MSB3023: "}</comment>
@@ -1615,6 +1619,12 @@
         LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name. "CopyLocalDependenciesWhenParentReferenceInGac" is a property name.
    </comment>
   </data>
+  <data name="ResolveAssemblyReference.NoBecauseBadImage">
+    <value>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</value>
+    <comment>
+      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
+    </comment>
+  </data>
   <data name="ResolveAssemblyReference.NotCopyLocalBecauseEmbedded">
     <value>This reference is not "CopyLocal" because its types will be embedded into the target assembly.</value>
     <comment>
@@ -2726,9 +2736,6 @@
         MSB3891 - MSB3900   Targets: Copy Overflow
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
-  <data name="Copy.ExactlyOneTypeOfLink">
-    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>
-  </data>
   <data name="Copy.ErrorIfLinkFailsSetWithoutLinkOption" xml:space="preserve">
     <value>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</value>
     <comment>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</comment>
