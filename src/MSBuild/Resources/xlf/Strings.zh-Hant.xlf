@@ -28,13 +28,9 @@
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse 參數不能在 MSBuild.rsp 自動回應檔中指定，也不能在自動回應檔所參考的任何回應檔中指定。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="CopyrightMessage">
-        <source>Microsoft (R) Build Engine version {0} for {1}
-Copyright (C) Microsoft Corporation. All rights reserved.
-</source>
-        <target state="translated">Microsoft (R) Build Engine for {1} {0} 版
-Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
-</target>
+      <trans-unit id="MSBuildVersionMessage">
+        <source>MSBuild version {0} for {1}</source>
+        <target state="new">MSBuild version {0} for {1}</target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
@@ -509,44 +505,48 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;參數&gt;
-                     主控台記錄器的參數。(簡短形式: -clp)
-                     可用的參數為:
-                        PerformanceSummary--顯示工作、目標
-                            及專案所花費的時間。
-                        Summary--結束時顯示錯誤與警告摘要。
-                        NoSummary--結束時不顯示錯誤
-                            與警告摘要。
-                        ErrorsOnly--只顯示錯誤。
-                        WarningsOnly--只顯示警告。
-                        NoItemAndPropertyList--不在每個專案開始建置時，
-                            顯示項目與屬性清單。
-                        ShowCommandLine--顯示 TaskCommandLineEvent 訊息
-                        ShowTimestamp--在所有訊息開頭顯示
-                            時間戳記。
-                        ShowEventId--顯示已開始之事件、已完成之事件
-                            以及訊息的事件識別碼
-                        ForceNoAlign--不將文字調整成主控台
-                            緩衝區的大小
-                        DisableConsoleColor--為所有記錄訊息使用預設的
-                            主控台色彩。
-                        DisableMPLogging-- 在非多處理器模式下執行時，
-                            停用輸出的多處理器
-                            記錄樣式。
-                        EnableMPLogging--在非多處理器模式下執行時，
-                            啟用多處理器記錄樣式。
-                            此記錄樣式預設為啟用。
-                        ForceConsoleColor--即使主控台不支援 ANSI 主控台色彩，
-                            也一律使用該色彩
-                        Verbosity--覆寫此記錄器的 -verbosity
-                             設定。
-                     範例:
+        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parameters to console logger. (Short form: -clp)
+                     The available parameters are:
+                        PerformanceSummary--Show time spent in tasks, targets
+                            and projects.
+                        Summary--Show error and warning summary at the end.
+                        NoSummary--Don't show error and warning summary at the
+                            end.
+                        ErrorsOnly--Show only errors.
+                        WarningsOnly--Show only warnings.
+                        NoItemAndPropertyList--Don't show list of items and
+                            properties at the start of each project build.
+                        ShowCommandLine--Show TaskCommandLineEvent messages
+                        ShowTimestamp--Display the Timestamp as a prefix to any
+                            message.
+                        ShowEventId--Show eventId for started events, finished
+                            events, and messages
+                        ForceNoAlign--Does not align the text to the size of
+                            the console buffer
+                        DisableConsoleColor--Use the default console colors
+                            for all logging messages.
+                        DisableMPLogging-- Disable the multiprocessor
+                            logging style of output when running in
+                            non-multiprocessor mode.
+                        EnableMPLogging--Enable the multiprocessor logging
+                            style even when running in non-multiprocessor
+                            mode. This logging style is on by default.
+                        ForceConsoleColor--Use ANSI console colors even if
+                            console does not support it
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
+                            logger.
+                     Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>

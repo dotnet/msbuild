@@ -28,13 +28,9 @@
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse anahtarı, MSBuild.rsp otomatik yanıt dosyasında ve bu dosyanın başvuruda bulunduğu herhangi bir yanıt dosyasında belirtilemez.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="CopyrightMessage">
-        <source>Microsoft (R) Build Engine version {0} for {1}
-Copyright (C) Microsoft Corporation. All rights reserved.
-</source>
-        <target state="translated">{1} için Microsoft (R) Build Engine sürüm {0}
-Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
-</target>
+      <trans-unit id="MSBuildVersionMessage">
+        <source>MSBuild version {0} for {1}</source>
+        <target state="new">MSBuild version {0} for {1}</target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
@@ -509,45 +505,49 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parametreler&gt;
-                     Konsol günlükçüsü için parametreler. (Kısa biçim: -clp)
-                     Kullanılabilir parametreler:
-                        PerformanceSummary--Görevlerde, hedeflerde ve 
-                            projelerde harcanan süreyi göster.
-                        Summary--Sonda hata ve uyarı özetini göster.
-                        NoSummary--Sonda hata ve uyarı özetini gösterme.
-                        ErrorsOnly--Yalnızca hataları göster.
-                        WarningsOnly--Yalnızca uyarıları göster.
-                        NoItemAndPropertyList--Her proje derlemesinin
-                            başında öğe ve özelliklerin listesini gösterme. 
-                        ShowCommandLine--TaskCommandLineEvent iletilerini 
-                            göster.
-                        ShowTimestamp--Tüm iletilerde önek olarak Zaman
-                            Damgasını göster.
-                        ShowEventId--Başlatılan olaylar, bitirilen olaylar ve 
-                            iletiler için eventId'yi göster.
-                        ForceNoAlign--Metni konsol arabelleğinin boyutuna göre
-                            ayarlama.
-                        DisableConsoleColor--Tüm günlük iletileri için
-                            varsayılan konsol renklerini kullan.
-                        DisableMPLogging--Çoklu işlemci olmayan modda 
-                            çalışırken çıkışta çok işlemcili günlük stilini 
-                            devre dışı bırak.
-                        EnableMPLogging--Çok işlemci olmayan modda çalışırken 
-                            bile çok işlemcili günlük stilini etkinleştir. Bu 
-                            günlük stili varsayılan olarak açıktır.
-                        ForceConsoleColor--Konsol desteklemese bile ANSI
-                            konsol renklerini kullan
-                                                Verbosity--Bu günlükçü için /verbosity ayarını
-                            geçersiz kılar.
-                     Örnek:
-                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parameters to console logger. (Short form: -clp)
+                     The available parameters are:
+                        PerformanceSummary--Show time spent in tasks, targets
+                            and projects.
+                        Summary--Show error and warning summary at the end.
+                        NoSummary--Don't show error and warning summary at the
+                            end.
+                        ErrorsOnly--Show only errors.
+                        WarningsOnly--Show only warnings.
+                        NoItemAndPropertyList--Don't show list of items and
+                            properties at the start of each project build.
+                        ShowCommandLine--Show TaskCommandLineEvent messages
+                        ShowTimestamp--Display the Timestamp as a prefix to any
+                            message.
+                        ShowEventId--Show eventId for started events, finished
+                            events, and messages
+                        ForceNoAlign--Does not align the text to the size of
+                            the console buffer
+                        DisableConsoleColor--Use the default console colors
+                            for all logging messages.
+                        DisableMPLogging-- Disable the multiprocessor
+                            logging style of output when running in
+                            non-multiprocessor mode.
+                        EnableMPLogging--Enable the multiprocessor logging
+                            style even when running in non-multiprocessor
+                            mode. This logging style is on by default.
+                        ForceConsoleColor--Use ANSI console colors even if
+                            console does not support it
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
+                            logger.
+                     Example:
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
