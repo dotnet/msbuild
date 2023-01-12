@@ -15,7 +15,6 @@ using Microsoft.TemplateEngine.TestHelper;
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public class TemplateCommandTests
     {
         [Fact]
