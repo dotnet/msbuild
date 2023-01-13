@@ -318,6 +318,7 @@ public class ReferencedExeProgram
             Directory.CreateDirectory(testProjectDirectory);
 
             new DotnetNewCommand(Log, testTemplateName)
+                .WithVirtualHive()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should()
@@ -354,6 +355,7 @@ public class ReferencedExeProgram
             Directory.CreateDirectory(testProjectDirectory);
 
             new DotnetNewCommand(Log, testTemplateName)
+                .WithVirtualHive()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should()
