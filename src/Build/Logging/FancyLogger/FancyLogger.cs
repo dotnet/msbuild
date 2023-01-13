@@ -43,6 +43,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
+            // Cancelled
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
         }
@@ -145,6 +147,13 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.Log();
         }
 
+        void console_CancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs)
+        {
+            // Clear screen
+            FancyLoggerBuffer.Terminate();
+            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
+            Console.Clear();
+        }
 
         public void Shutdown()
         {
