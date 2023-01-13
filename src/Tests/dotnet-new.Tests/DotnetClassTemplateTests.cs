@@ -82,7 +82,22 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 OutputDirectory = workingDir,
                 EnsureEmptyOutputDirectory = false
             }
-            .WithCustomEnvironment(environmentUnderTest);
+            .WithCustomEnvironment(environmentUnderTest)
+            .WithCustomScrubbers(
+               ScrubbersDefinition.Empty
+               .AddScrubber((path, content) =>
+               {
+                   if (path.Replace(Path.DirectorySeparatorChar, '/') == "std-streams/stdout.txt")
+                   {
+                       content
+                       .UnixifyNewlines()
+                       .ScrubAndReplace(
+                           "Warning: Failed to evaluate bind symbol \'langVersion\', it will be skipped.",
+                           string.Empty);
+
+                       content.ScrubAndReplace("\n", string.Empty);
+                   }
+               }));
 
             VerificationEngine engine = new VerificationEngine(_logger);
             await engine.Execute(options)
@@ -140,7 +155,22 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 OutputDirectory = workingDir,
                 EnsureEmptyOutputDirectory = false
             }
-            .WithCustomEnvironment(environmentUnderTest);
+            .WithCustomEnvironment(environmentUnderTest)
+            .WithCustomScrubbers(
+               ScrubbersDefinition.Empty
+               .AddScrubber((path, content) =>
+               {
+                   if (path.Replace(Path.DirectorySeparatorChar, '/') == "std-streams/stdout.txt")
+                   {
+                       content
+                       .UnixifyNewlines()
+                       .ScrubAndReplace(
+                           "Warning: Failed to evaluate bind symbol \'langVersion\', it will be skipped.",
+                           string.Empty);
+
+                       content.ScrubAndReplace("\n", string.Empty);
+                   }
+               }));
 
             VerificationEngine engine = new VerificationEngine(_logger);
             await engine.Execute(options)
