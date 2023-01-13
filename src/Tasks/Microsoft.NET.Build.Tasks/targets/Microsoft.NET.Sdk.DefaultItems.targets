@@ -169,7 +169,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_VerifyPackReleaseConfigurations"
           BeforeTargets="PrepareForBuild"
           Condition="'$(_IsPacking)' == 'true' and '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE)' != 'true'">
-    <NETSdkError Condition="'$(_SolutionLevelPackRelease)' != '' and
+    <NETSdkError Condition="'$(SolutionExt)' == '.sln' and
                             '$(_SolutionLevelPackRelease)' != '$(PackRelease)'"
           ResourceName="SolutionProjectConfigurationsConflict"
           FormatArguments="PackRelease"/>

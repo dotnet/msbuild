@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
@@ -21,8 +22,14 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
+
+
+
     public class GivenThatWeWantToPublishAHelloWorldProject : SdkTest
     {
+        private const string PublishRelease = nameof(PublishRelease);
+        private const string PackRelease = nameof(PackRelease);
+
         public GivenThatWeWantToPublishAHelloWorldProject(ITestOutputHelper log) : base(log)
         {
         }
@@ -458,7 +465,7 @@ public static class Program
                 {
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
+                    propertyGroup.Add(new XElement(ns + PublishRelease, "true"));
                 });
 
             new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
@@ -495,7 +502,6 @@ public static class Program
         [Fact]
         public void It_passes_using_PublishRelease_with_conflicting_capitalization_but_same_values_across_solution_projects()
         {
-
             var slnDir = _testAssetsManager
                .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingCasing")
                .WithSource()
@@ -519,7 +525,7 @@ public static class Program
                .WithSource()
                .Path;
 
-            var expectedError = string.Format(Strings.SolutionProjectConfigurationsConflict, "PublishRelease");
+            var expectedError = string.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease);
 
             new DotnetCommand(Log)
                 .WithWorkingDirectory(slnDir)
@@ -528,6 +534,71 @@ public static class Program
                 .Fail()
                 .And
                 .HaveStdOutContaining(expectedError);
+        }
+
+        [Fact]
+        public void It_sees_PublishRelease_values_of_hardcoded_sln_argument()
+        {
+            const string secondaryFolder = "secondary"; // Solution search under test only searches top level directory -> use a folder layer to force a search of a hardcoded sln path
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues", testAssetSubdirectory: secondaryFolder) // this also contains conflicting PackRelease values.
+               .WithSource()
+               .Path;
+
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(Directory.GetParent(slnDir).FullName)
+                .Execute("dotnet", "publish", slnDir)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(string.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease));
+        }
+
+        [Fact]
+        public void It_doesnt_error_if_environment_variable_opt_out_enabled_but_PublishRelease_conflicts()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues")
+               .WithSource()
+               .Path;
+
+            new DotnetCommand(Log)
+                .WithEnvironmentVariable("DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE", "true")
+                .WithWorkingDirectory(slnDir)
+                .Execute("dotnet", "publish")
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void It_doesnt_error_if_PublishRelease_conflicts_in_VisualStudio()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues")
+               .WithSource()
+               .Path;
+
+            new DotnetCommand(Log)
+                .WithEnvironmentVariable("DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE", "true")
+                .WithWorkingDirectory(slnDir)
+                .Execute("dotnet", "publish", "_IsPublishing=false") // This property won't be set in VS, make sure the error doesn't occur because of this by mimicking behavior.
+                .Should()
+                .Pass();
+        }
+
+
+        [Fact]
+        public void It_does_not_error_when_Net_7_and_Net_6_project_dont_define_PublishRelease()
+        {
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFrameworks("net6.0;net7.0");
+
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
         }
 
         [Fact]
@@ -664,7 +735,7 @@ public static class Program
                 {
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
+                    propertyGroup.Add(new XElement(ns + PublishRelease, "true"));
                 });
 
             var publishProfilesDirectory = Path.Combine(helloWorldAsset.Path, "Properties", "PublishProfiles");

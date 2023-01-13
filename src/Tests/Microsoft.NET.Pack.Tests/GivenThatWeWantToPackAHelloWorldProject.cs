@@ -115,7 +115,7 @@ namespace Microsoft.NET.Pack.Tests
         public void It_packs_with_release_if_PackRelease_property_set_in_csproj()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PackReleaseHelloWorld")
+               .CopyTestAsset("HelloWorld")
                .WithSource()
                .WithProjectChanges(project =>
                {
@@ -132,6 +132,34 @@ namespace Microsoft.NET.Pack.Tests
                 .Pass();
 
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [InlineData("")]
+        [InlineData("false")]
+        [Theory]
+        public void It_packs_successfully_with_debug_with_Mutlitargeting_where_net_8_and_net_7_project_defines_PackRelease_or_not(string packReleaseValue)
+        {
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFrameworks("net8.0;net7.0")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                     propertyGroup.Add(new XElement(packReleaseValue != "" ? ns + "PackRelease" + packReleaseValue : ""));
+                });
+
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string expectedConfiguration = packReleaseValue == "false" ? "Debug" : "Release";
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", expectedConfiguration, "HelloWorld.1.0.0.nupkg");
             Assert.True(File.Exists(expectedAssetPath));
         }
 

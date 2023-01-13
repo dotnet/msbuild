@@ -117,10 +117,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
-    <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations. -->
+    <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations.
+    SolutionExt is used to check if we are publishing a solution. Will be undefined if not.-->
     <NETSdkError Condition="'$(_IsPublishing)' == 'true' and
-                            '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE) != 'true' and
-                            '$(_SolutionLevelPublishRelease)' != '' and
+                            '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE)' != 'true' and
+                            '$(SolutionExt)' == '.sln' and
                             '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
                  ResourceName="SolutionProjectConfigurationsConflict"
                  FormatArguments="PublishRelease" />
