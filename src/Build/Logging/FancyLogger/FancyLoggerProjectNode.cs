@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -87,7 +88,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
 
             // Update buffer
-            FancyLoggerBuffer.Render();
+            Task.Run(() =>
+            {
+                FancyLoggerBuffer.Render();
+            });
         }
 
         public void AddTarget(TargetStartedEventArgs args)

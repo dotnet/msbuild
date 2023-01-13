@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -48,12 +49,18 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBuffer.WriteNewLine("");
             // for (int i = 0; i < 120; i++) FancyLoggerBuffer.WriteNewLine( new string(Convert.ToString(i, 16)[0], 200) );
             FancyLoggerBuffer.Render();
+
+
+            Task.Run(() =>
+            {
+            });
         }
 
         // Build
         void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
         {
         }
+
         void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
             Succeeded = e.Succeeded;
@@ -89,7 +96,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTarget(e);
-            node.Log();
+            // node.Log();
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
@@ -98,7 +105,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.FinishedTargets++;
-            node.Log();
+            // node.Log();
         }
 
         // Task
@@ -110,7 +117,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTask(e);
-            node.Log();
+            // node.Log();
             existingTasks++;
         }
 
@@ -126,7 +133,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddMessage(e);
-            node.Log();
+            // node.Log();
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
@@ -135,7 +142,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddWarning(e);
-            node.Log();
+            // node.Log();
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
         {
@@ -144,7 +151,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddError(e);
-            node.Log();
+            // node.Log();
         }
 
 
