@@ -30,7 +30,6 @@ dotnet new --debug:ephemeral-hive
 REM avoid potetial concurrency issues when nuget is creating nuget.config
 dotnet nuget list source --configfile %TestExecutionDirectory%\nuget.config
 REM We downloaded a special zip of files to the .nuget folder so add that as a source
-dotnet new nugetconfig
 dotnet nuget add source %DOTNET_ROOT%\.nuget --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source dotnet6-transport --configfile %TestExecutionDirectory%\nuget.config
 dotnet nuget remove source dotnet6-internal-transport --configfile %TestExecutionDirectory%\nuget.config
