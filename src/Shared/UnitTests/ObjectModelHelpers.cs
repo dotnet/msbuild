@@ -1817,7 +1817,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void DeleteFiles(params string[] paths)
         {
-            // When we delete the file which has the sub folder/file firstly, it will be not delected since not empty.
+            // When we delete the file directory which has the sub folder/file firstly, it will not be delected since not empty.
             // So sort paths descendingly by depth, it will delete sub folder/file at first.
             var pathsSortedByDepth = paths.OrderByDescending(x =>
                                        x.NormalizeForPathComparison().Split(Path.DirectorySeparatorChar).Length);
