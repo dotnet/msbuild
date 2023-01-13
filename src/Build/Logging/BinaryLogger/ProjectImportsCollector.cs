@@ -145,11 +145,8 @@ namespace Microsoft.Build.Logging
             }
 
             using FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
-            if (content.Length > 0)
-            {
-                using Stream entryStream = OpenArchiveEntry(filePath);
-                content.CopyTo(entryStream);
-            }
+            using Stream entryStream = OpenArchiveEntry(filePath);
+            content.CopyTo(entryStream);
         }
 
         /// <remarks>

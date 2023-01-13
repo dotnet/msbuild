@@ -266,7 +266,7 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkName));
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkLvl2Name));
-            zipArchive.Entries.ShouldNotContain(zE => zE.Name.EndsWith(emptyFileName));
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(emptyFileName));
         }
 
         [Fact]
