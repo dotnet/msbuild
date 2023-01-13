@@ -343,25 +343,41 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [Fact]
-        public void ItUsesVerbosityPassedToDefineVerbosityOfConsoleLoggerOfTheTests()
+        [Theory]
+        [InlineData("q", false)]
+        [InlineData("m", false)]
+        [InlineData("n", true)]
+        [InlineData("d", true)]
+        [InlineData("diag", true)]
+        public void ItUsesVerbosityPassedToDefineVerbosityOfConsoleLoggerOfTheTests(string verbosity, bool shouldShowPassedTests)
         {
             // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("9");
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp($"9_{verbosity}");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .Execute("-v", "q");
+                                        .Execute("-v", verbosity);
 
             // Verify
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total:     2");
-                result.StdOut.Should().Contain("Passed:     1");
-                result.StdOut.Should().Contain("Failed:     1");
-                result.StdOut.Should().NotContain("Passed TestNamespace.VSTestTests.VSTestPassTest");
-                result.StdOut.Should().NotContain("Failed TestNamespace.VSTestTests.VSTestFailTest");
+                if (shouldShowPassedTests)
+                {
+                    result.StdOut.Should().Contain("Total tests: 2");
+                    result.StdOut.Should().Contain("Passed: 1");
+                    result.StdOut.Should().Contain("Failed: 1");
+
+                    result.StdOut.Should().Contain("Passed VSTestPassTest");
+                }
+                else
+                {
+                    result.StdOut.Should().Contain("Total:     2");
+                    result.StdOut.Should().Contain("Passed:     1");
+                    result.StdOut.Should().Contain("Failed:     1");
+
+                    result.StdOut.Should().NotContain("Passed VSTestPassTest");
+                }
             }
 
             result.ExitCode.Should().Be(1);
@@ -603,7 +619,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(0);
         }
 
-        [PlatformSpecificFact(TestPlatforms.Linux, Skip="https://github.com/dotnet/sdk/issues/22865")]
+        [PlatformSpecificFact(TestPlatforms.Linux, Skip = "https://github.com/dotnet/sdk/issues/22865")]
         public void ItShouldShowWarningMessageOnCollectCodeCoverageThatProfilerWasNotInitialized()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
@@ -618,7 +634,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!TestContext.IsLocalized())
             {
-               result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows, Linux x64 and macOS x64.");
+                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows, Linux x64 and macOS x64.");
                 result.StdOut.Should().Contain("Total:     1");
                 result.StdOut.Should().Contain("Passed:     1");
                 result.StdOut.Should().NotContain("Failed!");
