@@ -51,6 +51,7 @@ namespace Microsoft.DotNet.Cli
         {
             // Setup
 #nullable enable
+            Debugger.Launch();
             Debug.Assert(_propertyToCheck == MSBuildPropertyNames.PUBLISH_RELEASE || _propertyToCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
             var nothing = Enumerable.Empty<string>();
             if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
@@ -146,10 +147,13 @@ namespace Microsoft.DotNet.Cli
 
             foreach (var project in sln.Projects.AsEnumerable())
             {
-                if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(project.FilePath))
+#pragma warning disable CS8604 // Possible null reference argument.
+                string projectFullPath = Path.Combine(Path.GetDirectoryName(sln.FullPath), project.FilePath);
+#pragma warning restore CS8604 // Possible null reference argument.
+                if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(projectFullPath))
                     continue;
 
-                var projectData = TryGetProjectInstance(project.FilePath, globalProps);
+                var projectData = TryGetProjectInstance(projectFullPath, globalProps);
                 if (projectData != null)
                 {
                     _isHandlingSolution = true;
