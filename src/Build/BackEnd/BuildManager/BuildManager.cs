@@ -378,12 +378,10 @@ namespace Microsoft.Build.Execution
         string IBuildComponentHost.Name => _hostName;
 
         /// <summary>
-        /// Gets or sets the build parameters associated with this build.
+        /// Retrieves the build parameters associated with this build.
         /// </summary>
-        BuildParameters IBuildComponentHost.BuildParameters
-        {
-            get => _buildParameters; set => _buildParameters = value;
-        }
+        /// <returns>The build parameters.</returns>
+        BuildParameters IBuildComponentHost.BuildParameters => _buildParameters;
 
         /// <summary>
         /// Retrieves the LegacyThreadingData associated with a particular build manager

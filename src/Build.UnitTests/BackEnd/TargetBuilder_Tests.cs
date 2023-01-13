@@ -1762,11 +1762,14 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             }
 
             /// <summary>
-            /// Gets or sets the build parameters.
+            /// Returns the build parameters.
             /// </summary>
             public BuildParameters BuildParameters
             {
-                get => _buildParameters; set => throw new NotImplementedException();
+                get
+                {
+                    return _buildParameters;
+                }
             }
 
             /// <summary>

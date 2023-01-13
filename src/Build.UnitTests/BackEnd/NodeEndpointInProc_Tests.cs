@@ -65,12 +65,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
 
-            /// <summary>
-            /// Gets or sets the build parameters.
-            /// </summary>
             public BuildParameters BuildParameters
             {
-                get => _buildParameters; set => throw new NotImplementedException();
+                get
+                {
+                    return _buildParameters;
+                }
             }
 
             #region IBuildComponentHost Members

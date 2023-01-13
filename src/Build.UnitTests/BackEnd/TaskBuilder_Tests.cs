@@ -1238,11 +1238,14 @@ namespace ClassLibrary2
             }
 
             /// <summary>
-            /// Gets or sets the build parameters.
+            /// Returns the build parameters.
             /// </summary>
             public BuildParameters BuildParameters
             {
-                get => _buildParameters; set => throw new NotSupportedException();
+                get
+                {
+                    return _buildParameters;
+                }
             }
 
             /// <summary>
