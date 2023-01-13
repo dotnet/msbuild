@@ -105,12 +105,12 @@ namespace Microsoft.Build.Graph
                 var requesterPlatform = "";
                 var requesterPlatformLookupTable = "";
 
-                if ( !projectReferenceItem.HasMetadata(SetPlatformMetadataName) && ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
+                if (!projectReferenceItem.HasMetadata(SetPlatformMetadataName) && ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
                 {
                     requesterPlatform = requesterInstance.GetPropertyValue("Platform");
                     requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
 
-                    var  projectInstance = _projectInstanceFactory(
+                    var projectInstance = _projectInstanceFactory(
                         projectReferenceFullPath,
                         null, // Platform negotiation requires an evaluation with no global properties first
                         _projectCollection);
@@ -164,30 +164,28 @@ namespace Microsoft.Build.Graph
         }
 
         /// <summary>
-        /// To avoid calling nuget at graph construction time, the graph is initially constructed with outer build nodes referencing inner build nodes.
-        /// However, at build time, for non root outer builds, the inner builds are NOT referenced by the outer build, but by the nodes referencing the
-        /// outer build. Change the graph to mimic this behaviour.
-        /// Examples
-        /// OuterAsRoot -> Inner go to OuterAsRoot -> Inner. Inner builds remain the same, parented to their outer build
-        /// Node -> Outer -> Inner go to: Node -> Outer; Node->Inner; Outer -> empty. Inner builds get reparented to Node
+        /// To avoid calling nuget at graph construction time, the graph is initially constructed with nodes referencing outer build nodes which in turn
+        /// reference inner build nodes. However at build time, the inner builds are referenced directly by the nodes referencing the outer build.
+        /// Change the graph to mimic this behaviour.
+        /// Example: Node -> Outer -> Inner go to: Node -> Outer; Node->Inner; Outer -> Inner. Inner build edges get added to Node.
         /// </summary>
-        public void ReparentInnerBuilds(Dictionary<ConfigurationMetadata, ParsedProject> allNodes, GraphBuilder graphBuilder)
+        public void AddInnerBuildEdges(Dictionary<ConfigurationMetadata, ParsedProject> allNodes, GraphBuilder graphBuilder)
         {
-            foreach (var node in allNodes)
+            foreach (KeyValuePair<ConfigurationMetadata, ParsedProject> node in allNodes)
             {
-                var outerBuild = node.Value.GraphNode;
+                ProjectGraphNode outerBuild = node.Value.GraphNode;
 
                 if (GetProjectType(outerBuild.ProjectInstance) == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
                 {
-                    foreach (var innerBuild in outerBuild.ProjectReferences)
+                    foreach (ProjectGraphNode innerBuild in outerBuild.ProjectReferences)
                     {
-                        foreach (var outerBuildReferencingProject in outerBuild.ReferencingProjects)
+                        foreach (ProjectGraphNode outerBuildReferencingProject in outerBuild.ReferencingProjects)
                         {
                             // Which edge should be used to connect the outerBuildReferencingProject to the inner builds?
                             // Decided to use the outerBuildBuildReferencingProject -> outerBuild edge in order to preserve any extra metadata
                             // information that may be present on the edge, like the "Targets" metadata which specifies what
                             // targets to call on the references.
-                            var newInnerBuildEdge = graphBuilder.Edges[(outerBuildReferencingProject, outerBuild)];
+                            ProjectItemInstance newInnerBuildEdge = graphBuilder.Edges[(outerBuildReferencingProject, outerBuild)];
 
                             if (outerBuildReferencingProject.ProjectReferences.Contains(innerBuild))
                             {
@@ -204,8 +202,6 @@ namespace Microsoft.Build.Graph
                             outerBuildReferencingProject.AddProjectReference(innerBuild, newInnerBuildEdge, graphBuilder.Edges);
                         }
                     }
-
-                    outerBuild.RemoveReferences(graphBuilder.Edges);
                 }
             }
         }
