@@ -41,6 +41,7 @@ namespace Microsoft.Build.Logging.FancyLogger
     {
         private static List<FancyLoggerBufferLine> Lines = new();
         private static int TopLineIndex = 0;
+        public static string Footer = string.Empty;
         // private static bool AutoScrollEnabled = true;
         public static void Initialize()
         {
@@ -53,7 +54,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 while (true)
                 {
-                    switch (Console.ReadKey().Key)
+                    // Wait (1/60 seconds)
+                    await Task.Delay((1 / 60) * 1_000);
+                    // Handle keyboard input
+                    switch (Console.ReadKey(true).Key)
                     {
                         case ConsoleKey.UpArrow:
                             if (TopLineIndex > 0) TopLineIndex--;
@@ -66,7 +70,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                             // AutoScrollEnabled = !AutoScrollEnabled;
                             break;
                     }
-                    await Task.Delay((1 / 60) * 1_000);
+                    // Render
                     Render();
             }
             });

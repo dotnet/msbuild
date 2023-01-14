@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -47,15 +46,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
             FancyLoggerBuffer.WriteNewLine("");
-            // Log all projects periodically
-            Task.Run(() =>
-            {
-                /*while (true)
-                {
-                    await Task.Delay((1/60)*10);
-                    foreach (var project in projects) project.Value.Log();
-                }*/
-            });
         }
 
         // Build
