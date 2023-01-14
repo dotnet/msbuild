@@ -27,25 +27,25 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             // Get type
-            if (args is BuildMessageEventArgs message)
+            switch (args)
             {
-                Type = MessageType.HighPriorityMessage;
-            }
-            else if (args is BuildWarningEventArgs warning)
-            {
-                Type = MessageType.Warning;
-                Code = warning.Code;
-                FilePath = warning.File;
-                LineNumber = warning.LineNumber;
-                ColumnNumber = warning.ColumnNumber;
-            }
-            else if (args is BuildErrorEventArgs error)
-            {
-                Type = MessageType.Error;
-                Code = error.Code;
-                FilePath = error.File;
-                LineNumber = error.LineNumber;
-                ColumnNumber = error.ColumnNumber;
+                case BuildMessageEventArgs:
+                    Type = MessageType.HighPriorityMessage;
+                    break;
+                case BuildWarningEventArgs warning:
+                    Type = MessageType.Warning;
+                    Code = warning.Code;
+                    FilePath = warning.File;
+                    LineNumber = warning.LineNumber;
+                    ColumnNumber = warning.ColumnNumber;
+                    break;
+                case BuildErrorEventArgs error:
+                    Type = MessageType.Error;
+                    Code = error.Code;
+                    FilePath = error.File;
+                    LineNumber = error.LineNumber;
+                    ColumnNumber = error.ColumnNumber;
+                    break;
             }
 
             // TODO: Replace
