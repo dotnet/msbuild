@@ -47,12 +47,14 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
             FancyLoggerBuffer.WriteNewLine("");
-            // for (int i = 0; i < 120; i++) FancyLoggerBuffer.WriteNewLine( new string(Convert.ToString(i, 16)[0], 200) );
-            FancyLoggerBuffer.Render();
-
-
+            // Log all projects periodically
             Task.Run(() =>
             {
+                /*while (true)
+                {
+                    await Task.Delay((1/60)*10);
+                    foreach (var project in projects) project.Value.Log();
+                }*/
             });
         }
 
@@ -96,7 +98,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTarget(e);
-            // node.Log();
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
@@ -105,7 +106,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.FinishedTargets++;
-            // node.Log();
         }
 
         // Task
@@ -117,7 +117,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTask(e);
-            // node.Log();
             existingTasks++;
         }
 
@@ -133,7 +132,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddMessage(e);
-            // node.Log();
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
@@ -142,7 +140,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddWarning(e);
-            // node.Log();
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
         {
@@ -151,7 +148,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddError(e);
-            // node.Log();
         }
 
 
@@ -160,7 +156,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
-            // Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
             if (Succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));

@@ -15,6 +15,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
+            if (Message.Length > 300)
+            {
+                Message = Message.Substring(0, 300);
+            }
         }
 
         public void Log()

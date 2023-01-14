@@ -49,34 +49,26 @@ namespace Microsoft.Build.Logging.FancyLogger
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
-            /*Task.Run(async () => {
-                while (true)
-                {
-                    await Task.Delay((1/60)/1000);
-                    Render();
-                }
-            });*/
-
-            Task.Run(() =>
+            Task.Run(async () =>
             {
-                /*while (true)
+                while (true)
                 {
                     switch (Console.ReadKey().Key)
                     {
                         case ConsoleKey.UpArrow:
                             if (TopLineIndex > 0) TopLineIndex--;
-                            Render();
                             break;
                         case ConsoleKey.DownArrow:
                             TopLineIndex++;
-                            Render();
                             break;
                         case ConsoleKey.Spacebar:
                         case ConsoleKey.Escape:
-                            AutoScrollEnabled = !AutoScrollEnabled;
+                            // AutoScrollEnabled = !AutoScrollEnabled;
                             break;
                     }
-                }*/
+                    await Task.Delay((1 / 60) * 1_000);
+                    Render();
+            }
             });
         }
 
