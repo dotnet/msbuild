@@ -8,8 +8,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+#if !RUNTIME_TYPE_NETCORE
 using System.Security;
 using System.Security.Permissions;
+#endif
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 
