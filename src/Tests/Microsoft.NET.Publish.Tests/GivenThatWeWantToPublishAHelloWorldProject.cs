@@ -539,14 +539,13 @@ public static class Program
         [Fact]
         public void It_sees_PublishRelease_values_of_hardcoded_sln_argument()
         {
-            const string secondaryFolder = "secondary"; // Solution search under test only searches top level directory -> use a folder layer to force a search of a hardcoded sln path
             var slnDir = _testAssetsManager
-               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues", testAssetSubdirectory: secondaryFolder) // this also contains conflicting PackRelease values.
+               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues")
                .WithSource()
                .Path;
 
             new DotnetCommand(Log)
-                .WithWorkingDirectory(Directory.GetParent(slnDir).FullName)
+                .WithWorkingDirectory(Directory.GetParent(slnDir).FullName) // code under test looks in CWD, ensure coverage outside this scenario
                 .Execute("dotnet", "publish", slnDir)
                 .Should()
                 .Fail()
@@ -581,7 +580,7 @@ public static class Program
             new DotnetCommand(Log)
                 .WithEnvironmentVariable("DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE", "true")
                 .WithWorkingDirectory(slnDir)
-                .Execute("dotnet", "publish", "_IsPublishing=false") // This property won't be set in VS, make sure the error doesn't occur because of this by mimicking behavior.
+                .Execute("dotnet", "publish", "--property:_IsPublishing=false") // This property won't be set in VS, make sure the error doesn't occur because of this by mimicking behavior.
                 .Should()
                 .Pass();
         }

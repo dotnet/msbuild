@@ -51,7 +51,6 @@ namespace Microsoft.DotNet.Cli
         {
             // Setup
 #nullable enable
-            Debugger.Launch();
             Debug.Assert(_propertyToCheck == MSBuildPropertyNames.PUBLISH_RELEASE || _propertyToCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
             var nothing = Enumerable.Empty<string>();
             if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
@@ -108,7 +107,7 @@ namespace Microsoft.DotNet.Cli
                 {
                     return TryGetProjectInstance(arg, globalProps);
                 }
-                else if(IsValidSlnFilePath(arg))
+                else if (IsValidSlnFilePath(arg))
                 {
                     return GetArbitraryProjectFromSolution(arg, globalProps);
                 }
