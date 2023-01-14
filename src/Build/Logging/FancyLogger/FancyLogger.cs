@@ -151,25 +151,30 @@ namespace Microsoft.Build.Logging.FancyLogger
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
             Console.Out.Flush();
+            int errorCount = 0;
+            int warningCount = 0;
             foreach (var project in projects)
             {
+                errorCount += project.Value.ErrorCount;
+                warningCount += project.Value.WarningCount;
                 foreach (var message in project.Value.AdditionalDetails)
                 {
                     Console.WriteLine(message.ToANSIString());
                 }
             }
-            // Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
+            // Emmpty line
+            Console.WriteLine();
             if (Succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine("\t0 Warning(s)");
-                Console.WriteLine("\t0 Error(s)");
+                Console.WriteLine($"\t{warningCount} Warning(s)");
+                Console.WriteLine($"\t{errorCount} Error(s)");
             }
             else
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-                Console.WriteLine("\tX Warnings(s)");
-                Console.WriteLine("\tX Errors(s)");
+                Console.WriteLine($"\t{warningCount} Warnings(s)");
+                Console.WriteLine($"\t{errorCount} Errors(s)");
             }
         }
     }
