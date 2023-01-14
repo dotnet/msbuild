@@ -4,7 +4,6 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;

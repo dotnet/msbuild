@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+#if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
 using Microsoft.Build.Eventing;
 #endif
 

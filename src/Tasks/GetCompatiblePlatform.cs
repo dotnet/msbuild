@@ -5,7 +5,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks
 {
