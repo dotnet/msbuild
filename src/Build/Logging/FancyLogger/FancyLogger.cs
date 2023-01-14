@@ -149,10 +149,8 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         void console_CancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs)
         {
-            // Clear screen
-            FancyLoggerBuffer.Terminate();
-            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
-            Console.Clear();
+            // Shutdown logger
+            Shutdown();
         }
 
         public void Shutdown()
