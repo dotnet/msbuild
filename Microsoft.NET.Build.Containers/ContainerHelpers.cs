@@ -24,7 +24,10 @@ public static class ContainerHelpers
     
     public const string HostObjectPass = "SDK_CONTAINER_REGISTRY_PWORD";
 
-    private static Regex envVarRegex = new Regex(@"^[a-zA-Z_]+$");
+    /// <summary>
+    /// Matches an environment variable name - must start with a letter or underscore, and can only contain letters, numbers, and underscores.
+    /// </summary>
+    private static Regex envVarRegex = new Regex(@"^[a-zA-Z_]{1,}[a-zA-Z0-9_]*$");
 
     /// <summary>
     /// DefaultRegistry is the canonical representation of something that lives in the local docker daemon. It's used as the inferred registry for repositories
