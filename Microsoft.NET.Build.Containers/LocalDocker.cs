@@ -47,19 +47,20 @@ public class LocalDocker
 
         foreach (var d in x.LayerDescriptors)
         {
-            if (x.originatingRegistry is null)
+            if (x.originatingRegistry is {} registry)
+            {
+                string localPath = await registry.DownloadBlob(x.OriginatingName, d);
+
+                // Stuff that (uncompressed) tarball into the image tar stream
+                // TODO uncompress!!
+                string layerTarballPath = $"{d.Digest.Substring("sha256:".Length)}/layer.tar";
+                await writer.WriteEntryAsync(localPath, layerTarballPath);
+                layerTarballPaths.Add(layerTarballPath);
+            }
+            else
             {
                 throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
-            }
-
-            string localPath = await x.originatingRegistry.DownloadBlob(x.OriginatingName, d);
-
-            // Stuff that (uncompressed) tarball into the image tar stream
-            // TODO uncompress!!
-            string layerTarballPath = $"{d.Digest.Substring("sha256:".Length)}/layer.tar";
-            await writer.WriteEntryAsync(localPath, layerTarballPath);
-            layerTarballPaths.Add(layerTarballPath);
-        }
+            }        }
 
         // add config
         string configTarballPath = $"{Image.GetSha(x.config)}.json";

@@ -1,4 +1,3 @@
-
 using NuGet.Packaging;
 using NuGet.RuntimeModel;
 using System.Diagnostics;
@@ -7,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.Json;
@@ -29,65 +29,125 @@ public record struct PlatformSpecificManifest(string mediaType, long size, strin
 public record struct ManifestListV2(int schemaVersion, string mediaType, PlatformSpecificManifest[] manifests);
 
 
-public record Registry(Uri BaseUri)
+public record struct Registry
 {
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
-    private const int MaxChunkSizeBytes = 1024 * 64;
 
-    private string RegistryName { get; } = BaseUri.Host;
+    private readonly Uri BaseUri;
+    private readonly string RegistryName => BaseUri.Host;
 
-    public async Task<Image?> GetImageManifest(string name, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath)
+    public Registry(Uri baseUri)
+    {
+        BaseUri = baseUri;
+        _client = CreateClient();
+    }
+
+    /// <summary>
+    /// The max chunk size for patch blob uploads.
+    /// </summary>
+    /// <remarks>
+    /// This varies by registry target, for example Amazon Elastic Container Registry requires 5MB chunks for all but the last chunk.
+    /// </remarks>
+    public readonly int MaxChunkSizeBytes => IsAmazonECRRegistry ? 5248080 : 1024 * 64;
+
+    /// <summary>
+    /// Check to see if the registry is for Amazon Elastic Container Registry (ECR).
+    /// </summary>
+    public readonly bool IsAmazonECRRegistry
+    {
+        get
+        {
+            // If this the registry is to public ECR the name will contain "public.ecr.aws".
+            if (RegistryName.Contains("public.ecr.aws"))
+            {
+                return true;
+            }
+
+            // If the registry is to a private ECR the registry will start with an account id which is a 12 digit number and will container either
+            // ".ecr." or ".ecr-" if pushed to a FIPS endpoint.
+            var accountId = RegistryName.Split('.')[0];
+            if ((RegistryName.Contains(".ecr.") || RegistryName.Contains(".ecr-")) && accountId.Length == 12 && long.TryParse(accountId, out _))
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Check to see if the registry is for Google Artifact Registry.
+    /// </summary>
+    /// <remarks>
+    /// Google Artifact Registry locations (one for each availability zone) are of the form "ZONE-docker.pkg.dev".
+    /// </remarks>
+    public readonly bool IsGoogleArtifactRegistry {
+        get => RegistryName.EndsWith("-docker.pkg.dev");
+    }
+
+    /// <summary>
+    /// Google Artifact Registry doesn't support chunked upload, but we want the capability check to be agnostic to the target.
+    /// </summary>
+    private readonly bool SupportsChunkedUpload => !IsGoogleArtifactRegistry;
+
+    /// <summary>
+    /// Pushing to ECR uses a much larger chunk size. To avoid getting too many socket disconnects trying to do too many
+    /// parallel uploads be more conservative and upload one layer at a time.
+    /// </summary>
+    private readonly bool SupportsParallelUploads => !IsAmazonECRRegistry;
+
+    public async Task<Image?> GetImageManifest(string repositoryName, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath)
     {
         var client = GetClient();
-        var initialManifestResponse = await GetManifest(reference);
+        var initialManifestResponse = await GetManifest(repositoryName, reference);
         
         return initialManifestResponse.Content.Headers.ContentType?.MediaType switch {
-            DockerManifestV2 => await TryReadSingleImage(await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>()),
-            DockerManifestListV2 => await TryPickBestImageFromManifestList(await initialManifestResponse.Content.ReadFromJsonAsync<ManifestListV2>(), runtimeIdentifier),
-            var unknownMediaType => throw new NotImplementedException($"The manifest for {name}:{reference} from registry {BaseUri} was an unknown type: {unknownMediaType}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.")
+            DockerManifestV2 => await TryReadSingleImage(repositoryName, await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>()),
+            DockerManifestListV2 => await TryPickBestImageFromManifestList(repositoryName, reference, await initialManifestResponse.Content.ReadFromJsonAsync<ManifestListV2>(), runtimeIdentifier, runtimeIdentifierGraphPath),
+            var unknownMediaType => throw new NotImplementedException($"The manifest for {repositoryName}:{reference} from registry {BaseUri} was an unknown type: {unknownMediaType}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.")
         };
+    }
 
-        async Task<Image?> TryReadSingleImage(ManifestV2 manifest) {
-            var config = manifest.config;
-            string configSha = config.digest;
-            
-            var blobResponse = await GetBlob(configSha);
+    private async Task<Image?> TryReadSingleImage(string repositoryName, ManifestV2 manifest) {
+        var config = manifest.config;
+        string configSha = config.digest;
+        
+        var blobResponse = await GetBlob(repositoryName, configSha);
 
-            JsonNode? configDoc = JsonNode.Parse(await blobResponse.Content.ReadAsStringAsync());
-            Debug.Assert(configDoc is not null);
+        JsonNode? configDoc = JsonNode.Parse(await blobResponse.Content.ReadAsStringAsync());
+        Debug.Assert(configDoc is not null);
 
-            return new Image(manifest, configDoc, name, this);
+        return new Image(manifest, configDoc, repositoryName, this);
+    }
+
+    async Task<Image?> TryPickBestImageFromManifestList(string repositoryName, string reference, ManifestListV2 manifestList, string runtimeIdentifier, string runtimeIdentifierGraphPath) {
+        var runtimeGraph = GetRuntimeGraphForDotNet(runtimeIdentifierGraphPath);
+        var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
+        var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, runtimeIdentifier);
+        if (bestManifestRid is null) {
+            throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers for the base image {repositoryName}:{reference} are {String.Join(",", graphForManifestList.Runtimes.Keys)}");
         }
+        var matchingManifest = ridDict[bestManifestRid];
+        var manifestResponse = await GetManifest(repositoryName, matchingManifest.digest);
+        return await TryReadSingleImage(repositoryName, await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>());
+    }
 
-        async Task<Image?> TryPickBestImageFromManifestList(ManifestListV2 manifestList, string runtimeIdentifier) {
-            var runtimeGraph = GetRuntimeGraphForDotNet(runtimeIdentifierGraphPath);
-            var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
-            var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, runtimeIdentifier);
-            if (bestManifestRid is null) {
-                throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers for the base image {name}:{reference} are {String.Join(",", graphForManifestList.Runtimes.Keys)}");
-            }
-            var matchingManifest = ridDict[bestManifestRid];
-            var manifestResponse = await GetManifest(matchingManifest.digest);
-            return await TryReadSingleImage(await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>());
-        }
+    private async Task<HttpResponseMessage> GetManifest(string repositoryName, string reference)
+    {
+        var client = GetClient();
+        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{repositoryName}/manifests/{reference}"));
+        response.EnsureSuccessStatusCode();
+        return response;
+    }
 
-        async Task<HttpResponseMessage> GetManifest(string reference)
-        {
-            var client = GetClient();
-            var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
-            response.EnsureSuccessStatusCode();
-            return response;
-        }
-
-        async Task<HttpResponseMessage> GetBlob(string digest)
-        {
-            var client = GetClient();
-            var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{digest}"));
-            response.EnsureSuccessStatusCode();
-            return response;
-        }
+    async Task<HttpResponseMessage> GetBlob(string repositoryName, string digest)
+    {
+        var client = GetClient();
+        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{repositoryName}/blobs/{digest}"));
+        response.EnsureSuccessStatusCode();
+        return response;
     }
 
     private string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, string userRid) => graphForManifestList.Runtimes.FirstOrDefault(kvp => graphForManifestList.AreCompatible(kvp.Key, userRid)).Key;
@@ -193,42 +253,10 @@ public record Registry(Uri BaseUri)
         }
     }
 
-    private async Task UploadBlob(string name, string digest, Stream contents)
-    {
-        HttpClient client = GetClient();
-
-        if (await BlobAlreadyUploaded(name, digest, client))
-        {
-            // Already there!
-            return;
-        }
-
-        Uri pushUri = new Uri(BaseUri, $"/v2/{name}/blobs/uploads/");
-        HttpResponseMessage pushResponse = await client.PostAsync(pushUri, content: null);
-
-        if (pushResponse.StatusCode != HttpStatusCode.Accepted)
-        {
-            string errorMessage = $"Failed to upload blob to {pushUri}; received {pushResponse.StatusCode} with detail {await pushResponse.Content.ReadAsStringAsync()}";
-            throw new ApplicationException(errorMessage);
-        }
-
-        UriBuilder x;
-        if (pushResponse.Headers.Location is {IsAbsoluteUri: true })
-        {
-            x = new UriBuilder(pushResponse.Headers.Location);
-        }
-        else
-        {
-            // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
-            // Uri constructor does this on our behalf.
-            x = new UriBuilder(new Uri(BaseUri, pushResponse.Headers.Location?.OriginalString ?? ""));
-        }
-
-        Uri patchUri = x.Uri;
-
-        x.Query += $"&digest={Uri.EscapeDataString(digest)}";
-
-        Uri putUri = x.Uri;
+    private readonly async Task<UriBuilder> UploadBlobChunked(string name, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+        Uri patchUri = uploadUri.Uri;
+        var localUploadUri = new UriBuilder(uploadUri.Uri);
+        localUploadUri.Query += $"&digest={Uri.EscapeDataString(digest)}";
 
         // TODO: this chunking is super tiny and probably not necessary; what does the docker client do
         //       and can we be smarter?
@@ -252,44 +280,104 @@ public record Registry(Uri BaseUri)
 
             HttpResponseMessage patchResponse = await client.PatchAsync(patchUri, content);
 
-            if (patchResponse.StatusCode != HttpStatusCode.Accepted)
+            // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
+            if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
             {
-                string errorMessage = $"Failed to upload blob to {patchUri}; recieved {patchResponse.StatusCode} with detail {await patchResponse.Content.ReadAsStringAsync()}";
+                string errorMessage = $"Failed to upload blob to {patchUri}; received {patchResponse.StatusCode} with detail {await patchResponse.Content.ReadAsStringAsync()}";
                 throw new ApplicationException(errorMessage);
             }
 
-            if (patchResponse.Headers.Location is { IsAbsoluteUri: true })
-            {
-                x = new UriBuilder(patchResponse.Headers.Location);
-            }
-            else
-            {
-                // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
-                // Uri constructor does this on our behalf.
-                x = new UriBuilder(new Uri(BaseUri, patchResponse.Headers.Location?.OriginalString ?? ""));
-            }
+           localUploadUri = GetNextLocation(patchResponse);
 
-            patchUri = x.Uri;
+            patchUri = localUploadUri.Uri;
 
             chunkCount += 1;
             chunkStart += bytesRead;
         }
+        return new UriBuilder(patchUri);
+    }
 
+    private readonly UriBuilder GetNextLocation(HttpResponseMessage response) {
+        if (response.Headers.Location is {IsAbsoluteUri: true })
+        {
+            return new UriBuilder(response.Headers.Location);
+        }
+        else
+        {
+            // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
+            // Uri constructor does this on our behalf.
+            return new UriBuilder(new Uri(BaseUri, response.Headers.Location?.OriginalString ?? ""));
+        }
+    }
+
+    private readonly async Task<UriBuilder> UploadBlobWhole(string name, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+        StreamContent content = new StreamContent(contents);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Headers.ContentLength = contents.Length;
+        HttpResponseMessage patchResponse = await client.PatchAsync(uploadUri.Uri, content);
+        if (patchResponse.StatusCode != HttpStatusCode.Accepted)
+        {
+            string errorMessage = $"Failed to upload to {uploadUri}; received {patchResponse.StatusCode} with detail {await patchResponse.Content.ReadAsStringAsync()}";
+            throw new ApplicationException(errorMessage);
+        }
+        return GetNextLocation(patchResponse);
+    }
+
+    private readonly async Task<UriBuilder> StartUploadSession(string name, string digest, HttpClient client) {
+        Uri startUploadUri = new Uri(BaseUri, $"/v2/{name}/blobs/uploads/");
+        
+        HttpResponseMessage pushResponse = await client.PostAsync(startUploadUri, content: null);
+
+        if (pushResponse.StatusCode != HttpStatusCode.Accepted)
+        {
+            string errorMessage = $"Failed to upload blob to {startUploadUri}; received {pushResponse.StatusCode} with detail {await pushResponse.Content.ReadAsStringAsync()}";
+            throw new ApplicationException(errorMessage);
+        }
+
+        return GetNextLocation(pushResponse);
+    }
+
+    private readonly async Task<UriBuilder> UploadBlobContents(string name, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+        if (SupportsChunkedUpload) return await UploadBlobChunked(name, digest, contents, client, uploadUri);
+        else return await UploadBlobWhole(name, digest, contents, client, uploadUri);
+    }
+
+    private readonly async Task FinishUploadSession(string digest, HttpClient client, UriBuilder uploadUri) {
         // PUT with digest to finalize
-        x.Query += $"&digest={Uri.EscapeDataString(digest)}";
+        uploadUri.Query += $"&digest={Uri.EscapeDataString(digest)}";
 
-        putUri = x.Uri;
+        var putUri = uploadUri.Uri;
 
         HttpResponseMessage finalizeResponse = await client.PutAsync(putUri, content: null);
 
         if (finalizeResponse.StatusCode != HttpStatusCode.Created)
         {
-            string errorMessage = $"Failed to finalize upload to {putUri}; recieved {finalizeResponse.StatusCode} with detail {await finalizeResponse.Content.ReadAsStringAsync()}";
+            string errorMessage = $"Failed to finalize upload to {putUri}; received {finalizeResponse.StatusCode} with detail {await finalizeResponse.Content.ReadAsStringAsync()}";
             throw new ApplicationException(errorMessage);
         }
     }
 
-    private async Task<bool> BlobAlreadyUploaded(string name, string digest, HttpClient client)
+    private readonly async Task UploadBlob(string name, string digest, Stream contents)
+    {
+        HttpClient client = GetClient();
+
+        if (await BlobAlreadyUploaded(name, digest, client))
+        {
+            // Already there!
+            return;
+        }
+
+        // Three steps to this process:
+        // * start an upload session
+        var uploadUri = await StartUploadSession(name, digest, client);
+        // * upload the blob
+        var finalChunkUri = await UploadBlobContents(name, digest, contents, client, uploadUri);
+        // * finish the upload session
+        await FinishUploadSession(digest, client, finalChunkUri);
+        
+    }
+
+    private readonly async Task<bool> BlobAlreadyUploaded(string name, string digest, HttpClient client)
     {
         HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, new Uri(BaseUri, $"/v2/{name}/blobs/{digest}")));
 
@@ -301,16 +389,22 @@ public record Registry(Uri BaseUri)
         return false;
     }
 
-    private static HttpClient _client = CreateClient();
+    private readonly HttpClient _client;
 
-    private static HttpClient GetClient()
+    private readonly HttpClient GetClient()
     {
         return _client;
     }
 
-    private static HttpClient CreateClient()
+    private HttpClient CreateClient()
     {
-        var clientHandler = new AuthHandshakeMessageHandler(new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.FromMilliseconds(10 /* total guess */) });
+        HttpMessageHandler clientHandler = new AuthHandshakeMessageHandler(new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.FromMilliseconds(10 /* total guess */) });
+
+        if(IsAmazonECRRegistry)
+        {
+            clientHandler = new AmazonECRMessageHandler(clientHandler);
+        }
+
         HttpClient client = new(clientHandler);
 
         client.DefaultRequestHeaders.Accept.Clear();
@@ -330,7 +424,9 @@ public record Registry(Uri BaseUri)
 
         HttpClient client = GetClient();
         var reg = this;
-        await Task.WhenAll(x.LayerDescriptors.Select(async descriptor => {
+
+        Func<Descriptor, Task> uploadLayerFunc = async (descriptor) =>
+        {
             string digest = descriptor.Digest;
             logProgressMessage($"Uploading layer {digest} to {reg.RegistryName}");
             if (await reg.BlobAlreadyUploaded(name, digest, client))
@@ -346,18 +442,31 @@ public record Registry(Uri BaseUri)
             {
                 // The blob wasn't already available in another namespace, so fall back to explicitly uploading it
 
-                if (x.originatingRegistry is null)
+                if (x.originatingRegistry is { } registry)
                 {
+                    // Ensure the blob is available locally
+                    await registry.DownloadBlob(x.OriginatingName, descriptor);
+                    // Then push it to the destination registry
+                    await reg.Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
+                    logProgressMessage($"Finished uploading layer {digest} to {reg.RegistryName}");
+                }
+                else {
                     throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
                 }
-
-                // Ensure the blob is available locally
-                await x.originatingRegistry.DownloadBlob(x.OriginatingName, descriptor);
-                // Then push it to the destination registry
-                await reg.Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
-                logProgressMessage($"Finished uploading layer {digest} to {reg.RegistryName}");
             }
-        }));
+        };
+
+        if (SupportsParallelUploads)
+        {
+            await Task.WhenAll(x.LayerDescriptors.Select(descriptor => uploadLayerFunc(descriptor)));
+        }
+        else
+        {
+            foreach(var descriptor in x.LayerDescriptors)
+            {
+                await uploadLayerFunc(descriptor);
+            }
+        }
 
         using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(x.config.ToJsonString())))
         {

@@ -30,6 +30,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <Compile Remove="*.*" />
     <Compile Include="ReferenceParser.cs" />
+    <Compile Include="KnownStrings.cs" />
     <Compile Include="ParseContainerProperties.cs" />
     <Compile Include="CreateNewImage.Interface.cs" />
     <Compile Include="CreateNewImageToolTask.cs" />

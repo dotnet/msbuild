@@ -40,14 +40,11 @@ By default, if your project has a RuntimeIdentifier set, that value will be used
 
 This property controls the destination registry - the place that the newly-created image will be pushed to.
 
-Be default, we push to the local Docker daemon (annotated by `docker://`), but for this release you can specify any _unauthenticated_ registry. For example:
+Be default, we push to the local Docker daemon (annotated by `docker://`), but you can also specify a remote registry. Interacting with that registry may require authentication, see [Authenticating to container registries](./RegistryAuthentication.md) for more details.
 
 ```xml
 <ContainerRegistry>registry.mycorp.com:1234</ContainerRegistry>
 ```
-
-> **Note**
-> There is no authentication currently supported - that [will come in a future release](https://github.com/dotnet/sdk-container-builds/issues/70) - so make sure you're pointing to a local Docker daemon
 
 ## ContainerImageName
 
@@ -60,7 +57,7 @@ By default, the value used will be the `AssemblyName` of the project.
 ```
 
 > **Note**
-> Image names can only contain lowercase alphanumeric characters, periods, underscores, and dashes, and must start with a letter or number - any other characters will result in an error being thrown.
+> Image names consist of one or more slash-delimited segments, each of which can only contain lowercase alphanumeric characters, periods, underscores, and dashes, and must start with a letter or number - any other characters will result in an error being thrown.
 
 ## ContainerImageTag(s)
 
@@ -188,15 +185,6 @@ ContainerEntrypointArg items have one property:
   <ContainerEntrypointArgs Include="database;update" />
 </ItemGroup>
 ```
-
-## ASP.NET Core customizations
-
-ASP.NET Core applications have certain defaults that are set to make containers more 'plug and play'.
-
-* A ContainerPort item is set to expose TCP port 80
-* The ASPNETCORE_URLS environment variable is set to `http://+:80` to match that port value.
-
-Both of these will be skipped if a custom value is set.
 
 ## Default container labels
 
