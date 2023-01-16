@@ -65,13 +65,13 @@ namespace Microsoft.Build.Tasks
         {
             if (Retries < 0)
             {
-                Log.LogErrorWithCodeFromResources("Copy.InvalidRetryCount", Retries);
+                Log.LogErrorWithCodeFromResources("Delete.InvalidRetryCount", Retries);
                 return false;
             }
 
             if (RetryDelayMilliseconds < 0)
             {
-                Log.LogErrorWithCodeFromResources("Copy.InvalidRetryDelay", RetryDelayMilliseconds);
+                Log.LogErrorWithCodeFromResources("Delete.InvalidRetryDelay", RetryDelayMilliseconds);
                 return false;
             }
 
@@ -98,10 +98,15 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             var deletedFilesList = new List<ITaskItem>();
-            var deletedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var deletedFilesSet = new HashSet<string>(FileUtilities.PathComparer);
 
             foreach (ITaskItem file in Files)
             {
+                // Break out of the infinite cycle in the following condition
+                // 1. succeed to delete the file
+                // 2. the file did not exist
+                // 3. deletedFilesSet contains the file
+                // 4. exceed the number of Retries
                 int retries = 0;
                 while (!_canceling)
                 {
@@ -125,8 +130,9 @@ namespace Microsoft.Build.Tasks
                             // note that we include in this list files that did not exist
                             ITaskItem deletedFile = new TaskItem(file);
                             deletedFilesList.Add(deletedFile);
-                            break;
                         }
+                        // Break when succeed to delete the file, the file did not exist or deletedFilesSet contains the file 
+                        break;
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {

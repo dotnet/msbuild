@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Retry Delete
+        /// Retry Delete. Specify windows since readonly not working on others
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -73,11 +73,12 @@ namespace Microsoft.Build.UnitTests
                 ((MockEngine)t.BuildEngine).AssertLogContains("MSB3062");
 
                 File.SetAttributes(source, FileAttributes.Normal);
+                ITaskItem[] duplicateSourceFiles = { sourceItem, sourceItem };
                 t = new Delete
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(),
-                    Files = sourceFiles,
+                    Files = duplicateSourceFiles,
                     Retries = 1,
                 };
                 t.Execute().ShouldBe(true);
