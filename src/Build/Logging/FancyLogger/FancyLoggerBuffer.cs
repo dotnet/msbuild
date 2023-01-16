@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 //
 
@@ -41,6 +41,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             Console.OutputEncoding = Encoding.UTF8;
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
+            Console.Write(ANSIBuilder.Cursor.Invisible());
+
             Task.Run(async () => {
                 while (true)
                 {
@@ -75,7 +77,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
             Console.Clear();
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.Clear();
+            Console.Write(ANSIBuilder.Eraser.Display());
+
+            Console.Write(ANSIBuilder.Cursor.Visible());
             Lines = new();
         }
 

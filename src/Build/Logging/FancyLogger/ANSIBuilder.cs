@@ -235,6 +235,16 @@ namespace Microsoft.Build.Logging.FancyLogger
             public static string RestorePosition() {
                 return String.Format("\x1b[u");
             }
+
+            public static string Invisible()
+            {
+                return "\x1b[?25l";
+            }
+
+            public static string Visible()
+            {
+                return "\x1b[?25h";
+            }
         }
 
         public static class Tabulator
