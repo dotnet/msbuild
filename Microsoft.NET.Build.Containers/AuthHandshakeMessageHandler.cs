@@ -85,7 +85,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
     /// <param name="scope"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<AuthenticationHeaderValue?> GetAuthenticationAsync(string scheme, Uri uri, string service, string? scope, CancellationToken cancellationToken)
+    private async Task<AuthenticationHeaderValue?> GetAuthenticationAsync(string registry, string scheme, Uri realm, string service, string? scope, CancellationToken cancellationToken)
     {
         // Allow overrides for auth via environment variables
         string? credU = Environment.GetEnvironmentVariable(ContainerHelpers.HostObjectUser);
@@ -102,18 +102,18 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
         {
             try
             {
-                privateRepoCreds = await CredsProvider.GetCredentialsAsync(uri.Host);
+                privateRepoCreds = await CredsProvider.GetCredentialsAsync(registry);
             }
             catch (Exception e)
             {
-                throw new CredentialRetrievalException(uri.Host, e);
+                throw new CredentialRetrievalException(registry, e);
             }
         }
         
         if (scheme is "Basic")
         {
             var basicAuth = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
-            return AuthHeaderCache.AddOrUpdate(uri, basicAuth);
+            return AuthHeaderCache.AddOrUpdate(realm, basicAuth);
         }
         else if (scheme is "Bearer")
         {
@@ -121,7 +121,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
             var header = privateRepoCreds.Username == "<token>"
                             ? new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password)
                             : new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
-            var builder = new UriBuilder(uri);
+            var builder = new UriBuilder(realm);
             var queryDict = System.Web.HttpUtility.ParseQueryString("");
             queryDict["service"] = service;
             if (scope is string s)
@@ -143,7 +143,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
 
             // save the retrieved token in the cache
             var bearerAuth = new AuthenticationHeaderValue("Bearer", token.ResolvedToken);
-            return AuthHeaderCache.AddOrUpdate(uri, bearerAuth);
+            return AuthHeaderCache.AddOrUpdate(realm, bearerAuth);
         }
         else
         {
@@ -177,7 +177,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
                 }
                 else if (response is { StatusCode: HttpStatusCode.Unauthorized } && TryParseAuthenticationInfo(response, out string? scheme, out AuthInfo? authInfo))
                 {
-                    if (await GetAuthenticationAsync(scheme, authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is AuthenticationHeaderValue authentication)
+                    if (await GetAuthenticationAsync(request.RequestUri.Host, scheme, authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is AuthenticationHeaderValue authentication)
                     {
                         request.Headers.Authorization = AuthHeaderCache.AddOrUpdate(request.RequestUri, authentication);
                         return await base.SendAsync(request, cancellationToken);
