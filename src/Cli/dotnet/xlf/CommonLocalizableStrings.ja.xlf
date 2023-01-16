@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CorruptSolutionProjectFolderStructure">
         <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</source>
-        <target state="new">The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</target>
+        <target state="translated">ソリューション ファイル '{0}' に EndProject タグがないか、プロジェクト GUID: '{1}' に関して無効な子 - 親プロジェクト フォルダー マッピングがあります。ソリューションを手動で修正するか、Visual Studio で開いて保存してみてください。"</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
