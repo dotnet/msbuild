@@ -31,11 +31,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private string _query;
 
-        /// <summary>
-        /// The property that this task will set.
-        /// </summary>
-        private ITaskItem _value;
-
         #endregion
 
         #region Properties
@@ -70,11 +65,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The value to be inserted into the specified location.
         /// </summary>        
-        public ITaskItem Value
-        {
-            get => _value;
-            set => _value = value;
-        }
+        public ITaskItem Value { get; set; }
 
         /// <summary>
         /// The namespaces for XPath query's prefixes.
@@ -91,10 +82,10 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
             ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, "XmlInputPath");
-            if (_value == null)
+            if (Value == null)
             {
                 // When Value is null, it means Value is not set or empty. Here we treat them all as empty.
-                _value = new TaskItem(String.Empty);
+                Value = new TaskItem(String.Empty);
             }
 
             // Load the XPath Document
@@ -163,12 +154,12 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     count++;
-                    iter.Current.InnerXml = _value.ItemSpec;
-                    Log.LogMessageFromResources(MessageImportance.Low, "XmlPoke.Replaced", iter.Current.Name, _value.ItemSpec);
+                    iter.Current.InnerXml = Value.ItemSpec;
+                    Log.LogMessageFromResources(MessageImportance.Low, "XmlPoke.Replaced", iter.Current.Name, Value.ItemSpec);
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("XmlPoke.PokeError", _value.ItemSpec, e.Message);
+                    Log.LogErrorWithCodeFromResources("XmlPoke.PokeError", Value.ItemSpec, e.Message);
                     return false;
                 }
             }

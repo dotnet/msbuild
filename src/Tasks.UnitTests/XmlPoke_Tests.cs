@@ -174,16 +174,26 @@ namespace Microsoft.Build.UnitTests
         public void XmlPokeWithEmptyValue()
         {
             string xmlInputPath;
+            string query = "//class/variable/@Name";
             Prepare(_xmlFileNoNs, out xmlInputPath);
-            string projectContents = @"
+            string projectContents = $"""
                 <Project ToolsVersion='msbuilddefaulttoolsversion'>
                 <Target Name='Poke'>
-                    <XmlPoke Value='' Query='//class/variable/@Name' XmlInputPath='{0}'/>
+                    <XmlPoke Value='' Query='{query}' XmlInputPath='{xmlInputPath}'/>
                 </Target>
-                </Project>";
-            projectContents = string.Format(projectContents, xmlInputPath);
+                </Project>
+                """;
 
             ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+
+            string result = File.ReadAllText(xmlInputPath);
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(result);
+            List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
+            foreach (var node in nodes)
+            {
+                node.Value.ShouldBe(string.Empty);
+            }
         }
 
         [Fact]
