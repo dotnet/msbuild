@@ -161,7 +161,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
             return WriteNewLineAfter(lineId, line);
         }
-        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line, bool overrideOverflowLines = false)
+        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line)
         {
             if (lineId != -1)
             {
