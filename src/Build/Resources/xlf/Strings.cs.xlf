@@ -416,6 +416,11 @@
         <target state="translated">Úloha {0} požadovala tento počet jader: {1}. Získala tento počet jader: {2}. Teď používá celkem tento počet jader: {3}</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during task run: {0} (location: {1}, MVID: {2})</source>
+        <target state="new">Assembly loaded during task run: {0} (location: {1}, MVID: {2})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Úloha {0} uvolnila tento počet jader: {1}. Teď používá celkem tento počet jader: {2}</target>

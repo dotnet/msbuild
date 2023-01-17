@@ -416,6 +416,11 @@
         <target state="translated">Задача "{0}" запросила указанное число ядер ({1}) и получила указанное число ядер ({2}). Теперь общее число ядер, которыми располагает задача, равно {3}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during task run: {0} (location: {1}, MVID: {2})</source>
+        <target state="new">Assembly loaded during task run: {0} (location: {1}, MVID: {2})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Задача "{0}" освободила указанное число ядер ({1}). Теперь общее число ядер, которыми располагает задача, равно {2}.</target>

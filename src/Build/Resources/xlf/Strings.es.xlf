@@ -416,6 +416,11 @@
         <target state="translated">La tarea "{0}" solicitó {1} núcleos, adquirió {2} núcleos y ahora retiene un total de {3} núcleos.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during task run: {0} (location: {1}, MVID: {2})</source>
+        <target state="new">Assembly loaded during task run: {0} (location: {1}, MVID: {2})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">La tarea "{0}" liberó {1} núcleos y ahora retiene un total de {2} núcleos.</target>

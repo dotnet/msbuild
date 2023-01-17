@@ -30,6 +30,7 @@ namespace Microsoft.Build.Logging
         NameValueList,
         String,
         TaskParameter,
-        ResponseFileUsed, 
+        ResponseFileUsed,
+        AssemblyLoad,
     }
 }

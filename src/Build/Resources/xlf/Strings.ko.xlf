@@ -416,6 +416,11 @@
         <target state="translated">"{0}" 작업에서 코어 {1}개를 요청했고 코어 {2}개를 획득했으며 지금 총 {3}개의 코어를 보유하고 있습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during task run: {0} (location: {1}, MVID: {2})</source>
+        <target state="new">Assembly loaded during task run: {0} (location: {1}, MVID: {2})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">"{0}" 작업에서 코어 {1}개를 해제했고 지금 총 {2}개의 코어를 보유하고 있습니다.</target>

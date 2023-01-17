@@ -188,6 +188,9 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.PropertyInitialValueSet:
                     result = ReadPropertyInitialValueSetEventArgs();
                     break;
+                case BinaryLogRecordKind.AssemblyLoad:
+                    result = ReadAssemblyLoadEventArgs();
+                    break;
                 default:
                     break;
             }
@@ -800,6 +803,27 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
+        private AssemblyLoadBuildEventArgs ReadAssemblyLoadEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+
+            string assemblyName = ReadDeduplicatedString();
+            string assemblyPath = ReadDeduplicatedString();
+            Guid mvid = ReadGuid();
+
+            var e = new AssemblyLoadBuildEventArgs(
+                assemblyName,
+                assemblyPath,
+                mvid,
+                fields.Message,
+                fields.HelpKeyword,
+                fields.SenderName,
+                fields.Importance);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
         /// <summary>
         /// For errors and warnings these 8 fields are written out explicitly
         /// (their presence is not marked as a bit in the flags). So we have to
@@ -1203,6 +1227,11 @@ namespace Microsoft.Build.Logging
         private bool ReadBoolean()
         {
             return binaryReader.ReadBoolean();
+        }
+
+        private unsafe Guid ReadGuid()
+        {
+            return new Guid(binaryReader.ReadBytes(sizeof(Guid)));
         }
 
         private DateTime ReadDateTime()

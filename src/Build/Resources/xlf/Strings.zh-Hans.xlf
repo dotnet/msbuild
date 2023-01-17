@@ -416,6 +416,11 @@
         <target state="translated">任务“{0}”请求了 {1} 个核心，已获取 {2} 个核心，现总共包含 {3} 个核心。</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during task run: {0} (location: {1}, MVID: {2})</source>
+        <target state="new">Assembly loaded during task run: {0} (location: {1}, MVID: {2})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">任务“{0}”发布了 {1} 个核心，现总共包含 {2} 个核心。</target>

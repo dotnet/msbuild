@@ -416,6 +416,11 @@
         <target state="translated">"{0}" görevi {1} çekirdek istedi, {2} çekirdek aldı ve şu anda toplam {3} çekirdek tutuyor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during task run: {0} (location: {1}, MVID: {2})</source>
+        <target state="new">Assembly loaded during task run: {0} (location: {1}, MVID: {2})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">"{0}" görevi {1} çekirdeği serbest bıraktı. Şu anda toplam {2} çekirdek tutuyor.</target>

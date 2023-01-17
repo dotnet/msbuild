@@ -13,6 +13,7 @@ using System.Runtime.ExceptionServices;
 #endif
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -662,6 +663,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, IDictionary<string, string> taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
+            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext);
             if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
