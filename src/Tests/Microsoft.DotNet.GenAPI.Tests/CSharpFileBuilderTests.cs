@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
         private void RunTest(string original, string expected)
         {
-            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original);
+            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true);
             _csharpFileBuilder.WriteAssembly(assemblySymbol);
 
             StringBuilder stringBuilder = _stringWriter.GetStringBuilder();
@@ -403,7 +403,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 """);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/arcade/issues/11937")]
+        [Fact]
         void TestDelegateGeneration()
         {
             RunTest(original: """
@@ -578,8 +578,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public class Car : System.IEquatable<Car>
                     {
-                        public bool Equals(Car c) { return true; }
-                        public override bool Equals(object o) { return true; }
+                        public bool Equals(Car? c) { return true; }
+                        public override bool Equals(object? o) { return true; }
                         public override int GetHashCode() => 0;
                         public static bool operator ==(Car lhs, Car rhs) { return true; }
                         public static bool operator !=(Car lhs, Car rhs) { return false; }
@@ -591,8 +591,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public partial class Car : System.IEquatable<Car>
                     {
-                        public bool Equals(Car c) { throw null; }
-                        public override bool Equals(object o) { throw null; }
+                        public bool Equals(Car? c) { throw null; }
+                        public override bool Equals(object? o) { throw null; }
                         public override int GetHashCode() { throw null; }
                         public static bool operator ==(Car lhs, Car rhs) { throw null; }
                         public static bool operator !=(Car lhs, Car rhs) { throw null; }
@@ -649,6 +649,35 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     public abstract partial class MemoryManager : System.IDisposable
                     {
                         void System.IDisposable.Dispose() { }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestNullabilityGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Bar
+                    {
+                        public int? AMember { get; set; }
+                        public string? BMember { get; }
+
+                        public string? Execute(string? a, int? b) { return null; }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Bar
+                    {
+                        public int? AMember { get { throw null; } set { } }
+                        public string? BMember { get { throw null; } }
+                
+                        public string? Execute(string? a, int? b) { throw null; }
                     }
                 }
                 """);
