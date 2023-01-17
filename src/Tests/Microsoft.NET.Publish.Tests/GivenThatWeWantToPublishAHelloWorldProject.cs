@@ -586,19 +586,6 @@ public static class Program
         }
 
 
-        [Fact]
-        public void It_does_not_error_when_Net_7_and_Net_6_project_dont_define_PublishRelease()
-        {
-            var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .WithTargetFrameworks("net6.0;net7.0");
-
-            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
-                .Execute()
-                .Should()
-                .Pass();
-        }
 
         [Fact]
         public void It_no_longer_warns_if_PublishRelease_set_on_sln_but_env_var_not_used()

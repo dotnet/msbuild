@@ -258,5 +258,21 @@ namespace Microsoft.NET.Publish.Tests
                 .And
                 .HaveStdOutContaining(String.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease));
         }
+
+        [Fact]
+        public void ItDoesNotErrorWithLegacyNet7ProjectAndNet6ProjectSolutionWithNoPublishRelease()
+        {
+            var firstProjectTfm = "net7.0";
+            var secondProjectTfm = "net6.0";
+
+            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "", "");
+            var sln = solutionAndProjects.Item1;
+
+            var dotnetCommand = new DotnetCommand(Log, publish);
+            dotnetCommand
+                .Execute(sln.SolutionPath)
+                .Should()
+                .Pass();
+        }
     }
 }
