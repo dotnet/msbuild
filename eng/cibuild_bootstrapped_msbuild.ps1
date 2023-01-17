@@ -123,7 +123,7 @@ try {
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Do run tests
   # - Don't try to create a bootstrap deployment
-  & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false @properties
+  & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /p:CollectCoverage=true /nr:false @properties
 
   exit $lastExitCode
 }
