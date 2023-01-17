@@ -130,6 +130,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Raised messages, warnings and errors
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
+            if (e is TaskCommandLineEventArgs) return;
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
@@ -171,7 +172,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
-            Console.Out.Flush();
             int errorCount = 0;
             int warningCount = 0;
             foreach (var project in projects)

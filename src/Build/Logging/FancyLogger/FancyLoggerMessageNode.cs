@@ -25,6 +25,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
+            if (Message.Length > 400) Message = Message.Substring(0, 400);
             // Get type
             switch (args)
             {
