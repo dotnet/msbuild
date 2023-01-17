@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+// using System.Linq;
+// using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -39,13 +41,21 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
             // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
             // Raised
-            eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
+            // eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            FancyLoggerBuffer.WriteNewLine("");
+            // FancyLoggerBuffer.WriteNewLine("");
+
+            /*for (int i = 0; i < 300; i++)
+            {
+                string l = string.Concat( Enumerable.Repeat($"{i}-", 30));
+                FancyLoggerBuffer.WriteNewLine(l);
+            }*/
+
+            FancyLoggerBuffer.Render();
         }
 
         // Build
@@ -88,6 +98,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTarget(e);
+
+            node.Log();
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
@@ -96,6 +108,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.FinishedTargets++;
+
+            node.Log();
         }
 
         // Task
@@ -108,6 +122,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update
             node.AddTask(e);
             existingTasks++;
+
+            node.Log();
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
@@ -122,6 +138,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddMessage(e);
+
+            node.Log();
         }
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
@@ -130,6 +148,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddWarning(e);
+
+            node.Log();
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
         {
@@ -138,6 +158,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddError(e);
+
+            node.Log();
         }
 
 

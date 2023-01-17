@@ -87,7 +87,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
 
             // Update buffer
-            FancyLoggerBuffer.Render();
+            // FancyLoggerBuffer.Render();
         }
 
         public void AddTarget(TargetStartedEventArgs args)

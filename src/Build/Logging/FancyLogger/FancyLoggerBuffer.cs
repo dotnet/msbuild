@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+// using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
@@ -40,44 +41,42 @@ namespace Microsoft.Build.Logging.FancyLogger
     public class FancyLoggerBuffer
     {
         private static List<FancyLoggerBufferLine> Lines = new();
-        private static int TopLineIndex = 0;
+        public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
+        private static bool IsTerminated = false;
         // private static bool AutoScrollEnabled = true;
         public static void Initialize()
         {
+            // Use encoding
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
             // Use alternate buffer
             // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
-            Task.Run(async () =>
+            Task.Run(() =>
             {
-                while (true)
+                // Use encoding
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
+                while (!IsTerminated)
                 {
-                    // Wait (1/60 seconds)
-                    await Task.Delay((1 / 60) * 1_000);
-                    // Handle keyboard input
-                    switch (Console.ReadKey(true).Key)
+                    Task.Delay((1 / 60) * 1_000).ContinueWith((t) =>
                     {
-                        case ConsoleKey.UpArrow:
-                            if (TopLineIndex > 0) TopLineIndex--;
-                            break;
-                        case ConsoleKey.DownArrow:
-                            TopLineIndex++;
-                            break;
-                        case ConsoleKey.Spacebar:
-                        case ConsoleKey.Escape:
-                            // AutoScrollEnabled = !AutoScrollEnabled;
-                            break;
+                        Render();
+                    });
+                    if (Console.KeyAvailable)
+                    {
+                        ConsoleKey key = Console.ReadKey().Key;
+                        if (key == ConsoleKey.UpArrow && TopLineIndex > 0) TopLineIndex--;
+                        else if (key == ConsoleKey.DownArrow) TopLineIndex++;
                     }
-                    // Render
-                    Render();
-            }
+                }
             });
         }
 
         public static void Terminate()
         {
+            IsTerminated = true;
             // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Eraser.Display());
