@@ -85,9 +85,6 @@ namespace Microsoft.Build.Logging.FancyLogger
                 if (node.Line == null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
                 node.Log();
             }
-
-            // Update buffer
-            // FancyLoggerBuffer.Render();
         }
 
         public void AddTarget(TargetStartedEventArgs args)

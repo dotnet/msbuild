@@ -43,12 +43,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         private static List<FancyLoggerBufferLine> Lines = new();
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
+        private static bool AutoScrollEnabled = true;
         private static bool IsTerminated = false;
-        // private static bool AutoScrollEnabled = true;
         public static void Initialize()
         {
-            // Use encoding
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
             // Use alternate buffer
             // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
@@ -58,17 +56,35 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 // Use encoding
                 Console.OutputEncoding = System.Text.Encoding.UTF8;
+                // Counter for delaying render
+                int i = 0;
+                // Execute while the buffer is active
                 while (!IsTerminated)
                 {
-                    Task.Delay((1 / 60) * 1_000).ContinueWith((t) =>
+                    // Delay by 60 fps (1/60 seconds)
+                    i++;
+                    Task.Delay((i/60) * 1_000).ContinueWith((t) =>
                     {
                         Render();
                     });
+                    // Handle keyboard input
                     if (Console.KeyAvailable)
-                    {
+                    { 
                         ConsoleKey key = Console.ReadKey().Key;
-                        if (key == ConsoleKey.UpArrow && TopLineIndex > 0) TopLineIndex--;
-                        else if (key == ConsoleKey.DownArrow) TopLineIndex++;
+                        switch (key)
+                        {
+                            case ConsoleKey.UpArrow:
+                                if (TopLineIndex > 0) TopLineIndex--;
+                                break;
+                            case ConsoleKey.DownArrow:
+                                TopLineIndex++;
+                                break;
+                            case ConsoleKey.Spacebar:
+                                AutoScrollEnabled = !AutoScrollEnabled;
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             });
@@ -86,6 +102,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         #region Rendering
         public static void Render()
         {
+            if (IsTerminated) return;
             // Write Header
             Console.Write(
                 // Write header

@@ -41,20 +41,14 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
             // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
             // Raised
+            // TODO: Enable next build
             // eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            // FancyLoggerBuffer.WriteNewLine("");
-
-            /*for (int i = 0; i < 300; i++)
-            {
-                string l = string.Concat( Enumerable.Repeat($"{i}-", 30));
-                FancyLoggerBuffer.WriteNewLine(l);
-            }*/
-
+            FancyLoggerBuffer.WriteNewLine("");
             FancyLoggerBuffer.Render();
         }
 
