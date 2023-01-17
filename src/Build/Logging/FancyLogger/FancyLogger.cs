@@ -28,19 +28,18 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void Initialize(IEventSource eventSource)
         {
             // Register for different events
-            // Started
+            // - Started
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
             eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
             eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
             eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
-            // Finished
+            // - Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
             eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
             // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
             // Raised
-            // TODO: Enable next build
-            // eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
+            eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Cancelled
@@ -75,6 +74,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Log
             node.Log();
         }
+
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             // Get project id
@@ -82,8 +82,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update line
             node.Finished = true;
+            // Log
             node.Log();
         }
+
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
@@ -92,9 +94,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTarget(e);
-
+            // Log
             node.Log();
         }
+
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
             // Get project id
@@ -102,7 +105,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.FinishedTargets++;
-
+            // Log
             node.Log();
         }
 
@@ -111,12 +114,11 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTask(e);
             existingTasks++;
-
+            // Log
             node.Log();
         }
 
@@ -125,6 +127,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             completedTasks++;
         }
 
+        // Raised messages, warnings and errors
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
             // Get project id
@@ -132,9 +135,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddMessage(e);
-
+            // Log
             node.Log();
         }
+
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
             // Get project id
@@ -142,7 +146,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddWarning(e);
-
+            // Log
             node.Log();
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
@@ -152,7 +156,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddError(e);
-
+            // Log
             node.Log();
         }
 
@@ -179,6 +183,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                     Console.WriteLine(message.ToANSIString());
                 }
             }
+
             // Emmpty line
             Console.WriteLine();
             if (Succeeded)

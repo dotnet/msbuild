@@ -18,7 +18,6 @@ namespace Microsoft.Build.Logging.FancyLogger
         public string Message;
         public FancyLoggerBufferLine? Line;
         public MessageType Type;
-        //
         public string? Code;
         public string? FilePath;
         public int? LineNumber;

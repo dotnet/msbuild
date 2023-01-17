@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-// using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
@@ -22,6 +21,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             get => _text;
             set
             {
+                // Set text value and get wrapped lines
                 _text = value;
                 WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
             }
@@ -48,19 +48,17 @@ namespace Microsoft.Build.Logging.FancyLogger
         private static bool IsTerminated = false;
         public static void Initialize()
         {
-            // Use alternate buffer
-            // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
-            // Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
 
             Task.Run(() =>
             {
+                // Configure buffer, encoding and cursor
+                Console.OutputEncoding = Encoding.UTF8;
+                Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
                 Console.Write(ANSIBuilder.Cursor.Invisible());
-                // Use encoding
-                Console.OutputEncoding = System.Text.Encoding.UTF8;
+
                 // Counter for delaying render
                 int i = 0;
+
                 // Execute while the buffer is active
                 while (!IsTerminated)
                 {
@@ -70,9 +68,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                     {
                         Render();
                     });
-                    // Handle keyboard input
                     if (Console.KeyAvailable)
                     { 
+                        // Handle keyboard input
                         ConsoleKey key = Console.ReadKey().Key;
                         switch (key)
                         {
@@ -96,12 +94,12 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static void Terminate()
         {
             IsTerminated = true;
-            // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
-            Console.Clear();
+            // Reset configuration for buffer and cursor, and clear screen
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Eraser.Display());
-
             Console.Write(ANSIBuilder.Cursor.Visible());
+            // TODO: Remove. Fixes a bug that causes contents of the alternate buffer to still show up in the main buffer
+            Console.Clear();
             Lines = new();
         }
 
@@ -109,7 +107,6 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static void Render()
         {
             if (IsTerminated) return;
-            // Write Header
             Console.Write(
                 // Write header
                 ANSIBuilder.Cursor.Home() +
@@ -120,6 +117,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 new string('-', Console.BufferWidth) +$"\nBuild progress: XX%\tTopLineIndex={TopLineIndex}"
             );
             if (Lines.Count == 0) return;
+
             // Iterate over lines and display on terminal
             // TODO: Delimit range to improve performance 
             int accumulatedLineCount = 0;
@@ -165,8 +163,6 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
         public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line, bool overrideOverflowLines = false)
         {
-            // Save top line (current if no lines)
-            // int topLineId = Lines.Count > 0 ? Lines[TopLineIndex].Id : line.Id;
             if (lineId != -1)
             {
                 // Get line index
@@ -179,9 +175,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 Lines.Add(line);
             }
-            // Get updated top line index
-            // TopLineIndex = GetLineIndexById(topLineId);
-            // Return
+            // TODO: Handle autoscrolling
             return line;
         }
 
@@ -204,12 +198,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             line.Text = text;
             // Return
             return line;
+            // TODO: Handle autoscrolling
         }
 
         // Delete line
         public static void DeleteLine(int lineId)
         {
-            // TODO: What if line id is equal to topLineId?????
             // Get line index
             int lineIndex = GetLineIndexById(lineId);
             if (lineIndex == -1) return;
@@ -217,11 +211,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             int topLineId = Lines[TopLineIndex].Id;
             // Delete
             Lines.RemoveAt(lineIndex);
-            // Get updated top line index
-            if (topLineId != lineId)
-            {
-                // TopLineIndex = GetLineIndexById(topLineId);
-            }
+            // TODO: Handle autoscrolling
         }
         #endregion
     }
