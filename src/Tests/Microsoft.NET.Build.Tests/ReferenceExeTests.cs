@@ -317,7 +317,8 @@ public class ReferencedExeProgram
             var testProjectDirectory = Path.Combine(testAsset.TestRoot, "TestProject");
             Directory.CreateDirectory(testProjectDirectory);
 
-            new DotnetCommand(Log, "new", testTemplateName, "--debug:ephemeral-hive")
+            new DotnetNewCommand(Log, testTemplateName)
+                .WithVirtualHive()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should()
@@ -353,7 +354,8 @@ public class ReferencedExeProgram
             var testProjectDirectory = Path.Combine(testAsset.TestRoot, "TestProject");
             Directory.CreateDirectory(testProjectDirectory);
 
-            new DotnetCommand(Log, "new", testTemplateName, "--debug:ephemeral-hive")
+            new DotnetNewCommand(Log, testTemplateName)
+                .WithVirtualHive()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should()
