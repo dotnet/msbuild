@@ -149,11 +149,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Gets or sets the build parameters.
+        /// Retrieve the build parameters.
         /// </summary>
+        /// <returns></returns>
         public BuildParameters BuildParameters
         {
-            get => _buildParameters; set => throw new NotImplementedException();
+            get
+            {
+                return _buildParameters;
+            }
         }
 
         /// <summary>
