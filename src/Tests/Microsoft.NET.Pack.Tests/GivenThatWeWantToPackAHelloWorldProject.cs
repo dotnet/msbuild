@@ -111,8 +111,10 @@ namespace Microsoft.NET.Pack.Tests
             Assert.True(File.Exists(expectedAssetPath));
         }
 
-        [Fact]
-        public void It_packs_with_release_if_PackRelease_property_set_in_csproj()
+        [Theory]
+        [InlineData("true")]
+        [InlineData("false")]
+        public void It_packs_with_release_if_PackRelease_property_set_in_csproj(string valueOfPackRelease)
         {
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld")
@@ -121,7 +123,7 @@ namespace Microsoft.NET.Pack.Tests
                {
                    var ns = project.Root.Name.Namespace;
                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                   propertyGroup.Add(new XElement(ns + "PackRelease", "true"));
+                   propertyGroup.Add(new XElement(ns + "PackRelease", valueOfPackRelease));
                });
 
             var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
@@ -131,30 +133,34 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
-            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", valueOfPackRelease == "true" ? "Release" : "Debug", "HelloWorld.1.0.0.nupkg");
             Assert.True(File.Exists(expectedAssetPath));
         }
 
         [InlineData("")]
         [InlineData("false")]
         [Theory]
-        public void It_packs_successfully_with_debug_with_Mutlitargeting_where_net_8_and_net_7_project_defines_PackRelease_or_not(string packReleaseValue)
+        public void It_packs_successfully_with_Mutlitargeting_where_net_8_and_net_7_project_defines_PackRelease_or_not(string packReleaseValue)
         {
             var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", identifier: packReleaseValue)
                 .WithSource()
                 .WithTargetFrameworks("net8.0;net7.0")
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                     propertyGroup.Add(new XElement(packReleaseValue != "" ? ns + "PackRelease" + packReleaseValue : ""));
+                     propertyGroup.Add(packReleaseValue != "" ? 
+                         new XElement(ns + "PackRelease", packReleaseValue)
+                         :
+                         new XElement(ns + "Foo", packReleaseValue)
+                    );
                 });
 
             var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
 
             packCommand
-                .Execute()
+                .Execute("-bl:C:\\users\\noahgilson\\whydoesthispackdebug.binlog")
                 .Should()
                 .Pass();
 

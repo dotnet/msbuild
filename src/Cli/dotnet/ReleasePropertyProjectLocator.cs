@@ -32,8 +32,8 @@ namespace Microsoft.DotNet.Cli
             public string? FrameworkOption;
             public string? ConfigurationOption;
 
-            public DependentCommandOptions(IEnumerable<string> slnOrProjectArgs, string? frameworkOption = null, string? configOption = null)
-            => (SlnOrProjectArgs, FrameworkOption, ConfigurationOption) = (slnOrProjectArgs, frameworkOption, configOption);
+            public DependentCommandOptions(IEnumerable<string> slnOrProjectArgs, string? configOption = null, string? frameworkOption = null)
+            => (SlnOrProjectArgs, ConfigurationOption, FrameworkOption) = (slnOrProjectArgs, configOption, frameworkOption);
         }
 
 
@@ -230,11 +230,9 @@ namespace Microsoft.DotNet.Cli
         {
             if (_options.FrameworkOption != null)
             {
-                string givenFrameworkOption = _parseResult.GetValue(_options.FrameworkOption);
-
                 // Note: dotnet -f FRAMEWORK_1 --property:TargetFramework=FRAMEWORK_2 will use FRAMEWORK_1.
                 // So we can replace the value in the globals non-dubiously if it exists.
-                oldGlobalProperties[MSBuildPropertyNames.TARGET_FRAMEWORK] = givenFrameworkOption;
+                oldGlobalProperties[MSBuildPropertyNames.TARGET_FRAMEWORK] = _options.FrameworkOption;
             }
             return oldGlobalProperties;
         }

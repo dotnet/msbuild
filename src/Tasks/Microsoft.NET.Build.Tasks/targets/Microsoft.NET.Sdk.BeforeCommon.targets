@@ -59,6 +59,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion.TrimStart('vV'))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
 
+  <!-- Evaluate the two below properties so they are available early enough to be defined in any ProjectInstance evaluation. -->
+  <!-- Default the value of PackRelease for every project. Note that this is pre-evaluated by the CLI in an evaluation before evaluation (see ReleasePropertyProjectLocator.cs).-->
+  <PropertyGroup Condition="'$(PackRelease)' == ''">
+    <PackRelease>true</PackRelease>
+  </PropertyGroup>
+
+  <!-- Default the value of PublishRelease for 8.0+ TFMs. Note that this is pre-evaluated by the CLI in an evaluation before evaluation (see ReleasePropertyProjectLocator.cs).-->
+  <PropertyGroup Condition="'$(PublishRelease)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '8.0'">
+    <PublishRelease>true</PublishRelease>
+  </PropertyGroup>
+
   <!--
     Import targets from RazorSDK if referenced
     Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.BeforeCommon.targets

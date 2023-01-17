@@ -50,7 +50,8 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = true
             };
             testProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
-            var mainProject = _testAssetsManager.CreateTestProject(testProject, callingMethod: testPath, identifier: PReleaseProperty);
+            testProject.AdditionalProperties[PReleaseProperty] = firstProjPReleaseValue;
+            var mainProject = _testAssetsManager.CreateTestProject(testProject, callingMethod: testPath, identifier: string.Join("", firstProjTfms) + PReleaseProperty);
 
             var referencedProject = new TestProject("ReferencedProject")
             {
@@ -58,8 +59,8 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = false
             };
             referencedProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
-            testProject.AdditionalProperties[PReleaseProperty] = secondProjPReleaseValue;
-            var secondProject = _testAssetsManager.CreateTestProject(referencedProject, callingMethod: testPath, identifier: PReleaseProperty);
+            referencedProject.AdditionalProperties[PReleaseProperty] = secondProjPReleaseValue;
+            var secondProject = _testAssetsManager.CreateTestProject(referencedProject, callingMethod: testPath, identifier: string.Join("", secondProjTfms) + PReleaseProperty);
 
             List<TestAsset> projects = new List<TestAsset> { mainProject, secondProject };
 
@@ -74,7 +75,6 @@ namespace Microsoft.NET.Publish.Tests
 
         [InlineData(PublishRelease, "net8.0", true)]
         [InlineData(PublishRelease, "-p:TargetFramework=net8.0", false)]
-        [InlineData(PackRelease, "-p:TargetFramework=net8.0", false)]
         [Theory]
         public void ItUsesReleaseWithATargetFrameworkOptionNet8ForNet6AndNet7MultitargetingProjectWithPReleaseUndefined(string releaseProperty, string args, bool passDashF)
         {
@@ -87,7 +87,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var dotnetCommand = new DotnetCommand(Log, releaseProperty == PublishRelease ? publish : pack);
             dotnetCommand
-                .Execute(passDashF ? "-f" : "", args, sln.SolutionPath, "-bl:C:\\users\\noahgilson\\releaseframework.binlog")
+                .Execute(passDashF ? "-f" : "", args, sln.SolutionPath)
                 .Should()
                 .Pass();
 

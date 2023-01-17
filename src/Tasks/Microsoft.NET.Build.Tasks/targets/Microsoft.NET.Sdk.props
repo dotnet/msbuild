@@ -24,6 +24,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
 
+  <!-- Default the value of PackRelease for every project. Note that this is pre-evaluated by the CLI in an evaluation before evaluation (see ReleasePropertyProjectLocator.cs).
+  Multitargeting pack splits a single 2 TFM project into 9 separate evaluations, with different target imports. Microsoft.NET.SDK.DefaultItems.Targets ...
+  is where PublishRelease is defaulted because it depends on _TargetFrameworkVersionWithoutV. Most targets do not run in some instances of dotnet pack.
+  So, we must set PackRelease here. Even though this occurs before project import, the project import can override PackRelease later, before the pre-evaluation, so this is fine.-->
+  <PropertyGroup Condition="'$(PackRelease)' == ''">
+    <PackRelease>true</PackRelease>
+  </PropertyGroup>
+
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
     <OutputType Condition=" '$(OutputType)' == '' ">Library</OutputType>

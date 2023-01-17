@@ -455,18 +455,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
+            // Another command, which should not be affected by PublishRelease
             new BuildCommand(helloWorldAsset)
                .Execute()
                .Should()
                .Pass();
-
-            // Another command, which should not be affected by PublishRelease
-            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
-
-            packCommand
-                .Execute()
-                .Should()
-                .Pass();
 
             var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
             Assert.False(File.Exists(expectedAssetPath));

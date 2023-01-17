@@ -10,6 +10,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Publish;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
@@ -43,6 +44,8 @@ namespace Microsoft.DotNet.Tools.Pack
             IEnumerable<string> slnOrProjectArgs = parseResult.GetValue(PackCommandParser.SlnOrProjectArgument);
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
+
+            Debugger.Launch();
 
             ReleasePropertyProjectLocator projectLocator = new ReleasePropertyProjectLocator(parseResult, MSBuildPropertyNames.PACK_RELEASE,
                 new ReleasePropertyProjectLocator.DependentCommandOptions(
