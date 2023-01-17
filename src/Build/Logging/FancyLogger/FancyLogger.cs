@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-// using System.Linq;
-// using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -45,6 +43,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             // eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
+            // Cancelled
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
@@ -156,22 +156,42 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.Log();
         }
 
+        void console_CancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs)
+        {
+            // Shutdown logger
+            Shutdown();
+        }
 
         public void Shutdown()
         {
             FancyLoggerBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
+            Console.Out.Flush();
+            int errorCount = 0;
+            int warningCount = 0;
+            foreach (var project in projects)
+            {
+                errorCount += project.Value.ErrorCount;
+                warningCount += project.Value.WarningCount;
+                foreach (var message in project.Value.AdditionalDetails)
+                {
+                    Console.WriteLine(message.ToANSIString());
+                }
+            }
+            // Emmpty line
+            Console.WriteLine();
             if (Succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine("\tX Warning(s)");
+                Console.WriteLine($"\t{warningCount} Warning(s)");
+                Console.WriteLine($"\t{errorCount} Error(s)");
             }
             else
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-                Console.WriteLine("\tX Warnings(s)");
-                Console.WriteLine("\tX Errors(s)");
+                Console.WriteLine($"\t{warningCount} Warnings(s)");
+                Console.WriteLine($"\t{errorCount} Errors(s)");
             }
         }
     }
