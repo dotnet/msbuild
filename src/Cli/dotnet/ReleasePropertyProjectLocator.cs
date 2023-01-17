@@ -25,8 +25,22 @@ namespace Microsoft.DotNet.Cli
     /// </summary>
     class ReleasePropertyProjectLocator
     {
+        public struct DependentCommandOptions
+        {
+#nullable enable
+            public IEnumerable<string> SlnOrProjectArgs = Enumerable.Empty<string>();
+            public string? FrameworkOption;
+            public string? ConfigurationOption;
+
+            public DependentCommandOptions(IEnumerable<string> slnOrProjectArgs, string? frameworkOption = null, string? configOption = null)
+            => (SlnOrProjectArgs, FrameworkOption, ConfigurationOption) = (slnOrProjectArgs, frameworkOption, configOption);
+        }
+
+
         private ParseResult _parseResult;
         private string _propertyToCheck;
+        DependentCommandOptions _options;
+
         private IEnumerable<string> _slnOrProjectArgs;
         private bool _isHandlingSolution = false;
 
@@ -38,9 +52,10 @@ namespace Microsoft.DotNet.Cli
         /// </summary>
         public ReleasePropertyProjectLocator(
             ParseResult parseResult,
-            string propertyToCheck
+            string propertyToCheck,
+            DependentCommandOptions commandOptions
          )
-         => (_parseResult, _propertyToCheck, _slnOrProjectArgs) = (parseResult, propertyToCheck, parseResult.GetValue(PublishCommandParser.SlnOrProjectArgument));
+         => (_parseResult, _propertyToCheck, _options, _slnOrProjectArgs) = (parseResult, propertyToCheck, commandOptions, commandOptions.SlnOrProjectArgs);
 
         /// <summary>
         /// Return dotnet CLI command-line parameters (or an empty list) to change configuration based on ...
@@ -50,7 +65,6 @@ namespace Microsoft.DotNet.Cli
         public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified()
         {
             // Setup
-#nullable enable
             Debug.Assert(_propertyToCheck == MSBuildPropertyNames.PUBLISH_RELEASE || _propertyToCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
             var nothing = Enumerable.Empty<string>();
             if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
@@ -64,7 +78,7 @@ namespace Microsoft.DotNet.Cli
 
             // Configuration doesn't work in a .proj file, but it does as a global property.
             // Detect either A) --configuration option usage OR /p:Configuration=Foo, if so, don't use these properties.
-            if (_parseResult.HasOption(PublishCommandParser.ConfigurationOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
+            if (_options.ConfigurationOption != null || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
                 return new List<string> { $"-property:{EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE}=true" }; // Don't throw error if publish* conflicts but global config specified.
 
             // Determine the project being acted upon
@@ -214,9 +228,9 @@ namespace Microsoft.DotNet.Cli
         /// <returns>The same set of global properties for the project, but with the new potential TFM based on -f or --framework.</returns>
         private Dictionary<string, string> InjectTargetFrameworkIntoGlobalProperties(Dictionary<string, string> oldGlobalProperties)
         {
-            if (_parseResult.HasOption(PublishCommandParser.FrameworkOption))
+            if (_options.FrameworkOption != null)
             {
-                string givenFrameworkOption = _parseResult.GetValue(PublishCommandParser.FrameworkOption);
+                string givenFrameworkOption = _parseResult.GetValue(_options.FrameworkOption);
 
                 // Note: dotnet -f FRAMEWORK_1 --property:TargetFramework=FRAMEWORK_2 will use FRAMEWORK_1.
                 // So we can replace the value in the globals non-dubiously if it exists.
