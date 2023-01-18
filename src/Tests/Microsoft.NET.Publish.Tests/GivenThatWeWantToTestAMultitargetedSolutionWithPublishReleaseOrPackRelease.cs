@@ -32,6 +32,17 @@ namespace Microsoft.NET.Publish.Tests
 
         }
 
+        /// <summary>
+        /// Create a solution with 2 projects, one an exe, the other a library.
+        /// </summary>
+        /// <param name="log"></param>
+        /// <param name="firstProjTfms">A string of TFMs separated by ; for the exe project.</param>
+        /// <param name="secondProjTfms">A string of TFMs separated by ; for the library project.</param>
+        /// <param name="PReleaseProperty">The value of the property to set, PublishRelease or PackRelease in this case.</param>
+        /// <param name="firstProjPReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
+        /// <param name="secondProjPReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
+        /// <param name="testPath">Use to set a unique folder name for the test, like other test infrastructure code.</param>
+        /// <returns></returns>
         internal Tuple<TestSolution, List<TestProject>> Setup(ITestOutputHelper log, List<string> firstProjTfms, List<string> secondProjTfms, string PReleaseProperty, string firstProjPReleaseValue, string secondProjPReleaseValue, [CallerMemberName] string testPath = "")
         {
             // Project Setup
@@ -42,7 +53,10 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = true
             };
             testProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
-            testProject.AdditionalProperties[PReleaseProperty] = firstProjPReleaseValue;
+            if (firstProjPReleaseValue != "")
+            {
+                testProject.AdditionalProperties[PReleaseProperty] = firstProjPReleaseValue;
+            }
             var mainProject = _testAssetsManager.CreateTestProject(testProject, callingMethod: testPath, identifier: string.Join("", firstProjTfms) + PReleaseProperty);
 
             var referencedProject = new TestProject("ReferencedProject")
@@ -51,7 +65,10 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = false
             };
             referencedProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
-            referencedProject.AdditionalProperties[PReleaseProperty] = secondProjPReleaseValue;
+            if (secondProjPReleaseValue != "")
+            {
+                referencedProject.AdditionalProperties[PReleaseProperty] = secondProjPReleaseValue;
+            }
             var secondProject = _testAssetsManager.CreateTestProject(referencedProject, callingMethod: testPath, identifier: string.Join("", secondProjTfms) + PReleaseProperty);
 
             List<TestAsset> projects = new List<TestAsset> { mainProject, secondProject };
@@ -127,7 +144,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var dotnetCommand = new DotnetCommand(Log, pack);
             dotnetCommand
-                .Execute(sln.SolutionPath)
+                .Execute(sln.SolutionPath, "-bl:C:\\users\\noahgilson\\packdebugwhy.binlog")
                 .Should()
                 .Pass();
 
