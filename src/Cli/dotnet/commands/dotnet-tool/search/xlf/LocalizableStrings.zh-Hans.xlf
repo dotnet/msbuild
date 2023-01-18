@@ -58,13 +58,13 @@
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
-        <source>determining whether to include pre-release packages.</source>
-        <target state="translated">正在确定是否包括预发行包。</target>
+        <source>Include pre-release packages.</source>
+        <target state="needs-review-translation">正在确定是否包括预发行包。</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
-        <source>Search Term</source>
-        <target state="translated">搜索词</target>
+        <source>SEARCH_TERM</source>
+        <target state="needs-review-translation">搜索词</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">

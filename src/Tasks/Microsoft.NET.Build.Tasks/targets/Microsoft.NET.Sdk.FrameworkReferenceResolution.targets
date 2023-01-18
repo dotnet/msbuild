@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NET.Sdk.FrameworkReferenceResolution.targets
 
@@ -99,6 +99,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 SelfContained="$(SelfContained)"
                                 ReadyToRunEnabled="$(PublishReadyToRun)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                TrimmingEnabled="$(_IsTrimmingEnabled)"
                                 AotEnabled="$(PublishAot)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
@@ -111,6 +112,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
                                 KnownILCompilerPacks="@(KnownILCompilerPack)"
+                                KnownILLinkPacks="@(KnownILLinkPack)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 NetCoreRoot="$(NetCoreRoot)"
                                 NETCoreSdkVersion="$(NETCoreSdkVersion)">
@@ -123,6 +125,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="HostILCompilerPacks" ItemName="HostILCompilerPack" />
       <Output TaskParameter="TargetILCompilerPacks" ItemName="TargetILCompilerPack" />
       <Output TaskParameter="UnavailableRuntimePacks" ItemName="UnavailableRuntimePack" />
+      <Output TaskParameter="ImplicitPackageReferences" ItemName="_ImplicitPackageReference" />
 
     </ProcessFrameworkReferences>
 
@@ -146,6 +149,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                      KnownAppHostPacks="@(KnownAppHostPack)"
                      NuGetRestoreSupported="$(_NuGetRestoreSupported)"
+                     EnableAppHostPackDownload="$(EnableAppHostPackDownload)"
                      NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
@@ -174,6 +178,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                         IsImplicitlyDefined="true"
                         PrivateAssets="all"
                         ExcludeAssets="all" />
+    </ItemGroup>
+
+    <!-- Add implicit package references that don't already exist in PackageReference. -->
+    <ItemGroup>
+      <_ImplicitPackageReference Remove="@(PackageReference)" />
+      <PackageReference Include="@(_ImplicitPackageReference)"
+                        IsImplicitlyDefined="true"
+                        PrivateAssets="all" />
     </ItemGroup>
   </Target>
 

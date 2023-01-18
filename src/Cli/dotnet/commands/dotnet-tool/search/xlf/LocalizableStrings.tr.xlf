@@ -58,13 +58,13 @@
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
-        <source>determining whether to include pre-release packages.</source>
-        <target state="translated">yayın öncesi paketlerin eklenip eklenmeyeceğini belirleme.</target>
+        <source>Include pre-release packages.</source>
+        <target state="needs-review-translation">yayın öncesi paketlerin eklenip eklenmeyeceğini belirleme.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
-        <source>Search Term</source>
-        <target state="translated">Arama Terimi</target>
+        <source>SEARCH_TERM</source>
+        <target state="needs-review-translation">Arama Terimi</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">

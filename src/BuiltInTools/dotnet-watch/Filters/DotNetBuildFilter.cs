@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.InteropServices.Marshalling;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Watcher.Internal;
@@ -9,17 +10,19 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class DotNetBuildFilter : IWatchFilter
+    internal sealed class DotNetBuildFilter : IWatchFilter
     {
         private readonly IFileSetFactory _fileSetFactory;
         private readonly ProcessRunner _processRunner;
         private readonly IReporter _reporter;
+        private readonly string _muxerPath;
 
-        public DotNetBuildFilter(IFileSetFactory fileSetFactory, ProcessRunner processRunner, IReporter reporter)
+        public DotNetBuildFilter(IFileSetFactory fileSetFactory, ProcessRunner processRunner, IReporter reporter, string muxerPath)
         {
             _fileSetFactory = fileSetFactory;
             _processRunner = processRunner;
             _reporter = reporter;
+            _muxerPath = muxerPath;
         }
 
         public async ValueTask ProcessAsync(DotNetWatchContext context, CancellationToken cancellationToken)
@@ -32,7 +35,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
                 var processSpec = new ProcessSpec
                 {
-                    Executable = DotnetMuxer.MuxerPath,
+                    Executable = _muxerPath,
                     Arguments = arguments,
                     WorkingDirectory = context.ProcessSpec.WorkingDirectory,
                 };

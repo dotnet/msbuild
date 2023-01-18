@@ -19,10 +19,11 @@ using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using IConsole = Microsoft.Extensions.Tools.Internal.IConsole;
 using Resources = Microsoft.DotNet.Watcher.Tools.Resources;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public class Program : IDisposable
+    internal sealed class Program : IDisposable
     {
         private const string Description = @"
 Environment variables:
@@ -62,46 +63,55 @@ Examples:
 ";
         private readonly IConsole _console;
         private readonly string _workingDirectory;
+        private readonly string _muxerPath;
         private readonly CancellationTokenSource _cts;
         private IReporter _reporter;
         private IRequester _requester;
 
-        public Program(IConsole console, string workingDirectory)
+        public Program(IConsole console, string workingDirectory, string muxerPath)
         {
-            // We can register the MSBuild that is bundled with the SDK to perform MSBuild things. dotnet-watch is in
-            // a nested folder of the SDK's root, we'll back up to it.
-            // AppContext.BaseDirectory = $sdkRoot\$sdkVersion\DotnetTools\dotnet-watch\$version\tools\net6.0\any\
-            // MSBuild.dll is located at $sdkRoot\$sdkVersion\MSBuild.dll
-            var sdkRootDirectory = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..");
-#if DEBUG
-            // In the usual case, use the SDK that contains the dotnet-watch. However during local testing, it's
-            // much more common to run dotnet-watch from a different SDK. Use the ambient SDK in that case.
-            MSBuildLocator.RegisterDefaults();
-#else
-            MSBuildLocator.RegisterMSBuildPath(sdkRootDirectory);
-#endif
-
             Ensure.NotNull(console, nameof(console));
             Ensure.NotNullOrEmpty(workingDirectory, nameof(workingDirectory));
 
             _console = console;
             _workingDirectory = workingDirectory;
+            _muxerPath = muxerPath;
             _cts = new CancellationTokenSource();
             console.CancelKeyPress += OnCancelKeyPress;
 
             var suppressEmojis = ShouldSuppressEmojis();
             _reporter = CreateReporter(verbose: true, quiet: false, console: _console, suppressEmojis);
             _requester = new ConsoleRequester(_console, quiet: false, suppressEmojis);
-
-            // Register listeners that load Roslyn-related assemblies from the `Rosyln/bincore` directory.
-            RegisterAssemblyResolutionEvents(sdkRootDirectory);
         }
 
         public static async Task<int> Main(string[] args)
         {
             try
             {
-                using var program = new Program(PhysicalConsole.Singleton, Directory.GetCurrentDirectory());
+                var muxerPath = Environment.ProcessPath;
+                Debug.Assert(Path.GetFileNameWithoutExtension(muxerPath) == "dotnet", $"Invalid muxer path {muxerPath}");
+
+#if DEBUG
+                var sdkRootDirectory = Environment.GetEnvironmentVariable("DOTNET_WATCH_DEBUG_SDK_DIRECTORY");
+#else
+                var sdkRootDirectory = "";
+#endif
+
+                // We can register the MSBuild that is bundled with the SDK to perform MSBuild things.
+                // In production deployment dotnet-watch is in a nested folder of the SDK's root, we'll back up to it.
+                // AppContext.BaseDirectory = $sdkRoot\$sdkVersion\DotnetTools\dotnet-watch\$version\tools\net6.0\any\
+                // MSBuild.dll is located at $sdkRoot\$sdkVersion\MSBuild.dll
+                if (string.IsNullOrEmpty(sdkRootDirectory))
+                {
+                    sdkRootDirectory = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..");
+                }
+
+                MSBuildLocator.RegisterMSBuildPath(sdkRootDirectory);
+
+                // Register listeners that load Roslyn-related assemblies from the `Roslyn/bincore` directory.
+                RegisterAssemblyResolutionEvents(sdkRootDirectory);
+
+                using var program = new Program(PhysicalConsole.Singleton, Directory.GetCurrentDirectory(), muxerPath);
                 return await program.RunAsync(args);
             }
             catch (Exception ex)
@@ -248,14 +258,17 @@ Examples:
             var watchOptions = DotNetWatchOptions.Default;
             watchOptions.NonInteractive = options.NonInteractive;
 
-            var fileSetFactory = new MsBuildFileSetFactory(_reporter,
+            var fileSetFactory = new MsBuildFileSetFactory(
+                _reporter,
                 watchOptions,
+                _muxerPath,
                 projectFile,
                 waitOnError: true,
                 trace: false);
+
             var processInfo = new ProcessSpec
             {
-                Executable = DotnetMuxer.MuxerPath,
+                Executable = _muxerPath,
                 WorkingDirectory = Path.GetDirectoryName(projectFile),
                 Arguments = args,
                 EnvironmentVariables =
@@ -289,7 +302,7 @@ Examples:
                 // a) watch was invoked with no args or with exactly one arg - the run command e.g. `dotnet watch` or `dotnet watch run`
                 // b) The launch profile supports hot-reload based watching.
                 // The watcher will complain if users configure this for runtimes that would not support it.
-                await using var watcher = new HotReloadDotNetWatcher(_reporter, _requester, fileSetFactory, watchOptions, _console, _workingDirectory);
+                await using var watcher = new HotReloadDotNetWatcher(_reporter, _requester, fileSetFactory, watchOptions, _console, _workingDirectory, _muxerPath);
                 await watcher.WatchAsync(context, cancellationToken);
             }
             else
@@ -298,7 +311,7 @@ Examples:
 
                 // We'll use the presence of a profile to decide if we're going to use the hot-reload based watching.
                 // The watcher will complain if users configure this for runtimes that would not support it.
-                await using var watcher = new DotNetWatcher(_reporter, fileSetFactory, watchOptions);
+                await using var watcher = new DotNetWatcher(_reporter, fileSetFactory, watchOptions, _muxerPath);
                 await watcher.WatchAsync(context, cancellationToken);
             }
 
@@ -359,9 +372,11 @@ Examples:
             var fileSetFactory = new MsBuildFileSetFactory(
                 reporter,
                 DotNetWatchOptions.Default,
+                _muxerPath,
                 projectFile,
                 waitOnError: false,
                 trace: false);
+
             var files = await fileSetFactory.CreateAsync(cancellationToken);
 
             if (files == null)
@@ -459,11 +474,11 @@ Examples:
             protected override CommandLineOptions GetBoundValue(BindingContext bindingContext)
             {
                 var parseResults = bindingContext.ParseResult;
-                var projectValue = parseResults.GetValueForOption(_longProjectOption);
+                var projectValue = parseResults.GetValue(_longProjectOption);
                 if (string.IsNullOrEmpty(projectValue))
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    var projectShortValue = parseResults.GetValueForOption(_shortProjectOption);
+                    var projectShortValue = parseResults.GetValue(_shortProjectOption);
 #pragma warning restore CS0618 // Type or member is obsolete
                     if (!string.IsNullOrEmpty(projectShortValue))
                     {
@@ -474,14 +489,14 @@ Examples:
 
                 var options = new CommandLineOptions
                 {
-                    Quiet = parseResults.GetValueForOption(_quietOption),
-                    List = parseResults.GetValueForOption(_listOption),
-                    NoHotReload = parseResults.GetValueForOption(_noHotReloadOption),
-                    NonInteractive = parseResults.GetValueForOption(_nonInteractiveOption),
-                    Verbose = parseResults.GetValueForOption(_verboseOption),
+                    Quiet = parseResults.GetValue(_quietOption),
+                    List = parseResults.GetValue(_listOption),
+                    NoHotReload = parseResults.GetValue(_noHotReloadOption),
+                    NonInteractive = parseResults.GetValue(_nonInteractiveOption),
+                    Verbose = parseResults.GetValue(_verboseOption),
                     Project = projectValue,
-                    LaunchProfile = parseResults.GetValueForOption(_launchProfileOption),
-                    RemainingArguments = parseResults.GetValueForArgument(_argumentsToForward),
+                    LaunchProfile = parseResults.GetValue(_launchProfileOption),
+                    RemainingArguments = parseResults.GetValue(_argumentsToForward),
                 };
                 return options;
             }

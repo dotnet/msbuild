@@ -33,7 +33,22 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {
-    public class ToolPackageInstallerTests : SdkTest
+    internal class DotnetEnvironmentTestFixture : IDisposable
+    {
+        private readonly string _originalPath;
+        private const string _PATH_VAR_NAME = "PATH";
+
+        public DotnetEnvironmentTestFixture()
+        {
+            string dotnetRootUnderTest = TestContext.Current.ToolsetUnderTest.DotNetRoot;
+            _originalPath = Environment.GetEnvironmentVariable(_PATH_VAR_NAME);
+            Environment.SetEnvironmentVariable(_PATH_VAR_NAME, dotnetRootUnderTest + Path.PathSeparator + _originalPath);
+        }
+
+        public void Dispose() => Environment.SetEnvironmentVariable(_PATH_VAR_NAME, _originalPath);
+    }
+
+    public class ToolPackageInstallerTests : SdkTest, IClassFixture<DotnetEnvironmentTestFixture>
     {
         [Theory]
         [InlineData(false)]

@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Cli
         {
             return Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null ||
                 parseResult.Directives.Count() > 0 ||
-                (parseResult.IsTopLevelDotnetCommand() && string.IsNullOrEmpty(parseResult.GetValueForArgument(Parser.DotnetSubCommand)));
+                (parseResult.IsTopLevelDotnetCommand() && string.IsNullOrEmpty(parseResult.GetValue(Parser.DotnetSubCommand)));
         }
 
         public static int HandleMissingCommand(this ParseResult parseResult)
@@ -166,19 +166,19 @@ namespace Microsoft.DotNet.Cli
         internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
         {
             return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
-                parseResult.GetValueForOption(RunCommandParser.RuntimeOption) :
+                parseResult.GetValue(RunCommandParser.RuntimeOption) :
                 parseResult.HasOption(CommonOptions.OperatingSystemOption) ||
                 parseResult.HasOption(CommonOptions.ArchitectureOption) ||
                 parseResult.HasOption(CommonOptions.LongFormArchitectureOption) ?
                 CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
-                    parseResult.GetValueForOption(CommonOptions.OperatingSystemOption),
+                    parseResult.GetValue(CommonOptions.OperatingSystemOption),
                     CommonOptions.ArchOptionValue(parseResult)) :
                 null;
         }
 
         public static bool UsingRunCommandShorthandProjectOption(this ParseResult parseResult)
         {
-            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.GetValueForOption(RunCommandParser.PropertyOption).Any())
+            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.GetValue(RunCommandParser.PropertyOption).Any())
             {
                 var projVals = parseResult.GetRunCommandShorthandProjectValues();
                 if (projVals.Any())
@@ -236,8 +236,8 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.FindResultFor(optionToGet) is OptionResult optionResult &&
                 !parseResult.Errors.Any(e => e.SymbolResult == optionResult))
             {
-                return optionResult.GetValueForOption(optionToGet);
-            }
+                return optionResult.GetValue(optionToGet);
+            } 
             else {
                 return default;
             }
@@ -254,8 +254,8 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.FindResultFor(optionToGet) is OptionResult optionResult &&
                 !parseResult.Errors.Any(e => e.SymbolResult == optionResult))
             {
-                return optionResult.GetValueForOption(optionToGet);
-            }
+                return optionResult.GetValue(optionToGet);
+            } 
             else {
                 return default;
             }

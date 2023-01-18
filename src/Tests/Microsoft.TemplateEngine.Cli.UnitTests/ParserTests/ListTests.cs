@@ -225,7 +225,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay.Count);
             foreach (string column in expectedColumns)
             {
-                Assert.Contains(column, args.ColumnsToDisplay);
+                Assert.Contains(column, args.ColumnsToDisplay!);
             }
         }
 

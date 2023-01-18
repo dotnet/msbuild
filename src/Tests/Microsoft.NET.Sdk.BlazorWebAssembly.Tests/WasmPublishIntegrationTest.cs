@@ -694,7 +694,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/39289")]
+        [Fact]
         // Regression test for https://github.com/dotnet/aspnetcore/issues/18752
         public void Publish_HostedApp_WithoutTrimming_Works()
         {

@@ -16,14 +16,15 @@ Options:
   --type <project>        Specifies the template type to instantiate.
 
 Template options:
-  -f, --framework <net6.0|net7.0>  The target framework for the project.
-                                   Type: choice
-                                     net7.0  Target net7.0
-                                     net6.0  Target net6.0
-                                   Default: net7.0
-  --no-restore                     If specified, skips the automatic restore of the project on create.
-                                   Type: bool
-                                   Default: false
+  -f, --framework <net6.0|net7.0|net8.0>  The target framework for the project.
+                                          Type: choice
+                                            net8.0  Target net8.0
+                                            net7.0  Target net7.0
+                                            net6.0  Target net6.0
+                                          Default: net8.0
+  --no-restore                            If specified, skips the automatic restore of the project on create.
+                                          Type: bool
+                                          Default: false
 
 To see help for other template languages (C#, VB), use --language option:
    dotnet new console -h --language C#

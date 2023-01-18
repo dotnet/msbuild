@@ -24,7 +24,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.7.0" Version="7.0.*-*" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.6.0" Version="6.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.7.0" Version="7.0.*-*" GeneratePathProperty="true" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -35,7 +37,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
   internal class TemplatePackagesPaths
   {
       public const string MicrosoftDotNetCommonProjectTemplates60Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_6_0)"%3B
+      public const string MicrosoftDotNetCommonProjectTemplates70Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_7_0)"%3B
       public const string MicrosoftDotNetWebProjectTemplates60Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_6_0)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates70Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_7_0)"%3B
   }
 }
       ]]>

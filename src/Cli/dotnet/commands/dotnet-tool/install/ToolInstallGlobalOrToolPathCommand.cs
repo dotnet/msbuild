@@ -55,15 +55,15 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             INuGetPackageDownloader nugetPackageDownloader = null)
             : base(parseResult)
         {
-            _packageId = new PackageId(parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
-            _packageVersion = parseResult.GetValueForOption(ToolInstallCommandParser.VersionOption);
-            _configFilePath = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
-            _framework = parseResult.GetValueForOption(ToolInstallCommandParser.FrameworkOption);
-            _source = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
-            _global = parseResult.GetValueForOption(ToolAppliedOption.GlobalOption);
-            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolInstallCommandParser.VerbosityOption));
-            _toolPath = parseResult.GetValueForOption(ToolAppliedOption.ToolPathOption);
-            _architectureOption = parseResult.GetValueForOption(ToolInstallCommandParser.ArchitectureOption);
+            _packageId = new PackageId(parseResult.GetValue(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.GetValue(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.GetValue(ToolInstallCommandParser.ConfigOption);
+            _framework = parseResult.GetValue(ToolInstallCommandParser.FrameworkOption);
+            _source = parseResult.GetValue(ToolInstallCommandParser.AddSourceOption);
+            _global = parseResult.GetValue(ToolAppliedOption.GlobalOption);
+            _verbosity = Enum.GetName(parseResult.GetValue(ToolInstallCommandParser.VerbosityOption));
+            _toolPath = parseResult.GetValue(ToolAppliedOption.ToolPathOption);
+            _architectureOption = parseResult.GetValue(ToolInstallCommandParser.ArchitectureOption);
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
             _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());
@@ -72,13 +72,13 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
             var tempDir = new DirectoryPath(PathUtilities.CreateTempSubdirectory());
-            var configOption = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
-            var sourceOption = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
+            var configOption = parseResult.GetValue(ToolInstallCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValue(ToolInstallCommandParser.AddSourceOption);
             var packageSourceLocation = new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), additionalSourceFeeds: sourceOption);
-            var restoreAction = new RestoreActionConfig(DisableParallel: parseResult.GetValueForOption(ToolCommandRestorePassThroughOptions.DisableParallelOption),
-                NoCache: parseResult.GetValueForOption(ToolCommandRestorePassThroughOptions.NoCacheOption),
-                IgnoreFailedSources: parseResult.GetValueForOption(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption),
-                Interactive: parseResult.GetValueForOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption));
+            var restoreAction = new RestoreActionConfig(DisableParallel: parseResult.GetValue(ToolCommandRestorePassThroughOptions.DisableParallelOption),
+                NoCache: parseResult.GetValue(ToolCommandRestorePassThroughOptions.NoCacheOption),
+                IgnoreFailedSources: parseResult.GetValue(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption),
+                Interactive: parseResult.GetValue(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption));
             nugetPackageDownloader ??= new NuGetPackageDownloader(tempDir, verboseLogger: new NullLogger(), restoreActionConfig: restoreAction);
             _shellShimTemplateFinder = new ShellShimTemplateFinder(nugetPackageDownloader, tempDir, packageSourceLocation);
 

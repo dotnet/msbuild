@@ -16,18 +16,19 @@ Options:
   --type <project>        Specifies the template type to instantiate.
 
 Template options:
-  -f, --framework <net6.0|net7.0|netstandard2.0|netstandard2.1>  The target framework for the project.
-                                                                 Type: choice
-                                                                   net7.0          Target net7.0
-                                                                   netstandard2.1  Target netstandard2.1
-                                                                   netstandard2.0  Target netstandard2.0
-                                                                   net6.0          Target net6.0
-                                                                 Default: net7.0
-  --langVersion <langVersion>                                    Sets the LangVersion property in the created project file
-                                                                 Type: text
-  --no-restore                                                   If specified, skips the automatic restore of the project on create.
-                                                                 Type: bool
-                                                                 Default: false
+  -f, --framework <net6.0|net7.0|net8.0|netstandard2.0|netstandard2.1>  The target framework for the project.
+                                                                        Type: choice
+                                                                          net8.0          Target net8.0
+                                                                          netstandard2.1  Target netstandard2.1
+                                                                          netstandard2.0  Target netstandard2.0
+                                                                          net7.0          Target net7.0
+                                                                          net6.0          Target net6.0
+                                                                        Default: net8.0
+  --langVersion <langVersion>                                           Sets the LangVersion property in the created project file
+                                                                        Type: text
+  --no-restore                                                          If specified, skips the automatic restore of the project on create.
+                                                                        Type: bool
+                                                                        Default: false
 
 To see help for other template languages (F#, VB), use --language option:
    dotnet new classlib -h --language F#

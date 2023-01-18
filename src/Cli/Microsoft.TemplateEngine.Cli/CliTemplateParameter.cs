@@ -241,7 +241,7 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        private static ParseArgument<T> GetParseArgument<T>(CliTemplateParameter parameter, Func<string?, (bool, T)> convert)
+        private static Func<ArgumentResult, T> GetParseArgument<T>(CliTemplateParameter parameter, Func<string?, (bool, T)> convert)
         {
             return (argumentResult) =>
             {

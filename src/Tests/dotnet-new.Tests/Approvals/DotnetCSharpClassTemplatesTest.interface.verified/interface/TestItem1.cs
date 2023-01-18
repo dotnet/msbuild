@@ -1,5 +1,7 @@
-﻿namespace ClassLib;
-public interface TestItem1
+﻿namespace ClassLib
 {
+    public interface TestItem1
+    {
 
+    }
 }

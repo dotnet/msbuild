@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <RootNamespace>Microsoft.DotNet.Watcher.Tools</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,5 +13,4 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
   </ItemGroup>
-
 </Project>

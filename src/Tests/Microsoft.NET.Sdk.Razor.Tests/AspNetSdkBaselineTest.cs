@@ -282,3 +282,4 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         }
     }
 }
+

@@ -132,6 +132,26 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Fact]
+        public Task CannotInstantiateTemplate_WhenNoDefaultNameSpecified()
+        {
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithPreferDefaultNameButNoDefaultName", _log, home, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithPreferDefaultNameButNoDefaultName")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut();
+
+            return Verify(commandResult.StdErr);
+        }
+
+        [Fact]
         public Task CannotInstantiateTemplate_WhenParameterIsInvalid()
         {
             string workingDirectory = CreateTemporaryFolder();
@@ -172,7 +192,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--framework", "net")
+            var commandResult = new DotnetNewCommand(_log, "console", "--framework", "net")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();

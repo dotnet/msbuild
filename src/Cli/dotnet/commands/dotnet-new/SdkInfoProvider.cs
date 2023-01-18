@@ -19,7 +19,18 @@ namespace Microsoft.DotNet.Tools.New
 {
     internal class SdkInfoProvider : ISdkInfoProvider
     {
+        private readonly Func<string> _getCurrentProcessPath;
+
         public Guid Id { get; } = Guid.Parse("{A846C4E2-1E85-4BF5-954D-17655D916928}");
+
+        public SdkInfoProvider()
+            : this(null)
+        { }
+
+        internal SdkInfoProvider(Func<string> getCurrentProcessPath)
+        {
+            _getCurrentProcessPath = getCurrentProcessPath;
+        }
 
         public Task<string> GetCurrentVersionAsync(CancellationToken cancellationToken)
         {
@@ -29,10 +40,12 @@ namespace Microsoft.DotNet.Tools.New
         public Task<IEnumerable<string>> GetInstalledVersionsAsync(CancellationToken cancellationToken)
         {
             // Get the dotnet directory, while ignoring custom msbuild resolvers
-            string dotnetDir = Microsoft.DotNet.NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory(key =>
+            string dotnetDir = Microsoft.DotNet.NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory(
+                key =>
                     key.Equals("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", StringComparison.InvariantCultureIgnoreCase)
                         ? null
-                        : Environment.GetEnvironmentVariable(key));
+                        : Environment.GetEnvironmentVariable(key),
+                _getCurrentProcessPath);
 
             IEnumerable<string> sdks;
             try

@@ -58,13 +58,13 @@
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
-        <source>determining whether to include pre-release packages.</source>
-        <target state="translated">verrà determinato se includere i pacchetti di versioni non definitive.</target>
+        <source>Include pre-release packages.</source>
+        <target state="needs-review-translation">verrà determinato se includere i pacchetti di versioni non definitive.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
-        <source>Search Term</source>
-        <target state="translated">Termine di ricerca</target>
+        <source>SEARCH_TERM</source>
+        <target state="needs-review-translation">Termine di ricerca</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">

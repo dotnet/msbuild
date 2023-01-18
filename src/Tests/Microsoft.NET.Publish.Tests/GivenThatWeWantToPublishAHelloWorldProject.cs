@@ -580,7 +580,7 @@ public static class Program
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
-            .Execute("-f", "net7.0")
+            .Execute("-f", ToolsetInfo.CurrentTargetFramework)
             .Should()
             .Pass().And.NotHaveStdErr();
         }

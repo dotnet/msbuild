@@ -38,6 +38,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
     <GenerateInternalsVisibleToAttributes Condition="'$(GenerateInternalsVisibleToAttributes)' == ''">true</GenerateInternalsVisibleToAttributes>
     <GenerateRequiresPreviewFeaturesAttribute Condition="'$(GenerateRequiresPreviewFeaturesAttribute)' == '' and '$(IsNetCoreAppTargetingLatestTFM)' == 'true'">true</GenerateRequiresPreviewFeaturesAttribute>
+    <GenerateTargetPlatformAttribute Condition="'$(GenerateTargetPlatformAttribute)' == ''">true</GenerateTargetPlatformAttribute>
+    <GenerateSupportedOSPlatformAttribute Condition="'$(GenerateSupportedOSPlatformAttribute)' == ''">true</GenerateSupportedOSPlatformAttribute>
   </PropertyGroup>
 
   <!--
@@ -122,7 +124,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       </AssemblyAttribute>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
+    <ItemGroup Condition="'$(GenerateTargetPlatformAttribute)' == 'true'
+                         and '$(TargetPlatformIdentifier)' != ''
                          and '$(TargetPlatformVersion)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
@@ -131,7 +134,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       </AssemblyAttribute>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
+    <ItemGroup Condition="'$(GenerateSupportedOSPlatformAttribute)' == 'true'
+                         and '$(TargetPlatformIdentifier)' != ''
                          and '$(SupportedOSPlatformVersion)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">

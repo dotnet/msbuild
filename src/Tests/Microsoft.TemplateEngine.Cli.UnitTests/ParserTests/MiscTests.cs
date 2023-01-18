@@ -161,7 +161,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.NotNull(args.ParseResult);
             Assert.Equal("console", args.ShortName);
             Assert.Empty(args.RemainingArguments);
-            Assert.Equal("val", args.ParseResult.GetValueForOption(customOption));
+            Assert.Equal("val", args.ParseResult.GetValue(customOption));
         }
 
         [Theory]
@@ -181,7 +181,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             rootCommand.Add(myCommand);
 
             ParseResult parseResult = rootCommand.Parse(command);
-            Assert.Equal(expected, parseResult.GetValueForOption(SharedOptions.OutputOption)?.Name);
+            Assert.Equal(expected, parseResult.GetValue(SharedOptions.OutputOption)?.Name);
         }
 
         [Theory]
@@ -199,7 +199,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             rootCommand.Add(myCommand);
 
             ParseResult parseResult = rootCommand.Parse(command);
-            Assert.Equal(expected, parseResult.GetValueForOption(SharedOptions.ProjectPathOption)?.Name);
+            Assert.Equal(expected, parseResult.GetValue(SharedOptions.ProjectPathOption)?.Name);
         }
     }
 }

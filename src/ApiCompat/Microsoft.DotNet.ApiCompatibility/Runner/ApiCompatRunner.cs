@@ -8,6 +8,8 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiSymbolExtensions;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.ApiCompatibility.Runner
 {
@@ -17,7 +19,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
     public class ApiCompatRunner : IApiCompatRunner
     {
         private readonly HashSet<ApiCompatRunnerWorkItem> _workItems = new();
-        private readonly ICompatibilityLogger _log;
+        private readonly ISuppressableLog _log;
         private readonly ISuppressionEngine _suppressionEngine;
         private readonly IApiComparerFactory _apiComparerFactory;
         private readonly IAssemblySymbolLoaderFactory _assemblySymbolLoaderFactory;
@@ -25,7 +27,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         /// <inheritdoc />
         public IReadOnlyCollection<ApiCompatRunnerWorkItem> WorkItems => _workItems;
 
-        public ApiCompatRunner(ICompatibilityLogger log,
+        public ApiCompatRunner(ISuppressableLog log,
             ISuppressionEngine suppressionEngine,
             IApiComparerFactory apiComparerFactory,
             IAssemblySymbolLoaderFactory assemblySymbolLoaderFactory)

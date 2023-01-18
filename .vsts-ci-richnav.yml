@@ -10,14 +10,6 @@ pr: none
 variables:
   - name: teamName
     value: Roslyn-Project-System
-  - name: _DotNetPublishToBlobFeed
-    value: false
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: _DotNetValidationArtifactsCategory
-    value: .NETCore
-  - name: _PublishToAzure
-    value: false
   - name: PostBuildSign
     value: true
 
@@ -32,8 +24,8 @@ stages:
         richCodeNavigationLanguage: 'csharp'
         richCodeNavigationEnvironment: 'production'
         pool:
-            name: NetCore-Svc-Public
-            demands: ImageOverride -equals windows.vs2019.amd64.open  
+            name: NetCore-Public
+            demands: ImageOverride -equals windows.vs2019.amd64.open   
         timeoutInMinutes: 180
         strategy:
           matrix:

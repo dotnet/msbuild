@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Rules;
+using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Moq;
 using Xunit;
 
@@ -25,6 +26,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Mappers
 
             AssemblyMapper assemblyMapper = new(ruleRunner, mapperSettings, rightSetSize, assemblySetMapper);
 
+            Assert.Null(assemblyMapper.Left);
             Assert.Equal(mapperSettings, assemblyMapper.Settings);
             Assert.Equal(rightSetSize, assemblyMapper.Right.Length);
             Assert.Equal(assemblySetMapper, assemblyMapper.ContainingAssemblySet);

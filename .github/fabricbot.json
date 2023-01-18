@@ -137,6 +137,39 @@
           }
         ]
       }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Area-ILLink"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Notify linker of new untriaged bugs",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "@dotnet/linker-contrib a new issue has been filed in the ILLink area, please triage"
+            }
+          }
+        ]
+      }
     }
   ],
   "userGroups": []

@@ -23,10 +23,10 @@
         <FolderName>$([System.IO.Path]::GetFileName(`%(Identity)`))</FolderName>
       </TemplatesFolderPath>
     </ItemGroup>
-    <Error Text="SDK Stage 0 has more than one folder with templates: @(TemplatesFolderPath->'%(FolderName)')" Condition="@(TemplatesFolderPath->Count()) > 1"></Error>
+    <Error Text="SDK Stage 0 has more than one folder with templates: @(TemplatesFolderPath->'%(Identity)'). Please delete all but one and rebuild" Condition="@(TemplatesFolderPath->Count()) > 1"></Error>
 
     <!--Prepare Microsoft.DotNet.Common.*.nupkg and pack them directly to target <redist root>\templates\<runtime version> folder. -->
-    <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.7.0 --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\" />
+    <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.8.0 --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\" />
     <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ItemTemplates --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\"  />
 
     <!-- 2. Other template packages will be included from SDK Stage 0. -->
@@ -38,17 +38,17 @@
       <OverlaySdkFilesFromStage0 Include="$(Stage0IncludedWorkloadManifestsFile)" Condition="Exists('$(Stage0IncludedWorkloadManifestsFile)')"/>
       <!-- Ignore dotnet-watch files from the SDK since we're building a newer version of it in this repo. -->
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"
-        Exclude="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-watch/**" />
+        Exclude="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-watch/**;$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-format/**" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/AppHostTemplate/**/*" RelativeDestination="AppHostTemplate"/>
-      <ToolsetToOverlay Include="$(OutputPath)/**/*" />
+      <ToolsetToOverlay Include="$(OutputPath)/**/*"
+        Exclude="$(OutputPath)/DotnetTools/dotnet-watch/**" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
           DestinationFiles="@(OverlaySDK->'$(RedistLayoutPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <PropertyGroup>
-      <SdkOutputDirectory>$(RedistLayoutPath)/sdk/$(Version)</SdkOutputDirectory>
-      <DotnetWatchOutputDirectory>$(SdkOutputDirectory)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchOutputDirectory>
+      <SdkOutputDirectory>$(RedistLayoutPath)sdk\$(Version)</SdkOutputDirectory>
     </PropertyGroup>
 
     <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
@@ -62,27 +62,12 @@
     <OverrideAndCreateBundledNETCoreAppPackageVersion
       Stage0MicrosoftNETCoreAppRefPackageVersionPath="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledVersions.props"
       MicrosoftNETCoreAppRefPackageVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
+      MicrosoftNETILLinkTasksPackageVersion="$(MicrosoftNETILLinkTasksPackageVersion)"
       NewSDKVersion="$(Version)"
       OutputPath="$(SdkOutputDirectory)/Microsoft.NETCoreSdk.BundledVersions.props"/>
 
     <Copy SourceFiles="@(ToolsetToOverlay)"
           DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-     <!-- Copy dotnet-watch files -->
-    <ItemGroup>
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
-      <!-- To reduce the size of the SDK, we use the compiler dependencies that are located in the `Rosyln/bincore` location
-      instead of shipping our own copies in the dotnet-watch tool. These assemblies will be resolved by path in the
-      dotnet-watch executable. -->
-      <DotNetWatchOverlay Remove="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\Microsoft.CodeAnalysis.CSharp.dll" />
-      <DotNetWatchOverlay Remove="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\Microsoft.CodeAnalysis.dll" />
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\*.dll" TargetDir="middleware" />
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\Microsoft.Extensions.DotNetDeltaApplier\$(Configuration)\netstandard2.1\*.dll" TargetDir="hotreload" />
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\DotNetWatchTasks\$(Configuration)\netstandard2.0\DotNetWatchTasks.dll" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(DotNetWatchOverlay)"
-          DestinationFiles="$(DotnetWatchOutputDirectory)\%(RecursiveDir)%(DotNetWatchOverlay.TargetDir)\%(Filename)%(Extension)" />
 
     <!-- Run "dotnet new" (which will just display usage and available templates) in order to print first time
          use message so that it doesn't interfere with tests which check the output of commands. -->

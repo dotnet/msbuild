@@ -1,0 +1,17 @@
+﻿<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="4.1.*" />
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

@@ -2,7 +2,6 @@ trigger:
   batch: true
   branches:
     include:
-    - master
     - main
     - release/*
     - internal/release/3.*
@@ -35,9 +34,9 @@ variables:
       value: ''
     - name: _OfficialBuildArgs
       value: ''
+    - name: "skipComponentGovernanceDetection"
+      value: "true"
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - name: _DotNetPublishToBlobFeed
-      value: true
     - name: _OfficialBuildArgs
       value: /p:OfficialBuilder=Microsoft
     - name: Codeql.Enabled
@@ -58,7 +57,7 @@ stages:
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         vmImage: 'windows-2019'
       ${{ if eq(variables['System.TeamProject'], 'internal') }}:
-        name: NetCore1ESPool-Svc-Internal
+        name: NetCore1ESPool-Internal
         demands: ImageOverride -equals windows.vs2019.amd64
     steps:
       - publish: $(Build.SourcesDirectory)\eng\BuildConfiguration
@@ -69,10 +68,11 @@ stages:
       agentOs: Windows_NT
       pool:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          vmImage: 'windows-2022'
+          name: Netcore-public
+          demands: ImageOverride -equals 1es-windows-2022-open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          name: NetCore1ESPool-Svc-Internal
-          demands: ImageOverride -equals windows.vs2022preview.amd64
+          name: NetCore1ESPool-Internal
+          demands: ImageOverride -equals 1es-windows-2022
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
       ${{ if ne(variables['System.TeamProject'], 'public') }}:
@@ -92,16 +92,17 @@ stages:
     parameters:
       platform:
         name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
   - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
         agentOs: Windows_NT_FullFramework
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            vmImage: 'windows-2022'
+            name: NetCore-Public
+            demands: ImageOverride -equals 1es-windows-2022-open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Internal
+            name: NetCore1ESPool-Internal
             demands: ImageOverride -equals windows.vs2022preview.amd64
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
@@ -122,7 +123,7 @@ stages:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
             vmImage: 'windows-2019'
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Internal
+            name: NetCore1ESPool-Internal
             demands: ImageOverride -equals windows.vs2019.amd64
         strategy:
           matrix:
@@ -133,17 +134,17 @@ stages:
 
     - template: /eng/build.yml
       parameters:
-        agentOs: Ubuntu_20_04
+        agentOs: Ubuntu_22_04
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            vmImage: 'ubuntu-20.04'
+            vmImage: 'ubuntu-22.04'
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Internal
-            demands: ImageOverride -equals 1es-ubuntu-2004
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals 1es-ubuntu-2204
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: 'ubuntu.2004.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-20.04-helix-amd64-20220502145738-4b2e4c2'
+          helixTargetQueue: 'ubuntu.2204.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-22.04-helix-amd64'
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: Ubuntu.2004.Amd64
+          helixTargetQueue: Ubuntu.2204.Amd64
         strategy:
           matrix:
             Build_Release:
@@ -175,11 +176,12 @@ stages:
     - template: /eng/common/templates/job/publish-build-assets.yml
       parameters:
         publishUsingPipelines: true
+        publishAssetsImmediately: true
         dependsOn:
           - Windows_NT
           - Source_Build_Managed
         pool:
-          name: NetCore1ESPool-Svc-Internal
+          name: NetCore1ESPool-Internal
           demands: ImageOverride -equals windows.vs2019.amd64
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/post-build/post-build.yml
@@ -190,6 +192,7 @@ stages:
       enableNugetValidation: false
       enableSourceLinkValidation: false
       publishInstallersAndChecksums: true
+      publishAssetsImmediately: true
       SDLValidationParameters:
         enable: false
         params: ' -SourceToolsList @("policheck","credscan")

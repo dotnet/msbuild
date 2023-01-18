@@ -3,13 +3,14 @@
 
 #nullable enable
 
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Rules;
+using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Moq;
 using Xunit;
-using System.Linq;
 
 namespace Microsoft.DotNet.ApiCompatibility.Tests.Mappers
 {
@@ -24,12 +25,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Mappers
             INamespaceMapper containingNamespace = Mock.Of<INamespaceMapper>();
             ITypeMapper containingType = Mock.Of<ITypeMapper>();
 
-            TypeMapper assemblyMapper = new(ruleRunner, mapperSettings, rightSetSize, containingNamespace, containingType);
 
-            Assert.Equal(mapperSettings, assemblyMapper.Settings);
-            Assert.Equal(rightSetSize, assemblyMapper.Right.Length);
-            Assert.Equal(containingNamespace, assemblyMapper.ContainingNamespace);
-            Assert.Equal(containingType, assemblyMapper.ContainingType);
+            TypeMapper typeMapper = new(ruleRunner, mapperSettings, rightSetSize, containingNamespace, containingType);
+
+            Assert.Null(typeMapper.Left);
+            Assert.Equal(mapperSettings, typeMapper.Settings);
+            Assert.Equal(rightSetSize, typeMapper.Right.Length);
+            Assert.Equal(containingNamespace, typeMapper.ContainingNamespace);
+            Assert.Equal(containingType, typeMapper.ContainingType);
         }
 
         [Fact]

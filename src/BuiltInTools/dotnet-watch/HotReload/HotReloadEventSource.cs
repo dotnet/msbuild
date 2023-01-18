@@ -7,9 +7,8 @@ using System.Diagnostics.Tracing;
 namespace Microsoft.DotNet.Watcher.Tools
 {
     [EventSource(Name = "HotReload")]
-    class HotReloadEventSource : EventSource
+    internal sealed class HotReloadEventSource : EventSource
     {
-
         public enum StartType
         {
             Main,
@@ -18,7 +17,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             ScopedCssHandler
         }
 
-        public class Keywords
+        internal sealed class Keywords
         {
             public const EventKeywords Perf = (EventKeywords)1;
         }

@@ -1,7 +1,11 @@
 ﻿
-// value of paramA: true
-// value of paramB: true
+// value of paramA: True
+// value of paramB: True
 
-// A is enabled
+// paramA is enabled
 
-// B is enabled
+// paramA is evaluated as true
+
+// paramB is enabled
+
+// paramB is evaluated as true

@@ -19,7 +19,7 @@ using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public class HotReloadDotNetWatcher : IAsyncDisposable
+    internal sealed class HotReloadDotNetWatcher : IAsyncDisposable
     {
         private readonly IReporter _reporter;
         private readonly IConsole _console;
@@ -28,8 +28,9 @@ namespace Microsoft.DotNet.Watcher
         private readonly IWatchFilter[] _filters;
         private readonly RudeEditDialog? _rudeEditDialog;
         private readonly string _workingDirectory;
+        private readonly string _muxerPath;
 
-        public HotReloadDotNetWatcher(IReporter reporter, IRequester requester, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions, IConsole console, string workingDirectory)
+        public HotReloadDotNetWatcher(IReporter reporter, IRequester requester, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions, IConsole console, string workingDirectory, string muxerPath)
         {
             Ensure.NotNull(reporter, nameof(reporter));
             Ensure.NotNull(requester, nameof(requester));
@@ -40,12 +41,13 @@ namespace Microsoft.DotNet.Watcher
             _dotNetWatchOptions = dotNetWatchOptions;
             _console = console;
             _workingDirectory = workingDirectory;
+            _muxerPath = muxerPath;
 
             _filters = new IWatchFilter[]
             {
-                new DotNetBuildFilter(fileSetFactory, _processRunner, _reporter),
+                new DotNetBuildFilter(fileSetFactory, _processRunner, _reporter, muxerPath),
                 new LaunchBrowserFilter(dotNetWatchOptions),
-                new BrowserRefreshFilter(dotNetWatchOptions, _reporter),
+                new BrowserRefreshFilter(dotNetWatchOptions, _reporter, muxerPath),
             };
 
             if (!dotNetWatchOptions.NonInteractive)
@@ -287,7 +289,7 @@ namespace Microsoft.DotNet.Watcher
             return default;
         }
 
-        private static void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
+        private void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
         {
             var project = context.FileSet.Project;
             processSpec.Executable = project.RunCommand;
@@ -313,7 +315,7 @@ namespace Microsoft.DotNet.Watcher
 
             if (rootVariableName != null && string.IsNullOrEmpty(Environment.GetEnvironmentVariable(rootVariableName)))
             {
-                processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(DotnetMuxer.MuxerPath);
+                processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(_muxerPath);
             }
 
             if (context.LaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)

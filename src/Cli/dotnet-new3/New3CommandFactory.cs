@@ -28,8 +28,8 @@ namespace Dotnet_new3
                 CommandName,
                 (ParseResult parseResult) =>
                 {
-                    FileInfo? outputPath = parseResult.GetValueForOption(SharedOptions.OutputOption);
-                    return HostFactory.CreateHost(parseResult.GetValueForOption(_debugDisableBuiltInTemplatesOption), outputPath?.FullName);
+                    FileInfo? outputPath = parseResult.GetValue(SharedOptions.OutputOption);
+                    return HostFactory.CreateHost(parseResult.GetValue(_debugDisableBuiltInTemplatesOption), outputPath?.FullName);
                 });
 
             newCommand.AddGlobalOption(_debugEmitTelemetryOption);

@@ -27,7 +27,8 @@ namespace Microsoft.DotNet.Cli.New.Tests
 
             try
             {
-                ISdkInfoProvider sp = new SdkInfoProvider();
+                // make sure current process path is not picked up as the dontet executable location
+                ISdkInfoProvider sp = new SdkInfoProvider(() => string.Empty);
 
                 string currentVersion = sp.GetCurrentVersionAsync(default).Result;
                 List<string>? allVersions = sp.GetInstalledVersionsAsync(default).Result?.ToList();

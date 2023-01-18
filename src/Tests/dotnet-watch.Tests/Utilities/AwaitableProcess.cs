@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.NET.TestFramework.Commands;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -23,7 +24,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         private BufferBlock<string> _source;
         private ITestOutputHelper _logger;
         private TaskCompletionSource<int> _exited;
-        private bool _started;
         private bool _disposed;
 
         public AwaitableProcess(DotnetCommand spec, ITestOutputHelper logger)
@@ -69,50 +69,42 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             WriteTestOutput($"{DateTime.Now}: starting process: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
             _process.Start();
-            _started = true;
             _process.BeginErrorReadLine();
             _process.BeginOutputReadLine();
             WriteTestOutput($"{DateTime.Now}: process started: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
         }
 
-        public Task<string> GetOutputLineAsyncWithConsoleHistoryAsync(string message)
+        public async Task<string> GetOutputLineAsync(Predicate<string> success, Predicate<string> failure)
         {
-            if (_lines.Contains(message))
+            bool failed = false;
+
+            using var cancellationOnFailure = new CancellationTokenSource();
+
+            while (!_source.Completion.IsCompleted && !failed)
             {
-                WriteTestOutput($"Found [msg == '{message}'] in console history.");
-                return Task.FromResult(message);
-            }
-            
-            WriteTestOutput($"Did not find [msg == '{message}'] in console history.");
-            return GetOutputLineAsync(message);
-        }
-
-        public async Task<string> GetOutputLineAsync(string message)
-        {
-            WriteTestOutput($"Waiting for output line [msg == '{message}']");
-            return await GetOutputLineAsync($"[msg == '{message}']", m => string.Equals(m, message, StringComparison.Ordinal), CancellationToken.None);
-        }
-
-        public async Task<string> GetOutputLineStartsWithAsync(string message)
-        {
-            WriteTestOutput($"Waiting for output line [msg.StartsWith('{message}')].");
-            return await GetOutputLineAsync($"[msg.StartsWith('{message}')]", m => m != null && m.StartsWith(message, StringComparison.Ordinal), CancellationToken.None);
-        }
-
-        private async Task<string> GetOutputLineAsync(string predicateName, Predicate<string> predicate, CancellationToken cancellationToken)
-        {
-            while (!_source.Completion.IsCompleted)
-            {
-                while (await _source.OutputAvailableAsync(cancellationToken))
+                try
                 {
-                    var next = await _source.ReceiveAsync(cancellationToken);
-                    _lines.Add(next);
-                    var match = predicate(next);
-                    WriteTestOutput($"{DateTime.Now}: recv: '{next}'. {(match ? "Matches" : "Does not match")} condition '{predicateName}'.");
-                    if (match)
+                    while (await _source.OutputAvailableAsync(cancellationOnFailure.Token))
                     {
-                        return next;
+                        var line = await _source.ReceiveAsync(cancellationOnFailure.Token);
+                        _lines.Add(line);
+                        if (success(line))
+                        {
+                            return line;
+                        }
+
+                        if (failure(line))
+                        {
+                            failed = true;
+
+                            // Limit the time to collect remaining output after a failure to avoid hangs:
+                            cancellationOnFailure.CancelAfter(TimeSpan.FromSeconds(1));
+                        }
                     }
+                }
+                catch (OperationCanceledException) when (failed)
+                {
+                    break;
                 }
             }
 
@@ -126,9 +118,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 while (await _source.OutputAvailableAsync(cancellationToken))
                 {
-                    var next = await _source.ReceiveAsync(cancellationToken);
-                    WriteTestOutput($"{DateTime.Now}: recv: '{next}'");
-                    lines.Add(next);
+                    lines.Add(await _source.ReceiveAsync(cancellationToken));
                 }
             }
             return lines;
@@ -159,7 +149,15 @@ namespace Microsoft.DotNet.Watcher.Tools
             _process.WaitForExit();
             _source.Complete();
             _exited.TrySetResult(_process.ExitCode);
-            WriteTestOutput($"Process {_process.Id} has exited");
+
+            try
+            {
+                WriteTestOutput($"Process {_process.Id} has exited");
+            }
+            catch
+            {
+                // test might not be running anymore
+            }
         }
 
         public void Dispose()
@@ -173,18 +171,35 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             if (_process != null)
             {
-                if (_started && !_process.HasExited)
+                try
                 {
                     _process.Kill(entireProcessTree: true);
                 }
+                catch
+                {
+                }
 
-                _process.CancelErrorRead();
-                _process.CancelOutputRead();
+                try
+                {
+                    _process.CancelErrorRead();
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    _process.CancelOutputRead();
+                }
+                catch
+                {
+                }
 
                 _process.ErrorDataReceived -= OnData;
                 _process.OutputDataReceived -= OnData;
                 _process.Exited -= OnExit;
                 _process.Dispose();
+                _process = null;
             }
         }
     }

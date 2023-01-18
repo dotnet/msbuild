@@ -1,0 +1,37 @@
+<Project>
+  <Target Name="GetDotnetWatchRedistOutputDirectory">
+    <PropertyGroup>
+      <DotnetWatchRedistOutputDirectory>$(ArtifactsDir)bin\redist\$(Configuration)\dotnet\sdk\$(Version)\DotnetTools\dotnet-watch\</DotnetWatchRedistOutputDirectory>
+      <DotnetWatchRedistOutputSubdirectory>$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchRedistOutputSubdirectory>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_PublishDotnetWatchToRedist_Inputs">
+    <ItemGroup>
+      <_DotnetWatchBuildOutput Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**"/>
+      
+      <!--
+        To reduce the size of the SDK, we use the compiler dependencies that are located in the `Roslyn/bincore` location
+        instead of shipping our own copies in the dotnet-watch tool. These assemblies will be resolved by path in the
+        dotnet-watch executable.
+      -->
+      <_DotnetWatchInputFile Include="@(_DotnetWatchBuildOutput)"
+                             Condition="'%(Filename)' != 'Microsoft.CodeAnalysis' and
+                                        '%(Filename)' != 'Microsoft.CodeAnalysis.resources' and
+                                        '%(Filename)' != 'Microsoft.CodeAnalysis.CSharp' and 
+                                        '%(Filename)' != 'Microsoft.CodeAnalysis.CSharp.resources'"/>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PublishDotnetWatchToRedist"
+          DependsOnTargets="GetDotnetWatchRedistOutputDirectory;_PublishDotnetWatchToRedist_Inputs"
+          Inputs="@(_DotnetWatchInputFile)"
+          Outputs="@(_DotnetWatchInputFile->'$(DotnetWatchRedistOutputDirectory)$(DotnetWatchRedistOutputSubdirectory)%(RecursiveDir)%(Filename)%(Extension)')">
+
+    <Copy SourceFiles="@(_DotnetWatchInputFile)" DestinationFiles="$(DotnetWatchRedistOutputDirectory)$(DotnetWatchRedistOutputSubdirectory)%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
+
+    <ItemGroup>
+      <FileWrites Include="@(_DotnetWatchOutputFile)" />
+    </ItemGroup>
+  </Target>
+</Project>

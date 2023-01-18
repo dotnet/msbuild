@@ -136,14 +136,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             _pipe?.Dispose();
         }
 
-        public readonly struct HotReloadDiagnostics
+        private readonly struct HotReloadDiagnostics
         {
             public string Type => "HotReloadDiagnosticsv1";
 
             public IEnumerable<string> Diagnostics { get; init; }
         }
 
-        public readonly struct AspNetCoreHotReloadApplied
+        private readonly struct AspNetCoreHotReloadApplied
         {
             public string Type => "AspNetCoreHotReloadApplied";
         }

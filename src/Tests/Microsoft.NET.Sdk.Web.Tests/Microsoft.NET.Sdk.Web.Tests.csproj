@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PackageId>testSdkWeb</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions.Json" Version="$(FluentAssertionsJsonVersion)" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectReference Include="..\..\..\src\WebSdk\Web\Tasks\Microsoft.NET.Sdk.Web.Tasks.csproj" />
+  </ItemGroup>
+
+</Project>

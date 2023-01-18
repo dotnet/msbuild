@@ -5,6 +5,7 @@
    'netcoreapp' is not a valid value for --framework. The possible values are:
       net6.0   - Target net6.0
       net7.0   - Target net7.0
+      net8.0   - Target net8.0
 
 For more information, run:
    dotnet new console -h

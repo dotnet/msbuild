@@ -8,8 +8,8 @@
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="AotNoValidRuntimePackageError">
-        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="translated">NETSDK1183: non è possibile ottimizzare gli assembly per la compilazione Ahead Of Time perché non è stato trovato alcun pacchetto di runtime valido. Impostare la proprietà PublishAot su false oppure usare un identificatore di runtime supportato durante la pubblicazione. Quando si usa .NET 7 o versioni successive, assicurarsi di ripristinare i pacchetti con la proprietà PublishAot impostata su true.</target>
+        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishAot property set to true.</source>
+        <target state="needs-review-translation">NETSDK1183: non è possibile ottimizzare gli assembly per la compilazione Ahead Of Time perché non è stato trovato alcun pacchetto di runtime valido. Impostare la proprietà PublishAot su false oppure usare un identificatore di runtime supportato durante la pubblicazione. Quando si usa .NET 7 o versioni successive, assicurarsi di ripristinare i pacchetti con la proprietà PublishAot impostata su true.</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -454,6 +454,11 @@
         <target state="translated">NETSDK1144: l'ottimizzazione degli assembly per le dimensioni non è riuscita. È possibile disabilitare l'ottimizzazione impostando la proprietà PublishTrimmed su false.</target>
         <note>{StrBegin="NETSDK1144: "}</note>
       </trans-unit>
+      <trans-unit id="ILLinkNoValidRuntimePackageError">
+        <source>NETSDK1195: Unable to optimize assemblies for size: a valid runtime package was not found. Either set the PublishTrimmed property to false, or use a supported target framework when publishing.</source>
+        <target state="new">NETSDK1195: Unable to optimize assemblies for size: a valid runtime package was not found. Either set the PublishTrimmed property to false, or use a supported target framework when publishing.</target>
+        <note>{StrBegin="NETSDK1195: "}</note>
+      </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
         <target state="translated">NETSDK1102: l'ottimizzazione degli assembly per le dimensioni non è supportata per la configurazione di pubblicazione selezionata. Assicurarsi di pubblicare un'app indipendente.</target>
@@ -756,8 +761,8 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
-        <target state="translated">NETSDK1094: non è possibile ottimizzare gli assembly per le prestazioni perché non è stato trovato alcun pacchetto di runtime valido. Impostare la proprietà PublishReadyToRun su false oppure usare un identificatore di runtime supportato durante la pubblicazione. Quando si usa .NET 6 o versioni successive, assicurarsi di ripristinare i pacchetti con la proprietà PublishReadyToRun impostata su true.</target>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <target state="needs-review-translation">NETSDK1094: non è possibile ottimizzare gli assembly per le prestazioni perché non è stato trovato alcun pacchetto di runtime valido. Impostare la proprietà PublishReadyToRun su false oppure usare un identificatore di runtime supportato durante la pubblicazione. Quando si usa .NET 6 o versioni successive, assicurarsi di ripristinare i pacchetti con la proprietà PublishReadyToRun impostata su true.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">

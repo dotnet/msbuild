@@ -1874,7 +1874,7 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             //  Libraries explicitly marked as exclude from publish should be excluded from
                             //  publish even if there are other transitive dependencies to them
-                            if (publishPackageExclusions.Contains(library.Name))
+                            if (excludeFromPublishPackageIds.Contains(library.Name))
                             {
                                 publishPackageExclusions.Add(library.Name);
                             }

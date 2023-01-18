@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         public static RunCommand FromParseResult(ParseResult parseResult)
         {
-            var project = parseResult.GetValueForOption(RunCommandParser.ProjectOption);
+            var project = parseResult.GetValue(RunCommandParser.ProjectOption);
             if (parseResult.UsingRunCommandShorthandProjectOption())
             {
                 Reporter.Output.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
@@ -29,17 +29,17 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             var command = new RunCommand(
-                configuration: parseResult.GetValueForOption(RunCommandParser.ConfigurationOption),
-                framework: parseResult.GetValueForOption(RunCommandParser.FrameworkOption),
+                configuration: parseResult.GetValue(RunCommandParser.ConfigurationOption),
+                framework: parseResult.GetValue(RunCommandParser.FrameworkOption),
                 runtime: parseResult.GetCommandLineRuntimeIdentifier(),
                 noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
                 project: project,
-                launchProfile: parseResult.GetValueForOption(RunCommandParser.LaunchProfileOption),
+                launchProfile: parseResult.GetValue(RunCommandParser.LaunchProfileOption),
                 noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
                 interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),
                 restoreArgs: parseResult.OptionValuesToBeForwarded(RunCommandParser.GetCommand()),
-                args: parseResult.GetValueForArgument(RunCommandParser.ApplicationArguments)
+                args: parseResult.GetValue(RunCommandParser.ApplicationArguments)
             );
 
             return command;

@@ -13,14 +13,14 @@ Options:
   --project <project>    The project that should be used for context evaluation.
 
 Template options:
-  -p, --paramA <paramA>   parameter A description
-                          Enabled if: A_enabled
-                          Type: string
-  -pa, --paramB <paramB>  parameter B description
-                          Enabled if: B_enabled
-                          Type: string
-                          Default: placeholderB
-  -A, --A_enabled         Type: bool
-                          Default: False
-  -B, --B_enabled         Type: bool
-                          Default: False
+  -p, --paramA     parameter A description
+                   Enabled if: A_enabled
+                   Type: bool
+  -pa, --paramB    parameter B description
+                   Enabled if: B_enabled
+                   Type: bool
+                   Default: False
+  -A, --A_enabled  Type: bool
+                   Default: False
+  -B, --B_enabled  Type: bool
+                   Default: False

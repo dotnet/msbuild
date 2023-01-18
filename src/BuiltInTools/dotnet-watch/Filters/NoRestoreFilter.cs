@@ -10,7 +10,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public sealed class NoRestoreFilter : IWatchFilter
+    internal sealed class NoRestoreFilter : IWatchFilter
     {
         private bool _canUseNoRestore;
         private string[] _noRestoreArguments;

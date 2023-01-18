@@ -291,7 +291,7 @@ namespace Microsoft.DotNet.Cli
                 }
                 else if (command.Name.Equals(NuGetCommandParser.GetCommand().Name))
                 {
-                    NuGetCommand.Run(helpArgs);
+                    NuGetCommand.Run(context.ParseResult);
                 }
                 else if (command.Name.Equals(MSBuildCommandParser.GetCommand().Name))
                 {
@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.Cli
                 }
                 else if (command.Name.Equals(FormatCommandParser.GetCommand().Name))
                 {
-                    var argumetns = context.ParseResult.GetValueForArgument(FormatCommandParser.Arguments);
+                    var argumetns = context.ParseResult.GetValue(FormatCommandParser.Arguments);
                     new DotnetFormatForwardingApp(argumetns.Concat(helpArgs).ToArray()).Execute();
                 }
                 else if (command.Name.Equals(FsiCommandParser.GetCommand().Name))

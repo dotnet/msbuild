@@ -13,6 +13,7 @@ using Microsoft.DotNet.ApiCompatibility.Runner;
 using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
+using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
@@ -27,9 +28,9 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
         {
         }
 
-        private (TestLogger, CompatibleFrameworkInPackageValidator) CreateLoggerAndValidator()
+        private (SuppressableTestLog, CompatibleFrameworkInPackageValidator) CreateLoggerAndValidator()
         {
-            TestLogger log = new();
+            SuppressableTestLog log = new();
             CompatibleFrameworkInPackageValidator validator = new(log,
                 new ApiCompatRunner(log,
                     new SuppressionEngine(),
@@ -169,7 +170,7 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = Package.Create(packCommand.GetNuGetPackage());
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             // First we run without references. Without references, ApiCompat should not be able to see that class First
             // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
@@ -219,7 +220,7 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
             Package package = Package.Create(packCommand.GetNuGetPackage(), packageAssemblyReferences: useReferences ? references : null);
 
             File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{testDummyDependency.Name}.dll"));
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             // First we run without references. Without references, ApiCompat should not be able to see that class First
             // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
@@ -266,7 +267,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             if (deleteFile)
                 File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{dependency.Name}.dll"));
 
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 
@@ -310,7 +311,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             Package package = Package.Create(packCommand.GetNuGetPackage(), references);
 
             File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{dependency.Name}.dll"));
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 
@@ -333,7 +334,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
                 { "netstandard2.0", new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } }
             };
             Package package = Package.Create(packCommand.GetNuGetPackage(), useReferences ? references : null);
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 

@@ -34,14 +34,21 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("global.json file", "globaljson", null)]
         [InlineData("global.json file", "globaljson", new[] { "--sdk-version", "6.0.200" })]
         [InlineData("global.json file", "globaljson", new[] { "--sdk-version", "6.0.200", "--roll-forward", "major" })]
+        [InlineData("global.json file", "global.json", null)]
+        [InlineData("global.json file", "global.json", new[] { "--sdk-version", "6.0.200" })]
+        [InlineData("global.json file", "global.json", new[] { "--sdk-version", "6.0.200", "--roll-forward", "major" })]
         [InlineData("NuGet Config", "nugetconfig", null)]
+        [InlineData("NuGet Config", "nuget.config", null)]
         [InlineData("dotnet gitignore file", "gitignore", null)]
+        [InlineData("dotnet gitignore file", ".gitignore", null)]
         [InlineData("Solution File", "sln", null)]
         [InlineData("Solution File", "solution", null)]
         [InlineData("Dotnet local tool manifest file", "tool-manifest", null)]
         [InlineData("Web Config", "webconfig", null)]
         [InlineData("EditorConfig file", "editorconfig", null)]
         [InlineData("EditorConfig file", "editorconfig", new[] { "--empty" })]
+        [InlineData("EditorConfig file", ".editorconfig", null)]
+        [InlineData("EditorConfig file", ".editorconfig", new[] { "--empty" })]
         [InlineData("MSBuild Directory.Build.props file", "buildprops", new[] { "--inherit" })]
         [InlineData("MSBuild Directory.Build.targets file", "buildtargets", new[] { "--inherit" })]
         public async void AllCommonItemsCreate(string expectedTemplateName, string templateShortName, string[]? args)
@@ -168,8 +175,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             var templatesToTest = new[]
             {
-                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net6.0", "net7.0" } },
-                new { Template = "classlib", Frameworks = new[] { null, "net6.0", "net7.0", "netstandard2.0", "netstandard2.1" } }
+                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net6.0", "net7.0", "net8.0" } },
+                new { Template = "classlib", Frameworks = new[] { null, "net6.0", "net7.0", "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
 
             //features: top-level statements; nullables; implicit usings; filescoped namespaces
@@ -178,9 +185,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
             string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
 
-            string?[] nullableSupportedInFrameworkByDefault = { null, "net6.0", "net7.0", "netstandard2.1" };
-            string?[] implicitUsingsSupportedInFramework = { null, "net6.0", "net7.0" };
-            string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net6.0", "net7.0" };
+            string?[] nullableSupportedInFrameworkByDefault = { null, "net6.0", "net7.0", "net8.0", "netstandard2.1" };
+            string?[] implicitUsingsSupportedInFramework = { null, "net6.0", "net7.0", "net8.0" };
+            string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net6.0", "net7.0", "net8.0" };
 
             string?[] nullableSupportedLanguages = { "8.0", "9.0", "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
             string?[] topLevelStatementSupportedLanguages = { null, "9.0", "10.0", "11", "11.0", /*"12",*/ "latest", "latestMajor", "default", "preview" };

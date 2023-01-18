@@ -17,6 +17,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.NET.Publish.Tests.PublishTestUtils;
@@ -26,6 +27,8 @@ namespace Microsoft.NET.Publish.Tests
     public class GivenThatWeWantToPublishAnAotApp : SdkTest
     {
         private readonly string RuntimeIdentifier = $"/p:RuntimeIdentifier={RuntimeInformation.RuntimeIdentifier}";
+
+        private readonly string ExplicitPackageVersion = "7.0.0-rc.2.22456.11";
 
         public GivenThatWeWantToPublishAnAotApp(ITestOutputHelper log) : base(log)
         {
@@ -272,7 +275,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.1.22416.1"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
@@ -282,15 +285,13 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand= new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
-                    .Should().Pass();
+                    .Should().Pass()
                 // Having an explicit package reference will generate a warning
-                // Comment back after the below issue is fixed
-                // https://github.com/dotnet/sdk/issues/27533
-                //.And.HaveStdOutContaining("warning")
-                //.And.HaveStdOutContaining("Microsoft.DotNet.ILCompiler");
+                .And.HaveStdOutContaining("warning")
+                .And.HaveStdOutContaining("Microsoft.DotNet.ILCompiler");
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
@@ -309,6 +310,8 @@ namespace Microsoft.NET.Publish.Tests
                 var command = new RunExeCommand(Log, publishedExe)
                     .Execute().Should().Pass()
                     .And.HaveStdOutContaining("Hello World");
+
+                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, rid, ExplicitPackageVersion);
             }
         }
 
@@ -324,7 +327,7 @@ namespace Microsoft.NET.Publish.Tests
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.1.22416.1"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
@@ -344,9 +347,7 @@ namespace Microsoft.NET.Publish.Tests
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
 
                 // Not setting PublishAot to true will be a normal publish
-                // Comment back after the below issue is fixed
-                // https://github.com/dotnet/sdk/issues/27533
-                // File.Exists(publishedDll).Should().BeTrue();
+                File.Exists(publishedDll).Should().BeTrue();
 
                 var command = new RunExeCommand(Log, publishedExe)
                     .Execute().Should().Pass()
@@ -377,7 +378,6 @@ namespace Microsoft.NET.Publish.Tests
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
                 File.Exists(publishedDll).Should().BeFalse();
                 File.Exists(publishedExe).Should().BeTrue();
-
             }
         }
 
@@ -395,26 +395,26 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.1.22416.1"));
-                testProject.PackageReferences.Add(new TestPackageReference("runtime.win-x64.Microsoft.DotNet.ILCompiler", "7.0.0-rc.1.22416.1"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
+                testProject.PackageReferences.Add(new TestPackageReference("runtime.win-x64.Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
-                    .Should().Pass();
+                    .Should().Pass()
                 // Having an explicit package reference will generate a warning
-                // Comment back after the below issue is fixed
-                // https://github.com/dotnet/sdk/issues/27533
-                //.And.HaveStdOutContaining("warning")
-                //.And.HaveStdOutContaining("Microsoft.DotNet.ILCompiler");
+                .And.HaveStdOutContaining("warning")
+                .And.HaveStdOutContaining("Microsoft.DotNet.ILCompiler");
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
                 File.Exists(publishedDll).Should().BeFalse();
                 File.Exists(publishedExe).Should().BeTrue();
+
+                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, rid, ExplicitPackageVersion);
             }
         }
 
@@ -430,8 +430,8 @@ namespace Microsoft.NET.Publish.Tests
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.1.22416.1"));
-                testProject.PackageReferences.Add(new TestPackageReference("runtime.win-x64.Microsoft.DotNet.ILCompiler", "7.0.0-rc.1.22416.1"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
+                testProject.PackageReferences.Add(new TestPackageReference("runtime.win-x64.Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -441,12 +441,55 @@ namespace Microsoft.NET.Publish.Tests
                     .Should().Pass();
 
                 // Not setting PublishAot to true will be a normal publish
-                // Comment back after the below issue is fixed
-                // https://github.com/dotnet/sdk/issues/27533
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
-                // File.Exists(publishedDll).Should().BeTrue();
+                File.Exists(publishedDll).Should().BeTrue();
+            }
+        }
 
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void NativeAot_hw_fails_with_sdk6_PublishAot_is_enabled(string targetFramework)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var projectName = "HellowWorldNativeAotApp";
+                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+                var testProject = CreateHelloWorldTestProject("net6.0", projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+
+                var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Should().Fail()
+                    .And.HaveStdOutContaining("error NETSDK1183:");
+            }
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void NativeAot_hw_fails_with_sdk6_PackageReference_PublishAot_is_enabled(string targetFramework)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var projectName = "HellowWorldNativeAotApp";
+                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+                var testProject = CreateHelloWorldTestProject("net6.0", projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
+
+                var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Should().Fail()
+                    .And.HaveStdOutContaining("error NETSDK1183:");
             }
         }
 
@@ -661,6 +704,55 @@ namespace Microsoft.NET.Publish.Tests
                     .Should()
                     .Pass();
             }
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void It_builds_with_dynamiccodesupport_false_when_publishaot_true(string targetFramework)
+        {
+            var projectName = "DynamicCodeSupportFalseApp";
+            var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+            testProject.AdditionalProperties["PublishAot"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string outputDirectory = buildCommand.GetOutputDirectory(targetFramework: targetFramework).FullName;
+            string runtimeConfigFile = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            JToken configProperties = runtimeConfig["runtimeOptions"]["configProperties"];
+            configProperties["System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported"].Value<bool>()
+                .Should().BeFalse();
+        }
+
+        private void CheckIlcVersions(string projectPath, string targetFramework, string rid, string expectedVersion)
+        {
+            // Compiler version matches expected version
+            var ilcToolsPathCommand = new GetValuesCommand(Log, projectPath, targetFramework, "IlcToolsPath")
+            {
+                DependsOnTargets = "WriteIlcRspFileForCompilation"
+            };
+            ilcToolsPathCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
+            var ilcToolsPath = ilcToolsPathCommand.GetValues()[0];
+            var ilcVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(ilcToolsPath)));
+            ilcVersion.Should().Be(ExplicitPackageVersion);
+
+            // Compilation references (corelib) match expected version
+            var ilcReferenceCommand = new GetValuesCommand(Log, projectPath, targetFramework, "IlcReference", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "WriteIlcRspFileForCompilation"
+            };
+            ilcReferenceCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
+            var ilcReference = ilcReferenceCommand.GetValues();
+            var corelibReference = ilcReference.Where(r => Path.GetFileName(r).Equals("System.Private.CoreLib.dll")).Single();
+            var ilcReferenceVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(corelibReference)));
+            ilcReferenceVersion.Should().Be(ExplicitPackageVersion);
         }
 
         private TestProject CreateHelloWorldTestProject(string targetFramework, string projectName, bool isExecutable)
