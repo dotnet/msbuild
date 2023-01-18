@@ -8,6 +8,7 @@
     <PropertyGroup>
       <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)\source-build.slnf"</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:UseSharedCompilation=false</InnerBuildArgs>
+      <InnerBuildArgs Condition="'$(SourceBuildUseMonoRuntime)' == 'true'">$(InnerBuildArgs) /p:NativeAotSupported=false</InnerBuildArgs>
     </PropertyGroup>
   </Target>
 
