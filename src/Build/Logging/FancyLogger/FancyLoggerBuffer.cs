@@ -33,6 +33,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         private static List<FancyLoggerBufferLine> Lines = new();
         private static int TopLineIndex = 0;
         private static bool AutoScrollEnabled = true;
+        public static string FooterText = string.Empty;
         public static void Initialize()
         {
             // Use alternate buffer
@@ -93,9 +94,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                 ANSIBuilder.Cursor.Home() +
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")) +
                 // Write footer
-                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
-                // TODO: Remove and replace with actual footer
-                new string('-', Console.BufferWidth) + '\n' + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
+                new string('-', Console.BufferWidth) + '\n' + FooterText
             );
             // Write lines
             for (int i = 0; i < Console.BufferHeight - 3; i++)

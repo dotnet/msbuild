@@ -10,14 +10,10 @@ namespace Microsoft.Build.Logging.FancyLogger
     public class FancyLogger : ILogger
     {   
         private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
-
         private bool Succeeded;
-
-        private float existingTasks = 1;
-        private float completedTasks = 0;
-
         public string Parameters {  get; set; }
-
+        public float StartedProjects = 0;
+        public float FinishedProjects = 0;
         public LoggerVerbosity Verbosity { get; set; }
 
         public FancyLogger()
@@ -61,6 +57,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Project
         void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
+            StartedProjects++;
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             // If id already exists...
@@ -70,6 +67,15 @@ namespace Microsoft.Build.Logging.FancyLogger
             projects[id] = node;
             // Log
             node.Log();
+            // Update footer
+            if (StartedProjects > 0)
+            {
+                FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
+                    $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects/StartedProjects)} {FinishedProjects}/{StartedProjects}",
+                    ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
+                    Console.BufferWidth
+                );
+            }
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
@@ -79,6 +85,16 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update line
             node.Finished = true;
             node.Log();
+            // Update footer
+            FinishedProjects++;
+            if (StartedProjects > 0)
+            {
+                FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
+                    $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects / StartedProjects)} {FinishedProjects}/{StartedProjects}",
+                    ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
+                    Console.BufferWidth
+                );
+            }
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
@@ -110,12 +126,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update
             node.AddTask(e);
             node.Log();
-            existingTasks++;
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
-            completedTasks++;
         }
 
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
