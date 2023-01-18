@@ -130,7 +130,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            if (!NativeMethodsShared.ExistAndHasContent(filePath))
+            if (!File.Exists(filePath))
             {
                 _processedFiles.Add(filePath);
                 return;
@@ -144,8 +144,8 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            using Stream entryStream = OpenArchiveEntry(filePath);
             using FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+            using Stream entryStream = OpenArchiveEntry(filePath);
             content.CopyTo(entryStream);
         }
 
