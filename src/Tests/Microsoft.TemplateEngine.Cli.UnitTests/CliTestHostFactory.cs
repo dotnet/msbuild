@@ -119,25 +119,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 //do nothing
                 return false;
             }
-
-            [Obsolete]
-            bool ITemplateEngineHost.OnConfirmPartialMatch(string name)
-            {
-                //do nothing
-                return false;
-            }
-
-            [Obsolete]
-            void ITemplateEngineHost.LogDiagnosticMessage(string message, string category, params string[] details)
-            {
-                //do nothing
-            }
-
-            [Obsolete]
-            void ITemplateEngineHost.LogTiming(string label, TimeSpan duration, int depth)
-            {
-                //do nothing
-            }
 #pragma warning restore CA1041 // Provide ObsoleteAttribute message
             #endregion
         }
