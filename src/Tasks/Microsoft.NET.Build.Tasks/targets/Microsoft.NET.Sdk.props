@@ -116,6 +116,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildCopyContentTransitively Condition="'$(MSBuildCopyContentTransitively)' == ''">true</MSBuildCopyContentTransitively>
     <ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts Condition="'$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)' == ''">true</ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts>
 
+    <PublishAotSupported>false</PublishAotSupported>
+    <PublishAotSupported Condition="Exists('$(MSBuildThisFileDirectory)../../Microsoft.DotNet.ILCompiler')">true</PublishAotSupported>
     <!-- Uncomment this once https://github.com/Microsoft/visualfsharp/issues/3207 gets fixed -->
     <!-- <WarningsAsErrors>$(WarningsAsErrors);NU1605</WarningsAsErrors> -->
   </PropertyGroup>
@@ -151,7 +153,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
-  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.ILCompiler" />
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.ILCompiler"  Condition="'$(PublishAotSupported)' == 'true'" />
   <Import Project="Sdk.props" Sdk="Microsoft.NET.ILLink.Tasks" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />

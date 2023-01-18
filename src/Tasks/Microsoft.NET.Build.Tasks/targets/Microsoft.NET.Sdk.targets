@@ -1181,7 +1181,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.targets" Condition="'$(Language)' == 'F#'" />
-  <Import Project="$(ILCompilerTargetsPath)" Condition="'$(PublishAot)' == 'true'"/>
+  <Import Project="$(ILCompilerTargetsPath)" Condition="'$(PublishAot)' == 'true' and '$(PublishAotSupported)' == 'true'"/>
   <Import Project="$(ILLinkTargetsPath)" Condition="'$(Language)' != 'C++'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.Analyzers.targets" Condition="'$(Language)' == 'C#' or '$(Language)' == 'VB'" />
 
