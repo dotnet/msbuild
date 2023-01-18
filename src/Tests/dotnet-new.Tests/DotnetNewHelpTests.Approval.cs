@@ -10,7 +10,6 @@ using Microsoft.NET.TestFramework.Commands;
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public partial class DotnetNewHelpTests : BaseIntegrationTest
     {
         [Theory]
@@ -187,7 +186,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            CommandResult commandResult = new DotnetNewCommand(_log, "class", "-h")
+            CommandResult commandResult = new DotnetNewCommand(_log, "classli", "-h")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();

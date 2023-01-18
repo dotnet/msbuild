@@ -14,6 +14,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -276,6 +277,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFramework, "macos")]
         public void Given_multi_target_It_should_get_suggested_workload_by_GetRequiredWorkloads_target(string mainTfm, string referencingTfm, string expected)
         {
+            // Skip Test if SDK is < 6.0.400
+            var sdkVersion = SemanticVersion.Parse(TestContext.Current.ToolsetUnderTest.SdkVersion);
+            if (new SemanticVersion(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch) < new SemanticVersion(6, 0, 400))
+                return; // MAUI was removed from earlier versions of the SDK
+
             var mainProject = new TestProject()
             {
                 Name = "MainProject",

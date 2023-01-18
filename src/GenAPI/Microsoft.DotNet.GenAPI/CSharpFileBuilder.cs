@@ -17,7 +17,7 @@ using Microsoft.DotNet.ApiSymbolExtensions;
 namespace Microsoft.DotNet.GenAPI
 {
     /// <summary>
-    /// Processes assemly symbols to build correspoding structures in C# language.
+    /// Processes assembly symbols to build corresponding structures in C# language.
     /// </summary>
     public class CSharpFileBuilder : IAssemblySymbolWriter, IDisposable
     {
@@ -51,8 +51,11 @@ namespace Microsoft.DotNet.GenAPI
 
         private void Visit(IAssemblySymbol assembly)
         {
+            CSharpCompilationOptions compilationOptions = new(OutputKind.DynamicallyLinkedLibrary,
+                    nullableContextOptions: NullableContextOptions.Enable);
             Project project = _adhocWorkspace.AddProject(ProjectInfo.Create(
-                ProjectId.CreateNewId(), VersionStamp.Create(), assembly.Name, assembly.Name, LanguageNames.CSharp));
+                ProjectId.CreateNewId(), VersionStamp.Create(), assembly.Name, assembly.Name, LanguageNames.CSharp,
+                compilationOptions: compilationOptions));
             project = project.AddMetadataReferences(_metadataReferences);
 
             IEnumerable<INamespaceSymbol> namespaceSymbols = EnumerateNamespaces(assembly).Where(_symbolFilter.Include);

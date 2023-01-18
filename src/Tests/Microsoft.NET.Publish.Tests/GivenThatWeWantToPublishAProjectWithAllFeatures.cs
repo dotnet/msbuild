@@ -83,6 +83,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Reflection.NullabilityInfoContext.IsSupported"": false,
             ""System.Resources.ResourceManager.AllowCustomResourceTypes"": false,
             ""System.Resources.UseSystemResourceKeys"": true,
+            ""System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported"": true,
             ""System.Runtime.InteropServices.BuiltInComInterop.IsSupported"": false,
             ""System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting"": false,
             ""System.Runtime.InteropServices.EnableCppCLIHostActivation"": false,

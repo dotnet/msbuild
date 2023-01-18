@@ -11,7 +11,6 @@ using Microsoft.TemplateEngine.TestHelper;
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public partial class DotnetNewInstantiateTests
     {
         [Fact]
@@ -127,6 +126,26 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             commandResult
                 .Should().Fail()
+                .And.NotHaveStdOut();
+
+            return Verify(commandResult.StdErr);
+        }
+
+        [Fact]
+        public Task CannotInstantiateTemplate_WhenNoDefaultNameSpecified()
+        {
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithPreferDefaultNameButNoDefaultName", _log, home, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithPreferDefaultNameButNoDefaultName")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
                 .And.NotHaveStdOut();
 
             return Verify(commandResult.StdErr);

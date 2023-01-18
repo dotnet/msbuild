@@ -10,7 +10,6 @@ using Microsoft.TemplateEngine.TestHelper;
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public partial class TabCompletionTests : BaseTest
     {
         [Fact]

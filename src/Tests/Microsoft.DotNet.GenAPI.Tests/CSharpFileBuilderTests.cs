@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
         private void RunTest(string original, string expected)
         {
-            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original);
+            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true);
             _csharpFileBuilder.WriteAssembly(assemblySymbol);
 
             StringBuilder stringBuilder = _stringWriter.GetStringBuilder();
@@ -131,17 +131,17 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     internal partial struct InternalStruct { }
 
-                    public partial struct PublicReadonlyRefStruct { }
+                    public readonly partial struct PublicReadonlyRefStruct { }
 
-                    public partial struct PublicReadonlyStruct { }
+                    public readonly partial struct PublicReadonlyStruct { }
 
                     public partial struct PublicRefStruct { }
 
                     public partial struct PublicStruct { }
 
-                    internal partial struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct> { }
+                    internal readonly partial struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct> { }
 
-                    internal partial struct ReadonlyStruct { }
+                    internal readonly partial struct ReadonlyStruct { }
 
                     internal partial struct RecordStruct : System.IEquatable<RecordStruct> { }
                 }
@@ -392,7 +392,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         Disable = 1
                     }
 
-                    public partial struct Options
+                    public readonly partial struct Options
                     {
                         public readonly bool BoolMember;
                         public readonly Kind KindMember;
@@ -403,7 +403,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 """);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/arcade/issues/11937")]
+        [Fact]
         void TestDelegateGeneration()
         {
             RunTest(original: """
@@ -578,8 +578,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public class Car : System.IEquatable<Car>
                     {
-                        public bool Equals(Car c) { return true; }
-                        public override bool Equals(object o) { return true; }
+                        public bool Equals(Car? c) { return true; }
+                        public override bool Equals(object? o) { return true; }
                         public override int GetHashCode() => 0;
                         public static bool operator ==(Car lhs, Car rhs) { return true; }
                         public static bool operator !=(Car lhs, Car rhs) { return false; }
@@ -591,8 +591,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public partial class Car : System.IEquatable<Car>
                     {
-                        public bool Equals(Car c) { throw null; }
-                        public override bool Equals(object o) { throw null; }
+                        public bool Equals(Car? c) { throw null; }
+                        public override bool Equals(object? o) { throw null; }
                         public override int GetHashCode() { throw null; }
                         public static bool operator ==(Car lhs, Car rhs) { throw null; }
                         public static bool operator !=(Car lhs, Car rhs) { throw null; }
@@ -649,6 +649,115 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     public abstract partial class MemoryManager : System.IDisposable
                     {
                         void System.IDisposable.Dispose() { }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestNullabilityGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Bar
+                    {
+                        public int? AMember { get; set; }
+                        public string? BMember { get; }
+
+                        public string? Execute(string? a, int? b) { return null; }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Bar
+                    {
+                        public int? AMember { get { throw null; } set { } }
+                        public string? BMember { get { throw null; } }
+                
+                        public string? Execute(string? a, int? b) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestExtensionMethodsGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public static class MyExtensions
+                    {
+                        public static int WordCount(this string str) { return 42; }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public static partial class MyExtensions
+                    {
+                        public static int WordCount(this string str) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestMethodsWithVariableNumberOfArgumentsGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Bar
+                    {
+                        public void Execute(params int[] list) { }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Bar
+                    {
+                        public void Execute(params int[] list) { }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestConversionOperatorGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public readonly struct Digit
+                    {
+                        private readonly byte digit;
+
+                        public Digit(byte digit)
+                        {
+                            this.digit = digit;
+                        }
+
+                        public static implicit operator byte(Digit d) => d.digit;
+                        public static explicit operator Digit(byte b) => new Digit(b);
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public readonly partial struct Digit
+                    {
+                        public Digit(byte digit) { }
+                        public static explicit operator Digit(byte b) { throw null; }
+
+                        public static implicit operator byte(Digit d) { throw null; }
                     }
                 }
                 """);
