@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     public class GivenDotnetPublishPublishesProjects : SdkTest
     {
 
-        private static string _defaultConfiguration = "Debug";
+        private static string _defaultConfiguration = "Release";
 
         public GivenDotnetPublishPublishesProjects(ITestOutputHelper log) : base(log)
         {
@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Pass();
 
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: targetFramework);
 
             if (resultShouldBeSelfContained)
             {

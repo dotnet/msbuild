@@ -232,7 +232,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             string expectedRid = runtimeIdentifierIsGlobal ? runtimeIdentifier : publishRuntimeIdentifier;
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: tfm);
             var finalRid = properties["RuntimeIdentifier"];
 
             Assert.True(finalRid == expectedRid);

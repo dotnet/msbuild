@@ -169,25 +169,6 @@ namespace Microsoft.NET.Pack.Tests
             Assert.True(File.Exists(expectedAssetPath));
         }
 
-        [Theory]
-        [InlineData("net7.0")]
-        [InlineData("net8.0")]
-        public void It_packs_with_release_by_default_in_net_8_but_not_in_net_7(string tfm)
-        {
-            var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", identifier: tfm)
-               .WithSource()
-               .WithTargetFramework(tfm);
-
-            new DotnetPackCommand(Log, helloWorldAsset.TestRoot)
-                .Execute()
-                .Should()
-                .Pass();
-
-            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", tfm == "net7.0" ? "Debug" : "Release", "HelloWorld.1.0.0.nupkg");
-            Assert.True(File.Exists(expectedAssetPath));
-        }
-
         [Fact]
         public void It_packs_with_Release_on_all_TargetFrameworks_If_8_or_above_is_included()
         {
