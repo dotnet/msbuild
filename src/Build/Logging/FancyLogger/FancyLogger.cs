@@ -28,12 +28,12 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void Initialize(IEventSource eventSource)
         {
             // Register for different events
-            // - Started
+            // Started
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
             eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
             eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
             eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
-            // - Finished
+            // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
             eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
@@ -47,7 +47,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            FancyLoggerBuffer.WriteNewLine("");
+            FancyLoggerBuffer.WriteNewLine(string.Empty);
+            // FancyLoggerBuffer.WriteNewLine("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
             FancyLoggerBuffer.Render();
         }
 

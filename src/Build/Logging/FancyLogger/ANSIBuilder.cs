@@ -18,15 +18,20 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static int ANSIBreakpoint(string text, int position)
         {
             if (position >= text.Length) return text.Length;
-            // Get substring
-            string substring = text.Substring(0, position);
-            string substringWithoutANSI = ANSIRemove(substring);
-            // Get length difference
-            int difference = substring.Length - substringWithoutANSI.Length;
-            int newPosition = position + difference;
-            // If new position is not inside the string
-            if (newPosition > text.Length) return text.Length;
-            return newPosition;
+            // Create new array of positions
+            int[] nonAnsiIndices = new int[text.Length];
+            for (int i = 0; i < text.Length; i++)
+            {
+                // TODO: Figure how to do with spans for greater efficiency
+                nonAnsiIndices[i] = ANSIRemove(text.Substring(0, i)).Length - 1;
+            }
+            // Breakpoint (default at last)
+            int breakpoint = text.Length;
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (nonAnsiIndices[i] == position - 1) breakpoint = i;
+            }
+            return breakpoint;
         }
 
         public static List<string> ANSIWrap(string text, int position)
@@ -88,7 +93,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth) return leftText + rightText;
                 int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length);
                 result += leftText;
-                result += new string(' ', space);
+                result += new string(' ', space - 1);
                 result += rightText;
                 return result;
             }
