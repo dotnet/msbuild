@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                        <StringProperty Name=`TargetAssembly` Switch=`/target:&quot;[value]&quot;` />
                                      </Rule>
                                    </ProjectSchemaDefinitions>";
-            string tmpXamlFile = FileUtilities.GetTemporaryFile();
+            string tmpXamlFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(tmpXamlFile, xmlContents.Replace("`", "\""));

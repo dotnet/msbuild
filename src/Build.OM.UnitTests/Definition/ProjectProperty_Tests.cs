@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     import.SetProperty("p", "v0");
                     import.Save(file);

@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             {
                 ProjectRootElementCache cache = new ProjectRootElementCache(true /* auto reload from disk */);
 
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
 
                 ProjectRootElement xml0 = ProjectRootElement.Create(path);
                 xml0.Save();
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             {
                 ProjectRootElementCache cache = new ProjectRootElementCache(false /* do not auto reload from disk */);
 
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
 
                 ProjectRootElement xml0 = ProjectRootElement.Create(path);
                 xml0.Save();
