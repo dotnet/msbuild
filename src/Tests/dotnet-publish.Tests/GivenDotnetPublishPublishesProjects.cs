@@ -454,14 +454,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                .CopyTestAsset("HelloWorld", "PublishPropertiesHelloWorld")
                .WithSource();
 
-            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
+            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
             // Another command, which should not be affected by PublishRelease
-            var result = new BuildCommand(helloWorldAsset)
+            new BuildCommand(helloWorldAsset)
                .Execute();
             
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.exe");
-            Assert.True(File.Exists(expectedAssetPath));
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release");
+            Assert.False(Directory.Exists(expectedAssetPath));
         }
     }
 }
