@@ -71,5 +71,19 @@ namespace Microsoft.Build.Shared
             writer.Write(context.ProjectInstanceId);
             writer.Write(context.EvaluationId);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteGuid(this BinaryWriter writer, Guid value)
+        {
+            Guid val = value;
+            unsafe
+            {
+                byte* ptr = (byte*)&val;
+                for (int i = 0; i < sizeof(Guid); i++, ptr++)
+                {
+                    writer.Write(*ptr);
+                }
+            }
+        }
     }
 }

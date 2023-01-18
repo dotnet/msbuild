@@ -529,8 +529,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
                 LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
-                LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
+                LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
                 LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
                 LoggingEventType.ProjectEvaluationFinishedEvent => new ProjectEvaluationFinishedEventArgs(),
@@ -595,6 +595,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.Telemetry;
             }
+            else if (eventType == typeof(AssemblyLoadBuildEventArgs))
+            {
+                return LoggingEventType.AssemblyLoadEvent;
+            }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
             {
@@ -635,10 +639,6 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(ResponseFileUsedEventArgs))
             {
                 return LoggingEventType.ResponseFileUsedEvent;
-            }
-            else if (eventType == typeof(AssemblyLoadBuildEventArgs))
-            {
-                return LoggingEventType.AssemblyLoadEvent;
             }
             else
             {
@@ -700,32 +700,10 @@ namespace Microsoft.Build.Shared
                 case LoggingEventType.EnvironmentVariableReadEvent:
                     WriteEnvironmentVariableReadEventArgs((EnvironmentVariableReadEventArgs)buildEvent, translator);
                     break;
-                case LoggingEventType.AssemblyLoadEvent:
-                    WriteAssemblyLoadEventArgs((AssemblyLoadBuildEventArgs)buildEvent, translator);
-                    break;
                 default:
                     ErrorUtilities.ThrowInternalError("Not Supported LoggingEventType {0}", eventType.ToString());
                     break;
             }
-        }
-
-        /// <summary>
-        /// Serializes AssemblyLoadBuildEventArgs Event argument to the stream. Does not work properly on TaskHosts due to BuildEventContext serialization not being
-        /// enabled on TaskHosts..
-        /// TODO: Is this possibly problematic??
-        /// </summary>
-        private void WriteAssemblyLoadEventArgs(AssemblyLoadBuildEventArgs assemblyLoadBuildEventArgs, ITranslator translator)
-        {
-            string assemblyName = assemblyLoadBuildEventArgs.AssemblyName;
-            translator.Translate(ref assemblyName);
-            string assemblyPath = assemblyLoadBuildEventArgs.AssemblyPath;
-            translator.Translate(ref assemblyPath);
-            Guid assemblyMvid = assemblyLoadBuildEventArgs.MVID;
-            translator.Translate(ref assemblyMvid);
-            BuildEventContext context = assemblyLoadBuildEventArgs.BuildEventContext;
-#if !CLR2COMPATIBILITY
-            translator.Translate(ref context);
-#endif
         }
 
         /// <summary>
@@ -1095,31 +1073,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.ResponseFileUsedEvent => ReadResponseFileUsedEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildWarningEvent => ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.EnvironmentVariableReadEvent => ReadEnvironmentVariableReadEventFromStream(translator, message, helpKeyword, senderName),
-                LoggingEventType.AssemblyLoadEvent => ReadAssemblyLoadEventFromStream(translator, message, helpKeyword, senderName),
                 _ => null,
             };
-        }
-
-        /// <summary>
-        /// Read and reconstruct an AssemblyLoadBuildEventArgs from the stream.
-        /// TODO: Task host support?
-        /// </summary>
-        private AssemblyLoadBuildEventArgs ReadAssemblyLoadEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
-        {
-            string assemblyName = null;
-            translator.Translate(ref assemblyName);
-            string assemblyPath = null;
-            translator.Translate(ref assemblyPath);
-            Guid assemblyMvid = Guid.Empty;
-            translator.Translate(ref assemblyMvid);
-            BuildEventContext context = null;
-#if !CLR2COMPATIBILITY
-            translator.Translate(ref context);
-#endif
-
-            AssemblyLoadBuildEventArgs args = new(assemblyName, assemblyPath, assemblyMvid, message, helpKeyword, senderName);
-            args.BuildEventContext = context;
-            return args;
         }
 
         /// <summary>

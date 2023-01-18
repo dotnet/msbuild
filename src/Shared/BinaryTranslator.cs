@@ -187,15 +187,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a guid.
-            /// </summary>
-            /// <param name="value">The value to be translated.</param>
-            public unsafe void Translate(ref Guid value)
-            {
-                value = new Guid(_reader.ReadBytes(sizeof(Guid)));
-            }
-
-            /// <summary>
             /// Translates a string.
             /// </summary>
             /// <param name="value">The value to be translated.</param>
@@ -876,23 +867,6 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref double value)
             {
                 _writer.Write(value);
-            }
-
-            /// <summary>
-            /// Translates a guid.
-            /// </summary>
-            /// <param name="value">The value to be translated.</param>
-            public void Translate(ref Guid value)
-            {
-                Guid val = value;
-                unsafe
-                {
-                    byte* ptr = (byte*)&val;
-                    for (int i = 0; i < sizeof(Guid); i++, ptr++)
-                    {
-                        _writer.Write(*ptr);
-                    }
-                }
             }
 
             /// <summary>

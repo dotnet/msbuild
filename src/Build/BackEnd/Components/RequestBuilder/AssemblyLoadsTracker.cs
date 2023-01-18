@@ -5,7 +5,6 @@
 using System;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 {
@@ -17,6 +16,7 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 
         public static IDisposable StartTracking(LoggingContext loggingContext)
         {
+            // Debugger.Launch();
             var tracker = new AssemblyLoadsTracker(loggingContext);
             tracker.StartTracking();
             return tracker;
@@ -38,13 +38,14 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 
         private void CurrentDomainOnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            // what about FormatResourceStringIgnoreCodeAndKeyword ??
-            string? message = ResourceUtilities.GetResourceString("TaskAssemblyLoaded");
+            // Is it correct to get the resource within the args? Or should the caller pass it
+            // (former seems as better separation of concerns)
+            // string? message = ResourceUtilities.GetResourceString("TaskAssemblyLoaded");
             string? assemblyName = args.LoadedAssembly.FullName;
             string? assemblyPath = args.LoadedAssembly.Location;
             Guid mvid = args.LoadedAssembly.ManifestModule.ModuleVersionId;
 
-            AssemblyLoadBuildEventArgs buildArgs = new(assemblyName, assemblyPath, mvid, message);
+            AssemblyLoadBuildEventArgs buildArgs = new(assemblyName, assemblyPath, mvid, null);
             buildArgs.BuildEventContext = _loggingContext.BuildEventContext;
             _loggingContext.LogBuildEvent(buildArgs);
         }

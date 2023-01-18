@@ -153,12 +153,6 @@ namespace Microsoft.Build.BackEnd
         void Translate(ref double value);
 
         /// <summary>
-        /// Translates a guid.
-        /// </summary>
-        /// <param name="value">The value to be translated.</param>
-        void Translate(ref Guid value);
-
-        /// <summary>
         /// Translates a string array.
         /// </summary>
         /// <param name="array">The array to be translated.</param>

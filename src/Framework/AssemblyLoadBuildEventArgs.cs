@@ -5,10 +5,12 @@
 #nullable disable
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
-    [Serializable]
+    // [Serializable] TODO: this is likely not needed - custom serialization is happening
     public class AssemblyLoadBuildEventArgs : BuildMessageEventArgs // or LazyFormattedBuildEventArgs?
     {
         public AssemblyLoadBuildEventArgs()
@@ -22,7 +24,7 @@ namespace Microsoft.Build.Framework
             string helpKeyword = null,
             string senderName = null,
             MessageImportance importance = MessageImportance.Low)
-            : base(message, helpKeyword, senderName, importance/*, DateTime.UtcNow, assemblyName, assemblyPath, mvid*/)
+            : base(message, helpKeyword, senderName, importance, DateTime.UtcNow, assemblyName, assemblyPath, mvid)
         {
             AssemblyName = assemblyName;
             AssemblyPath = assemblyPath;
@@ -32,5 +34,36 @@ namespace Microsoft.Build.Framework
         public string AssemblyName { get; private set; }
         public string AssemblyPath { get; private set; }
         public Guid MVID { get; private set; }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            writer.WriteTimestamp(RawTimestamp);
+            writer.WriteOptionalBuildEventContext(BuildEventContext);
+            writer.WriteGuid(MVID);
+            writer.WriteOptionalString(AssemblyName);
+            writer.WriteOptionalString(AssemblyPath);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            RawTimestamp = reader.ReadTimestamp();
+            BuildEventContext = reader.ReadOptionalBuildEventContext();
+            MVID = reader.ReadGuid();
+            AssemblyName = reader.ReadString();
+            AssemblyPath = reader.ReadString();
+        }
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", AssemblyName, AssemblyPath, MVID.ToString());
+                }
+
+                return RawMessage;
+            }
+        }
     }
 }
