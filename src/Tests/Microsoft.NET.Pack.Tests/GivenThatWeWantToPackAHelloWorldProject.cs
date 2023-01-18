@@ -160,7 +160,7 @@ namespace Microsoft.NET.Pack.Tests
             var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
 
             packCommand
-                .Execute("-bl:C:\\users\\noahgilson\\whydoesthispackdebug.binlog")
+                .Execute()
                 .Should()
                 .Pass();
 

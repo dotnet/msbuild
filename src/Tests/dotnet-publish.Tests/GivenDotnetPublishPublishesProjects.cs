@@ -368,9 +368,10 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var rid = selfContained ? EnvironmentInfo.GetCompatibleRid() : "";
             var ridArgs = selfContained ? $"-r {rid}".Split() : Array.Empty<string>();
+            var ridAndConfigurationArgs = ridArgs.ToList().Concat(new List<string> { "-c", "Release" });
 
             new DotnetBuildCommand(Log, rootPath)
-                .Execute(ridArgs)
+                .Execute(ridAndConfigurationArgs)
                 .Should()
                 .Pass();
 
