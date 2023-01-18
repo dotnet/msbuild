@@ -102,37 +102,34 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem file in Files)
             {
-                // Break out of the infinite cycle in the following condition
-                // 1. succeed to delete the file
-                // 2. the file did not exist
-                // 3. deletedFilesSet contains the file
-                // 4. exceed the number of Retries
+                if (_canceling)
+                {
+                    DeletedFiles = deletedFilesList.ToArray();
+                    return false;
+                }
+
                 int retries = 0;
-                while (!_canceling)
+                while (!deletedFilesSet.Contains(file.ItemSpec))
                 {
                     try
                     {
-                        // For speed, eliminate duplicates caused by poor targets authoring
-                        if (!deletedFilesSet.Contains(file.ItemSpec))
+                        if (FileSystems.Default.FileExists(file.ItemSpec))
                         {
-                            if (FileSystems.Default.FileExists(file.ItemSpec))
-                            {
-                                // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
+                            // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+                            Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
 
-                                File.Delete(file.ItemSpec);
-                            }
-                            else
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", file.ItemSpec);
-                            }
-                            // keep a running list of the files that were actually deleted
-                            // note that we include in this list files that did not exist
-                            ITaskItem deletedFile = new TaskItem(file);
-                            deletedFilesList.Add(deletedFile);
+                            File.Delete(file.ItemSpec);
                         }
-                        // Break when succeed to delete the file, the file did not exist or deletedFilesSet contains the file 
-                        break;
+                        else
+                        {
+                            Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", file.ItemSpec);
+                        }
+                        // keep a running list of the files that were actually deleted
+                        // note that we include in this list files that did not exist
+                        ITaskItem deletedFile = new TaskItem(file);
+                        deletedFilesList.Add(deletedFile);
+                        // Avoid reattempting when succeed to delete and file doesn't exist.
+                        deletedFilesSet.Add(file.ItemSpec);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
@@ -147,13 +144,11 @@ namespace Microsoft.Build.Tasks
                         else
                         {
                             LogError(file, e);
-                            break;
+                            // Add on failure to avoid reattempting
+                            deletedFilesSet.Add(file.ItemSpec);
                         }
                     }
                 }
-
-                // Add even on failure to avoid reattempting
-                deletedFilesSet.Add(file.ItemSpec);
             }
             // convert the list of deleted files into an array of ITaskItems
             DeletedFiles = deletedFilesList.ToArray();
