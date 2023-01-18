@@ -3,21 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Xml.Linq;
-using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools;
-using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using Microsoft.VisualStudio.TestPlatform.Common.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -97,11 +89,7 @@ namespace Microsoft.NET.Publish.Tests
                    new Tuple<string, string>(expectedTfm, expectedConfiguration),
                });
 
-            Assert.Equal("true", finalPropertyResults.First()[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.First()[Configuration]);
-
-            Assert.Equal("true", finalPropertyResults.ElementAt(1)[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.ElementAt(1)[Configuration]);
+            VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
 
         [Fact]
@@ -124,11 +112,7 @@ namespace Microsoft.NET.Publish.Tests
                    new Tuple<string, string>("net8.0", expectedConfiguration),
                });
 
-            Assert.Equal("false", finalPropertyResults.First()[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.First()[Configuration]);
-
-            Assert.Equal("false", finalPropertyResults.ElementAt(1)[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.ElementAt(1)[Configuration]);
+            VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
 
         [Fact]
@@ -153,11 +137,7 @@ namespace Microsoft.NET.Publish.Tests
                    new Tuple<string, string>(secondProjectTfm, expectedConfiguration),
                });
 
-            Assert.Equal("true", finalPropertyResults.First()[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.First()[Configuration]);
-
-            Assert.Equal("true", finalPropertyResults.ElementAt(1)[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.ElementAt(1)[Configuration]);
+            VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
 
         [InlineData("net7.0", true)]
@@ -165,8 +145,8 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         public void ItPublishesDebugWithATargetFrameworkOptionNet7ForNet8Net7ProjectAndNet7Net6ProjectSolutionWithPublishReleaseUndefined(string args, bool passDashF)
         {
-            var expectedConfiguration = Debug;
             var expectedTfm = "net7.0";
+            var expectedConfiguration = Debug;
 
             var solutionAndProjects = Setup(Log, new List<string> { "net6.0", "net7.0" }, new List<string> { "net7.0", "net8.0" }, PublishRelease, "", "");
             var sln = solutionAndProjects.Item1;
@@ -183,11 +163,7 @@ namespace Microsoft.NET.Publish.Tests
                    new Tuple<string, string>(expectedTfm, expectedConfiguration),
                });
 
-            Assert.Equal("false", finalPropertyResults.First()[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.First()[Configuration]);
-
-            Assert.Equal("false", finalPropertyResults.ElementAt(1)[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.ElementAt(1)[Configuration]);
+            VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
 
         [Fact]
@@ -212,11 +188,7 @@ namespace Microsoft.NET.Publish.Tests
                    new Tuple<string, string>(secondProjectTfm, expectedConfiguration),
                });
 
-            Assert.Equal("true", finalPropertyResults.First()[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.First()[Configuration]);
-
-            Assert.Equal("true", finalPropertyResults.ElementAt(1)[Optimize]);
-            Assert.Equal(expectedConfiguration, finalPropertyResults.ElementAt(1)[Configuration]);
+            VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
 
 
@@ -273,6 +245,22 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(sln.SolutionPath)
                 .Should()
                 .Pass();
+        }
+
+        private void VerifyCorrectConfiguration(List<Dictionary<string, string>> finalProperties, string expectedConfiguration)
+        {
+            string expectedBooleanValue = "true";
+            if(expectedConfiguration != "Release")
+            {
+                expectedBooleanValue = "false";
+            }
+
+
+            Assert.Equal(expectedBooleanValue, finalProperties.First()[Optimize]);
+            Assert.Equal(expectedConfiguration, finalProperties.First()[Configuration]);
+
+            Assert.Equal(expectedBooleanValue, finalProperties.ElementAt(1)[Optimize]);
+            Assert.Equal(expectedConfiguration, finalProperties.ElementAt(1)[Configuration]);
         }
     }
 }

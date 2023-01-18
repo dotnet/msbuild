@@ -164,7 +164,7 @@ namespace Microsoft.NET.ToolPack.Tests
         }
 
         [Theory]
-        // [InlineData(true)] skip: "Compile" Target no longer exists in project? Let's discuss more.
+        [InlineData(true)]
         [InlineData(false)]
         public void It_does_not_contain_apphost_exe(bool multiTarget)
         {

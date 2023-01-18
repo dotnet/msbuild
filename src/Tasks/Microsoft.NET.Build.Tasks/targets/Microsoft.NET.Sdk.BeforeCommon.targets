@@ -58,7 +58,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion.TrimStart('vV'))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
-  
+
   <!--
     Import targets from RazorSDK if referenced
     Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.BeforeCommon.targets
