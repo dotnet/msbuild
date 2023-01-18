@@ -195,6 +195,21 @@ internal static class NativeMethods
         // ARM64
         ARM64,
 
+        // WebAssembly
+        WASM,
+
+        // S390x
+        S390X,
+
+        // LongAarch64
+        LOONGARCH64,
+
+        // 32-bit ARMv6
+        ARMV6,
+
+        // PowerPC 64-bit (little-endian) 
+        PPC64LE,
+
         // Who knows
         Unknown
     }
@@ -443,6 +458,17 @@ internal static class NativeMethods
                     Architecture.Arm64 => ProcessorArchitectures.ARM64,
                     Architecture.X64 => ProcessorArchitectures.X64,
                     Architecture.X86 => ProcessorArchitectures.X86,
+#if NET5_0_OR_GREATER
+                    Architecture.Wasm => ProcessorArchitectures.WASM,
+#endif
+#if NET6_0_OR_GREATER
+                    Architecture.S390x => ProcessorArchitectures.S390X,
+#endif
+#if NET7_0_OR_GREATER
+                    Architecture.LoongArch64 => ProcessorArchitectures.LOONGARCH64,
+                    Architecture.Armv6 => ProcessorArchitectures.ARMV6,
+                    Architecture.Ppc64le => ProcessorArchitectures.PPC64LE,
+#endif
                     _ => ProcessorArchitectures.Unknown,
                 };
 #endif
@@ -487,6 +513,22 @@ internal static class NativeMethods
                                 else if (arch.StartsWith("aarch64", StringComparison.OrdinalIgnoreCase))
                                 {
                                     ProcessorArchitectureType = ProcessorArchitectures.ARM64;
+                                }
+                                else if (arch.StartsWith("s390x", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ProcessorArchitectureType = ProcessorArchitectures.S390X;
+                                }
+                                else if (arch.StartsWith("ppc64le", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ProcessorArchitectureType = ProcessorArchitectures.PPC64LE;
+                                }
+                                else if (arch.StartsWith("armv6l", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ProcessorArchitectureType = ProcessorArchitectures.ARMV6;
+                                }
+                                else if (arch.StartsWith("loongarch64", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ProcessorArchitectureType = ProcessorArchitectures.LOONGARCH64;
                                 }
                                 else if (arch.StartsWith("i", StringComparison.OrdinalIgnoreCase)
                                         && arch.EndsWith("86", StringComparison.OrdinalIgnoreCase))
