@@ -1,0 +1,5 @@
+﻿Searching for the templates...
+Matches from template source: NuGet.org
+
+To instantiate the template with short name 'search', run:
+   dotnet new create search

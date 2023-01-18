@@ -594,6 +594,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To instantiate the template with short name &apos;{0}&apos;, run:.
+        /// </summary>
+        internal static string Commands_TemplateShortNameCommandConflict_Info {
+            get {
+                return ResourceManager.GetString("Commands_TemplateShortNameCommandConflict_Info", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Argument(s) {0} are not recognized. Must be one of: {1}..
         /// </summary>
         internal static string Commands_Validator_WrongArgumentValue {
@@ -749,6 +758,33 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To list installed templates, run:.
+        /// </summary>
+        internal static string Generic_CommandHints_List {
+            get {
+                return ResourceManager.GetString("Generic_CommandHints_List", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To list installed templates similar to &apos;{0}&apos;, run:.
+        /// </summary>
+        internal static string Generic_CommandHints_List_Template {
+            get {
+                return ResourceManager.GetString("Generic_CommandHints_List_Template", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To search for the templates on NuGet.org, run:.
+        /// </summary>
+        internal static string Generic_CommandHints_Search {
+            get {
+                return ResourceManager.GetString("Generic_CommandHints_Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Details: {0}.
         /// </summary>
         internal static string Generic_Details {
@@ -781,6 +817,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string Generic_ExamplesHeader {
             get {
                 return ResourceManager.GetString("Generic_ExamplesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No templates found matching: {0}..
+        /// </summary>
+        internal static string Generic_Info_NoMatchingTemplates {
+            get {
+                return ResourceManager.GetString("Generic_Info_NoMatchingTemplates", resourceCulture);
             }
         }
         
@@ -826,6 +871,51 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string HostSpecificDataLoader_Warning_FailedToReadFromFile {
             get {
                 return ResourceManager.GetString("HostSpecificDataLoader_Warning_FailedToReadFromFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No templates or subcommands found matching: &apos;{0}&apos;..
+        /// </summary>
+        internal static string InstantiateCommand_Info_NoMatchingTemplatesSubCommands {
+            get {
+                return ResourceManager.GetString("InstantiateCommand_Info_NoMatchingTemplatesSubCommands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Did you mean one of the following subcommands?.
+        /// </summary>
+        internal static string InstantiateCommand_Info_TypoCorrection_Subcommands {
+            get {
+                return ResourceManager.GetString("InstantiateCommand_Info_TypoCorrection_Subcommands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Did you mean one of the following templates?.
+        /// </summary>
+        internal static string InstantiateCommand_Info_TypoCorrection_Templates {
+            get {
+                return ResourceManager.GetString("InstantiateCommand_Info_TypoCorrection_Templates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to get information about template packages for the template with identity &apos;{0}&apos;..
+        /// </summary>
+        internal static string InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate {
+            get {
+                return ResourceManager.GetString("InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to get information about template packages for template group &apos;{0}&apos;..
+        /// </summary>
+        internal static string InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup {
+            get {
+                return ResourceManager.GetString("InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup", resourceCulture);
             }
         }
         
@@ -893,16 +983,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To list installed templates, run:.
-        /// </summary>
-        internal static string ListTemplatesCommand {
-            get {
-                return ResourceManager.GetString("ListTemplatesCommand", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Mandatory option &apos;{0}&apos; is missing for the template &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Missing mandatory option(s) for the template &apos;{1}&apos;: {0}..
         /// </summary>
         internal static string MissingRequiredParameter {
             get {
@@ -947,11 +1028,11 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No templates found matching: {0}..
+        ///   Looks up a localized string similar to The operation was cancelled..
         /// </summary>
-        internal static string NoTemplatesMatchingInputParameters {
+        internal static string OperationCancelled {
             get {
-                return ResourceManager.GetString("NoTemplatesMatchingInputParameters", resourceCulture);
+                return ResourceManager.GetString("OperationCancelled", resourceCulture);
             }
         }
         
@@ -1199,7 +1280,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rerun the command and pass --force to accept and create..
+        ///   Looks up a localized string similar to To create the template anyway, run the command with &apos;{0}&apos; option:.
         /// </summary>
         internal static string RerunCommandAndPassForceToCreateAnyway {
             get {
@@ -1222,15 +1303,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string RunningCommand {
             get {
                 return ResourceManager.GetString("RunningCommand", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to To search for the templates on NuGet.org, run:.
-        /// </summary>
-        internal static string SearchTemplatesCommand {
-            get {
-                return ResourceManager.GetString("SearchTemplatesCommand", resourceCulture);
             }
         }
         
@@ -1843,6 +1915,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string UnableToSetPermissions {
             get {
                 return ResourceManager.GetString("UnableToSetPermissions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template generation ended with unexpected result: &apos;{0}&apos;. Details: {1}.
+        /// </summary>
+        internal static string UnexpectedResult {
+            get {
+                return ResourceManager.GetString("UnexpectedResult", resourceCulture);
             }
         }
         

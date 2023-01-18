@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Help;
@@ -141,11 +142,16 @@ namespace Microsoft.TemplateEngine.Cli
         {
             Option option = GetBaseOption(aliases);
             option.IsHidden = IsHidden;
-            option.IsRequired = IsRequired;
-            if (!string.IsNullOrWhiteSpace(DefaultValue)
-                || (Type == ParameterType.String || Type == ParameterType.Choice) && DefaultValue != null)
+
+            //if parameter is required, the default value is ignored.
+            //the user should always specify the parameter, so the default value is not even shown.
+            if (!IsRequired)
             {
-                option.SetDefaultValue(DefaultValue);
+                if (!string.IsNullOrWhiteSpace(DefaultValue)
+                    || (Type == ParameterType.String || Type == ParameterType.Choice) && DefaultValue != null)
+                {
+                    option.SetDefaultValue(DefaultValue);
+                }
             }
             option.Description = GetOptionDescription();
             return option;
@@ -235,7 +241,7 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        private static ParseArgument<T> GetParseArgument<T>(CliTemplateParameter parameter, Func<string?, (bool, T)> convert)
+        private static Func<ArgumentResult, T> GetParseArgument<T>(CliTemplateParameter parameter, Func<string?, (bool, T)> convert)
         {
             return (argumentResult) =>
             {
@@ -325,6 +331,7 @@ namespace Microsoft.TemplateEngine.Cli
                 case PrecedenceDefinition.Disabled:
                     return HelpStrings.Text_Disabled;
                 case PrecedenceDefinition.Required:
+                    return (HelpStrings.Text_Required);
                 case PrecedenceDefinition.Optional:
                 case PrecedenceDefinition.Implicit:
                     return null;

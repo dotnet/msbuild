@@ -37,6 +37,11 @@
         <target state="translated">`{0}` にプロジェクトが見つかりませんでした。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
+        <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
+        <target state="translated">プロジェクト '{0}' でカスタム構成が検出されたため、プロパティ '{1}' は有効になりません。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">永続的なビルド サーバーがそのコマンドで無視されるようにします。</target>
@@ -190,6 +195,13 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">ソリューション</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionExecutableConfigurationMismatchError">
+        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+{1}.</source>
+        <target state="translated">ソリューション内の複数の実行可能プロジェクトに、競合する '{0}' 値が含まれています。値が一致するようにしてください。Directory.build.props ファイルを使用して、すべてのプロジェクト構成を設定することを検討してください。競合するプロジェクト:
+{1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">

@@ -9,19 +9,18 @@ namespace Microsoft.DotNet.ApiCompatibility
     public interface IDifferenceVisitorFactory
     {
         /// <summary>
-        /// Creates an IDifferenceVisitor with an optionally provided count of the right elements that are compared. 
+        /// Factory to create an IDifferenceVisitor.
         /// </summary>
-        /// <param name="rightCount">The number of rights that are compared against a left.</param>
         /// <returns></returns>
-        IDifferenceVisitor Create(int rightCount = 1);
+        IDifferenceVisitor Create();
     }
 
     /// <summary>
-    /// Factory to create an DifferenceVisitor instance.
+    /// Factory to create a DifferenceVisitor instance.
     /// </summary>
     public sealed class DifferenceVisitorFactory : IDifferenceVisitorFactory
     {
         /// <inheritdoc />
-        public IDifferenceVisitor Create(int rightCount = 1) => new DifferenceVisitor(rightCount);
+        public IDifferenceVisitor Create() => new DifferenceVisitor();
     }
 }

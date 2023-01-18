@@ -13,7 +13,7 @@
   "groupIdentity": "GitignoreFile",
   "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.GitignoreFile",
-  "shortName": "gitignore",
+  "shortName": [ "gitignore", ".gitignore" ],
   "primaryOutputs": [
     {
       "path": ".gitignore"

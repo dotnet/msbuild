@@ -31,19 +31,21 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         public override int Priority => 5000;
 
         private readonly Func<string, string> _getEnvironmentVariable;
+        private readonly Func<string> _getCurrentProcessPath;
         private readonly NETCoreSdkResolver _netCoreSdkResolver;
 
         private static CachingWorkloadResolver _staticWorkloadResolver = new CachingWorkloadResolver();
 
         public DotNetMSBuildSdkResolver() 
-            : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
+            : this(Environment.GetEnvironmentVariable, null, VSSettings.Ambient)
         {
         }
 
         // Test constructor
-        public DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
+        public DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, Func<string> getCurrentProcessPath, VSSettings vsSettings)
         {
             _getEnvironmentVariable = getEnvironmentVariable;
+            _getCurrentProcessPath = getCurrentProcessPath;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
         }
 
@@ -87,7 +89,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (msbuildSdksDir == null)
             {
-                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
+                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, _getCurrentProcessPath);
                 string globalJsonStartDir = GetGlobalJsonStartDir(context);
                 var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetRoot);
 

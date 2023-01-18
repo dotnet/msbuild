@@ -183,7 +183,7 @@ This section contains a union of all the dependencies found in the various targe
 * `path` - in the `package` library this is a relative path where to find the assets.
 * `serviceable` - a boolean indicating if the library can be serviced (only for `package`-typed libraries)
 * `sha512` - SHA-512 hash of the package file (`package`-typed libraries).
-* `hashPath` - in the `package` library this is a relative path to the `.nupkg.sha512` has file.
+* `hashPath` - in the `package` library this is a relative path to the `.nupkg.sha512` hash file.
 
 ### `runtimes` Section (`.deps.json`)
 
@@ -349,7 +349,7 @@ The path to a runtime-specific asset is resolved in the same way as a normal ass
 
 Each entry in the `runtime` or `runtimeTargets` sections can also have `assemblyVersion` and `fileVersion` properties. These specify the assembly and file version of the assembly being referenced. These versions are used when resolving assemblies based on roll-forward settings. See the [Multi Level Shared FX Lookup](https://github.com/dotnet/core-setup/blob/main/Documentation/design-docs/multilevel-sharedfx-lookup.md#hostpolicy-changes-for-21) for more details.
 
-## Additional information on runtimeconfig.json frammework settings (3.0+)
+## Additional information on runtimeconfig.json framework settings (3.0+)
 With the addition of the `frameworks` section in 3.0, an application (or another framework) can reference multiple frameworks. This is necessary when more than one framework is being used by the application (or framework). Previously, an application or framework could only reference one framework, causing a "chain" of frameworks. Now, with multiple frameworks at each level, a "graph" or "tree" of frameworks is supported.
 
 In addition to specifying a dependency on more than one framework, the `frameworks` section can also be used to override settings from a framework's `runtimeconfig.json`; this should only be done with the understanding of all consequences including preventing roll-forward compatibility to future versions. The settings include `version`, `rollForwardOnNoCandidateFx` and `applyPatches`, with `version` the most likely value to be changed.

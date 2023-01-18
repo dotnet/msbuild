@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             string nestedFilePath = Path.Combine(directory, "nonExits", "filename");
             Action a = () => fileSystem.File.CreateEmptyFile(nestedFilePath);
 
-            a.ShouldThrow<DirectoryNotFoundException>().And.Message.Should()
+            a.Should().Throw<DirectoryNotFoundException>().And.Message.Should()
                 .Contain("Could not find a part of the path");
         }
 
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             string directory = fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
 
             Action a = () => fileSystem.Directory.CreateDirectory(directory);
-            a.ShouldNotThrow();
+            a.Should().NotThrow();
         }
 
         [Theory]
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             string path = Path.Combine(directory, "sub");
             fileSystem.File.CreateEmptyFile(path);
             Action a = () => fileSystem.Directory.CreateDirectory(path);
-            a.ShouldThrow<IOException>();
+            a.Should().Throw<IOException>();
         }
 
         [WindowsOnlyTheory]
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             string directory = fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
             string nestedFilePath = Path.Combine(directory, "subfolder", "filename");
             Action a = () => fileSystem.File.CreateEmptyFile(nestedFilePath);
-            a.ShouldThrow<DirectoryNotFoundException>();
+            a.Should().Throw<DirectoryNotFoundException>();
         }
 
         [Theory]
@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             string path = Path.Combine(directory, Path.GetRandomFileName());
 
             Action a = () => fileSystem.File.ReadAllText(path);
-            a.ShouldThrow<FileNotFoundException>().And.Message.Should().Contain("Could not find file");
+            a.Should().Throw<FileNotFoundException>().And.Message.Should().Contain("Could not find file");
         }
 
         [Theory]
@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             fileSystem.Directory.CreateDirectory(directory);
 
             Action a = () => fileSystem.File.ReadAllText(directory);
-            a.ShouldThrow<UnauthorizedAccessException>().And.Message.Should().Contain("Access to the path");
+            a.Should().Throw<UnauthorizedAccessException>().And.Message.Should().Contain("Access to the path");
         }
 
         [Theory]
@@ -249,7 +249,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Move(sourceFile, destinationFile);
 
-            a.ShouldThrow<FileNotFoundException>().And.Message.Should().Contain("Could not find file");
+            a.Should().Throw<FileNotFoundException>().And.Message.Should().Contain("Could not find file");
         }
 
         [Theory]
@@ -266,7 +266,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Move(badSourceFile, destinationFile);
 
-            a.ShouldThrow<FileNotFoundException>().And.Message.Should().Contain("Could not find file");
+            a.Should().Throw<FileNotFoundException>().And.Message.Should().Contain("Could not find file");
         }
 
         [Theory]
@@ -283,7 +283,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Move(sourceFile, destinationFile);
 
-            a.ShouldThrow<DirectoryNotFoundException>()
+            a.Should().Throw<DirectoryNotFoundException>()
                 .And.Message.Should().Contain("Could not find a part of the path");
         }
 
@@ -315,7 +315,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Copy(sourceFile, destinationFile);
 
-            a.ShouldThrow<FileNotFoundException>().And.Message.Should().Contain("Could not find file");
+            a.Should().Throw<FileNotFoundException>().And.Message.Should().Contain("Could not find file");
         }
 
         [Theory]
@@ -331,7 +331,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Copy(badSourceFile, destinationFile);
 
-            a.ShouldThrow<UnauthorizedAccessException>().And.Message.Should().Contain("Access to the path");
+            a.Should().Throw<UnauthorizedAccessException>().And.Message.Should().Contain("Access to the path");
         }
 
         [Theory]
@@ -347,7 +347,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Copy(sourceFile, destinationFile);
 
-            a.ShouldThrow<DirectoryNotFoundException>()
+            a.Should().Throw<DirectoryNotFoundException>()
                 .And.Message.Should().Contain("Could not find a part of the path");
         }
 
@@ -365,7 +365,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Copy(sourceFile, destinationFile);
 
-            a.ShouldThrow<IOException>()
+            a.Should().Throw<IOException>()
                 .And.Message.Should().Contain("already exists");
         }
 
@@ -395,7 +395,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Delete(file);
 
-            a.ShouldNotThrow();
+            a.Should().NotThrow();
         }
 
         // https://github.com/dotnet/corefx/issues/32110
@@ -412,7 +412,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.File.Delete(file);
 
-            a.ShouldThrow<DirectoryNotFoundException>().And.Message.Should().Contain("Could not find a part of the path");
+            a.Should().Throw<DirectoryNotFoundException>().And.Message.Should().Contain("Could not find a part of the path");
         }
 
         [Theory]
@@ -426,7 +426,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.Directory.EnumerateFiles(nonExistDirectory);
 
-            a.ShouldThrow<DirectoryNotFoundException>().And.Message.Should()
+            a.Should().Throw<DirectoryNotFoundException>().And.Message.Should()
                 .Contain("Could not find a part of the path");
         }
 
@@ -445,7 +445,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             // On Windows: The parameter is incorrect
             // On Linux: Not a directory
             // But the message is not important
-            a.ShouldThrow<IOException>();
+            a.Should().Throw<IOException>();
         }
 
         [Theory]
@@ -492,7 +492,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
 
             Action a = () => fileSystem.Directory.EnumerateFileSystemEntries(nonExistDirectory);
 
-            a.ShouldThrow<DirectoryNotFoundException>().And.Message.Should()
+            a.Should().Throw<DirectoryNotFoundException>().And.Message.Should()
                 .Contain("Could not find a part of the path");
         }
 
@@ -511,7 +511,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             // On Windows: The parameter is incorrect
             // On Linux: Not a directory
             // But the message is not important
-            a.ShouldThrow<IOException>();
+            a.Should().Throw<IOException>();
         }
 
         [Theory]
@@ -577,7 +577,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             string nonExistsTestDirectory = Path.Combine(tempDirectory, Path.GetRandomFileName());
 
             Action action = () => fileSystem.Directory.Delete(nonExistsTestDirectory, recursive);
-            action.ShouldThrow<DirectoryNotFoundException>().And.Message.Should()
+            action.Should().Throw<DirectoryNotFoundException>().And.Message.Should()
                 .Contain("Could not find a part of the path");
         }
 
@@ -594,7 +594,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             fileSystem.File.CreateEmptyFile(actuallyAFilePath);
 
             Action action = () => fileSystem.Directory.Delete(actuallyAFilePath, recursive);
-            action.ShouldThrow<IOException>();
+            action.Should().Throw<IOException>();
         }
 
         [Theory]
@@ -613,7 +613,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             // On Windows: The directory is not empty
             // On Linux: Directory not empty
             // But the message is not important
-            action.ShouldThrow<IOException>().And.Message.Should().Contain("not empty");
+            action.Should().Throw<IOException>().And.Message.Should().Contain("not empty");
         }
 
         [Theory]
@@ -667,7 +667,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             string testDestinationDirectoryPath = Path.Combine(tempDirectory, Path.GetRandomFileName());
 
             Action a = () => fileSystem.Directory.Move(testSourceDirectoryPath, testDestinationDirectoryPath);
-            a.ShouldThrow<DirectoryNotFoundException>().And.Message.Should()
+            a.Should().Throw<DirectoryNotFoundException>().And.Message.Should()
                 .Contain("Could not find a part of the path");
         }
 
@@ -685,7 +685,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             fileSystem.Directory.CreateDirectory(testDestinationDirectoryPath);
 
             Action a = () => fileSystem.Directory.Move(testSourceDirectoryPath, testDestinationDirectoryPath);
-            a.ShouldThrow<IOException>();
+            a.Should().Throw<IOException>();
         }
 
         [Theory]
@@ -702,7 +702,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             fileSystem.File.CreateEmptyFile(testDestinationDirectoryPath);
 
             Action a = () => fileSystem.Directory.Move(testSourceDirectoryPath, testDestinationDirectoryPath);
-            a.ShouldThrow<IOException>();
+            a.Should().Throw<IOException>();
         }
 
         [Theory]
@@ -716,7 +716,7 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             fileSystem.Directory.CreateDirectory(testSourceDirectoryPath);
 
             Action a = () => fileSystem.Directory.Move(testSourceDirectoryPath, testSourceDirectoryPath);
-            a.ShouldThrow<IOException>().And.Message.Should().Contain("Source and destination path must be different");
+            a.Should().Throw<IOException>().And.Message.Should().Contain("Source and destination path must be different");
         }
 
         private static IFileSystem SetupSubjectFileSystem(bool testMockBehaviorIsInSync)

@@ -4,6 +4,7 @@
     <Description>Template creation for the dotnet CLI</Description>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>false</IsShippingPackage>
+    <EnableStyleCopAnalyzer>true</EnableStyleCopAnalyzer>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -22,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
+    <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />
   </ItemGroup>
   
   <ItemGroup>

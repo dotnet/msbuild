@@ -9,13 +9,13 @@
       </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
-        <target state="translated">Pokud chcete najít další úlohy, které se mají nainstalovat, použijte vyhledávání úloh dotnet.</target>
-        <note />
+        <target state="translated">Pokud chcete najít další úlohy, které se mají nainstalovat, použijte `dotnet workload search`.</target>
+        <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="translated">Aktualizace jsou k dispozici pro následující úlohy: {0}. Pokud chcete získat nejnovější verzi, spusťte aktualizaci úlohy dotnet.</target>
-        <note />
+        <target state="translated">Aktualizace jsou k dispozici pro následující úlohy: {0}. Pokud chcete získat nejnovější verzi, spusťte aktualizaci úlohy dotnet (`dotnet workload update`).</target>
+        <note>{Locked="dotnet workload update"}</note>
       </trans-unit>
     </body>
   </file>

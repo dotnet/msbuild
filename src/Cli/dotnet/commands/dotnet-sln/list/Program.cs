@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Sln.List
         public ListProjectsInSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.GetValueForArgument(SlnCommandParser.SlnArgument);
+            _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
         }
 
         public override int Execute()

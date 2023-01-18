@@ -5,10 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
@@ -17,7 +15,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Versioning;
@@ -62,24 +59,24 @@ namespace Microsoft.DotNet.Workloads.Workload
             string installedFeatureBand = null)
             : base(parseResult, reporter: reporter, tempDirPath: tempDirPath, nugetPackageDownloader: nugetPackageDownloader)
         {
-            _printDownloadLinkOnly = parseResult.GetValueForOption(InstallingWorkloadCommandParser.PrintDownloadLinkOnlyOption);
-            _fromCacheOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.FromCacheOption);
-            _includePreviews = parseResult.GetValueForOption(InstallingWorkloadCommandParser.IncludePreviewOption);
-            _downloadToCacheOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.DownloadToCacheOption);
+            _printDownloadLinkOnly = parseResult.GetValue(InstallingWorkloadCommandParser.PrintDownloadLinkOnlyOption);
+            _fromCacheOption = parseResult.GetValue(InstallingWorkloadCommandParser.FromCacheOption);
+            _includePreviews = parseResult.GetValue(InstallingWorkloadCommandParser.IncludePreviewOption);
+            _downloadToCacheOption = parseResult.GetValue(InstallingWorkloadCommandParser.DownloadToCacheOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             _checkIfManifestExist = !(_printDownloadLinkOnly);      // don't check for manifest existence when print download link is passed
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, _checkIfManifestExist);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, _checkIfManifestExist);
             _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _installedSdkVersion = new ReleaseVersion(version ?? Product.Version);
             _installedFeatureBand = new SdkFeatureBand(installedFeatureBand ?? Product.Version);
 
-            _fromRollbackDefinition = parseResult.GetValueForOption(InstallingWorkloadCommandParser.FromRollbackFileOption);
-            var configOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.ConfigOption);
-            var sourceOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.SourceOption);
+            _fromRollbackDefinition = parseResult.GetValue(InstallingWorkloadCommandParser.FromRollbackFileOption);
+            var configOption = parseResult.GetValue(InstallingWorkloadCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValue(InstallingWorkloadCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
-                       
+
             var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _installedSdkVersion.ToString(), userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(sdkWorkloadManifestProvider, _dotnetPath, _installedSdkVersion.ToString(), _userProfileDir);
 

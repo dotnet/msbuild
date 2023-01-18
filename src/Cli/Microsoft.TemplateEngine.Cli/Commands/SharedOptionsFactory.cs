@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -7,8 +8,32 @@ using Microsoft.TemplateEngine.Cli.TabularOutput;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal static class SharedOptionsFactory
+    public static class SharedOptionsFactory
     {
+        public static Option AsHidden(this Option o)
+        {
+            o.IsHidden = true;
+            return o;
+        }
+
+        public static Option<T> AsHidden<T>(this Option<T> o)
+        {
+            o.IsHidden = true;
+            return o;
+        }
+
+        public static Option<T> WithDescription<T>(this Option<T> o, string description)
+        {
+            o.Description = description;
+            return o;
+        }
+
+        public static Option<T> DisableAllowMultipleArgumentsPerToken<T>(this Option<T> o)
+        {
+            o.AllowMultipleArgumentsPerToken = false;
+            return o;
+        }
+
         internal static Option<bool> CreateInteractiveOption()
         {
             return new Option<bool>("--interactive")
@@ -109,7 +134,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 Description = SymbolStrings.Option_Columns,
                 AllowMultipleArgumentsPerToken = true,
             };
-            option.FromAmong(
+            option.AcceptOnlyFromAmong(
                 TabularOutputSettings.ColumnNames.Author,
                 TabularOutputSettings.ColumnNames.Language,
                 TabularOutputSettings.ColumnNames.Type,
@@ -117,48 +142,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return option;
         }
 
-        internal static Option<string> CreateOutputOption()
-        {
-            return new Option<string>(new string[] { "-o", "--output" })
-            {
-                Description = SymbolStrings.Option_Output,
-                IsRequired = false,
-                Arity = new ArgumentArity(1, 1)
-            };
-        }
-
         internal static string[] ParseCommaSeparatedValues(ArgumentResult result)
         {
-            List<string> values = new List<string>();
-            foreach (var value in result.Tokens.Select(t => t.Value))
+            List<string> values = new();
+            foreach (string value in result.Tokens.Select(t => t.Value))
             {
                 values.AddRange(value.Split(",", StringSplitOptions.TrimEntries).Where(s => !string.IsNullOrWhiteSpace(s)));
             }
             return values.ToArray();
-        }
-
-        internal static Option AsHidden(this Option o)
-        {
-            o.IsHidden = true;
-            return o;
-        }
-
-        internal static Option<T> AsHidden<T>(this Option<T> o)
-        {
-            o.IsHidden = true;
-            return o;
-        }
-
-        internal static Option<T> WithDescription<T>(this Option<T> o, string description)
-        {
-            o.Description = description;
-            return o;
-        }
-
-        internal static Option<T> DisableAllowMultipleArgumentsPerToken<T>(this Option<T> o)
-        {
-            o.AllowMultipleArgumentsPerToken = false;
-            return o;
         }
     }
 }

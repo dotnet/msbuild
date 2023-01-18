@@ -78,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">Aggiorna uno strumento globale.</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">Aggiornare uno strumento globale o locale.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

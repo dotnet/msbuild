@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var toolInstallLocalCommand = GetDefaultTestToolInstallLocalCommand();
 
             Action a = () => toolInstallLocalCommand.Execute();
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.Message.Should()
                 .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
         }
@@ -125,15 +125,15 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var toolInstallLocalCommand = GetDefaultTestToolInstallLocalCommand();
 
             Action a = () => toolInstallLocalCommand.Execute();
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.Message.Should()
                 .Contain(LocalizableStrings.NoManifestGuide);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.Message.Should()
                 .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.VerboseMessage.Should().Contain(string.Format(ToolManifest.LocalizableStrings.ListOfSearched, ""));
         }
 
@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 _reporter);
 
             Action a = () => installLocalCommand.Execute();
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.Message.Should()
                 .Contain(LocalizableStrings.ToolInstallationRestoreFailed);
 
@@ -224,7 +224,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var toolInstallLocalCommand = GetDefaultTestToolInstallLocalCommand();
 
             Action a = () => toolInstallLocalCommand.Execute();
-            a.ShouldThrow<GracefulException>();
+            a.Should().Throw<GracefulException>();
 
             _localToolsResolverCache.TryLoad(new RestoredCommandIdentifier(
                     _packageIdA,

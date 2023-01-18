@@ -92,7 +92,7 @@ namespace Microsoft.NET.Publish.Tests
                                                      runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29602")]
         public void Incremental_add_single_file()
         {
             var testProject = new TestProject()
@@ -123,17 +123,6 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello World");
-        }
-
-        [Fact]
-        public void It_errors_when_publishing_single_file_app_without_rid()
-        {
-            GetPublishCommand()
-                .Execute(PublishSingleFile)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotHaveSingleFileWithoutRuntimeIdentifier);
         }
 
         [Fact]
@@ -680,18 +669,19 @@ class C
         [InlineData("netcoreapp3.1", true, IncludeDefault)]
         [InlineData("netcoreapp3.1", false, IncludePdb)]
         [InlineData("netcoreapp3.1", true, IncludePdb)]
-        [InlineData("net5.0", false, IncludeDefault)]
-        [InlineData("net5.0", false, IncludeNative)]
-        [InlineData("net5.0", false, IncludeAllContent)]
-        [InlineData("net5.0", true, IncludeDefault)]
-        [InlineData("net5.0", true, IncludeNative)]
-        [InlineData("net5.0", true, IncludeAllContent)]
+        [InlineData("net6.0", false, IncludeDefault)]
+        [InlineData("net6.0", false, IncludeNative)]
+        [InlineData("net6.0", false, IncludeAllContent)]
+        [InlineData("net6.0", true, IncludeDefault)]
+        [InlineData("net6.0", true, IncludeNative)]
+        [InlineData("net6.0", true, IncludeAllContent)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeDefault)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeNative)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeAllContent)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeDefault)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeNative)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeAllContent)]
+        // https://github.com/dotnet/sdk/issues/29602
+        //[InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeDefault)]
+        //[InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeNative)]
+        //[InlineData(ToolsetInfo.CurrentTargetFramework, true, IncludeAllContent)]
         public void It_runs_single_file_apps(string targetFramework, bool selfContained, string bundleOption)
         {
             var testProject = new TestProject()
@@ -852,7 +842,7 @@ class C
             uncompressedSize.Should().Be(compressedSize);
         }
 
-        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29602")]
         public void User_can_get_bundle_info_before_bundling()
         {
             var testProject = new TestProject()
@@ -881,7 +871,7 @@ class C
                 .And
                 .HaveStdOutContaining("Hello World");
 
-            void VerifyPrepareForBundle(XDocument project)
+            static void VerifyPrepareForBundle(XDocument project)
             {
                 var ns = project.Root.Name.Namespace;
                 var targetName = "CheckPrepareForBundleData";
@@ -931,7 +921,7 @@ class C
                 .Should()
                 .Pass();
 
-            void VerifyPrepareForBundle(XDocument project)
+            static void VerifyPrepareForBundle(XDocument project)
             {
                 var ns = project.Root.Name.Namespace;
                 var targetName = "CheckPrepareForBundleData";

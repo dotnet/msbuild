@@ -1,0 +1,5 @@
+﻿No templates found matching: 'console', --type='item'.
+Allowed values for '--type' option are: 'project'.
+
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

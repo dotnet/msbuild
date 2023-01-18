@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 #nullable enable
 
@@ -18,9 +19,9 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
 {
     internal class DotnetSlnPostActionProcessor : PostActionProcessorBase
     {
-        private readonly Func<string, IReadOnlyList<string>, string?, bool> _addProjToSolutionCallback;
+        private readonly Func<string, IReadOnlyList<string>, string?, bool?, bool> _addProjToSolutionCallback;
 
-        public DotnetSlnPostActionProcessor(Func<string, IReadOnlyList<string>, string?, bool>? addProjToSolutionCallback = null)
+        public DotnetSlnPostActionProcessor(Func<string, IReadOnlyList<string>, string?, bool?, bool>? addProjToSolutionCallback = null)
         {
             _addProjToSolutionCallback = addProjToSolutionCallback ?? DotnetCommandCallbacks.AddProjectsToSolution;
         }
@@ -36,7 +37,7 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
 
         // The project files to add are a subset of the primary outputs, specifically the primary outputs indicated by the primaryOutputIndexes post action argument (semicolon separated)
         // If any indexes are out of range or non-numeric, this method returns false and projectFiles is set to null.
-        internal static bool TryGetProjectFilesToAdd(IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, [NotNullWhen(true)]out IReadOnlyList<string>? projectFiles)
+        internal static bool TryGetProjectFilesToAdd(IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, [NotNullWhen(true)] out IReadOnlyList<string>? projectFiles)
         {
             List<string> filesToAdd = new();
 
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
             if (projectFiles is null)
             {
                 //If the author didn't opt in to the new behavior by specifying "projectFiles", use the old behavior
-                if (!TryGetProjectFilesToAdd( action, templateCreationResult, outputBasePath, out projectFiles))
+                if (!TryGetProjectFilesToAdd(action, templateCreationResult, outputBasePath, out projectFiles))
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Error_NoProjectsToAdd);
                     return false;
@@ -101,17 +102,31 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
                 return false;
             }
 
-            string solutionFolder = GetSolutionFolder(action);
+            string? solutionFolder = GetSolutionFolder(action);
+            bool? inRoot = GetInRoot(action);
 
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
-            return AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
+            if (!string.IsNullOrWhiteSpace(solutionFolder) && inRoot is true)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified);
+                return false;
+            }
+
+            if (inRoot is true)
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_InRoot_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0]));
+            }
+            else
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+            }
+            return AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder, inRoot);
         }
-        
-        private bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
+
+        private bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder, bool? inRoot)
         {
             try
             {
-                bool succeeded = _addProjToSolutionCallback(solutionPath, projectsToAdd, solutionFolder);
+                bool succeeded = _addProjToSolutionCallback(solutionPath, projectsToAdd, solutionFolder, inRoot);
                 if (!succeeded)
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Failed_NoReason);
@@ -130,13 +145,25 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
             }
         }
 
-        private static string GetSolutionFolder(IPostAction actionConfig)
+        private static string? GetSolutionFolder(IPostAction actionConfig)
         {
             if (actionConfig.Args != null && actionConfig.Args.TryGetValue("solutionFolder", out string? solutionFolder))
             {
                 return solutionFolder;
             }
-            return string.Empty;
+            return null;
+        }
+
+        private static bool? GetInRoot(IPostAction actionConfig)
+        {
+            if (actionConfig.Args != null && actionConfig.Args.TryGetValue("inRoot", out string? inRoot))
+            {
+                if (bool.TryParse(inRoot, out bool result))
+                {
+                    return result;
+                }
+            }
+            return null;
         }
     }
 }

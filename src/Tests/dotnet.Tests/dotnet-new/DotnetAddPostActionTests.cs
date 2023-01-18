@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddRefFindsOneDefaultProjFileInOutputDirectory))]
         public void AddRefFindsOneDefaultProjFileInOutputDirectory()
         {
-            string targetBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.proj");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(projFileFullPath, TestCsprojFile);
 
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddRefFindsOneNameConfiguredProjFileInOutputDirectory))]
         public void AddRefFindsOneNameConfiguredProjFileInOutputDirectory()
         {
-            string targetBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string fooprojFileFullPath = Path.Combine(targetBasePath, "MyApp.fooproj");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(fooprojFileFullPath, TestCsprojFile);
 
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddRefFindsOneNameConfiguredProjFileWhenMultipleExtensionsAreAllowed))]
         public void AddRefFindsOneNameConfiguredProjFileWhenMultipleExtensionsAreAllowed()
         {
-            string targetBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string fooprojFileFullPath = Path.Combine(targetBasePath, "MyApp.fooproj");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(fooprojFileFullPath, TestCsprojFile);
 
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddRefIgnoresOtherProjectTypesWhenMultipleTypesAreAllowed))]
         public void AddRefIgnoresOtherProjectTypesWhenMultipleTypesAreAllowed()
         {
-            string targetBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string fooprojFileFullPath = Path.Combine(targetBasePath, "MyApp.fooproj");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(fooprojFileFullPath, TestCsprojFile);
 
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddRefFindsOneDefaultProjFileInAncestorOfOutputDirectory))]
         public void AddRefFindsOneDefaultProjFileInAncestorOfOutputDirectory()
         {
-            string targetBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.xproj");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(projFileFullPath, TestCsprojFile);
 
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         public void AddRefFindsMultipleDefaultProjFilesInOutputDirectory()
         {
             string projFilesOriginalContent = TestCsprojFile;
-            string targetBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPathOne = Path.Combine(targetBasePath, "MyApp.anysproj");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(projFileFullPathOne, projFilesOriginalContent);
 
@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         public void AddRefFindsMultipleDefaultProjFilesInAncestorOfOutputDirectory()
         {
             string projFilesOriginalContent = TestCsprojFile;
-            string targetBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPathOne = Path.Combine(targetBasePath, "MyApp.fooproj");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(projFileFullPathOne, projFilesOriginalContent);
 
@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectReferenceCallback();
             DotnetAddPostActionProcessor actionProcessor = new(callback.AddPackageReference, callback.AddProjectReference);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
             string referencedProjFileFullPath = Path.Combine(targetBasePath, "NewName.csproj");
             
@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectReferenceCallback();
             DotnetAddPostActionProcessor actionProcessor = new(callback.AddPackageReference, callback.AddProjectReference);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
             string referencedProjFileFullPath = Path.Combine(targetBasePath, "Reference.csproj");
 
@@ -216,7 +216,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectReferenceCallback();
             DotnetAddPostActionProcessor actionProcessor = new(callback.AddPackageReference, callback.AddProjectReference);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
             var args = new Dictionary<string, string>() { { "targetFiles", "[\"MyApp.csproj\"]" }, { "referenceType", "package" }, { "reference", "System.Net.Json" } };
@@ -242,7 +242,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectReferenceCallback();
             DotnetAddPostActionProcessor actionProcessor = new(callback.AddPackageReference, callback.AddProjectReference);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
             var args = new Dictionary<string, string>() { { "targetFiles", "MyApp.csproj" }, { "referenceType", "package" }, { "reference", "System.Net.Json" } };

@@ -133,7 +133,7 @@
     <value>SOURCE</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Update a global tool.</value>
+    <value>Update a global or local tool.</value>
   </data>
   <data name="ConfigFileOptionName" xml:space="preserve">
     <value>FILE</value>

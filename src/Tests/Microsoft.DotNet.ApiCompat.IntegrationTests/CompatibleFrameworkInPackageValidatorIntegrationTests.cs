@@ -7,8 +7,9 @@ using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.ApiCompatibility.Runner;
+using Microsoft.DotNet.ApiCompatibility.Tests;
+using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.DotNet.PackageValidation;
-using Microsoft.DotNet.PackageValidation.Tests;
 using Microsoft.DotNet.PackageValidation.Validators;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
@@ -24,15 +25,14 @@ namespace Microsoft.DotNet.ApiCompat.IntegrationTests
         {
         }
 
-        private (TestLogger, CompatibleFrameworkInPackageValidator) CreateLoggerAndValidator()
+        private (SuppressableTestLog, CompatibleFrameworkInPackageValidator) CreateLoggerAndValidator()
         {
-            TestLogger log = new();
+            SuppressableTestLog log = new();
             CompatibleFrameworkInPackageValidator validator = new(log,
                 new ApiCompatRunner(log,
                     new SuppressionEngine(),
-                    new ApiComparerFactory(new RuleFactory()),
-                    new AssemblySymbolLoaderFactory(),
-                    new MetadataStreamProvider()));
+                    new ApiComparerFactory(new RuleFactory(log)),
+                    new AssemblySymbolLoaderFactory()));
 
             return (log, validator);
         }
@@ -64,7 +64,7 @@ namespace PackageValidationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = Package.Create(packCommand.GetNuGetPackage(), null);
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 
@@ -105,7 +105,7 @@ namespace PackageValidationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = Package.Create(packCommand.GetNuGetPackage(), null);
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 

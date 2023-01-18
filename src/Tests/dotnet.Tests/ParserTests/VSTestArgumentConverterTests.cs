@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             // Act
             new VSTestArgumentConverter().Invoking(i => i.Convert(args, out _))
-                .ShouldThrow<ArgumentException>()
+                .Should().Throw<ArgumentException>()
                 .WithMessage("Inline settings should not be passed to Convert.");
         }
 

@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "warningLevelConsoleApp"+tfm, targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "warningLevelConsoleApp" + tfm, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
@@ -69,10 +69,10 @@ namespace Microsoft.NET.Build.Tests
             computedWarningLevel.Should().Be(parsedWarningLevel.ToString());
         }
 
-        [InlineData(1, 1)]
-        [InlineData(null, 7)]
+        [InlineData(1, "1")]
+        [InlineData(null, ToolsetInfo.CurrentTargetFrameworkVersion)]
         [RequiresMSBuildVersionTheory("16.8")]
-        public void It_always_accepts_user_defined_WarningLevel(int? warningLevel, int expectedWarningLevel)
+        public void It_always_accepts_user_defined_WarningLevel(int? warningLevel, string expectedWarningLevel)
         {
             var testProject = new TestProject
             {
@@ -110,7 +110,7 @@ namespace Microsoft.NET.Build.Tests
             var buildResult = buildCommand.Execute();
             var computedWarningLevel = buildCommand.GetValues()[0];
             buildResult.StdErr.Should().Be(string.Empty);
-            computedWarningLevel.Should().Be(expectedWarningLevel.ToString());
+            computedWarningLevel.Should().Be(((int)float.Parse(expectedWarningLevel)).ToString());
         }
 
         [InlineData(targetFrameworkNet6, "6.0")]
@@ -143,7 +143,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "analysisLevelConsoleApp"+tfm, targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "analysisLevelConsoleApp" + tfm, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
@@ -154,12 +154,13 @@ namespace Microsoft.NET.Build.Tests
             };
             var buildResult = buildCommand.Execute();
 
-                buildResult.StdErr.Should().Be(string.Empty);
+            buildResult.StdErr.Should().Be(string.Empty);
             if (analysisLevel == null)
             {
                 buildCommand.GetValues().Should().BeEmpty();
             }
-            else {
+            else
+            {
                 var computedEffectiveAnalysisLevel = buildCommand.GetValues()[0];
                 computedEffectiveAnalysisLevel.Should().Be(analysisLevel.ToString());
             }
@@ -195,7 +196,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties.Add("AnalysisLevel", "preview");
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "analysisLevelPreviewConsoleApp"+currentTFM, targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "analysisLevelPreviewConsoleApp" + currentTFM, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
@@ -206,7 +207,7 @@ namespace Microsoft.NET.Build.Tests
             };
             var buildResult = buildCommand.Execute();
 
-            buildResult.StdErr.Should().Be(string.Empty);
+            buildResult.StdErr.Should().Be(string.Empty, "If this test fails when updating to a new TFM, you need to update _PreviewAnalysisLevel and _LatestAnalysisLevel in Microsoft.NET.SDK.Analyzers.Targets");
             var computedEffectiveAnalysisLevel = buildCommand.GetValues()[0];
             computedEffectiveAnalysisLevel.Should().Be(nextTFMVersionNumber.ToString());
         }
@@ -242,7 +243,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties.Add("AnalysisLevel", analysisLevel);
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "analysisLevelPreviewConsoleApp"+ToolsetInfo.CurrentTargetFramework+analysisLevel, targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "analysisLevelPreviewConsoleApp" + ToolsetInfo.CurrentTargetFramework + analysisLevel, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,

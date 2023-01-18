@@ -87,6 +87,11 @@
         <target state="translated">(Aucune option)</target>
         <note />
       </trans-unit>
+      <trans-unit id="Text_Required">
+        <source>Required: *true*</source>
+        <target state="translated">Obligatoire : *true*</target>
+        <note>Indication that parameter is always required, do not translate "true".</note>
+      </trans-unit>
       <trans-unit id="Text_RequiredCondition">
         <source>Required if: {0}</source>
         <target state="translated">Obligatoire si : {0}</target>

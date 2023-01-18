@@ -1,7 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-#nullable enable
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Help;
@@ -90,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// Custom parse method for template option.
         /// It is mainly required to process default if no option value cases.
         /// </summary>
-        private static ParseArgument<string> GetParseChoiceArgument(ChoiceTemplateParameter parameter)
+        private static Func<ArgumentResult, string> GetParseChoiceArgument(ChoiceTemplateParameter parameter)
         {
             return (argumentResult) =>
             {

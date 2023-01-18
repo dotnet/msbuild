@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             if (command is UpdateCommand updateCommand)
             {
-                CheckOnly = parseResult.GetValueForOption(UpdateCommand.CheckOnlyOption);
+                CheckOnly = parseResult.GetValue(UpdateCommand.CheckOnlyOption);
             }
             else if (command is LegacyUpdateCheckCommand)
             {
@@ -27,8 +27,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 throw new ArgumentException($"Unsupported type {command.GetType().FullName}", nameof(command));
             }
 
-            Interactive = parseResult.GetValueForOption(command.InteractiveOption);
-            AdditionalSources = parseResult.GetValueForOption(command.AddSourceOption);
+            Interactive = parseResult.GetValue(command.InteractiveOption);
+            AdditionalSources = parseResult.GetValue(command.AddSourceOption);
         }
 
         public bool CheckOnly { get; }

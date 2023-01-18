@@ -1,9 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -25,9 +25,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseSearchCommand(
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_Search_Description)
+            : base(hostBuilder, commandName, SymbolStrings.Command_Search_Description)
         {
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);
@@ -50,20 +49,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal NewCommand ParentCommand { get; }
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(
+        protected override Task<NewCommandStatus> ExecuteAsync(
             SearchCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            //we need to await, otherwise templatePackageManager will be disposed.
-            return await CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(
+            return CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(
                 environmentSettings,
                 templatePackageManager,
                 args,
                 environmentSettings.GetDefaultLanguage(),
-                context.GetCancellationToken()).ConfigureAwait(false);
+                context.GetCancellationToken());
         }
 
         protected override SearchCommandArgs ParseContext(ParseResult parseResult)

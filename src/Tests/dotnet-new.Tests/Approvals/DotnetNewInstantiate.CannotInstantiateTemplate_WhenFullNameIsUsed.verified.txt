@@ -1,9 +1,0 @@
-﻿No templates found matching: 'Console App'.
-
-To list installed templates, run:
-   dotnet new list
-To search for the templates on NuGet.org, run:
-   dotnet new search 'Console App'
-
-
-For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

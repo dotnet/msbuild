@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new DotnetTestCommand(Log, ConsoleLoggerOutputNormal)
                .WithWorkingDirectory(projectDirectory)
-               .Execute("--framework", "netcoreapp3.0")
+               .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                .Should().Pass();
         }
 
@@ -169,7 +169,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            new DotnetCommand(Log, "new", "sln", "--debug:ephemeral-hive")
+            new DotnetNewCommand(Log, "sln")
+                .WithVirtualHive()
                 .WithWorkingDirectory(testAsset.TestRoot)
                 .Execute()
                 .Should()

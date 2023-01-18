@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         {
             _workloadListHelper = new WorkloadInfoHelper(
                 Verbosity,
-                result?.GetValueForOption(WorkloadListCommandParser.VersionOption) ?? null,
+                result?.GetValue(WorkloadListCommandParser.VersionOption) ?? null,
                 VerifySignatures,
                 Reporter,
                 workloadRecordRepo,
@@ -50,9 +50,9 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 workloadResolver
             );
 
-            _machineReadableOption = result.GetValueForOption(WorkloadListCommandParser.MachineReadableOption);
+            _machineReadableOption = result.GetValue(WorkloadListCommandParser.MachineReadableOption);
 
-            _includePreviews = result.GetValueForOption(WorkloadListCommandParser.IncludePreviewsOption);
+            _includePreviews = result.GetValue(WorkloadListCommandParser.IncludePreviewsOption);
             string userProfileDir1 = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,

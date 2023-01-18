@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/template.json",
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithConflictShortName",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithConflictShortName",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithConflictShortName",
+  "shortName": [ "list", "search", "install", "uninstall", "update", "create" ]
+}

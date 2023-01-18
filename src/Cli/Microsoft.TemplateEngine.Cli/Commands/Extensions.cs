@@ -1,9 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Threading;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Edge;
@@ -46,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         }
 
         /// <summary>
-        /// Case insensitive version for <see cref="System.CommandLine.OptionExtensions.FromAmong{TOption}(TOption, string[])"/>.
+        /// Case insensitive version for <see cref="System.CommandLine.Option{TOption}.AcceptOnlyFromAmong(string[])"/>.
         /// </summary>
         internal static void FromAmongCaseInsensitive(this Option<string> option, string[]? allowedValues = null, string? allowedHiddenValue = null)
         {
@@ -58,7 +58,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         /// <summary>
         /// Gets the list of allowed templates from <paramref name="templateGroup"/> as the result of constraints evaluation.
         /// </summary>
-        internal static async Task<IEnumerable<CliTemplateInfo>> GetAllowedTemplatesAsync(this TemplateGroup templateGroup,  TemplateConstraintManager constraintManager, CancellationToken cancellationToken)
+        internal static async Task<IEnumerable<CliTemplateInfo>> GetAllowedTemplatesAsync(this TemplateGroup templateGroup, TemplateConstraintManager constraintManager, CancellationToken cancellationToken)
         {
             IReadOnlyList<(ITemplateInfo Template, IReadOnlyList<TemplateConstraintResult> Result)> results =
                 await constraintManager.EvaluateConstraintsAsync(templateGroup.Templates, cancellationToken).ConfigureAwait(false);

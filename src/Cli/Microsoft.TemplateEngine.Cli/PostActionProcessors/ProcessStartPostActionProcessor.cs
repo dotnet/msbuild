@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Diagnostics;
 using Microsoft.DotNet.Cli.Utils;
@@ -47,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 {
                     command = command + " " + args;
                 }
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.RunningCommand, command));
+                Reporter.Output.WriteLine(LocalizableStrings.RunningCommand, command);
                 string resolvedExecutablePath = ResolveExecutableFilePath(environment.Host.FileSystem, executable, outputBasePath);
 
                 Process? commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
@@ -88,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 Reporter.Error.WriteLine(LocalizableStrings.CommandFailed);
                 Reporter.Error.WriteLine(ex.Message);
                 Reporter.Error.WriteLine(string.Empty);
-                Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.Generic_Details, ex.ToString()));
+                Reporter.Verbose.WriteLine(LocalizableStrings.Generic_Details, ex.ToString());
                 return false;
             }
         }

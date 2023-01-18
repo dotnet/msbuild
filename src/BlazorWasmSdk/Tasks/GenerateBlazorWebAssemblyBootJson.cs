@@ -171,11 +171,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         AddResourceToList(resource, resourceList, targetPath);
                         continue;
                     } 
-                    else if(string.Equals(assetTraitName, "BlazorWebAssemblyResource", StringComparison.OrdinalIgnoreCase) &&
-                            string.Equals(assetTraitValue, "js-module-crypto", StringComparison.OrdinalIgnoreCase))
-                    {
-                        behavior = assetTraitValue;
-                    }
                     else if (string.Equals("BlazorWebAssemblyResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
                              assetTraitValue.StartsWith("extension:", StringComparison.OrdinalIgnoreCase))
                     {

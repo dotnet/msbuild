@@ -67,7 +67,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -184,7 +184,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -248,7 +248,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -278,7 +278,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -309,7 +309,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -346,7 +346,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -384,7 +384,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -420,7 +420,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -456,7 +456,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         [Fact]
@@ -500,7 +500,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
 
             // Assert
-            manifest.ShouldBeEquivalentTo(expectedManifest);
+            manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
         private static StaticWebAssetsManifest.DiscoveryPattern CreatePattern(

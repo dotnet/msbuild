@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tests
         {
             string[] args = { "publish", "-r"};
             Action a = () => { Cli.Program.ProcessArgs(args); };
-            a.ShouldNotThrow<ArgumentOutOfRangeException>();
+            a.Should().NotThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tests
         {
             string[] args = { "restore", "-v" };
             Action a = () => { Cli.Program.ProcessArgs(args); };
-            a.ShouldNotThrow<ArgumentOutOfRangeException>();
+            a.Should().NotThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]

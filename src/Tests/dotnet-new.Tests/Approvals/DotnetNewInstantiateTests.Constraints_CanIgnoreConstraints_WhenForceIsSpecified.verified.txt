@@ -1,0 +1,6 @@
+﻿The template "Constraints - Restricted Template" was created successfully.
+
+Warning: the following constraints for the template 'Constraints - Restricted Template' are not met:
+   Template engine host: Running template on dotnetcli (version: %VERSION%) is not supported, supported hosts is/are: do-not-exist((1.0.0, )).
+
+The template might not be usable.

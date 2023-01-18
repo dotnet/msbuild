@@ -1,18 +1,13 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     /// <summary>
     /// This class represents shared /tmp/RANDOM-GUID/.templateengine/dotnetcli-preview/ folder
@@ -21,7 +16,7 @@ namespace Microsoft.DotNet.New.Tests
     /// </summary>
     public class SharedHomeDirectory : IDisposable
     {
-        private readonly HashSet<string> _installedPackages = new HashSet<string>();
+        private readonly HashSet<string> _installedPackages = new();
 
         public SharedHomeDirectory(IMessageSink messageSink)
         {
@@ -29,11 +24,15 @@ namespace Microsoft.DotNet.New.Tests
             Initialize();
         }
 
-        public string HomeDirectory { get; } = TestUtils.CreateTemporaryFolder("Home");
+        public string HomeDirectory { get; } = Utilities.CreateTemporaryFolder(nameof(SharedHomeDirectory));
 
         protected ITestOutputHelper Log { get; private set; }
 
-        public void Dispose() => Directory.Delete(HomeDirectory, true);
+        public void Dispose()
+        {
+            Directory.Delete(HomeDirectory, true);
+            GC.SuppressFinalize(this);
+        }
 
         public void InstallPackage(string packageName, string? workingDirectory = null, string? nugetSource = null)
         {
@@ -45,7 +44,7 @@ namespace Microsoft.DotNet.New.Tests
             {
                 workingDirectory = Directory.GetCurrentDirectory();
             }
-            var args = new List<string> { "-i", packageName, };
+            List<string> args = new() { "install", packageName };
             if (!string.IsNullOrWhiteSpace(nugetSource))
             {
                 args.AddRange(new[] { "--nuget-source", nugetSource });
@@ -70,7 +69,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetNewCommand(Log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates31Path)
+            new DotnetNewCommand(Log, "install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates60Path)
                 .WithCustomHive(HomeDirectory)
                 .Execute()
                 .Should()
@@ -78,7 +77,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetNewCommand(Log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates50Path)
+            new DotnetNewCommand(Log, "install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates70Path)
                 .WithCustomHive(HomeDirectory)
                 .Execute()
                 .Should()

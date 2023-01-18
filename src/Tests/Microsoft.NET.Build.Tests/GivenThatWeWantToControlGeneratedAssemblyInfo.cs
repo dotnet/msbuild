@@ -103,7 +103,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -134,7 +134,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -202,7 +202,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0+xyz" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0+xyz" });
         }
 
         [Fact]
@@ -239,7 +239,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.2.3+abc.xyz" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.2.3+abc.xyz" });
         }
 
         [WindowsOnlyTheory]
@@ -806,7 +806,7 @@ class Program
                 .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
                 .Execute();
             result.Should().Pass();
-            result.StdOut.Should().Equals(expectedFrameworkDisplayName);
+            result.StdOut.Should().BeEquivalentTo(expectedFrameworkDisplayName);
 
         }
 

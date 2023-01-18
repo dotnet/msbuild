@@ -24,8 +24,9 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string? PackageTargetPath { get; set; }
 
         /// <summary>
-        /// If provided, the path to the roslyn assemblies that should be loaded.
+        /// The path to the roslyn assemblies that should be loaded.
         /// </summary>
+        [Required]
         public string? RoslynAssembliesPath { get; set; }
 
         /// <summary>
@@ -37,6 +38,21 @@ namespace Microsoft.DotNet.ApiCompat.Task
         /// A NoWarn string contains the error codes that should be ignored.
         /// </summary>
         public string? NoWarn { get; set; }
+
+        /// <summary>
+        /// Enables rule to check that attributes match.
+        /// </summary>
+        public bool EnableRuleAttributesMustMatch { get; set; }
+
+        /// <summary>
+        /// Set of files with types in DocId format of which attributes to exclude.
+        /// </summary>
+        public string[]? ExcludeAttributesFiles { get; set; }
+
+        /// <summary>
+        /// Enables rule to check that the parameter names between public methods do not change.
+        /// </summary>
+        public bool EnableRuleCannotChangeParameterName { get; set; }
 
         /// <summary>
         /// If true, performs api compatibility checks on the package assets.
@@ -64,14 +80,19 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string? BaselinePackageTargetPath { get; set; }
 
         /// <summary>
-        /// If true, generates a compatibility suppression file that contains the api compatibility errors.
+        /// If true, generates a suppression file that contains the api compatibility errors.
         /// </summary>
-        public bool GenerateCompatibilitySuppressionFile { get; set; }
+        public bool GenerateSuppressionFile { get; set; }
 
         /// <summary>
-        /// The path to a compatibility suppression file. If provided, the suppressions are read and stored.
+        /// The path to suppression files. If provided, the suppressions are read and stored.
         /// </summary>
-        public string? CompatibilitySuppressionFilePath { get; set; }
+        public string[]? SuppressionFiles { get; set; }
+
+        /// <summary>
+        /// The path to the suppression output file that is written to, when <see cref="GenerateCompatibilitySuppressionFile"/> is true.
+        /// </summary>
+        public string? SuppressionOutputFile { get; set; }
 
         /// <summary>
         /// Assembly references grouped by target framework, for the assets inside the package.
@@ -85,12 +106,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
 
         public override bool Execute()
         {
-            if (RoslynAssembliesPath == null)
-            {
-                return base.Execute();
-            }
-
-            RoslynResolver roslynResolver = RoslynResolver.Register(RoslynAssembliesPath);
+            RoslynResolver roslynResolver = RoslynResolver.Register(RoslynAssembliesPath!);
             try
             {
                 return base.Execute();
@@ -119,11 +135,15 @@ namespace Microsoft.DotNet.ApiCompat.Task
                 }
             }
 
-            Func<ISuppressionEngine, MSBuildCompatibilityLogger> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
+            Func<ISuppressionEngine, SuppressableMSBuildLog> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
             ValidatePackage.Run(logFactory,
-                GenerateCompatibilitySuppressionFile,
-                CompatibilitySuppressionFilePath,
+                GenerateSuppressionFile,
+                SuppressionFiles,
+                SuppressionOutputFile,
                 NoWarn,
+                EnableRuleAttributesMustMatch,
+                ExcludeAttributesFiles,
+                EnableRuleCannotChangeParameterName,
                 PackageTargetPath!,
                 RunApiCompat,
                 EnableStrictModeForCompatibleTfms,

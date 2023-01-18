@@ -9,19 +9,21 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class MsBuildFileSetFactory : IFileSetFactory
+    internal sealed class MsBuildFileSetFactory : IFileSetFactory
     {
         private const string TargetName = "GenerateWatchList";
         private const string WatchTargetsFileName = "DotNetWatch.targets";
 
         private readonly IReporter _reporter;
         private readonly DotNetWatchOptions _dotNetWatchOptions;
+        private readonly string _muxerPath;
         private readonly string _projectFile;
         private readonly OutputSink _outputSink;
         private readonly ProcessRunner _processRunner;
@@ -31,10 +33,11 @@ namespace Microsoft.DotNet.Watcher.Internal
         public MsBuildFileSetFactory(
             IReporter reporter,
             DotNetWatchOptions dotNetWatchOptions,
+            string muxerPath,
             string projectFile,
             bool waitOnError,
             bool trace)
-            : this(dotNetWatchOptions, reporter, projectFile, new OutputSink(), waitOnError, trace)
+            : this(dotNetWatchOptions, reporter, muxerPath, projectFile, new OutputSink(), waitOnError, trace)
         {
         }
 
@@ -42,6 +45,7 @@ namespace Microsoft.DotNet.Watcher.Internal
         internal MsBuildFileSetFactory(
             DotNetWatchOptions dotNetWatchOptions,
             IReporter reporter,
+            string muxerPath,
             string projectFile,
             OutputSink outputSink,
             bool waitOnError,
@@ -53,6 +57,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
             _reporter = reporter;
             _dotNetWatchOptions = dotNetWatchOptions;
+            _muxerPath = muxerPath;
             _projectFile = projectFile;
             _outputSink = outputSink;
             _processRunner = new ProcessRunner(reporter);
@@ -63,7 +68,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
         public async Task<FileSet> CreateAsync(CancellationToken cancellationToken)
         {
-            var watchList = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var watchList = Path.GetTempFileName();
             try
             {
                 var projectDir = Path.GetDirectoryName(_projectFile);
@@ -90,7 +95,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
                     var processSpec = new ProcessSpec
                     {
-                        Executable = DotnetMuxer.MuxerPath,
+                        Executable = _muxerPath,
                         WorkingDirectory = projectDir,
                         Arguments = arguments,
                         OutputCapture = capture
@@ -146,14 +151,12 @@ namespace Microsoft.DotNet.Watcher.Internal
                         Debug.Assert(fileItems.All(f => Path.IsPathRooted(f.FilePath)), "All files should be rooted paths");
 #endif
 
-                        // TargetFrameworkVersion appears as v6.0 in msbuild. Ignore the leading v
-                        var targetFrameworkVersion = !string.IsNullOrEmpty(result.TargetFrameworkVersion) ?
-                            Version.Parse(result.TargetFrameworkVersion.AsSpan(1)) : // Ignore leading v
-                            null;
                         var projectInfo = new ProjectInfo(
                             _projectFile,
                             result.IsNetCoreApp,
-                            targetFrameworkVersion,
+                            EnvironmentVariableNames.TryParseTargetFrameworkVersion(result.TargetFrameworkVersion),
+                            result.RuntimeIdentifier,
+                            result.DefaultAppHostRuntimeIdentifier,
                             result.RunCommand,
                             result.RunArguments,
                             result.RunWorkingDirectory);

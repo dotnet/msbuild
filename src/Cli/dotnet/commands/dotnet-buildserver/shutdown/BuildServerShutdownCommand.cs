@@ -28,9 +28,9 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
             IReporter reporter = null)
             : base(result)
         {
-            bool msbuild = result.GetValueForOption(ServerShutdownCommandParser.MSBuildOption);
-            bool vbcscompiler = result.GetValueForOption(ServerShutdownCommandParser.VbcsOption);
-            bool razor = result.GetValueForOption(ServerShutdownCommandParser.RazorOption);
+            bool msbuild = result.GetValue(ServerShutdownCommandParser.MSBuildOption);
+            bool vbcscompiler = result.GetValue(ServerShutdownCommandParser.VbcsOption);
+            bool razor = result.GetValue(ServerShutdownCommandParser.RazorOption);
             bool all = !msbuild && !vbcscompiler && !razor;
 
             _enumerationFlags = ServerEnumerationFlags.None;
@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
                         exception.InnerException.Message).Red());
             }
 
-            if (Reporter.IsVerbose)
+            if (CommandLoggingContext.IsVerbose)
             {
                 Reporter.Verbose.WriteLine(exception.ToString().Red());
             }

@@ -61,8 +61,43 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
+  <!-- Edit SelfContained to match the value of PublishSelfContained if we are publishing.
+       This Won't affect t:/Publish (because of _IsPublishing), and also won't override a global SelfContained property.-->
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and ('$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false')">
+    <SelfContained>$(PublishSelfContained)</SelfContained>
+  </PropertyGroup>
+
+  <!-- Automatically infer the RuntimeIdentifier for properties that require it.
+  SelfContained without a RID is a no-op and semantically hints towards the fact that it can change the behavior of build, publish, and friends.
+  ... So, we infer the RID for SelfContained regardless of the context.
+
+  The other publish properties are specifically labelled Publish* and don't 'NEED' their RID unless we are doing a publish, so the RID inference
+  ... for these properties is limited to publishing only scenarios.
+
+  Finally, library projects and non-executable projects have awkward interactions here so they are excluded.-->
+  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
+    <UseCurrentRuntimeIdentifier Condition="
+                 '$(RuntimeIdentifier)' == '' and
+                 '$(_IsExecutable)' == 'true' and '$(IsTestProject)' != 'true' and
+                 '$(IsRidAgnostic)' != 'true' and
+                 (
+                   '$(SelfContained)' == 'true' or
+                   ('$(_IsPublishing)' == 'true' and
+                      (
+                        '$(PublishReadyToRun)' == 'true' or
+                        '$(PublishSingleFile)' == 'true' or
+                        '$(PublishAot)' == 'true'
+                      )
+                   )
+                 )">true</UseCurrentRuntimeIdentifier>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
     <RuntimeIdentifier>$(NETCoreSdkPortableRuntimeIdentifier)</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and '$(PublishRuntimeIdentifier)' != ''">
+    <RuntimeIdentifier>$(PublishRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PlatformTarget)' == ''">
@@ -151,8 +186,28 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
 
+    <!-- The following RID errors are asserts, and we don't expect them to ever occur. The error message is added as a safeguard.-->
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
-                 ResourceName="CannotHaveSelfContainedWithoutRuntimeIdentifier" />
+                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                 FormatArguments="SelfContained"/>
+
+    <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
+                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                 FormatArguments="PublishReadyToRun"/>
+
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
+                ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                FormatArguments="PublishSingleFile"/>
+
+    <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
+                ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                FormatArguments="PublishAot"/>
+
+    <!-- End of implicit RID resolver checks.-->
+
+    <NETSdkError Condition="'$(PublishSelfContained)' != 'true' and '$(PublishSelfContained)' != 'false' and '$(PublishSelfContained)' != ''"
+                ResourceName="PublishSelfContainedMustBeBool"
+                FormatArguments="$(PublishSelfContained)"/>
 
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true' and '$(_RuntimeIdentifierUsesAppHost)' == 'true'"
                  ResourceName="CannotUseSelfContainedWithoutAppHost" />
@@ -186,6 +241,19 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkWarning Condition="'$(SelfContained)' == 'true' and '$(EnableComHosting)' == 'true'"
                    ResourceName="NoSupportComSelfContained" />
+
+  </Target>
+
+  <Target Name="_CheckAndUnsetUnsupportedPrefer32Bit"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '7.0'">
+
+    <NETSdkWarning Condition="'$(Prefer32Bit)' == 'true'"
+                    ResourceName="Prefer32BitIgnoredForNetCoreApp" />
+
+    <PropertyGroup>
+      <Prefer32Bit>false</Prefer32Bit>
+    </PropertyGroup>
 
   </Target>
 

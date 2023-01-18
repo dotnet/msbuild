@@ -56,6 +56,7 @@
   <!-- Filter out any test packages from ItemsToSign -->
   <ItemGroup>
     <ItemsToSignPostBuild Remove="*tests*.nupkg" />
+    <ItemsToSign Remove="$(ArtifactsPackagesDir)**\*tests*.nupkg" />
   </ItemGroup>
 
   <PropertyGroup>

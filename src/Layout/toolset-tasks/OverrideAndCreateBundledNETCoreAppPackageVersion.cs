@@ -35,6 +35,11 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required] public string Stage0MicrosoftNETCoreAppRefPackageVersionPath { get; set; }
 
         [Required] public string MicrosoftNETCoreAppRefPackageVersion { get; set; }
+
+        // TODO: remove this once linker packages are produced from dotnet/runtime
+        // and replace it with MicrosoftNETCoreAppRefPackageVersion.
+        [Required] public string MicrosoftNETILLinkTasksPackageVersion { get; set; }
+
         [Required] public string NewSDKVersion { get; set; }
 
         [Required] public string OutputPath { get; set; }
@@ -45,6 +50,7 @@ namespace Microsoft.DotNet.Build.Tasks
                 ExecuteInternal(
                     File.ReadAllText(Stage0MicrosoftNETCoreAppRefPackageVersionPath),
                     MicrosoftNETCoreAppRefPackageVersion,
+                    MicrosoftNETILLinkTasksPackageVersion,
                     NewSDKVersion));
             return true;
         }
@@ -52,6 +58,7 @@ namespace Microsoft.DotNet.Build.Tasks
         public static string ExecuteInternal(
             string stage0MicrosoftNETCoreAppRefPackageVersionContent,
             string microsoftNETCoreAppRefPackageVersion,
+            string microsoftNETILLinkTasksPackageVersion,
             string newSDKVersion)
         {
             var projectXml = XDocument.Parse(stage0MicrosoftNETCoreAppRefPackageVersionContent);
@@ -125,6 +132,24 @@ namespace Microsoft.DotNet.Build.Tasks
 
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownRuntimePack").First().Attribute("LatestRuntimeFrameworkVersion"));
+
+            // TODO: remove this once we're using an SDK that contains KnownILLinkPack: https://github.com/dotnet/installer/pull/15106
+            {
+                itemGroup.Add(new XElement(ns + "KnownILLinkPack",
+                    new XAttribute("Include", "Microsoft.NET.ILLink.Tasks"),
+                    new XAttribute("TargetFramework", "net8.0"),
+                    new XAttribute("ILLinkPackVersion", microsoftNETILLinkTasksPackageVersion)));
+
+                // Use 7.0 linker when targeting supported RIDS <= net7.0.
+                var net70Version = "7.0.100-1.22579.2";
+
+                foreach (var tfm in new[] { "net7.0", "net6.0", "net5.0", "netcoreapp3.1", "netcoreapp3.0" }) {
+                    itemGroup.Add(new XElement(ns + "KnownILLinkPack",
+                        new XAttribute("Include", "Microsoft.NET.ILLink.Tasks"),
+                        new XAttribute("TargetFramework", tfm),
+                        new XAttribute("ILLinkPackVersion", net70Version)));
+                }
+            }
 
             return projectXml.ToString();
         }

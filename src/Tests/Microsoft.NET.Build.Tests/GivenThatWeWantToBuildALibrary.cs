@@ -17,6 +17,7 @@ using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Newtonsoft.Json.Linq;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -393,6 +394,16 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID12_12", "ANDROID11_11_OR_GREATER", "ANDROID12_12_OR_GREATER" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_platform(string[] sdkSupportedTargetPlatformVersion, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
+            if (targetPlatformIdentifier.Equals("windows", StringComparison.OrdinalIgnoreCase))
+            {
+                var sdkVersion = SemanticVersion.Parse(TestContext.Current.ToolsetUnderTest.SdkVersion);
+                if (new SemanticVersion(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch) < new SemanticVersion(7, 0, 200))
+                {
+                    //  Fixed in 7.0.200: https://github.com/dotnet/sdk/pull/29009
+                    return;
+                }
+            }
+
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework, identifier: expectedDefines.GetHashCode().ToString())
@@ -488,8 +499,8 @@ namespace Microsoft.NET.Build.Tests
                 testProj.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
                 testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
             }
-            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
-            File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
+
+            testProj.SourceFiles[$"{testProj.Name}.cs"] = @"
 using System;
 class Program
 {
@@ -529,7 +540,8 @@ class Program
             Console.WriteLine(""IOS"");
         #endif
     }
-}");
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
             buildCommand
@@ -628,7 +640,7 @@ class Program
                 .Should()
                 .Pass();
 
-            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "7.0" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "7.0" });
         }
 
         private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
@@ -662,17 +674,17 @@ class Program
 
             if (useSolution)
             {
-                var dotnetCommand = new DotnetCommand(Log)
-                {
-                    WorkingDirectory = testAsset.TestRoot
-                };
-
-                dotnetCommand.Execute("new", "sln", "--debug:ephemeral-hive")
+                new DotnetNewCommand(Log)
+                    .WithVirtualHive()
+                    .WithWorkingDirectory(testAsset.TestRoot)
+                    .Execute("sln")
                     .Should()
                     .Pass();
 
                 var relativePathToProject = Path.Combine(testProject.Name, testProject.Name + ".csproj");
-                dotnetCommand.Execute($"sln", "add", relativePathToProject)
+                new DotnetCommand(Log)
+                    .WithWorkingDirectory(testAsset.TestRoot)
+                    .Execute($"sln", "add", relativePathToProject)
                     .Should()
                     .Pass();
 

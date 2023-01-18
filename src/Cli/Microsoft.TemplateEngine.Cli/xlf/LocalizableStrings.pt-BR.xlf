@@ -308,6 +308,11 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
         <target state="translated">O comando foi bem-sucedido.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Commands_TemplateShortNameCommandConflict_Info">
+        <source>To instantiate the template with short name '{0}', run:</source>
+        <target state="translated">Para instanciar o modelo com o nome abreviado '{0}', execute:</target>
+        <note>Followed by command example from new line.</note>
+      </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
         <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
         <target state="translated">O(s) argumento(s) {0} não é(são) reconhecido(s). Deve ser um destes: {1}.</target>
@@ -403,6 +408,21 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Aviso: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_CommandHints_List">
+        <source>To list installed templates, run:</source>
+        <target state="translated">Para listar os modelos instalados, execute:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_List_Template">
+        <source>To list installed templates similar to '{0}', run:</source>
+        <target state="translated">Para listar modelos instalados semelhantes a '{0}', execute:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_Search">
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="translated">Para pesquisar os modelos no NuGet.org, execute:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Generic_Details">
         <source>Details: {0}</source>
         <target state="translated">Detalhes: {0}</target>
@@ -423,6 +443,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Exemplos:</target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_Info_NoMatchingTemplates">
+        <source>No templates found matching: {0}.</source>
+        <target state="translated">Nenhum modelo encontrado: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Generic_NoCallbackError">
         <source>No callback is configured. Running post action is not possible.</source>
         <target state="translated">Nenhum retorno de chamada está configurado. Não é possível executar a ação de postagem.</target>
@@ -437,6 +462,31 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
         <target state="translated">Falha ao carregar os dados do host CLI do dotnet para o modelo {0} de {1}. Os dados do host serão ignorados.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
+        <source>No templates or subcommands found matching: '{0}'.</source>
+        <target state="translated">Nenhum modelo ou subcomando encontrado correspondente: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
+        <source>Did you mean one of the following subcommands?</source>
+        <target state="translated">Você quis dizer um dos seguintes subcomandos?</target>
+        <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
+        <source>Did you mean one of the following templates?</source>
+        <target state="translated">Você quis dizer um dos seguintes modelos?</target>
+        <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate">
+        <source>Failed to get information about template packages for the template with identity '{0}'.</source>
+        <target state="translated">Ocorreu um erro ao obter informações sobre pacotes de modelos para o modelo com a identidade '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup">
+        <source>Failed to get information about template packages for template group '{0}'.</source>
+        <target state="translated">Ocorreu um erro ao obter informações sobre pacotes de modelos para o grupo de modelos '{0}'.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
@@ -473,15 +523,10 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Sintaxe de comando inválida: usar '{0}' em seu lugar.</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
-      <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run:</source>
-        <target state="translated">Para listar os modelos instalados, execute:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingRequiredParameter">
-        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
-        <target state="translated">A opção obrigatória '{0}' está faltando para o modelo '{1}'.</target>
-        <note />
+        <source>Missing mandatory option(s) for the template '{1}': {0}.</source>
+        <target state="translated">Opções obrigatórias ausentes para o modelo '{1}': {0}.</target>
+        <note>{0} - comma-separated list of missing options, each option is quoted.</note>
       </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
@@ -503,9 +548,9 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Nenhum modelo instalado.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoTemplatesMatchingInputParameters">
-        <source>No templates found matching: {0}.</source>
-        <target state="translated">Nenhum modelo encontrado: {0}.</target>
+      <trans-unit id="OperationCancelled">
+        <source>The operation was cancelled.</source>
+        <target state="translated">A operação foi cancelada.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -662,9 +707,9 @@ The header is followed by the list of parameters and their errors (might be seve
         <note />
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
-        <source>Rerun the command and pass --force to accept and create.</source>
-        <target state="translated">Re-execute o comando e passe --force para aceitar e criar.</target>
-        <note />
+        <source>To create the template anyway, run the command with '{0}' option:</source>
+        <target state="translated">Para criar o modelo mesmo assim, execute o comando com a opção “{0}”:</target>
+        <note>{0} - additional option name (--force)</note>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>
@@ -674,11 +719,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
         <target state="translated">Comando em execução '{0}'...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run:</source>
-        <target state="translated">Para pesquisar os modelos no NuGet.org, execute:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
@@ -1020,6 +1060,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="UnableToSetPermissions">
         <source>Unable to apply permissions {0} to "{1}".</source>
         <target state="translated">Não é possível aplicar as permissões {0} a "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedResult">
+        <source>Template generation ended with unexpected result: '{0}'. Details: {1}</source>
+        <target state="translated">Geração de modelo encerrada com resultado inesperado: '{0}'. Detalhes: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">

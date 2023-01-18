@@ -47,8 +47,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                   nugetPackageDownloader: nugetPackageDownloader, workloadManifestUpdater: workloadManifestUpdater,
                   dotnetDir: dotnetDir, userProfileDir: userProfileDir, tempDirPath: tempDirPath, version: version, installedFeatureBand: installedFeatureBand)
         {
-            _skipManifestUpdate = parseResult.GetValueForOption(WorkloadInstallCommandParser.SkipManifestUpdateOption);
-            _workloadIds = workloadIds ?? parseResult.GetValueForArgument(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
+            _skipManifestUpdate = parseResult.GetValue(WorkloadInstallCommandParser.SkipManifestUpdateOption);
+            _workloadIds = workloadIds ?? parseResult.GetValue(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
 
             _workloadInstaller = _workloadInstallerFromConstructor ??
                                  WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, _sdkFeatureBand,
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                      _packageSourceLocation, RestoreActionConfiguration, elevationRequired: !_printDownloadLinkOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
 
             bool displayManifestUpdates = false;
-            if (Verbosity.VerbosityIsDetailedOrDiagnostic())
+            if (Verbosity.IsDetailedOrDiagnostic())
             {
                 displayManifestUpdates = true;
             }
@@ -194,7 +194,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 // Garbage collection failed, warn user
                 reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectionFailed,
-                    verbosity.VerbosityIsDetailedOrDiagnostic() ? e.StackTrace.ToString() : e.Message).Yellow());
+                    verbosity.IsDetailedOrDiagnostic() ? e.StackTrace.ToString() : e.Message).Yellow());
             }
         }
 

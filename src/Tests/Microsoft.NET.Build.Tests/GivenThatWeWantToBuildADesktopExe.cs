@@ -19,6 +19,8 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Reflection.Metadata;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -530,7 +532,7 @@ namespace DefaultReferences
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", httpPackageVersion));
 
-            testProject.SourceFiles["Program.cs"] = 
+            testProject.SourceFiles["Program.cs"] =
                 (useAlias ? "extern alias snh;" + Environment.NewLine : "") +
 
                 @"using System;
@@ -849,6 +851,228 @@ class Program
                 .Execute()
                 .Should()
                 .Pass();
+        }
+
+        [WindowsOnlyFact]
+        public void It_places_package_xml_in_ref_folder_in_output_directory()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopUsingPackageWithdXmlInRefFolder",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            // This package contains an xml in ref, but not in lib.
+            testProject.PackageReferences.Add(new TestPackageReference("system.diagnostics.debug", "4.3.0"));
+
+            testProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", "true");
+            testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", "true");
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            // this xml is coming from ref folder
+            outputDirectory.Should().HaveFile("System.Diagnostics.Debug.xml");
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("true",  "true")]
+        [InlineData("true",  "false")]
+        [InlineData("false", "true")]
+        [InlineData("false", "false")]
+        public void It_places_package_pdb_and_xml_files_in_output_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopUsingPackageWithPdbAndXml",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
+            
+            testProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", enableCopyDebugSymbolFilesFromPackages);
+            testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", enableDocumentationFilesFromPackages);
+
+            string testPath = enableCopyDebugSymbolFilesFromPackages + enableDocumentationFilesFromPackages;
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: testPath);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            HelperCheckPdbAndDocumentation(outputDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("true",  "true")]
+        [InlineData("true",  "false")]
+        [InlineData("false", "true")]
+        [InlineData("false", "false")]
+        public void It_places_package_pdb_and_xml_files_from_project_references_in_output_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)
+        {
+            var libraryProject = new TestProject()
+            {
+                Name = "ProjectWithPackage",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = false,
+            };
+
+            libraryProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
+
+            var consumerProject = new TestProject()
+            {
+                Name = "ConsumerProject",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            consumerProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", enableCopyDebugSymbolFilesFromPackages);
+            consumerProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", enableDocumentationFilesFromPackages);
+
+            consumerProject.ReferencedProjects.Add(libraryProject);
+
+            string testPath = enableCopyDebugSymbolFilesFromPackages + enableDocumentationFilesFromPackages;
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(consumerProject, consumerProject.Name, identifier: testPath);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(libraryProject.TargetFrameworks);
+
+            HelperCheckPdbAndDocumentation(outputDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("true",  "true")]
+        [InlineData("true",  "false")]
+        [InlineData("false", "true")]
+        [InlineData("false", "false")]
+        public void It_places_package_pdb_and_xml_files_in_publish_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopPublishPackageWithPdbAndXml",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
+
+            testProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", enableCopyDebugSymbolFilesFromPackages);
+            testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", enableDocumentationFilesFromPackages);
+
+            string testPath = enableCopyDebugSymbolFilesFromPackages + enableDocumentationFilesFromPackages;
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: testPath);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand
+                .Execute()
+                .Should()
+            .Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            HelperCheckPdbAndDocumentation(publishDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
+        }
+
+        [WindowsOnlyFact]
+        public void It_places_package_xml_files_in_output_directory_but_not_in_publish()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopPackageWithXmlNotPublished",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
+
+            testProject.AdditionalProperties.Add("PublishReferencesDocumentationFiles", "false");
+            testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", "true");
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand
+                .Execute()
+                .Should()
+            .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            outputDirectory.Should().HaveFile("Microsoft.Build.xml");
+            publishDirectory.Should().NotHaveFile("Microsoft.Build.xml");
+        }
+
+        void HelperCheckPdbAndDocumentation(
+            DirectoryInfo directoryInfo,
+            string packageName,
+            string enableCopyDebugSymbolFilesFromPackages,
+            string enableDocumentationFilesFromPackages)
+        {
+            string assemblyFile = packageName + ".dll";
+            string pdbFile = packageName + ".pdb";
+            string docFile = packageName + ".xml";
+
+            ShouldHave(assemblyFile);
+            if (enableCopyDebugSymbolFilesFromPackages == "true")
+            {
+                ShouldHave(pdbFile);
+            }
+            else
+            {
+                ShouldNotHave(pdbFile);
+            }
+
+            if (enableDocumentationFilesFromPackages == "true")
+            {
+                ShouldHave(docFile);
+            }
+            else
+            {
+                ShouldNotHave(docFile);
+            }
+
+            void ShouldHave(string file) => directoryInfo.Should().HaveFile(file);
+
+            void ShouldNotHave(string file) => directoryInfo.Should().NotHaveFile(file);
         }
     }
 }

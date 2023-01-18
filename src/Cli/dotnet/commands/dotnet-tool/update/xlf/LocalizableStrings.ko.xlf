@@ -78,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">전역 도구를 업데이트합니다.</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">전역 또는 로컬 도구를 업데이트합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

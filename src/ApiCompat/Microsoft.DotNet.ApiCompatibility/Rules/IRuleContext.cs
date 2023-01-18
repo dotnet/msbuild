@@ -25,19 +25,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// Registers a callback to invoke when two <see cref="IAssemblySymbol"/> are compared.
         /// </summary>
         /// <param name="action">The action to invoke.</param>
-        void RegisterOnAssemblySymbolAction(Action<IAssemblySymbol?, IAssemblySymbol?, string, string, IList<CompatDifference>> action);
+        void RegisterOnAssemblySymbolAction(Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, bool, IList<CompatDifference>> action);
 
         /// <summary>
         /// Registers a callback to invoke when two <see cref="ITypeSymbol"/> are compared.
         /// </summary>
         /// <param name="action">The action to invoke.</param>
-        void RegisterOnTypeSymbolAction(Action<ITypeSymbol?, ITypeSymbol?, string, string, IList<CompatDifference>> action);
+        void RegisterOnTypeSymbolAction(Action<ITypeSymbol?, ITypeSymbol?, MetadataInformation, MetadataInformation, IList<CompatDifference>> action);
 
         /// <summary>
         /// Registers a callback to invoke when two <see cref="ISymbol"/> members of a <see cref="ITypeSymbol"/> are compared.
         /// </summary>
         /// <param name="action">The action to invoke.</param>
-        void RegisterOnMemberSymbolAction(Action<ISymbol?, ISymbol?, string, string, IList<CompatDifference>> action);
+        void RegisterOnMemberSymbolAction(Action<ISymbol?, ISymbol?, MetadataInformation, MetadataInformation, IList<CompatDifference>> action);
 
         /// <summary>
         /// Register a callback to invoke when two <see cref="ISymbol"/> members of a <see cref="ITypeSymbol"/>
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// is needed by some rules regardless of left or right being null.
         /// </summary>
         /// <param name="action">The action to invoke</param>
-        void RegisterOnMemberSymbolAction(Action<ISymbol?, ISymbol?, ITypeSymbol, ITypeSymbol, string, string, IList<CompatDifference>> action);
+        void RegisterOnMemberSymbolAction(Action<ISymbol?, ISymbol?, ITypeSymbol, ITypeSymbol, MetadataInformation, MetadataInformation, IList<CompatDifference>> action);
     }
 
     /// <summary>
@@ -53,10 +53,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public interface IRuleRunnerContext
     {
-        void RunOnAssemblySymbolActions(IAssemblySymbol? left, IAssemblySymbol? right, string leftName, string rightName, IList<CompatDifference> differences);
+        void RunOnAssemblySymbolActions(IAssemblySymbol? left, IAssemblySymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, bool isSingleAssembly, IList<CompatDifference> differences);
 
-        void RunOnTypeSymbolActions(ITypeSymbol? left, ITypeSymbol? right, string leftName, string rightName, IList<CompatDifference> differences);
+        void RunOnTypeSymbolActions(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences);
 
-        void RunOnMemberSymbolActions(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences);
+        void RunOnMemberSymbolActions(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences);
     }
 }

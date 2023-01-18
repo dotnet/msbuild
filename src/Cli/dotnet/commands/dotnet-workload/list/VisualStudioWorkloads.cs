@@ -11,8 +11,6 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.VisualStudio.Setup.Configuration;
 
-#nullable disable
-
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
     /// <summary>

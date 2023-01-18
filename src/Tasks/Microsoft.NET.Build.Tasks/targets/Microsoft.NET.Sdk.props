@@ -20,9 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>
     <Platforms Condition=" '$(Platforms)' == '' ">AnyCPU</Platforms>
-    <Configuration Condition=" '$(_IsPacking)' == 'true' and '$(PackRelease)' == 'true' and '$(Configuration)' == '' ">Release</Configuration>
-    <Configuration Condition=" '$(_IsPublishing)' == 'true' and '$(PublishRelease)' == 'true' and '$(Configuration)' == '' ">Release</Configuration>
-    <Configuration Condition="'$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
 
@@ -113,7 +111,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugSymbols Condition="'$(DebugSymbols)'==''">false</DebugSymbols>
     <CheckForOverflowUnderflow Condition="'$(CheckForOverflowUnderflow)'==''">false</CheckForOverflowUnderflow>
     <AutomaticallyUseReferenceAssemblyPackages Condition="'$(AutomaticallyUseReferenceAssemblyPackages)'==''">true</AutomaticallyUseReferenceAssemblyPackages>
-    <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.2</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
+    <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.3</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
     <CopyConflictingTransitiveContent>false</CopyConflictingTransitiveContent>
     <MSBuildCopyContentTransitively Condition="'$(MSBuildCopyContentTransitively)' == ''">true</MSBuildCopyContentTransitively>
     <ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts Condition="'$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)' == ''">true</ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts>
@@ -153,8 +151,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
-  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.ILCompiler" />
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.ILLink.Tasks" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />

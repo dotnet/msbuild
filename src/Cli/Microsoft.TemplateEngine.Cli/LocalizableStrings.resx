@@ -167,7 +167,8 @@
     <value>Language</value>
   </data>
   <data name="MissingRequiredParameter" xml:space="preserve">
-    <value>Mandatory option '{0}' is missing for the template '{1}'.</value>
+    <value>Missing mandatory option(s) for the template '{1}': {0}.</value>
+    <comment>{0} - comma-separated list of missing options, each option is quoted.</comment>
   </data>
   <data name="MountPointFactories" xml:space="preserve">
     <value>Mount Point Factories</value>
@@ -178,7 +179,7 @@
   <data name="NoParameters" xml:space="preserve">
     <value>    (No Parameters)</value>
   </data>
-  <data name="NoTemplatesMatchingInputParameters" xml:space="preserve">
+  <data name="Generic_Info_NoMatchingTemplates" xml:space="preserve">
     <value>No templates found matching: {0}.</value>
   </data>
   <data name="OptionalWorkloadsSyncFailed" xml:space="preserve">
@@ -191,7 +192,8 @@
     <value>Overwrite</value>
   </data>
   <data name="RerunCommandAndPassForceToCreateAnyway" xml:space="preserve">
-    <value>Rerun the command and pass --force to accept and create.</value>
+    <value>To create the template anyway, run the command with '{0}' option:</value>
+    <comment>{0} - additional option name (--force)</comment>
   </data>
   <data name="RunHelpForInformationAboutAcceptedParameters" xml:space="preserve">
     <value>For usage information, run: </value>
@@ -385,8 +387,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="InvalidParameterTemplateHint" xml:space="preserve">
     <value>For more information, run:</value>
   </data>
-  <data name="ListTemplatesCommand" xml:space="preserve">
-    <value>To list installed templates, run:</value>
+  <data name="Generic_CommandHints_List_Template" xml:space="preserve">
+    <value>To list installed templates similar to '{0}', run:</value>
   </data>
   <data name="ColumnNameAuthor" xml:space="preserve">
     <value>Author</value>
@@ -415,7 +417,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="ColumnNameTotalDownloads" xml:space="preserve">
     <value>Downloads</value>
   </data>
-  <data name="SearchTemplatesCommand" xml:space="preserve">
+  <data name="Generic_CommandHints_Search" xml:space="preserve">
     <value>To search for the templates on NuGet.org, run:</value>
   </data>
   <data name="AmbiguousParameterDetail" xml:space="preserve">
@@ -781,5 +783,35 @@ The header is followed by the list of parameters and their errors (might be seve
   <data name="TemplateCreator_Hint_Uninstall" xml:space="preserve">
     <value>To uninstall the template package, run:</value>
     <comment>The sentence is followed by the command to run the action</comment>
+  </data>
+  <data name="InstantiateCommand_Info_TypoCorrection_Templates" xml:space="preserve">
+    <value>Did you mean one of the following templates?</value>
+    <comment>Followed by the list of suggestions</comment>
+  </data>
+  <data name="InstantiateCommand_Info_NoMatchingTemplatesSubCommands" xml:space="preserve">
+    <value>No templates or subcommands found matching: '{0}'.</value>
+  </data>
+  <data name="InstantiateCommand_Info_TypoCorrection_Subcommands" xml:space="preserve">
+    <value>Did you mean one of the following subcommands?</value>
+    <comment>Followed by the list of suggestions</comment>
+  </data>
+  <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate" xml:space="preserve">
+    <value>Failed to get information about template packages for the template with identity '{0}'.</value>
+  </data>
+  <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup" xml:space="preserve">
+    <value>Failed to get information about template packages for template group '{0}'.</value>
+  </data>
+  <data name="Commands_TemplateShortNameCommandConflict_Info" xml:space="preserve">
+    <value>To instantiate the template with short name '{0}', run:</value>
+    <comment>Followed by command example from new line.</comment>
+  </data>
+  <data name="Generic_CommandHints_List" xml:space="preserve">
+    <value>To list installed templates, run:</value>
+  </data>
+  <data name="OperationCancelled" xml:space="preserve">
+    <value>The operation was cancelled.</value>
+  </data>
+  <data name="UnexpectedResult" xml:space="preserve">
+    <value>Template generation ended with unexpected result: '{0}'. Details: {1}</value>
   </data>
 </root>

@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             Action logWithoutErrorCode = () => logger.LogError("No error code");
 
 #if DEBUG
-            logWithoutErrorCode.ShouldThrow<ArgumentException>();
+            logWithoutErrorCode.Should().Throw<ArgumentException>();
 #else
             logWithoutErrorCode();
             logger.Messages.Should().Equal(

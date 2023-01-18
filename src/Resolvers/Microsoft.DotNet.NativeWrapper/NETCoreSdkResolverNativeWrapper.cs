@@ -4,7 +4,10 @@
 using System;
 using System.Diagnostics;
 
+//only Microsoft.DotNet.NativeWrapper (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
 #nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
 
 namespace Microsoft.DotNet.NativeWrapper
 {

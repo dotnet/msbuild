@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = $"dotnet-{toolCommandNameA.ToString()}",
             });
 
-            action.ShouldThrow<GracefulException>(string.Format(CommandFactory.LocalizableStrings.NeedRunToolRestore,
+            action.Should().Throw<GracefulException>(string.Format(CommandFactory.LocalizableStrings.NeedRunToolRestore,
                 toolCommandNameA.ToString()));
         }
 
@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = $"dotnet-{toolCommandNameA.ToString()}",
             });
 
-            action.ShouldThrow<GracefulException>(string.Format(CommandFactory.LocalizableStrings.NeedRunToolRestore,
+            action.Should().Throw<GracefulException>(string.Format(CommandFactory.LocalizableStrings.NeedRunToolRestore,
                 toolCommandNameA.ToString()));
         }
 

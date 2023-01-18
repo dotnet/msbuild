@@ -10,7 +10,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public static class HotReloadProfileReader
+    internal static class HotReloadProfileReader
     {
         public static HotReloadProfile InferHotReloadProfile(ProjectGraph projectGraph, IReporter reporter)
         {

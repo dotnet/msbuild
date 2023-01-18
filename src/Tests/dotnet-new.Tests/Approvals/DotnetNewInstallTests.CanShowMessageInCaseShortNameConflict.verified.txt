@@ -1,0 +1,10 @@
+﻿The following template packages will be installed:
+   %TEMPLATE FOLDER%
+
+Success: %TEMPLATE FOLDER% installed the following templates:
+Template Name                  Short Name                                   Language  Tags      
+-----------------------------  -------------------------------------------  --------  ----------
+TemplateWithConflictShortName  list,search,install,uninstall,update,create            Test Asset
+
+To instantiate the template with short name 'install', run:
+   dotnet new create install

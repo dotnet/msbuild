@@ -42,9 +42,9 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name.</source>
-        <target state="translated">以指定的簡短名稱具現化範本。</target>
-        <note />
+        <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
+        <target state="translated">使用指定的簡短名稱將範本具現化。'dotnet new &lt;template name&gt;' 的別名。</target>
+        <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
         <source>Checks the currently installed template packages for updates.</source>
@@ -94,7 +94,7 @@ If command is specified without the argument, it lists all the template packages
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
         <target state="translated">只檢查更新並顯示要更新的範本套件，而不套用更新。</target>
         <note />
       </trans-unit>
@@ -124,8 +124,8 @@ If command is specified without the argument, it lists all the template packages
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
-        <target state="translated">顯示輸出中所有的欄位。</target>
+        <source>Displays all columns in the output.</source>
+        <target state="translated">顯示輸出中所有資料行。</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">
@@ -181,6 +181,11 @@ If command is specified without the argument, it lists all the template packages
       <trans-unit id="Option_PackageFilter">
         <source>Filters the templates based on NuGet package ID.</source>
         <target state="translated">根據 NuGet 套件識別碼篩選範本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="translated">應該用於內容評估的專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

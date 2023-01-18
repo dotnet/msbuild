@@ -1,16 +1,23 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
-using System;
-using VerifyTests;
+using VerifyTests.DiffPlex;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
     public class VerifySettingsFixture : IDisposable
     {
+        private static bool _called;
+
         public VerifySettingsFixture()
         {
-            VerifierSettings.DerivePathInfo(
+            if (_called)
+            {
+                return;
+            }
+            _called = true;
+            Verifier.DerivePathInfo(
                 (_, _, type, method) => new(
                     directory: "Approvals",
                     typeName: type.Name,

@@ -3,47 +3,23 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using Jab;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
-using Microsoft.DotNet.ApiCompatibility.Runner;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
 
 namespace Microsoft.DotNet.ApiCompat
 {
-    [ServiceProvider(RootServices = new[] { typeof(IEnumerable<IRule>) })]
-    [Import(typeof(IApiCompatServiceProviderModule))]
-    [Singleton(typeof(CompatibleFrameworkInPackageValidator))]
-    [Singleton(typeof(CompatibleTfmValidator))]
-    [Singleton(typeof(BaselinePackageValidator))]
-    internal partial class ValidatePackageServiceProvider : IApiCompatServiceProviderModule
-    {
-        public Func<ICompatibilityLogger> LogFactory { get; }
-
-        public Func<ISuppressionEngine> SuppressionEngineFactory { get; }
-
-        public RuleFactory RuleFactory { get; }
-
-        public ValidatePackageServiceProvider(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
-            Func<ISuppressionEngine> suppressionEngineFactory,
-            RuleFactory ruleFactory)
-        {
-            // It's important to use GetService<T> here instead of directly invoking the factory
-            // to avoid two instances being created when retrieving a singleton.
-            LogFactory = () => logFactory(GetService<ISuppressionEngine>());
-            SuppressionEngineFactory = suppressionEngineFactory;
-            RuleFactory = ruleFactory;
-        }
-    }
-
     internal static class ValidatePackage
     {
-        public static void Run(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
+        public static void Run(Func<ISuppressionEngine, ISuppressableLog> logFactory,
             bool generateSuppressionFile,
-            string? suppressionFile,
+            string[]? suppressionFiles,
+            string? suppressionOutputFile,
             string? noWarn,
+            bool enableRuleAttributesMustMatch,
+            string[]? excludeAttributesFiles,
+            bool enableRuleCannotChangeParameterName,
             string packagePath,
             bool runApiCompat,
             bool enableStrictModeForCompatibleTfms,
@@ -54,13 +30,13 @@ namespace Microsoft.DotNet.ApiCompat
             Dictionary<string, string[]>? packageAssemblyReferences,
             Dictionary<string, string[]>? baselinePackageAssemblyReferences)
         {
-            // Configure the suppression engine. Ignore the passed in suppression file if it should be generated and doesn't yet exist.
-            string? suppressionFileForEngine = generateSuppressionFile && !File.Exists(suppressionFile) ? null : suppressionFile;
-
             // Initialize the service provider
-            ValidatePackageServiceProvider serviceProvider = new(logFactory,
-                () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
-                new RuleFactory());
+            ApiCompatServiceProvider serviceProvider = new(logFactory,
+                () => new SuppressionEngine(suppressionFiles, noWarn, generateSuppressionFile),
+                (log) => new RuleFactory(log,
+                    enableRuleAttributesMustMatch,
+                    excludeAttributesFiles,
+                    enableRuleCannotChangeParameterName));
 
             // If a runtime graph is provided, parse and use it for asset selection during the in-memory package construction.
             if (runtimeGraph != null)
@@ -72,19 +48,22 @@ namespace Microsoft.DotNet.ApiCompat
             Package package = Package.Create(packagePath, packageAssemblyReferences);
 
             // Invoke all validators and pass the specific validation options in. Don't execute work items, just enqueue them.
-            serviceProvider.GetService<CompatibleTfmValidator>().Validate(new PackageValidatorOption(package,
+            CompatibleTfmValidator tfmValidator = new(serviceProvider.SuppressableLog, serviceProvider.ApiCompatRunner);
+            tfmValidator.Validate(new PackageValidatorOption(package,
                 enableStrictModeForCompatibleTfms,
                 enqueueApiCompatWorkItems: runApiCompat,
                 executeApiCompatWorkItems: false));
 
-            serviceProvider.GetService<CompatibleFrameworkInPackageValidator>().Validate(new PackageValidatorOption(package,
+            CompatibleFrameworkInPackageValidator compatibleFrameworkInPackageValidator = new(serviceProvider.SuppressableLog, serviceProvider.ApiCompatRunner);
+            compatibleFrameworkInPackageValidator.Validate(new PackageValidatorOption(package,
                 enableStrictModeForCompatibleFrameworksInPackage,
                 enqueueApiCompatWorkItems: runApiCompat,
                 executeApiCompatWorkItems: false));
 
             if (!string.IsNullOrEmpty(baselinePackagePath))
             {
-                serviceProvider.GetService<BaselinePackageValidator>().Validate(new PackageValidatorOption(package,
+                BaselinePackageValidator baselineValidator = new(serviceProvider.SuppressableLog, serviceProvider.ApiCompatRunner);
+                baselineValidator.Validate(new PackageValidatorOption(package,
                     enableStrictMode: enableStrictModeForBaselineValidation,
                     enqueueApiCompatWorkItems: runApiCompat,
                     executeApiCompatWorkItems: false,
@@ -94,14 +73,17 @@ namespace Microsoft.DotNet.ApiCompat
             if (runApiCompat)
             {
                 // Execute the work items that were enqueued.
-                serviceProvider.GetService<IApiCompatRunner>().ExecuteWorkItems();
+                serviceProvider.ApiCompatRunner.ExecuteWorkItems();
+
+                SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.SuppressableLog);
             }
 
             if (generateSuppressionFile)
             {
-                SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.GetService<ISuppressionEngine>(),
-                    serviceProvider.GetService<ICompatibilityLogger>(),
-                    suppressionFile);
+                SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
+                    serviceProvider.SuppressableLog,
+                    suppressionFiles,
+                    suppressionOutputFile);
             }
         }
     }

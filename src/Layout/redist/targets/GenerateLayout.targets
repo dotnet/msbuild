@@ -161,13 +161,14 @@
           BeforeTargets="Build">
     <PropertyGroup>
       <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' != 'true'" >netcoreapp3.1</TestCliNuGetDirectoryTargetFramework>
-      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'" >net6.0</TestCliNuGetDirectoryTargetFramework>
+      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'" >net7.0</TestCliNuGetDirectoryTargetFramework>
       <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/$(TestCliNuGetDirectoryTargetFramework)/</TestCliNuGetDirectory>
     </PropertyGroup>
     <ItemGroup>
       <!-- https://github.com/microsoft/vstest/issues/1886 -->
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NewtonSoft.Json.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.Extensions.DependencyModel.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.Extensions.FileSystemGlobbing.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Memory.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Runtime.CompilerServices.Unsafe.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NuGet.Frameworks.dll" />
@@ -184,25 +185,6 @@
       Targets="Publish"
       Projects="$(RepoRoot)/src/Layout/tool_fsharp/tool_fsc.csproj"
       Properties="Configuration=$(Configuration);PublishDir=$(OutputPath)/FSharp" />
-  </Target>
-
-  <Target Name="PublishBuiltInTools"
-          BeforeTargets="Build">
-
-    <PropertyGroup>
-      <DotnetWatchOutputDirectory>$(OutputPath)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchOutputDirectory>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <DotNetWatchFile Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
-      <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\*.dll" DeploymentSubpath="middleware" />
-      <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.Extensions.DotNetDeltaApplier\$(Configuration)\net6.0\*.dll" DeploymentSubpath="hotreload" />
-      <DotNetWatchFile Include="$(ArtifactsDir)bin\DotNetWatchTasks\$(Configuration)\netstandard2.0\DotNetWatchTasks.dll" />
-    </ItemGroup>
-
-    <Copy
-      SourceFiles="@(DotNetWatchFile)"
-      DestinationFiles="$(DotnetWatchOutputDirectory)%(DotNetWatchFile.DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)" />
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"

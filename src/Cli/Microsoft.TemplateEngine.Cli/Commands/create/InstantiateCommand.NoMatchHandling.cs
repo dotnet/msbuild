@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //we need to process errors only for templates that match on language, type or baseline
             IEnumerable<TemplateResult> templatesToAnalyze = templates.Where(template => template.IsTemplateMatch);
 
-            List<InvalidTemplateOptionResult> invalidOptionsList = new List<InvalidTemplateOptionResult>();
+            List<InvalidTemplateOptionResult> invalidOptionsList = new();
 
             //collect the options with invalid names (unmatched tokens)
             IEnumerable<InvalidTemplateOptionResult> unmatchedOptions = templatesToAnalyze.SelectMany(
@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static List<TemplateResult> CollectTemplateMatchInfo(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, TemplateGroup templateGroup)
         {
-            List<TemplateResult> matchInfos = new List<TemplateResult>();
+            List<TemplateResult> matchInfos = new();
             foreach (CliTemplateInfo template in templateGroup.Templates)
             {
                 if (ReparseForTemplate(args, environmentSettings, templatePackageManager, templateGroup, template)
@@ -91,7 +91,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 templates = templates.Where(template => template.IsTemplateMatch);
             }
 
-            StringBuilder invalidParamsErrorText = new StringBuilder(LocalizableStrings.InvalidCommandOptions);
+            StringBuilder invalidParamsErrorText = new(LocalizableStrings.InvalidCommandOptions);
             foreach (InvalidTemplateOptionResult invalidParam in invalidParameterList)
             {
                 invalidParamsErrorText.AppendLine();
@@ -126,7 +126,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             TemplateGroup templateGroup,
-            Reporter reporter)
+            IReporter reporter)
         {
             List<TemplateResult> matchInfos = CollectTemplateMatchInfo(args, environmentSettings, templatePackageManager, templateGroup);
             //process language, type and baseline errors
@@ -143,8 +143,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             else
             {
-                var tokens = args.ParseResult.Tokens.Select(t => t.Value);
-                reporter.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, string.Join(" ", tokens)).Bold().Red());
+                IEnumerable<string> tokens = args.ParseResult.Tokens.Select(t => $"'{t.Value}'");
+                reporter.WriteLine(string.Format(LocalizableStrings.Generic_Info_NoMatchingTemplates, string.Join(" ", tokens)).Bold().Red());
             }
             reporter.WriteLine();
             //TODO: if we were not able to match the errors, print all the errors template by template.
@@ -152,11 +152,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (templateGroup.ShortNames.Any())
             {
                 reporter.WriteLine(LocalizableStrings.InvalidParameterTemplateHint);
-                reporter.WriteCommand(
-                    Example
-                        .For<NewCommand>(args.ParseResult)
-                        .WithArgument(NewCommand.ShortNameArgument, templateGroup.ShortNames[0])
-                        .WithHelpOption());
+                var example = Example
+                    .For<NewCommand>(args.ParseResult)
+                    .WithArgument(NewCommand.ShortNameArgument, templateGroup.ShortNames[0]);
+                var language = matchInfos.Where(mi => mi.Language != null).FirstOrDefault()?.Language;
+                if (language != null)
+                {
+                    example.WithOption(language.Option, language.GetValueOrDefault<string>()!);
+                }
+                example.WithHelpOption();
+                reporter.WriteCommand(example);
             }
 
             return invalidOptionsList.Any() ? NewCommandStatus.InvalidOption : NewCommandStatus.NotFound;
@@ -168,7 +173,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Option<string> typeOption = SharedOptionsFactory.CreateTypeOption();
             Option<string> baselineOption = SharedOptionsFactory.CreateBaselineOption();
 
-            Command reparseCommand = new Command("reparse-only")
+            Command reparseCommand = new("reparse-only")
             {
                 languageOption,
                 typeOption,
@@ -181,15 +186,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             ParseResult result = ParserFactory.CreateParser(reparseCommand).Parse(args.RemainingArguments ?? Array.Empty<string>());
             string baseInputParameters = $"'{args.ShortName}'";
-            foreach (var option in new[] { languageOption, typeOption, baselineOption })
+            foreach (Option<string> option in new[] { languageOption, typeOption, baselineOption })
             {
                 if (result.FindResultFor(option) is { } optionResult && optionResult.Token is { } token)
                 {
-                    baseInputParameters = baseInputParameters + $", {token.Value}='{optionResult.GetValueOrDefault<string>()}'";
+                    baseInputParameters += $", {token.Value}='{optionResult.GetValueOrDefault<string>()}'";
                 }
             }
 
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, baseInputParameters).Bold().Red());
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.Generic_Info_NoMatchingTemplates, baseInputParameters).Bold().Red());
             foreach (var option in new[]
                 {
                     new { Option = languageOption, Condition = matchInfos.All(mi => !mi.IsLanguageMatch), AllowedValues = templateGroup.Languages },
@@ -204,21 +209,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
             }
 
-            Reporter.Error.WriteLine();
-
-            Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
-
-            Reporter.Error.WriteCommand(
-                 Example
-                     .For<NewCommand>(args.ParseResult)
-                     .WithSubcommand<ListCommand>());
-
-            Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-            Reporter.Error.WriteCommand(
-                  Example
-                      .For<NewCommand>(args.ParseResult)
-                      .WithSubcommand<SearchCommand>()
-                      .WithArgument(SearchCommand.NameArgument, args.ShortName ?? string.Empty));
             Reporter.Error.WriteLine();
         }
     }

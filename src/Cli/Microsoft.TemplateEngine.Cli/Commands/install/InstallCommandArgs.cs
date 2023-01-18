@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public InstallCommandArgs(BaseInstallCommand installCommand, ParseResult parseResult) : base(installCommand, parseResult)
         {
-            TemplatePackages = parseResult.GetValueForArgument(InstallCommand.NameArgument)
+            TemplatePackages = parseResult.GetValue(InstallCommand.NameArgument)
                 ?? throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(InstallCommand.NameArgument)}", nameof(parseResult));
 
             //workaround for --install source1 --install source2 case
@@ -24,9 +24,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(InstallCommand.NameArgument)}", nameof(parseResult));
             }
 
-            Interactive = parseResult.GetValueForOption(installCommand.InteractiveOption);
-            AdditionalSources = parseResult.GetValueForOption(installCommand.AddSourceOption);
-            Force = parseResult.GetValueForOption(BaseInstallCommand.ForceOption);
+            Interactive = parseResult.GetValue(installCommand.InteractiveOption);
+            AdditionalSources = parseResult.GetValue(installCommand.AddSourceOption);
+            Force = parseResult.GetValue(BaseInstallCommand.ForceOption);
         }
 
         public IReadOnlyList<string> TemplatePackages { get; }

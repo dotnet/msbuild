@@ -1,11 +1,15 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.TemplateEngine.Utils;
 using Xunit;
 using Xunit.Abstractions;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
@@ -27,31 +31,75 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             var testProjectDirectory = testInstance.Path;
 
-            new DotnetCommand(Log, "run")
+            var runResult = new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--launch-profile", "test")
-                .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!")
-                         .And.HaveStdErrContaining(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile);
+                .Execute("--launch-profile", "test");
+
+            string[] expectedErrorWords = LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Replace("\'{0}\'", "").Split(" ");
+            runResult
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
+
+            expectedErrorWords.ForEach(word => runResult.Should().HaveStdErrContaining(word));
         }
 
         [Fact]
-        public void ItUsesLaunchProfileOfTheSpecifiedName()
+        public void ItFailsWhenTryingToUseLaunchProfileSharingTheSameNameWithAnotherProfileButDifferentCapitalization()
+        {
+            var testAppName = "AppWithDuplicateLaunchProfiles";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var runResult = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("--launch-profile", "first");
+
+            string expectedError = String.Format(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames, "\tfirst," + (OperatingSystem.IsWindows() ? "\r" : "") + "\n\tFIRST");
+            runResult
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(expectedError);
+        }
+
+        [Fact]
+        public void ItFailsWithSpecificErrorMessageIfLaunchProfileDoesntExist()
         {
             var testAppName = "VbAppWithLaunchSettings";
             var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            string invalidLaunchProfileName = "Invalid";
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("--launch-profile", "Invalid")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdErrContaining(String.Format(LocalizableStrings.LaunchProfileDoesNotExist, invalidLaunchProfileName));
+        }
+
+        [Theory]
+        [InlineData("Second")]
+        [InlineData("sEcoND")] // ItAcceptsLaunchProfileWithAlternativeCasing
+        public void ItUsesLaunchProfileOfTheSpecifiedName(string launchProfileName)
+        {
+            var testAppName = "VbAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, identifier: $"LaunchProfileSuccess-{launchProfileName}")
                             .WithSource();
 
-            var testProjectDirectory = testInstance.Path;
-
-            var cmd = new DotnetCommand(Log, "run")
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--launch-profile", "Second");
-
-            cmd.Should().Pass()
-                .And.HaveStdOutContaining("Second");
-
-            cmd.StdErr.Should().BeEmpty();
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("--launch-profile", launchProfileName)
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Second")
+                .And
+                .NotHaveStdErr();
         }
 
         [Fact]

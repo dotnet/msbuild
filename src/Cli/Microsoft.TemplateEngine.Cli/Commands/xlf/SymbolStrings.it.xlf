@@ -42,9 +42,9 @@ Per installare il pacchetto NuGet di una determinata versione, usare &lt;package
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name.</source>
-        <target state="translated">Crea un'istanza di un modello con il nome breve specificato.</target>
-        <note />
+        <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
+        <target state="translated">Creare un'istanza di un modello con il nome breve specificato. Alias di 'dotnet new &lt;template name&gt;'.</target>
+        <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
         <source>Checks the currently installed template packages for updates.</source>
@@ -94,7 +94,7 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
         <target state="translated">Controlla solo la disponibilità di aggiornamenti e visualizza i pacchetti di modelli da aggiornare senza applicare l'aggiornamento.</target>
         <note />
       </trans-unit>
@@ -124,7 +124,7 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
+        <source>Displays all columns in the output.</source>
         <target state="translated">Visualizza tutte le colonne nell'output.</target>
         <note />
       </trans-unit>
@@ -181,6 +181,11 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
       <trans-unit id="Option_PackageFilter">
         <source>Filters the templates based on NuGet package ID.</source>
         <target state="translated">Filtra i modelli basati sull'ID pacchetto NuGet. Si applica a--search.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="translated">Progetto da usare per la valutazione del contesto.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

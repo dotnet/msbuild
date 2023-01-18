@@ -1,0 +1,33 @@
+<Project>
+  <Target Name="_PublishDotnetWatch_InputsOutputs">
+    <PropertyGroup>
+      <_DotnetWatchOutputDirectory>$(ArtifactsDir)bin\redist\$(Configuration)\dotnet\sdk\$(Version)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</_DotnetWatchOutputDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <_DotnetWatchBuildOutput Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**"/>
+      
+      <!--
+        To reduce the size of the SDK, we use the compiler dependencies that are located in the `Roslyn/bincore` location
+        instead of shipping our own copies in the dotnet-watch tool. These assemblies will be resolved by path in the
+        dotnet-watch executable.
+      -->
+      <_DotnetWatchInputFile Include="@(_DotnetWatchBuildOutput)"
+                             Condition="'%(Filename)' != 'Microsoft.CodeAnalysis' and
+                                        '%(Filename)' != 'Microsoft.CodeAnalysis.resources' and
+                                        '%(Filename)' != 'Microsoft.CodeAnalysis.CSharp' and 
+                                        '%(Filename)' != 'Microsoft.CodeAnalysis.CSharp.resources'"/>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PublishDotnetWatch"
+          DependsOnTargets="_PublishDotnetWatch_InputsOutputs"
+          Inputs="@(_DotnetWatchInputFile)"
+          Outputs="@(_DotnetWatchInputFile->'$(_DotnetWatchOutputDirectory)%(RecursiveDir)%(Filename)%(Extension)')">
+
+    <Copy SourceFiles="@(_DotnetWatchInputFile)" DestinationFiles="$(_DotnetWatchOutputDirectory)%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
+
+    <ItemGroup>
+      <FileWrites Include="@(_DotnetWatchOutputFile)" />
+    </ItemGroup>
+  </Target>
+</Project>

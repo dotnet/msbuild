@@ -37,6 +37,11 @@
         <target state="translated">在 `{0}` 中找不到任何專案。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
+        <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
+        <target state="translated">在專案 '{0}' 中偵測到自訂設定，因此屬性 '{1}' 將不會生效。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">強制命令略過任何持續性組建伺服器。</target>
@@ -190,6 +195,13 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">解決方案</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionExecutableConfigurationMismatchError">
+        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+{1}.</source>
+        <target state="translated">方案中的多個可執行檔專案包含衝突的 '{0}' 值。請確認值相符。請考慮使用 Directory.build.props 檔案來設定所有專案組態。衝突的專案:
+{1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">

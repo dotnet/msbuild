@@ -12,6 +12,11 @@
         <target state="translated">非推奨化されたパッケージを一覧表示します。'--vulnerable' または '--outdated' オプションと組み合わせることはできません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="translated">list packages コマンドの出力形式の種類を指定します。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
@@ -25,6 +30,11 @@
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
         <target state="translated">新しいバージョンのパッケージを一覧表示します。'--deprecated' または '--vulnerable' オプションと組み合わせることはできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputVersionDescription">
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="translated">コンピューターが読み取り可能な出力のバージョンを指定します。'--format json' オプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">

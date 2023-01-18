@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using NuGet.Client;
@@ -43,6 +44,9 @@ namespace Microsoft.DotNet.PackageValidation
         /// </summary>
         public Dictionary<NuGetFramework, IEnumerable<PackageDependency>> PackageDependencies { get; }
 
+        /// <summary>
+        /// List of assets in the package.
+        /// </summary>
         public IEnumerable<ContentItem> PackageAssets { get; }
 
         /// <summary>
@@ -58,7 +62,6 @@ namespace Microsoft.DotNet.PackageValidation
         /// <summary>
         /// List of assets under lib in the package.
         /// </summary>
-
         public IEnumerable<ContentItem> LibAssets { get; }
 
         /// <summary>
@@ -84,7 +87,7 @@ namespace Microsoft.DotNet.PackageValidation
         /// <summary>
         /// List of the frameworks in the package.
         /// </summary>
-        public IEnumerable<NuGetFramework> FrameworksInPackage { get; }
+        public IReadOnlyList<NuGetFramework> FrameworksInPackage { get; }
 
         public Package(string packagePath,
             string packageId,
@@ -144,7 +147,7 @@ namespace Microsoft.DotNet.PackageValidation
             NuspecReader nuspecReader = packageReader.NuspecReader;
             string packageId = nuspecReader.GetId();
             string version = nuspecReader.GetVersion().ToString();
-            IEnumerable<string> packageAssets = packageReader.GetFiles().Where(t => t.EndsWith(packageId + ".dll")).ToArray();
+            IEnumerable<string> packageAssets = packageReader.GetFiles().Where(t => t.EndsWith(".dll")).ToArray();
 
             Dictionary<NuGetFramework, IEnumerable<PackageDependency>> packageDependencies = new();
             foreach (PackageDependencyGroup item in nuspecReader.GetDependencyGroups())
@@ -160,11 +163,31 @@ namespace Microsoft.DotNet.PackageValidation
         /// </summary>
         /// <param name="framework">The framework where the package needs to be installed.</param>
         /// <returns>A ContentItem representing the best runtime asset</returns>
-        public ContentItem? FindBestRuntimeAssetForFramework(NuGetFramework framework)
+        public IReadOnlyList<ContentItem>? FindBestRuntimeAssetForFramework(NuGetFramework framework)
         {
             SelectionCriteria managedCriteria = _conventions.Criteria.ForFramework(framework);
-            return _contentItemCollection.FindBestItemGroup(managedCriteria,
-                _conventions.Patterns.RuntimeAssemblies)?.Items.FirstOrDefault();
+            IList<ContentItem>? items = _contentItemCollection.FindBestItemGroup(managedCriteria,
+                _conventions.Patterns.RuntimeAssemblies)?.Items;
+
+            return items != null ?
+                new ReadOnlyCollection<ContentItem>(items.Where(t => !t.Path.StartsWith("runtimes")).ToArray()) :
+                null;
+        }
+
+        /// <summary>
+        /// Finds the best runtime specific asset for for a specific framework.
+        /// </summary>
+        /// <param name="framework">The framework where the package needs to be installed.</param>
+        /// <returns>A ContentItem representing the best runtime specific asset.</returns>
+        public IReadOnlyList<ContentItem>? FindBestRuntimeSpecificAssetForFramework(NuGetFramework framework)
+        {
+            SelectionCriteria managedCriteria = _conventions.Criteria.ForFramework(framework);
+            IList<ContentItem>? items = _contentItemCollection.FindBestItemGroup(managedCriteria,
+                _conventions.Patterns.RuntimeAssemblies)?.Items;
+
+            return items != null ?
+                new ReadOnlyCollection<ContentItem>(items.Where(t => t.Path.StartsWith("runtimes")).ToArray()) :
+                null;
         }
 
         /// <summary>
@@ -173,11 +196,15 @@ namespace Microsoft.DotNet.PackageValidation
         /// <param name="framework">The framework where the package needs to be installed.</param>
         /// <param name="rid">The rid where the package needs to be installed.</param>
         /// <returns>A ContentItem representing the best runtime asset</returns>
-        public ContentItem? FindBestRuntimeAssetForFrameworkAndRuntime(NuGetFramework framework, string rid)
+        public IReadOnlyList<ContentItem>? FindBestRuntimeAssetForFrameworkAndRuntime(NuGetFramework framework, string rid)
         {
             SelectionCriteria managedCriteria = _conventions.Criteria.ForFrameworkAndRuntime(framework, rid);
-            return _contentItemCollection.FindBestItemGroup(managedCriteria,
-                _conventions.Patterns.RuntimeAssemblies)?.Items.FirstOrDefault();
+            IList<ContentItem>? items = _contentItemCollection.FindBestItemGroup(managedCriteria,
+                _conventions.Patterns.RuntimeAssemblies)?.Items;
+
+            return items != null ?
+                new ReadOnlyCollection<ContentItem>(items) :
+                null;
         }
 
         /// <summary>
@@ -185,14 +212,17 @@ namespace Microsoft.DotNet.PackageValidation
         /// </summary>
         /// <param name="framework">The framework where the package needs to be installed.</param>
         /// <returns>A ContentItem representing the best compile time asset.</returns>
-        public ContentItem? FindBestCompileAssetForFramework(NuGetFramework framework)
+        public IReadOnlyList<ContentItem>? FindBestCompileAssetForFramework(NuGetFramework framework)
         {
             SelectionCriteria managedCriteria = _conventions.Criteria.ForFramework(framework);
             PatternSet patternSet = RefAssets.Any() ?
                 _conventions.Patterns.CompileRefAssemblies :
                 _conventions.Patterns.CompileLibAssemblies;
+            IList<ContentItem>? items = _contentItemCollection.FindBestItemGroup(managedCriteria, patternSet)?.Items;
 
-            return _contentItemCollection.FindBestItemGroup(managedCriteria, patternSet)?.Items.FirstOrDefault();
+            return items != null ?
+                new ReadOnlyCollection<ContentItem>(items) :
+                null;
         }
     }
 }

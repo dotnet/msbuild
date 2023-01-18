@@ -25,24 +25,6 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_errors_when_publishing_self_contained_app_without_rid()
-        {
-             var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName)
-                .WithSource();
-
-            var publishCommand = new PublishCommand(testAsset);
-            publishCommand
-                .Execute(
-                    "/p:SelfContained=true",
-                    $"/p:TargetFramework={TargetFramework}")
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotHaveSelfContainedWithoutRuntimeIdentifier);
-        }
-
-        [Fact]
         public void It_errors_when_publishing_self_contained_without_apphost()
         {
             var runtimeIdentifier = RuntimeInformation.RuntimeIdentifier;
@@ -129,7 +111,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Be(2);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.4.0.41702")]
         public void It_publishes_an_app_with_a_netcoreapp_lib_reference()
         {
             var testAsset = _testAssetsManager
@@ -248,9 +230,9 @@ namespace Microsoft.NET.Publish.Tests
         [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void NoStaticLibs()
         {
-             var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName)
-                .WithSource();
+            var testAsset = _testAssetsManager
+               .CopyTestAsset(TestProjectName)
+               .WithSource();
 
             var publishCommand = new PublishCommand(testAsset);
             var tfm = ToolsetInfo.CurrentTargetFramework;

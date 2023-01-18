@@ -42,9 +42,9 @@ Para instalar el paquete NuGet de una versión determinada, use &lt;package ID&g
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name.</source>
-        <target state="translated">Crea una instancia de una plantilla con un nombre corto determinado.</target>
-        <note />
+        <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
+        <target state="translated">Crea una instancia de una plantilla con el nombre corto especificado. Alias de "dotnet new &lt;template name&gt;".</target>
+        <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
         <source>Checks the currently installed template packages for updates.</source>
@@ -94,8 +94,8 @@ Si el comando se especifica sin el argumento, muestra todos los paquetes de plan
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="translated">Compruebe solo si hay actualizaciones y muestre los paquetes de plantillas que se van a actualizar sin aplicar la actualización.</target>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
+        <target state="translated">Comprueba solo si hay actualizaciones y muestra los paquetes de plantillas que se van a actualizar sin aplicar la actualización.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -124,7 +124,7 @@ Si el comando se especifica sin el argumento, muestra todos los paquetes de plan
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
+        <source>Displays all columns in the output.</source>
         <target state="translated">Muestra todas las columnas de la salida.</target>
         <note />
       </trans-unit>
@@ -181,6 +181,11 @@ Si el comando se especifica sin el argumento, muestra todos los paquetes de plan
       <trans-unit id="Option_PackageFilter">
         <source>Filters the templates based on NuGet package ID.</source>
         <target state="translated">Filtra las plantillas en función del id. del paquete NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="translated">Proyecto que se debe usar para la evaluación de contexto.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

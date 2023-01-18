@@ -1,0 +1,11 @@
+﻿
+// value of paramA: True
+// value of paramB: placeholderB
+
+// paramA is enabled
+
+// paramA is evaluated as true
+
+// paramB is disabled
+
+// paramB is evaluated as false

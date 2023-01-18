@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Format
 
         public static FormatCommand FromParseResult(ParseResult result)
         {
-            return new FormatCommand(result.GetValueForArgument(FormatCommandParser.Arguments));
+            return new FormatCommand(result.GetValue(FormatCommandParser.Arguments));
         }
 
         public static int Run(ParseResult parseResult)

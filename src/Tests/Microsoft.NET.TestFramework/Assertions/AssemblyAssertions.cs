@@ -79,10 +79,28 @@ namespace Microsoft.NET.TestFramework.Assertions
                 return metadataReader.CustomAttributes.Where(t => !t.IsNil).Select(t =>
                 {
                     var attribute = metadataReader.GetCustomAttribute(t);
-                    var constructor = metadataReader.GetMemberReference((MemberReferenceHandle)attribute.Constructor);
-                    var type = metadataReader.GetTypeReference((TypeReferenceHandle)constructor.Parent);
-
-                    return metadataReader.GetString(type.Namespace) + "." + metadataReader.GetString(type.Name);
+                    switch (attribute.Constructor.Kind)
+                    {
+                        case HandleKind.MethodDefinition:
+                        {
+                            var methodDef = metadataReader.GetMethodDefinition((MethodDefinitionHandle)attribute.Constructor);
+                            var declaringTypeHandle = methodDef.GetDeclaringType();
+                            var typeDefinition = metadataReader.GetTypeDefinition(declaringTypeHandle);
+                            var @namespace = metadataReader.GetString(typeDefinition.Namespace);
+                            var name = metadataReader.GetString(typeDefinition.Name);
+                            return $"{@namespace}.{name}";
+                        }
+                        case HandleKind.MemberReference:
+                        {
+                            var memberRef = metadataReader.GetMemberReference((MemberReferenceHandle)attribute.Constructor);
+                            var typeRef = metadataReader.GetTypeReference((TypeReferenceHandle)memberRef.Parent);
+                            var @namespace = metadataReader.GetString(typeRef.Namespace);
+                            var name = metadataReader.GetString(typeRef.Name);
+                            return $"{@namespace}.{name}";
+                        }
+                    default:
+                        throw new InvalidOperationException();
+                    }
                 }).ToArray();
             }
         }

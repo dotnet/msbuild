@@ -8,7 +8,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class RudeEditDialog
+    internal sealed class RudeEditDialog
     {
         private readonly IReporter _reporter;
         private readonly IRequester _requester;
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     return;
             }
 
-            bool KeyPressed(ConsoleKey key)
+            static bool KeyPressed(ConsoleKey key)
             {
                 return key is ConsoleKey.Y or ConsoleKey.N or ConsoleKey.A or ConsoleKey.V;
             }

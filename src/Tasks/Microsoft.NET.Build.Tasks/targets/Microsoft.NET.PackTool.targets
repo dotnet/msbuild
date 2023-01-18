@@ -59,6 +59,12 @@ Copyright (c) .NET Foundation. All rights reserved.
         <PackagePath>%(_ResolvedFileToPublishWithPackagePath.PackagePath)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
+
+    <!-- Enable warning for trying to use PackRelease with a solution if env-var is not set.-->
+    <NETSdkWarning Condition="'$(PackRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS)' == ''"
+                   ResourceName="PReleaseRequiresEnvVarOnSln"
+                   FormatArguments="PackRelease;DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS"
+    />
   </Target>
 
   <PropertyGroup>

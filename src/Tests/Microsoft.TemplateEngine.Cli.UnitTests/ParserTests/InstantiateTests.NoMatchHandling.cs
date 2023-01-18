@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using FakeItEasy;
@@ -8,8 +9,6 @@ using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
-using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
@@ -132,10 +131,160 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                     new string?[] { "value", "langVersion", "--langVersion", null, "Required argument missing for option: '--langVersion'." }
                 }
             };
+
+            yield return new object[]
+            {
+                "foo --fake",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithParameter("langVersion")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--fake", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --fake value",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithParameter("langVersion")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--fake", null, null },
+                    new string?[] { "name", null, "value", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --language F# --include",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "C#").WithParameter("include", "bool"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "F#")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--include", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --language F# --exclude",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "C#").WithParameter("include", "bool"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "F#")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--exclude", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --int 6 --float 3.14 --hex 0x1A2F --bool --string stringtype --choice c1 --fake",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--fake", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --int 6 --float 3.14 --hex 0x1A2F --bool --string stringtype --choice c1 --fake value",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--fake", null, null },
+                    new string?[] { "name", null, "value", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --language F# --int 6 --float 3.14 --hex 0x1A2F --bool --string stringtype --choice c1 --include",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "C#")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                    .WithParameter("include", "bool"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "F#")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--include", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --language F# --int 6 --float 3.14 --hex 0x1A2F --bool --string stringtype --choice c1 --exclude",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "C#")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                    .WithParameter("include", "bool"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "F#")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--exclude", null, null }
+                }
+            };
         }
 
         [Theory]
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(GetInvalidParametersTestData))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         // invalid params:
         // [0] name / value - Kind
         // [1] canonical
@@ -148,21 +297,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 CliTemplateInfo.FromTemplateInfo(templates, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new {command}");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new {command}");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
-            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            HashSet<TemplateCommand> templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Empty(templateCommands);
 
-            var templateMatchInfos = InstantiateCommand.CollectTemplateMatchInfo(args, settings, templatePackageManager, templateGroup);
-            var invalidOptions = InstantiateCommand.GetInvalidOptions(templateMatchInfos);
+            List<TemplateResult> templateMatchInfos = InstantiateCommand.CollectTemplateMatchInfo(args, settings, templatePackageManager, templateGroup);
+            List<InvalidTemplateOptionResult> invalidOptions = InstantiateCommand.GetInvalidOptions(templateMatchInfos);
             Assert.Equal(expectedInvalidParams.Length, invalidOptions.Count);
 
-            foreach (var invalidParam in expectedInvalidParams)
+            foreach (string?[] invalidParam in expectedInvalidParams)
             {
                 InvalidTemplateOptionResult.Kind expectedErrorKind = invalidParam[0] == "name"
                     ? InvalidTemplateOptionResult.Kind.InvalidName
@@ -177,7 +326,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                     expectedErrorMessage = invalidParam[4];
                 }
 
-                var actualParam = invalidOptions.Single(param => param.InputFormat == expectedInputFormat);
+                InvalidTemplateOptionResult actualParam = invalidOptions.Single(param => param.InputFormat == expectedInputFormat);
 
                 Assert.Equal(expectedErrorKind, actualParam.ErrorKind);
                 Assert.Equal(expectedCanonicalName, actualParam.TemplateOption?.TemplateParameter.Name);

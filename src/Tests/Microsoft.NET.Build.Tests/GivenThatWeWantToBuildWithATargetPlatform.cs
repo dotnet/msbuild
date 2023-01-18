@@ -48,7 +48,7 @@ namespace Microsoft.NET.Build.Tests
                 }
                 else
                 {
-                    getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { expected }, $"Asserting \"{valueName}\"'s value");
+                    getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { expected }, $"Asserting \"{valueName}\"'s value");
                 }
             };
 
@@ -80,7 +80,7 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Pass();
-            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "Windows" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "Windows" });
         }
 
         [Fact]

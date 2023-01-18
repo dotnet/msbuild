@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             Action a = () => telemetryTask.Execute();
 
-            a.ShouldThrow<ArgumentException>();
+            a.Should().Throw<ArgumentException>();
         }
 
         [Fact]

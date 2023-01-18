@@ -29,8 +29,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             IReporter reporter = null)
             : base(parseResult)
         {
-            _packageId = new PackageId(parseResult.GetValueForArgument(ToolUninstallCommandParser.PackageIdArgument));
-            _explicitManifestFile = parseResult.GetValueForOption(ToolUninstallCommandParser.ToolManifestOption);
+            _packageId = new PackageId(parseResult.GetValue(ToolUninstallCommandParser.PackageIdArgument));
+            _explicitManifestFile = parseResult.GetValue(ToolUninstallCommandParser.ToolManifestOption);
 
             _reporter = (reporter ?? Reporter.Output);
 

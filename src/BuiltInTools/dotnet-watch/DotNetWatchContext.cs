@@ -8,7 +8,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class DotNetWatchContext
+    internal sealed class DotNetWatchContext
     {
         public IReporter Reporter { get; init; } = NullReporter.Singleton;
 

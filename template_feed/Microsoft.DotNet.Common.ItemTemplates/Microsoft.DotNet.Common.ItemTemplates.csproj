@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netstandard1.0</TargetFramework>
+        <TargetFramework>$(SdkTargetFramework)</TargetFramework>
         <IncludeBuildOutput>False</IncludeBuildOutput>
         <IncludeSource>False</IncludeSource>
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
@@ -14,9 +14,9 @@
         <NoPackageAnalysis>true</NoPackageAnalysis>
         <PackageId>Microsoft.DotNet.Common.ItemTemplates</PackageId>
         <Authors>Microsoft</Authors>
-        <Description>Common File Templates for Microsoft Template Engine</Description>
+        <Description>Common Item Templates</Description>
         <language>en-US</language>
-        <PackageProjectUrl>https://github.com/dotnet/templating</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/dotnet/sdk</PackageProjectUrl>
         <PackageType>Template</PackageType>
         <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
         <NoDefaultExcludes>true</NoDefaultExcludes>

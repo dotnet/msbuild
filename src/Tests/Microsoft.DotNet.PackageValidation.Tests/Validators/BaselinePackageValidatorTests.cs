@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.ApiCompatibility.Runner;
+using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.PackageValidation.Tests;
 using Moq;
 using Xunit;
@@ -10,9 +11,9 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
 {
     public class BaselinePackageValidatorTests
     {
-        private (TestLogger, BaselinePackageValidator) CreateLoggerAndValidator()
+        private (SuppressableTestLog, BaselinePackageValidator) CreateLoggerAndValidator()
         {
-            TestLogger log = new();
+            SuppressableTestLog log = new();
             BaselinePackageValidator validator = new(log,
                 Mock.Of<IApiCompatRunner>());
 
@@ -34,7 +35,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
                 @"ref/netcoreapp3.1/TestPackage.dll"
             };
             Package package = new(string.Empty, "TestPackage", "2.0.0", currentFilePaths, null, null);
-            (TestLogger log, BaselinePackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, BaselinePackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package,
                 enableStrictMode: false,

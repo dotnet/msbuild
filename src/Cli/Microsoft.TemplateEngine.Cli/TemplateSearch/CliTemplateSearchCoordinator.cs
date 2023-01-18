@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
@@ -62,12 +63,12 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             {
                 if (!result.Success)
                 {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, result.Provider.Factory.DisplayName));
+                    Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, result.Provider.Factory.DisplayName);
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Error_SearchFailure, result.ErrorMessage).Red().Bold());
                     continue;
                 }
 
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, result.Provider.Factory.DisplayName));
+                Reporter.Output.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, result.Provider.Factory.DisplayName);
                 if (result.SearchHits.Any())
                 {
                     DisplayResultsForPack(result.SearchHits, environmentSettings, commandArgs, defaultLanguage);
@@ -79,7 +80,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     // No templates found matching the following input parameter(s): {0}.
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.NoTemplatesMatchingInputParameters,
+                            LocalizableStrings.Generic_Info_NoMatchingTemplates,
                             GetInputParametersString(commandArgs))
                         .Bold().Red());
                 }
@@ -134,10 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         {
             //TODO: implement it for template options matching
             //IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandArgs);
-            Reporter.Output.WriteLine(
-                string.Format(
-                    LocalizableStrings.TemplatesFoundMatchingInputParameters,
-                    GetInputParametersString(commandArgs)));
+            Reporter.Output.WriteLine(LocalizableStrings.TemplatesFoundMatchingInputParameters, GetInputParametersString(commandArgs));
             Reporter.Output.WriteLine();
             IReadOnlyCollection<SearchResultTableRow> data = GetSearchResultsForDisplay(results, commandArgs.Language, defaultLanguage, environmentSettings.Environment);
 
@@ -184,7 +182,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             // && !commandInput.RemainingParameters.Any())
             {
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoTemplateName.Red().Bold());
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchHelp, string.Join(", ", SearchCommand.SupportedFilters.Select(f => $"'{f.OptionFactory().Aliases.First()}'"))));
+                Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchHelp, string.Join(", ", SearchCommand.SupportedFilters.Select(f => $"'{f.OptionFactory().Aliases.First()}'")));
                 Reporter.Error.WriteLine(LocalizableStrings.Generic_ExamplesHeader);
                 Reporter.Error.WriteCommand(
                     Example

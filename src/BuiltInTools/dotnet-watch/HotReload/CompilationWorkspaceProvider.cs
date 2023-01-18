@@ -47,15 +47,27 @@ namespace Microsoft.DotNet.Watcher.Tools
                     }
                     else
                     {
-                        taskCompletionSource.TrySetException(new InvalidOperationException($"Failed to create MSBuildWorkspace: {diag.Diagnostic}"));
+                        taskCompletionSource.TrySetException(new ApplicationException($"Failed to create MSBuildWorkspace: {diag.Diagnostic}"));
                     }
                 };
 
                 await workspace.OpenProjectAsync(projectPath, cancellationToken: cancellationToken);
                 var currentSolution = workspace.CurrentSolution;
 
-                var hotReloadCapabilities = await GetHotReloadCapabilitiesAsync(hotReloadCapabilitiesTask, reporter);
-                var hotReloadService = new WatchHotReloadService(workspace.Services, await hotReloadCapabilitiesTask);
+                ImmutableArray<string> hotReloadCapabilities;
+                try
+                {
+                    hotReloadCapabilities = await hotReloadCapabilitiesTask;
+                }
+                catch (Exception ex)
+                {
+                    taskCompletionSource.TrySetException(new ApplicationException("Failed to read Hot Reload capabilities: " + ex.Message, ex));
+                    return;
+                }
+
+                reporter.Verbose($"Hot reload capabilities: {string.Join(" ", hotReloadCapabilities)}.", emoji: "🔥");
+
+                var hotReloadService = new WatchHotReloadService(workspace.Services, hotReloadCapabilities);
 
                 await hotReloadService.StartSessionAsync(currentSolution, cancellationToken);
 
@@ -74,24 +86,6 @@ namespace Microsoft.DotNet.Watcher.Tools
             catch (Exception ex)
             {
                 taskCompletionSource.TrySetException(ex);
-            }
-        }
-
-        private static async Task<ImmutableArray<string>> GetHotReloadCapabilitiesAsync(Task<ImmutableArray<string>> hotReloadCapabilitiesTask, IReporter reporter)
-        {
-            try
-            {
-                var capabilities = await hotReloadCapabilitiesTask;
-                reporter.Verbose($"Hot reload capabilities: {string.Join(" ", capabilities)}.", emoji: "🔥");
-
-                return capabilities;
-            }
-            catch (Exception ex)
-            {
-                reporter.Verbose("Reading hot reload capabilities failed. Using default capabilities.");
-                reporter.Verbose(ex.ToString());
-
-                return ImmutableArray.Create("Baseline", "AddDefinitionToExistingType", "NewTypeDefinition");
             }
         }
     }

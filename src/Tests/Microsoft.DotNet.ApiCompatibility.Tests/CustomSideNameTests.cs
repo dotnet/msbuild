@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Rules;
+using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Tests
@@ -140,7 +141,6 @@ namespace CompatTests
   }
 }
 ";
-
             string[] rightSyntaxes = new[]
             { @"
 namespace CompatTests
@@ -194,13 +194,15 @@ namespace CompatTests
 }
 "};
             ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation("a.dll", "ref/net6.0/a.dll"));
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes);
             ApiComparer differ = new(s_ruleFactory);
 
-            foreach ((MetadataInformation leftMetadata, MetadataInformation rightMetadata, IEnumerable<CompatDifference> differences) in differ.GetDifferences(left, right))
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            Assert.Equal(right.Count, differences.Count());
+            foreach (CompatDifference difference in differences)
             {
-                Assert.Single(differences);
-                AssertNames(differences.First(), leftMetadata.AssemblyId, rightMetadata.AssemblyId);
+                AssertNames(difference, difference.Left.AssemblyId, difference.Right.AssemblyId);
             }
         }
 

@@ -57,7 +57,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             Action a = () => task.PublicExecuteCore();
-            a.ShouldNotThrow();
+            a.Should().NotThrow();
 
             File.ReadAllText(_runtimeConfigPath).Should()
                 .Be(
@@ -112,7 +112,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             Action a = () => task.PublicExecuteCore();
-            a.ShouldNotThrow();
+            a.Should().NotThrow();
 
             File.ReadAllText(_runtimeConfigPath).Should()
                 .Be(
@@ -165,7 +165,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             Action a = () => task.PublicExecuteCore();
-            a.ShouldNotThrow();
+            a.Should().NotThrow();
 
             File.ReadAllText(_runtimeConfigPath).Should()
                 .Be(
@@ -205,7 +205,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             Action a = () => task.PublicExecuteCore();
-            a.ShouldNotThrow();
+            a.Should().NotThrow();
 
             File.ReadAllText(_runtimeConfigPath).Should()
                 .Be(

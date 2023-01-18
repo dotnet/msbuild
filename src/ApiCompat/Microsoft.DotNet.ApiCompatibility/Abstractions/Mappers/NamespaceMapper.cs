@@ -9,19 +9,17 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
     /// <summary>
     /// Object that represents a mapping between two <see cref="INamespaceSymbol"/> objects.
-    /// This also holds a list of <see cref="TypeMapper"/> to represent the mapping of types in between
-    /// <see cref="ElementMapper{T}.Left"/> and <see cref="ElementMapper{T}.Right"/>.
+    /// This also holds a list of <see cref="ITypeMapper"/> to represent the mapping of types in between
+    /// <see cref="IElementMapper{T}.Left"/> and <see cref="IElementMapper{T}.Right"/>.
     /// </summary>
-    public class NamespaceMapper : ElementMapper<INamespaceSymbol>
+    public class NamespaceMapper : ElementMapper<INamespaceSymbol>, INamespaceMapper
     {
-        private readonly Dictionary<ITypeSymbol, TypeMapper> _types;
+        private readonly Dictionary<ITypeSymbol, ITypeMapper> _types;
         private bool _expandedTree = false;
         private readonly bool _typeforwardsOnly;
 
-        /// <summary>
-        /// The containing assembly of this namespace.
-        /// </summary>
-        public AssemblyMapper ContainingAssembly { get; }
+        /// <inheritdoc />
+        public IAssemblyMapper ContainingAssembly { get; }
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
@@ -30,22 +28,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
         /// <param name="typeforwardsOnly">Indicates if <see cref="GetTypes"/> should only return typeforwards.</param>
         public NamespaceMapper(IRuleRunner ruleRunner,
-            AssemblyMapper containingAssembly,
-            MapperSettings settings = default,
-            int rightSetSize = 1,
+            MapperSettings settings,
+            int rightSetSize,
+            IAssemblyMapper containingAssembly,
             bool typeforwardsOnly = false)
             : base(ruleRunner, settings, rightSetSize)
         {
             ContainingAssembly = containingAssembly;
-            _types = new Dictionary<ITypeSymbol, TypeMapper>(Settings.EqualityComparer);
+            _types = new Dictionary<ITypeSymbol, ITypeMapper>(Settings.EqualityComparer);
             _typeforwardsOnly = typeforwardsOnly;
         }
 
-        /// <summary>
-        /// Gets all the <see cref="TypeMapper"/> representing the types defined in the namespace including the typeforwards.
-        /// </summary>
-        /// <returns>The mapper representing the types in the namespace</returns>
-        public IEnumerable<TypeMapper> GetTypes()
+        /// <inheritdoc />
+        public IEnumerable<ITypeMapper> GetTypes()
         {
             if (!_expandedTree)
             {
@@ -69,12 +64,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             return _types.Values;
         }
 
-        /// <summary>
-        /// Adds forwarded types to the mapper to the index specified in the mapper.
-        /// </summary>
-        /// <param name="forwardedTypes">List containing the <see cref="INamedTypeSymbol"/> that represents the forwarded types.</param>
-        /// <param name="side">Side to add the forwarded types into, 0 (Left) or 1 (Right).</param>
-        /// <param name="setIndex">Value representing the index on the set of elements corresponding to the compared side.</param>
+        /// <inheritdoc />
         public void AddForwardedTypes(IEnumerable<INamedTypeSymbol>? forwardedTypes, ElementSide side, int setIndex)
         {
             AddOrCreateMappers(forwardedTypes, side, setIndex);
@@ -100,9 +90,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             {
                 if (Settings.Filter.Include(type))
                 {
-                    if (!_types.TryGetValue(type, out TypeMapper? mapper))
+                    if (!_types.TryGetValue(type, out ITypeMapper? mapper))
                     {
-                        mapper = new TypeMapper(RuleRunner, this, Settings, null, Right.Length);
+                        mapper = new TypeMapper(RuleRunner, Settings, Right.Length, this, null);
                         _types.Add(type, mapper);
                     }
 

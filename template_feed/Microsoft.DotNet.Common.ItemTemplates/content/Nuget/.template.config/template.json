@@ -13,7 +13,7 @@
   "groupIdentity": "ItemNugetConfig",
   "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
-  "shortName": "nugetconfig",
+  "shortName": [ "nugetconfig", "nuget.config" ],
   "primaryOutputs": [
     {
       "path": "nuget.config"
@@ -27,6 +27,21 @@
     }
   },
   "postActions": [
+    {
+      "id": "chmod",
+      "condition": "(OS != \"Windows_NT\") && (HostIdentifier == \"dotnetcli\" || HostIdentifier == \"dotnetcli-preview\")",
+      "description": "Apply permissions",
+      "manualInstructions": [
+        {
+          "text": "Run 'chmod 600 nuget.config'"
+        }
+      ],
+      "actionId": "cb9a6cf3-4f5c-4860-b9d2-03a574959774",
+      "args": {
+        "600": "nuget.config"
+      },
+      "continueOnError": false
+    },
     {
       "id": "open-file",
       "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",

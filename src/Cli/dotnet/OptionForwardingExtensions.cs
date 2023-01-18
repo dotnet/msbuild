@@ -18,12 +18,37 @@ namespace Microsoft.DotNet.Cli
 
         public static ForwardedOption<T> ForwardAsSingle<T>(this ForwardedOption<T> option, Func<T, string> format) => option.SetForwardingFunction(format);
 
+        /// <summary>
+        /// Set up an option to be forwaded as an output path to MSBuild
+        /// </summary>
+        /// <param name="option">The command line option</param>
+        /// <param name="outputPropertyName">The property name for the output path (such as OutputPath or PublishDir)</param>
+        /// <param name="surroundWithDoubleQuotes">Whether the path should be surrounded with double quotes.  This may not be necessary but preserves the provious behavior of "dotnet test"</param>
+        /// <returns>The option</returns>
+        public static ForwardedOption<string> ForwardAsOutputPath(this ForwardedOption<string> option, string outputPropertyName, bool surroundWithDoubleQuotes = false)
+        {
+            return option.SetForwardingFunction((string o) =>
+            {
+                string argVal = CommandDirectoryContext.GetFullPath(o);
+                if (surroundWithDoubleQuotes)
+                {
+                    //  Not sure if this is necessary, but this is what "dotnet test" previously did and so we are
+                    //  preserving the behavior here after refactoring
+                    argVal = TestCommandParser.SurroundWithDoubleQuotes(argVal);
+                }
+                return new string[]
+                {
+                    $"-property:{outputPropertyName}={argVal}",
+                    "-property:_CommandLineDefinedOutputPath=true"
+                };
+            });
+        }
+
         public static ForwardedOption<string[]> ForwardAsProperty(this ForwardedOption<string[]> option) => option
             .SetForwardingFunction((optionVals) =>
                 optionVals
                     .SelectMany(Microsoft.DotNet.Cli.Utils.MSBuildPropertyParser.ParseProperties)
-                    // must escape semicolon-delimited property values when forwarding them to MSBuild
-                    .Select(keyValue => $"{option.Aliases.FirstOrDefault()}:{keyValue.key}={keyValue.value.Replace(";", "%3B")}")
+                    .Select(keyValue => $"{option.Aliases.FirstOrDefault()}:{keyValue.key}={keyValue.value}")
                 );
 
         public static Option<T> ForwardAsMany<T>(this ForwardedOption<T> option, Func<T, IEnumerable<string>> format) => option.SetForwardingFunction(format);
@@ -95,7 +120,7 @@ namespace Microsoft.DotNet.Cli
 
         public ForwardedOption(string alias, string description = null) : base(alias, description) { }
 
-        public ForwardedOption(string alias, ParseArgument<T> parseArgument, string description = null) :
+        public ForwardedOption(string alias, Func<ArgumentResult, T> parseArgument, string description = null) :
             base(alias, parseArgument, description: description) { }
 
         public ForwardedOption<T> SetForwardingFunction(Func<T, IEnumerable<string>> func)
@@ -112,13 +137,13 @@ namespace Microsoft.DotNet.Cli
 
         public ForwardedOption<T> SetForwardingFunction(Func<T, ParseResult, IEnumerable<string>> func)
         {
-            ForwardingFunction = (ParseResult parseResult) => parseResult.HasOption(this) ? func(parseResult.GetValueForOption<T>(this), parseResult) : Array.Empty<string>();
+            ForwardingFunction = (ParseResult parseResult) => parseResult.HasOption(this) ? func(parseResult.GetValue<T>(this), parseResult) : Array.Empty<string>();
             return this;
         }
 
         public Func<ParseResult, IEnumerable<string>> GetForwardingFunction(Func<T, IEnumerable<string>> func)
         {
-            return (ParseResult parseResult) => parseResult.HasOption(this) ? func(parseResult.GetValueForOption<T>(this)) : Array.Empty<string>();
+            return (ParseResult parseResult) => parseResult.HasOption(this) ? func(parseResult.GetValue<T>(this)) : Array.Empty<string>();
         }
 
         public Func<ParseResult, IEnumerable<string>> GetForwardingFunction()

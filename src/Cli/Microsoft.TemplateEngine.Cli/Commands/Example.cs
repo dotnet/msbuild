@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -116,9 +117,23 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return this;
         }
 
+        internal Example WithSubcommand(string token)
+        {
+            Command? commandToUse = _currentCommand.Children.OfType<Command>().FirstOrDefault(c => c.Aliases.Contains(token));
+
+            if (commandToUse is null)
+            {
+                throw new ArgumentException($"Command {_currentCommand.Name} does not have subcommand '{token}'.");
+            }
+
+            _commandParts.Add(token);
+            _currentCommand = commandToUse;
+            return this;
+        }
+
         internal Example WithSubcommand<T>() where T : Command
         {
-            if (!_currentCommand.Children.OfType<Command>().Any( c => c is T))
+            if (!_currentCommand.Children.OfType<Command>().Any(c => c is T))
             {
                 throw new ArgumentException($"Command {_currentCommand.Name} does not have subcommand {typeof(T).Name}");
             }

@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal ListCommandArgs(BaseListCommand command, ParseResult parseResult) : base(command, parseResult)
         {
-            string? nameCriteria = parseResult.GetValueForArgument(command.NameArgument);
+            string? nameCriteria = parseResult.GetValue(ListCommand.NameArgument);
             if (!string.IsNullOrWhiteSpace(nameCriteria))
             {
                 ListNameCriteria = nameCriteria;
@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             // for legacy case new command argument is also accepted
             else if (command is LegacyListCommand legacySearchCommand)
             {
-                string? newCommandArgument = parseResult.GetValueForArgument(NewCommand.ShortNameArgument);
+                string? newCommandArgument = parseResult.GetValue(NewCommand.ShortNameArgument);
                 if (!string.IsNullOrWhiteSpace(newCommandArgument))
                 {
                     ListNameCriteria = newCommandArgument;
@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 Language = GetFilterValue(FilterOptionDefinition.LanguageFilter);
             }
-            IgnoreConstraints = parseResult.GetValueForOption(ListCommand.IgnoreConstraintsOption);
+            IgnoreConstraints = parseResult.GetValue(ListCommand.IgnoreConstraintsOption);
         }
 
         public bool DisplayAllColumns { get; }

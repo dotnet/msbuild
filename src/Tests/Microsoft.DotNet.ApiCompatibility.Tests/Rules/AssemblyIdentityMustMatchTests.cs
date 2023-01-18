@@ -8,13 +8,15 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Tests;
+using Microsoft.DotNet.ApiSymbolExtensions;
+using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class AssemblyIdentityMustMatchTests
     {
-        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new AssemblyIdentityMustMatch(settings, context));
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new AssemblyIdentityMustMatch(new SuppressableTestLog(), settings, context));
 
         private static readonly byte[] _publicKey = new byte[]
         { 
@@ -40,7 +42,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             Assert.Single(differences);
-            CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, "AssemblyB, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
+            CompatDifference expected = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, "AssemblyB, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
 
@@ -60,7 +62,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
             
             Assert.Single(differences);
-            CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=de, PublicKeyToken=null");
+            CompatDifference expected = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=de, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
 
@@ -81,7 +83,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 
             // right assembly should have same or higher version than left
             Assert.Single(differences);
-            CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{rightSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
+            CompatDifference expected = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{rightSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
 
@@ -108,7 +110,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             differences = differ.GetDifferences(leftSymbol, rightSymbol);
             Assert.Single(differences);
 
-            CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+            CompatDifference expected = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
 
@@ -151,7 +153,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             if (strictMode)
             {
                 Assert.Single(differences);
-                CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{rightSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
+                CompatDifference expected = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{rightSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
                 Assert.Equal(expected, differences.First());
             }
             else
@@ -177,7 +179,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
             
             Assert.Single(differences);
-            CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
+            CompatDifference expected = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
 

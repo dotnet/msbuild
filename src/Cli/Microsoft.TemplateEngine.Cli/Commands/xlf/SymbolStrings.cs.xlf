@@ -42,9 +42,9 @@ Pokud chcete nainstalovat balíček NuGet určité verze, použijte &lt;package 
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name.</source>
-        <target state="translated">Vytvoří instanci šablony se zadaným krátkým názvem.</target>
-        <note />
+        <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
+        <target state="translated">Vytvoří instanci šablony se zadaným krátkým názvem. Alias „dotnet new &lt;template name&gt;“.</target>
+        <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
         <source>Checks the currently installed template packages for updates.</source>
@@ -94,8 +94,8 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="translated">Zkontrolujte pouze aktualizace a zobrazte balíčky šablon, které se mají aktualizovat bez použití aktualizace.</target>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
+        <target state="translated">Zkontroluje pouze aktualizace a zobrazte balíčky šablon, které se mají aktualizovat bez použití aktualizace.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -124,7 +124,7 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
+        <source>Displays all columns in the output.</source>
         <target state="translated">Zobrazí všechny sloupce ve výstupu.</target>
         <note />
       </trans-unit>
@@ -181,6 +181,11 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
       <trans-unit id="Option_PackageFilter">
         <source>Filters the templates based on NuGet package ID.</source>
         <target state="translated">Filtruje šablony podle ID balíčku NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="translated">Projekt, který by se měl použít pro vyhodnocení kontextu.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

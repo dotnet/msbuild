@@ -120,6 +120,9 @@
   <data name="CapabilityExpressionEvaluator_Exception_InvalidExpression" xml:space="preserve">
     <value>Invalid expression, position: {0}.</value>
   </data>
+  <data name="Diagnostics_OptionDescription" xml:space="preserve">
+    <value>Enables diagnostic output.</value>
+  </data>
   <data name="DisableProjectContextEval_OptionDescription" xml:space="preserve">
     <value>Disables evaluating project context using MSBuild.</value>
   </data>
@@ -148,6 +151,11 @@
   <data name="PostAction_AddProjToSln_Error_NoSolutionFile" xml:space="preserve">
     <value>Unable to determine which solution file to add the reference to.</value>
   </data>
+  <data name="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified" xml:space="preserve">
+    <value>Add project reference to solution action is not configured correctly in the template.
+    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</value>
+    <comment>do not translate: 'solutionFolder', 'inRoot'</comment>
+  </data>
   <data name="PostAction_AddProjToSln_Failed" xml:space="preserve">
     <value>Failed to add project(s) to the solution: {0}</value>
     <comment>{0} - the reason why operation failed, normally ends with period</comment>
@@ -160,6 +168,16 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</value>
+    <comment>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</comment>
+  </data>
+  <data name="PostAction_AddProjToSln_InRoot_Running" xml:space="preserve">
+    <value>Adding
+    project(s): {0}
+    in the root of solution file: {1}</value>
+    <comment>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</comment>
   </data>
   <data name="PostAction_AddProjToSln_Succeeded" xml:space="preserve">
     <value>Successfully added project(s) to a solution file.</value>
@@ -270,13 +288,10 @@
   </data>
   <data name="ProjectCapabilityConstraint_Restricted_NotRestored_CTA" xml:space="preserve">
     <value>Run 'dotnet restore {0}' to restore the project.</value>
-    <comment>do not translate 'dotnet restore {0}'</comment>
+    <comment>{Locked="dotnet restore {0}"}</comment>
   </data>
   <data name="ProjectContextSymbolSource_DisplayName" xml:space="preserve">
     <value>Project context</value>
-  </data>
-  <data name="ProjectPath_OptionDescription" xml:space="preserve">
-    <value>The project that should be used for context evaluation.</value>
   </data>
   <data name="SdkInfoProvider_Message_InstallSdk" xml:space="preserve">
     <value>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</value>
@@ -286,7 +301,11 @@
     <value>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</value>
     <comment>{0} is the list of installed and supported versions.</comment>
   </data>
+  <data name="Verbosity_OptionDescription" xml:space="preserve">
+    <value>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</value>
+  </data>
   <data name="WorkloadInfoProvider_Message_AddWorkloads" xml:space="preserve">
     <value>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</value>
+    <comment>{Locked="dotnet workload search"}</comment>
   </data>
 </root>

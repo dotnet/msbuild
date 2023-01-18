@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left == null && right != null && right.ContainingType.TypeKind == TypeKind.Interface)
             {
@@ -35,8 +35,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (right.ContainingType.FindImplementationForInterfaceMember(right) == null)
                 {
                     differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
                         DiagnosticIds.CannotAddMemberToInterface,
-                        string.Format(Resources.CannotAddMemberToInterface, right.ToDisplayString(), rightName, leftName),
+                        string.Format(Resources.CannotAddMemberToInterface, right.ToDisplayString(), rightMetadata, leftMetadata),
                         DifferenceType.Added,
                         right));
                 }

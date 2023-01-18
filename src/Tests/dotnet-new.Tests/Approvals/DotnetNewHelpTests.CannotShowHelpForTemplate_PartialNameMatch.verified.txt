@@ -1,0 +1,10 @@
+﻿No templates or subcommands found matching: 'class'.
+Did you mean one of the following templates?
+   dotnet new classlib -h
+Did you mean one of the following subcommands?
+   dotnet new list -h
+
+To list installed templates similar to 'class', run:
+   dotnet new list class
+To search for the templates on NuGet.org, run:
+   dotnet new search class

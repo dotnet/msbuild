@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal SearchCommandArgs(BaseSearchCommand command, ParseResult parseResult) : base(command, parseResult)
         {
-            string? nameCriteria = parseResult.GetValueForArgument(BaseSearchCommand.NameArgument);
+            string? nameCriteria = parseResult.GetValue(BaseSearchCommand.NameArgument);
             if (!string.IsNullOrWhiteSpace(nameCriteria))
             {
                 SearchNameCriteria = nameCriteria;
@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             // for legacy case new command argument is also accepted
             else if (command is LegacySearchCommand legacySearchCommand)
             {
-                string? newCommandArgument = parseResult.GetValueForArgument(NewCommand.ShortNameArgument);
+                string? newCommandArgument = parseResult.GetValue(NewCommand.ShortNameArgument);
                 if (!string.IsNullOrWhiteSpace(newCommandArgument))
                 {
                     SearchNameCriteria = newCommandArgument;

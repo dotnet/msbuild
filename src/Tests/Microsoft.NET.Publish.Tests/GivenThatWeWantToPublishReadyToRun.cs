@@ -213,7 +213,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
@@ -226,7 +226,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
         {
@@ -239,7 +239,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_supports_libraries_when_using_crossgen2(string targetFramework)
         {
@@ -268,10 +268,10 @@ namespace Microsoft.NET.Publish.Tests
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework, "linux-x64", "windows,linux,osx", "X64,Arm64", "_", "_")]
         [InlineData(ToolsetInfo.CurrentTargetFramework, "linux-x64", "windows,linux,osx", "X64,Arm64", "composite", "selfcontained")] // Composite in .NET 6.0 is only supported for self-contained builds
-        // In .NET 6.0 building targetting Windows on linux or osx doesn't support emitting native symbols.
+        // In .NET 6.0 building targeting Windows on linux or osx doesn't support emitting native symbols.
         [InlineData(ToolsetInfo.CurrentTargetFramework, "win-x64", "windows", "X64,Arm64", "composite", "selfcontained")] // Composite in .NET 6.0 is only supported for self-contained builds
         [InlineData(ToolsetInfo.CurrentTargetFramework, "osx-arm64", "windows,linux,osx", "X64,Arm64", "_", "_")]
-        // In .NET 6.0 building targetting Windows on linux or osx doesn't support emitting native symbols.
+        // In .NET 6.0 building targeting Windows on linux or osx doesn't support emitting native symbols.
         [InlineData(ToolsetInfo.CurrentTargetFramework, "win-x86", "windows", "X86,X64,Arm64,Arm", "_", "_")]
         public void It_supports_crossos_arch_compilation(string targetFramework, string runtimeIdentifier, string sdkSupportedOs, string sdkSupportedArch, string composite, string selfcontained)
         {

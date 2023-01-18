@@ -1,21 +1,17 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
-using System.IO;
 using System.Runtime.InteropServices;
 using FluentAssertions;
-using Microsoft.Build.Evaluation;
-using Microsoft.NET.TestFramework;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using VerifyTests;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public partial class PostActionTests : SdkTest
+    public partial class PostActionTests : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
@@ -35,9 +31,9 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("PostActions/RestoreNuGet/CustomSourceTargetPathFiles", "TestAssets.PostActions.RestoreNuGet.CustomSourceTargetPathFiles", "./Target/Output/")]
         public void Restore_Basic(string templateLocation, string templateName, string targetSubfolder = "")
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "MyProject")
                 .WithCustomHive(home)
@@ -53,7 +49,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(Path.Combine(workingDirectory, targetSubfolder, $"MyProject.csproj")));
             Assert.True(File.Exists(Path.Combine(workingDirectory, targetSubfolder, $"Program.cs")));
 
-            new DotnetCommand(_log, "build", "--no-restore")
+            new DotnetBuildCommand(_log, "--no-restore")
                 .WithWorkingDirectory(Path.Combine(workingDirectory, targetSubfolder))
                 .Execute()
                 .Should()
@@ -69,10 +65,10 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/RestoreNuGet/Basic";
             string expectedTemplateName = "TestAssets.PostActions.RestoreNuGet.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string outputDirectory = TestUtils.CreateTemporaryFolder("output");
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string outputDirectory = CreateTemporaryFolder("output");
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-n", "MyProject", "-o", outputDirectory)
                 .WithCustomHive(home)
@@ -89,7 +85,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(Path.Combine(outputDirectory, $"MyProject.csproj")));
             Assert.True(File.Exists(Path.Combine(outputDirectory, $"Program.cs")));
 
-            new DotnetCommand(_log, "build", "--no-restore")
+            new DotnetBuildCommand(_log, "--no-restore")
                 .WithWorkingDirectory(outputDirectory)
                 .Execute()
                 .Should()
@@ -105,10 +101,10 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/RestoreNuGet/Basic";
             string expectedTemplateName = "TestAssets.PostActions.RestoreNuGet.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = "output";
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-n", "MyProject", "-o", outputDirectory)
                 .WithCustomHive(home)
@@ -125,7 +121,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(Path.Combine(workingDirectory, outputDirectory, $"MyProject.csproj")));
             Assert.True(File.Exists(Path.Combine(workingDirectory, outputDirectory, $"Program.cs")));
 
-            new DotnetCommand(_log, "build", "--no-restore")
+            new DotnetBuildCommand(_log, "--no-restore")
                 .WithWorkingDirectory(Path.Combine(workingDirectory, outputDirectory))
                 .Execute()
                 .Should()
@@ -141,9 +137,9 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("PostActions/RestoreNuGet/SourceRenameFiles", "TestAssets.PostActions.RestoreNuGet.SourceRenameFiles")]
         public void Restore_SourceRenameTest(string templateLocation, string templateName)
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "MyProject", "--firstRename", "Awesome")
                 .WithCustomHive(home)
@@ -159,7 +155,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(Path.Combine(workingDirectory, $"MyAwesomeTestProject.csproj")));
             Assert.True(File.Exists(Path.Combine(workingDirectory, $"Program.cs")));
 
-            new DotnetCommand(_log, "build", "--no-restore")
+            new DotnetBuildCommand(_log, "--no-restore")
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -175,9 +171,9 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("PostActions/RestoreNuGet/TwoProjectsFiles", "TestAssets.PostActions.RestoreNuGet.TwoProjectsFiles")]
         public void Restore_RestoreOneProjectFromTwo(string templateLocation, string templateName)
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "TemplateApplication")
                 .WithCustomHive(home)
@@ -193,7 +189,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(Path.Combine(workingDirectory, $"src/TemplateApplication/TemplateApplication.csproj")));
             Assert.True(File.Exists(Path.Combine(workingDirectory, $"test/TemplateApplication.Tests/TemplateApplication.Tests.csproj")));
 
-            new DotnetCommand(_log, "build", "src/TemplateApplication", "--no-restore")
+            new DotnetBuildCommand(_log, "src/TemplateApplication", "--no-restore")
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -203,7 +199,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining("Build succeeded.")
                 .And.HaveStdOutContaining("TemplateApplication");
 
-            new DotnetCommand(_log, "build", "test/TemplateApplication.Tests", "--no-restore")
+            new DotnetBuildCommand(_log, "test/TemplateApplication.Tests", "--no-restore")
                   .WithWorkingDirectory(workingDirectory)
                   .Execute()
                   .Should().Fail()
@@ -216,9 +212,9 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("PostActions/RestoreNuGet/TwoProjectsWithSourceRenames2", "TestAssets.PostActions.RestoreNuGet.TwoProjectsWithSourceRenames2")]
         public void Restore_SourceRenameTwoProjectsTest(string templateLocation, string templateName)
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "TemplateApplication")
                 .WithCustomHive(home)
@@ -234,7 +230,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(Path.Combine(workingDirectory, $"TemplateApplication.UI/TemplateApplication.UI.csproj")));
             Assert.True(File.Exists(Path.Combine(workingDirectory, $"TemplateApplication.Tests/TemplateApplication.Tests.csproj")));
 
-            new DotnetCommand(_log, "build", "TemplateApplication.UI", "--no-restore")
+            new DotnetBuildCommand(_log, "TemplateApplication.UI", "--no-restore")
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -244,7 +240,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining("Build succeeded.")
                 .And.HaveStdOutContaining("TemplateApplication.UI");
 
-            new DotnetCommand(_log, "build", "TemplateApplication.Tests", "--no-restore")
+            new DotnetBuildCommand(_log, "TemplateApplication.Tests", "--no-restore")
                   .WithWorkingDirectory(workingDirectory)
                   .Execute()
                   .Should()
@@ -260,11 +256,11 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/RunScript/Basic";
             string templateName = "TestAssets.PostActions.RunScript.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -293,11 +289,11 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/RunScript/DoNotRedirect";
             string templateName = "TestAssets.PostActions.RunScript.DoNotRedirect";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -318,11 +314,11 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/RunScript/Redirect";
             string templateName = "TestAssets.PostActions.RunScript.Redirect";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -343,11 +339,11 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/RunScript/RedirectOnError";
             string templateName = "TestAssets.PostActions.RunScript.RedirectOnError";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -376,9 +372,9 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("PostActions/AddPackageReference/BasicWithFiles", "TestAssets.PostActions.AddPackageReference.BasicWithFiles")]
         public void AddPackageReference_Basic(string templateLocation, string templateName)
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
@@ -392,7 +388,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining("Adding a package reference Newtonsoft.Json (version: 13.0.1) to project file")
                 .And.NotHaveStdOutContaining("Manual instructions: Manually add");
 
-            new DotnetCommand(_log, "build")
+            new DotnetBuildCommand(_log)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -406,10 +402,10 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/AddPackageReference/Basic";
             string expectedTemplateName = "TestAssets.PostActions.AddPackageReference.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string outputDirectory = TestUtils.CreateTemporaryFolder("output");
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string outputDirectory = CreateTemporaryFolder("output");
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-o", outputDirectory, "-n", "MyProject")
                 .WithCustomHive(home)
@@ -424,7 +420,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.NotHaveStdOutContaining("Manual instructions: Manually add")
                 .And.HaveStdOutContaining(Path.Combine(outputDirectory, "MyProject.csproj"));
 
-            new DotnetCommand(_log, "build", Path.Combine(outputDirectory, "MyProject.csproj"))
+            new DotnetBuildCommand(_log, Path.Combine(outputDirectory, "MyProject.csproj"))
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -438,9 +434,9 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/AddPackageReference/Basic";
             string expectedTemplateName = "TestAssets.PostActions.AddPackageReference.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-o", "output", "-n", "MyProject")
                 .WithCustomHive(home)
@@ -455,7 +451,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.NotHaveStdOutContaining("Manual instructions: Manually add")
                 .And.HaveStdOutContaining(Path.Combine(workingDirectory, "output", "MyProject.csproj"));
 
-            new DotnetCommand(_log, "build", Path.Combine("output", "MyProject.csproj"))
+            new DotnetBuildCommand(_log, Path.Combine("output", "MyProject.csproj"))
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -469,9 +465,9 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/AddProjectReference/Basic";
             string expectedTemplateName = "TestAssets.PostActions.AddProjectReference.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName)
                 .WithCustomHive(home)
@@ -483,7 +479,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining($"The template \"{expectedTemplateName}\" was created successfully.")
                 .And.HaveStdOutContaining("Successfully added");
 
-            new DotnetCommand(_log, "build", "Project1/Project1.csproj")
+            new DotnetBuildCommand(_log, "Project1/Project1.csproj")
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -491,7 +487,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetCommand(_log, "build", "Project2/Project2.csproj")
+            new DotnetBuildCommand(_log, "Project2/Project2.csproj")
                  .WithWorkingDirectory(workingDirectory)
                  .Execute()
                  .Should()
@@ -505,10 +501,10 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/AddProjectReference/Basic";
             string expectedTemplateName = "TestAssets.PostActions.AddProjectReference.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string outputDirectory = TestUtils.CreateTemporaryFolder("output");
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string outputDirectory = CreateTemporaryFolder("output");
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-o", outputDirectory)
                 .WithCustomHive(home)
@@ -522,7 +518,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining(Path.Combine(outputDirectory, "Project1", "Project1.csproj"))
                 .And.HaveStdOutContaining(Path.Combine(outputDirectory, "Project2", "Project2.csproj"));
 
-            new DotnetCommand(_log, "build", Path.Combine(outputDirectory, "Project1", "Project1.csproj"))
+            new DotnetBuildCommand(_log, Path.Combine(outputDirectory, "Project1", "Project1.csproj"))
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -536,9 +532,9 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/AddProjectReference/Basic";
             string expectedTemplateName = "TestAssets.PostActions.AddProjectReference.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-o", "output")
                 .WithCustomHive(home)
@@ -552,7 +548,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining(Path.Combine(workingDirectory, "output", "Project1", "Project1.csproj"))
                 .And.HaveStdOutContaining(Path.Combine(workingDirectory, "output", "Project2", "Project2.csproj"));
 
-            new DotnetCommand(_log, "build", Path.Combine("output", "Project1", "Project1.csproj"))
+            new DotnetBuildCommand(_log, Path.Combine("output", "Project1", "Project1.csproj"))
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -566,11 +562,11 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("PostActions/RestoreNuGet/Invalid_ContinueOnError", "TestAssets.PostActions.RestoreNuGet.Invalid.ContinueOnError", false)]
         public void ErrorExitCodeOnFailedPostAction(string templateLocation, string templateName, bool errorExpected)
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName)
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName)
                    .WithCustomHive(home)
                    .WithWorkingDirectory(workingDirectory)
                    .Execute();
@@ -593,7 +589,7 @@ namespace Microsoft.DotNet.New.Tests
                   .And.HaveStdErrContaining("Post action failed.")
                   .And.HaveStdErrContaining("Manual instructions: Run 'dotnet restore'");
 
-            new DotnetCommand(_log, "build", "--no-restore")
+            new DotnetBuildCommand(_log, "--no-restore")
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Fail();
@@ -604,9 +600,9 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("PostActions/AddProjectToSolution/BasicWithFiles", "TestAssets.PostActions.AddProjectToSolution.BasicWithFiles")]
         public void AddProjectToSolution_Basic(string templateLocation, string templateName)
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution")
@@ -633,14 +629,50 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Fact]
+        public void AddProjectToSolution_BasicInSolutionRoot()
+        {
+            string templateLocation = "PostActions/AddProjectToSolution/BasicInSolutionRoot";
+            string expectedTemplateName = "TestAssets.PostActions.AddProjectToSolution.BasicInSolutionRoot";
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string outputDirectory = CreateTemporaryFolder("output");
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            //creating solution file to add to
+            new DotnetNewCommand(_log, "sln", "-n", "MySolution", "-o", outputDirectory)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            new DotnetNewCommand(_log, expectedTemplateName, "-n", "MyProject", "-o", outputDirectory)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"The template \"{expectedTemplateName}\" was created successfully.")
+                .And.HaveStdOutContaining("Successfully added")
+                .And.HaveStdOutContaining("in the root of solution file")
+                .And.NotHaveStdOutContaining("Manual instructions: Add the generated files to solution manually.")
+                .And.HaveStdOutContaining(Path.Combine(outputDirectory, "MySolution.sln"))
+                .And.HaveStdOutContaining(Path.Combine(outputDirectory, "MyProject.csproj"));
+
+            Assert.Contains("MyProject.csproj", File.ReadAllText(Path.Combine(outputDirectory, "MySolution.sln")));
+        }
+
+        [Fact]
         public void AddProjectToSolution_WithOutputAbsolutePath()
         {
             string templateLocation = "PostActions/AddProjectToSolution/Basic";
             string expectedTemplateName = "TestAssets.PostActions.AddProjectToSolution.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string outputDirectory = TestUtils.CreateTemporaryFolder("output");
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string outputDirectory = CreateTemporaryFolder("output");
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution", "-o", outputDirectory)
@@ -673,10 +705,10 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/AddProjectToSolution/Basic";
             string expectedTemplateName = "TestAssets.PostActions.AddProjectToSolution.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = "output";
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution", "-o", outputDirectory)
@@ -709,9 +741,9 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/AddProjectToSolution/BasicWithIndexes";
             string expectedTemplateName = "TestAssets.PostActions.AddProjectToSolution.BasicWithIndexes";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution")
@@ -748,11 +780,11 @@ namespace Microsoft.DotNet.New.Tests
         {
             string templateLocation = "PostActions/Instructions/Basic";
             string templateName = "TestAssets.PostActions.Instructions.Basic";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName)
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -765,6 +797,80 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining($"Description: Manual actions needed")
                 .And.HaveStdOutContaining($"Manual instructions: Run the following command:")
                 .And.HaveStdOutContaining($"Actual command: setup.cmd <your project name>");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddProjectReference()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
+            string templateLocation = GetTestTemplateLocation("AddProjectReference");
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("install", templateLocation);
+            cmd.Should().Pass();
+
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute("TestAssets.AddReference");
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Adding a project reference")
+                .And.HaveStdOutContaining("Successfully added a reference to the project file.");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddPackageReference()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
+            string templateLocation = GetTestTemplateLocation("AddPackageReference");
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("install", templateLocation);
+            cmd.Should().Pass();
+
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("TestAssets.AddReference", "-o", workingDirectory);
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Adding a package reference Newtonsoft.Json (version: 13.0.1) to project file")
+                .And.HaveStdOutContaining("Successfully added a reference to the project file.");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddProjectToSolution()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
+            string templateLocation = GetTestTemplateLocation("AddProjectToSolution");
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("install", templateLocation);
+            cmd.Should().Pass();
+
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("TestAssets.AddProjectToSolution", "-o", workingDirectory);
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Successfully added project(s) to a solution file.");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithRestore()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
+
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute("console");
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Determining projects to restore...")
+                .And.HaveStdOutContaining("Restore succeeded.");
         }
     }
 }

@@ -99,21 +99,21 @@ namespace Microsoft.NET.Build.Tests
             const string PlatformTarget = "x86";
 
             var testAsset = _testAssetsManager
-				.CopyTestAsset("HelloWorld")
-				.WithSource()
-				.WithProjectChanges(project =>
-				{
-					var ns = project.Root.Name.Namespace;
-					var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-					propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", RuntimeIdentifier));
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", RuntimeIdentifier));
                     propertyGroup.Add(new XElement(ns + "PlatformTarget", PlatformTarget));
-				});
+                });
 
-			var buildCommand = new BuildCommand(testAsset);
+            var buildCommand = new BuildCommand(testAsset);
 
-			buildCommand
-				.Execute()
-				.Should()
+            buildCommand
+                .Execute()
+                .Should()
                 .Fail()
                 .And.HaveStdOutContaining(string.Format(
                     Strings.CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget,
@@ -121,41 +121,41 @@ namespace Microsoft.NET.Build.Tests
                     PlatformTarget));
         }
 
-		[Fact]
-		public void It_succeeds_when_RuntimeIdentifier_and_PlatformTarget_mismatch_but_PT_is_AnyCPU()
-		{
-			var targetFramework = ToolsetInfo.CurrentTargetFramework;
-			var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
-			var testAsset = _testAssetsManager
-				.CopyTestAsset("HelloWorld")
-				.WithSource()
-				.WithProjectChanges(project =>
-				{
-					var ns = project.Root.Name.Namespace;
-					var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-					propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
-					propertyGroup.Add(new XElement(ns + "PlatformTarget", "AnyCPU"));
-				});
+        [Fact]
+        public void It_succeeds_when_RuntimeIdentifier_and_PlatformTarget_mismatch_but_PT_is_AnyCPU()
+        {
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
+                    propertyGroup.Add(new XElement(ns + "PlatformTarget", "AnyCPU"));
+                });
 
-			var buildCommand = new BuildCommand(testAsset);
+            var buildCommand = new BuildCommand(testAsset);
 
-			buildCommand
-				.Execute()
-				.Should()
-				.Pass();
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
 
-			var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
-			var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
+            var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
-			string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
+            string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
             new RunExeCommand(Log, selfContainedExecutableFullPath)
-				.Execute()
-				.Should()
-				.Pass()
-				.And
-				.HaveStdOutContaining("Hello World!");
-		}
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
+        }
 
         [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_resolves_runtimepack_from_packs_folder()
@@ -241,7 +241,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_resolves_pack_versions_from_workload_manifest()
         {
-            string GetVersionBand(string sdkVersion)
+            static string GetVersionBand(string sdkVersion)
             {
                 if (!Version.TryParse(sdkVersion.Split('-')[0], out var sdkVersionParsed))
                 {
@@ -317,7 +317,7 @@ namespace Microsoft.NET.Build.Tests
 ");
 
             //  Verify correct targeting pack version is resolved
-            var getValuesCommand = (GetValuesCommand) new GetValuesCommand(testAsset, "TargetingPack", GetValuesCommand.ValueType.Item)
+            var getValuesCommand = (GetValuesCommand)new GetValuesCommand(testAsset, "TargetingPack", GetValuesCommand.ValueType.Item)
                 .WithEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS, manifestRoot);
             getValuesCommand.MetadataNames = new List<string>() { "NuGetPackageId", "NuGetPackageVersion" };
             getValuesCommand.DependsOnTargets = "ProcessFrameworkReferences";
@@ -349,21 +349,30 @@ namespace Microsoft.NET.Build.Tests
             testRuntimePack.metadata["NuGetPackageVersion"].Should().Be("1.0.42-abc");
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.51802")]
         [InlineData("net6.0")]
-        public void It_can_publish_runtime_specific_apps_with_library_dependencies_self_contained(string targetFramework) {
+        public void It_can_publish_runtime_specific_apps_with_library_dependencies_self_contained(string targetFramework)
+        {
+
+            // There's a bug when using the 6.0 SDK with 17.4 but we have limited control over the VS version used in helix
+            Version.TryParse(TestContext.Current.ToolsetUnderTest.MSBuildVersion, out Version msbuildVersion);
+            Version.TryParse("17.4.0", out Version maximumVersion);
+            if (msbuildVersion >= maximumVersion)
+                return;
 
             // create a basic library and a basic app, reference the library from the app and then
             // publish the app with a RID specified and self-contained.
             // verify that no warnings about missing the --self-contained flag are emitted.
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
-            var libProject = new TestProject("RidSelfContainedLib"){
+            var libProject = new TestProject("RidSelfContainedLib")
+            {
                 IsExe = false,
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true
             };
             var createdLibProject = _testAssetsManager.CreateTestProject(libProject);
-            var appProject = new TestProject("RidSelfContainedApp") {
+            var appProject = new TestProject("RidSelfContainedApp")
+            {
                 IsExe = true,
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true
@@ -371,7 +380,104 @@ namespace Microsoft.NET.Build.Tests
             appProject.ReferencedProjects.Add(libProject);
             var createdAppProject = _testAssetsManager.CreateTestProject(appProject);
             var publishCommand = new PublishCommand(createdAppProject);
-            publishCommand.Execute(new [] {"-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" }).Should().Pass().And.NotHaveStdOutContaining("warning");
+            publishCommand.Execute(new[] { "-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" }).Should().Pass().And.NotHaveStdOutContaining("warning");
+        }
+
+        [Fact]
+        public void It_does_not_build_SelfContained_due_to_PublishSelfContained_being_true()
+        {
+            string targetFramework = ToolsetInfo.CurrentTargetFramework;
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: "ItDoesNotBuildSCDueToPSC")
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "PublishSelfContained", "true"));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            outputDirectory.Should().NotHaveFile("hostfxr.dll"); // This file will only appear if SelfContained. 
+        }
+
+        [Theory]
+        [InlineData("PublishReadyToRun")]
+        [InlineData("PublishSingleFile")]
+        [InlineData("PublishSelfContained")]
+        [InlineData("PublishAot")]
+        public void It_builds_without_implicit_rid_with_RuntimeIdentifier_specific_during_publish_only_properties(string property)
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm,
+            };
+            testProject.AdditionalProperties[property] = "true";
+            testProject.RecordProperties("RuntimeIdentifier");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: property);
+
+            var buildCommand = new DotnetBuildCommand(testAsset);
+            buildCommand
+               .Execute()
+               .Should()
+               .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
+            properties["RuntimeIdentifier"].Should().Be("");
+        }
+
+        [Theory]
+        [InlineData("net7.0")]
+        public void It_builds_a_runnable_output_with_Prefer32Bit(string targetFramework)
+        {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
+                    propertyGroup.Add(new XElement(ns + "Prefer32Bit", "true"));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(Strings.Prefer32BitIgnoredForNetCoreApp);
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
+            var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
+
+            string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
         }
     }
 }
