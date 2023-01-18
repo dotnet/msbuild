@@ -811,8 +811,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="SolutionProjectConfigurationsConflict">
-        <source>NETSDK1196: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:</source>
-        <target state="new">NETSDK1196: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting project:</target>
+        <source>NETSDK1196: Multiple solution projects contain conflicting '{0}' values. Every project must have the same value of '{0}', only true; or false. The property can instead be defined globally, such as: -p:'{0}'=true. Conflicting project:</source>
+        <target state="new">NETSDK1196: Multiple solution projects contain conflicting '{0}' values. Every project must have the same value of '{0}', only true; or false. The property can instead be defined globally, such as: -p:'{0}'=true. Conflicting project:</target>
         <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="TargetFrameworkIsEol">
