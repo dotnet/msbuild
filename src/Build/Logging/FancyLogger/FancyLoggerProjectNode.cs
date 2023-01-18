@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -26,6 +27,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public string ProjectPath;
         public string TargetFramework;
         public bool Finished;
+        public string ProjectOutputExecutable;
         // Line to display project info
         public FancyLoggerBufferLine? Line;
         // Targets
@@ -44,6 +46,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             ProjectPath = args.ProjectFile!;
             Finished = false;
             FinishedTargets = 0;
+            ProjectOutputExecutable = string.Empty;
             if (args.GlobalProperties != null && args.GlobalProperties.ContainsKey("TargetFramework"))
             {
                 TargetFramework = args.GlobalProperties["TargetFramework"];
@@ -60,13 +63,17 @@ namespace Microsoft.Build.Logging.FancyLogger
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
                 // Show indicator
                 (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner())) +
-                // Project
-                ANSIBuilder.Formatting.Dim("Project: ") +
                 // Project file path with color
-                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework ?? "*"}]",
+                $" {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}" +
+                // TFM
+                $" {ANSIBuilder.Formatting.Inverse(TargetFramework)} " +
+                // TODO: Known bug
+                $"-> { ANSIBuilder.Formatting.Hyperlink(GetUnambiguousPath(ProjectOutputExecutable), ProjectOutputExecutable) }"
+                ,
                 $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
+                // ProjectOutputExecutable, 
                 Console.WindowWidth
-            );
+            );;
 
             // Create or update line
             if (Line == null) Line = FancyLoggerBuffer.WriteNewLine(lineContents);
@@ -116,6 +123,12 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             if (args.Importance != MessageImportance.High) return null;
             MessageCount++;
+            // Detect output messages using regex
+            // var match = Regex.Match(args.Message, $"(?<={args.ProjectFile} -> )(.*)");
+            var match = Regex.Match(args.Message!, $"(?<=.* -> )(.*)");
+            if (match.Success)
+                ProjectOutputExecutable = match.Value;
+
             FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
             AdditionalDetails.Add(node);
             return node;
