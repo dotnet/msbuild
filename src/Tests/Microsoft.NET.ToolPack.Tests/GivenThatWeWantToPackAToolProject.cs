@@ -193,7 +193,10 @@ namespace Microsoft.NET.ToolPack.Tests
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                getValuesCommand.Execute();
+                //  If multi-targeted, we need to specify which target framework to get the value for
+                string[] args = multiTarget ? new[] { $"/p:TargetFramework={_targetFrameworkOrFrameworks}" } : Array.Empty<string>();
+                getValuesCommand.Execute(args)
+                    .Should().Pass();
                 string runCommandPath = getValuesCommand.GetValues().Single();
                 Path.GetExtension(runCommandPath)
                     .Should().Be(extension);
