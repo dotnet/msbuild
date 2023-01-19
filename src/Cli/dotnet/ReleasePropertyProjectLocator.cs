@@ -9,6 +9,7 @@ using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
@@ -42,7 +43,6 @@ namespace Microsoft.DotNet.Cli
         DependentCommandOptions _options;
 
         private IEnumerable<string> _slnOrProjectArgs;
-        private bool _isHandlingSolution = false;
 
         private static string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
         private static string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
@@ -96,11 +96,6 @@ namespace Microsoft.DotNet.Cli
                         }"
                     };
 
-                    if (_isHandlingSolution) // This will allow us to detect conflicting configuration values during evaluation.
-                    {
-                        newConfigurationArgs.Add($"-property:_SolutionLevel{_propertyToCheck}={propertyToCheckValue}");
-                    }
-
                     return newConfigurationArgs;
                 }
             }
@@ -145,7 +140,8 @@ namespace Microsoft.DotNet.Cli
             return null;  // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
         }
 
-        /// <returns>An arbitrary existant project in a solution file. Returns null if no projects exist.</returns>
+        /// <returns>An arbitrary existant project in a solution file. Returns null if no projects exist.
+        /// Throws exception if two+ projects disagree in PublishRelease, PackRelease, or whatever _propertyToCheck is, and have it defined.</returns>
         public ProjectInstance? GetArbitraryProjectFromSolution(string slnPath, Dictionary<string, string> globalProps)
         {
             SlnFile sln;
@@ -158,23 +154,50 @@ namespace Microsoft.DotNet.Cli
                 return null; // This can be called if a solution doesn't exist. MSBuild will catch that for us.
             }
 
-            foreach (var project in sln.Projects.AsEnumerable())
+            List<ProjectInstance> configuredProjects = new List<ProjectInstance>();
+            HashSet<string> configValues = new HashSet<string>();
+            object projectDataLock = new object();
+
+            if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE_SOLTUION), "true", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            Parallel.ForEach(sln.Projects.AsEnumerable(), (project, state) =>
             {
 #pragma warning disable CS8604 // Possible null reference argument.
                 string projectFullPath = Path.Combine(Path.GetDirectoryName(sln.FullPath), project.FilePath);
 #pragma warning restore CS8604 // Possible null reference argument.
                 if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(projectFullPath))
-                    continue;
+                    return;
 
                 var projectData = TryGetProjectInstance(projectFullPath, globalProps);
-                if (projectData != null)
+                if (projectData == null)
                 {
-                    _isHandlingSolution = true;
-                    return projectData;
+                    return;
                 }
-            };
 
-            return null;
+                string pReleasePropertyValue = projectData.GetPropertyValue(_propertyToCheck);
+                if (!string.IsNullOrEmpty(pReleasePropertyValue))
+                {
+                    lock (projectDataLock)
+                    {
+                        configuredProjects.Add(projectData);
+                        configValues.Add(pReleasePropertyValue.ToLower());
+                    }
+                }
+            });
+
+            if (configuredProjects.Any() && configValues.Count > 1)
+            {
+                // Note:
+                // 1) This error should not be thrown in VS because it is part of the SDK CLI code
+                // 2) If PublishRelease or PackRelease is disabled via opt out, or Configuration is specified, we won't get to this code, so we won't error
+                // 3) This code only gets hit if we are in a solution publish setting, so we don't need to worry about it failing other publish scenarios
+                throw new GracefulException(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, _propertyToCheck, String.Join("\n", (configuredProjects).Select(x => x.FullPath)));
+            }
+
+            return configuredProjects.Any() ? configuredProjects.First() : null;
         }
 
         /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails.</returns>

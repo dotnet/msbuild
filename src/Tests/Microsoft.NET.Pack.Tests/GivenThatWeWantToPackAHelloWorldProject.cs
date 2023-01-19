@@ -206,7 +206,7 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(string.Format(Strings.SolutionProjectConfigurationsConflict, "PackRelease"));
+                .HaveStdErrContaining(string.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, "PackRelease", ""));
         }
 
         [Fact]

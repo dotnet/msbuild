@@ -157,17 +157,4 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(PublishRelease)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '8.0'">
     <PublishRelease>true</PublishRelease>
   </PropertyGroup>
-
-  <!-- This verifies that the configuration between projects in a solution set by PackRelease agree.
-  PackRelease only affects the CLI since VS has its own Configuration UI and it's not possible to detect like this in MSBuild.
-  _IsPacking will only be set if packing in the CLI, so that's fine here. The pack targets are all outside of the SDK, which is why this is here.-->
-  <Target Name="_VerifyPackReleaseConfigurations"
-          BeforeTargets="PrepareForBuild"
-          Condition="'$(_IsPacking)' == 'true' and '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE)' != 'true'">
-    <NETSdkError Condition="'$(SolutionExt)' == '.sln' and
-                            '$(_SolutionLevelPackRelease)' != '$(PackRelease)'"
-          ResourceName="SolutionProjectConfigurationsConflict"
-          FormatArguments="PackRelease"/>
-  </Target>
-
 </Project>

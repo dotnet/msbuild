@@ -242,6 +242,13 @@ La valeur par défaut est 'true' si un identificateur de runtime est spécifié.
         <target state="translated">supprimer</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionProjectConfigurationsConflict">
+        <source>Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+{1}</source>
+        <target state="new">Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+{1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Update">
         <source>Update</source>
         <target state="translated">Mettre à jour</target>

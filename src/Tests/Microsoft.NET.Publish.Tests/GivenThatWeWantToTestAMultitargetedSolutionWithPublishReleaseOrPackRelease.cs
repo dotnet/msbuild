@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.DotNet.Tools;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -36,40 +37,40 @@ namespace Microsoft.NET.Publish.Tests
         /// Create a solution with 2 projects, one an exe, the other a library.
         /// </summary>
         /// <param name="log"></param>
-        /// <param name="firstProjTfms">A string of TFMs separated by ; for the exe project.</param>
-        /// <param name="secondProjTfms">A string of TFMs separated by ; for the library project.</param>
+        /// <param name="exeProjTfms">A string of TFMs separated by ; for the exe project.</param>
+        /// <param name="libraryProjTfms">A string of TFMs separated by ; for the library project.</param>
         /// <param name="PReleaseProperty">The value of the property to set, PublishRelease or PackRelease in this case.</param>
-        /// <param name="firstProjPReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
-        /// <param name="secondProjPReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
+        /// <param name="exePReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
+        /// <param name="libraryPReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
         /// <param name="testPath">Use to set a unique folder name for the test, like other test infrastructure code.</param>
         /// <returns></returns>
-        internal Tuple<TestSolution, List<TestProject>> Setup(ITestOutputHelper log, List<string> firstProjTfms, List<string> secondProjTfms, string PReleaseProperty, string firstProjPReleaseValue, string secondProjPReleaseValue, [CallerMemberName] string testPath = "")
+        internal Tuple<TestSolution, List<TestProject>> Setup(ITestOutputHelper log, List<string> exeProjTfms, List<string> libraryProjTfms, string PReleaseProperty, string exePReleaseValue, string libraryPReleaseValue, [CallerMemberName] string testPath = "")
         {
             // Project Setup
             List<TestProject> testProjects = new List<TestProject>();
             var testProject = new TestProject("TestProject")
             {
-                TargetFrameworks = String.Join(";", firstProjTfms),
+                TargetFrameworks = String.Join(";", exeProjTfms),
                 IsExe = true
             };
             testProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
-            if (firstProjPReleaseValue != "")
+            if (exePReleaseValue != "")
             {
-                testProject.AdditionalProperties[PReleaseProperty] = firstProjPReleaseValue;
+                testProject.AdditionalProperties[PReleaseProperty] = exePReleaseValue;
             }
-            var mainProject = _testAssetsManager.CreateTestProject(testProject, callingMethod: testPath, identifier: string.Join("", firstProjTfms) + PReleaseProperty);
+            var mainProject = _testAssetsManager.CreateTestProject(testProject, callingMethod: testPath, identifier: string.Join("", exeProjTfms) + PReleaseProperty);
 
             var referencedProject = new TestProject("ReferencedProject")
             {
-                TargetFrameworks = String.Join(";", secondProjTfms),
+                TargetFrameworks = String.Join(";", libraryProjTfms),
                 IsExe = false
             };
             referencedProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
-            if (secondProjPReleaseValue != "")
+            if (libraryPReleaseValue != "")
             {
-                referencedProject.AdditionalProperties[PReleaseProperty] = secondProjPReleaseValue;
+                referencedProject.AdditionalProperties[PReleaseProperty] = libraryPReleaseValue;
             }
-            var secondProject = _testAssetsManager.CreateTestProject(referencedProject, callingMethod: testPath, identifier: string.Join("", secondProjTfms) + PReleaseProperty);
+            var secondProject = _testAssetsManager.CreateTestProject(referencedProject, callingMethod: testPath, identifier: string.Join("", libraryProjTfms) + PReleaseProperty);
 
             List<TestAsset> projects = new List<TestAsset> { mainProject, secondProject };
 
@@ -144,7 +145,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var dotnetCommand = new DotnetCommand(Log, pack);
             dotnetCommand
-                .Execute(sln.SolutionPath, "-bl:C:\\users\\noahgilson\\packdebugwhy.binlog")
+                .Execute(sln.SolutionPath)
                 .Should()
                 .Pass();
 
@@ -209,25 +210,40 @@ namespace Microsoft.NET.Publish.Tests
         }
 
 
-        [InlineData("true")]
-        [InlineData("false")]
-        [InlineData("")]
+        [InlineData("true", PublishRelease)]
+        [InlineData("false", PublishRelease)]
+        [InlineData("", PublishRelease)]
+        [InlineData("true", PackRelease)]
+        // [InlineData("false", PackRelease)] This case we would expect to fail as PackRelease is enabled regardless of TFM.
+        [InlineData("", PackRelease)]
         [Theory]
-        public void ItFailsWithNet8ProjectAndNet7ProjectSolutionWithPublishReleaseUndefined(string publishReleaseValue)
+        public void ItPassesWithNet8ProjectAndNet7ProjectSolutionWithPublishReleaseOrPackReleaseUndefined(string releasePropertyValue, string property)
         {
             var firstProjectTfm = "net7.0";
             var secondProjectTfm = ToolsetInfo.CurrentTargetFramework; // This should work for Net8+, test name is for brevity
 
-            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "", publishReleaseValue);
+            var expectedConfiguration = Release;
+            if (releasePropertyValue == "false" && property == PublishRelease)
+            {
+                expectedConfiguration = Debug;
+            }
+
+            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, property, "", releasePropertyValue);
             var sln = solutionAndProjects.Item1;
 
-            var dotnetCommand = new DotnetPublishCommand(Log);
+            var dotnetCommand = new DotnetCommand(Log);
             dotnetCommand
-                .Execute(sln.SolutionPath)
+                .Execute(property == PublishRelease ? "publish" : "pack", sln.SolutionPath)
                 .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(String.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease));
+                .Pass();
+
+            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+               {
+                   new Tuple<string, string>(firstProjectTfm, expectedConfiguration),
+                   new Tuple<string, string>(secondProjectTfm, expectedConfiguration),
+               });
+
+            VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
 
         [Fact]
@@ -245,7 +261,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(String.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease));
+                .HaveStdErrContaining(String.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, PublishRelease, ""));;
         }
 
         [Fact]

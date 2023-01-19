@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
@@ -525,7 +526,7 @@ public static class Program
                .WithSource()
                .Path;
 
-            var expectedError = string.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease);
+            var expectedError = string.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, PublishRelease, "");
 
             new DotnetCommand(Log)
                 .WithWorkingDirectory(slnDir)
@@ -550,11 +551,13 @@ public static class Program
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(string.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease));
+                .HaveStdErrContaining(string.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, PublishRelease, ""));
         }
 
-        [Fact]
-        public void It_doesnt_error_if_environment_variable_opt_out_enabled_but_PublishRelease_conflicts()
+        [Theory]
+        [InlineData("DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE")]
+        [InlineData("DOTNET_CLI_DETECT_PUBLISH_RELEASE_FOR_SOLUTIONS")]
+        public void It_doesnt_error_if_environment_variable_opt_out_enabled_but_PublishRelease_conflicts(string envVar)
         {
             var slnDir = _testAssetsManager
                .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingValues")
@@ -562,7 +565,7 @@ public static class Program
                .Path;
 
             new DotnetCommand(Log)
-                .WithEnvironmentVariable("DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE", "true")
+                .WithEnvironmentVariable(envVar, "true")
                 .WithWorkingDirectory(slnDir)
                 .Execute("dotnet", "publish")
                 .Should()
