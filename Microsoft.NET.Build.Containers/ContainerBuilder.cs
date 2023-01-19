@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 public static class ContainerBuilder
 {
-    public static async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string[] entrypointArgs, string imageName, string[] imageTags, string outputRegistry, string[] labels, Port[] exposedPorts, string[] envVars, string containerRuntimeIdentifier, string ridGraphPath)
+    public static async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string[] entrypointArgs, string imageName, string[] imageTags, string? outputRegistry, string[] labels, Port[] exposedPorts, string[] envVars, string containerRuntimeIdentifier, string ridGraphPath)
     {
         var isDockerPull = String.IsNullOrEmpty(registryName);
         if (isDockerPull) {
@@ -34,7 +34,7 @@ public static class ContainerBuilder
         img.SetEntrypoint(entrypoint, entrypointArgs);
 
         var isDockerPush = String.IsNullOrEmpty(outputRegistry);
-        Registry? outputReg = isDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(outputRegistry));
+        Registry? outputReg = isDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(outputRegistry!));
 
         foreach (var label in labels)
         {

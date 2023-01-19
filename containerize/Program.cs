@@ -32,7 +32,7 @@ var outputRegistryOpt = new Option<string>(
     name: "--outputregistry",
     description: "The registry to push to.")
 {
-    IsRequired = true
+    IsRequired = false
 };
 
 var imageNameOpt = new Option<string>(
@@ -180,7 +180,7 @@ root.SetHandler(async (context) =>
     string _baseReg = context.ParseResult.GetValueForOption(baseRegistryOpt) ?? "";
     string _baseName = context.ParseResult.GetValueForOption(baseImageNameOpt) ?? "";
     string _baseTag = context.ParseResult.GetValueForOption(baseImageTagOpt) ?? "";
-    string _outputReg = context.ParseResult.GetValueForOption(outputRegistryOpt) ?? "";
+    string? _outputReg = context.ParseResult.GetValueForOption(outputRegistryOpt);
     string _name = context.ParseResult.GetValueForOption(imageNameOpt) ?? "";
     string[] _tags = context.ParseResult.GetValueForOption(imageTagsOpt) ?? Array.Empty<string>();
     string _workingDir = context.ParseResult.GetValueForOption(workingDirectoryOpt) ?? "";
