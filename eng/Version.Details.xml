@@ -42,13 +42,13 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>88ab5ba69adb602ffd36b048e34617d37a38e540</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.6.0-preview-23068-05">
+    <Dependency Name="Microsoft.Build" Version="17.6.0-preview-23069-03">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>98924b86bbc19aff3360f9cc3a2922df6a5c5d6a</Sha>
+      <Sha>4203bb6e02271c413c559fb76aef26f24e37a937</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.6.0-preview-23068-05">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.6.0-preview-23069-03">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>98924b86bbc19aff3360f9cc3a2922df6a5c5d6a</Sha>
+      <Sha>4203bb6e02271c413c559fb76aef26f24e37a937</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="12.5.0-beta.23067.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
