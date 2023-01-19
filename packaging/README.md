@@ -5,10 +5,10 @@ This package lets you build container images from your projects with a single co
 ## Getting Started
 
 To build a container from the SDK, add this package and run the `publish` command,
-specifying the `DefaultContainer` PublishProfile. You can learn more about Publish Profiles [in the documentation](https://docs.microsoft.com/aspnet/core/host-and-deploy/visual-studio-publish-profiles?view=aspnetcore-6.0#publish-profiles).
+specifying the `DefaultContainer` PublishProfile. You can learn more about Publish Profiles [in the documentation](https://learn.microsoft.com/aspnet/core/host-and-deploy/visual-studio-publish-profiles?view=aspnetcore-6.0#publish-profiles).
 
 ```shell
->dotnet add package Microsoft.NET.Build.Containers --prerelease
+>dotnet add package Microsoft.NET.Build.Containers
 >dotnet publish --os linux --arch x64 -p:PublishProfile=DefaultContainer
 ...
 Pushed container '<your app name>:<your app version>' to registry 'docker://'

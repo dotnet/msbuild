@@ -34,18 +34,20 @@ The following registries have been explicitly tested:
 * GitLab Container Registry
 * Google Cloud Artifact Registry
 * Quay.io
+* AWS Elastic Container Registry
+* GitHub Package Registry
+* Docker Hub*
 
 ## Known-unsupported registries
 
-* Docker Hub
-  * needs changes to the code to differentiate between pushing to a local daemon and the remote hub
-* AWS Elastic Container Registry
-  * blob upload is canceled by ECR, unknown reason
-* GitHub Package Registry
-  * blob upload is canceled by the registry, unknown reason
+None! We're compatible with most registries.
 
 ## Notes for specific registries
 
 ### Azure Container Registry
 
 When authenticating to an Azure Container Registry, at this moment only authentication with an admin username and password is supported. This is the same as running `az acr login -n <registry> -u <username> -p <password>`. Token-based login, like `az  acr login -n <registry>` is not supported yet.
+
+### Docker Hub
+
+When using Docker Hub as a base image registry (via ContainerBaseImage) or as the destination registry for pushing your images, you must use the `registry-1.docker.io` domain name instead of `docker.io`. The `docker.io` domain does not respond to the Registry API in the expected way.
