@@ -34,6 +34,7 @@ public static class ContentStore
         {
             "application/vnd.docker.image.rootfs.diff.tar.gzip"
             or "application/vnd.oci.image.layer.v1.tar+gzip"
+            or "application/vnd.docker.image.rootfs.foreign.diff.tar.gzip"
                 => ".tar.gz",
             "application/vnd.docker.image.rootfs.diff.tar"
             or "application/vnd.oci.image.layer.v1.tar"

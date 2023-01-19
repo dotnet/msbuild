@@ -21,8 +21,6 @@ The `Microsoft.NET.Build.Containers` package infers a number of properties about
 <!--The `Microsoft.NET.Build.Containers` package provides full control over the preceding properties. -->
 For more information, see [Customizing a container](./ContainerCustomization.md)
 
-> **Note**
-> This package only supports Linux containers in this version.
 
 > **Note**
 > If you are publishing a console application (or any non-Web project) you will need to add the `/t:PublishContainer` option to the command line above. See [dotnet/sdk-container-builds#141](https://github.com/dotnet/sdk-container-builds/issues/141) for more details.

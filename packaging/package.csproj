@@ -49,6 +49,8 @@
             <!-- containerize folder -->
             <Content Include="$(OutDir)containerize.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)containerize.runtimeconfig.json" Pack="true" PackagePath="containerize/" />
+            <Content Include="$(OutDir)Newtonsoft.Json.dll" Pack="true" PackagePath="containerize/" />
+            <Content Include="$(OutDir)NuGet.*.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)System.CommandLine.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="containerize/" />

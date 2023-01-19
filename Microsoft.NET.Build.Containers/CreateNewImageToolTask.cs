@@ -83,7 +83,9 @@ public partial class CreateNewImage : ToolTask
                (ImageTags.Length > 0 ? " --imagetags " + String.Join(" ", ImageTags.Select((i) => Quote(i))) : "") +
                (EntrypointArgs.Length > 0 ? " --entrypointargs " + String.Join(" ", EntrypointArgs.Select((i) => i.ItemSpec)) : "") +
                (ExposedPorts.Length > 0 ? " --ports " + String.Join(" ", ExposedPorts.Select((i) => i.ItemSpec + "/" + i.GetMetadata("Type"))) : "") +
-               (ContainerEnvironmentVariables.Length > 0 ? " --environmentvariables " + String.Join(" ", ContainerEnvironmentVariables.Select((i) => i.ItemSpec + "=" + Quote(i.GetMetadata("Value")))) : "");
+               (ContainerEnvironmentVariables.Length > 0 ? " --environmentvariables " + String.Join(" ", ContainerEnvironmentVariables.Select((i) => i.ItemSpec + "=" + Quote(i.GetMetadata("Value")))) : "") +
+               $" --rid {Quote(ContainerRuntimeIdentifier)}" +
+               $" --ridgraphpath {Quote(RuntimeIdentifierGraphPath)}";
     }
 
     private string Quote(string path)

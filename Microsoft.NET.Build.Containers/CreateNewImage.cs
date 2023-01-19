@@ -1,4 +1,5 @@
-﻿using Microsoft.Build.Framework;
+﻿using System.Text.Json;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
@@ -72,12 +73,12 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
     }
 
-    private Image GetBaseImage() {
+    private Image? GetBaseImage() {
         if (IsDockerPull) {
             throw new ArgumentException("Don't know how to pull images from local daemons at the moment");
         } else {
             var reg = new Registry(ContainerHelpers.TryExpandRegistryToUri(BaseRegistry));
-            return reg.GetImageManifest(BaseImageName, BaseImageTag).Result;
+            return reg.GetImageManifest(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier, RuntimeIdentifierGraphPath).Result;
         }
     }
 
@@ -94,6 +95,11 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
 
         var image = GetBaseImage();
+
+        if (image is null) {
+            Log.LogError($"Couldn't find matching base image for {0}:{1} that matches RuntimeIdentifier {2}", BaseImageName, BaseImageTag, ContainerRuntimeIdentifier);
+            return !Log.HasLoggedErrors;
+        }
 
         SafeLog("Building image '{0}' with tags {1} on top of base image {2}/{3}:{4}", ImageName, String.Join(",", ImageTags), BaseRegistry, BaseImageName, BaseImageTag);
 
@@ -118,7 +124,7 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
 
         // at this point we're done with modifications and are just pushing the data other places
-        GeneratedContainerManifest = image.manifest.ToJsonString();
+        GeneratedContainerManifest =  JsonSerializer.Serialize(image.manifest);
         GeneratedContainerConfiguration = image.config.ToJsonString();
 
         Registry? outputReg = IsDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(OutputRegistry));
