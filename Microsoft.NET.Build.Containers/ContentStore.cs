@@ -38,7 +38,6 @@ public static class ContentStore
                 => ".tar.gz",
             "application/vnd.docker.image.rootfs.diff.tar"
             or "application/vnd.oci.image.layer.v1.tar"
-            or ":application/vnd.docker.image.rootfs.foreign.diff.tar"
                 => ".tar",
             _ => throw new ArgumentException($"Unrecognized mediaType '{descriptor.MediaType}'")
         };
