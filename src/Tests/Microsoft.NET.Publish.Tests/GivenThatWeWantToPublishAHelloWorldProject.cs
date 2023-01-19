@@ -534,7 +534,7 @@ public static class Program
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(expectedError);
+                .HaveStdErrContaining(expectedError);
         }
 
         [Fact]
