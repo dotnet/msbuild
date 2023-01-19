@@ -29,7 +29,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Register for different events
             // Started
-            eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
+            /*eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
             eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
             eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
             eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
@@ -43,12 +43,14 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Cancelled
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed); */
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
             FancyLoggerBuffer.WriteNewLine(string.Empty);
-            // FancyLoggerBuffer.WriteNewLine("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+            string s = "Lorem ipsum \x1b[2mdolor sit amet\x1b[0m, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\x1b[0m";
+            FancyLoggerBuffer.WriteNewLine(s);
+            // FancyLoggerBuffer.WriteNewLine("Hi");
             FancyLoggerBuffer.Render();
         }
 

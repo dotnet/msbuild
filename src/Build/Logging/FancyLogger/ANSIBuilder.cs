@@ -10,14 +10,52 @@ namespace Microsoft.Build.Logging.FancyLogger
 {
     internal static class ANSIBuilder
     {
+        public static string ANSIRegex = @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~])";
         public static string ANSIRemove(string text)
         {
-            return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
+            return Regex.Replace(text, ANSIRegex, "");
         }
 
         public static int ANSIBreakpoint(string text, int position)
         {
             if (position >= text.Length) return text.Length;
+            int nonAnsiIndex = 0;
+            Match nextMatch = Regex.Match(text, ANSIRegex);
+            int i = 0;
+            while (i < text.Length && nonAnsiIndex < position)
+            {
+                // Jump over ansi codes
+                if (i == nextMatch.Index && nextMatch.Length > 0)
+                {
+                    i += nextMatch.Length;
+                    nextMatch = nextMatch.NextMatch();
+                }
+                // Increment non ansi index
+                nonAnsiIndex++;
+                i++;
+            }
+            return i;
+
+            /*int nonAnsiIndex = 0;
+            Match nextMatch = Regex.Match(text, ANSIRegex);
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (nonAnsiIndex == position) return i;
+                // Match
+                if (i == nextMatch.Index)
+                {
+                    i += nextMatch.Length;
+                    nextMatch = nextMatch.NextMatch();
+                }
+                else
+                {
+                    nonAnsiIndex++;
+                }
+            }
+            return text.Length;*/
+
+
+            /*if (position >= text.Length) return text.Length;
             // Create new array of positions
             int[] nonAnsiIndices = new int[text.Length];
             for (int i = 0; i < text.Length; i++)
@@ -31,7 +69,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 if (nonAnsiIndices[i] == position - 1) breakpoint = i;
             }
-            return breakpoint;
+            return breakpoint;*/
         }
 
         public static List<string> ANSIWrap(string text, int position)
