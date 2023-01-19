@@ -7,7 +7,6 @@ You should expect it to shrink noticeably over time!
 
 * [.NET SDK 7.0.100-preview.7](https://dotnet.microsoft.com/download/dotnet/7.0) or higher
 * Docker should be installed and running
-* On Windows, Docker must be [configured for Linux containers](https://docs.microsoft.com/virtualization/windowscontainers/quick-start/quick-start-windows-10-linux)
 
 ## Usage
 
