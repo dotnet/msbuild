@@ -201,11 +201,6 @@
         <target state="translated">Rimozione dell'attributo di sola lettura da "{0}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="Copy.RetryingAsSymbolicLink">
-        <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
-        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
-        <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
-      </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
         <target state="translated">MSB3025: il file di origine "{0}" è in realtà una directory. L'attività "Copia" non supporta la copia di directory.</target>
@@ -1617,13 +1612,6 @@
         <target state="translated">Percorso AssemblyFoldersEx: "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
-        <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
-        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</target>
-        <note>
-      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
-    </note>
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
         <target state="translated">Percorsi AssemblyFoldersEx considerati.</target>
@@ -2602,11 +2590,6 @@
         <target state="translated">Decompressione del file "{0}" in "{1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="Unzip.ZipSlipExploit">
-        <source>Entry is outside the target directory: "{0}"</source>
-        <target state="new">Entry is outside the target directory: "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: "{1}" è un valore non valido per il parametro "{0}". I valori validi sono: {2}</target>
@@ -3290,6 +3273,11 @@
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
         <source>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</source>
         <target state="translated">Il file config AssemblyFolder ('{0}') specificato in Microsoft.Common.CurrentVersion.targets non è valido. Errore: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Copy.ExactlyOneTypeOfLink">
+        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
+        <target state="translated">MSB3891: nel file di progetto sono stati specificati sia "{0}" che "{1}". Sceglierne uno.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">
