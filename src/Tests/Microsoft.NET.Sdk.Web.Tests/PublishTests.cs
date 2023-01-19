@@ -20,7 +20,7 @@ namespace Microsoft.NET.Sdk.Web.Tests
         {
         }
 
-        [Theory()]
+        [Theory]
         [MemberData(nameof(SupportedTfms))]
         public void TrimmingOptions_Are_Defaulted_Correctly_On_Trimmed_Apps(string targetFramework)
         {
@@ -29,11 +29,16 @@ namespace Microsoft.NET.Sdk.Web.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
+            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+            testProject.PropertiesToRecord.Add("TrimMode");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: projectName + targetFramework);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
+            publishCommand.Execute().Should().Pass();
+
+            var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+            buildProperties["TrimMode"].Should().Be("partial");
 
             string outputDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
             string runtimeConfigFile = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
@@ -46,7 +51,7 @@ namespace Microsoft.NET.Sdk.Web.Tests
                     .Should().BeTrue();
         }
 
-        [Theory()]
+        [Theory]
         [MemberData(nameof(SupportedTfms))]
         public void TrimmingOptions_Are_Defaulted_Correctly_On_Aot_Apps(string targetFramework)
         {
@@ -55,16 +60,26 @@ namespace Microsoft.NET.Sdk.Web.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             testProject.AdditionalProperties["PublishAOT"] = "true";
+            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+            testProject.PropertiesToRecord.Add("PublishTrimmed");
+            testProject.PropertiesToRecord.Add("TrimMode");
+            testProject.PropertiesToRecord.Add("PublishIISAssets");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: projectName + targetFramework);
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
-            string outputDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+            buildProperties["PublishTrimmed"].Should().Be("true");
+            buildProperties["TrimMode"].Should().Be("");
+            buildProperties["PublishIISAssets"].Should().Be("false");
+
+            string outputDirectory = publishCommand.GetIntermediateDirectory(targetFramework, runtimeIdentifier: rid).FullName;
             string responseFile = Path.Combine(outputDirectory, "native", $"{projectName}.ilc.rsp");
             var responseFileContents = File.ReadLines(responseFile);
 
             responseFileContents.Should().Contain("--feature:Microsoft.AspNetCore.EnsureJsonTrimmability=true");
+            File.Exists(Path.Combine(outputDirectory, "web.config")).Should().BeFalse();
         }
 
         public static IEnumerable<object[]> SupportedTfms { get; } = new List<object[]>

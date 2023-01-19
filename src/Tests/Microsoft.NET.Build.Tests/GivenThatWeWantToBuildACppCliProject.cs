@@ -256,7 +256,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        public Dictionary<string, string> GetPropertyValues(string testRoot, string project, string configuration = "Debug", string targetFramework = null)
+        public Dictionary<string, string> GetPropertyValues(string testRoot, string project, string targetFramework = null, string configuration = "Debug")
         {
             var propertyValues = new Dictionary<string, string>();
 

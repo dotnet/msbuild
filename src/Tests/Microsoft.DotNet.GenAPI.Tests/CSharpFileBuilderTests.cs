@@ -682,5 +682,85 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """);
         }
+
+        [Fact]
+        void TestExtensionMethodsGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public static class MyExtensions
+                    {
+                        public static int WordCount(this string str) { return 42; }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public static partial class MyExtensions
+                    {
+                        public static int WordCount(this string str) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestMethodsWithVariableNumberOfArgumentsGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Bar
+                    {
+                        public void Execute(params int[] list) { }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Bar
+                    {
+                        public void Execute(params int[] list) { }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestConversionOperatorGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public readonly struct Digit
+                    {
+                        private readonly byte digit;
+
+                        public Digit(byte digit)
+                        {
+                            this.digit = digit;
+                        }
+
+                        public static implicit operator byte(Digit d) => d.digit;
+                        public static explicit operator Digit(byte b) => new Digit(b);
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public readonly partial struct Digit
+                    {
+                        public Digit(byte digit) { }
+                        public static explicit operator Digit(byte b) { throw null; }
+
+                        public static implicit operator byte(Digit d) { throw null; }
+                    }
+                }
+                """);
+        }
     }
 }

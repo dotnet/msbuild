@@ -92,6 +92,15 @@ namespace Microsoft.DotNet.GenAPI
         }
 
         /// <inheritdoc />
+        public override SyntaxNode? VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
+        {
+            ConversionOperatorDeclarationSyntax? rs = base.VisitConversionOperatorDeclaration(node) as ConversionOperatorDeclarationSyntax;
+            return rs?
+                .WithBody(GetThrowNullBody())
+                .WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
+        }
+
+        /// <inheritdoc />
         public override SyntaxNode? VisitAccessorDeclaration(AccessorDeclarationSyntax node)
         {
             switch (node.Kind())

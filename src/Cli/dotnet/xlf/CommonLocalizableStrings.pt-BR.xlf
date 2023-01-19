@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CorruptSolutionProjectFolderStructure">
         <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</source>
-        <target state="new">The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</target>
+        <target state="translated">O arquivo de solução '{0}' tem marcas EndProject ausentes ou tem mapeamentos de pasta de projeto pai-filho inválidos em torno do GUID do projeto: '{1}'. Repare manualmente a solução ou tente abri-la e salvá-la no Visual Studio."</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">

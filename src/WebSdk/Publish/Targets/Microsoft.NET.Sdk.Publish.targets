@@ -36,6 +36,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
              And '$(RuntimeIdentifier)' != ''
              And !$(RuntimeIdentifier.StartsWith('win'))
              And '$(PublishIISAssets)' == ''">false</PublishIISAssets>
+    <PublishIISAssets Condition="'$(PublishIISAssets)' == '' and '$(PublishAot)' == 'true'">false</PublishIISAssets>
   </PropertyGroup>
 
   <!-- Extension points for BeforePublish and AfterPublish-->
@@ -87,7 +88,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
 
     <!-- If TrimMode has not already been set, default to partial trimming, as AspNet is not currently fully trim-compatible -->
-    <TrimMode Condition="'$(PublishTrimmed)' == 'true' and '$(TrimMode)' == ''">partial</TrimMode>
+    <!-- We allow the full trimming default with PublishAot enabled, because the parts that are not trim-compatible are not aot-compatible either -->
+    <TrimMode Condition="'$(TrimMode)' == '' and '$(PublishTrimmed)' == 'true' and '$(PublishAot)' != 'true'">partial</TrimMode>
   </PropertyGroup>
 
   <!--
