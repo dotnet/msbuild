@@ -5713,7 +5713,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <RemoveDir
         Directories="$(ClickOncePublishDir)"
-        Condition="Exists('$(ClickOncePublishDir)')"/>
+        Condition="'$(ClickOncePublishDir)'=='$(OutputPath)app.publish\' and Exists('$(ClickOncePublishDir)')"/>
 
   </Target>
 

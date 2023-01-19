@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
 
                 string content = GetSampleProjectContent();
                 File.WriteAllText(file, content);
@@ -413,7 +413,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(collection);
                 project.Xml.AddImport("$(MSBuildProjectFullPath)");
 
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 project.Save(file);
                 project.ReevaluateIfNecessary();
 
@@ -440,8 +440,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 MockLogger logger = new MockLogger();
                 collection.RegisterLogger(logger);
 
-                file = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
                 Project project = new Project(collection);
                 project.Xml.AddImport(file2);
                 project.Save(file);
@@ -476,8 +476,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 MockLogger logger = new MockLogger();
                 collection.RegisterLogger(logger);
 
-                file = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
                 Project project = new Project(collection);
                 project.Xml.AddImport(file2);
                 project.Xml.AddImport(file2);
@@ -513,9 +513,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 MockLogger logger = new MockLogger();
                 collection.RegisterLogger(logger);
 
-                file = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
-                file3 = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
+                file3 = FileUtilities.GetTemporaryFileName();
 
                 Project project = new Project(collection);
                 project.Xml.AddImport(file2);
@@ -649,12 +649,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 project.Save(file);
                 project.ReevaluateIfNecessary();
 
                 project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(
-                        Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386", "foo.dll"));
+                    Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386", "foo.dll"));
             }
             finally
             {
@@ -792,8 +792,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
                 // Should be the full path to the directory
-                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"));
-                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"));
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory /* remove c:\ */, "obj", "i386"));
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory /* remove c:\ */, "obj", "i386"));
             }
             finally
             {
@@ -1359,7 +1359,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement.Create().Save(path);
 
                 Project project = new Project(path);
@@ -1387,7 +1387,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement import = ProjectRootElement.Create(path);
                 import.Save();
 
@@ -2080,7 +2080,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'>
                 </Project>");
 
-            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile() + ".proj";
+            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".proj";
             File.WriteAllText(importFileName, importProjectContent);
 
             string projectContent =
@@ -2180,7 +2180,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             string file = null;
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 project.Save(file);
             }
             finally
@@ -2959,7 +2959,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             };
 
             AssertProvenanceResult(expected, project, "1.foo", "B");
-            AssertProvenanceResult(new ProvenanceResultTupleList(), project, "1.foo", "NotExistant");
+            AssertProvenanceResult(new ProvenanceResultTupleList(), project, "1.foo", "NotExistent");
         }
 
         public static IEnumerable<Object[]> GetItemProvenanceByProjectItemTestData

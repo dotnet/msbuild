@@ -605,6 +605,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="properties">The list of properties associated with the event.</param>
         void LogTelemetry(BuildEventContext buildEventContext, string eventName, IDictionary<string, string> properties);
         #endregion
+
+        #region Log response files
+        /// <summary>
+        /// Helper method to create an event for including files. Typically response files
+        /// </summary>
+        /// <param name="buildEventContext">Event context information which describes where is the event getting logged</param>
+        /// <param name="filePath">Full path to the response file</param>
+        void LogIncludeFile(BuildEventContext buildEventContext, string filePath);
+        #endregion
     }
 
     /// <summary>

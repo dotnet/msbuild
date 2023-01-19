@@ -109,8 +109,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 "<File AssemblyName='UniFYme' Version='2.0.0.0' Culture='neutral' PublicKeyToken='b77a5c561934e089' InGAC='false' />" +
                 "</FileList >";
 
-            string redistListPath = FileUtilities.GetTemporaryFile();
-            string subsetListPath = FileUtilities.GetTemporaryFile();
+            string redistListPath = FileUtilities.GetTemporaryFileName();
+            string subsetListPath = FileUtilities.GetTemporaryFileName();
             string appConfigFile = null;
             try
             {

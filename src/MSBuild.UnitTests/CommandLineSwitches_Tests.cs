@@ -990,7 +990,7 @@ namespace Microsoft.Build.UnitTests
                 string filename = null;
                 try
                 {
-                    filename = FileUtilities.GetTemporaryFile();
+                    filename = FileUtilities.GetTemporaryFileName();
                     ProjectRootElement project = ProjectRootElement.Create();
                     project.Save(filename);
                     MSBuildApp.BuildProject(

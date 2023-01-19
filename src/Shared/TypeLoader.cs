@@ -8,9 +8,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-#if !NETFRAMEWORK
-using System.Runtime.Loader;
-#endif
 using System.Threading;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;

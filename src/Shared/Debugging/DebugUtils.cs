@@ -5,7 +5,6 @@ using Microsoft.Build.Framework;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Security;
 using System.Text.RegularExpressions;
 
 #nullable disable

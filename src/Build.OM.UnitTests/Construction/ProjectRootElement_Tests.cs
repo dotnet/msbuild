@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ConstructOverSameFileReturnsSame()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
-            projectXml1.Save(FileUtilities.GetTemporaryFile());
+            projectXml1.Save(FileUtilities.GetTemporaryFileName());
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(projectXml1.FullPath);
 
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     try
                     {
-                        path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                        path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                         File.WriteAllText(path, content);
 
                         ProjectRootElement.Open(path);
@@ -462,7 +462,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(path, content);
 
                 var reader1 = XmlReader.Create(path);
@@ -499,7 +499,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(path, content);
 
                 ProjectRootElement root1 = ProjectRootElement.Create(path);
@@ -605,7 +605,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
 
                 project.Save(file);
 
@@ -730,7 +730,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
-            string projectFullPath = FileUtilities.GetTemporaryFile();
+            string projectFullPath = FileUtilities.GetTemporaryFileName();
             try
             {
                 VerifyLoadedProjectHasEncoding(projectFullPath, Encoding.UTF8);
@@ -996,7 +996,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 try
                 {
-                    solutionFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    solutionFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
 
                     // Arbitrary corrupt content
                     string content = @"Microsoft Visual Studio Solution File, Format Version 10.00

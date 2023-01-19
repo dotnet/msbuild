@@ -8,10 +8,8 @@ using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 
@@ -262,14 +260,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                return s_configurationCache.Value;
-            }
-            else
-            {
-                return ReadOpenMappedExeConfiguration();
-            }
+            return s_configurationCache.Value;
         }
 
         private static Configuration ReadOpenMappedExeConfiguration()
