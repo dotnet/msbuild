@@ -22,7 +22,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             int nonAnsiIndex = 0;
             Match nextMatch = Regex.Match(text, ANSIRegex);
             int i = 0;
-            while (i < text.Length && nonAnsiIndex < position)
+            while (i < text.Length && nonAnsiIndex != position)
             {
                 // Jump over ansi codes
                 if (i == nextMatch.Index && nextMatch.Length > 0)
@@ -35,55 +35,19 @@ namespace Microsoft.Build.Logging.FancyLogger
                 i++;
             }
             return i;
-
-            /*int nonAnsiIndex = 0;
-            Match nextMatch = Regex.Match(text, ANSIRegex);
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (nonAnsiIndex == position) return i;
-                // Match
-                if (i == nextMatch.Index)
-                {
-                    i += nextMatch.Length;
-                    nextMatch = nextMatch.NextMatch();
-                }
-                else
-                {
-                    nonAnsiIndex++;
-                }
-            }
-            return text.Length;*/
-
-
-            /*if (position >= text.Length) return text.Length;
-            // Create new array of positions
-            int[] nonAnsiIndices = new int[text.Length];
-            for (int i = 0; i < text.Length; i++)
-            {
-                // TODO: Figure how to do with spans for greater efficiency
-                nonAnsiIndices[i] = ANSIRemove(text.Substring(0, i)).Length - 1;
-            }
-            // Breakpoint (default at last)
-            int breakpoint = text.Length;
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (nonAnsiIndices[i] == position - 1) breakpoint = i;
-            }
-            return breakpoint;*/
         }
 
         public static List<string> ANSIWrap(string text, int position)
         {
-            // Using spans to improve efficiency of substring operations
-            ReadOnlySpan<char> textSpan = text.AsSpan();
             List<string> result = new();
             int breakpoint = ANSIBreakpoint(text, position);
-            while(textSpan.Length > breakpoint)
+            while (text.Length > breakpoint)
             {
-                result.Add(textSpan.Slice(0, breakpoint).ToString());
-                textSpan = textSpan.Slice(breakpoint);
+                result.Add(text.Substring(0, breakpoint));
+                text = text.Substring(breakpoint);
+                breakpoint = ANSIBreakpoint(text, position);
             }
-            result.Add(textSpan.ToString());
+            result.Add(text);
             return result;
         }
 

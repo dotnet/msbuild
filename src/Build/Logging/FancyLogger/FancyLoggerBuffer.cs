@@ -16,6 +16,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         private string _text = string.Empty;
         public List<string> WrappedText { get; private set; } = new();
         public int Id;
+        public bool ShouldWrapLines;
         public string Text
         {
             get => _text;
@@ -23,7 +24,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 // Set text value and get wrapped lines
                 _text = value;
-                WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
+                if (ShouldWrapLines) WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
+                else WrappedText = new List<string> { value };
             }
         }
 
@@ -31,10 +33,17 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             Id = Counter++;
             Text = string.Empty;
+            ShouldWrapLines = false;
         }
         public FancyLoggerBufferLine(string text)
             : this()
         {
+            Text = text;
+        }
+        public FancyLoggerBufferLine(string text, bool shouldWrapLines)
+            : this()
+        {
+            ShouldWrapLines = shouldWrapLines;
             Text = text;
         }
     }
@@ -156,9 +165,9 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         #region Line create, update and delete
         // Write new line
-        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text)
+        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text, bool shouldWrapLines=true)
         {
-            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
+            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text, shouldWrapLines);
             return WriteNewLineAfter(lineId, line);
         }
         public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line)
@@ -179,9 +188,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             return line;
         }
 
-        public static FancyLoggerBufferLine? WriteNewLine(string text)
+        public static FancyLoggerBufferLine? WriteNewLine(string text, bool shouldWrapLines=true)
         {
-            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
+            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text, shouldWrapLines);
             return WriteNewLine(line);
         }
         public static FancyLoggerBufferLine? WriteNewLine(FancyLoggerBufferLine line)
