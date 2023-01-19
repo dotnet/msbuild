@@ -604,6 +604,11 @@
         <target state="translated">MSB3094: "{2}" は {0} 項目を参照し、"{3}" は {1} 項目を参照します。これらは同じ項目数を持たなければなりません。</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="new">Creating binding redirection file "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
         <target state="translated">MSB3831: アプリケーション構成ファイルにはルート構成要素が必要です。</target>
@@ -2114,8 +2119,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Writing assembly cache file "{0}" because it is marked dirty.</source>
-        <target state="new">Writing assembly cache file "{0}" because it is marked dirty.</target>
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="new">Updating assembly cache file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

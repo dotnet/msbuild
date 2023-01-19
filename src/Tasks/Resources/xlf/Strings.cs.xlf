@@ -604,6 +604,11 @@
         <target state="translated">MSB3094: Položka {2} odkazuje na {0} položek a položka {3} odkazuje na {1} položek. Musí mít stejný počet položek.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="new">Creating binding redirection file "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
         <target state="translated">MSB3831: Konfigurační soubor aplikace musí mít kořenový element konfigurace.</target>
@@ -2114,8 +2119,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Writing assembly cache file "{0}" because it is marked dirty.</source>
-        <target state="new">Writing assembly cache file "{0}" because it is marked dirty.</target>
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="new">Updating assembly cache file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

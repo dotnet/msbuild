@@ -610,6 +610,9 @@
   <data name="GenerateBindingRedirects.ProcessingSuggestedRedirect">
     <value>Processing suggested binding redirect on "{0}" with MaxVersion "{1}".</value>
   </data>
+  <data name="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+    <value>Creating binding redirection file "{0}".</value>
+  </data>
   <!--
         The GenerateBootstrapper message bucket is: MSB3141 - MSB3170
 
@@ -1746,7 +1749,7 @@
     <comment></comment>
   </data>
   <data name="ResolveAssemblyReference.WritingCacheFile">
-    <value>Writing assembly cache file "{0}" because it is marked dirty.</value>
+    <value>Updating assembly cache file "{0}".</value>
     <comment></comment>
   </data>
   <!--

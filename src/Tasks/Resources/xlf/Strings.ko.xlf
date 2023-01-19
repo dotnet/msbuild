@@ -604,6 +604,11 @@
         <target state="translated">MSB3094: "{2}"은(는) 항목을 {0}개 참조하고 "{3}"은(는) 항목을 {1}개 참조합니다. 참조하는 항목 수는 같아야 합니다.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="new">Creating binding redirection file "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
         <target state="translated">MSB3831: 애플리케이션 구성 파일은 루트 구성 요소를 포함해야 합니다.</target>
@@ -2114,8 +2119,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Writing assembly cache file "{0}" because it is marked dirty.</source>
-        <target state="new">Writing assembly cache file "{0}" because it is marked dirty.</target>
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="new">Updating assembly cache file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
