@@ -92,6 +92,18 @@ namespace Microsoft.Build.Shared
         /// File will NOT be created.
         /// May throw IOException.
         /// </summary>
+        internal static string GetTemporaryFileName()
+        {
+            return GetTemporaryFileName(".tmp");
+        }
+
+        /// <summary>
+        /// Generates a unique temporary file name with a given extension in the temporary folder.
+        /// File is guaranteed to be unique.
+        /// Extension may have an initial period.
+        /// File will NOT be created.
+        /// May throw IOException.
+        /// </summary>
         internal static string GetTemporaryFileName(string extension)
         {
             return GetTemporaryFile(null, null, extension, false);

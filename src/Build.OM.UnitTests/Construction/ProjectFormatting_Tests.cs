@@ -653,7 +653,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             content += @"<Project><Target Name=""Build""/></Project>";
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            var file = FileUtilities.GetTemporaryFile(".proj");
+            var file = FileUtilities.GetTemporaryFileName(".proj");
             try
             {
                 File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: byteOrderMark));

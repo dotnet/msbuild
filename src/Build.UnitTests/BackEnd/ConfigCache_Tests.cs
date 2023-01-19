@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Shouldly;
 using Xunit;
@@ -55,6 +56,38 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        public static IEnumerable<object[]> CacheSerializationTestDataNoConfigs
+        {
+            get
+            {
+                yield return new[] { new ConfigCache() };
+            }
+        }
+
+        public static IEnumerable<object[]> CacheSerializationTestDataMultipleConfigs
+        {
+            get
+            {
+                var configCache = new ConfigCache();
+                var brq1 = new BuildRequestConfiguration(
+                  1,
+                  new BuildRequestData("path1", new Dictionary<string, string> { ["a1"] = "b1" }, Constants.defaultToolsVersion, new[] { "target1" }, null),
+                  Constants.defaultToolsVersion);
+                var brq2 = new BuildRequestConfiguration(
+                  2,
+                  new BuildRequestData("path2", new Dictionary<string, string> { ["a2"] = "b2" }, Constants.defaultToolsVersion, new[] { "target2" }, null),
+                  Constants.defaultToolsVersion);
+                var brq3 = new BuildRequestConfiguration(
+                  3,
+                  new BuildRequestData("path3", new Dictionary<string, string> { ["a3"] = "b3" }, Constants.defaultToolsVersion, new[] { "target3" }, null),
+                  Constants.defaultToolsVersion);
+                configCache.AddConfiguration(brq1.ShallowCloneWithNewId(1));
+                configCache.AddConfiguration(brq2.ShallowCloneWithNewId(2));
+                configCache.AddConfiguration(brq3.ShallowCloneWithNewId(3));
+                yield return new[] { configCache };
+            }
+        }
+
         [Theory]
         [MemberData(nameof(CacheSerializationTestData))]
         public void ConfigCacheShouldBeTranslatable(object obj)
@@ -83,6 +116,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 copy[initialConfiguration.ConfigurationId].ProjectDefaultTargets.ShouldBe(initialConfiguration.ProjectDefaultTargets);
                 copy[initialConfiguration.ConfigurationId].ProjectInitialTargets.ShouldBe(initialConfiguration.ProjectInitialTargets);
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(CacheSerializationTestDataNoConfigs))]
+        public void GetSmallestConfigIdThrows(object obj)
+        {
+            Assert.Throws<InternalErrorException>(() => ((ConfigCache)obj).GetSmallestConfigId());
+        }
+
+        [Theory]
+        [MemberData(nameof(CacheSerializationTestDataMultipleConfigs))]
+        public void HappyGetSmallestConfigId(object obj)
+        {
+            Assert.Equal(1, ((ConfigCache)obj).GetSmallestConfigId());
         }
     }
 }

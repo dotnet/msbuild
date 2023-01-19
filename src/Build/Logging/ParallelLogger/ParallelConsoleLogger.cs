@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;

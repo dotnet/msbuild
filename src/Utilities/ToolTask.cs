@@ -545,7 +545,7 @@ namespace Microsoft.Build.Utilities
                 // have to worry about how long the command-line is going to be
 
                 // May throw IO-related exceptions
-                responseFile = FileUtilities.GetTemporaryFile(".rsp");
+                responseFile = FileUtilities.GetTemporaryFileName(".rsp");
 
                 // Use the encoding specified by the overridable ResponseFileEncoding property
                 using (StreamWriter responseFileStream = FileUtilities.OpenWrite(responseFile, false, ResponseFileEncoding))

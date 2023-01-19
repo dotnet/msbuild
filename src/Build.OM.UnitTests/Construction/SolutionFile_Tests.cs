@@ -1064,7 +1064,7 @@ namespace Microsoft.Build.UnitTests.Construction
         private static SolutionFile ParseSolutionHelper(string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-            string solutionPath = FileUtilities.GetTemporaryFile(".sln");
+            string solutionPath = FileUtilities.GetTemporaryFileName(".sln");
 
             try
             {

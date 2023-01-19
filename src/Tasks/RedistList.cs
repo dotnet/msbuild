@@ -918,8 +918,8 @@ namespace Microsoft.Build.Tasks
 
         internal AssemblyTableInfo(string path, string frameworkDirectory)
         {
-            Path = path;
-            FrameworkDirectory = frameworkDirectory;
+            Path = FileUtilities.NormalizeForPathComparison(path);
+            FrameworkDirectory = FileUtilities.NormalizeForPathComparison(frameworkDirectory);
         }
 
         internal string Path { get; }

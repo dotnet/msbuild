@@ -2538,7 +2538,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                   "<File AssemblyName='Microsoft.BuildEngine' Version='3.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='false' />" +
               "</FileList >";
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(redistFile, fullRedistListContentsDuplicates);
@@ -2691,7 +2691,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         private static List<AssemblyEntry> ExpectRedistEntries(string fullRedistListContentsDuplicates, int numberOfExpectedEntries, int numberofExpectedRemapEntries)
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             List<AssemblyEntry> assembliesReadIn = new List<AssemblyEntry>();
             List<AssemblyRemapping> remapEntries = new List<AssemblyRemapping>();
             try
@@ -3392,6 +3392,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // There should have been one warning about the exception.
             Assert.Equal(1, engine.Warnings);
+            engine.AssertLogContains("MSB3246");
+
+            // There should have been no ugly callstack dumped
+            engine.AssertLogDoesntContain("Microsoft.Build.UnitTests");
+
+            // But it should contain the message from the BadImageFormatException, something like
+            //     WARNING MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. The format of the file 'C:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\BadImage.dll' is invalid
+            engine.AssertLogContains("'C:\\WINNT\\Microsoft.NET\\Framework\\v2.0.MyVersion\\BadImage.dll'"); // just search for the un-localized part
         }
 
         /// <summary>
@@ -3429,6 +3437,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // There should have been no warning about the exception because it's only a dependency
             Assert.Equal(0, engine.Warnings);
+        
+            // There should have been no ugly callstack dumped
+            engine.AssertLogDoesntContain("Microsoft.Build.UnitTests");
         }
 
         /// <summary>
@@ -5292,10 +5303,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\Regress407623"                    // Assembly is here.
             };
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,
@@ -5378,12 +5388,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
             t.TargetFrameworkDirectories = new string[] { @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx" };
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
 
             try
             {
-                File.Delete(redistFile);
-
                 File.WriteAllText
                 (
                     redistFile,
@@ -5411,12 +5419,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void PartialNameMatchingFromRedist()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
 
             try
             {
-                File.Delete(redistFile);
-
                 File.WriteAllText
                 (
                     redistFile,
@@ -5559,7 +5565,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                          "<File AssemblyName='C' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
                     "</FileList >";
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(redistFile, redistListContents);
 
             bool success = false;
@@ -5626,7 +5632,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         "<File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
                     "</FileList >";
 
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, redistListContents);
             return tempFile;
         }
@@ -5732,7 +5738,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGarbageSubsetListFiles()
         {
             string redistFile = CreateGenericRedistList();
-            string garbageSubsetFile = FileUtilities.GetTemporaryFile();
+            string garbageSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText
@@ -5776,7 +5782,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListNoSubsetListName()
         {
             string redistFile = CreateGenericRedistList();
-            string subsetFile = FileUtilities.GetTemporaryFile();
+            string subsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 string subsetListContents =
@@ -5821,8 +5827,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListNullkRedistListName()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
-            string subsetFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
+            string subsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 string subsetListContents =
@@ -5874,7 +5880,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListDifferentNameToSubSet()
         {
             string redistFile = CreateGenericRedistList();
-            string subsetFile = FileUtilities.GetTemporaryFile();
+            string subsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 string subsetListContents =
@@ -5911,7 +5917,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListEmptySubsetMatchingName()
         {
             string redistFile = CreateGenericRedistList();
-            string subsetFile = FileUtilities.GetTemporaryFile();
+            string subsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 string subsetListContents =
@@ -5968,8 +5974,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"{TargetFrameworkDirectory}"
             };
 
-            string redistListPath = FileUtilities.GetTemporaryFile();
-            string subsetListPath = FileUtilities.GetTemporaryFile();
+            string redistListPath = FileUtilities.GetTemporaryFileName();
+            string subsetListPath = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(subsetListPath, _xmlOnlySubset);
             try
             {
@@ -6002,7 +6008,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGoodListsSubsetIsSubsetOfRedist()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(goodSubsetFile, _engineOnlySubset);
@@ -6035,7 +6041,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListVerifyBlackListCache()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(goodSubsetFile, _engineOnlySubset);
@@ -6076,8 +6082,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGoodListsSubsetIsSameAsRedistList()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
-            string goodSubsetFile2 = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
+            string goodSubsetFile2 = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(goodSubsetFile, _engineOnlySubset);
@@ -6113,7 +6119,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGoodListsSubsetIsSuperSet()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText
@@ -6153,7 +6159,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGoodListsCheckCaseInsensitive()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(goodSubsetFile, _engineAndXmlSubset.ToUpperInvariant());
@@ -6184,8 +6190,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListGenerateBlackListGoodListsMultipleIdenticalAssembliesInRedistList()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 // Create a redist list which will contains both of the assemblies to search for
@@ -7971,13 +7977,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyRedist"
             };
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
 
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
-(
+                (
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
                         "<File IsRedistRoot='true' AssemblyName='MyRedistRootAssembly' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true'/>" +
@@ -8103,10 +8108,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyGetSimpleNamesIsSorted()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,
@@ -8151,10 +8155,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListNonWindowsRedistName()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,
@@ -8182,10 +8185,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListWindowsRedistName()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,
@@ -8213,10 +8215,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListPartialMatches()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,
@@ -8256,10 +8257,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListDiffVersion()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,
@@ -8288,10 +8288,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListDiffPublicKey()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,
@@ -8320,10 +8319,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListDiffCulture()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,
@@ -8352,10 +8350,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListDiffSimpleName()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,

@@ -1947,8 +1947,7 @@ EndGlobal
         [Trait("Category", "mono-osx-failing")]
         public void TestSkipInvalidConfigurationsCase()
         {
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            File.Delete(tmpFileName);
+            string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionContents =
@@ -2024,8 +2023,7 @@ EndGlobal
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void BadFrameworkMonkierExpectBuildToFail()
         {
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            File.Delete(tmpFileName);
+            string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionFileContents =
@@ -2112,8 +2110,7 @@ EndGlobal
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void BadFrameworkMonkierExpectBuildToFail2()
         {
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            File.Delete(tmpFileName);
+            string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionFileContents =
@@ -2200,8 +2197,7 @@ EndGlobal
         [Fact]
         public void TestTargetFrameworkVersionGreaterThan4()
         {
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            File.Delete(tmpFileName);
+            string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionFileContents =

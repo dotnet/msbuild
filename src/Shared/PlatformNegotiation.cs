@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+#if BUILD_ENGINE
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Evaluation;
+#else
+using Microsoft.Build.Utilities;
+#endif
 
 namespace Microsoft.Build.Shared
 {

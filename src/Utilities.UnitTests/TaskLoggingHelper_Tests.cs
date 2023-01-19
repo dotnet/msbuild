@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
 
                 string contents = @"a message here
                     error abcd12345: hey jude.

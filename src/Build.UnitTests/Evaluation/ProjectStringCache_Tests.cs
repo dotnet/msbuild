@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                     </Project>
                     ");
 
-                string path = FileUtilities.GetTemporaryFile();
+                string path = FileUtilities.GetTemporaryFileName();
 
                 try
                 {
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                     </Project>
                     ");
 
-                string path = FileUtilities.GetTemporaryFile();
+                string path = FileUtilities.GetTemporaryFileName();
 
                 try
                 {
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                     </Project>
                     ");
 
-                string path = FileUtilities.GetTemporaryFile();
+                string path = FileUtilities.GetTemporaryFileName();
 
                 try
                 {

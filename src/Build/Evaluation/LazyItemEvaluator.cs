@@ -9,12 +9,13 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Linq;
 using System.Threading;
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -200,6 +201,21 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// Gets the smallest configuration id of any configuration
+        /// in this cache.
+        /// </summary>
+        /// <returns>Gets the smallest configuration id of any
+        /// configuration in this cache.</returns>
+        public int GetSmallestConfigId()
+        {
+            lock (_lockObject)
+            {
+                ErrorUtilities.VerifyThrow(_configurations.Count > 0, "No configurations exist from which to obtain the smallest configuration id.");
+                return _configurations.OrderBy(kvp => kvp.Key).First().Key;
+            }
+        }
+    
         /// <summary>
         /// Clears configurations from the configuration cache which have not been explicitly loaded.
         /// </summary>

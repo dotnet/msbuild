@@ -462,7 +462,7 @@ multi-line comment here
             // Using streams can cause issues with CRLF characters being replaced by LF going in to
             // ProjectRootElement. Saving to disk mimics the real-world behavior so we can specifically
             // test issues with CRLF characters being normalized. Related issue: #1340
-            var file = FileUtilities.GetTemporaryFile();
+            var file = FileUtilities.GetTemporaryFileName();
             var expected = ObjectModelHelpers.CleanupFileContents(updatedProject);
             string actual;
 
