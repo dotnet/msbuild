@@ -68,7 +68,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Log
             node.Log();
             // Update footer
-            if (StartedProjects > 0)
+            // if (StartedProjects > 0)
             {
                 FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
                     $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects/StartedProjects)} {FinishedProjects}/{StartedProjects}",
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.Log();
             // Update footer
             FinishedProjects++;
-            if (StartedProjects > 0)
+            // if (StartedProjects > 0)
             {
                 FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
                     $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects / StartedProjects)} {FinishedProjects}/{StartedProjects}",
