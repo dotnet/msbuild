@@ -32,7 +32,7 @@ Template options:
   -ssp, --susi-policy-id <susi-policy-id>                                 The sign-in and sign-up policy ID for this project (use with IndividualB2C auth).
                                                                           Type: string
                                                                           Default: b2c_1_susi
-  -S, --SignedOutCallbackPath <SignedOutCallbackPath>                     The global signout callback (use with IndividualB2C auth).
+  -socp, --signed-out-callback-path <signed-out-callback-path>            The global signout callback (use with IndividualB2C auth).
                                                                           Type: string
                                                                           Default: /signout/B2C_1_susi
   -rp, --reset-password-policy-id <reset-password-policy-id>              The reset password policy ID for this project (use with IndividualB2C auth).
@@ -68,11 +68,12 @@ Template options:
   -uld, --use-local-db                                                    Whether to use LocalDB instead of SQLite. This option only applies if --auth Individual or --auth IndividualB2C is specified.
                                                                           Type: bool
                                                                           Default: false
-  -f, --framework <net6.0|net7.0>                                         The target framework for the project.
+  -f, --framework <net6.0|net7.0|net8.0>                                  The target framework for the project.
                                                                           Type: choice
+                                                                            net8.0  Target net8.0
                                                                             net7.0  Target net7.0
                                                                             net6.0  Target net6.0
-                                                                          Default: net7.0
+                                                                          Default: net8.0
   --no-restore                                                            If specified, skips the automatic restore of the project on create.
                                                                           Type: bool
                                                                           Default: false
@@ -88,6 +89,9 @@ Template options:
   --use-program-main                                                      Whether to generate an explicit Program class and Main method instead of top-level statements.
                                                                           Type: bool
                                                                           Default: false
+  -S, --SignedOutCallbackPath <SignedOutCallbackPath>                     The global signout callback (use with IndividualB2C auth).
+                                                                          Type: string
+                                                                          Default: /signout/B2C_1_susi
 
 To see help for other template languages (F#), use --language option:
    dotnet new mvc -h --language F#

@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Build.Tasks
     /// and then update the stage 0 back.
     ///
     /// Override NETCoreSdkVersion to stage 0 sdk version like 6.0.100-dev
-    /// 
+    ///
     /// Use a task to override since it was generated as a string literal replace anyway.
     /// And using C# can have better error when anything goes wrong.
     /// </summary>
