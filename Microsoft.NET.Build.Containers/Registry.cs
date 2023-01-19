@@ -146,7 +146,12 @@ public record struct Registry
         return response;
     }
 
-    private string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, string userRid) => graphForManifestList.Runtimes.FirstOrDefault(kvp => graphForManifestList.AreCompatible(kvp.Key, userRid)).Key;
+    private string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, string userRid) {
+        var leafRids = 
+            graphForManifestList.Runtimes.Keys
+            .Where(k => !graphForManifestList.Runtimes.Values.Any(r => r.InheritedRuntimes.Contains(k)));
+        return leafRids.FirstOrDefault(leaf => graphForManifestList.AreCompatible(leaf, userRid));
+    }
 
     private (IReadOnlyDictionary<string, PlatformSpecificManifest>, RuntimeGraph) ConstructRuntimeGraphForManifestList(ManifestListV2 manifestList, RuntimeGraph dotnetRuntimeGraph)
     {
