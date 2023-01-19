@@ -20,10 +20,6 @@ public record struct ManifestConfig(string mediaType, long size, string digest);
 public record struct ManifestLayer(string mediaType, long size, string digest, string[]? urls);
 public record struct ManifestV2(int schemaVersion, string tag, string mediaType, ManifestConfig config, List<ManifestLayer> layers);
 
-// not a complete list, only the subset that we support
-// public enum GoOS { linux, windows };
-// not a complete list, only the subset that we support
-// public enum GoArch { amd64, arm , arm64,  [JsonStringEnumMember("386")] x386 };
 public record struct PlatformInformation(string architecture, string os, string? variant, string[] features, [property:JsonPropertyName("os.version")][field: JsonPropertyName("os.version")] string? version);
 public record struct PlatformSpecificManifest(string mediaType, long size, string digest, PlatformInformation platform);
 public record struct ManifestListV2(int schemaVersion, string mediaType, PlatformSpecificManifest[] manifests);
@@ -170,7 +166,10 @@ public record struct Registry
     }
 
     private string? CreateRidForPlatform(PlatformInformation platform)
-    {
+    {   
+        // we only support linux and windows containers explicitly, so anything else we should skip past.
+        // there are theoretically other platforms/architectures that Docker supports (s390x?), but we are
+        // deliberately ignoring them without clear user signal.
         var osPart = platform.os switch
         {
             "linux" => "linux",
