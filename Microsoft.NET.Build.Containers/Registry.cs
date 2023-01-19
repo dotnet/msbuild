@@ -121,7 +121,7 @@ public record struct Registry
     async Task<Image?> TryPickBestImageFromManifestList(string repositoryName, string reference, ManifestListV2 manifestList, string runtimeIdentifier, string runtimeIdentifierGraphPath) {
         var runtimeGraph = GetRuntimeGraphForDotNet(runtimeIdentifierGraphPath);
         var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
-        var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, runtimeIdentifier);
+        var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, ridDict.Keys, runtimeIdentifier);
         if (bestManifestRid is null) {
             throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers for the base image {repositoryName}:{reference} are {String.Join(",", graphForManifestList.Runtimes.Keys)}");
         }
@@ -146,12 +146,7 @@ public record struct Registry
         return response;
     }
 
-    private string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, string userRid) {
-        var leafRids = 
-            graphForManifestList.Runtimes.Keys
-            .Where(k => !graphForManifestList.Runtimes.Values.Any(r => r.InheritedRuntimes.Contains(k)));
-        return leafRids.FirstOrDefault(leaf => graphForManifestList.AreCompatible(leaf, userRid));
-    }
+    private string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, IEnumerable<string> leafRids, string userRid) => leafRids.FirstOrDefault(leaf => graphForManifestList.AreCompatible(leaf, userRid));
 
     private (IReadOnlyDictionary<string, PlatformSpecificManifest>, RuntimeGraph) ConstructRuntimeGraphForManifestList(ManifestListV2 manifestList, RuntimeGraph dotnetRuntimeGraph)
     {
