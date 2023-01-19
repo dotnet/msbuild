@@ -218,8 +218,6 @@ namespace Microsoft.Build.Execution
 
         private string _outputResultsCacheFile;
 
-        private HashSet<string> _targets;
-
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
@@ -303,7 +301,6 @@ namespace Microsoft.Build.Execution
             _projectIsolationMode = other.ProjectIsolationMode;
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
-            _targets = other.Targets;
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
@@ -802,15 +799,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// The set of specified targets to build.
-        /// </summary>
-        public HashSet<string> Targets
-        {
-            get => _targets;
-            set => _targets = value;
-        }
-
-        /// <summary>
         /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
         /// </summary>
         public bool DiscardBuildResults { get; set; } = false;
@@ -884,7 +872,6 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
             translator.Translate(ref _interactive);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
-            translator.Translate(ref _targets);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

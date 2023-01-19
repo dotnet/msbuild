@@ -17,11 +17,11 @@ namespace Microsoft.Build.Execution
         /// Enable isolation and log isolation violations as messages.
         /// </summary>
         /// <remarks>
-        /// Under this mode, only the results from specific (usually
-        /// top-level) targets are serialized if the -orc switch is
-        /// supplied. This is to mitigate the chances of an isolation-
-        /// violating target on a dependency project using incorrect state
-        /// due to its dependency on a cached target whose side effects would
+        /// Under this mode, only the results from top-level targets
+        /// are serialized if the -orc switch is supplied to mitigate
+        /// the chances of an isolation-violating target on a
+        /// dependency project using incorrect state due to its
+        /// dependency on a cached target whose side effects would
         /// not be taken into account. (E.g., the definition of a property.)
         /// </remarks>
         MessageUponIsolationViolation,

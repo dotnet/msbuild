@@ -758,15 +758,14 @@
     <value>  -isolateProjects[:True|MessageUponIsolationViolation|False]
                      Causes MSBuild to build each project in isolation.
 
-                     When set to MessageUponIsolationViolation
-                     (or its short form Message), all isolation violations are
-                     logged as messages and, if -orc is supplied,
-                     only the results from specific (usually top-level)
-                     targets are serialized. This is to mitigate
-                     the chances of an isolation-violating target on
-                     a dependency project using incorrect state due
-                     to its dependency on a cached target whose
-                     side effects would not be taken into account.
+                     When set to MessageUponIsolationViolation (or its short
+                     form Message), only the results from top-level targets
+                     are serialized if the -orc switch is supplied to mitigate
+                     the chances of an isolation-violating target on a
+                     dependency project using incorrect state due to its
+                     dependency on a cached target whose side effects would not
+                     be taken into account. (E.g., the definition of a
+                     property.)
 
                      This is a more restrictive mode of MSBuild as it requires
                      that the project graph be statically discoverable at
@@ -1197,7 +1196,7 @@
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent
-      to Boolean.TrueString, ProjectIsolationMode.MessageUponIsolationViolation.toString(), or Boolean.FalseString.
+      to Boolean.TrueString, nameof(ProjectIsolationMode.MessageUponIsolationViolation), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>

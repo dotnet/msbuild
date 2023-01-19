@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -481,21 +482,18 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Keep the results only for <paramref name="targets"/>.
-        /// If <paramref name="targets"/> is empty, keep the results only for
-        /// <see cref="DefaultTargets"/>.
+        /// Keep the results only for targets in <paramref name="targetsToKeep"/>.
         /// </summary>
-        /// <param name="targets">The targets whose results should be kept.</param>
-        internal void KeepResultsForSpecificTargets(ICollection<string> targets)
+        /// <param name="targetsToKeep">The targets whose results to keep.</param>
+        internal void KeepSpecificTargetResults(IReadOnlyCollection<string> targetsToKeep)
         {
-            if (targets.Count == 0)
-            {
-                targets = _defaultTargets;
-            }
+            ErrorUtilities.VerifyThrow(
+                targetsToKeep.Count > 0,
+                $"{nameof(targetsToKeep)} should contain at least one target.");
 
             foreach (string target in _resultsByTarget.Keys)
             {
-                if (!targets.Contains(target))
+                if (!targetsToKeep.Contains(target))
                 {
                     _ = _resultsByTarget.TryRemove(target, out _);
                 }

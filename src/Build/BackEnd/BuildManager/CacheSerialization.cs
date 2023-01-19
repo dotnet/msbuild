@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
@@ -18,8 +17,7 @@ namespace Microsoft.Build.Execution
             IConfigCache configCache,
             IResultsCache resultsCache,
             string outputCacheFile,
-            ProjectIsolationMode projectIsolationMode,
-            HashSet<string> targets)
+            ProjectIsolationMode projectIsolationMode)
         {
             ErrorUtilities.VerifyThrowInternalNull(outputCacheFile, nameof(outputCacheFile));
 
@@ -91,13 +89,15 @@ namespace Microsoft.Build.Execution
 
                     if (projectIsolationMode == ProjectIsolationMode.MessageUponIsolationViolation)
                     {
+                        int smallestConfigId = configCacheToSerialize.GetSmallestConfigId();
+
                         // In MessageUponIsolationViolation mode, only keep the TargetResults for
-                        // targets in the targets set, which should usually just contain the
-                        // top-level targets. This is to mitigate the chances of an isolation-
+                        // top-level targets to mitigate the chances of an isolation-
                         // violating target on a dependency project using incorrect state
                         // due to its dependency on a cached target whose side effects would
                         // not be taken into account. (E.g., the definition of a property.)
-                        resultsCacheToSerialize.GetResultsForConfiguration(configCacheToSerialize.GetSmallestConfigId()).KeepResultsForSpecificTargets(targets);
+                        resultsCacheToSerialize.GetResultsForConfiguration(smallestConfigId)
+                            .KeepSpecificTargetResults(configCacheToSerialize[smallestConfigId].TargetNames);
                     }
 
                     translator.Translate(ref configCacheToSerialize);

@@ -1057,8 +1057,7 @@ namespace Microsoft.Build.Execution
                     _configCache,
                     _resultsCache,
                     _buildParameters.OutputResultsCacheFile,
-                    _buildParameters.ProjectIsolationMode,
-                    _buildParameters.Targets);
+                    _buildParameters.ProjectIsolationMode);
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     LogErrorAndShutdown(errorMessage);

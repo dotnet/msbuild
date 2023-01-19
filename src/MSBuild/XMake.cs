@@ -1299,7 +1299,6 @@ namespace Microsoft.Build.CommandLine
                     parameters.ProjectIsolationMode = isolateProjects;
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
-                    parameters.Targets = new HashSet<string>(targets);
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -2564,12 +2563,9 @@ namespace Microsoft.Build.CommandLine
                     continue;
                 }
 
-                var messageUponIsolationViolationParams = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ProjectIsolationMode.MessageUponIsolationViolation.ToString(),
-                    "Message",
-                };
-                if (messageUponIsolationViolationParams.Contains(parameter.Trim()))
+                string trimmedParameter = parameter.Trim();
+                if (trimmedParameter.Equals(nameof(ProjectIsolationMode.MessageUponIsolationViolation), StringComparison.OrdinalIgnoreCase)
+                    || trimmedParameter.Equals("Message", StringComparison.OrdinalIgnoreCase))
                 {
                     isolateProjects = ProjectIsolationMode.MessageUponIsolationViolation;
                 }
