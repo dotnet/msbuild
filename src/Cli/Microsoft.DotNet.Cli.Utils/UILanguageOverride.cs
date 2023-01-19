@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -24,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             if (
-                OperatingSystem.IsWindows() && // Encoding is only an issue on Windows
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && // Encoding is only an issue on Windows
                 !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase) &&
                 Environment.OSVersion.Version.Major >= 10 // UTF-8 is only officially supported on 10+.
                 )
