@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 //
 
+using System;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -9,6 +10,8 @@ namespace Microsoft.Build.Logging.FancyLogger
 
     public class FancyLoggerMessageNode
     {
+        // Use this to change the max lenngth (relative to screen size) of messages
+        private static int MAX_LENGTH = 3 * Console.BufferWidth;
         public enum MessageType
         {
             HighPriorityMessage,
@@ -25,7 +28,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
-            if (Message.Length > 400) Message = Message.Substring(0, 400);
+            if (Message.Length > MAX_LENGTH) Message = Message.Substring(0, MAX_LENGTH - 1) + "…";
             // Get type
             switch (args)
             {

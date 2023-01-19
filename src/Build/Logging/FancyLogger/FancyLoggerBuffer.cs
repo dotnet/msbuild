@@ -71,7 +71,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 // Execute while the buffer is active
                 while (!IsTerminated)
                 {
-                    // Delay by 60 fps (1/60 seconds)
+                    // Delay by 1/60 seconds
                     i++;
                     Task.Delay((i/60) * 1_000).ContinueWith((t) =>
                     {
@@ -106,9 +106,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Reset configuration for buffer and cursor, and clear screen
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Eraser.Display());
-            Console.Write(ANSIBuilder.Cursor.Visible());
-            // TODO: Remove. Fixes a bug that causes contents of the alternate buffer to still show up in the main buffer
             Console.Clear();
+            Console.Write(ANSIBuilder.Cursor.Visible());
             Lines = new();
         }
 
