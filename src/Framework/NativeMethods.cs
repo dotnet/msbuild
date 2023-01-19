@@ -10,8 +10,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
-using System.Threading;
 
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
@@ -1043,99 +1041,6 @@ internal static class NativeMethods
         return null;
     }
 
-    internal static bool ExistAndHasContent(string path)
-    {
-        var fileInfo = new FileInfo(path);
-
-        // File exist and has some content
-        return fileInfo.Exists &&
-               (fileInfo.Length > 0 ||
-                    // Or final destination of the link is nonempty file
-                    (
-                        IsSymLink(fileInfo) &&
-                        TryGetFinalLinkTarget(fileInfo, out string finalTarget, out _) &&
-                        File.Exists(finalTarget) &&
-                        new FileInfo(finalTarget).Length > 0
-                    )
-               );
-    }
-
-    internal static bool IsSymLink(FileInfo fileInfo)
-    {
-#if NET
-        return fileInfo.Exists && !string.IsNullOrEmpty(fileInfo.LinkTarget);
-#else
-        if (!IsWindows)
-        {
-            return false;
-        }
-
-        WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-
-        return NativeMethods.GetFileAttributesEx(fileInfo.FullName, 0, ref data) &&
-               (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0 &&
-               (data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT;
-#endif
-    }
-
-    internal static bool IsSymLink(string path)
-    {
-        return IsSymLink(new FileInfo(path));
-    }
-
-    internal static bool TryGetFinalLinkTarget(FileInfo fileInfo, out string finalTarget, out string errorMessage)
-    {
-        if (!IsWindows)
-        {
-            errorMessage = null;
-#if NET
-            while(!string.IsNullOrEmpty(fileInfo.LinkTarget))
-            {
-                fileInfo = new FileInfo(fileInfo.LinkTarget);
-            }
-            finalTarget = fileInfo.FullName;
-            return true;
-#else
-
-            finalTarget = null;
-            return false;
-#endif
-        }
-
-        using SafeFileHandle handle = OpenFileThroughSymlinks(fileInfo.FullName);
-        if (handle.IsInvalid)
-        {
-            // Link is broken.
-            errorMessage = Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
-            finalTarget = null;
-            return false;
-        }
-
-        const int initialBufferSize = 4096;
-        char[] targetPathBuffer = new char[initialBufferSize];
-        uint result = GetFinalPathNameByHandle(handle, targetPathBuffer);
-
-        // Buffer too small
-        if (result > targetPathBuffer.Length)
-        {
-            targetPathBuffer = new char[(int)result];
-            result = GetFinalPathNameByHandle(handle, targetPathBuffer);
-        }
-
-        // Error
-        if (result == 0)
-        {
-            errorMessage = Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
-            finalTarget = null;
-            return false;
-        }
-
-        // Normalize \\?\ and \??\ syntax.
-        finalTarget = new string(targetPathBuffer, 0, (int)result).TrimStart(new char[] { '\\', '?' });
-        errorMessage = null;
-        return true;
-    }
-
     internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
     {
         bool symbolicLinkCreated;
@@ -1777,20 +1682,6 @@ internal static class NativeMethods
 
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
-
-    internal const uint FILE_NAME_NORMALIZED = 0x0;
-
-    [SupportedOSPlatform("windows")]
-    static uint GetFinalPathNameByHandle(SafeFileHandle fileHandle, char[] filePath) =>
-        GetFinalPathNameByHandle(fileHandle, filePath, (uint) filePath.Length, FILE_NAME_NORMALIZED);
-
-    [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-    [SupportedOSPlatform("windows")]
-    static extern uint GetFinalPathNameByHandle(
-        SafeFileHandle hFile,
-        [Out] char[] lpszFilePath,
-        uint cchFilePath,
-        uint dwFlags);
 
     #endregion
 

@@ -77,9 +77,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetLastWriteFileUtcTimeReturnsMinValueForMissingFile()
         {
-            string nonexistentFile = FileUtilities.GetTemporaryFile();
-            // Make sure that the file does not, in fact, exist.
-            File.Delete(nonexistentFile);
+            string nonexistentFile = FileUtilities.GetTemporaryFileName();
 
             DateTime nonexistentFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(nonexistentFile);
             Assert.Equal(DateTime.MinValue, nonexistentFileTime);

@@ -314,7 +314,7 @@ namespace ConsoleApplication4
 
             try
             {
-                codeFile = FileUtilities.GetTemporaryFile();
+                codeFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
                 csc.BuildEngine = new MockEngine();
@@ -418,7 +418,7 @@ namespace ConsoleApplication4
             try
             {
                 string inputPath = Path.GetFullPath("test.in");
-                codeFile = FileUtilities.GetTemporaryFile();
+                codeFile = FileUtilities.GetTemporaryFileName();
                 string codeContent = @"using System.IO; class X { static void Main() { File.ReadAllText(@""" + inputPath + @"""); File.ReadAllText(@""" + inputPath + @"""); }}";
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();

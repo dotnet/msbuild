@@ -10,8 +10,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
-using System.Transactions;
 
 #nullable disable
 

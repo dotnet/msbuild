@@ -10,15 +10,15 @@ using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 #if FEATURE_PIPE_SECURITY
 using System.Security.Principal;
 #endif
 
 #if FEATURE_APM
 using Microsoft.Build.Eventing;
+#else
+using System.Threading;
 #endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;

@@ -92,8 +92,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         private string CreateSampleResx()
         {
-            string resx = FileUtilities.GetTemporaryFile();
-            File.Delete(resx);
+            string resx = FileUtilities.GetTemporaryFileName();
             Stream fileToSend = Assembly.GetExecutingAssembly().GetManifestResourceStream("Microsoft.Build.Tasks.UnitTests.SampleResx");
             using (FileStream f = new FileStream(resx, FileMode.CreateNew))
             {

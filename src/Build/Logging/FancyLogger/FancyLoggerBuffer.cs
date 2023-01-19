@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+//
 
 using System;
 using System.Collections.Generic;
@@ -9,257 +10,194 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
-    /// <summary>
-    /// Represents an identifiable line inside the fancylogger buffer.
-    /// </summary>
     public class FancyLoggerBufferLine
     {
-        private static int counter = 0;
+        private static int Counter = 0;
         public int Id;
         public string Text;
-        public bool IsHidden;
-        public int IdentationLevel = -1;
+
         public FancyLoggerBufferLine()
         {
-            Id = counter++;
+            Id = Counter++;
             Text = String.Empty;
         }
         public FancyLoggerBufferLine(string text)
+            : this()
         {
-            Id = counter++;
             Text = text;
-        }
-        public FancyLoggerBufferLine(string text, int identationLevel) : this(text)
-        {
-            IdentationLevel = identationLevel;
-        }
-        public void Hide()
-        {
-            IsHidden = true;
-        }
-        public void Unhide()
-        {
-            IsHidden = false;
-        }
-        public int GetIndex()
-        {
-            return FancyLoggerBuffer.GetLineIndexById(Id);
         }
     }
 
-    /// <summary>
-    /// Buffer manager for FancyLogger
-    /// </summary>
-    internal static class FancyLoggerBuffer
+    public class FancyLoggerBuffer
     {
-        // Status
-        public static bool AutoScrollEnabled { get; private set; }
-        public static bool IsTerminated { get; private set; }
-        public static int CurrentTopLineIndex { get; private set; }
-        public static int Height { get { return Console.WindowHeight; } }
-        // Lines to be presented by the buffer
-        private static List<FancyLoggerBufferLine> lines = new();
+        private static List<FancyLoggerBufferLine> Lines = new();
+        private static int TopLineIndex = 0;
+        private static bool AutoScrollEnabled = true;
         public static void Initialize()
         {
-            // Setup event listeners
+            // Use alternate buffer
+            // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
+            // Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
+
+            Console.Write(ANSIBuilder.Cursor.Invisible());
+
+            Task.Run(async () => {
+                while (true)
+                {
+                    await Task.Delay(500 / 60);
+                    Render();
+                }
+            });
+
             Task.Run(() =>
             {
                 while (true)
                 {
-                    if (IsTerminated) return;
                     switch (Console.ReadKey().Key)
                     {
-                        case ConsoleKey.Q:
-                            IsTerminated = true;
-                        break;
                         case ConsoleKey.UpArrow:
-                            ScrollToLine(CurrentTopLineIndex - 1);
+                            if (TopLineIndex > 0) TopLineIndex--;
                             break;
                         case ConsoleKey.DownArrow:
-                            ScrollToLine(CurrentTopLineIndex + 1);
-                            break;
-                        case ConsoleKey.Home:
-                            ScrollToLine(0);
-                            break;
-                        case ConsoleKey.End:
-                            ScrollToEnd();
+                            if (TopLineIndex < Console.BufferHeight - 3) TopLineIndex++;
                             break;
                         case ConsoleKey.Spacebar:
                         case ConsoleKey.Escape:
-                            ToggleAutoScroll();
+                            AutoScrollEnabled = !AutoScrollEnabled;
                             break;
                     }
                 }
             });
-            // Switch to alternate
-            Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
-            // Settings
-            AutoScrollEnabled = true;
-            // Render contents
-            WriteTitleBar();
-            WriteFooter("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            ScrollToEnd();
         }
+
         public static void Terminate()
         {
-            // Switch to main buffer
+            // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
+            Console.Clear();
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            // Dispose event listeners
-            IsTerminated = true;
-            // Delete lines
-            lines = new();
+            Console.Write(ANSIBuilder.Eraser.Display());
+
+            Console.Write(ANSIBuilder.Cursor.Visible());
+            Lines = new();
         }
 
-        #region Scrolling
-        private static void ScrollToLine(int firstLineIndex)
+        #region Rendering
+        public static void Render()
         {
-            if (firstLineIndex < 0 || firstLineIndex >= lines.Count) return;
-            CurrentTopLineIndex = firstLineIndex;
-            int i = 0;
-            while (i < Height - 4)
+            if (Lines.Count == 0) return;
+            // Write Header
+            Console.Write(
+                // Write header
+                ANSIBuilder.Cursor.Home() +
+                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")) +
+                // Write footer
+                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
+                // TODO: Remove and replace with actual footer
+                new string('-', Console.BufferWidth) + '\n' + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            );
+            // Write lines
+            for (int i = 0; i < Console.BufferHeight - 3; i++)
             {
-                int lineIndex = i + firstLineIndex;
-                Console.Write(""
-                    + ANSIBuilder.Cursor.Position(i + 2, 0)
-                    + ANSIBuilder.Eraser.LineCursorToEnd()
-                    // + ((lineIndex < lines.Count && lines[lineIndex].IsHidden) ? " Hidden" : "")
-                    + ((lineIndex < lines.Count) ? ANSIBuilder.Tabulator.ForwardTab(lines[lineIndex].IdentationLevel) + lines[lineIndex].Text : "")
+                int lineIndex = i + TopLineIndex;
+                Console.Write(
+                    ANSIBuilder.Cursor.Position(i + 2, 0) +
+                    ANSIBuilder.Eraser.LineCursorToEnd() + 
+                    (lineIndex < Lines.Count ? Lines[lineIndex].Text : String.Empty)
                 );
-                i++;
             }
-
-            Console.Write(ANSIBuilder.Cursor.Position(Height, 0));
-        }
-        private static void ScrollToEnd()
-        { 
-            // If number of lines is smaller than height
-            if (lines.Count < Height - 2)
-            {
-                ScrollToLine(0);
-            }
-            else
-            {
-                ScrollToLine(lines.Count - Height + 4);
-            }
-            // Go to end
-            Console.Write(ANSIBuilder.Cursor.Position(Height, 0));
-        }
-        private static void ToggleAutoScroll()
-        {
-            AutoScrollEnabled = !AutoScrollEnabled;
         }
         #endregion
-        #region Line Referencing
+
+        #region Line identification
         public static int GetLineIndexById(int lineId)
         {
-            for (int i = 0; i < lines.Count; i++)
+            for (int i = 0; i < Lines.Count; i++)
             {
-                if (lines[i].Id == lineId) return i;
+                if (Lines[i].Id == lineId) return i;
             }
             return -1;
         }
+
         public static FancyLoggerBufferLine? GetLineById(int lineId)
         {
-            int i = GetLineIndexById(lineId);
-            if (i == -1) return null;
-            return lines[i];
+            int index = GetLineIndexById(lineId);
+            if (index == -1) return null;
+            return Lines[index];
         }
         #endregion
-        #region Writing
-        public static void WriteTitleBar()
+
+        #region Line create, update and delete
+        // Write new line
+        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text)
         {
-            Console.Write(""
-                + ANSIBuilder.Cursor.Home()
-                + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress"))
-            );
+            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
+            return WriteNewLineAfter(lineId, line);
         }
-        public static void WriteFooter(string text)
+        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line)
         {
-            Console.Write(""
-                + ANSIBuilder.Cursor.Position(Height - 2, 0) // Position at bottom
-                + new string('-', Console.BufferWidth) + "\n"
-                + ANSIBuilder.Eraser.LineCursorToEnd()
-                + text
-            );
+            // Get line index
+            int lineIndex = GetLineIndexById(lineId);
+            if (lineIndex == -1) return null;
+            // Save top line
+            int topLineId = Lines[TopLineIndex].Id;
+            // Add
+            Lines.Insert(lineIndex + 1, line);
+            // Get updated top line index
+            TopLineIndex = GetLineIndexById(topLineId);
+            // Return
+            return line;
         }
-        public static FancyLoggerBufferLine WriteNewLine(string text)
+
+        public static FancyLoggerBufferLine? WriteNewLine(string text)
         {
-            // Create line
             FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
             return WriteNewLine(line);
         }
-        public static FancyLoggerBufferLine WriteNewLine(FancyLoggerBufferLine line)
+        public static FancyLoggerBufferLine? WriteNewLine(FancyLoggerBufferLine line)
         {
-            // Add line
-            lines.Add(line);
-            // Update contents
-            if (AutoScrollEnabled) ScrollToEnd();
-            else ScrollToLine(CurrentTopLineIndex);
-            return line;
-        }
-        public static FancyLoggerBufferLine? WriteNewLineAfter(string text, int lineId)
-        {
-            // get line
-            int lineIndex = GetLineIndexById(lineId);
-            if (lineIndex == -1) return null;
-
-            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
-            return WriteNewLineAfterIndex(line, lineIndex);
+            // Get last id
+            if (Lines.Count > 0)
+            {
+                int lineId = Lines.Last().Id;
+                return WriteNewLineAfter(lineId, line);
+            }
+            else
+            {
+                Lines.Add(line);
+                return line;
+            }
         }
 
-        public static FancyLoggerBufferLine? WriteNewLineAfter(FancyLoggerBufferLine line, int lineId)
-        {
-            // get line
-            int lineIndex = GetLineIndexById(lineId);
-            if (lineIndex == -1) return null;
-
-            return WriteNewLineAfterIndex(line, lineIndex);
-        }
-
-        public static FancyLoggerBufferLine? WriteNewLineAfterIndex(FancyLoggerBufferLine line, int lineIndex)
-        {
-            if (lineIndex == -1) return null;
-            lines.Insert(lineIndex + 1, line);
-            // Scroll to end if lineIndex >= lines
-            // if (lineIndex >= lines.Count -2 && AutoScrollEnabled) ScrollToEnd();
-            // else ScrollToLine(CurrentTopLineIndex);
-            ScrollToEnd();
-            return line;
-        }
-
-        public static void DeleteLine(int lineId)
-        {
-            int lineIndex = GetLineIndexById(lineId);
-            if (lineIndex == -1) return;
-            lines.RemoveAt(lineIndex);
-            ScrollToLine(CurrentTopLineIndex);
-        }
-
+        // Update line
         public static FancyLoggerBufferLine? UpdateLine(int lineId, string text)
         {
+            // Get line
             FancyLoggerBufferLine? line = GetLineById(lineId);
             if (line == null) return null;
-
             line.Text = text;
-            ScrollToLine(CurrentTopLineIndex);
+            // Return
             return line;
         }
-        #endregion
 
-        public static void HideLine(int lineId)
+        // Delete line
+        public static void DeleteLine(int lineId)
         {
-            FancyLoggerBufferLine? line = GetLineById(lineId);
-            if (line == null) return;
-            line.Hide();
-            ScrollToLine(CurrentTopLineIndex);
+            // TODO: What if line id is equal to topLineId?????
+            // Get line index
+            int lineIndex = GetLineIndexById(lineId);
+            if (lineIndex == -1) return;
+            // Save top line
+            int topLineId = Lines[TopLineIndex].Id;
+            // Delete
+            Lines.RemoveAt(lineIndex);
+            // Get updated top line index
+            if (topLineId != lineId)
+            {
+                TopLineIndex = GetLineIndexById(topLineId);
+            }
         }
-        public static void UnhideLine(int lineId)
-        {
-            FancyLoggerBufferLine? line = GetLineById(lineId);
-            if (line == null) return;
-            line.Unhide();
-            ScrollToLine(CurrentTopLineIndex);
-        }
+        #endregion
     }
 }

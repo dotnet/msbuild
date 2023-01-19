@@ -213,11 +213,13 @@ namespace Microsoft.Build.UnitTests
             string testFileName = "foobar.txt";
             string symlinkName = "symlink1.txt";
             string symlinkLvl2Name = "symlink2.txt";
+            string emptyFileName = "empty.txt";
             TransientTestFolder testFolder = _env.DefaultTestDirectory.CreateDirectory("TestDir");
             TransientTestFolder testFolder2 = _env.DefaultTestDirectory.CreateDirectory("TestDir2");
             TransientTestFile testFile = testFolder.CreateFile(testFileName, string.Join(Environment.NewLine, new[] { "123", "456" }));
             string symlinkPath = Path.Combine(testFolder2.Path, symlinkName);
             string symlinkLvl2Path = Path.Combine(testFolder2.Path, symlinkLvl2Name);
+            string emptyFile = testFolder.CreateFile(emptyFileName).Path;
 
             string errorMessage = string.Empty;
             Assert.True(NativeMethodsShared.MakeSymbolicLink(symlinkPath, testFile.Path, ref errorMessage), errorMessage);
@@ -248,9 +250,12 @@ namespace Microsoft.Build.UnitTests
         <CreateItem Include=""{1}"">
             <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
         </CreateItem>
+        <CreateItem Include=""{2}"">
+            <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
+        </CreateItem>
     </Target>
 </Project>";
-            var testProject = string.Format(testProjectFmt, symlinkPath, symlinkLvl2Path);
+            var testProject = string.Format(testProjectFmt, symlinkPath, symlinkLvl2Path, emptyFile);
             ObjectModelHelpers.BuildProjectExpectSuccess(testProject, binaryLogger);
             var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
@@ -261,6 +266,7 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkName));
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkLvl2Name));
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(emptyFileName));
         }
 
         [Fact]

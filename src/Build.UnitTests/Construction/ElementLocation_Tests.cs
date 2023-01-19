@@ -403,7 +403,7 @@ namespace Microsoft.Build.UnitTests.Construction
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
             doc.Load(_pathToCommonTargets);
             Assert.True(doc.IsReadOnly);
-            using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFile(), FileMode.Create)))
+            using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFileName(), FileMode.Create)))
             {
                 Assert.Throws<InvalidOperationException>(() =>
                 {
@@ -421,7 +421,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(file, content);
                 var doc = new XmlDocumentWithLocation(loadAsReadOnly: readOnly);
                 doc.Load(file);

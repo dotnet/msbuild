@@ -8,7 +8,9 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
 using System.Security.Principal;
+#endif
 using System.Threading;
 
 using Microsoft.Build.Framework;

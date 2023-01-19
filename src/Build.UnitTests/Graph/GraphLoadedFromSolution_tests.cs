@@ -585,7 +585,7 @@ namespace Microsoft.Build.Graph.UnitTests
             var graph = new ProjectGraph(_env.CreateFile("solution.sln", solutionContents).Path);
 
             var edges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
-            edges.Count.ShouldBe(8);
+            edges.Count.ShouldBe(10);
 
             var node1 = GetFirstNodeWithProjectNumber(graph, 1);
             node1.ProjectReferences.Count.ShouldBe(3);

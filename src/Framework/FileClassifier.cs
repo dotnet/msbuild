@@ -4,11 +4,13 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
+#if !RUNTIME_TYPE_NETCORE
+using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
+#endif
 
 namespace Microsoft.Build.Framework
 {
