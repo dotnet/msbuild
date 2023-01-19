@@ -84,6 +84,7 @@ public partial class CreateNewImage : ToolTask
                (EntrypointArgs.Length > 0 ? " --entrypointargs " + String.Join(" ", EntrypointArgs.Select((i) => i.ItemSpec)) : "") +
                (ExposedPorts.Length > 0 ? " --ports " + String.Join(" ", ExposedPorts.Select((i) => i.ItemSpec + "/" + i.GetMetadata("Type"))) : "") +
                (ContainerEnvironmentVariables.Length > 0 ? " --environmentvariables " + String.Join(" ", ContainerEnvironmentVariables.Select((i) => i.ItemSpec + "=" + Quote(i.GetMetadata("Value")))) : "") +
+               $" --rid {Quote(ContainerRuntimeIdentifier)}" +
                $" --ridgraphpath {Quote(RuntimeIdentifierGraphPath)}";
     }
 
