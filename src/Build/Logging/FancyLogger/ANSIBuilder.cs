@@ -157,8 +157,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                 return String.Format("\x1b[53m{0}\x1b[55m", text);
             }
 
-            public static string Hyperlink(string text, string url)
+            public static string Hyperlink(string text, string rawUrl)
             {
+                string url = rawUrl.Length > 0 ? new System.Uri(rawUrl).AbsoluteUri : rawUrl;
                 return $"\x1b]8;;{url}\x1b\\{text}\x1b]8;;\x1b\\";
             }
 
