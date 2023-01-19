@@ -76,6 +76,7 @@
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
