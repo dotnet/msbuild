@@ -11,7 +11,7 @@ namespace Microsoft.Build.Logging.FancyLogger
     {
         public static string ANSIRemove(string text)
         {
-            return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
+            return Regex.Replace(text, @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~]|(?:\]8;;.*?\x1b\\))", "");
         }
 
         public static class Alignment
@@ -157,12 +157,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                 return String.Format("\x1b[53m{0}\x1b[55m", text);
             }
 
-            // TODO: Right now only replaces \ with /. Needs review to make sure it works on all or most terminal emulators.
             public static string Hyperlink(string text, string url)
             {
                 return $"\x1b]8;;{url}\x1b\\{text}\x1b]8;;\x1b\\";
-                // return String.Format("\x1b[]8;;{0}\x1b\\{1}\x1b[]8;\x1b\\", text, url);
-                // return url.Replace("\\", "/");
             }
 
             public static string DECLineDrawing(string text)
