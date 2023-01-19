@@ -517,7 +517,7 @@ namespace Microsoft.Build.BackEnd
             // cannot correlate them to any output item
             foreach (string itemVectorType in itemVectorsReferencedOnlyInTargetInputs)
             {
-                discreteTargetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, itemVectorType));
+                discreteTargetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, itemVectorType, itemVectorsInTargetInputs[itemVectorType]));
             }
 
             // if there are any discrete input items, we can treat them as "meta" inputs, because:
@@ -858,13 +858,17 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="itemVectors"></param>
         /// <returns>list of item-specs</returns>
-        private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors)
+        private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, bool earlyExitIfNonEmpty = false)
         {
-            List<string> itemSpecs = new List<string>();
+            List<string> itemSpecs = new();
 
-            foreach (string itemType in itemVectors.Keys)
+            foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
             {
-                itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, itemType));
+                itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value));
+                if (earlyExitIfNonEmpty && itemSpecs.Count > 0)
+                {
+                    return itemSpecs;
+                }
             }
 
             return itemSpecs;
@@ -875,13 +879,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="itemVectors"></param>
         /// <param name="itemType"></param>
+        /// <param name="itemVectorPartition"></param>
         /// <returns>list of item-specs</returns>
-        private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, string itemType)
+        private static IEnumerable<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, string itemType, ItemVectorPartition itemVectorPartition)
         {
-            List<string> itemSpecs = new List<string>();
-
-            ItemVectorPartition itemVectorPartition = itemVectors[itemType];
-
             if (itemVectorPartition != null)
             {
                 foreach (IList<ProjectItemInstance> items in itemVectorPartition.Values)
@@ -891,12 +892,10 @@ namespace Microsoft.Build.BackEnd
                         // The item can be null in the case of an item transform.
                         // eg., @(Compile->'%(NonExistentMetadata)')
                         // Nevertheless, include these, so that correlation can still occur.
-                        itemSpecs.Add((item == null) ? null : ((IItem)item).EvaluatedIncludeEscaped);
+                        yield return item == null ? null : ((IItem)item).EvaluatedIncludeEscaped;
                     }
                 }
             }
-
-            return itemSpecs;
         }
 
         /// <summary>
