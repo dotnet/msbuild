@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
 #if !RUNTIME_TYPE_NETCORE
+using Microsoft.Build.Framework;
 using System.Collections.Generic;
 #endif
 using System.ComponentModel;

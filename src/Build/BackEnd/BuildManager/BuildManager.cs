@@ -251,6 +251,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private DateTime _instantiationTimeUtc;
 
+        /// <summary>
+        /// Messages to be logged
+        /// </summary>
         private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
 
         private ProjectCacheService _projectCacheService;
@@ -394,10 +397,20 @@ namespace Microsoft.Build.Execution
 
             public string Text { get; }
 
+            public string FilePath { get; }
+
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
+                FilePath = null;
+            }
+
+            public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
+            {
+                Importance = importance;
+                Text = text;
+                FilePath = filePath;
             }
         }
 
@@ -527,6 +540,7 @@ namespace Microsoft.Build.Execution
 
                 var loggingService = InitializeLoggingService();
 
+                // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
                 InitializeCaches();
@@ -2866,6 +2880,12 @@ namespace Microsoft.Build.Execution
             foreach (var message in deferredBuildMessages)
             {
                 loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+
+                // If message includes a file path, include that file
+                if (message.FilePath is not null)
+                {
+                    loggingService.LogIncludeFile(BuildEventContext.Invalid, message.FilePath);
+                }
             }
         }
 

@@ -23,7 +23,6 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
-using System.Linq;
 using Microsoft.Build.Collections;
 
 #nullable disable

@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -117,7 +116,7 @@ namespace Microsoft.Build.Graph
 
             AddEdgesFromProjectReferenceItems(allParsedProjects, Edges);
 
-            _projectInterpretation.ReparentInnerBuilds(allParsedProjects, this);
+            _projectInterpretation.AddInnerBuildEdges(allParsedProjects, this);
 
             if (_solutionDependencies != null && _solutionDependencies.Count != 0)
             {

@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement xml = ProjectRootElement.Create(path);
                 xml.Save();
 
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
 
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 project.Save(path);
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject(path);
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectCollection collection = new ProjectCollection();
                 Project project = new Project(collection);
 
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 project.Save(path);
 
                 Project project2 = collection.LoadProject(path);
@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.Save(path);
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement.Create(path).Save();
 
                 ProjectCollection collection1 = new ProjectCollection();
@@ -823,8 +823,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file1 = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file1 = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
 
                 Project project = new Project();
                 project.Save(file1);
@@ -855,8 +855,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file1 = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file1 = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
 
                 var project = new Project();
                 project.Save(file1);
@@ -891,8 +891,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file1 = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file1 = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
 
                 var project = new Project();
                 project.Save(file1);
@@ -1433,7 +1433,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private static string CreateProjectFile()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
-            string path = FileUtilities.GetTemporaryFile();
+            string path = FileUtilities.GetTemporaryFileName();
             xml.Save(path);
             return path;
         }

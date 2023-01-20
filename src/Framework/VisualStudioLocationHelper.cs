@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 #if FEATURE_VISUALSTUDIOSETUP
+using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Setup.Configuration;
 #endif
 

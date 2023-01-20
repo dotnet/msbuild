@@ -5,7 +5,9 @@ using System;
 using System.Text;
 using System.Reflection;
 using System.Globalization;
+#if DEBUG
 using System.Diagnostics;
+#endif
 
 namespace Microsoft.Build.BuildEngine.Shared
 {

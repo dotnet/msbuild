@@ -2936,7 +2936,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             "    </runtime>\n" +
             "</configuration>";
 
-            string appConfigFile = FileUtilities.GetTemporaryFile();
+            string appConfigFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(appConfigFile, appConfigContents);
             return appConfigFile;
         }
@@ -3150,10 +3150,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies = items;
             t.SearchPaths = searchPaths.ToArray();
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
                 File.WriteAllText
                 (
                     redistFile,

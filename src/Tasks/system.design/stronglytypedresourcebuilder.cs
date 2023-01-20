@@ -23,7 +23,9 @@
 
 using System;
 using System.IO;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.Collections;
+#endif
 using System.Collections.Generic;
 using System.Resources;
 using System.CodeDom;

@@ -428,6 +428,7 @@ Build
         {
             switch (e)
             {
+                case ResponseFileUsedEventArgs responseFileUsed: Write(responseFileUsed); break;
                 case TaskParameterEventArgs taskParameter: Write(taskParameter); break;
                 case ProjectImportedEventArgs projectImported: Write(projectImported); break;
                 case TargetSkippedEventArgs targetSkipped: Write(targetSkipped); break;
@@ -506,7 +507,12 @@ Build
             WriteMessageFields(e, writeImportance: true);
             WriteDeduplicatedString(e.EnvironmentVariableName);
         }
-
+        private void Write(ResponseFileUsedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.ResponseFileUsed);
+            WriteMessageFields(e);
+            WriteDeduplicatedString(e.ResponseFilePath);
+        }
         private void Write(TaskCommandLineEventArgs e)
         {
             Write(BinaryLogRecordKind.TaskCommandLine);

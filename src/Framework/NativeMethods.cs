@@ -10,7 +10,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Threading;
 
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
@@ -200,9 +199,16 @@ internal static class NativeMethods
         Unknown
     }
 
-#endregion
+    internal enum SymbolicLink
+    {
+        File = 0,
+        Directory = 1,
+        AllowUnprivilegedCreate = 2,
+    }
 
-#region Structs
+    #endregion
+
+    #region Structs
 
     /// <summary>
     /// Structure that contain information about the system on which we are running
@@ -1035,6 +1041,30 @@ internal static class NativeMethods
         return null;
     }
 
+    internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
+    {
+        bool symbolicLinkCreated;
+        if (IsWindows)
+        {
+            Version osVersion = Environment.OSVersion.Version;
+            SymbolicLink flags = SymbolicLink.File;
+            if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
+            {
+                flags |= SymbolicLink.AllowUnprivilegedCreate;
+            }
+
+            symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, flags);
+            errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+        }
+        else
+        {
+            symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
+            errorMessage = symbolicLinkCreated ? null : Marshal.GetLastWin32Error().ToString();
+        }
+
+        return symbolicLinkCreated;
+    }
+
     /// <summary>
     /// Get the last write time of the fullpath to the file.
     /// </summary>
@@ -1112,6 +1142,23 @@ internal static class NativeMethods
     }
 
     /// <summary>
+    /// Get the SafeFileHandle for a file, while skipping reparse points (going directly to target file).
+    /// </summary>
+    /// <param name="fullPath">Full path to the file in the filesystem</param>
+    /// <returns>the SafeFileHandle for a file (target file in case of symlinks)</returns>
+    [SupportedOSPlatform("windows")]
+    private static SafeFileHandle OpenFileThroughSymlinks(string fullPath)
+    {
+        return CreateFile(fullPath,
+            GENERIC_READ,
+            FILE_SHARE_READ,
+            IntPtr.Zero,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL, /* No FILE_FLAG_OPEN_REPARSE_POINT; read through to content */
+            IntPtr.Zero);
+    }
+
+    /// <summary>
     /// Get the last write time of the content pointed to by a file path.
     /// </summary>
     /// <param name="fullPath">Full path to the file in the filesystem</param>
@@ -1125,14 +1172,7 @@ internal static class NativeMethods
     {
         DateTime fileModifiedTime = DateTime.MinValue;
 
-        using (SafeFileHandle handle =
-            CreateFile(fullPath,
-                GENERIC_READ,
-                FILE_SHARE_READ,
-                IntPtr.Zero,
-                OPEN_EXISTING,
-                FILE_ATTRIBUTE_NORMAL, /* No FILE_FLAG_OPEN_REPARSE_POINT; read through to content */
-                IntPtr.Zero))
+        using (SafeFileHandle handle = OpenFileThroughSymlinks(fullPath))
         {
             if (!handle.IsInvalid)
             {
@@ -1635,9 +1675,17 @@ internal static class NativeMethods
     [SupportedOSPlatform("windows")]
     internal static extern bool SetThreadErrorMode(int newMode, out int oldMode);
 
-#endregion
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.I1)]
+    [SupportedOSPlatform("windows")]
+    internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
 
-#region helper methods
+    [DllImport("libc", SetLastError = true)]
+    internal static extern int symlink(string oldpath, string newpath);
+
+    #endregion
+
+    #region helper methods
 
     internal static bool DirectoryExists(string fullPath)
     {
