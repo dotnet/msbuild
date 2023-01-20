@@ -790,6 +790,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1028: Określ element RuntimeIdentifier</target>
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
+      <trans-unit id="RuntimeIdentifierWillNoLongerImplySelfContained">
+        <source>NETSDK1198: In projects with TargetFrameworks &gt;= 8.0, RuntimeIdentifier no longer automatically gives a SelfContained app. To preserve a project's current behavior after upgrading to 8.0, consider setting SelfContained explicitly.</source>
+        <target state="new">NETSDK1198: In projects with TargetFrameworks &gt;= 8.0, RuntimeIdentifier no longer automatically gives a SelfContained app. To preserve a project's current behavior after upgrading to 8.0, consider setting SelfContained explicitly.</target>
+        <note>{StrBegin="NETSDK1198: "}</note>
+      </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1109: Nie odnaleziono pliku listy środowiska uruchomieniowego „{0}”. Zgłoś ten błąd zespołowi platformy .NET tutaj: https://aka.ms/dotnet-sdk-issue.</target>
