@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/template.json",
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithPreferDefaultNameButNoDefaultName",
+  "tags": { "type": "project" },
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithPreferDefaultNameButNoDefaultName",
+  "identity": "TestAssets.TemplateWithPreferDefaultNameButNoDefaultName",
+  "shortName": "TestAssets.TemplateWithPreferDefaultNameButNoDefaultName",
+  "preferDefaultName": true,
+  "sourceName": "toChange"
+}
