@@ -891,4 +891,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</value>
     <comment>{StrBegin="NETSDK1196: "}</comment>
   </data>
+  <data name="RuntimeIdentifierWillNoLongerImplySelfContained" xml:space="preserve">
+    <value>NETSDK1198: In projects with TargetFrameworks >= 8.0, RuntimeIdentifier no longer automatically gives a SelfContained app. To preserve a project's current behavior after upgrading to 8.0, consider setting SelfContained explicitly.</value>
+    <comment>{StrBegin="NETSDK1198: "}</comment>
+  </data>
 </root>

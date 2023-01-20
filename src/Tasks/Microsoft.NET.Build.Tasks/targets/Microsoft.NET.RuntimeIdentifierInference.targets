@@ -149,7 +149,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_SelfContainedWasSpecified Condition="'$(SelfContained)' != ''">true</_SelfContainedWasSpecified>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
-    <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
+    <!-- Breaking change below! Projects with 8.0+ TFMS will no longer have RuntimeIdentifier imply SelfContained. -->
+    <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != '' and
+                              '$(_TargetFrameworkVersionWithoutV)' &lt; '8.0'">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
     <_RuntimeIdentifierUsesAppHost Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('maccatalyst')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">false</_RuntimeIdentifierUsesAppHost>
     <_RuntimeIdentifierUsesAppHost Condition="'$(_RuntimeIdentifierUsesAppHost)' == ''">true</_RuntimeIdentifierUsesAppHost>
@@ -222,10 +224,15 @@ Copyright (c) .NET Foundation. All rights reserved.
          because we do not want the behavior to be a breaking change compared to version 3.0 -->
 
     <NETSdkWarning Condition="'$(PublishReadyToRun)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
-                   ResourceName="PublishReadyToRunRequiresVersion30" />
+                 ResourceName="PublishReadyToRunRequiresVersion30" />
 
     <NETSdkWarning Condition="'$(PublishTrimmed)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
-                   ResourceName="PublishTrimmedRequiresVersion30" />
+                 ResourceName="PublishTrimmedRequiresVersion30" />
+
+    <!-- Previously, RuntimeIdentifier (RID) implied SelfContained (SC). A breaking change in 8.0 made it so RID did not activate SC by default.
+         So we warn older TFM users before they upgrade to TFM 8.0 or above that they need to add <SelfContained>true</SelfContained> now to keep the same behavior.-->
+    <NETSdkWarning Condition="'$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' != '' and '$(_TargetFrameworkVersionWithoutV)' &lt; '8.0' and '$(_SelfContainedWasSpecified)' != 'true' and '$(SelfContained)' == ''"
+                 ResourceName="RuntimeIdentifierWillNoLongerImplySelfContained" />
 
     <!-- Generate Trimming warnings for WinForms and Wpf applications-->
     <NetSdkError Condition="('$(UseWindowsForms)' == 'true') and ('$(PublishTrimmed)' == 'true') and ('$(_SuppressWinFormsTrimError)' != 'true')"

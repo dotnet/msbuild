@@ -383,6 +383,81 @@ namespace Microsoft.NET.Build.Tests
             publishCommand.Execute(new[] { "-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" }).Should().Pass().And.NotHaveStdOutContaining("warning");
         }
 
+        [Theory]
+        [InlineData("net7.0")]
+        [InlineData("net8.0")]
+        public void It_does_or_doesnt_imply_SelfContained_based_on_RuntimeIdentifier_and_TargetFramework(string targetFramework)
+        {
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
+            var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
+            string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
+
+            if (targetFramework == "net7.0")
+            {
+                Assert.True(File.Exists(selfContainedExecutableFullPath));
+            }
+            else
+            {
+                Assert.False(File.Exists(selfContainedExecutableFullPath)); // RuntimeIdentifier no longer implies SelfContained for TFM >= 8
+            }
+        }
+
+        [Theory]
+        [InlineData("net7.0", true)]
+        [InlineData("net7.0", false)]
+        [InlineData("net8.0", false)]
+        public void It_does_or_doesnt_warn_based_on_SelfContained_and_TargetFramework_breaking_RID_change(string targetFramework, bool defineSelfContained)
+        {
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: targetFramework + defineSelfContained.ToString())
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
+                    propertyGroup.Add(new XElement(ns + "SelfContained", defineSelfContained ? "true" : ""));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+            var commandResult = buildCommand.Execute();
+
+            if (targetFramework == "net7.0" && !defineSelfContained)
+            {
+                commandResult
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining(Strings.RuntimeIdentifierWillNoLongerImplySelfContained);
+            }
+            else
+            {
+                commandResult
+                    .Should()
+                    .Pass()
+                    .And
+                    .NotHaveStdOutContaining(Strings.RuntimeIdentifierWillNoLongerImplySelfContained);
+            }
+        }
+
         [Fact]
         public void It_does_not_build_SelfContained_due_to_PublishSelfContained_being_true()
         {
