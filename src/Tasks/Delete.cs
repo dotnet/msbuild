@@ -65,6 +65,7 @@ namespace Microsoft.Build.Tasks
 
         private bool question = false;
 
+        /// <summary>
         /// Verify that the inputs are correct.
         /// </summary>
         /// <returns>False on an error, implying that the overall delete operation should be aborted.</returns>
