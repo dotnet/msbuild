@@ -304,8 +304,7 @@ namespace Microsoft.Build.Tasks
                 TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
                 if (!NativeMethodsShared.IsWindows)
                 {
-                    errorMessage = Log.FormatResourceString("Copy.NonWindowsLinkErrorMessage"
-                    , "symlink()", errorMessage);
+                    errorMessage = Log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "symlink()", errorMessage);
                 }
                 if (!symbolicLinkCreated)
                 {
