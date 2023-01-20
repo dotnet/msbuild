@@ -1,7 +1,7 @@
 # SDK PR Guide
 
 ## Branching & Release Schedules
-See the [versions](https://learn.microsoft.com/en-us/dotnet/core/porting/versioning-sdk-msbuild-vs#lifecycle) document for more details on how SDK versions map to MSBuild and Visual Studio.
+See the [versions](https://learn.microsoft.com/en-us/dotnet/core/porting/versioning-sdk-msbuild-vs#lifecycle) document for more details on how SDK versions map to MSBuild and Visual Studio. The Visual Studio schedule is available on the devdiv internal Azure DevOps wiki and the .NET schedule is communicated through the internal .NET Tactics alias.
 
 ### Major releases
 The .NET SDK has yearly major releases aligning with the .NET Runtime in November.  These releases will be of the form `N.0.1xx`. The feature work for major releases will be done in `main`. 
@@ -9,10 +9,10 @@ The .NET SDK has yearly major releases aligning with the .NET Runtime in Novembe
 Typically, previews for each major release start in February of each year.  For each preview, we will snap a new branch off of main approximately midway through the prior month.
 
 During .NET 7, for example, the preview branches were created around the 21st of each month prior, with the later previews forking earlier to provide more time for stabilization and codeflow.
-The `main` branch's major version will be set to match the next year's major release in August. (For example, the switch from `.NET 7` to `.NET 8` occurred in August of 2022, while .NET 8 was set for release in 2023.) Warning: This process can take a bit for those waiting to develop features for the next major release.
+The `main` branch's major version will be set to match the next year's major release in August. (For example, the switch from `.NET 7` to `.NET 8` occurred in August of 2022, while .NET 8 was set for release in 2023.) Warning: This process can take a bit for those waiting to develop features for the next major release. In prior releases it has taken 1-3 months before the new branch could be fully used to target the new .NET Runtime version.
 
 ### Minor releases
-The .NET SDK has quarterly minor releases that align with Visual Studio releases. For example, two different quarterly releases in the same schedule would be: `7.0.100` vs `7.0.200`. These SDK releases are open to all bug fixes and some features work as well. 
+The .NET SDK has quarterly minor releases that align with Visual Studio releases. For example, two different quarterly releases in the same schedule would be: `7.0.200` vs `7.0.300`. These SDK releases are open to all bug fixes and some features work as well. 
 These quarterly releases should avoid breaking changes if at all possible. Breaking changes instead should be included in the major releases and be tied to customer `TargetFramework` updates when possible. We do this to limit the pain of breaking changes, as customers need to take action (upgrading the `TargetFramework`) before they are broken. 
 
 Minor releases lock down after preview 3 for each release.  Preview 3 is typically 1 month prior to GA and locks down by the end of the month before the preview release.
@@ -20,7 +20,7 @@ Minor releases lock down after preview 3 for each release.  Preview 3 is typical
 #### Transition from minor release to servicing
 After the minor release locks down, it transitions into servicing / "QB" (Quarterback) mode. This typically happens around the `preview 3` release to allow time for any late public changes we want feedback on. The next release after `preview 3` is typically GA and done as a servicing release. The following steps are done when transitioning from minor release previews to servicing:
 - [ ] Follow the new branch check list for creating a new minor release (steps listed on internal OneNote)
-- [ ] Set stabilize branding to true
+- [ ] Set [`StabilizePackageVersion`](https://github.com/dotnet/sdk/blob/main/eng/Versions.props#L18) to true
 - [ ] Enable internal runtime `darc` subscriptions and trigger them
 
 ### Servicing releases
