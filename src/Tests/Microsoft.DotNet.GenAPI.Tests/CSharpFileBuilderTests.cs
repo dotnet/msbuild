@@ -762,5 +762,66 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """);
         }
+
+        [Fact]
+        void TestDestructorGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Bar
+                    {
+                        ~Bar() {}
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Bar
+                    {
+                        ~Bar() {}
+                    }
+                }
+                """);
+        }
+        [Fact]
+        void TestExplicitInterfaceImplementationPropertyGeneration()
+        {
+            RunTest(original: """
+                    namespace Foo
+                    {
+                        public interface IFoo
+                        {
+                            int FooField { get; set; }
+                            void FooMethod();
+                        }
+
+                        public class Bar : IFoo
+                        {
+                            int BarField { get; set; }
+                            int IFoo.FooField { get; set; }
+
+                            void IFoo.FooMethod() { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public partial class Bar : IFoo
+                        {
+                            int Foo.IFoo.FooField { get { throw null; } set { } }
+                            void Foo.IFoo.FooMethod() { }
+                        }
+
+                        public partial interface IFoo
+                        {
+                            int FooField { get; set; }
+                            void FooMethod();
+                        }
+                    }
+                    """);
+        }
     }
 }

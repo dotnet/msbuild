@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.GenAPI
 {
@@ -65,6 +68,22 @@ namespace Microsoft.DotNet.GenAPI
                 {
                     return syntaxGenerator.ExplicitInterfaceImplementationMethodDeclaration(method, method.Name);
                 }
+                else if (method.MethodKind == MethodKind.Destructor)
+                {
+                    return syntaxGenerator.DestructorDeclaration(method);
+                }
+            }
+            else if (symbol.Kind == SymbolKind.Property)
+            {
+                var property = (IPropertySymbol)symbol;
+                if (property.IsExplicitInterfaceImplementation())
+                {
+                    return syntaxGenerator.PropertyDeclaration(
+                        property.Name,
+                        syntaxGenerator.TypeExpression(property.Type),
+                        Accessibility.NotApplicable,
+                        DeclarationModifiers.From(property));
+                }
             }
 
             try
@@ -119,6 +138,13 @@ namespace Microsoft.DotNet.GenAPI
             }
 
             return declaration;
+        }
+
+        // TODO: temporary solution. Remove after the issue https://github.com/dotnet/arcade/issues/11938 is fixed.
+        private static SyntaxNode DestructorDeclaration(this SyntaxGenerator syntaxGenerator, IMethodSymbol method)
+        {
+            MethodDeclarationSyntax decl = (MethodDeclarationSyntax)syntaxGenerator.MethodDeclaration("~" + method.ContainingType.Name);
+            return decl.ReplaceNode(decl.ReturnType, SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(string.Empty)));
         }
     }
 }
