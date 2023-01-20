@@ -67,12 +67,12 @@ namespace Microsoft.Build.Logging.FancyLogger
                 $" {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}" +
                 // TFM
                 $" {ANSIBuilder.Formatting.Inverse(TargetFramework)} " +
-                (ProjectOutputExecutable.Length > 0 ? $"-> { ANSIBuilder.Formatting.Hyperlink(GetUnambiguousPath(ProjectOutputExecutable), ProjectOutputExecutable) }" : string.Empty)
+                (ProjectOutputExecutable.Length > 0 ? $"-> { ANSIBuilder.Formatting.Hyperlink(GetUnambiguousPath(ProjectOutputExecutable), Path.GetDirectoryName(ProjectOutputExecutable)!) }" : string.Empty)
                 ,
                 $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)",
                 // ProjectOutputExecutable, 
                 Console.WindowWidth
-            );;
+            );
 
             // Create or update line
             if (Line == null) Line = FancyLoggerBuffer.WriteNewLine(lineContents);
