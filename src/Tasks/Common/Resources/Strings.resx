@@ -836,7 +836,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1182: "}</comment>
   </data>
   <data name="AotNoValidRuntimePackageError" xml:space="preserve">
-    <value>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishAot property set to true.</value>
+    <value>NETSDK1183: Unable to optimize assemblies for ahead-of-time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</value>
     <comment>{StrBegin="NETSDK1183: "}</comment>
   </data>
   <data name="TargetingPackNotRestored_TransitiveDisabled" xml:space="preserve">
@@ -879,12 +879,16 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</value>
     <comment>{StrBegin="NETSDK1193: "}</comment>
   </data>
-    <data name="CannotHaveSolutionLevelOutputPath" xml:space="preserve">
+  <data name="CannotHaveSolutionLevelOutputPath" xml:space="preserve">
     <value>NETSDK1194: The "--output" option isn't supported when building a solution.</value>
     <comment>{StrBegin="NETSDK1194: "}</comment>
   </data>
   <data name="ILLinkNoValidRuntimePackageError" xml:space="preserve">
     <value>NETSDK1195: Unable to optimize assemblies for size: a valid runtime package was not found. Either set the PublishTrimmed property to false, or use a supported target framework when publishing.</value>
     <comment>{StrBegin="NETSDK1195: "}</comment>
+  </data>
+  <data name="AotNotSupported" xml:space="preserve">
+    <value>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</value>
+    <comment>{StrBegin="NETSDK1196: "}</comment>
   </data>
 </root>
