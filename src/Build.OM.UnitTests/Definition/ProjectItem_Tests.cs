@@ -319,7 +319,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(path, String.Empty);
                 FileInfo info = new FileInfo(path);
 
@@ -2063,7 +2063,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     import.AddItem("i", "i1");
                     import.Save(file);
@@ -2095,7 +2095,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     import.AddItem("i", "i1");
                     import.Save(file);
@@ -2127,7 +2127,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     ProjectItem item = import.AddItem("i", "i1")[0];
                     item.SetMetadataValue("m", "m0");

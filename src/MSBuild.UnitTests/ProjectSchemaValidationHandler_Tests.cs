@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBuildOldOM", "");
 
                 // Create schema files in the temp folder
-                invalidSchemaFile = FileUtilities.GetTemporaryFile();
+                invalidSchemaFile = FileUtilities.GetTemporaryFileName();
 
                 File.WriteAllText(invalidSchemaFile, "<this_is_invalid_schema_content/>");
 
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBuildOldOM", "");
 
                 // Create schema files in the temp folder
-                invalidSchemaFile = FileUtilities.GetTemporaryFile();
+                invalidSchemaFile = FileUtilities.GetTemporaryFileName();
 
                 File.WriteAllText(invalidSchemaFile, @"<?xml version=""1.0"" encoding=""UTF-8""?>
 <xs:schema targetNamespace=""http://schemas.microsoft.com/developer/msbuild/2003"" xmlns:msb=""http://schemas.microsoft.com/developer/msbuild/2003"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" elementFormDefault=""qualified"">
@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests
         /// this project everything that ObjectModelHelpers depends on</remarks>
         static internal string CreateTempFileOnDiskNoFormat(string fileContents)
         {
-            string projectFilePath = FileUtilities.GetTemporaryFile();
+            string projectFilePath = FileUtilities.GetTemporaryFileName();
 
             File.WriteAllText(projectFilePath, CleanupFileContents(fileContents));
 

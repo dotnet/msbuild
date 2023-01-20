@@ -13,17 +13,37 @@ namespace Microsoft.Build.Logging.FancyLogger
     public class FancyLoggerBufferLine
     {
         private static int Counter = 0;
+        private string _text = string.Empty;
+        public List<string> WrappedText { get; private set; } = new();
         public int Id;
-        public string Text;
+        public bool ShouldWrapLines;
+        public string Text
+        {
+            get => _text;
+            set
+            {
+                // Set text value and get wrapped lines
+                _text = value;
+                if (ShouldWrapLines) WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
+                else WrappedText = new List<string> { value };
+            }
+        }
 
         public FancyLoggerBufferLine()
         {
             Id = Counter++;
-            Text = String.Empty;
+            Text = string.Empty;
+            ShouldWrapLines = false;
         }
         public FancyLoggerBufferLine(string text)
             : this()
         {
+            Text = text;
+        }
+        public FancyLoggerBufferLine(string text, bool shouldWrapLines)
+            : this()
+        {
+            ShouldWrapLines = shouldWrapLines;
             Text = text;
         }
     }
@@ -31,43 +51,51 @@ namespace Microsoft.Build.Logging.FancyLogger
     public class FancyLoggerBuffer
     {
         private static List<FancyLoggerBufferLine> Lines = new();
-        private static int TopLineIndex = 0;
+        public static int TopLineIndex = 0;
+        public static string Footer = string.Empty;
         private static bool AutoScrollEnabled = true;
         public static string FooterText = string.Empty;
+        private static bool IsTerminated = false;
         public static void Initialize()
         {
-            // Use alternate buffer
-            // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
-            // Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
-
-            Console.Write(ANSIBuilder.Cursor.Invisible());
-
-            Task.Run(async () => {
-                while (true)
-                {
-                    await Task.Delay(500 / 60);
-                    Render();
-                }
-            });
 
             Task.Run(() =>
             {
-                while (true)
+                // Configure buffer, encoding and cursor
+                Console.OutputEncoding = Encoding.UTF8;
+                Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
+                Console.Write(ANSIBuilder.Cursor.Invisible());
+
+                // Counter for delaying render
+                int i = 0;
+
+                // Execute while the buffer is active
+                while (!IsTerminated)
                 {
-                    switch (Console.ReadKey().Key)
+                    // Delay by 1/60 seconds
+                    i++;
+                    Task.Delay((i/60) * 1_000).ContinueWith((t) =>
                     {
-                        case ConsoleKey.UpArrow:
-                            if (TopLineIndex > 0) TopLineIndex--;
-                            break;
-                        case ConsoleKey.DownArrow:
-                            if (TopLineIndex < Console.BufferHeight - 3) TopLineIndex++;
-                            break;
-                        case ConsoleKey.Spacebar:
-                        case ConsoleKey.Escape:
-                            AutoScrollEnabled = !AutoScrollEnabled;
-                            break;
+                        Render();
+                    });
+                    if (Console.KeyAvailable)
+                    { 
+                        // Handle keyboard input
+                        ConsoleKey key = Console.ReadKey().Key;
+                        switch (key)
+                        {
+                            case ConsoleKey.UpArrow:
+                                if (TopLineIndex > 0) TopLineIndex--;
+                                break;
+                            case ConsoleKey.DownArrow:
+                                TopLineIndex++;
+                                break;
+                            case ConsoleKey.Spacebar:
+                                AutoScrollEnabled = !AutoScrollEnabled;
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             });
@@ -75,11 +103,11 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public static void Terminate()
         {
-            // TODO: Remove. Tries to solve a bug when switching from and to the alternate buffer
-            Console.Clear();
+            IsTerminated = true;
+            // Reset configuration for buffer and cursor, and clear screen
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
             Console.Write(ANSIBuilder.Eraser.Display());
-
+            Console.Clear();
             Console.Write(ANSIBuilder.Cursor.Visible());
             Lines = new();
         }
@@ -87,8 +115,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         #region Rendering
         public static void Render()
         {
-            if (Lines.Count == 0) return;
-            // Write Header
+            if (IsTerminated) return;
             Console.Write(
                 // Write header
                 ANSIBuilder.Cursor.Home() +
@@ -97,19 +124,26 @@ namespace Microsoft.Build.Logging.FancyLogger
                 ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
                 new string('-', Console.BufferWidth) + '\n' + FooterText
             );
-            // Write lines
-            for (int i = 0; i < Console.BufferHeight - 3; i++)
+            if (Lines.Count == 0) return;
+
+            // Iterate over lines and display on terminal
+            // TODO: Delimit range to improve performance 
+            int accumulatedLineCount = 0;
+            foreach (FancyLoggerBufferLine line in Lines)
             {
-                int lineIndex = i + TopLineIndex;
-                Console.Write(
-                    ANSIBuilder.Cursor.Position(i + 2, 0) +
-                    ANSIBuilder.Eraser.LineCursorToEnd() + 
-                    (lineIndex < Lines.Count ? Lines[lineIndex].Text : String.Empty)
-                );
+                foreach (string s in line.WrappedText) {
+                    // Get line index relative to scroll area
+                    int lineIndex = accumulatedLineCount - TopLineIndex;
+                    // Print if line in scrolling area
+                    if (lineIndex >= 0 && lineIndex < Console.BufferHeight - 3)
+                    {
+                        Console.Write(ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s);
+                    }
+                    accumulatedLineCount++;
+                }
             }
         }
         #endregion
-
         #region Line identification
         public static int GetLineIndexById(int lineId)
         {
@@ -132,42 +166,43 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Write new line
         public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text)
         {
-            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
+            return WriteNewLineAfter(lineId, text, true);
+        }
+        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text, bool shouldWrapLines)
+        {
+            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text, shouldWrapLines);
             return WriteNewLineAfter(lineId, line);
         }
         public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line)
         {
-            // Get line index
-            int lineIndex = GetLineIndexById(lineId);
-            if (lineIndex == -1) return null;
-            // Save top line
-            int topLineId = Lines[TopLineIndex].Id;
-            // Add
-            Lines.Insert(lineIndex + 1, line);
-            // Get updated top line index
-            TopLineIndex = GetLineIndexById(topLineId);
-            // Return
+            if (lineId != -1)
+            {
+                // Get line index
+                int lineIndex = GetLineIndexById(lineId);
+                if (lineIndex == -1) return null;
+                // Get line end index
+                Lines.Insert(lineIndex, line);
+            }
+            else
+            {
+                Lines.Add(line);
+            }
+            // TODO: Handle autoscrolling
             return line;
         }
 
         public static FancyLoggerBufferLine? WriteNewLine(string text)
         {
-            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text);
+            return WriteNewLine(text, true);
+        }
+        public static FancyLoggerBufferLine? WriteNewLine(string text, bool shouldWrapLines)
+        {
+            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text, shouldWrapLines);
             return WriteNewLine(line);
         }
         public static FancyLoggerBufferLine? WriteNewLine(FancyLoggerBufferLine line)
         {
-            // Get last id
-            if (Lines.Count > 0)
-            {
-                int lineId = Lines.Last().Id;
-                return WriteNewLineAfter(lineId, line);
-            }
-            else
-            {
-                Lines.Add(line);
-                return line;
-            }
+            return WriteNewLineAfter(Lines.Count > 0 ? Lines.Last().Id : -1, line);
         }
 
         // Update line
@@ -179,12 +214,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             line.Text = text;
             // Return
             return line;
+            // TODO: Handle autoscrolling
         }
 
         // Delete line
         public static void DeleteLine(int lineId)
         {
-            // TODO: What if line id is equal to topLineId?????
             // Get line index
             int lineIndex = GetLineIndexById(lineId);
             if (lineIndex == -1) return;
@@ -192,11 +227,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             int topLineId = Lines[TopLineIndex].Id;
             // Delete
             Lines.RemoveAt(lineIndex);
-            // Get updated top line index
-            if (topLineId != lineId)
-            {
-                TopLineIndex = GetLineIndexById(topLineId);
-            }
+            // TODO: Handle autoscrolling
         }
         #endregion
     }
