@@ -791,8 +791,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWillNoLongerImplySelfContained">
-        <source>NETSDK1198: In projects with TargetFrameworks &gt;= 8.0, RuntimeIdentifier no longer automatically gives a SelfContained app. To preserve a project's current behavior after upgrading to 8.0, consider setting SelfContained explicitly.</source>
-        <target state="new">NETSDK1198: In projects with TargetFrameworks &gt;= 8.0, RuntimeIdentifier no longer automatically gives a SelfContained app. To preserve a project's current behavior after upgrading to 8.0, consider setting SelfContained explicitly.</target>
+        <source>NETSDK1198: For projects with TargetFrameworks &gt;= 8.0, RuntimeIdentifier no longer automatically gives a SelfContained app. To continue creating a .NET framework independent app after upgrading to 8.0, consider setting SelfContained explicitly.</source>
+        <target state="new">NETSDK1198: For projects with TargetFrameworks &gt;= 8.0, RuntimeIdentifier no longer automatically gives a SelfContained app. To continue creating a .NET framework independent app after upgrading to 8.0, consider setting SelfContained explicitly.</target>
         <note>{StrBegin="NETSDK1198: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
