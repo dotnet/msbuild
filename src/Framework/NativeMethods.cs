@@ -1059,7 +1059,7 @@ internal static class NativeMethods
         else
         {
             symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
-            errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+            errorMessage = symbolicLinkCreated ? null : Marshal.GetLastWin32Error().ToString();
         }
 
         return symbolicLinkCreated;
