@@ -12,8 +12,8 @@ namespace Microsoft.Build.Logging.FancyLogger
         private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
         private bool Succeeded;
         public string Parameters {  get; set; }
-        public float StartedProjects = 0;
-        public float FinishedProjects = 0;
+        public int StartedProjects = 0;
+        public int FinishedProjects = 0;
         public LoggerVerbosity Verbosity { get; set; }
 
         public FancyLogger()
@@ -44,6 +44,16 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerBuffer.Initialize();
         }
 
+        void UpdateFooter()
+        {
+            float percentage = (float) FinishedProjects / StartedProjects;
+            FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
+                $"Build progress (approx.) {ANSIBuilder.Graphics.ProgressBar(percentage)}",
+                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
+                Console.BufferWidth
+            );
+        }
+
         // Build
         void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
         {
@@ -68,11 +78,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Log
             node.Log();
             // Update footer
-            FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
-                $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects/StartedProjects)} {FinishedProjects}/{StartedProjects}",
-                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
-                Console.BufferWidth
-            );
+            UpdateFooter();
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
@@ -84,11 +90,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.Log();
             // Update footer
             FinishedProjects++;
-            FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
-                $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects / StartedProjects)} {FinishedProjects}/{StartedProjects}",
-                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
-                Console.BufferWidth
-            );
+            UpdateFooter();
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
