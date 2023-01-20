@@ -2472,15 +2472,6 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(destFolder);
 
-                // Exhaust the number (1024) of directory entries that can be created for a file
-                // This is 1 + (1 x hard links)
-                // We need to test the fallback code path when we're out of directory entries for a file..
-                for (int n = 0; n < 1025 /* make sure */; n++)
-                {
-                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
-                    string linkError = String.Empty;
-                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError);
-                }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
@@ -2494,6 +2485,16 @@ namespace Microsoft.Build.UnitTests
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true
                 };
+
+                // Exhaust the number (1024) of directory entries that can be created for a file
+                // This is 1 + (1 x hard links)
+                // We need to test the fallback code path when we're out of directory entries for a file..
+                for (int n = 0; n < 1025 /* make sure */; n++)
+                {
+                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
+                    string linkError = String.Empty;
+                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError, t.Log);
+                }
 
                 bool success = t.Execute();
 

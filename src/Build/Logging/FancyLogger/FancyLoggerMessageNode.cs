@@ -10,6 +10,8 @@ namespace Microsoft.Build.Logging.FancyLogger
 
     public class FancyLoggerMessageNode
     {
+        // Use this to change the max lenngth (relative to screen size) of messages
+        private static int MAX_LENGTH = 3 * Console.BufferWidth;
         public enum MessageType
         {
             HighPriorityMessage,
@@ -19,13 +21,14 @@ namespace Microsoft.Build.Logging.FancyLogger
         public string Message;
         public FancyLoggerBufferLine? Line;
         public MessageType Type;
-        //
         public string? Code;
         public string? FilePath;
         public int? LineNumber;
         public int? ColumnNumber;
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
+            Message = args.Message ?? string.Empty;
+            if (Message.Length > MAX_LENGTH) Message = Message.Substring(0, MAX_LENGTH - 1) + "…";
             // Get type
             switch (args)
             {
@@ -46,20 +49,6 @@ namespace Microsoft.Build.Logging.FancyLogger
                     LineNumber = error.LineNumber;
                     ColumnNumber = error.ColumnNumber;
                     break;
-            }
-
-            // TODO: Replace
-            if (args.Message == null)
-            {
-                Message = string.Empty;
-            }
-            else if (args.Message.Length > Console.WindowWidth - 1)
-            {
-                Message = args.Message.Substring(0, Console.WindowWidth - 1);
-            }
-            else
-            {
-                Message = args.Message;
             }
         }
 

@@ -67,9 +67,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                 $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
                 Console.WindowWidth
             );
-
             // Create or update line
-            if (Line == null) Line = FancyLoggerBuffer.WriteNewLine(lineContents);
+            if (Line == null) Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
             else FancyLoggerBuffer.UpdateLine(Line.Id, lineContents);
 
             // For finished projects
