@@ -2437,6 +2437,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                File.Delete(sourceFile);
                 File.Delete(destFile);
                 FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
