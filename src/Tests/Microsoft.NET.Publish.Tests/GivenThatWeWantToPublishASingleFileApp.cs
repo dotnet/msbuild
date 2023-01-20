@@ -794,7 +794,7 @@ class C
             var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, ToolsetInfo.CurrentTargetFramework).FullName, $"SingleFileTest{Constants.ExeSuffix}");
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:EnableCompressionInSingleFile=false")
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:SelfContained=true", "/p:EnableCompressionInSingleFile=false")
                 .Should()
                 .Pass();
             var uncompressedSize = new FileInfo(singleFilePath).Length;
@@ -802,7 +802,7 @@ class C
             WaitForUtcNowToAdvance();
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:EnableCompressionInSingleFile=true")
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:SelfContained=true", "/p:EnableCompressionInSingleFile=true")
                 .Should()
                 .Pass();
             var compressedSize = new FileInfo(singleFilePath).Length;

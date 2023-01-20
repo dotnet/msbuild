@@ -137,6 +137,7 @@ namespace Microsoft.NET.Publish.Tests
                 RuntimeIdentifier = "win-x86"
             };
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
+            testProject.AdditionalProperties["SelfContained"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var publishDir = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Debug", testProject.TargetFrameworks, testProject.RuntimeIdentifier, "publish");

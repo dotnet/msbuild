@@ -31,7 +31,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
-            CommandResult result = packCommand.Execute();
+            CommandResult result = packCommand.Execute("--property:SelfContained=true");
             result.ExitCode.Should().NotBe(0);
             result.StdOut.Should().Contain(Strings.PackAsToolCannotSupportSelfContained);
         }
@@ -44,7 +44,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new BuildCommand(helloWorldAsset);
 
-            CommandResult result = packCommand.Execute();
+            CommandResult result = packCommand.Execute("--property:SelfContained=true");
             result.ExitCode.Should().Be(0);
         }
 

@@ -77,6 +77,7 @@ if (string.Empty.Length > 0)
             if (MainSelfContained)
             {
                 MainProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
+                MainProject.AdditionalProperties["SelfContained"] = "true";
             }
 
             ReferencedProject = new TestProject()
@@ -90,6 +91,7 @@ if (string.Empty.Length > 0)
             if (ReferencedSelfContained)
             {
                 ReferencedProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
+                ReferencedProject.AdditionalProperties["SelfContained"] = "true";
             }
 
             //  Use a lower version of a library in the referenced project
@@ -296,8 +298,8 @@ public class ReferencedExeProgram
             CreateProjects();
 
             RunTest(callingMethod: System.Reflection.MethodBase.GetCurrentMethod().ToString()
-                .Replace("Void ","")
-                .Replace("Boolean",referenceExeInCode.ToString()));
+                .Replace("Void ", "")
+                .Replace("Boolean", referenceExeInCode.ToString()));
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]

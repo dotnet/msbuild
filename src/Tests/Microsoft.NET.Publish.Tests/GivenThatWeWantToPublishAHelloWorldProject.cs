@@ -88,7 +88,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithTargetFramework(targetFramework);
 
             var publishCommand = new PublishCommand(helloWorldAsset);
-            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:CopyLocalLockFileAssemblies=true");
+            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:CopyLocalLockFileAssemblies=true");
 
             publishResult.Should().Pass();
 

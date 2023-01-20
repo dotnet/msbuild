@@ -822,6 +822,7 @@ class Program
                 IsExe = true
             };
 
+            testProject.AdditionalProperties["SelfContained"] = "true";
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 

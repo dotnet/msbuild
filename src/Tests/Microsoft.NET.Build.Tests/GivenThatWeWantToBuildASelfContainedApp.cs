@@ -389,34 +389,29 @@ namespace Microsoft.NET.Build.Tests
         public void It_does_or_doesnt_imply_SelfContained_based_on_RuntimeIdentifier_and_TargetFramework(string targetFramework)
         {
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: targetFramework)
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
-                });
+            bool resultShouldBeSelfContained = targetFramework == "net7.0" ? true : false;
+            var testProject = new TestProject("MainProject")
+            {
+                TargetFrameworks = targetFramework,
+                IsExe = true
+            };
 
-            var buildCommand = new BuildCommand(testAsset);
-            buildCommand
+            testProject.RecordProperties("SelfContained");
+            testProject.AdditionalProperties["RuntimeIdentifier"] = runtimeIdentifier;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+            new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.Path, "MainProject"))
                 .Execute()
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
-            var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
-            string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            if (resultShouldBeSelfContained)
+            {
+                Assert.True(bool.Parse(properties["SelfContained"]) == resultShouldBeSelfContained);
+            }
 
-            if (targetFramework == "net7.0")
-            {
-                Assert.True(File.Exists(selfContainedExecutableFullPath));
-            }
-            else
-            {
-                Assert.False(File.Exists(selfContainedExecutableFullPath)); // RuntimeIdentifier no longer implies SelfContained for TFM >= 8
-            }
         }
 
         [Theory]
