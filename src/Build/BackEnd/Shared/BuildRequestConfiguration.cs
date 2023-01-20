@@ -108,6 +108,11 @@ namespace Microsoft.Build.BackEnd
         private List<string> _projectDefaultTargets;
 
         /// <summary>
+        /// The defined targets for the project.
+        /// </summary>
+        private HashSet<string> _projectTargets;
+
+        /// <summary>
         /// This is the lookup representing the current project items and properties 'state'.
         /// </summary>
         private Lookup _baseLookup;
@@ -138,7 +143,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The target names that were requested to execute.
         /// </summary>
-        internal IReadOnlyCollection<string> TargetNames { get; }
+        internal IReadOnlyCollection<string> RequestedTargets { get; }
 
         /// <summary>
         /// Initializes a configuration from a BuildRequestData structure.  Used by the BuildManager.
@@ -170,7 +175,7 @@ namespace Microsoft.Build.BackEnd
             _explicitToolsVersionSpecified = data.ExplicitToolsVersionSpecified;
             _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion);
             _globalProperties = data.GlobalPropertiesDictionary;
-            TargetNames = new List<string>(data.TargetNames);
+            RequestedTargets = new List<string>(data.TargetNames);
 
             // The following information only exists when the request is populated with an existing project.
             if (data.ProjectInstance != null)
@@ -178,7 +183,7 @@ namespace Microsoft.Build.BackEnd
                 _project = data.ProjectInstance;
                 _projectInitialTargets = data.ProjectInstance.InitialTargets;
                 _projectDefaultTargets = data.ProjectInstance.DefaultTargets;
-
+                _projectTargets = data.ProjectInstance.Targets.Keys.ToHashSet();
                 if (data.PropertiesToTransfer != null)
                 {
                     _transferredProperties = new List<ProjectPropertyInstance>();
@@ -215,6 +220,7 @@ namespace Microsoft.Build.BackEnd
             _project = instance;
             _projectInitialTargets = instance.InitialTargets;
             _projectDefaultTargets = instance.DefaultTargets;
+            _projectTargets = instance.Targets.Keys.ToHashSet();
             IsCacheable = false;
         }
 
@@ -231,13 +237,14 @@ namespace Microsoft.Build.BackEnd
             _transferredProperties = other._transferredProperties;
             _projectDefaultTargets = other._projectDefaultTargets;
             _projectInitialTargets = other._projectInitialTargets;
+            _projectTargets = other._projectTargets;
             _projectFullPath = other._projectFullPath;
             _toolsVersion = other._toolsVersion;
             _explicitToolsVersionSpecified = other._explicitToolsVersionSpecified;
             _globalProperties = other._globalProperties;
             IsCacheable = other.IsCacheable;
             _configId = configId;
-            TargetNames = other.TargetNames;
+            RequestedTargets = other.RequestedTargets;
         }
 
         /// <summary>
@@ -404,9 +411,11 @@ namespace Microsoft.Build.BackEnd
             // Clear these out so the other accessors don't complain.  We don't want to generally enable resetting these fields.
             _projectDefaultTargets = null;
             _projectInitialTargets = null;
+            _projectTargets = null;
 
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
+            ProjectTargets = _project.Targets.Keys.ToHashSet();
 
             if (IsCached)
             {
@@ -546,6 +555,23 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrow(_projectDefaultTargets == null, "Default targets cannot be reset once they have been set.");
                 _projectDefaultTargets = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the targets defined for the project.
+        /// </summary>
+        public HashSet<string> ProjectTargets
+        {
+            [DebuggerStepThrough]
+            get => _projectTargets;
+            [DebuggerStepThrough]
+            set
+            {
+                ErrorUtilities.VerifyThrow(
+                    _projectTargets == null,
+                    "Targets cannot be reset once set.");
+                _projectTargets = value;
             }
         }
 
@@ -880,6 +906,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _explicitToolsVersionSpecified);
             translator.Translate(ref _projectDefaultTargets);
             translator.Translate(ref _projectInitialTargets);
+            translator.Translate(ref _projectTargets);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
         }
 

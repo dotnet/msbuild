@@ -117,6 +117,8 @@ namespace Microsoft.Build.Execution
 
         private string _schedulerInducedError;
 
+        private HashSet<string> _projectTargets;
+
         /// <summary>
         /// Constructor for serialization.
         /// </summary>
@@ -228,6 +230,7 @@ namespace Microsoft.Build.Execution
             _circularDependency = result._circularDependency;
             _initialTargets = result._initialTargets;
             _defaultTargets = result._defaultTargets;
+            _projectTargets = result._projectTargets;
             _baseOverallResult = result.OverallResult == BuildResultCode.Success;
         }
 
@@ -244,6 +247,7 @@ namespace Microsoft.Build.Execution
             _circularDependency = result._circularDependency;
             _initialTargets = result._initialTargets;
             _defaultTargets = result._defaultTargets;
+            _projectTargets = result._projectTargets;
             _baseOverallResult = result.OverallResult == BuildResultCode.Success;
         }
 
@@ -434,6 +438,17 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// The defined targets for the project associated with this build result.
+        /// </summary>
+        public HashSet<string> ProjectTargets
+        {
+            [DebuggerStepThrough]
+            get => _projectTargets;
+            [DebuggerStepThrough]
+            set => _projectTargets = value;
+        }
+
+        /// <summary>
         /// Container used to transport errors from the scheduler (issued while computing a build result)
         /// to the TaskHost that has the proper logging context (project id, target id, task id, file location)
         /// </summary>
@@ -537,6 +552,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _nodeRequestId);
             translator.Translate(ref _initialTargets);
             translator.Translate(ref _defaultTargets);
+            translator.Translate(ref _projectTargets);
             translator.Translate(ref _circularDependency);
             translator.TranslateException(ref _requestException);
             translator.TranslateDictionary(ref _resultsByTarget, TargetResult.FactoryForDeserialization, CreateTargetResultDictionary);
