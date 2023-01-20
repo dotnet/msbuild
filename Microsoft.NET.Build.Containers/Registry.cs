@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Containers;
 
 public record struct ManifestConfig(string mediaType, long size, string digest);
 public record struct ManifestLayer(string mediaType, long size, string digest, string[]? urls);
-public record struct ManifestV2(int schemaVersion, string tag, string mediaType, ManifestConfig config, List<ManifestLayer> layers);
+public record struct ManifestV2(int schemaVersion, string mediaType, ManifestConfig config, List<ManifestLayer> layers);
 
 public record struct PlatformInformation(string architecture, string os, string? variant, string[] features, [property:JsonPropertyName("os.version")][field: JsonPropertyName("os.version")] string? version);
 public record struct PlatformSpecificManifest(string mediaType, long size, string digest, PlatformInformation platform);
