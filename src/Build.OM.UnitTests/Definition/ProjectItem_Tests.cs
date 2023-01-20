@@ -2144,7 +2144,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents);
 
                 var metadata = project.GetItems("I").FirstOrDefault().SetMetadataValue("M", "$(P);@(Foo)", true);
 
@@ -2170,7 +2170,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents);
 
                 var item = project.GetItems("I").FirstOrDefault();
                 var metadata = item.SetMetadataValue("M", "V", true);
@@ -2543,7 +2543,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, content, null, null);
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, content);
 
                 var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
 
@@ -2580,7 +2580,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, content, null, null);
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, content);
 
                 var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
 
