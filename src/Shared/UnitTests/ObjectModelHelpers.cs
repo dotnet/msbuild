@@ -766,8 +766,11 @@ namespace Microsoft.Build.UnitTests
             string projectContents,
             params ILogger[] loggers)
         {
-            Project project = CreateInMemoryProject(projectContents, loggers);
-            project.Build().ShouldBeTrue();
+            using (ProjectCollection collection = new())
+            {
+                Project project = CreateInMemoryProject(collection, projectContents, loggers);
+                project.Build().ShouldBeTrue();
+            }
         }
 
         /// <summary>
@@ -793,10 +796,11 @@ namespace Microsoft.Build.UnitTests
             string projectContents,
             params ILogger[] loggers)
         {
-            Project project = CreateInMemoryProject(projectContents, loggers);
-
-            bool success = project.Build();
-            Assert.False(success); // "Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details"
+            using (ProjectCollection collection = new())
+            {
+                Project project = CreateInMemoryProject(collection, projectContents, loggers);
+                project.Build().ShouldBeFalse("Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details\"");
+            }
         }
 
         /// <summary>
