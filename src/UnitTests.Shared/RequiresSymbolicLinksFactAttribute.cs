@@ -9,6 +9,9 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+    /// <summary>
+    /// A custom <see cref="FactAttribute"/> that skips the test if the OS doesn't support creating symlinks.
+    /// </summary>
     public sealed class RequiresSymbolicLinksFactAttribute : FactAttribute
     {
         public RequiresSymbolicLinksFactAttribute()
@@ -18,6 +21,8 @@ namespace Microsoft.Build.UnitTests
                 return;
             }
 
+            // In Windows, a process can create symlinks only if it has sufficient permissions.
+            // We simply try to create one and if it fails we skip the test.
             string sourceFile = FileUtilities.GetTemporaryFile();
             string destinationFile = FileUtilities.GetTemporaryFile();
             try
