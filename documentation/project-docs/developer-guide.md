@@ -33,6 +33,12 @@ As part of the build, some intermediate files will get generated which may run i
 
 To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated environment for your shell. If you're using `cmd`, then run `artifacts\sdk-build-env.bat`. If you're using powershell, you need to 'dot source' `artifacts/sdk-build-env.ps1`. Finally, open Visual Studio with `devenv sdk.sln`.
 
+In addition, Visual Studio must have the following option set:
+
+![image](https://user-images.githubusercontent.com/23152278/211684116-923ed37e-6d56-42bf-befe-a5ef66758000.png)
+
+Go to `Tools` -> `Options` to make sure "Use previews of the .NET SDK (requires restart)" is checked and restart VS.
+
 ### Linux and macOS
 
 Run the following command from the root of the repository:
@@ -132,6 +138,8 @@ build.cmd # to have a full build first
 .\artifacts\sdk-build-env.bat
 devenv sdk.sln
 ```
+
+Note again that in Visual studio "Use previews of the .NET SDK (requires restart)" must be checked. See the above comment for how to enable this.
 
 ## A simple test
 
