@@ -170,6 +170,44 @@
           }
         ]
       }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Area-AspNetCore"
+              }
+            },
+            {
+              "name": "isOpen",
+              "parameters": {}
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Remind ASP.NET Core PR authors the process to follow",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Thanks for your PR, @${issueAuthor}.\nTo learn about the PR process and branching schedule of this repo, please take a look at the [SDK PR Guide](https://github.com/dotnet/sdk/blob/main/documentation/project-docs/SDK-PR-guide.md)."
+            }
+          }
+        ]
+      }
     }
   ],
   "userGroups": []
