@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
         }
 
-        [Fact]
+        [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
             string testFileName = "foobar.txt";
@@ -231,13 +231,7 @@ namespace Microsoft.Build.UnitTests
             string emptyFile = testFolder.CreateFile(emptyFileName).Path;
 
             string errorMessage = string.Empty;
-            if (!NativeMethodsShared.MakeSymbolicLink(symlinkPath, testFile.Path, ref errorMessage))
-            {
-                // The environment doesn't support creating symlinks. Create an empty log file to satisfy
-                // the test requirement and skip the rest of the test.
-                File.Create(_logFile);
-                return;
-            }
+            Assert.True(NativeMethodsShared.MakeSymbolicLink(symlinkPath, testFile.Path, ref errorMessage), errorMessage);
             Assert.True(NativeMethodsShared.MakeSymbolicLink(symlinkLvl2Path, symlinkPath, ref errorMessage), errorMessage);
 
             using var buildManager = new BuildManager();

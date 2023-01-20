@@ -122,6 +122,9 @@
     <Compile Include="..\Shared\UnitTests\LongPathSupportDisabledFactAttribute.cs">
       <Link>Shared\LongPathSupportDisabledFactAttribute.cs</Link>
     </Compile>
+    <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs">
+      <Link>RequiresSymbolicLinksFactAttribute.cs</Link>
+    </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
