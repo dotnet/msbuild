@@ -3,6 +3,7 @@
 //
 
 using System;
+using System.IO;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -14,7 +15,8 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             HighPriorityMessage,
             Warning,
-            Error
+            Error,
+            ProjectOutputMessage
         }
         public string Message;
         public FancyLoggerBufferLine? Line;
@@ -24,13 +26,25 @@ namespace Microsoft.Build.Logging.FancyLogger
         public string? FilePath;
         public int? LineNumber;
         public int? ColumnNumber;
+        public string? ProjectOutputExecutablePath;
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             // Get type
             switch (args)
             {
                 case BuildMessageEventArgs:
-                    Type = MessageType.HighPriorityMessage;
+                    // Detect output messages
+                    var finalOutputMarker = " -> ";
+                    int i = args.Message!.IndexOf(finalOutputMarker, StringComparison.Ordinal);
+                    if (i > 0)
+                    {
+                        Type = MessageType.ProjectOutputMessage;
+                        ProjectOutputExecutablePath = args.Message!.Substring(i + finalOutputMarker.Length);
+                    }
+                    else
+                    {
+                        Type = MessageType.HighPriorityMessage;
+                    }
                     break;
                 case BuildWarningEventArgs warning:
                     Type = MessageType.Warning;
@@ -75,6 +89,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                     return $"❌ {ANSIBuilder.Formatting.Color(
                         $"Error {Code}: {FilePath}({LineNumber},{ColumnNumber}) {Message}",
                         ANSIBuilder.Formatting.ForegroundColor.Red)}";
+                case MessageType.ProjectOutputMessage:
+                    return $"⚙️ {ANSIBuilder.Formatting.Hyperlink(ProjectOutputExecutablePath!, Path.GetDirectoryName(ProjectOutputExecutablePath)!)}";
                 case MessageType.HighPriorityMessage:
                 default:
                     return $"ℹ️ {ANSIBuilder.Formatting.Italic(Message)}";

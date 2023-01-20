@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -27,7 +26,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public string ProjectPath;
         public string TargetFramework;
         public bool Finished;
-        public string ProjectOutputExecutable;
+        public string? ProjectOutputExecutable;
         // Line to display project info
         public FancyLoggerBufferLine? Line;
         // Targets
@@ -46,7 +45,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             ProjectPath = args.ProjectFile!;
             Finished = false;
             FinishedTargets = 0;
-            ProjectOutputExecutable = string.Empty;
             if (args.GlobalProperties != null && args.GlobalProperties.ContainsKey("TargetFramework"))
             {
                 TargetFramework = args.GlobalProperties["TargetFramework"];
@@ -66,8 +64,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                 // Project file path with color
                 $" {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}" +
                 // TFM
-                $" {ANSIBuilder.Formatting.Inverse(TargetFramework)} " +
-                (ProjectOutputExecutable.Length > 0 ? $"-> { ANSIBuilder.Formatting.Hyperlink(GetUnambiguousPath(ProjectOutputExecutable), Path.GetDirectoryName(ProjectOutputExecutable)!) }" : string.Empty)
+                $" {ANSIBuilder.Formatting.Inverse(TargetFramework)} "
+                // Show project output executable inline
+                // (ProjectOutputExecutable is not null ? $"-> { ANSIBuilder.Formatting.Hyperlink(ProjectOutputExecutable, Path.GetDirectoryName(ProjectOutputExecutable)!) }" : string.Empty)
                 ,
                 $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)",
                 // ProjectOutputExecutable, 
@@ -122,13 +121,9 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             if (args.Importance != MessageImportance.High) return null;
             MessageCount++;
-            // Detect output messages using regex
-            // var match = Regex.Match(args.Message, $"(?<={args.ProjectFile} -> )(.*)");
-            var match = Regex.Match(args.Message!, $"(?<=.* -> )(.*)");
-            if (match.Success)
-                ProjectOutputExecutable = match.Value;
-
             FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            // Add output executable path
+            if (node.ProjectOutputExecutablePath is not null) ProjectOutputExecutable = node.ProjectOutputExecutablePath;
             AdditionalDetails.Add(node);
             return node;
         }

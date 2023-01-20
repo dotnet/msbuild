@@ -52,6 +52,8 @@ namespace Microsoft.Build.Logging.FancyLogger
 
             public static string SpaceBetween(string leftText, string rightText, int width)
             {
+                // Edge case when text doesnt fit
+                if (leftText.Length + rightText.Length > width) return leftText + rightText;
                 string result = String.Empty;
                 string leftNoFormatString = ANSIRemove(leftText);
                 string rightNoFormatString = ANSIRemove(rightText);

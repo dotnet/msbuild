@@ -55,7 +55,6 @@ namespace Microsoft.Build.Logging.FancyLogger
         void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
             Succeeded = e.Succeeded;
-            // Console.WriteLine(LoggerFormatting.Bold("[Build]") + "\t Finished");
         }
 
         // Project
@@ -162,12 +161,14 @@ namespace Microsoft.Build.Logging.FancyLogger
             int warningCount = 0;
             foreach (var project in projects)
             {
+                Console.WriteLine($"[{project.Value.ProjectPath}]");
                 errorCount += project.Value.ErrorCount;
                 warningCount += project.Value.WarningCount;
                 foreach (var message in project.Value.AdditionalDetails)
                 {
                     Console.WriteLine(message.ToANSIString());
                 }
+                Console.WriteLine();
             }
             // Emmpty line
             Console.WriteLine();
