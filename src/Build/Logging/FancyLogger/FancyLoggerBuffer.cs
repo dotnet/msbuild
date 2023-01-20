@@ -164,7 +164,11 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         #region Line create, update and delete
         // Write new line
-        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text, bool shouldWrapLines=true)
+        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text)
+        {
+            return WriteNewLineAfter(lineId, text, true);
+        }
+        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text, bool shouldWrapLines)
         {
             FancyLoggerBufferLine line = new FancyLoggerBufferLine(text, shouldWrapLines);
             return WriteNewLineAfter(lineId, line);
@@ -187,7 +191,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             return line;
         }
 
-        public static FancyLoggerBufferLine? WriteNewLine(string text, bool shouldWrapLines=true)
+        public static FancyLoggerBufferLine? WriteNewLine(string text)
+        {
+            return WriteNewLine(text, true);
+        }
+        public static FancyLoggerBufferLine? WriteNewLine(string text, bool shouldWrapLines)
         {
             FancyLoggerBufferLine line = new FancyLoggerBufferLine(text, shouldWrapLines);
             return WriteNewLine(line);
