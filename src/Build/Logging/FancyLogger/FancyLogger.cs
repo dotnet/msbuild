@@ -68,14 +68,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Log
             node.Log();
             // Update footer
-            // if (StartedProjects > 0)
-            {
-                FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
-                    $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects/StartedProjects)} {FinishedProjects}/{StartedProjects}",
-                    ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
-                    Console.BufferWidth
-                );
-            }
+            FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
+                $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects/StartedProjects)} {FinishedProjects}/{StartedProjects}",
+                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
+                Console.BufferWidth
+            );
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
@@ -87,14 +84,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.Log();
             // Update footer
             FinishedProjects++;
-            // if (StartedProjects > 0)
-            {
-                FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
-                    $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects / StartedProjects)} {FinishedProjects}/{StartedProjects}",
-                    ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
-                    Console.BufferWidth
-                );
-            }
+            FancyLoggerBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
+                $"Finished projects: {ANSIBuilder.Graphics.ProgressBar(FinishedProjects / StartedProjects)} {FinishedProjects}/{StartedProjects}",
+                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
+                Console.BufferWidth
+            );
         }
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
