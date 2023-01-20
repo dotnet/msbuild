@@ -49,8 +49,8 @@ namespace Microsoft.Build.Framework
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             MVID = reader.ReadGuid();
-            AssemblyName = reader.ReadString();
-            AssemblyPath = reader.ReadString();
+            AssemblyName = reader.ReadOptionalString();
+            AssemblyPath = reader.ReadOptionalString();
         }
 
         public override string Message
