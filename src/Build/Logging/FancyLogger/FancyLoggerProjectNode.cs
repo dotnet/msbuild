@@ -67,10 +67,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                 $" {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}" +
                 // TFM
                 $" {ANSIBuilder.Formatting.Inverse(TargetFramework)} " +
-                // TODO: Known bug
-                $"-> { ANSIBuilder.Formatting.Hyperlink(GetUnambiguousPath(ProjectOutputExecutable), ProjectOutputExecutable) }"
+                (ProjectOutputExecutable.Length > 0 ? $"-> { ANSIBuilder.Formatting.Hyperlink(GetUnambiguousPath(ProjectOutputExecutable), ProjectOutputExecutable) }" : string.Empty)
                 ,
-                $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
+                $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)",
                 // ProjectOutputExecutable, 
                 Console.WindowWidth
             );;
