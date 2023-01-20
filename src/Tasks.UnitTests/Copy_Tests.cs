@@ -2391,6 +2391,12 @@ namespace Microsoft.Build.UnitTests
             {
                 File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
+                if (!IsSymlinkingSupported(sourceFile))
+                {
+                    // The environment doesn't support creating symlinks, skip the test.
+                    return;
+                }
+
                 // Don't create the dest folder, let task do that
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
@@ -2438,8 +2444,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 File.Delete(sourceFile);
-                File.Delete(destFile);
-                FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
+                if (Directory.Exists(destFolder))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
+                }
             }
         }
 
@@ -2447,6 +2455,23 @@ namespace Microsoft.Build.UnitTests
         internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();
+        }
+
+        private bool IsSymlinkingSupported(string sourceFile)
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return true;
+            }
+
+            string symlinkFile = FileUtilities.GetTemporaryFile();
+            string errorMessage = null;
+            if (NativeMethodsShared.MakeSymbolicLink(symlinkFile, sourceFile, ref errorMessage))
+            {
+                File.Delete(symlinkFile);
+                return true;
+            }
+            return false;
         }
     }
 }
