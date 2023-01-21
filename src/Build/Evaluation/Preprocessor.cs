@@ -235,8 +235,7 @@ namespace Microsoft.Build.Evaluation
                     child.NodeType == XmlNodeType.Element &&
                     sourceDocument.DocumentElement == child &&                                      // This is the root element, not some random element named 'Project'
                     destinationDocument.DocumentElement != null &&                                  // Skip <Project> tag from the outer project
-                    String.Equals(XMakeElements.project, child.Name, StringComparison.Ordinal)
-                   )
+                    String.Equals(XMakeElements.project, child.Name, StringComparison.Ordinal))
                 {
                     // But suffix any InitialTargets attribute
                     string outerInitialTargets = destinationDocument.DocumentElement.GetAttribute(XMakeAttributes.initialTargets).Trim();

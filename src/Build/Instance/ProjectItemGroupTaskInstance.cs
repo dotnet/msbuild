@@ -45,13 +45,11 @@ namespace Microsoft.Build.Execution
         /// Constructor called by the Evaluator.
         /// Assumes ProjectItemGroupTaskItemInstance is an immutable type.
         /// </summary>
-        internal ProjectItemGroupTaskInstance
-            (
+        internal ProjectItemGroupTaskInstance(
             string condition,
             ElementLocation location,
             ElementLocation conditionLocation,
-            List<ProjectItemGroupTaskItemInstance> items
-            )
+            List<ProjectItemGroupTaskItemInstance> items)
         {
             ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
             ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));

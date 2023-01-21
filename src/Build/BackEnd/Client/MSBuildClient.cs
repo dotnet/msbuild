@@ -138,11 +138,17 @@ namespace Microsoft.Build.Experimental
 
         private void CreateNodePipeStream()
         {
-            _nodeStream = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            _nodeStream = new NamedPipeClientStream(
+                serverName: ".",
+                _pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 | PipeOptions.CurrentUserOnly
 #endif
             );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             _packetPump = new MSBuildClientPacketPump(_nodeStream);
         }
 

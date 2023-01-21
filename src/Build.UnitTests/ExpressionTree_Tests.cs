@@ -109,16 +109,14 @@ namespace Microsoft.Build.UnitTests
             tree = p.Parse(command, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
 
             ConditionEvaluator.IConditionEvaluationState state =
-                            new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                                (
+                            new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                                     command,
                                     expander,
                                     ExpanderOptions.ExpandAll,
                                     null,
                                     Directory.GetCurrentDirectory(),
                                     ElementLocation.EmptyLocation,
-                                    FileSystems.Default
-                                );
+                                    FileSystems.Default);
 
             value = tree.Evaluate(state);
             Assert.True(value);
@@ -334,16 +332,14 @@ namespace Microsoft.Build.UnitTests
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), itemBag, FileSystems.Default);
             Dictionary<string, List<string>> conditionedProperties = new Dictionary<string, List<string>>();
             ConditionEvaluator.IConditionEvaluationState state =
-                               new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                                   (
+                               new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                                        String.Empty,
                                        expander,
                                        ExpanderOptions.ExpandAll,
                                        conditionedProperties,
                                        Directory.GetCurrentDirectory(),
                                        ElementLocation.EmptyLocation,
-                                       FileSystems.Default
-                                   );
+                                       FileSystems.Default);
             AssertParseEvaluate(p, "'0' == '1'", expander, false, state);
             Assert.Empty(conditionedProperties);
 
@@ -445,16 +441,14 @@ namespace Microsoft.Build.UnitTests
             if (state == null)
             {
                 state =
-                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                    (
+                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                         String.Empty,
                         expander,
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
                         ElementLocation.EmptyLocation,
-                        FileSystems.Default
-                    );
+                        FileSystems.Default);
             }
 
             bool result = tree.Evaluate(state);
@@ -483,16 +477,14 @@ namespace Microsoft.Build.UnitTests
                 if (state == null)
                 {
                     state =
-                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                        (
+                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                             String.Empty,
                             expander,
                             ExpanderOptions.ExpandAll,
                             null,
                             Directory.GetCurrentDirectory(),
                             ElementLocation.EmptyLocation,
-                            FileSystems.Default
-                        );
+                            FileSystems.Default);
                 }
                 tree.Evaluate(state);
             }

@@ -230,10 +230,8 @@ namespace Microsoft.Build.Tasks
         /// of the FX folders.
         /// </summary>
         /// <param name="installedAssemblyTableInfos">List of Assembly Table Info.</param>
-        internal void SetInstalledAssemblyInformation
-        (
-            AssemblyTableInfo[] installedAssemblyTableInfos
-        )
+        internal void SetInstalledAssemblyInformation(
+            AssemblyTableInfo[] installedAssemblyTableInfos)
         {
             redistList = RedistList.GetRedistList(installedAssemblyTableInfos);
         }
@@ -423,10 +421,8 @@ namespace Microsoft.Build.Tasks
 
                 if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
                 {
-                    IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName
-                        (
-                            Path.GetFileNameWithoutExtension(path)
-                        );
+                    IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName(
+                            Path.GetFileNameWithoutExtension(path));
                     string filename = Path.GetFileName(path);
 
                     foreach (AssemblyEntry a in assemblyNames)
@@ -490,26 +486,22 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="frameworkName"></param>
-        private void GetAssemblyMetadata
-        (
+        private void GetAssemblyMetadata(
             string path,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
-            out FrameworkName frameworkName
-        )
+            out FrameworkName frameworkName)
         {
             FileState fileState = GetFileState(path);
             if (fileState.dependencies == null)
             {
-                getAssemblyMetadata
-                (
+                getAssemblyMetadata(
                     path,
                     assemblyMetadataCache,
                     out fileState.dependencies,
                     out fileState.scatterFiles,
-                    out fileState.frameworkName
-                 );
+                    out fileState.frameworkName);
 
                 isDirty = true;
             }

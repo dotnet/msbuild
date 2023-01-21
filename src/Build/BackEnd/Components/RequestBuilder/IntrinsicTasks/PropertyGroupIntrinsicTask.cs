@@ -57,8 +57,7 @@ namespace Microsoft.Build.BackEnd
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
                     {
-                        bool condition = ConditionEvaluator.EvaluateCondition
-                            (
+                        bool condition = ConditionEvaluator.EvaluateCondition(
                             property.Condition,
                             ParserOptions.AllowAll,
                             bucket.Expander,
@@ -73,13 +72,11 @@ namespace Microsoft.Build.BackEnd
                         {
                             // Check for a reserved name now, so it fails right here instead of later when the property eventually reaches
                             // the outer scope.
-                            ProjectErrorUtilities.VerifyThrowInvalidProject
-                                (
+                            ProjectErrorUtilities.VerifyThrowInvalidProject(
                                 !ReservedPropertyNames.IsReservedProperty(property.Name),
                                 property.Location,
                                 "CannotModifyReservedProperty",
-                                property.Name
-                                );
+                                property.Name);
 
                             string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
 

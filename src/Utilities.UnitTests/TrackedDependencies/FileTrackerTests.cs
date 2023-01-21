@@ -1024,8 +1024,7 @@ class X
 
                 // This should throw a COMException, since we have cleaned up
                 FileTracker.WriteContextTLogs(Path.GetFullPath("."), tlogRootName);
-            }
-           );
+            });
         }
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
         public void InProcTrackingTestNotStop()
@@ -1359,8 +1358,7 @@ class X
                     File.Delete(tlogWriteFile);
                     File.Delete(tlogWriteFile2);
                 }
-            }
-           );
+            });
         }
 
         [Fact(Skip = "Test fails in xunit because tracker includes the PID in the log file.")]

@@ -271,8 +271,7 @@ namespace Microsoft.Build.Logging
             return new ProfiledLocation(
                 location.InclusiveTime + otherLocation.InclusiveTime,
                 location.ExclusiveTime + otherLocation.ExclusiveTime,
-                location.NumberOfHits + 1
-            );
+                location.NumberOfHits + 1);
         }
 
         /// <summary>

@@ -51,13 +51,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             assemblyNames[0].SetMetadata("SpecificVersion", "true");
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-                (
+            string appConfigFile = WriteAppConfig(
                     "        <dependentAssembly>\n" +
                     "            <assemblyIdentity name='UnifyMe' PublicKeyToken='b77a5c561934e089' culture='neutral' />\n" +
                     "            <bindingRedirect oldVersion='1.0.0.0' newVersion='2.0.0.0' />\n" +
-                    "        </dependentAssembly>\n"
-                );
+                    "        </dependentAssembly>\n");
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -118,13 +116,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             assemblyNames[0].SetMetadata("SpecificVersion", "true");
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-                (
+            string appConfigFile = WriteAppConfig(
                     "        <dependentAssembly>\n" +
                     "            <assemblyIdentity name='DontUnifyMe' PublicKeyToken='b77a5c561934e089' culture='neutral' />\n" +
                     "            <bindingRedirect oldVersion='1.0.0.0' newVersion='2.0.0.0' />\n" +
-                    "        </dependentAssembly>\n"
-                );
+                    "        </dependentAssembly>\n");
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -173,13 +169,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             assemblyNames[0].SetMetadata("SpecificVersion", "true");
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-                (
+            string appConfigFile = WriteAppConfig(
                     "        <dependentAssembly>\n" +
                     "            <assemblyIdentity name='UnifyMe' PublicKeyToken='b77a5c561934e089' culture='neutral' />\n" +
                     "            <bindingRedirect oldVersion='0.0.0.0-1.5.0.0' newVersion='2.0.0.0' />\n" +
-                    "        </dependentAssembly>\n"
-                );
+                    "        </dependentAssembly>\n");
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -228,13 +222,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             assemblyNames[0].SetMetadata("SpecificVersion", "true");
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-                (
+            string appConfigFile = WriteAppConfig(
                     "        <dependentAssembly>\n" +
                     "            <assemblyIdentity name='UnifyMe' PublicKeyToken='b77a5c561934e089' culture='neutral' />\n" +
                     "            <bindingRedirect oldVersion='1.0.0.0' newVersion='4.0.0.0' />\n" +
-                    "        </dependentAssembly>\n"
-                );
+                    "        </dependentAssembly>\n");
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -282,13 +274,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             assemblyNames[0].SetMetadata("SpecificVersion", "true");
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-                (
+            string appConfigFile = WriteAppConfig(
                     "        <dependentAssembly>\n" +
                     "            <assemblyIdentity name='UnifyMe' PublicKeyToken='b77a5c561934e089' culture='neutral' />\n" +
                     "            <bindingRedirect oldVersion='0.0.0.0-2.0.0.0' newVersion='2.0.0.0' />\n" +
-                    "        </dependentAssembly>\n"
-                );
+                    "        </dependentAssembly>\n");
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();

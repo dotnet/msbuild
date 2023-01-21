@@ -2164,9 +2164,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             GenerateResource t = Utilities.CreateTask(_output);
 
             t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
                 new TaskItem( Utilities.WriteTestResX(false, null, null)),
             };
 
@@ -2200,9 +2200,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             GenerateResource t = Utilities.CreateTask(_output);
 
             t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
                 new TaskItem( Utilities.WriteTestResX(false, null, null)),
             };
 
@@ -2244,9 +2244,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             try
             {
                 t.Sources = new ITaskItem[] {
-                    new TaskItem( Utilities.WriteTestText(null, null) ),
-                    new TaskItem( Utilities.WriteTestText(null, null) ),
-                    new TaskItem( Utilities.WriteTestText("goober", null) ),
+                    new TaskItem( Utilities.WriteTestText(null, null)),
+                    new TaskItem( Utilities.WriteTestText(null, null)),
+                    new TaskItem( Utilities.WriteTestText("goober", null)),
                     new TaskItem( Utilities.WriteTestText(null, null)),
                 };
 
@@ -3664,8 +3664,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         {
             Assert.Contains(
                 String.Format(AssemblyResources.GetString(messageID), replacements),
-                ((MockEngine)t.BuildEngine).Log
-            );
+                ((MockEngine)t.BuildEngine).Log);
         }
 
         /// <summary>
@@ -3941,15 +3940,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 + "  </resheader>\xd\xa"
                 + "  <resheader name='writer'>\xd\xa"
                 + "    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>\xd\xa"
-                + "  </resheader>\xd\xa"
-                );
+                + "  </resheader>\xd\xa");
 
             resgenFileContents.Append(
                  // A plain old string value.
                  "  <data name=\"MyString\">\xd\xa"
                 + "    <value>MyValue</value>\xd\xa"
-                + "  </data>\xd\xa"
-                );
+                + "  </data>\xd\xa");
 
             if (extraToken != null)
             {
@@ -3962,8 +3959,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 resgenFileContents.Append(
                      "  <data name='Label.Modifiers' type='System.CodeDom.MemberAttributes, System'>\xd\xa"
                     + "    <value>Assembly</value>\xd\xa"
-                    + "  </data>\xd\xa"
-                    );
+                    + "  </data>\xd\xa");
             }
 
             if (useInvalidType)
@@ -3972,8 +3968,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 resgenFileContents.Append(
                      "  <data name='xx' type='X, INVALID'>\xd\xa"
                     + "    <value>1</value>\xd\xa"
-                    + "  </data>\xd\xa"
-                    );
+                    + "  </data>\xd\xa");
             }
 
             if (linkedBitmap != null)
@@ -3981,8 +3976,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 // A linked-in bitmap.
                 resgenFileContents.Append(
                      "  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Forms'>\xd\xa"
-                    + "    <value>"
-                    );
+                    + "    <value>");
 
                 // The linked file may have a different case than reported by the filesystem
                 // simulate this by lower-casing our file before writing it into the resx.
@@ -3993,8 +3987,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 resgenFileContents.Append(
                      ";System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>\xd\xa"
-                    + "  </data>\xd\xa"
-                    );
+                    + "  </data>\xd\xa");
             }
 
             resgenFileContents.Append("</root>\xd\xa");

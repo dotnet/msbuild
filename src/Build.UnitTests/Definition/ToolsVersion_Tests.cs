@@ -393,8 +393,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </Project>")), null /* no global properties */, "goober", p);
                 success = project.Build(mockLogger);
                 // BANG!
-            }
-           );
+            });
         }
         /// <summary>
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT

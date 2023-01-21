@@ -253,8 +253,7 @@ namespace Microsoft.Build.Tasks
                 // as well as within the namespaces that we automatically import.
                 Lazy<Type> attributeType = new(
                     () => Type.GetType(attribute.Name, throwOnError: false) ?? NamespaceImports.Select(x => Type.GetType($"{x}.{attribute.Name}", throwOnError: false)).FirstOrDefault(),
-                    System.Threading.LazyThreadSafetyMode.None
-                );
+                    System.Threading.LazyThreadSafetyMode.None);
 
                 if (
                     !AddArguments(attribute, attributeType, providedOrderedParameters, isPositional: true)
@@ -383,8 +382,7 @@ namespace Microsoft.Build.Tasks
             CodeAttributeDeclaration attribute,
             Lazy<Type> attributeType,
             IReadOnlyList<AttributeParameter> parameters,
-            bool isPositional
-        )
+            bool isPositional)
         {
             Type[] constructorParameterTypes = null;
 
@@ -435,8 +433,7 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 constructorParameterTypes[i],
                                 parameter.Value,
-                                $"#{i + 1}" /* back to 1 based */
-                            );
+                                $"#{i + 1}"); /* back to 1 based */
                         }
                         else
                         {
@@ -444,8 +441,7 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 attributeType.Value?.GetProperty(parameter.Name)?.PropertyType,
                                 parameter.Value,
-                                parameter.Name
-                            );
+                                parameter.Name);
                         }
 
                         break;

@@ -489,8 +489,7 @@ namespace Microsoft.Build.BackEnd
         private void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)
         {
             if (_project == null || // building from file. Load project from file
-                _transferredProperties != null // need to overwrite particular properties, so load project from file and overwrite properties
-            )
+                _transferredProperties != null) // need to overwrite particular properties, so load project from file and overwrite properties
             {
                 Project = loadProjectFromFile.Invoke();
             }

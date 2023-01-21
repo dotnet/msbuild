@@ -31,14 +31,12 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Creates a logger description from given data
         /// </summary>
-        public LoggerDescription
-        (
+        public LoggerDescription(
             string loggerClassName,
             string loggerAssemblyName,
             string loggerAssemblyFile,
             string loggerSwitchParameters,
-            LoggerVerbosity verbosity
-        ) : this(loggerClassName,
+            LoggerVerbosity verbosity) : this(loggerClassName,
             loggerAssemblyName,
             loggerAssemblyFile,
             loggerSwitchParameters,
@@ -50,15 +48,13 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Creates a logger description from given data
         /// </summary>
-        public LoggerDescription
-        (
+        public LoggerDescription(
             string loggerClassName,
             string loggerAssemblyName,
             string loggerAssemblyFile,
             string loggerSwitchParameters,
             LoggerVerbosity verbosity,
-            bool isOptional
-        )
+            bool isOptional)
         {
             _loggerClassName = loggerClassName;
 

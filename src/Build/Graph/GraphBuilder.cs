@@ -154,8 +154,7 @@ namespace Microsoft.Build.Graph
                                     itemType: ProjectInterpretation.TransitiveReferenceItemName,
                                     includeEscaped: referenceInfo.ReferenceConfiguration.ProjectFullPath,
                                     directMetadata: null,
-                                    definingFileEscaped: currentNode.ProjectInstance.FullPath
-                                ),
+                                    definingFileEscaped: currentNode.ProjectInstance.FullPath),
                                 edges);
                         }
                     }
@@ -295,8 +294,7 @@ namespace Microsoft.Build.Graph
                             project.AbsolutePath,
                             solutionGlobalProperties
                                 .SetItem("Configuration", projectConfiguration.ConfigurationName)
-                                .SetItem("Platform", projectConfiguration.PlatformName)
-                            ));
+                                .SetItem("Platform", projectConfiguration.PlatformName)));
                 }
             }
 
@@ -555,8 +553,7 @@ namespace Microsoft.Build.Graph
                     throw new InvalidOperationException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "StaticGraphDoesNotSupportSlnReferences",
                         referenceInfo.ReferenceConfiguration.ProjectFullPath,
-                        referenceInfo.ReferenceConfiguration.ProjectFullPath
-                        ));
+                        referenceInfo.ReferenceConfiguration.ProjectFullPath));
                 }
 
                 SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
@@ -670,8 +667,7 @@ namespace Microsoft.Build.Graph
             {
                 return ReferenceItems.ToImmutableDictionary(
                     kvp => (kvp.Key.Item1.ToConfigurationMetadata(), kvp.Key.Item2.ToConfigurationMetadata()),
-                    kvp => kvp.Value
-                    );
+                    kvp => kvp.Value);
             }
         }
 

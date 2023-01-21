@@ -79,8 +79,7 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions expanderOptions,
             ParserOptions parserOptions,
             Expander<P, I> expander,
-            LazyItemEvaluator<P, I, M, D> lazyEvaluator
-            )
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
             if (condition?.Length == 0)
             {
@@ -90,8 +89,7 @@ namespace Microsoft.Build.Evaluation
 
             using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
-                bool result = ConditionEvaluator.EvaluateCondition
-                    (
+                bool result = ConditionEvaluator.EvaluateCondition(
                     condition,
                     parserOptions,
                     expander,
@@ -101,8 +99,7 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator._loggingContext.LoggingService,
                     lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem,
-                    loggingContext: lazyEvaluator._loggingContext
-                    );
+                    loggingContext: lazyEvaluator._loggingContext);
                 MSBuildEventSource.Log.EvaluateConditionStop(condition, result);
 
                 return result;

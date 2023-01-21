@@ -141,9 +141,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     sc => new ProjectConfigurationInSolution(
                         sc.ConfigurationName,
                         sc.PlatformName,
-                        true)
-                    )
-                );
+                        true)));
 
             var sb = new StringBuilder();
 

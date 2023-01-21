@@ -30,15 +30,13 @@ namespace Microsoft.Build.UnitTests
 
         private bool Execute(Touch t)
         {
-            return t.ExecuteImpl
-            (
+            return t.ExecuteImpl(
                 fileExists,
                 fileCreate,
                 fileGetAttributes,
                 fileSetAttributes,
                 setLastAccessTime,
-                setLastWriteTime
-            );
+                setLastWriteTime);
         }
 
         /// <summary>
@@ -203,8 +201,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),
-                engine.Log
-            );
+                engine.Log);
         }
 
         [Fact]
@@ -226,8 +223,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt),
-                engine.Log
-            );
+                engine.Log);
         }
 
         [Fact]
@@ -250,8 +246,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate"),
-                engine.Log
-            );
+                engine.Log);
         }
 
         [Fact]

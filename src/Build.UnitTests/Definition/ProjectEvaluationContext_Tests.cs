@@ -34,8 +34,8 @@ namespace Microsoft.Build.UnitTests.Definition
             _resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new Dictionary<string, SdkResult>
                 {
-                    {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null)},
-                    {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null)}
+                    {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null) },
+                    {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null) }
                 });
         }
 
@@ -109,8 +109,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     {
                         ProjectCollection = projectCollection,
                         EvaluationContext = evaluationContext
-                    }
-                );
+                    });
             }
 
             fileSystem.ExistenceChecks.OrderBy(kvp => kvp.Key)
@@ -145,8 +144,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 {
                     ProjectCollection = projectCollection,
                     DirectoryCacheFactory = directoryCacheFactory,
-                }
-            );
+                });
 
             directoryCacheFactory.DirectoryCaches.Count.ShouldBe(1);
             var directoryCache = directoryCacheFactory.DirectoryCaches[0];
@@ -359,8 +357,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         public static IEnumerable<object[]> ContextDisambiguatesRelativeGlobsData
@@ -440,8 +437,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                     File.WriteAllText(Path.Combine(projectDirectory1, $"1.{evaluationCount}.cs"), "");
                     File.WriteAllText(Path.Combine(projectDirectory2, $"2.{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -498,8 +494,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                     File.WriteAllText(Path.Combine(project1GlobDirectory, $"1.{evaluationCount}.cs"), "");
                     File.WriteAllText(Path.Combine(project2GlobDirectory, $"2.{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -569,8 +564,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(project1GlobDirectory, $"{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -630,8 +624,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -703,8 +696,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         private static string[] _projectsWithGlobImports =
@@ -741,8 +733,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.props"), $"<Project><ItemGroup><i Include=`{evaluationCount}.cs`/></ItemGroup></Project>".Cleanup());
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         private static string[] _projectsWithConditions =
@@ -804,8 +795,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                 throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
                         }
                     }
-                }
-                );
+                });
         }
 
         [Theory]

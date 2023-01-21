@@ -255,8 +255,7 @@ namespace Microsoft.Build.Evaluation
                                     metadataExpansionOptions,
                                     ParserOptions.AllowAll,
                                     _expander,
-                                    _lazyEvaluator
-                                    ))
+                                    _lazyEvaluator))
                             {
                                 continue;
                             }

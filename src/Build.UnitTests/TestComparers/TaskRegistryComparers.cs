@@ -28,8 +28,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                     {
                         Assert.Equal(xp.Key, yp.Key, TaskRegistry.RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
                         Assert.Equal(xp.Value, yp.Value, new RegisteredTaskRecordComparer());
-                    }
-                );
+                    });
 
                 return true;
             }

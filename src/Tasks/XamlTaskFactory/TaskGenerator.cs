@@ -1193,8 +1193,8 @@ namespace Microsoft.Build.Tasks.Xaml
                             }
                         }
 
-                        checkRequired.TrueStatements.Add(new CodeMethodInvokeExpression
-                            (new CodeThisReferenceExpression(), "RemoveSwitchToolBasedOnValue",
+                        checkRequired.TrueStatements.Add(new CodeMethodInvokeExpression(
+                            new CodeThisReferenceExpression(), "RemoveSwitchToolBasedOnValue",
                             new CodeSnippetExpression(SurroundWithQuotes(switchRelations.Key))));
 
                         addValidateRelationsMethod.Statements.Add(checkRequired);

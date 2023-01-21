@@ -227,8 +227,7 @@ namespace Microsoft.Build.UnitTests
                     Console.WriteLine(e.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the LogErrorFromException & LogWarningFromException methods

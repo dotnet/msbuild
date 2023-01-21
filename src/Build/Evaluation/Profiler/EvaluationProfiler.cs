@@ -149,8 +149,7 @@ namespace Microsoft.Build.Evaluation
                 var updatedTimeSpent = new ProfiledLocation(
                         previousTimeSpent.InclusiveTime + _inclusiveTime.Elapsed,
                         previousTimeSpent.ExclusiveTime + _exclusiveTime.Elapsed,
-                        0
-                    );
+                        0);
 
                 _evaluationProfiler._timeSpent[Location] = updatedTimeSpent;
             }

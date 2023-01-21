@@ -45,13 +45,11 @@ namespace Microsoft.Build.Execution
         /// Constructor called by the Evaluator.
         /// Assumes ProjectPropertyGroupTaskPropertyInstance is an immutable type.
         /// </summary>
-        internal ProjectPropertyGroupTaskInstance
-            (
+        internal ProjectPropertyGroupTaskInstance(
             string condition,
             ElementLocation location,
             ElementLocation conditionLocation,
-            List<ProjectPropertyGroupTaskPropertyInstance> properties
-            )
+            List<ProjectPropertyGroupTaskPropertyInstance> properties)
         {
             ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
             ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));

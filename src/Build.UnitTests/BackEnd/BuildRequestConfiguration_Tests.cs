@@ -42,8 +42,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructorNullProps()
@@ -51,8 +50,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", Array.Empty<string>(), null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructor1()
@@ -68,8 +66,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
                 BuildRequestConfiguration config1 = new BuildRequestConfiguration(1, data, "2.0");
                 config1.ShallowCloneWithNewId(0);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructor2PositiveConfigId()
@@ -91,8 +88,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -101,8 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", Array.Empty<string>(), null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestWasGeneratedByNode()
@@ -144,8 +139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
                 BuildRequestConfiguration config1 = new BuildRequestConfiguration(-1, data, "2.0");
                 config1.ConfigurationId = -2;
-            }
-           );
+            });
         }
         [Fact]
         public void TestSetConfigurationIdGood()

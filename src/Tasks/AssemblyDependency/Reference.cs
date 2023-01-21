@@ -877,12 +877,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="sourceItem">The source item.</param>
         /// <param name="wantSpecificVersionValue">Whether the version needs to match exactly or loosely.</param>
         /// <param name="executableExtension">The filename extension that the resulting assembly must have.</param>
-        internal void MakePrimaryAssemblyReference
-        (
+        internal void MakePrimaryAssemblyReference(
             ITaskItem sourceItem,
             bool wantSpecificVersionValue,
-            string executableExtension
-        )
+            string executableExtension)
         {
             CopyLocal = CopyLocalState.Undecided;
 
@@ -926,14 +924,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if
                     (
-                        String.Compare
-                        (
+                        String.Compare(
                             frameworkPath, 0,
                             fullPath, 0,
                             frameworkPath.Length,
-                            StringComparison.OrdinalIgnoreCase
-                        ) == 0
-                    )
+                            StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         return true;
                     }
@@ -955,8 +950,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="copyLocalDependenciesWhenParentReferenceInGac">if set to true, copy local dependencies when only parent reference in gac.</param>
         /// <param name="doNotCopyLocalIfInGac">If set to true, do not copy local a reference that exists in the GAC (legacy behavior).</param>
         /// <param name="referenceTable">The reference table.</param>
-        internal void SetFinalCopyLocalState
-        (
+        internal void SetFinalCopyLocalState(
             AssemblyNameExtension assemblyName,
             string[] frameworkPaths,
             ProcessorArchitecture targetProcessorArchitecture,
@@ -966,8 +960,7 @@ namespace Microsoft.Build.Tasks
             GetAssemblyPathInGac getAssemblyPathInGac,
             bool copyLocalDependenciesWhenParentReferenceInGac,
             bool doNotCopyLocalIfInGac,
-            ReferenceTable referenceTable
-        )
+            ReferenceTable referenceTable)
         {
             if (IsBadImage)
             {
@@ -999,12 +992,10 @@ namespace Microsoft.Build.Tasks
             if (IsPrimary)
             {
                 bool found;
-                bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                    (
+                bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                         PrimarySourceItem,
                         ItemMetadataNames.privateMetadata,
-                        out found
-                    );
+                        out found);
 
                 if (found)
                 {
@@ -1023,12 +1014,10 @@ namespace Microsoft.Build.Tasks
                 foreach (ITaskItem item in _sourceItems.Values)
                 {
                     bool found;
-                    bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                        (
+                    bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                             item,
                             ItemMetadataNames.privateMetadata,
-                            out found
-                        );
+                            out found);
 
                     if (found)
                     {

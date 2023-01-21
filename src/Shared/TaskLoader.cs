@@ -42,15 +42,23 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an ITask instance and returns it.  
         /// </summary>
-        internal static ITask CreateTask(LoadedType loadedType, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        internal static ITask CreateTask(
+            LoadedType loadedType,
+            string taskName,
+            string taskLocation,
+            int taskLine,
+            int taskColumn,
+            LogError logError,
 #if FEATURE_APPDOMAIN
-            , AppDomainSetup appDomainSetup
+            AppDomainSetup appDomainSetup,
 #endif
-            , bool isOutOfProc
+            bool isOutOfProc
 #if FEATURE_APPDOMAIN
             , out AppDomain taskAppDomain
 #endif
             )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
 #if FEATURE_APPDOMAIN
             bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute;
@@ -66,14 +74,12 @@ namespace Microsoft.Build.Shared
                 {
                     if (!loadedType.IsMarshalByRef)
                     {
-                        logError
-                        (
+                        logError(
                             taskLocation,
                             taskLine,
                             taskColumn,
                             "TaskNotMarshalByRef",
-                            taskName
-                         );
+                            taskName);
 
                         return null;
                     }
@@ -135,15 +141,13 @@ namespace Microsoft.Build.Shared
                     // to fail here.
                     if (taskType != loadedType.Type)
                     {
-                        logError
-                        (
+                        logError(
                         taskLocation,
                         taskLine,
                         taskColumn,
                         "ConflictingTaskAssembly",
                         loadedType.Assembly.AssemblyFile,
-                        loadedType.Type.GetTypeInfo().Assembly.Location
-                        );
+                        loadedType.Type.GetTypeInfo().Assembly.Location);
 
                         taskInstanceInOtherAppDomain = null;
                     }

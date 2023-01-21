@@ -28,11 +28,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         //  as an SDK resolver built for .NET Framework probably won't work on .NET Core, and vice versa.
         private readonly string AdditionalResolversFolder = Environment.GetEnvironmentVariable(
 #if NETFRAMEWORK
-            "MSBUILDADDITIONALSDKRESOLVERSFOLDER_NETFRAMEWORK"
+            "MSBUILDADDITIONALSDKRESOLVERSFOLDER_NETFRAMEWORK")
 #elif NET
-            "MSBUILDADDITIONALSDKRESOLVERSFOLDER_NET"
+            "MSBUILDADDITIONALSDKRESOLVERSFOLDER_NET")
 #endif
-            ) ?? Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
+            ?? Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
 
         internal virtual IList<SdkResolver> GetDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
         {

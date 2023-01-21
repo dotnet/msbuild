@@ -81,15 +81,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                 t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V20Path, StringCompareShould.IgnoreCase);
 
-                engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UniFYme, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
-                );
+                engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UniFYme, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
 
-                engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
-                );
+                engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
             }
         }
 
@@ -157,15 +153,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                 t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V10Path, StringCompareShould.IgnoreCase);
 
-                engine.AssertLogDoesntContain
-                    (
-                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL")
-                    );
+                engine.AssertLogDoesntContain(
+                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL"));
 
-                engine.AssertLogDoesntContain
-                    (
-                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))
-                    );
+                engine.AssertLogDoesntContain(
+                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll")));
             }
             finally
             {
@@ -222,13 +214,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 };
 
                 // Construct the app.config.
-                appConfigFile = WriteAppConfig
-                    (
+                appConfigFile = WriteAppConfig(
                         "        <dependentAssembly>\n" +
                         "            <assemblyIdentity name='UnifyMe' PublicKeyToken='b77a5c561934e089' culture='neutral' />\n" +
                         "            <bindingRedirect oldVersion='1.0.0.0' newVersion='2.0.0.0' />\n" +
-                        "        </dependentAssembly>\n"
-                    );
+                        "        </dependentAssembly>\n");
 
                 // Now, pass feed resolved primary references into ResolveAssemblyReference.
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -244,10 +234,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
                 Assert.True(succeeded);
                 Assert.Empty(t.ResolvedDependencyFiles);
-                engine.AssertLogDoesntContain
-                    (
-                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
-                    );
+                engine.AssertLogDoesntContain(
+                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
             }
             finally
             {
@@ -397,20 +385,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V20Path, StringCompareShould.IgnoreCase);
 
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UniFYme, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UniFYme, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
 
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
 
-            engine.AssertLogDoesntContain
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "2.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))
-                );
+            engine.AssertLogDoesntContain(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "2.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll")));
         }
 
         /// <summary>
@@ -457,20 +439,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V30Path, StringCompareShould.IgnoreCase);
 
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UniFYme, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UniFYme, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
 
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
 
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "2.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "2.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll")));
         }
 
         /// <summary>
@@ -513,10 +489,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             Assert.True(succeeded);
             Assert.Single(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "0.5.0.0", Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"))
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "0.5.0.0", Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll")));
         }
     }
 }

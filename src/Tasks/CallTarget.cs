@@ -76,8 +76,7 @@ namespace Microsoft.Build.Tasks
             var singleProject = new List<ITaskItem>(1) { null };
 
             // Build the specified targets in the current project.
-            return MSBuild.ExecuteTargets
-                (
+            return MSBuild.ExecuteTargets(
                 singleProject,  // project = null (current project)
                 null,           // propertiesTable = null
                 null,           // undefineProperties
@@ -88,8 +87,7 @@ namespace Microsoft.Build.Tasks
                 Log,
                 _targetOutputs,
                 false,
-                null            // toolsVersion = null
-                );
+                null);            // toolsVersion = null
         }
 
         #endregion

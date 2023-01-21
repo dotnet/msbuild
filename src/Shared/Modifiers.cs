@@ -563,11 +563,9 @@ namespace Microsoft.Build.Shared
                             if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase))
                             {
                                 // ItemSpecModifiers.Directory does not contain the root directory
-                                modifiedItemSpec = Path.Combine
-                                    (
+                                modifiedItemSpec = Path.Combine(
                                         GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, ItemSpecModifiers.RootDir),
-                                        GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, ItemSpecModifiers.Directory)
-                                    );
+                                        GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, ItemSpecModifiers.Directory));
                             }
                             else
                             {

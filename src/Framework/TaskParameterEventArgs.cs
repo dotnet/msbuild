@@ -32,14 +32,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Creates an instance of this class for the given task parameter.
         /// </summary>
-        public TaskParameterEventArgs
-        (
+        public TaskParameterEventArgs(
             TaskParameterMessageKind kind,
             string itemType,
             IList items,
             bool logItemMetadata,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(null, null, null, MessageImportance.Low, eventTimestamp)
         {
             Kind = kind;

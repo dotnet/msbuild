@@ -629,8 +629,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 CleanUp(dir);
-            }
-           );
+            });
         }
         /// <summary>
         /// Missing XmlFile file.

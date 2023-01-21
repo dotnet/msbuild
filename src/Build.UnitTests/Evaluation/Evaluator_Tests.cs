@@ -1027,8 +1027,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     File.Delete(importPath1);
                     File.Delete(importPath2);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// MSBuildDefaultTargets was not getting cleared out between reevaluations.
@@ -3066,8 +3065,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 // Should not reach this point.
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Basic verification -- whitespace in the TreatAsLocalProperty definition should be trimmed.

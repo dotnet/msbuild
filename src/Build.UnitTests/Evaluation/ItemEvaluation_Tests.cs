@@ -89,8 +89,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             <i Include='@(i2)'/>
 
-            <i2 Remove='a;b;c'/>"
-            )]
+            <i2 Remove='a;b;c'/>")]
         // remove the items via a glob
         [InlineData(
             @"
@@ -101,8 +100,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             <i Include='@(i2)'/>
 
-            <i2 Remove='*'/>"
-            )]
+            <i2 Remove='*'/>")]
         public void RemoveShouldPreserveIntermediaryReferences(string content)
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, allItems: true);

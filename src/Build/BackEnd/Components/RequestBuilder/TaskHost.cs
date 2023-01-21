@@ -258,16 +258,14 @@ namespace Microsoft.Build.BackEnd
         public bool BuildProjectFile(string projectFileName, string[] targetNames, System.Collections.IDictionary globalProperties, System.Collections.IDictionary targetOutputs, string toolsVersion)
         {
             VerifyActiveProxy();
-            return BuildProjectFilesInParallel
-            (
+            return BuildProjectFilesInParallel(
                 new string[] { projectFileName },
                 targetNames,
                 new IDictionary[] { globalProperties },
                 new IDictionary[] { targetOutputs },
                 new string[] { toolsVersion },
                 true,
-                false
-            );
+                false);
         }
 
         /// <summary>
@@ -425,8 +423,7 @@ namespace Microsoft.Build.BackEnd
                     // ContinueOnError is that a project author expects that the task might fail,
                     // but wants to ignore the failures.  This implies that we shouldn't be logging
                     // errors either, because you should never have a successful build with errors.
-                    BuildWarningEventArgs warningEvent = new BuildWarningEventArgs
-                            (
+                    BuildWarningEventArgs warningEvent = new BuildWarningEventArgs(
                                 e.Subcategory,
                                 e.Code,
                                 e.File,
@@ -436,8 +433,7 @@ namespace Microsoft.Build.BackEnd
                                 e.EndColumnNumber,
                                 e.Message,
                                 e.HelpKeyword,
-                                e.SenderName
-                            );
+                                e.SenderName);
 
                     warningEvent.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(warningEvent);

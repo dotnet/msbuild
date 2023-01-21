@@ -1780,8 +1780,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
                 ToolsetRegistryReader registryReader = null,
 #endif
-                ToolsetConfigurationReader configReader = null
-                )
+                ToolsetConfigurationReader configReader = null)
         {
             _toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 

@@ -706,8 +706,7 @@ namespace Microsoft.Build.Execution
                                         inheritedItemDefinitions,
                                         _project.Directory,
                                         _project.IsImmutable,
-                                        definingFileEscaped
-                                        );
+                                        definingFileEscaped);
         }
 
         /// <summary>
@@ -797,8 +796,7 @@ namespace Microsoft.Build.Execution
                               List<ProjectItemDefinitionInstance> itemDefinitions,
                               string projectDirectory,
                               bool immutable,
-                              string definingFileEscaped // the actual project file (or import) that defines this item.
-                              )
+                              string definingFileEscaped) // the actual project file (or import) that defines this item.
             {
                 ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, nameof(includeEscaped));
                 ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, nameof(includeBeforeWildcardExpansionEscaped));
@@ -1578,13 +1576,10 @@ namespace Microsoft.Build.Execution
 
                     // This is case-insensitive, so that for example "en-US" and "en-us" match and are bucketed together.
                     // In this respect, therefore, we have to consider item metadata value case as not significant.
-                    if (!String.Equals
-                            (
+                    if (!String.Equals(
                                 thisAsITaskItem2.GetMetadataValueEscaped(name),
                                 otherAsITaskItem2.GetMetadataValueEscaped(name),
-                                StringComparison.OrdinalIgnoreCase
-                            )
-                       )
+                                StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }

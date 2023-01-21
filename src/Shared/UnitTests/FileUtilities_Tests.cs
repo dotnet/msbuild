@@ -158,8 +158,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 TestGetItemSpecModifierOnBadPath(Directory.GetCurrentDirectory());
-            }
-           );
+            });
         }
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
@@ -172,8 +171,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 TestGetItemSpecModifierOnBadPath(null);
-            }
-           );
+            });
         }
 
         private static void TestGetItemSpecModifierOnBadPath(string currentDirectory)
@@ -444,8 +442,7 @@ namespace Microsoft.Build.UnitTests
                 string fullPath = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\a.cs";
 
                 Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -465,8 +462,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(null, null));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -475,8 +471,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(String.Empty));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -487,8 +482,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(@"\\"));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -499,8 +493,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(@"\\XXX\"));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -511,8 +504,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -546,8 +538,7 @@ namespace Microsoft.Build.UnitTests
                    // with this for security reasons.
                  * */
                 Assert.Null(FileUtilities.NormalizePath(@"\\?\globalroot\XXX"));
-            }
-           );
+            });
         }
 #endif
 
@@ -901,8 +892,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<IOException>(() =>
             {
                 FileUtilities.GetTemporaryFile("|");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -917,8 +907,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<IOException>(() =>
             {
                 FileUtilities.GetTemporaryFile("|", null, ".tmp");
-            }
-           );
+            });
         }
 
         [Fact]

@@ -1158,11 +1158,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         /// <param name="batchableObjectParameter"></param>
         /// <param name="consumedMetadataReferences"></param>
-        private static void FindEmbeddedMetadataReferences_OriginalImplementation
-        (
+        private static void FindEmbeddedMetadataReferences_OriginalImplementation(
             string batchableObjectParameter,
-            Dictionary<string, MetadataReference> consumedMetadataReferences
-        )
+            Dictionary<string, MetadataReference> consumedMetadataReferences)
         {
             MatchCollection embeddedMetadataReferences = FindEmbeddedMetadataReferenceMatches_OriginalImplementation(batchableObjectParameter);
 

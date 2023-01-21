@@ -372,8 +372,7 @@ namespace i;
         [Fact(Skip = "Preprocessor is not yet implemented.")]
         public void PreprocessorNamespaceInFalsePreprocessorBlock()
         {
-            AssertParse
-            (
+            AssertParse(
                 @"
 #if (false)             
 namespace i 
@@ -413,10 +412,8 @@ class c {}")]
         */
         private static void AssertParse(string source, string expectedClassName)
         {
-            ExtractedClassName className = CSharpParserUtilities.GetFirstClassNameFullyQualified
-            (
-                StreamHelpers.StringToStream(source)
-            );
+            ExtractedClassName className = CSharpParserUtilities.GetFirstClassNameFullyQualified(
+                StreamHelpers.StringToStream(source));
 
             Assert.Equal(expectedClassName, className.Name);
         }

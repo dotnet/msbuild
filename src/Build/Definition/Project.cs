@@ -4296,14 +4296,12 @@ namespace Microsoft.Build.Evaluation
                     toolsVersionLocation = Project.Xml.ToolsVersionLocation;
                 }
 
-                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-                (
+                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                     ExplicitToolsVersion,
                     Project.Xml.ToolsVersion,
                     Project.ProjectCollection.GetToolset,
                     Project.ProjectCollection.DefaultToolsVersion,
-                    out var usingDifferentToolsVersionFromProjectFile
-                );
+                    out var usingDifferentToolsVersionFromProjectFile);
 
                 UsingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 

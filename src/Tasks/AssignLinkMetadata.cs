@@ -51,8 +51,7 @@ namespace Microsoft.Build.Tasks
                         if (
                                 String.IsNullOrEmpty(item.GetMetadata("Link"))
                                 && !String.IsNullOrEmpty(definingProject)
-                                && fullPath.StartsWith(definingProjectDirectory, StringComparison.OrdinalIgnoreCase)
-                            )
+                                && fullPath.StartsWith(definingProjectDirectory, StringComparison.OrdinalIgnoreCase))
                         {
                             string link = fullPath.Substring(definingProjectDirectory.Length);
                             ITaskItem outputItem = new TaskItem(item);

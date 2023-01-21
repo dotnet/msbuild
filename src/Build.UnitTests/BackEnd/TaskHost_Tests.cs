@@ -236,8 +236,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 _taskHost.LogErrorEvent(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that a null warning event will cause an exception
@@ -248,8 +247,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 _taskHost.LogWarningEvent(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that a null message event will cause an exception
@@ -260,8 +258,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 _taskHost.LogMessageEvent(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that a null custom event will cause an exception
@@ -272,8 +269,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 _taskHost.LogCustomEvent(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that errors are logged properly
@@ -808,10 +804,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Constructor
             /// </summary>
-            internal MyCustomMessageEvent
-                (
-                string message
-                )
+            internal MyCustomMessageEvent(
+                string message)
                 : base(message, null, null, MessageImportance.High)
             {
             }
@@ -868,10 +862,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Constructor
             /// </summary>
-            internal MyCustomBuildErrorEventArgs
-                (
-                string message
-                )
+            internal MyCustomBuildErrorEventArgs(
+                string message)
                 : base(null, null, null, 0, 0, 0, 0, message, null, null)
             {
             }
@@ -907,10 +899,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Constructor
             /// </summary>
-            internal MyCustomBuildWarningEventArgs
-                (
-                string message
-                )
+            internal MyCustomBuildWarningEventArgs(
+                string message)
                 : base(null, null, null, 0, 0, 0, 0, message, null, null)
             {
             }
@@ -945,10 +935,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Constructor
             /// </summary>
-            internal MyCustomMessageEventNotSerializable
-                (
-                string message
-                )
+            internal MyCustomMessageEventNotSerializable(
+                string message)
                 : base(message, null, null, MessageImportance.High)
             {
             }
@@ -1005,10 +993,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Constructor
             /// </summary>
-            internal MyCustomBuildErrorEventArgsNotSerializable
-                (
-                string message
-                )
+            internal MyCustomBuildErrorEventArgsNotSerializable(
+                string message)
                 : base(null, null, null, 0, 0, 0, 0, message, null, null)
             {
             }
@@ -1043,10 +1029,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Constructor
             /// </summary>
-            internal MyCustomBuildWarningEventArgsNotSerializable
-                (
-                string message
-                )
+            internal MyCustomBuildWarningEventArgsNotSerializable(
+                string message)
                 : base(null, null, null, 0, 0, 0, 0, message, null, null)
             {
             }

@@ -83,8 +83,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
 
                 Assert.Equal(String.Empty, onError.ExecuteTargetsAttribute);
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror with empty executetargets attribute
@@ -110,8 +109,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
 
                 Assert.Equal(String.Empty, onError.ExecuteTargetsAttribute);
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror with invalid attribute
@@ -130,8 +128,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror with invalid child element
@@ -152,8 +149,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror before task
@@ -173,8 +169,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror before task
@@ -194,8 +189,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror before task
@@ -215,8 +209,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Set ExecuteTargets
@@ -242,8 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOnErrorElement onError = GetOnError();
 
                 onError.ExecuteTargetsAttribute = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set ExecuteTargets to empty string
@@ -256,8 +248,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOnErrorElement onError = GetOnError();
 
                 onError.ExecuteTargetsAttribute = String.Empty;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set on error condition

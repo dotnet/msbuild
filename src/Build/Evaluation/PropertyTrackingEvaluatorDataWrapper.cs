@@ -258,8 +258,7 @@ namespace Microsoft.Build.Evaluation
                     property.Name,
                     property.EvaluatedValue,
                     source.ToString(),
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, property.EvaluatedValue, source)
-                );
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, property.EvaluatedValue, source));
             args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
 
             _evaluationLoggingContext.LogBuildEvent(args);

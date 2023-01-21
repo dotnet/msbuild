@@ -670,8 +670,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: CLSCompliantAttribute(true)]"
-            );
+                @"[assembly: CLSCompliantAttribute(true)]");
         }
 
         /// <summary>
@@ -689,8 +688,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(Int32Argument=42, BoolArgument=false)]"
-            );
+                @"[assembly: TestAttribute(Int32Argument=42, BoolArgument=false)]");
         }
 
         /// <summary>
@@ -707,8 +705,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(Int32Argument_TypeName=""System.Int32"", BoolArgument=false)]"
-            );
+                @"[assembly: TestAttribute(Int32Argument_TypeName=""System.Int32"", BoolArgument=false)]");
         }
 
         /// <summary>
@@ -723,8 +720,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifyFailure(
                 CreateTask("c#", attribute),
-                "MSB3715"
-            );
+                "MSB3715");
         }
 
         /// <summary>
@@ -739,8 +735,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifyFailure(
                 CreateTask("c#", attribute),
-                "MSB3716"
-            );
+                "MSB3716");
         }
 
         /// <summary>
@@ -755,8 +750,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifyFailure(
                 CreateTask("c#", attribute),
-                "MSB3716"
-            );
+                "MSB3716");
         }
 
         /// <summary>
@@ -771,8 +765,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(System.DateTimeKind.Local)]"
-            );
+                @"[assembly: TestAttribute(System.DateTimeKind.Local)]");
         }
 
         /// <summary>
@@ -787,8 +780,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(typeof(System.Console))]"
-            );
+                @"[assembly: TestAttribute(typeof(System.Console))]");
         }
 
         /// <summary>
@@ -803,8 +795,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("visualbasic", attribute),
-                @"<Assembly: TestAttribute(GetType(System.Console))>"
-            );
+                @"<Assembly: TestAttribute(GetType(System.Console))>");
         }
 
         /// <summary>
@@ -820,8 +811,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifyFailure(
                 CreateTask("c#", attribute),
-                "MSB3716"
-            );
+                "MSB3716");
         }
 
         /// <summary>
@@ -837,8 +827,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(42 /* A comment */)]"
-            );
+                @"[assembly: TestAttribute(42 /* A comment */)]");
         }
 
         /// <summary>
@@ -854,8 +843,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(TestParameter=42 /* A comment */)]"
-            );
+                @"[assembly: TestAttribute(TestParameter=42 /* A comment */)]");
         }
 
         /// <summary>
@@ -870,8 +858,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: CLSCompliantAttribute(true)]"
-            );
+                @"[assembly: CLSCompliantAttribute(true)]");
         }
 
         /// <summary>
@@ -887,8 +874,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute(""MyAssembly"", AllInternalsVisible=true)]"
-            );
+                @"[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute(""MyAssembly"", AllInternalsVisible=true)]");
         }
 
         /// <summary>
@@ -914,8 +900,7 @@ namespace Microsoft.Build.UnitTests
             // all strings should be preferred over all other constructors.
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""a"", ""b"", ""false"")]"
-            );
+                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""a"", ""b"", ""false"")]");
         }
 
         /// <summary>
@@ -940,8 +925,7 @@ namespace Microsoft.Build.UnitTests
             // is alphabetically before any of the other types.
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Reflection.AssemblyFlagsAttribute(2)]"
-            );
+                @"[assembly: System.Reflection.AssemblyFlagsAttribute(2)]");
 
             // To prove that it's treating the argument as an int,
             // we can specify an enum value which should fail type
@@ -949,8 +933,7 @@ namespace Microsoft.Build.UnitTests
             attribute.SetMetadata("_Parameter1", "PublicKey");
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Reflection.AssemblyFlagsAttribute(""PublicKey"")]"
-            );
+                @"[assembly: System.Reflection.AssemblyFlagsAttribute(""PublicKey"")]");
         }
 
         /// <summary>
@@ -967,8 +950,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.ComponentModel.TypeConverterAttribute(""false"")]"
-            );
+                @"[assembly: System.ComponentModel.TypeConverterAttribute(""false"")]");
         }
 
         /// <summary>
@@ -984,8 +966,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Diagnostics.DebuggableAttribute(true, ""42"")]"
-            );
+                @"[assembly: System.Diagnostics.DebuggableAttribute(true, ""42"")]");
         }
 
         /// <summary>
@@ -1003,8 +984,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""foo"", ""bar"" /* setting */, false)]"
-            );
+                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""foo"", ""bar"" /* setting */, false)]");
         }
 
         private WriteCodeFragment CreateTask(string language, params TaskItem[] attributes)

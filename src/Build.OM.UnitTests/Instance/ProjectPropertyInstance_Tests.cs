@@ -70,8 +70,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectPropertyInstance property = GetPropertyInstance();
                 property.EvaluatedValue = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Immutable getter

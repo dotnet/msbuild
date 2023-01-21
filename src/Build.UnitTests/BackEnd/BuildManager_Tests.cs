@@ -1143,8 +1143,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidOperationException>(() =>
                 {
                     _buildManager.EndBuild();
-                }
-            );
+                });
         }
 
         [Fact]
@@ -3791,8 +3790,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
                     new[] { "MainTarget" },
-                    null
-                );
+                    null);
 
                 var submission = _buildManager.PendBuildRequest(buildRequestData);
 
@@ -3949,8 +3947,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
                     new[] { "MainTarget" },
-                    null
-                );
+                    null);
 
                 var submission = _buildManager.PendBuildRequest(buildRequestData);
 

@@ -148,8 +148,7 @@ namespace Microsoft.Build.UnitTests
             ToolTaskExtension t,
             string startsWith,
             string except,
-            bool useResponseFile
-        )
+            bool useResponseFile)
         {
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 

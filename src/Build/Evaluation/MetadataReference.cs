@@ -28,11 +28,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="itemName">Name of the item</param>
         /// <param name="metadataName">Name of the metadata</param>
-        internal MetadataReference
-        (
+        internal MetadataReference(
             string itemName,
-            string metadataName
-        )
+            string metadataName)
         {
             this.ItemName = itemName;
             this.MetadataName = metadataName;

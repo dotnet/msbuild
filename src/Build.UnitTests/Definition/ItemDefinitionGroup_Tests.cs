@@ -178,8 +178,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that item definition metadata doesn't allow item expansion for the conditional.
@@ -207,8 +206,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that item definition metadata doesn't allow item expansion for the value.
@@ -236,8 +234,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that item metadata which contains a metadata expansion referring to an item type other
@@ -804,8 +801,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
                 p.Build("t", new ILogger[] { logger });
-            }
-           );
+            });
         }
         [Fact]
         public void UnqualifiedMetadataConditionOnItemDefinitionGroupErrors()
@@ -820,8 +816,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
                 p.Build("t", new ILogger[] { logger });
-            }
-           );
+            });
         }
 
         [Fact]
@@ -837,8 +832,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
                 p.Build("t", new ILogger[] { logger });
-            }
-           );
+            });
         }
         [Fact]
         public void MetadataConditionOnItemDefinition()
@@ -1045,8 +1039,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
                 bool result = p.Build("t", new ILogger[] { logger });
-            }
-           );
+            });
         }
 
 #if FEATURE_ASSEMBLY_LOCATION

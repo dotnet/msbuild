@@ -772,8 +772,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Console.WriteLine(ex.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
 
         /// <summary>

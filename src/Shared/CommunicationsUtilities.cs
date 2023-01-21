@@ -422,18 +422,25 @@ namespace Microsoft.Build.Internal
             stream.Write(bytes, 0, bytes.Length);
         }
 
-        internal static void ReadEndOfHandshakeSignal(this PipeStream stream, bool isProvider
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        internal static void ReadEndOfHandshakeSignal(
+            this PipeStream stream,
+            bool isProvider
 #if NETCOREAPP2_1_OR_GREATER || MONO
             , int timeout
 #endif
             )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             // Accept only the first byte of the EndOfHandshakeSignal
-            int valueRead = stream.ReadIntForHandshake(null
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            int valueRead = stream.ReadIntForHandshake(
+                byteToAccept: null
 #if NETCOREAPP2_1_OR_GREATER || MONO
             , timeout
 #endif
                 );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
             if (valueRead != EndOfHandshakeSignal)
             {
@@ -449,6 +456,7 @@ namespace Microsoft.Build.Internal
             }
         }
 
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
@@ -458,6 +466,7 @@ namespace Microsoft.Build.Internal
             , int timeout
 #endif
             )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             byte[] bytes = new byte[4];
 

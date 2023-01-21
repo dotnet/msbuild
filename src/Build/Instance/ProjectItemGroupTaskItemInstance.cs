@@ -137,8 +137,7 @@ namespace Microsoft.Build.Execution
         /// Metadata collection is ordered.
         /// Assumes ProjectItemGroupTaskMetadataInstance is an immutable type.
         /// </summary>
-        internal ProjectItemGroupTaskItemInstance
-            (
+        internal ProjectItemGroupTaskItemInstance(
             string itemType,
             string include,
             string exclude,
@@ -159,8 +158,7 @@ namespace Microsoft.Build.Execution
             ElementLocation removeMetadataLocation,
             ElementLocation keepDuplicatesLocation,
             ElementLocation conditionLocation,
-            List<ProjectItemGroupTaskMetadataInstance> metadata
-            )
+            List<ProjectItemGroupTaskMetadataInstance> metadata)
         {
             ErrorUtilities.VerifyThrowInternalNull(itemType, nameof(itemType));
             ErrorUtilities.VerifyThrowInternalNull(include, nameof(include));

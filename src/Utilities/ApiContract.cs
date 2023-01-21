@@ -56,8 +56,7 @@ namespace Microsoft.Build.Utilities
                     {
                         apiContracts.Add(new ApiContract(
                             contractElement.GetAttribute(Attributes.Name),
-                            contractElement.GetAttribute(Attributes.Version)
-                        ));
+                            contractElement.GetAttribute(Attributes.Version)));
                     }
                 }
             }

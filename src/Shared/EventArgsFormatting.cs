@@ -170,8 +170,7 @@ namespace Microsoft.Build.Shared
         /// <param name="endColumnNumber">end column number (0 if n/a)</param>
         /// <param name="threadId">thread id</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage
-        (
+        internal static string FormatEventMessage(
             string category,
             string subcategory,
             string message,
@@ -181,8 +180,7 @@ namespace Microsoft.Build.Shared
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            int threadId
-        )
+            int threadId)
         {
             return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, null);
         }
@@ -204,8 +202,7 @@ namespace Microsoft.Build.Shared
         /// <param name="threadId">thread id</param>
         /// <param name="logOutputProperties">log output properties</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage
-        (
+        internal static string FormatEventMessage(
             string category,
             string subcategory,
             string message,
@@ -217,8 +214,7 @@ namespace Microsoft.Build.Shared
             int columnNumber,
             int endColumnNumber,
             int threadId,
-            string logOutputProperties
-        )
+            string logOutputProperties)
         {
             // capacity is the longest possible path through the below
             // to avoid reallocating while constructing the string

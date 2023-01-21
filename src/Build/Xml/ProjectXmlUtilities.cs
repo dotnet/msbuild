@@ -128,15 +128,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectAttributeEitherMissingOrNotEmpty(XmlElementWithLocation xmlElement, XmlAttributeWithLocation attribute, string attributeName)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 attribute == null || attribute.Value.Length > 0,
                 attribute?.Location,
                 "InvalidAttributeValue",
                 String.Empty,
                 attributeName,
-                xmlElement.Name
-            );
+                xmlElement.Name);
         }
 
         /// <summary>

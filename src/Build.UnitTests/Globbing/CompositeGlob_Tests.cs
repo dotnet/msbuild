@@ -126,10 +126,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
                 new CompositeGlob(
                     new MSBuildGlobWithGaps(g3, MSBuildGlob.Parse("x*")),
                     new CompositeGlob(
-                        g4
-                    )
-                )
-            );
+                        g4)));
 
             var leafGlobs = composite.GetParsedGlobs().ToArray();
 

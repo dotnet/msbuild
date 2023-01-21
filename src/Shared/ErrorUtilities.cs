@@ -206,11 +206,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="unformattedMessage"></param>
-        internal static void VerifyThrow
-        (
+        internal static void VerifyThrow(
             bool condition,
-            string unformattedMessage
-        )
+            string unformattedMessage)
         {
             if (!condition)
             {
@@ -226,12 +224,10 @@ namespace Microsoft.Build.Shared
         /// <param name="condition"></param>
         /// <param name="unformattedMessage"></param>
         /// <param name="arg0"></param>
-        internal static void VerifyThrow
-        (
+        internal static void VerifyThrow(
             bool condition,
             string unformattedMessage,
-            object arg0
-        )
+            object arg0)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInternalError() method, because that method always
@@ -249,13 +245,11 @@ namespace Microsoft.Build.Shared
         /// <param name="unformattedMessage"></param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void VerifyThrow
-        (
+        internal static void VerifyThrow(
             bool condition,
             string unformattedMessage,
             object arg0,
-            object arg1
-        )
+            object arg1)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInternalError() method, because that method always
@@ -274,14 +268,12 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal static void VerifyThrow
-        (
+        internal static void VerifyThrow(
             bool condition,
             string unformattedMessage,
             object arg0,
             object arg1,
-            object arg2
-        )
+            object arg2)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInternalError() method, because that method always
@@ -301,15 +293,13 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        internal static void VerifyThrow
-        (
+        internal static void VerifyThrow(
             bool condition,
             string unformattedMessage,
             object arg0,
             object arg1,
             object arg2,
-            object arg3
-        )
+            object arg3)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInternalError() method, because that method always
@@ -345,11 +335,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="resourceName"></param>
-        internal static void VerifyThrowInvalidOperation
-        (
+        internal static void VerifyThrowInvalidOperation(
             bool condition,
-            string resourceName
-        )
+            string resourceName)
         {
             if (!condition)
             {
@@ -365,12 +353,10 @@ namespace Microsoft.Build.Shared
         /// <param name="condition"></param>
         /// <param name="resourceName"></param>
         /// <param name="arg0"></param>
-        internal static void VerifyThrowInvalidOperation
-        (
+        internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName,
-            object arg0
-        )
+            object arg0)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
@@ -388,13 +374,11 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName"></param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void VerifyThrowInvalidOperation
-        (
+        internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName,
             object arg0,
-            object arg1
-        )
+            object arg1)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
@@ -413,14 +397,12 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal static void VerifyThrowInvalidOperation
-        (
+        internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName,
             object arg0,
             object arg1,
-            object arg2
-        )
+            object arg2)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
@@ -440,15 +422,13 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        internal static void VerifyThrowInvalidOperation
-        (
+        internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName,
             object arg0,
             object arg1,
             object arg2,
-            object arg3
-        )
+            object arg3)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
@@ -470,11 +450,9 @@ namespace Microsoft.Build.Shared
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
         /// </summary>
-        internal static void ThrowArgument
-        (
+        internal static void ThrowArgument(
             string resourceName,
-            params object[] args
-        )
+            params object[] args)
         {
             ThrowArgument(null, resourceName, args);
         }
@@ -492,12 +470,10 @@ namespace Microsoft.Build.Shared
         /// <param name="innerException">Can be null.</param>
         /// <param name="resourceName"></param>
         /// <param name="args"></param>
-        internal static void ThrowArgument
-        (
+        internal static void ThrowArgument(
             Exception innerException,
             string resourceName,
-            params object[] args
-        )
+            params object[] args)
         {
 #if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
@@ -514,11 +490,9 @@ namespace Microsoft.Build.Shared
         /// <remarks>This method is thread-safe.</remarks>
         /// <param name="condition"></param>
         /// <param name="resourceName"></param>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
-            string resourceName
-        )
+            string resourceName)
         {
             VerifyThrowArgument(condition, null, resourceName);
         }
@@ -530,12 +504,10 @@ namespace Microsoft.Build.Shared
         /// <param name="condition"></param>
         /// <param name="resourceName"></param>
         /// <param name="arg0"></param>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             string resourceName,
-            object arg0
-        )
+            object arg0)
         {
             VerifyThrowArgument(condition, null, resourceName, arg0);
         }
@@ -548,13 +520,11 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName"></param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             string resourceName,
             object arg0,
-            object arg1
-        )
+            object arg1)
         {
             VerifyThrowArgument(condition, null, resourceName, arg0, arg1);
         }
@@ -563,14 +533,12 @@ namespace Microsoft.Build.Shared
         /// Overload for three string format arguments.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             string resourceName,
             object arg0,
             object arg1,
-            object arg2
-        )
+            object arg2)
         {
             VerifyThrowArgument(condition, null, resourceName, arg0, arg1, arg2);
         }
@@ -579,15 +547,13 @@ namespace Microsoft.Build.Shared
         /// Overload for four string format arguments.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             string resourceName,
             object arg0,
             object arg1,
             object arg2,
-            object arg3
-        )
+            object arg3)
         {
             VerifyThrowArgument(condition, null, resourceName, arg0, arg1, arg2, arg3);
         }
@@ -600,12 +566,10 @@ namespace Microsoft.Build.Shared
         /// <param name="condition"></param>
         /// <param name="innerException">Can be null.</param>
         /// <param name="resourceName"></param>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             Exception innerException,
-            string resourceName
-        )
+            string resourceName)
         {
             if (!condition)
             {
@@ -623,13 +587,11 @@ namespace Microsoft.Build.Shared
         /// <param name="innerException"></param>
         /// <param name="resourceName"></param>
         /// <param name="arg0"></param>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             Exception innerException,
             string resourceName,
-            object arg0
-        )
+            object arg0)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
@@ -649,14 +611,12 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName"></param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             Exception innerException,
             string resourceName,
             object arg0,
-            object arg1
-        )
+            object arg1)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
@@ -671,15 +631,13 @@ namespace Microsoft.Build.Shared
         /// Overload for three string format arguments.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             Exception innerException,
             string resourceName,
             object arg0,
             object arg1,
-            object arg2
-        )
+            object arg2)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
@@ -694,16 +652,14 @@ namespace Microsoft.Build.Shared
         /// Overload for four string format arguments.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        internal static void VerifyThrowArgument
-        (
+        internal static void VerifyThrowArgument(
             bool condition,
             Exception innerException,
             string resourceName,
             object arg0,
             object arg1,
             object arg2,
-            object arg3
-        )
+            object arg3)
         {
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates

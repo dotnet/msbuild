@@ -217,25 +217,21 @@ namespace Microsoft.Build.UnitTests
 
         public bool IsRunningMultipleNodes { get; set; }
 
-        public bool BuildProjectFile
-            (
+        public bool BuildProjectFile(
             string projectFileName,
             string[] targetNames,
             IDictionary globalPropertiesPassedIntoTask,
-            IDictionary targetOutputs
-            )
+            IDictionary targetOutputs)
         {
             return BuildProjectFile(projectFileName, targetNames, globalPropertiesPassedIntoTask, targetOutputs, null);
         }
 
-        public bool BuildProjectFile
-            (
+        public bool BuildProjectFile(
             string projectFileName,
             string[] targetNames,
             IDictionary globalPropertiesPassedIntoTask,
             IDictionary targetOutputs,
-            string toolsVersion
-            )
+            string toolsVersion)
         {
             var finalGlobalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -255,16 +251,14 @@ namespace Microsoft.Build.UnitTests
             return project.Build(targetNames, loggers);
         }
 
-        public bool BuildProjectFilesInParallel
-        (
+        public bool BuildProjectFilesInParallel(
             string[] projectFileNames,
             string[] targetNames,
             IDictionary[] globalProperties,
             IDictionary[] targetOutputsPerProject,
             string[] toolsVersion,
             bool useResultsCache,
-            bool unloadProjectsOnCompletion
-        )
+            bool unloadProjectsOnCompletion)
         {
             bool includeTargetOutputs = targetOutputsPerProject != null;
 
@@ -287,15 +281,13 @@ namespace Microsoft.Build.UnitTests
             return result.Result;
         }
 
-        public BuildEngineResult BuildProjectFilesInParallel
-        (
+        public BuildEngineResult BuildProjectFilesInParallel(
             string[] projectFileNames,
             string[] targetNames,
             IDictionary[] globalProperties,
             IList<string>[] undefineProperties,
             string[] toolsVersion,
-            bool returnTargetOutputs
-        )
+            bool returnTargetOutputs)
         {
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
 
@@ -347,42 +339,32 @@ namespace Microsoft.Build.UnitTests
         {
         }
 
-        public bool BuildProjectFile
-            (
-            string projectFileName
-            )
+        public bool BuildProjectFile(
+            string projectFileName)
         {
             return (_projectCollection.LoadProject(projectFileName)).Build();
         }
 
-        public bool BuildProjectFile
-            (
+        public bool BuildProjectFile(
             string projectFileName,
-            string[] targetNames
-            )
+            string[] targetNames)
         {
             return (_projectCollection.LoadProject(projectFileName)).Build(targetNames);
         }
 
-        public bool BuildProjectFile
-            (
+        public bool BuildProjectFile(
             string projectFileName,
-            string targetName
-            )
+            string targetName)
         {
             return (_projectCollection.LoadProject(projectFileName)).Build(targetName);
         }
 
-        public void UnregisterAllLoggers
-            (
-            )
+        public void UnregisterAllLoggers()
         {
             _projectCollection.UnregisterAllLoggers();
         }
 
-        public void UnloadAllProjects
-            (
-            )
+        public void UnloadAllProjects()
         {
             _projectCollection.UnloadAllProjects();
         }

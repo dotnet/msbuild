@@ -49,14 +49,12 @@ namespace Microsoft.Build.Execution
         /// Constructor called by Evaluator.
         /// All parameters are in the unevaluated state.
         /// </summary>
-        internal ProjectOnErrorInstance
-            (
+        internal ProjectOnErrorInstance(
             string executeTargets,
             string condition,
             ElementLocation location,
             ElementLocation executeTargetsLocation,
-            ElementLocation conditionLocation
-            )
+            ElementLocation conditionLocation)
         {
             ErrorUtilities.VerifyThrowInternalLength(executeTargets, nameof(executeTargets));
             ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));

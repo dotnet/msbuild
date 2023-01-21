@@ -67,8 +67,7 @@ namespace Microsoft.Build.UnitTests
         public void FreeHandle(IntPtr handle)
         {
             Assert.True(_allocatedHandles.Exists(new Predicate<IntPtr>(
-                delegate (IntPtr ptr) { return ptr == handle; }
-            )));
+                delegate (IntPtr ptr) { return ptr == handle; })));
             Marshal.FreeHGlobal(handle);
             _allocatedHandles.Remove(handle);
 

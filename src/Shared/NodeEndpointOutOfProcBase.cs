@@ -226,8 +226,7 @@ namespace Microsoft.Build.BackEnd
                 security.AddAccessRule(rule);
                 security.SetOwner(identifier);
 
-                _pipeServer = new NamedPipeServerStream
-                    (
+                _pipeServer = new NamedPipeServerStream(
                     pipeName,
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
@@ -240,14 +239,12 @@ namespace Microsoft.Build.BackEnd
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize,  // Default output buffer
                     security,
-                    HandleInheritability.None
-                );
+                    HandleInheritability.None);
             }
             else
 #endif
             {
-                _pipeServer = new NamedPipeServerStream
-                    (
+                _pipeServer = new NamedPipeServerStream(
                     pipeName,
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
@@ -258,8 +255,7 @@ namespace Microsoft.Build.BackEnd
 #endif
                     ,
                     PipeBufferSize, // Default input buffer
-                    PipeBufferSize  // Default output buffer
-                );
+                    PipeBufferSize);  // Default output buffer
             }
         }
 
@@ -403,11 +399,14 @@ namespace Microsoft.Build.BackEnd
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
-                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                            int handshakePart = _pipeServer.ReadIntForHandshake(
+                                byteToAccept: i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
                             if (handshakePart != handshakeComponents[i])
                             {

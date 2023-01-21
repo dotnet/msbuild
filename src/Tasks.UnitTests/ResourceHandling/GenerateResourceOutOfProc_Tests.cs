@@ -1787,9 +1787,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
                 new TaskItem( Utilities.WriteTestResX(false, null, null)),
             };
 
@@ -1825,9 +1825,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
                 new TaskItem( Utilities.WriteTestResX(false, null, null)),
             };
 
@@ -1869,9 +1869,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             try
             {
                 t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestText(null, null) ),
-                new TaskItem( Utilities.WriteTestText(null, null) ),
-                new TaskItem( Utilities.WriteTestText("goober", null) ),
+                new TaskItem( Utilities.WriteTestText(null, null)),
+                new TaskItem( Utilities.WriteTestText(null, null)),
+                new TaskItem( Utilities.WriteTestText("goober", null)),
                 new TaskItem( Utilities.WriteTestText(null, null)),
             };
                 foreach (ITaskItem taskItem in t.Sources)

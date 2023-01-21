@@ -32,8 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.CreateTargetElement("@#$invalid@#$");
-            }
-           );
+            });
         }
         /// <summary>
         /// Read targets in an empty project
@@ -107,8 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.Inputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null outputs on the target element
@@ -120,8 +118,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.Outputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null dependsOnTargets on the target element
@@ -133,8 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.DependsOnTargets = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null dependsOnTargets on the target element
@@ -146,8 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.KeepDuplicateOutputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null condition on the target element
@@ -176,8 +171,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read a target with an invalid attribute
@@ -194,8 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an target with two task children

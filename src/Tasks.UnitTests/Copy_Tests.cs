@@ -577,8 +577,7 @@ namespace Microsoft.Build.UnitTests
                             sourceFile,
                             destinationFile,
                             "SkipUnchangedFiles",
-                            "true"
-                            );
+                            "true");
                     }
                     else
                     {
@@ -587,8 +586,7 @@ namespace Microsoft.Build.UnitTests
                             sourceFile,
                             destinationFile,
                             "SkipUnchangedFiles",
-                            "true"
-                            );
+                            "true");
                     }
 
                     // "Expected the destination file to contain the contents of source file."

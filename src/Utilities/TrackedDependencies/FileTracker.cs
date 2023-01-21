@@ -529,8 +529,7 @@ namespace Microsoft.Build.Utilities
                                        s_TrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase) ||
                                        s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase),
                                        "This method should only be passed s_TrackerFilename or s_FileTrackerFilename, but was passed {0} instead!",
-                                       filename
-                                       );
+                                       filename);
 
             // Look for FileTracker.dll/Tracker.exe in the MSBuild tools directory. They may exist elsewhere on disk,
             // but other copies aren't guaranteed to be compatible with the latest.

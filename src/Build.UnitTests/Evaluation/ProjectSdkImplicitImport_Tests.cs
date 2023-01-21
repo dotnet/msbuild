@@ -633,12 +633,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 data.TemplateName,
                 _projectInnerContents,
                 data.TemplateVersion,
-                null
-            );
+                null);
 
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(
-                new MockExpandedSdkResolver(_testSdkDirectory)
-            );
+                new MockExpandedSdkResolver(_testSdkDirectory));
 
             void AddProperty(string name, string value) =>
                 (projectOptions.GlobalProperties ??= new Dictionary<string, string>()).Add(name, value);
@@ -672,14 +670,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 var expectedSdkReferenceRaw = new SdkReference(
                     data.TemplateName,
                     data.TemplateVersion,
-                    data.Template.ExpectedMinimumVersion
-                );
+                    data.Template.ExpectedMinimumVersion);
 
                 var expectedSdkReference = new SdkReference(
                     SdkName,
                     SdkExpectedVersion,
-                    data.Template.ExpectedMinimumVersion
-                );
+                    data.Template.ExpectedMinimumVersion);
 
                 project.Imports.Count.ShouldBe(2);
 
@@ -716,14 +712,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     var templates = new[]
                     {
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsAttributeWithVersion, true
-                        ),
+                            ProjectTemplateSdkAsAttributeWithVersion, true),
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsElementWithVersion, false
-                        ),
+                            ProjectTemplateSdkAsElementWithVersion, false),
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsExplicitImportWithVersion, false
-                        )
+                            ProjectTemplateSdkAsExplicitImportWithVersion, false)
                     };
 
                     foreach (var template in templates)
@@ -749,8 +742,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setName
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setName)
                             {
                                 TemplateName = SdkNameProperty
                             }
@@ -759,8 +751,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setVersion
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setVersion)
                             {
                                 TemplateVersion = SdkVersionProperty
                             }
@@ -769,8 +760,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setName && setVersion
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setName && setVersion)
                             {
                                 TemplateName = SdkNameProperty,
                                 TemplateVersion = SdkVersionProperty

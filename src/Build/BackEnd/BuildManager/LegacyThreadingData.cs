@@ -88,11 +88,9 @@ namespace Microsoft.Build.Execution
             {
                 ErrorUtilities.VerifyThrow(!_legacyThreadingEventsById.ContainsKey(submissionId), "Submission {0} should not already be registered with LegacyThreadingData", submissionId);
 
-                _legacyThreadingEventsById[submissionId] = new Tuple<AutoResetEvent, ManualResetEvent>
-                            (
+                _legacyThreadingEventsById[submissionId] = new Tuple<AutoResetEvent, ManualResetEvent>(
                                 new AutoResetEvent(false),
-                                new ManualResetEvent(false)
-                            );
+                                new ManualResetEvent(false));
             }
         }
 
@@ -151,11 +149,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void SignalLegacyThreadStart(RequestBuilder instance)
         {
-            ErrorUtilities.VerifyThrow
-                (
+            ErrorUtilities.VerifyThrow(
                     instance?.RequestEntry?.Request != null,
-                    "Cannot signal legacy thread start for a RequestBuilder without a request"
-                );
+                    "Cannot signal legacy thread start for a RequestBuilder without a request");
 
             int submissionId = instance.RequestEntry.Request.SubmissionId;
             InstanceForMainThread = instance;

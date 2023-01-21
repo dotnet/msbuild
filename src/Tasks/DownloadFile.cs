@@ -191,12 +191,13 @@ namespace Microsoft.Build.Tasks
                         using (var target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
-
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync(
 #if NET6_0_OR_GREATER
                             cancellationToken
 #endif
                             ).ConfigureAwait(false))
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             {
                                 await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
                             }

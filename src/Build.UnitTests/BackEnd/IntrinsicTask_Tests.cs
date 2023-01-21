@@ -97,8 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -114,12 +113,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <PropertyGroup/>
                 </PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task);
-            }
-           );
+            });
         }
         [Fact]
         public void BlankProperty()
@@ -132,8 +129,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <p1></p1>
                 </PropertyGroup>
             </Target>
-            </Project>"
-            );
+            </Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
@@ -153,12 +149,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             <Target Name='t'>
                 <PropertyGroup>x</PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -174,12 +168,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <p Include='v0'/>
                 </PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void PropertyGroupWithConditionOnGroup()
@@ -661,8 +653,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 Lookup lookup = LookupHelpers.CreateEmptyLookup();
                 ExecuteTask(task, lookup);
-            }
-           );
+            });
         }
         /// <summary>
         /// Should not make items with an empty include.
@@ -748,8 +739,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -767,8 +757,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -786,8 +775,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void ItemGroupWithTransform()
@@ -1575,8 +1563,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void RemoveNoOp()
@@ -2964,8 +2951,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void ModifyItemInTargetWithConditionWithoutItemTypeOnMetadataInCondition()

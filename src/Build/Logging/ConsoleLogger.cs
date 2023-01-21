@@ -85,13 +85,11 @@ namespace Microsoft.Build.Logging
         /// <param name="write"></param>
         /// <param name="colorSet"></param>
         /// <param name="colorReset"></param>
-        public ConsoleLogger
-        (
+        public ConsoleLogger(
             LoggerVerbosity verbosity,
             WriteHandler write,
             ColorSetter colorSet,
-            ColorResetter colorReset
-        )
+            ColorResetter colorReset)
         {
             _verbosity = verbosity;
             _write = write;

@@ -134,14 +134,12 @@ namespace Microsoft.Build.Tasks
                     AssignedFiles[i] = new TaskItem(Files[i]);
 
                     string dependentUpon = AssignedFiles[i].GetMetadata(ItemMetadataNames.dependentUpon);
-                    Culture.ItemCultureInfo info = Culture.GetItemCultureInfo
-                        (
+                    Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(
                             AssignedFiles[i].ItemSpec,
                             dependentUpon,
                             // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                             // https://github.com/dotnet/msbuild/issues/3064
-                            AssignedFiles[i].GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase)
-                        );
+                            AssignedFiles[i].GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase));
 
                     if (!string.IsNullOrEmpty(info.culture))
                     {
@@ -158,13 +156,11 @@ namespace Microsoft.Build.Tasks
                     CultureNeutralAssignedFiles[i] =
                         new TaskItem(AssignedFiles[i]) { ItemSpec = info.cultureNeutralFilename };
 
-                    Log.LogMessageFromResources
-                    (
+                    Log.LogMessageFromResources(
                         MessageImportance.Low,
                         "AssignCulture.Comment",
                         AssignedFiles[i].GetMetadata("Culture"),
-                        AssignedFiles[i].ItemSpec
-                    );
+                        AssignedFiles[i].ItemSpec);
                 }
                 catch (ArgumentException e)
                 {

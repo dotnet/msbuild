@@ -668,8 +668,7 @@ namespace Microsoft.Build.BackEnd
             // See if we are done.  We are done if there are no unassigned requests and no requests assigned to nodes.
             if (_schedulingData.UnscheduledRequestsCount == 0 &&
                 _schedulingData.ReadyRequestsCount == 0 &&
-                _schedulingData.BlockedRequestsCount == 0
-                )
+                _schedulingData.BlockedRequestsCount == 0)
             {
                 if (_schedulingData.ExecutingRequestsCount == 0 && _schedulingData.YieldingRequestsCount == 0)
                 {
@@ -1777,8 +1776,7 @@ namespace Microsoft.Build.BackEnd
                                         requestAffinity,
                                         existingRequestAffinity,
                                         config.ProjectFullPath,
-                                        globalProperties
-                                        )));
+                                        globalProperties)));
                             response = GetResponseForResult(nodeForResults, request, result);
                             responses.Add(response);
                             continue;
@@ -2470,8 +2468,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            loggingService.LogComment
-            (
+            loggingService.LogComment(
                 context,
                 MessageImportance.Normal,
                 "BuildHierarchyEntry",
@@ -2481,8 +2478,7 @@ namespace Microsoft.Build.BackEnd
                 String.Format(CultureInfo.InvariantCulture, "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds),
                 String.Format(CultureInfo.InvariantCulture, "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Blocked).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Ready).TotalSeconds),
                 _configCache[request.BuildRequest.ConfigurationId].ProjectFullPath,
-                String.Join(", ", request.BuildRequest.Targets)
-            );
+                String.Join(", ", request.BuildRequest.Targets));
 
             List<SchedulableRequest> childRequests = new List<SchedulableRequest>(_schedulingData.GetRequestsByHierarchy(request));
             childRequests.Sort(delegate (SchedulableRequest left, SchedulableRequest right)

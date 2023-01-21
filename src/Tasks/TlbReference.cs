@@ -317,36 +317,28 @@ namespace Microsoft.Build.Tasks
                 switch (_targetProcessorArchitecture)
                 {
                     case UtilitiesProcessorArchitecture.X86:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.Required32Bit,
-                                ImageFileMachine.I386
-                            );
+                                ImageFileMachine.I386);
                         break;
                     case UtilitiesProcessorArchitecture.AMD64:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.PE32Plus,
-                                ImageFileMachine.AMD64
-                            );
+                                ImageFileMachine.AMD64);
                         break;
                     case UtilitiesProcessorArchitecture.IA64:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.PE32Plus,
-                                ImageFileMachine.IA64
-                            );
+                                ImageFileMachine.IA64);
                         break;
                     case UtilitiesProcessorArchitecture.ARM:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.Required32Bit,
-                                ImageFileMachine.ARM
-                            );
+                                ImageFileMachine.ARM);
                         break;
                     case UtilitiesProcessorArchitecture.MSIL:
                     default:

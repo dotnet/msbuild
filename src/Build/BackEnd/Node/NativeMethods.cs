@@ -49,8 +49,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CreateProcess
-        (
+        internal static extern bool CreateProcess(
             string lpApplicationName,
             string lpCommandLine,
             ref SECURITY_ATTRIBUTES lpProcessAttributes,
@@ -61,8 +60,7 @@ namespace Microsoft.Build.BackEnd
             IntPtr lpEnvironment,
             string lpCurrentDirectory,
             [In] ref STARTUP_INFO lpStartupInfo,
-            out PROCESS_INFORMATION lpProcessInformation
-        );
+            out PROCESS_INFORMATION lpProcessInformation);
 
         /// <summary>
         /// Structure that contains the startupinfo

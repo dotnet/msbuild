@@ -209,12 +209,10 @@ namespace Microsoft.Build.Construction
         /// Assumes path is already normalized.
         /// May throw InvalidProjectFileException.
         /// </summary>
-        private ProjectRootElement
-            (
+        private ProjectRootElement(
                 string path,
                 ProjectRootElementCacheBase projectRootElementCache,
-                bool preserveFormatting
-            )
+                bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
             ErrorUtilities.VerifyThrowInternalRooted(path);
@@ -2011,12 +2009,10 @@ namespace Microsoft.Build.Construction
         /// If the file is in MSBuild format, may throw InvalidProjectFileException.
         /// If the file is a solution, will throw an IO-related exception if the file cannot be read.
         /// </summary>
-        private static ProjectRootElement CreateProjectFromPath
-            (
+        private static ProjectRootElement CreateProjectFromPath(
                 string projectFile,
                 ProjectRootElementCacheBase projectRootElementCache,
-                bool preserveFormatting
-            )
+                bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
 

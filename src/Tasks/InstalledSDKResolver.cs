@@ -33,8 +33,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Resolve references which are found in a specific SDK
         /// </summary>
-        public override bool Resolve
-        (
+        public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
@@ -45,8 +44,7 @@ namespace Microsoft.Build.Tasks
             string assemblyFolderKey,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
-            out bool userRequestedSpecificFile
-        )
+            out bool userRequestedSpecificFile)
         {
             foundPath = null;
             userRequestedSpecificFile = false;

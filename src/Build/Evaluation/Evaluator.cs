@@ -411,31 +411,27 @@ namespace Microsoft.Build.Evaluation
             {
                 if (output.IsOutputItem)
                 {
-                    ProjectTaskOutputItemInstance outputItem = new ProjectTaskOutputItemInstance
-                        (
+                    ProjectTaskOutputItemInstance outputItem = new ProjectTaskOutputItemInstance(
                         output.ItemType,
                         output.TaskParameter,
                         output.Condition,
                         output.Location,
                         output.ItemTypeLocation,
                         output.TaskParameterLocation,
-                        output.ConditionLocation
-                        );
+                        output.ConditionLocation);
 
                     taskOutputs.Add(outputItem);
                 }
                 else
                 {
-                    ProjectTaskOutputPropertyInstance outputProperty = new ProjectTaskOutputPropertyInstance
-                        (
+                    ProjectTaskOutputPropertyInstance outputProperty = new ProjectTaskOutputPropertyInstance(
                         output.PropertyName,
                         output.TaskParameter,
                         output.Condition,
                         output.Location,
                         output.PropertyNameLocation,
                         output.TaskParameterLocation,
-                        output.ConditionLocation
-                        );
+                        output.ConditionLocation);
 
                     taskOutputs.Add(outputProperty);
                 }
@@ -489,18 +485,15 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (ProjectMetadataElement metadataElement in itemElement.Metadata)
                 {
-                    metadata.Add(new ProjectItemGroupTaskMetadataInstance
-                        (
+                    metadata.Add(new ProjectItemGroupTaskMetadataInstance(
                         metadataElement.Name,
                         metadataElement.Value,
                         metadataElement.Condition,
                         metadataElement.Location,
-                        metadataElement.ConditionLocation
-                        ));
+                        metadataElement.ConditionLocation));
                 }
 
-                items.Add(new ProjectItemGroupTaskItemInstance
-                    (
+                items.Add(new ProjectItemGroupTaskItemInstance(
                     itemElement.ItemType,
                     itemElement.Include,
                     itemElement.Exclude,
@@ -521,8 +514,7 @@ namespace Microsoft.Build.Evaluation
                     itemElement.RemoveMetadataLocation,
                     itemElement.KeepDuplicatesLocation,
                     itemElement.ConditionLocation,
-                    metadata
-                    ));
+                    metadata));
             }
 
             ProjectItemGroupTaskInstance itemGroup = new ProjectItemGroupTaskInstance(itemGroupElement.Condition, itemGroupElement.Location, itemGroupElement.ConditionLocation, items);
@@ -570,8 +562,7 @@ namespace Microsoft.Build.Evaluation
             ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild> readOnlyTargetChildren = new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(targetChildren);
             ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance> readOnlyTargetOnErrorChildren = new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(targetOnErrorChildren);
 
-            ProjectTargetInstance targetInstance = new ProjectTargetInstance
-                (
+            ProjectTargetInstance targetInstance = new ProjectTargetInstance(
                 targetElement.Name,
                 targetElement.Condition,
                 targetElement.Inputs,
@@ -592,8 +583,7 @@ namespace Microsoft.Build.Evaluation
                 targetElement.AfterTargetsLocation,
                 readOnlyTargetChildren,
                 readOnlyTargetOnErrorChildren,
-                parentProjectSupportsReturnsAttribute
-                );
+                parentProjectSupportsReturnsAttribute);
 
             targetElement.TargetInstance = targetInstance;
             return targetInstance;
@@ -1025,8 +1015,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluateUsingTaskElement(string directoryOfImportingFile, ProjectUsingTaskElement projectUsingTaskElement)
         {
-            TaskRegistry.RegisterTasksFromUsingTaskElement<P, I>
-                (
+            TaskRegistry.RegisterTasksFromUsingTaskElement<P, I>(
                 _evaluationLoggingContext.LoggingService,
                 _evaluationLoggingContext.BuildEventContext,
                 directoryOfImportingFile,
@@ -1034,8 +1023,7 @@ namespace Microsoft.Build.Evaluation
                 _data.TaskRegistry,
                 _expander,
                 ExpanderOptions.ExpandPropertiesAndItems,
-                _evaluationContext.FileSystem
-                );
+                _evaluationContext.FileSystem);
         }
 
         /// <summary>
@@ -1300,8 +1288,7 @@ namespace Microsoft.Build.Evaluation
                 // of this project (or import).
                 if (
                         ((IDictionary<string, ProjectPropertyInstance>)_data.GlobalPropertiesDictionary).ContainsKey(propertyElement.Name) &&
-                        !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name)
-                    )
+                        !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name))
                 {
                     _evaluationLoggingContext.LogComment(MessageImportance.Low, "OM_GlobalProperty", propertyElement.Name);
                     return;
@@ -1849,8 +1836,7 @@ namespace Microsoft.Build.Evaluation
                         sdkReference = new SdkReference(
                             EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode),
                             EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode),
-                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode)
-                        );
+                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode));
                     }
                 }
 
@@ -2454,8 +2440,7 @@ namespace Microsoft.Build.Evaluation
 
             using (_evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
-                bool result = ConditionEvaluator.EvaluateCondition
-                    (
+                bool result = ConditionEvaluator.EvaluateCondition(
                     condition,
                     parserOptions,
                     _expander,
@@ -2465,8 +2450,7 @@ namespace Microsoft.Build.Evaluation
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
-                    loggingContext: _evaluationLoggingContext
-                    );
+                    loggingContext: _evaluationLoggingContext);
 
                 return result;
             }
@@ -2494,8 +2478,7 @@ namespace Microsoft.Build.Evaluation
 
             using (_evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
-                bool result = ConditionEvaluator.EvaluateConditionCollectingConditionedProperties
-                    (
+                bool result = ConditionEvaluator.EvaluateConditionCollectingConditionedProperties(
                     condition,
                     parserOptions,
                     _expander,
@@ -2506,8 +2489,7 @@ namespace Microsoft.Build.Evaluation
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
-                    projectRootElementCache
-                    );
+                    projectRootElementCache);
 
                 return result;
             }

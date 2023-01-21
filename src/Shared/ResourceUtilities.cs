@@ -62,8 +62,7 @@ namespace Microsoft.Build.Shared
                     message[i + 4] < '0' || message[i + 4] > '9' ||
                     message[i + 5] < '0' || message[i + 5] > '9' ||
                     message[i + 6] < '0' || message[i + 6] > '9' ||
-                    message[i + 7] != ':'
-                    )
+                    message[i + 7] != ':')
                 {
                     return message;
                 }

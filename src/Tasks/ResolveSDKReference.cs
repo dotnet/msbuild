@@ -37,11 +37,9 @@ namespace Microsoft.Build.Tasks
         /// Regex for breaking up the sdk reference include into pieces.
         /// Example: XNA, Version=8.0
         /// </summary>
-        private static readonly Regex s_sdkReferenceFormat = new Regex
-        (
+        private static readonly Regex s_sdkReferenceFormat = new Regex(
              @"(?<SDKSIMPLENAME>^[^,]*),\s*Version=(?<SDKVERSION>.*)",
-            RegexOptions.IgnoreCase
-        );
+            RegexOptions.IgnoreCase);
 
         /// <summary>
         /// SimpleName group

@@ -19,12 +19,10 @@ namespace Microsoft.Build.UnitTests
         // Generic build class to test custom serialization of abstract class BuildEventArgs
         internal class GenericBuildEventArg : BuildEventArgs
         {
-            internal GenericBuildEventArg
-        (
+            internal GenericBuildEventArg(
             string message,
             string helpKeyword,
-            string senderName
-        )
+            string senderName)
                 : base(message, helpKeyword, senderName)
             {
                 // Do Nothing

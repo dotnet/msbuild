@@ -1023,8 +1023,7 @@ namespace Microsoft.Build.UnitTests
                                         lowPriority: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
-                                        commandLine: null
-                        );
+                                        commandLine: null);
                 }
                 finally
                 {
@@ -1033,8 +1032,7 @@ namespace Microsoft.Build.UnitTests
                         File.Delete(filename);
                     }
                 }
-            }
-           );
+            });
         }
         [Fact]
         public void TestHaveAnySwitchesBeenSet()

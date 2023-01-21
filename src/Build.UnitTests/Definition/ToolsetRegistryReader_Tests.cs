@@ -244,8 +244,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
-            }
-           );
+            });
         }
         /// <summary>
         /// Registry has the following structure
@@ -463,8 +462,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
-            }
-           );
+            });
         }
         private ToolsetRegistryReader GetStandardRegistryReader()
         {
@@ -523,8 +521,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 string msbuildOverrideTasksPath = null;
                 string defaultOverrideToolsVersion = null;
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
-            }
-           );
+            });
         }
         /// <summary>
         /// Regular case of getting the default override toolsversion
@@ -573,8 +570,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 string msbuildOverrideTasksPath = null;
                 string defaultOverrideToolsVersion = null;
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
-            }
-           );
+            });
         }
         [Fact]
         public void ReadToolsets_NoBinPathOrToolsPath()

@@ -56,13 +56,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// This is the original constructor.  No one should ever use this except internally for backward compatibility.
         /// </summary>
-        public BuildEventContext
-        (
+        public BuildEventContext(
             int nodeId,
             int targetId,
             int projectContextId,
-            int taskId
-        )
+            int taskId)
             : this(InvalidSubmissionId, nodeId, InvalidEvaluationId, InvalidProjectInstanceId, projectContextId, targetId, taskId)
         {
             // UNDONE: This is obsolete.
@@ -71,14 +69,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Constructs a BuildEventContext with a specified project instance id.
         /// </summary>
-        public BuildEventContext
-        (
+        public BuildEventContext(
             int nodeId,
             int projectInstanceId,
             int projectContextId,
             int targetId,
-            int taskId
-        )
+            int taskId)
             : this(InvalidSubmissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
@@ -86,15 +82,13 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Constructs a BuildEventContext with a specific submission id
         /// </summary>
-        public BuildEventContext
-        (
+        public BuildEventContext(
             int submissionId,
             int nodeId,
             int projectInstanceId,
             int projectContextId,
             int targetId,
-            int taskId
-        )
+            int taskId)
             : this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
@@ -102,16 +96,14 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Constructs a BuildEventContext
         /// </summary>
-        public BuildEventContext
-        (
+        public BuildEventContext(
             int submissionId,
             int nodeId,
             int evaluationId,
             int projectInstanceId,
             int projectContextId,
             int targetId,
-            int taskId
-        )
+            int taskId)
         {
             _submissionId = submissionId;
             _nodeId = nodeId;

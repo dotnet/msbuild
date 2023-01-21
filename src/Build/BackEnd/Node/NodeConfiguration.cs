@@ -53,16 +53,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="forwardingLoggers">The forwarding loggers.</param>
         /// <param name="appDomainSetup">The AppDomain setup information.</param>
         /// <param name="loggingNodeConfiguration">The logging configuration for the node.</param>
-        public NodeConfiguration
-            (
+        public NodeConfiguration(
             int nodeId,
             BuildParameters buildParameters,
             LoggerDescription[] forwardingLoggers,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            LoggingNodeConfiguration loggingNodeConfiguration
-            )
+            LoggingNodeConfiguration loggingNodeConfiguration)
         {
             _nodeId = nodeId;
             _buildParameters = buildParameters;
@@ -188,8 +186,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                 , _appDomainSetup
 #endif
-                , _loggingNodeConfiguration
-                );
+                , _loggingNodeConfiguration);
         }
     }
 }

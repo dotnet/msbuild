@@ -512,28 +512,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// The setup required here suggests that the TargetDependencyAnalyzer
         /// class should be refactored.
         /// </summary>
-        private DependencyAnalysisResult PerformDependencyAnalysisTestHelper
-        (
+        private DependencyAnalysisResult PerformDependencyAnalysisTestHelper(
             FileWriteInfo[] filesToAnalyze,
             ItemDictionary<ProjectItemInstance> itemsByName,
             string inputs,
-            string outputs
-        )
+            string outputs)
         {
             ItemDictionary<ProjectItemInstance> h1 = new ItemDictionary<ProjectItemInstance>();
             ItemDictionary<ProjectItemInstance> h2 = new ItemDictionary<ProjectItemInstance>();
             return PerformDependencyAnalysisTestHelper(filesToAnalyze, itemsByName, inputs, outputs, out h1, out h2);
         }
 
-        private DependencyAnalysisResult PerformDependencyAnalysisTestHelper
-        (
+        private DependencyAnalysisResult PerformDependencyAnalysisTestHelper(
             FileWriteInfo[] filesToAnalyze,
             ItemDictionary<ProjectItemInstance> itemsByName,
             string inputs,
             string outputs,
             out ItemDictionary<ProjectItemInstance> changedTargetInputs,
-            out ItemDictionary<ProjectItemInstance> upToDateTargetInputs
-        )
+            out ItemDictionary<ProjectItemInstance> upToDateTargetInputs)
         {
             List<string> filesToDelete = new List<string>();
 
@@ -599,14 +595,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate1()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 new DateTime(2000, 1, 1), /* input2 */
                 new DateTime(2001, 1, 1), /* output1 */
                 new DateTime(2001, 1, 1), /* output2 */
-                false /* none out of date */
-                );
+                false); /* none out of date */
         }
 
         /// <summary>
@@ -615,14 +609,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate2()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2002, 1, 1), /* input1 */
                 new DateTime(2000, 1, 1), /* input2 */
                 new DateTime(2003, 1, 1), /* output1 */
                 new DateTime(2001, 1, 1), /* output2 */
-                true /* some out of date */
-                );
+                true); /* some out of date */
         }
 
         /// <summary>
@@ -631,14 +623,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate3()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 new DateTime(2002, 1, 1), /* input2 */
                 new DateTime(2001, 1, 1), /* output1 */
                 new DateTime(2003, 1, 1), /* output2 */
-                true /* some out of date */
-                );
+                true); /* some out of date */
         }
 
         /// <summary>
@@ -647,14 +637,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate4()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 new DateTime(2000, 1, 1), /* input2 */
                 new DateTime(2000, 1, 1), /* output1 */
                 new DateTime(2000, 1, 1), /* output2 */
-                false /* none out of date */
-                );
+                false); /* none out of date */
         }
 
         /// <summary>
@@ -663,14 +651,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate5()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 null, /* input1 */
                 new DateTime(2000, 1, 1), /* input2 */
                 new DateTime(2002, 1, 1), /* output1 */
                 new DateTime(2002, 1, 1), /* output2 */
-                true /* some out of date */
-                );
+                true); /* some out of date */
         }
 
 
@@ -680,14 +666,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate6()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 null, /* input2 */
                 new DateTime(2002, 1, 1), /* output1 */
                 new DateTime(2002, 1, 1), /* output2 */
-                true /* some out of date */
-                );
+                true); /* some out of date */
         }
 
         /// <summary>
@@ -696,14 +680,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate7()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 new DateTime(2000, 1, 1), /* input2 */
                 new DateTime(2002, 1, 1), /* output1 */
                 null, /* output2 */
-                true /* some out of date */
-                );
+                true); /* some out of date */
         }
 
         /// <summary>
@@ -712,14 +694,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate8()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 new DateTime(2000, 1, 1), /* input2 */
                 null, /* output1 */
                 new DateTime(2002, 1, 1), /* output2 */
-                true /* some out of date */
-                );
+                true); /* some out of date */
         }
 
         /// <summary>
@@ -728,14 +708,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate9()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 null, /* input1 */
                 new DateTime(2000, 1, 1), /* input2 */
                 null, /* output1 */
                 new DateTime(2002, 1, 1), /* output2 */
-                true /* some out of date */
-                );
+                true); /* some out of date */
         }
 
         /// <summary>
@@ -744,8 +722,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate10()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2002, 1, 1), /* input1 */
                 null, /* input2 */
                 new DateTime(2000, 1, 1), /* output1 */
@@ -754,8 +731,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 true, /* include input1 */
                 false, /* do not include input2 */
                 true, /* include output1 */
-                true /* include output2 */
-                );
+                true); /* include output2 */
         }
 
         /// <summary>
@@ -764,8 +740,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate11()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 null, /* input2 */
                 new DateTime(2002, 1, 1), /* output1 */
@@ -774,8 +749,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 true, /* include input1 */
                 false, /* do not include input2 */
                 true, /* include output1 */
-                true /* include output2 */
-                );
+                true); /* include output2 */
         }
 
         /// <summary>
@@ -784,8 +758,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate12()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 new DateTime(2000, 1, 1), /* input2 */
                 new DateTime(2002, 1, 1), /* output1 */
@@ -794,8 +767,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 true, /* include input1 */
                 true, /* include input2 */
                 true, /* include output1 */
-                false /* do not include output2 */
-                );
+                false); /* do not include output2 */
         }
 
         /// <summary>
@@ -804,8 +776,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestIsAnyOutOfDate13()
         {
-            IsAnyOutOfDateTestHelper
-                (
+            IsAnyOutOfDateTestHelper(
                 new DateTime(2000, 1, 1), /* input1 */
                 new DateTime(2003, 1, 1), /* input2 */
                 new DateTime(2002, 1, 1), /* output1 */
@@ -814,8 +785,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 true, /* include input1 */
                 true, /* include input2 */
                 true, /* include output1 */
-                false /* do not include output2 */
-                );
+                false); /* do not include output2 */
         }
 
         /// <summary>
@@ -828,14 +798,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="output1Time"></param>
         /// <param name="output2Time"></param>
         /// <param name="isUpToDate"></param>
-        private void IsAnyOutOfDateTestHelper
-            (
+        private void IsAnyOutOfDateTestHelper(
             DateTime? input1Time,
             DateTime? input2Time,
             DateTime? output1Time,
             DateTime? output2Time,
-            bool isUpToDate
-            )
+            bool isUpToDate)
         {
             IsAnyOutOfDateTestHelper(input1Time, input2Time, output1Time, output2Time, isUpToDate, true, true, true, true);
         }
@@ -850,8 +818,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="output1Time"></param>
         /// <param name="output2Time"></param>
         /// <param name="isUpToDate"></param>
-        private void IsAnyOutOfDateTestHelper
-            (
+        private void IsAnyOutOfDateTestHelper(
             DateTime? input1Time,
             DateTime? input2Time,
             DateTime? output1Time,
@@ -860,8 +827,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             bool includeInput1,
             bool includeInput2,
             bool includeOutput1,
-            bool includeOutput2
-            )
+            bool includeOutput2)
         {
             List<string> inputs = new List<string>();
             List<string> outputs = new List<string>();

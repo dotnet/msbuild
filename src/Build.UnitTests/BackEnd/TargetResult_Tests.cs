@@ -53,8 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 TargetResult result = new TargetResult(null, BuildResultUtilities.GetStopWithErrorResult());
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests a constructor with an exception passed.

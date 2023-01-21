@@ -36,14 +36,12 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of the object sending this event</param>
         /// <param name="projectFile">project name</param>
         /// <param name="succeeded">true indicates project built successfully</param>
-        public ExternalProjectFinishedEventArgs
-        (
+        public ExternalProjectFinishedEventArgs(
             string message,
             string helpKeyword,
             string senderName,
             string projectFile,
-            bool succeeded
-        )
+            bool succeeded)
             : this(message, helpKeyword, senderName, projectFile, succeeded, DateTime.UtcNow)
         {
         }
@@ -57,15 +55,13 @@ namespace Microsoft.Build.Framework
         /// <param name="projectFile">project name</param>
         /// <param name="succeeded">true indicates project built successfully</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        public ExternalProjectFinishedEventArgs
-        (
+        public ExternalProjectFinishedEventArgs(
             string message,
             string helpKeyword,
             string senderName,
             string projectFile,
             bool succeeded,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
             this.projectFile = projectFile;

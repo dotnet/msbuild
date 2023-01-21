@@ -427,14 +427,12 @@ namespace Microsoft.Build.Construction
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     childElement.Name == XMakeElements.import,
                     childElement.Location,
                     "UnrecognizedChildElement",
                     childElement.Name,
-                    element.Name
-                );
+                    element.Name);
 
                 ProjectImportElement item = ParseProjectImportElement(childElement, importGroup);
 
@@ -449,14 +447,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectImportElement ParseProjectImportElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 parent is ProjectRootElement || parent is ProjectImportGroupElement,
                 element.Location,
                 "UnrecognizedParentElement",
                 parent,
-                element
-            );
+                element);
 
             ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnImport);
             ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.project);
@@ -518,15 +514,13 @@ namespace Microsoft.Build.Construction
             string assemblyName = element.GetAttribute(XMakeAttributes.assemblyName);
             string assemblyFile = element.GetAttribute(XMakeAttributes.assemblyFile);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 (assemblyName.Length > 0) ^ (assemblyFile.Length > 0),
                 element.Location,
                 "UsingTaskAssemblySpecification",
                 XMakeElements.usingTask,
                 XMakeAttributes.assemblyName,
-                XMakeAttributes.assemblyFile
-            );
+                XMakeAttributes.assemblyFile);
 
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, XMakeAttributes.assemblyName);
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, XMakeAttributes.assemblyFile);
@@ -662,15 +656,13 @@ namespace Microsoft.Build.Construction
         {
             foreach (XmlAttributeWithLocation attribute in element.Attributes)
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     !XMakeAttributes.IsBadlyCasedSpecialTaskAttribute(attribute.Name),
                     attribute.Location,
                     "BadlyCasedSpecialTaskAttribute",
                     attribute.Name,
                     element.Name,
-                    element.Name
-                );
+                    element.Name);
             }
 
             ProjectTaskElement task = new ProjectTaskElement(element, parent, _project);
@@ -699,13 +691,11 @@ namespace Microsoft.Build.Construction
             XmlAttributeWithLocation itemNameAttribute = element.GetAttributeWithLocation(XMakeAttributes.itemName);
             XmlAttributeWithLocation propertyNameAttribute = element.GetAttributeWithLocation(XMakeAttributes.propertyName);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 (String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && !String.IsNullOrWhiteSpace(propertyNameAttribute?.Value)) || (!String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && String.IsNullOrWhiteSpace(propertyNameAttribute?.Value)),
                 element.Location,
                 "InvalidTaskOutputSpecification",
-                parent.Name
-            );
+                parent.Name);
 
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, itemNameAttribute, XMakeAttributes.itemName);
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, propertyNameAttribute, XMakeAttributes.propertyName);

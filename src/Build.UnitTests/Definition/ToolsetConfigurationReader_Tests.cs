@@ -221,8 +221,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         ///  More than 1 toolset element with the same name
@@ -250,8 +249,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         /// empty toolset element 
@@ -278,8 +276,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         #endregion
 
@@ -346,8 +343,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         /// value attribute is missing
@@ -372,8 +368,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         /// more than 1 property element with the same name
@@ -399,8 +394,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         ///  property element is an empty element
@@ -427,8 +421,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         #endregion
 
@@ -636,8 +629,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -670,8 +662,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
 
         private ToolsetConfigurationReader GetStandardConfigurationReader()

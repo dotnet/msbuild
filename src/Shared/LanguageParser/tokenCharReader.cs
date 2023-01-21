@@ -158,13 +158,10 @@ namespace Microsoft.Build.Shared.LanguageParser
 
             if
             (
-                String.Equals
-                (
+                String.Equals(
                     match,
                     compare,
-                    (ignoreCase /* ignore case */) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal
-                )
-            )
+                    (ignoreCase /* ignore case */) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
             {
                 Skip(match.Length);
                 return true;
@@ -243,8 +240,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     || TokenChar.IsDecimalDigit(CurrentCharacter)
                     || TokenChar.IsConnecting(CurrentCharacter)
                     || TokenChar.IsCombining(CurrentCharacter)
-                    || TokenChar.IsFormatting(CurrentCharacter)
-                )
+                    || TokenChar.IsFormatting(CurrentCharacter))
             {
                 Skip();
                 return true;

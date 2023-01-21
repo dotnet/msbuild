@@ -80,18 +80,15 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [InlineData(
             "a/b/c",
             "**",
-            "a/b/c"
-            )]
+            "a/b/c")]
         [InlineData(
             "a/b/c",
             "../../**",
-            "a"
-            )]
+            "a")]
         [InlineData(
             "a/b/c",
             "../d/e/**",
-            "a/b/d/e"
-            )]
+            "a/b/d/e")]
         public void GlobWithRelativeFixedDirectoryPartShouldMismatchTheGlobRoot(string globRoot, string filespec, string expectedFixedDirectoryPart)
         {
             var glob = MSBuildGlob.Parse(globRoot, filespec);

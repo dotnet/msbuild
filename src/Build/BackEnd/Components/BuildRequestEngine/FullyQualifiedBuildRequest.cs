@@ -33,8 +33,7 @@ namespace Microsoft.Build.BackEnd
             string[] targets,
             bool resultsNeeded,
             bool skipStaticGraphIsolationConstraints = false,
-            BuildRequestDataFlags flags = BuildRequestDataFlags.None
-            )
+            BuildRequestDataFlags flags = BuildRequestDataFlags.None)
         {
             ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
             ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));

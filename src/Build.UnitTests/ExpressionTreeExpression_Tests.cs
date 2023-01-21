@@ -432,16 +432,14 @@ namespace Microsoft.Build.UnitTests
             Parser p = new Parser();
             GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
             ConditionEvaluator.IConditionEvaluationState state =
-                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                    (
+                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
                     _expander,
                     ExpanderOptions.ExpandAll,
                     null,
                     Directory.GetCurrentDirectory(),
                     ElementLocation.EmptyLocation,
-                    FileSystems.Default
-                    );
+                    FileSystems.Default);
 
             Assert.True(tree.Evaluate(state), "expected true from '" + expression + "'");
         }
@@ -458,16 +456,14 @@ namespace Microsoft.Build.UnitTests
             Parser p = new Parser();
             GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
             ConditionEvaluator.IConditionEvaluationState state =
-                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                    (
+                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
                     _expander,
                     ExpanderOptions.ExpandAll,
                     null,
                     Directory.GetCurrentDirectory(),
                     ElementLocation.EmptyLocation,
-                    FileSystems.Default
-                    );
+                    FileSystems.Default);
 
             Assert.False(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
         }
@@ -492,16 +488,14 @@ namespace Microsoft.Build.UnitTests
                 var tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
 
                 ConditionEvaluator.IConditionEvaluationState state =
-                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                        (
+                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                         expression,
                         _expander,
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
                         ElementLocation.EmptyLocation,
-                        FileSystems.Default
-                        );
+                        FileSystems.Default);
 
                 tree.Evaluate(state);
             }

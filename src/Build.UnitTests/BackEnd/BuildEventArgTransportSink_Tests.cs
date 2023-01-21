@@ -52,8 +52,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(PacketProcessor);
                 transportSink.Consume(null, 0);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify consume properly packages up the message event into a packet and send it to the 

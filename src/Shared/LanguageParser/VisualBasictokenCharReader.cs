@@ -44,8 +44,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 || CurrentCharacter == '.'
                 || CurrentCharacter == ':'
                 || CurrentCharacter == '{'
-                || CurrentCharacter == '}'
-            )
+                || CurrentCharacter == '}')
             {
                 Skip();
                 return true;
@@ -63,8 +62,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         {
             if
             (
-                CurrentCharacter == '_'
-            )
+                CurrentCharacter == '_')
             {
                 Skip();
                 return true;

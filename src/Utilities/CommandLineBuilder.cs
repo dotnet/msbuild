@@ -518,22 +518,18 @@ namespace Microsoft.Build.Utilities
             {
                 if (string.IsNullOrEmpty(switchName))
                 {
-                    ErrorUtilities.VerifyThrowArgument
-                        (
+                    ErrorUtilities.VerifyThrowArgument(
                             -1 == parameter.IndexOf('"'),
                             "General.QuotesNotAllowedInThisKindOfTaskParameterNoSwitchName",
-                            parameter
-                        );
+                            parameter);
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrowArgument
-                        (
+                    ErrorUtilities.VerifyThrowArgument(
                             -1 == parameter.IndexOf('"'),
                             "General.QuotesNotAllowedInThisKindOfTaskParameter",
                             switchName,
-                            parameter
-                        );
+                            parameter);
                 }
             }
         }

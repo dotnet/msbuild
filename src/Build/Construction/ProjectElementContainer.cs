@@ -72,10 +72,8 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return new Collections.ReadOnlyCollection<ProjectElement>
-                    (
-                        new ProjectElementSiblingEnumerable(FirstChild)
-                    );
+                return new Collections.ReadOnlyCollection<ProjectElement>(
+                        new ProjectElementSiblingEnumerable(FirstChild));
             }
         }
 
@@ -87,10 +85,8 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return new Collections.ReadOnlyCollection<ProjectElement>
-                    (
-                        new ProjectElementSiblingEnumerable(LastChild, false /* reverse */)
-                    );
+                return new Collections.ReadOnlyCollection<ProjectElement>(
+                        new ProjectElementSiblingEnumerable(LastChild, false /* reverse */));
             }
         }
 

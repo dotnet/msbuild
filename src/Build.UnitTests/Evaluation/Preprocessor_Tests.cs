@@ -958,8 +958,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                         version: null,
                         propertiesToAdd,
                         itemsToAdd,
-                        warnings: null
-                        )));
+                        warnings: null)));
 
                 string content = @"<Project>
 <Import Project='Import.props' Sdk='TestPropsAndItemsFromResolverSdk' />

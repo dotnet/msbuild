@@ -102,8 +102,7 @@ namespace Microsoft.Build.Shared
                 if (
                         (indexOfPercent <= (escapedStringLength - 3)) &&
                         TryDecodeHexDigit(escapedString[indexOfPercent + 1], out int digit1) &&
-                        TryDecodeHexDigit(escapedString[indexOfPercent + 2], out int digit2)
-                    )
+                        TryDecodeHexDigit(escapedString[indexOfPercent + 2], out int digit2))
                 {
                     // First copy all the characters up to the current percent sign into
                     // the destination.
@@ -215,10 +214,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="unescapedString"></param>
         /// <returns></returns>
-        private static bool ContainsReservedCharacters
-            (
-            string unescapedString
-            )
+        private static bool ContainsReservedCharacters(
+            string unescapedString)
         {
             return -1 != unescapedString.IndexOfAny(s_charsToEscape);
         }

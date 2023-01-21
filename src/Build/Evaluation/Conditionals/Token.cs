@@ -90,16 +90,14 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal Token(TokenType type, string tokenString, bool expandable)
         {
-            ErrorUtilities.VerifyThrow
-                (
+            ErrorUtilities.VerifyThrow(
                 type == TokenType.Property ||
                 type == TokenType.String ||
                 type == TokenType.Numeric ||
                 type == TokenType.ItemList ||
                 type == TokenType.ItemMetadata ||
                 type == TokenType.Function,
-                "Unexpected token type"
-                );
+                "Unexpected token type");
 
             ErrorUtilities.VerifyThrowInternalNull(tokenString, nameof(tokenString));
 

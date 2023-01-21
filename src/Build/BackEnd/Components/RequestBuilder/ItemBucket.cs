@@ -71,13 +71,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="metadata">Hashtable of item metadata values: null indicates no batching is occurring</param>
         /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
         /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
-        internal ItemBucket
-        (
+        internal ItemBucket(
             ICollection<string> itemNames,
             Dictionary<string, string> metadata,
             Lookup lookup,
-            int bucketSequenceNumber
-        )
+            int bucketSequenceNumber)
         {
             ErrorUtilities.VerifyThrow(lookup != null, "Need lookup.");
 

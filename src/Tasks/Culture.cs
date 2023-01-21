@@ -28,12 +28,10 @@ namespace Microsoft.Build.Tasks
         /// <remarks>
         /// We've decided to ignore explicit Culture attributes on items.
         /// </remarks>
-        internal static ItemCultureInfo GetItemCultureInfo
-        (
+        internal static ItemCultureInfo GetItemCultureInfo(
             string name,
             string dependentUponFilename,
-            bool treatAsCultureNeutral = false
-        )
+            bool treatAsCultureNeutral = false)
         {
             ItemCultureInfo info;
             info.culture = null;

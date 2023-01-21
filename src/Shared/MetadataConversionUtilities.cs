@@ -24,12 +24,10 @@ namespace Microsoft.Build.Shared
         /// <param name="itemMetadataName">The name of the metadata.</param>
         /// <param name="metadataFound">Receives true if the metadata was found, false otherwise.</param>
         /// <returns>The resulting boolean value.</returns>
-        internal static bool TryConvertItemMetadataToBool
-            (
+        internal static bool TryConvertItemMetadataToBool(
                 ITaskItem item,
                 string itemMetadataName,
-                out bool metadataFound
-            )
+                out bool metadataFound)
         {
             string metadataValue = item.GetMetadata(itemMetadataName);
             if (string.IsNullOrEmpty(metadataValue))
@@ -58,11 +56,9 @@ namespace Microsoft.Build.Shared
         /// <param name="item">The item that contains the metadata.</param>
         /// <param name="itemMetadataName">The name of the metadata.</param>
         /// <returns>The resulting boolean value.</returns>
-        internal static bool TryConvertItemMetadataToBool
-            (
+        internal static bool TryConvertItemMetadataToBool(
                 ITaskItem item,
-                string itemMetadataName
-            )
+                string itemMetadataName)
         {
             bool metadataFound;
             return TryConvertItemMetadataToBool(item, itemMetadataName, out metadataFound);

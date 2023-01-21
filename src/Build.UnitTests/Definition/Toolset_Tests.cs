@@ -25,8 +25,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Toolset t = new Toolset(null, "x", new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -35,8 +34,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Toolset t = new Toolset("x", null, new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -45,8 +43,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentException>(() =>
             {
                 Toolset t = new Toolset(String.Empty, "x", new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]

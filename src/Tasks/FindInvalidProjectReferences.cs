@@ -21,11 +21,9 @@ namespace Microsoft.Build.Tasks
         /// Regex for breaking up the platform moniker
         /// Example: XNA, Version=8.0
         /// </summary>
-        private static readonly Regex s_platformMonikerFormat = new Regex
-        (
+        private static readonly Regex s_platformMonikerFormat = new Regex(
              @"(?<PLATFORMIDENTITY>^[^,]*),\s*Version=(?<PLATFORMVERSION>.*)",
-            RegexOptions.IgnoreCase
-        );
+            RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Reference moniker metadata

@@ -77,8 +77,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 ErrorUtilities.VerifyThrowArgumentArraysSameLength(null, new string[1], string.Empty, string.Empty);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -87,8 +86,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 ErrorUtilities.VerifyThrowArgumentArraysSameLength(new string[1], null, string.Empty, string.Empty);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -97,8 +95,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 ErrorUtilities.VerifyThrowArgumentArraysSameLength(new string[1], new string[2], string.Empty, string.Empty);
-            }
-           );
+            });
         }
 
         [Fact]

@@ -73,15 +73,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName")
                 .ShouldBe("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=" + AssemblyRef.EcmaPublicKey, StringCompareShould.IgnoreCase);
 
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"))
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll")));
 
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.NotCopyLocalBecausePrerequisite"))
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.NotCopyLocalBecausePrerequisite")));
 
             t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
         }
@@ -122,10 +118,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             Assert.True(succeeded);
             Assert.Empty(t.ResolvedDependencyFiles);
-            engine.AssertLogContains
-                (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"))
-                );
+            engine.AssertLogContains(
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll")));
         }
 
         [Fact]

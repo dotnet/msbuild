@@ -38,13 +38,11 @@ namespace Microsoft.Build.UnitTests
                 // Validate that a legitimate bool works first.
                 try
                 {
-                    c.AppendSwitchIfNotNull
-                    (
+                    c.AppendSwitchIfNotNull(
                         "/myswitch:",
                         new ITaskItem[] { i },
                         new string[] { "Name", "Private" },
-                        new bool[] { false, true }
-                    );
+                        new bool[] { false, true });
                     Assert.Equal(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
                 }
                 catch (ArgumentException e)
@@ -54,15 +52,12 @@ namespace Microsoft.Build.UnitTests
 
                 // Now try a bogus boolean.
                 i.SetMetadata("Private", "Maybe");       // This is our flag.
-                c.AppendSwitchIfNotNull
-                (
+                c.AppendSwitchIfNotNull(
                     "/myswitch:",
                     new ITaskItem[] { i },
                     new string[] { "Name", "Private" },
-                    new bool[] { false, true }
-                );  // <-- Expect an ArgumentException here.
-            }
-           );
+                    new bool[] { false, true });  // <-- Expect an ArgumentException here.
+            });
         }
         /// <summary>
         /// When appending an ITaskItem[] where some of the optional attributes are
@@ -87,13 +82,11 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineBuilderExtension c = new CommandLineBuilderExtension();
 
-            c.AppendSwitchIfNotNull
-            (
+            c.AppendSwitchIfNotNull(
                 "/myswitch:",
                 new ITaskItem[] { i, j },
                 new string[] { "Name", "HintPath", "Access" },
-                null
-            );
+                null);
 
             Assert.Equal(
                @"/myswitch:MySoundEffect.wav,Kenny "

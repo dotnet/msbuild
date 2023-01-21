@@ -124,8 +124,7 @@ namespace Microsoft.Build.Evaluation
                              string evaluatedIncludeEscaped,
                              string evaluatedIncludeBeforeWildcardExpansionEscaped,
                              PropertyDictionary<ProjectMetadata> directMetadataCloned,
-                             List<ProjectItemDefinition> inheritedItemDefinitionsCloned
-                            )
+                             List<ProjectItemDefinition> inheritedItemDefinitionsCloned)
         {
             ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
             ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));

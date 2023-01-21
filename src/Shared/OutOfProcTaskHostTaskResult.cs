@@ -67,13 +67,11 @@ namespace Microsoft.Build.Shared
 
             if (exceptionMessage != null)
             {
-                ErrorUtilities.VerifyThrow
-                    (
+                ErrorUtilities.VerifyThrow(
                         result == TaskCompleteType.CrashedDuringInitialization ||
                         result == TaskCompleteType.CrashedDuringExecution ||
                         result == TaskCompleteType.CrashedAfterExecution,
-                        "If we have an exception message, the result type should be 'crashed' of some variety."
-                    );
+                        "If we have an exception message, the result type should be 'crashed' of some variety.");
             }
 
             if (exceptionMessageArgs?.Length > 0)

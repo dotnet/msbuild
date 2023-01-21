@@ -41,15 +41,13 @@ namespace Microsoft.Build.Framework
         /// <param name="projectFile">project file</param>
         /// <param name="targetFile">file in which the target is defined</param>
         /// <param name="succeeded">true if target built successfully</param>
-        public TargetFinishedEventArgs
-        (
+        public TargetFinishedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
             string projectFile,
             string targetFile,
-            bool succeeded
-        )
+            bool succeeded)
             : this(message, helpKeyword, targetName, projectFile, targetFile, succeeded, DateTime.UtcNow, null)
         {
         }
@@ -65,16 +63,14 @@ namespace Microsoft.Build.Framework
         /// <param name="targetFile">file in which the target is defined</param>
         /// <param name="succeeded">true if target built successfully</param>
         /// <param name="targetOutputs">Target output items for the target. If batching will be null for everything except for the last target in the batch</param>
-        public TargetFinishedEventArgs
-        (
+        public TargetFinishedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
             string projectFile,
             string targetFile,
             bool succeeded,
-            IEnumerable targetOutputs
-        )
+            IEnumerable targetOutputs)
             : this(message, helpKeyword, targetName, projectFile, targetFile, succeeded, DateTime.UtcNow, targetOutputs)
         {
         }
@@ -91,8 +87,7 @@ namespace Microsoft.Build.Framework
         /// <param name="succeeded">true if target built successfully</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         /// <param name="targetOutputs">An <see cref="IEnumerable"/> containing the outputs of the target.</param>
-        public TargetFinishedEventArgs
-        (
+        public TargetFinishedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
@@ -100,8 +95,7 @@ namespace Microsoft.Build.Framework
             string targetFile,
             bool succeeded,
             DateTime eventTimestamp,
-            IEnumerable targetOutputs
-        )
+            IEnumerable targetOutputs)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.targetName = targetName;

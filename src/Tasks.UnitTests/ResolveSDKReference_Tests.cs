@@ -1443,8 +1443,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 ResolveSDKReference t = new ResolveSDKReference();
                 t.SDKReferences = null;
                 bool succeeded = t.Execute();
-            }
-           );
+            });
         }
         /// <summary>
         /// When a null is passed into the set of InstalledSDKS property make sure we get the correct exception out.
@@ -1460,8 +1459,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 ResolveSDKReference t = new ResolveSDKReference();
                 t.InstalledSDKs = null;
                 bool succeeded = t.Execute();
-            }
-           );
+            });
         }
 
         /// <summary>

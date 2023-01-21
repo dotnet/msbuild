@@ -37,7 +37,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
                 {
                     new Dictionary<string, (string, MockElementLocation)>
                     {
-                        {"p1", ("v1", new MockElementLocation("p1"))}
+                        {"p1", ("v1", new MockElementLocation("p1")) }
                     },
                     new List<ProjectTaskInstanceChild>
                     {
@@ -49,8 +49,8 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
                 {
                     new Dictionary<string, (string, MockElementLocation)>
                     {
-                        {"p1", ("v1", new MockElementLocation("p1"))},
-                        {"p2", ("v2", new MockElementLocation("p2"))}
+                        {"p1", ("v1", new MockElementLocation("p1")) },
+                        {"p2", ("v2", new MockElementLocation("p2")) }
                     },
                     new List<ProjectTaskInstanceChild>
                     {

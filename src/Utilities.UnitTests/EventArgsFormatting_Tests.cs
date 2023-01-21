@@ -163,8 +163,7 @@ namespace Microsoft.Build.UnitTests
                 MyLogger l = new MyLogger();
                 BuildErrorEventArgs beea = null;
                 l.FormatErrorEvent(beea);
-            }
-           );
+            });
         }
         /// <summary>
         /// Check null handling
@@ -177,8 +176,7 @@ namespace Microsoft.Build.UnitTests
                 MyLogger l = new MyLogger();
                 BuildWarningEventArgs bwea = null;
                 l.FormatWarningEvent(bwea);
-            }
-           );
+            });
         }
     }
 

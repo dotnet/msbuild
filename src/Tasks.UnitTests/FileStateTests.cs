@@ -22,8 +22,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 new FileState("");
-            }
-           );
+            });
         }
         [Fact]
         public void BadCharsCtorOK()
@@ -402,8 +401,7 @@ namespace Microsoft.Build.UnitTests
                 string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
 
                 var x = new FileState(file).IsDirectory;
-            }
-           );
+            });
         }
         [Fact]
         public void DoesNotExistDirectoryOrFileExists()

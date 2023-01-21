@@ -139,8 +139,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectProperty property = project.GetProperty("MSBuildProjectDirectory");
 
                 property.UnevaluatedValue = "v";
-            }
-           );
+            });
         }
         /// <summary>
         /// Set the value of a property originating in the environment.
@@ -279,8 +278,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     File.Delete(file);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Get the property named "p" in the project provided

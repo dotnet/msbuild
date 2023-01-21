@@ -59,8 +59,7 @@ namespace Microsoft.Build.UnitTests
         {
             ArrayList itemsList = new ArrayList();
             ArrayList propertiesList = new ArrayList();
-            ProjectStartedEventArgs differentItemsAndProperties = new ProjectStartedEventArgs
-                (
+            ProjectStartedEventArgs differentItemsAndProperties = new ProjectStartedEventArgs(
                   s_baseProjectStartedEvent.ProjectId,
                   s_baseProjectStartedEvent.Message,
                   s_baseProjectStartedEvent.HelpKeyword,
@@ -69,8 +68,7 @@ namespace Microsoft.Build.UnitTests
                   propertiesList,
                   itemsList,
                   s_baseProjectStartedEvent.ParentProjectBuildEventContext,
-                  s_baseProjectStartedEvent.Timestamp
-                );
+                  s_baseProjectStartedEvent.Timestamp);
 
             s_baseProjectStartedEvent.Properties.ShouldNotBe(propertiesList);
             s_baseProjectStartedEvent.Items.ShouldNotBe(itemsList);

@@ -125,8 +125,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 EventSourceSink sink = new EventSourceSink();
                 RaiseEventHelper eventHelper = new RaiseEventHelper(sink);
                 eventHelper.RaiseBuildEvent(RaiseEventHelper.GenericBuildEvent);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify that shutdown un registers all of the event handlers

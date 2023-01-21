@@ -117,12 +117,10 @@ namespace Microsoft.Build.BackEnd
             }
 
             // It's not null or invalid, so it should be a valid parameter type.
-            ErrorUtilities.VerifyThrow
-                (
+            ErrorUtilities.VerifyThrow(
                     TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
                     "How did we manage to get a task parameter of type {0} that isn't a valid parameter type?",
-                    wrappedParameterType
-                );
+                    wrappedParameterType);
 
             if (wrappedParameterType.IsArray)
             {

@@ -65,8 +65,7 @@ namespace Microsoft.Build.Shared
         /// <param name="getRegistrySubKeyDefaultValue">Used to find registry key default values.</param>
         /// <param name="targetProcessorArchitecture">Architecture to seek.</param>
         /// <param name="openBaseKey">Key object to open.</param>
-        internal AssemblyFoldersEx
-        (
+        internal AssemblyFoldersEx(
             string registryKeyRoot,
             string targetRuntimeVersion,
             string registryKeySuffix,
@@ -75,8 +74,7 @@ namespace Microsoft.Build.Shared
             GetRegistrySubKeyNames getRegistrySubKeyNames,
             GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue,
             ProcessorArchitecture targetProcessorArchitecture,
-            OpenBaseKey openBaseKey
-        )
+            OpenBaseKey openBaseKey)
         {
             // No extensions are supported, except on Windows
             if (!NativeMethodsShared.IsWindows)
@@ -139,8 +137,7 @@ namespace Microsoft.Build.Shared
         /// <param name="getRegistrySubKeyNames">Used to find registry subkey names.</param>
         /// <param name="getRegistrySubKeyDefaultValue">Used to find registry key default values.</param>
         /// <param name="openBaseKey">Key object to open.</param>
-        private void FindDirectories
-        (
+        private void FindDirectories(
             RegistryView view,
             RegistryHive hive,
             string registryKeyRoot,
@@ -150,8 +147,7 @@ namespace Microsoft.Build.Shared
             string platform,
             GetRegistrySubKeyNames getRegistrySubKeyNames,
             GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue,
-            OpenBaseKey openBaseKey
-        )
+            OpenBaseKey openBaseKey)
         {
             // Open the hive for a given view
             using (RegistryKey baseKey = openBaseKey(hive, view))

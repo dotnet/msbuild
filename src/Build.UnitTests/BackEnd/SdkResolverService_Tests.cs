@@ -87,8 +87,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             sdk,
                             "path",
                             "2.0.0",
-                            Enumerable.Empty<string>()
-                            ))
+                            Enumerable.Empty<string>()))
                 });
 
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
@@ -266,8 +265,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     sdk,
                     "path",
                     "1.0.0",
-                    Enumerable.Empty<string>()
-                    ));
+                    Enumerable.Empty<string>()));
 
             var service = new CachingSdkResolverService();
             service.InitializeForTests(
@@ -354,8 +352,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     version: null,
                     propertiesToAdd,
                     itemsToAdd,
-                    warnings: null
-                    ));
+                    warnings: null));
 
             SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
@@ -391,8 +388,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     version: "1.0",
                     propertiesToAdd,
                     itemsToAdd,
-                    warnings: null
-                    ));
+                    warnings: null));
 
             SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
@@ -438,8 +434,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     version: "1.0",
                     propertiesToAdd,
                     itemsToAdd,
-                    warnings: null
-                    ));
+                    warnings: null));
 
             SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
@@ -484,8 +479,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     version: "1.1",
                     propertiesToAdd,
                     itemsToAdd,
-                    warnings: null
-                    ));
+                    warnings: null));
 
             SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
@@ -522,8 +516,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     sdk,
                     "path",
                     "1.0.0",
-                    Enumerable.Empty<string>()
-                ));
+                    Enumerable.Empty<string>()));
 
             var service = new CachingSdkResolverService();
             service.InitializeForTests(
@@ -664,8 +657,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(
                         pair.Resolver.Name,
                         null,
-                        new Regex(pair.ResolvableSdkPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(500))
-                    );
+                        new Regex(pair.ResolvableSdkPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(500)));
                     manifests.Add(sdkResolverManifest);
                 }
                 return manifests;

@@ -141,8 +141,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsNotAsErrors">Warning codes not to be treated as errors for the current project.</param>
         /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
 #endif
-        public TaskHostConfiguration
-            (
+        public TaskHostConfiguration(
                 int nodeId,
                 string startupDirectory,
                 IDictionary<string, string> buildProcessEnvironment,
@@ -162,8 +161,7 @@ namespace Microsoft.Build.BackEnd
                 Dictionary<string, string> globalParameters,
                 ICollection<string> warningsAsErrors,
                 ICollection<string> warningsNotAsErrors,
-                ICollection<string> warningsAsMessages
-            )
+                ICollection<string> warningsAsMessages)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalLength(taskLocation, nameof(taskLocation));

@@ -187,8 +187,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void VerifyArgumentCount(int expected, ConditionEvaluator.IConditionEvaluationState state)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (_arguments.Count == expected,
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                _arguments.Count == expected,
                  state.ElementLocation,
                  "IncorrectNumberOfFunctionArguments",
                  state.Condition,

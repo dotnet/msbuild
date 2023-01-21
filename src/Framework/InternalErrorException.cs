@@ -30,10 +30,8 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Creates an instance of this exception using the given message.
         /// </summary>
-        internal InternalErrorException
-        (
-            String message
-        ) :
+        internal InternalErrorException(
+            String message) :
             base("MSB0001: Internal MSBuild Error: " + message)
         {
             ConsiderDebuggerLaunch(message, null);
@@ -44,11 +42,9 @@ namespace Microsoft.Build.Framework
         /// Adds the inner exception's details to the exception message because most bug reporters don't bother
         /// to provide the inner exception details which is typically what we care about.
         /// </summary>
-        internal InternalErrorException
-        (
+        internal InternalErrorException(
             String message,
-            Exception innerException
-        ) :
+            Exception innerException) :
             base("MSB0001: Internal MSBuild Error: " + message + (innerException == null ? String.Empty : ("\n=============\n" + innerException.ToString() + "\n\n")), innerException)
         {
             ConsiderDebuggerLaunch(message, innerException);

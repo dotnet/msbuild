@@ -187,8 +187,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             {
                 object fakeTaskInstance = CreateFakeTask();
                 XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexInteger", 2);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -201,8 +200,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
                 XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexInteger", 256);
                 string expectedResult = "/always /Ci256 /Cr:CT";
                 CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
-            }
-           );
+            });
         }
         [Fact]
         [Trait("Category", "mono-osx-failing")]

@@ -215,8 +215,7 @@ namespace Microsoft.Build.Evaluation
             s_getEntriesNumber++;
             ErrorUtilities.VerifyThrow(
                 s_getEntriesNumber == 1,
-                "Reentrance to the ProjectRootElementCache.Get function detected."
-            );
+                "Reentrance to the ProjectRootElementCache.Get function detected.");
 
             try
             {
@@ -284,8 +283,7 @@ namespace Microsoft.Build.Evaluation
                         projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
                         "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
                         projectFile,
-                        projectRootElement.FullPath
-                    );
+                        projectRootElement.FullPath);
 
                     // An implicit load will never reset the explicit flag.
                     if (isExplicitlyLoaded)

@@ -353,19 +353,15 @@ namespace Microsoft.Build.Tasks
 
             commandLine.AppendSwitchIfNotNull("", SourceModules, new[] { "TargetFile" });
 
-            commandLine.AppendSwitchIfNotNull
-            (
+            commandLine.AppendSwitchIfNotNull(
                 "/embed:",
                 EmbedResources,
-                new[] { "LogicalName", "Access" }
-            );
+                new[] { "LogicalName", "Access" });
 
-            commandLine.AppendSwitchIfNotNull
-            (
+            commandLine.AppendSwitchIfNotNull(
                 "/link:",
                 LinkResources,
-                new[] { "LogicalName", "TargetFile", "Access" }
-            );
+                new[] { "LogicalName", "TargetFile", "Access" });
 
             // It's a good idea for the response file to be the very last switch passed, just
             // from a predictability perspective.  This is also consistent with the compiler

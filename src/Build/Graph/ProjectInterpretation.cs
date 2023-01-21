@@ -233,8 +233,7 @@ namespace Microsoft.Build.Graph
         /// </remarks>
         private static GlobalPropertyPartsForMSBuildTask ProjectReferenceGlobalPropertiesModifier(
             GlobalPropertyPartsForMSBuildTask defaultParts,
-            ProjectItemInstance projectReference
-        )
+            ProjectItemInstance projectReference)
         {
             // ProjectReference defines yet another metadata name containing properties to undefine. Merge it in if non empty.
             var globalPropertiesToRemove = SplitPropertyNames(projectReference.GetMetadataValue(GlobalPropertiesToRemoveMetadataName));

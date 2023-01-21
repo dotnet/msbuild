@@ -39,8 +39,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (LeftChild != null && RightChild != null,
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                LeftChild != null && RightChild != null,
                  state.ElementLocation,
                  "IllFormedCondition",
                  state.Condition);
@@ -77,8 +77,8 @@ namespace Microsoft.Build.Evaluation
             string leftExpandedValue = LeftChild.GetExpandedValue(state, loggingContext);
             string rightExpandedValue = RightChild.GetExpandedValue(state, loggingContext);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (leftExpandedValue != null && rightExpandedValue != null,
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                leftExpandedValue != null && rightExpandedValue != null,
                     state.ElementLocation,
                     "IllFormedCondition",
                     state.Condition);
@@ -109,16 +109,16 @@ namespace Microsoft.Build.Evaluation
 
                 if (leftUnexpandedValue != null)
                 {
-                    ConditionEvaluator.UpdateConditionedPropertiesTable
-                        (state.ConditionedPropertiesInProject,
+                    ConditionEvaluator.UpdateConditionedPropertiesTable(
+                        state.ConditionedPropertiesInProject,
                          leftUnexpandedValue,
                          RightChild.GetExpandedValue(state));
                 }
 
                 if (rightUnexpandedValue != null)
                 {
-                    ConditionEvaluator.UpdateConditionedPropertiesTable
-                        (state.ConditionedPropertiesInProject,
+                    ConditionEvaluator.UpdateConditionedPropertiesTable(
+                        state.ConditionedPropertiesInProject,
                          rightUnexpandedValue,
                          LeftChild.GetExpandedValue(state));
                 }

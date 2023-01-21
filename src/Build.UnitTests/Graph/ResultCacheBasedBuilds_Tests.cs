@@ -509,8 +509,7 @@ namespace Microsoft.Build.Graph.UnitTests
             int projectNumber,
             int[] projectReferences = null,
             string defaultTargets = null,
-            string explicitTargets = null
-            )
+            string explicitTargets = null)
         {
             var sb = new StringBuilder();
 
@@ -538,8 +537,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 projectReferences,
                 null,
                 defaultTargets,
-                sb.ToString()
-                );
+                sb.ToString());
         }
 
         [Fact]

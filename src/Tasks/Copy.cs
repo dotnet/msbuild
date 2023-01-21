@@ -170,11 +170,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="sourceFile">The source file</param>
         /// <param name="destinationFile">The destination file</param>
-        private static bool IsMatchingSizeAndTimeStamp
-        (
+        private static bool IsMatchingSizeAndTimeStamp(
             FileState sourceFile,
-            FileState destinationFile
-        )
+            FileState destinationFile)
         {
             // If the destination doesn't exist, then it is not a matching file.
             if (!destinationFile.FileExists)
@@ -224,11 +222,9 @@ namespace Microsoft.Build.Tasks
         /// leave the file read-write.
         /// </summary>
         /// <returns>Return true to indicate success, return false to indicate failure and NO retry, return NULL to indicate retry.</returns>
-        private bool? CopyFileWithLogging
-        (
+        private bool? CopyFileWithLogging(
             FileState sourceFileState,      // The source file
-            FileState destinationFileState  // The destination file
-        )
+            FileState destinationFileState)  // The destination file
         {
             bool destinationFileExists = false;
 
@@ -394,11 +390,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="parallelism">
         /// Thread parallelism allowed during copies. 1 uses the original algorithm, >1 uses newer algorithm.
         /// </param>
-        internal bool Execute
-        (
+        internal bool Execute(
             CopyFileWithState copyFile,
-            int parallelism
-        )
+            int parallelism)
         {
             // If there are no source files then just return success.
             if (SourceFiles == null || SourceFiles.Length == 0)
@@ -743,8 +737,7 @@ namespace Microsoft.Build.Tasks
                         sourceFileState.Name,
                         destinationFileState.Name,
                         "SkipUnchangedFiles",
-                        "true"
-                    );
+                        "true");
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
                 }
                 // We only do the cheap check for identicalness here, we try the more expensive check

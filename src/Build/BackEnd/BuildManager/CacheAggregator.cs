@@ -94,8 +94,7 @@ namespace Microsoft.Build.Execution
                         configIdMapping[result.ConfigurationId],
                         BuildRequest.InvalidGlobalRequestId,
                         BuildRequest.InvalidGlobalRequestId,
-                        BuildRequest.InvalidNodeRequestId
-                        ));
+                        BuildRequest.InvalidNodeRequestId));
             }
         }
     }

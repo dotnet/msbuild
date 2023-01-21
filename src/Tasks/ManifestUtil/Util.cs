@@ -245,19 +245,23 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     hashAlg = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
 #endif
                         );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 }
                 else
                 {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     hashAlg = SHA256.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA256CryptoServiceProvider"
 #endif
                         );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 }
                 byte[] hashBytes = hashAlg.ComputeHash(s);
                 hash = Convert.ToBase64String(hashBytes);

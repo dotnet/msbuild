@@ -89,14 +89,12 @@ namespace Microsoft.Build.Tasks
     /// <param name="dependencies">Receives the list of dependencies.</param>
     /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
     /// <param name="frameworkNameAttribute">The framework name</param>
-    internal delegate void GetAssemblyMetadata
-    (
+    internal delegate void GetAssemblyMetadata(
         string path,
         ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
         out AssemblyNameExtension[] dependencies,
         out string[] scatterFiles,
-        out FrameworkName frameworkNameAttribute
-    );
+        out FrameworkName frameworkNameAttribute);
 
     /// <summary>
     /// Delegate to take in a dll path and read the machine type from the PEHeader

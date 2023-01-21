@@ -174,8 +174,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 t.TargetPlatformIdentifier = "Hello";
                 t.TargetPlatformVersion = null;
                 t.Execute();
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure we get a ArgumentException if null is passed into the target platform version.
@@ -189,8 +188,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 t.TargetPlatformIdentifier = null;
                 t.TargetPlatformVersion = "1.0";
                 t.Execute();
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure we get an error message if an empty platform identifier is passed in.

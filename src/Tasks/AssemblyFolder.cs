@@ -34,12 +34,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="hive">Like 'hklm' or 'hkcu'</param>
         /// <param name="key">The registry key to examine</param>
         /// <param name="directories">The object to populate</param>
-        private static void AddFoldersFromRegistryKey
-        (
+        private static void AddFoldersFromRegistryKey(
             RegistryKey hive,
             string key,
-            Dictionary<string, string> directories
-        )
+            Dictionary<string, string> directories)
         {
             using (RegistryKey baseKey = hive.OpenSubKey(key))
             {
@@ -84,24 +82,19 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void AddFoldersFromRegistryKey(
             string key,
-            Dictionary<string, string> directories
-        )
+            Dictionary<string, string> directories)
         {
             // First add the current user.
-            AddFoldersFromRegistryKey
-            (
+            AddFoldersFromRegistryKey(
                 Registry.CurrentUser,
                 key,
-                directories
-            );
+                directories);
 
             // Then add the local machine.            
-            AddFoldersFromRegistryKey
-            (
+            AddFoldersFromRegistryKey(
                 Registry.LocalMachine,
                 key,
-                directories
-            );
+                directories);
         }
 
         /// <summary>
@@ -114,17 +107,13 @@ namespace Microsoft.Build.Tasks
             if (NativeMethodsShared.IsWindows)
             {
                 // Populate the table of assembly folders.
-                AddFoldersFromRegistryKey
-                (
+                AddFoldersFromRegistryKey(
                     @"SOFTWARE\Microsoft\.NETFramework\AssemblyFolders",
-                    s_assemblyFolders
-                );
+                    s_assemblyFolders);
 
-                AddFoldersFromRegistryKey
-                (
+                AddFoldersFromRegistryKey(
                     @"SOFTWARE\Microsoft\VisualStudio\8.0\AssemblyFolders",
-                    s_assemblyFolders
-                );
+                    s_assemblyFolders);
             }
         }
 

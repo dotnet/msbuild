@@ -248,14 +248,11 @@ namespace Microsoft.Build.Shared
                 (
                  runtimeA.Equals(actualCurrentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) ||
-                 runtimeA.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase)
-                ) &&
+                 runtimeA.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase)) &&
                 (
                  runtimeB.Equals(actualCurrentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeB.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) ||
-                 runtimeB.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase)
-                )
-               )
+                 runtimeB.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase)))
             {
                 mergedRuntime = actualCurrentRuntime;
                 return true;
@@ -390,14 +387,11 @@ namespace Microsoft.Build.Shared
                 (
                  architectureA.Equals(currentArchitecture, StringComparison.OrdinalIgnoreCase) ||
                  architectureA.Equals(MSBuildArchitectureValues.currentArchitecture, StringComparison.OrdinalIgnoreCase) ||
-                 architectureA.Equals(MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase)
-                ) &&
+                 architectureA.Equals(MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase)) &&
                 (
                  architectureB.Equals(currentArchitecture, StringComparison.OrdinalIgnoreCase) ||
                  architectureB.Equals(MSBuildArchitectureValues.currentArchitecture, StringComparison.OrdinalIgnoreCase) ||
-                 architectureB.Equals(MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase)
-                )
-               )
+                 architectureB.Equals(MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase)))
             {
                 mergedArchitecture = currentArchitecture;
                 return true;

@@ -48,8 +48,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Create a task body outside of a using task
@@ -68,8 +67,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Set body value
@@ -110,8 +108,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectUsingTaskBodyElement body = GetBodyXml();
                 body.TaskBody = null;
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify setting the value of evaluate to null will wipe out the element and then the property will return true by default.

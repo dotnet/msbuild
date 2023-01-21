@@ -105,8 +105,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (
                     (excludeItems.Count == 0) ||        // minor perf optimization
-                    (!excludeItems.ContainsKey(i.ItemSpec))
-                )
+                    (!excludeItems.ContainsKey(i.ItemSpec)))
                 {
                     ITaskItem newItem = i;
                     if (metadataTable != null)

@@ -67,8 +67,7 @@ namespace Microsoft.Build.Evaluation
                     rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
                     "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
                     key,
-                    rootElement.FullPath
-                );
+                    rootElement.FullPath);
 
                 AddEntry(rootElement);
 

@@ -366,8 +366,7 @@ namespace Microsoft.Build.BackEnd
                                                 _targetOutputs,
                                                 UnloadProjectsOnCompletion,
                                                 ToolsVersion,
-                                                SkipNonexistentTargets
-                                                );
+                                                SkipNonexistentTargets);
 
                         if (!executeResult)
                         {
@@ -426,8 +425,7 @@ namespace Microsoft.Build.BackEnd
                 return success;
             }
 
-            bool executeResult = await ExecuteTargets
-            (
+            bool executeResult = await ExecuteTargets(
                 projectToBuildInParallel,
                 propertiesTable,
                 undefinePropertiesArray,
@@ -439,8 +437,7 @@ namespace Microsoft.Build.BackEnd
                 _targetOutputs,
                 UnloadProjectsOnCompletion,
                 ToolsVersion,
-                SkipNonexistentTargets
-            );
+                SkipNonexistentTargets);
 
             if (!executeResult)
             {
@@ -493,11 +490,9 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        internal static List<string[]> CreateTargetLists
-            (
+        internal static List<string[]> CreateTargetLists(
             string[] targets,
-            bool runEachTargetSeparately
-            )
+            bool runEachTargetSeparately)
         {
             // This is a list of string[].  That is, each element in the list is a string[].  Each
             // string[] represents a set of target names to build.  Depending on the value 
@@ -564,14 +559,12 @@ namespace Microsoft.Build.BackEnd
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName)))
                     {
-                        if (!PropertyParser.GetTableWithEscaping
-                            (
+                        if (!PropertyParser.GetTableWithEscaping(
                                 log,
                                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]),
                                 ItemMetadataNames.PropertiesMetadataName,
                                 projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
-                                out Dictionary<string, string> preProjectPropertiesTable)
-                            )
+                                out Dictionary<string, string> preProjectPropertiesTable))
                         {
                             return false;
                         }
@@ -610,14 +603,12 @@ namespace Microsoft.Build.BackEnd
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName)))
                     {
-                        if (!PropertyParser.GetTableWithEscaping
-                            (
+                        if (!PropertyParser.GetTableWithEscaping(
                                 log,
                                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]),
                                 ItemMetadataNames.AdditionalPropertiesMetadataName,
                                 projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
-                                out Dictionary<string, string> additionalProjectPropertiesTable)
-                           )
+                                out Dictionary<string, string> additionalProjectPropertiesTable))
                         {
                             return false;
                         }

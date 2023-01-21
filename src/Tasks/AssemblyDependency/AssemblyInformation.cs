@@ -201,14 +201,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="frameworkName">Gets the assembly name.</param>
-        internal static void GetAssemblyMetadata
-        (
+        internal static void GetAssemblyMetadata(
             string path,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
-            out FrameworkName frameworkName
-        )
+            out FrameworkName frameworkName)
         {
             var import = assemblyMetadataCache?.GetOrAdd(path, p => new AssemblyMetadata(p))
                 ?? new AssemblyMetadata(path);

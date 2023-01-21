@@ -139,8 +139,7 @@ namespace Microsoft.Build.Exceptions
         /// <param name="errorSubcategory">Error sub-category that describes the error (can be null).</param>
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The F1-help keyword for the host IDE (can be null).</param>
-        public InvalidProjectFileException
-        (
+        public InvalidProjectFileException(
             string projectFile,
             int lineNumber,
             int columnNumber,
@@ -149,8 +148,7 @@ namespace Microsoft.Build.Exceptions
             string message,
             string errorSubcategory,
             string errorCode,
-            string helpKeyword
-        ) :
+            string helpKeyword) :
             this(projectFile, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, errorSubcategory, errorCode, helpKeyword, null)
         {
         }
@@ -169,8 +167,7 @@ namespace Microsoft.Build.Exceptions
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The F1-help keyword for the host IDE (can be null).</param>
         /// <param name="innerException">Any inner exception. May be null.</param>
-        internal InvalidProjectFileException
-        (
+        internal InvalidProjectFileException(
             string projectFile,
             int lineNumber,
             int columnNumber,
@@ -180,8 +177,7 @@ namespace Microsoft.Build.Exceptions
             string errorSubcategory,
             string errorCode,
             string helpKeyword,
-            Exception innerException
-        ) : base(message, innerException)
+            Exception innerException) : base(message, innerException)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));

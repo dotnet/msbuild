@@ -190,11 +190,9 @@ namespace Microsoft.Build.Tasks
         /// Move one file from source to destination. Create the target directory if necessary.
         /// </summary>
         /// <throws>IO related exceptions</throws>
-        private bool MoveFileWithLogging
-        (
+        private bool MoveFileWithLogging(
             string sourceFile,
-            string destinationFile
-        )
+            string destinationFile)
         {
             if (FileSystems.Default.DirectoryExists(destinationFile))
             {

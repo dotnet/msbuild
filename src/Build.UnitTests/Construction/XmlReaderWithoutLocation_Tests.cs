@@ -155,12 +155,10 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void CreateProjectWithoutLineInfo()
         {
-            XmlReader reader = XmlReader.Create(new StringReader
-                (
+            XmlReader reader = XmlReader.Create(new StringReader(
                 @"<Project>
                       <Target Name='foo'/>
-                  </Project>"
-                ));
+                  </Project>"));
             XmlReader noLineInfoReader = new XmlReaderNoIXmlLineInfo(reader);
             Project project = new Project(noLineInfoReader);
             Assert.Single(project.Targets);

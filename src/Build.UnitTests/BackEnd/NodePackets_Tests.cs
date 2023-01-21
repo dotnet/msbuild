@@ -32,8 +32,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 LogMessagePacket packet = new LogMessagePacket(null);
-            }
-           );
+            });
         }
 
         /// <summary>

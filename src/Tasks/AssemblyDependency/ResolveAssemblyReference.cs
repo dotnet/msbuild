@@ -1050,13 +1050,11 @@ namespace Microsoft.Build.Tasks
         /// <param name="idealAssemblyRemappingsIdentities">Array of identities of ideal assembly remappings.</param>
         /// <param name="generalResolutionExceptions">List of exceptions that were not attributable to a particular fusion name.</param>
         /// <returns></returns>
-        private bool LogResults
-        (
+        private bool LogResults(
             ReferenceTable dependencyTable,
             List<DependentAssembly> idealAssemblyRemappings,
             List<AssemblyNameReference> idealAssemblyRemappingsIdentities,
-            List<Exception> generalResolutionExceptions
-        )
+            List<Exception> generalResolutionExceptions)
         {
             bool success = true;
             MSBuildEventSource.Log.RarLogResultsStart();
@@ -1180,16 +1178,14 @@ namespace Microsoft.Build.Tasks
 
                                     Reference victimReference = dependencyTable.GetReference(conflictVictim);
                                     var newVerStr = idealRemapping.BindingRedirects[j].NewVersion.ToString();
-                                    Log.LogMessageFromResources
-                                    (
+                                    Log.LogMessageFromResources(
                                         MessageImportance.High,
                                         "ResolveAssemblyReference.ConflictRedirectSuggestion",
                                         idealRemappingPartialAssemblyName,
                                         conflictVictim.Version,
                                         victimReference.FullPath,
                                         newVerStr,
-                                        reference.FullPath
-                                    );
+                                        reference.FullPath);
 
                                     if (!SupportsBindingRedirectGeneration && !AutoUnify)
                                     {
@@ -1772,8 +1768,7 @@ namespace Microsoft.Build.Tasks
                         }
 
                         if ((messageImportance == MessageImportance.Low && (importance == MessageImportance.Normal || importance == MessageImportance.High)) ||
-                            (messageImportance == MessageImportance.Normal && importance == MessageImportance.High)
-                           )
+                            (messageImportance == MessageImportance.Normal && importance == MessageImportance.High))
                         {
                             _showAssemblyFoldersExLocations[location.SearchPath] = importance;
                         }
@@ -2115,8 +2110,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader">Delegate use to read machine type from PE Header</param>
         /// <returns>True if there was success.</returns>
 #endif
-        internal bool Execute
-        (
+        internal bool Execute(
             FileExists fileExists,
             DirectoryExists directoryExists,
             GetDirectories getDirectories,
@@ -2133,8 +2127,7 @@ namespace Microsoft.Build.Tasks
 #endif
             GetAssemblyPathInGac getAssemblyPathInGac,
             IsWinMDFile isWinMDFile,
-            ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader
-        )
+            ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader)
         {
             bool success = true;
             MSBuildEventSource.Log.RarOverallStart();
@@ -2326,8 +2319,7 @@ namespace Microsoft.Build.Tasks
                             : null;
 
                     // Start the table of dependencies with all of the primary references.
-                    ReferenceTable dependencyTable = new ReferenceTable
-                    (
+                    ReferenceTable dependencyTable = new ReferenceTable(
                         BuildEngine,
                         _findDependencies,
                         _findSatellites,
@@ -2366,8 +2358,7 @@ namespace Microsoft.Build.Tasks
                         _warnOrErrorOnTargetArchitectureMismatch,
                         _ignoreTargetFrameworkAttributeVersionMismatch,
                         _unresolveFrameworkAssembliesFromHigherFrameworks,
-                        assemblyMetadataCache
-                        );
+                        assemblyMetadataCache);
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
 
@@ -2382,15 +2373,13 @@ namespace Microsoft.Build.Tasks
                     if (AutoUnify && FindDependencies)
                     {
                         // Compute all dependencies.
-                        dependencyTable.ComputeClosure
-                        (
+                        dependencyTable.ComputeClosure(
                             // Use any app.config specified binding redirects so that later when we output suggested redirects
                             // for the GenerateBindingRedirects target, we don't suggest ones that the user already wrote
                             appConfigRemappedAssemblies,
                             _assemblyFiles,
                             _assemblyNames,
-                            generalResolutionExceptions
-                        );
+                            generalResolutionExceptions);
 
                         try
                         {
@@ -2413,11 +2402,9 @@ namespace Microsoft.Build.Tasks
 
                         // Based on the closure, get a table of ideal remappings needed to
                         // produce zero conflicts.
-                        dependencyTable.ResolveConflicts
-                        (
+                        dependencyTable.ResolveConflicts(
                             out autoUnifiedRemappedAssemblies,
-                            out autoUnifiedRemappedAssemblyReferences
-                        );
+                            out autoUnifiedRemappedAssemblyReferences);
                     }
 
                     IReadOnlyCollection<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
@@ -2450,24 +2437,20 @@ namespace Microsoft.Build.Tasks
                         }
 
                         // Resolve any conflicts.
-                        dependencyTable.ResolveConflicts
-                        (
+                        dependencyTable.ResolveConflicts(
                             out idealAssemblyRemappings,
-                            out idealAssemblyRemappingsIdentities
-                        );
+                            out idealAssemblyRemappingsIdentities);
                     }
 
                     // Build the output tables.
-                    dependencyTable.GetReferenceItems
-                    (
+                    dependencyTable.GetReferenceItems(
                         out _resolvedFiles,
                         out _resolvedDependencyFiles,
                         out _relatedFiles,
                         out _satelliteFiles,
                         out _serializationAssemblyFiles,
                         out _scatterFiles,
-                        out _copyLocalFiles
-                    );
+                        out _copyLocalFiles);
 
                     // If we're not finding dependencies, then don't suggest redirects (they're only about dependencies).
                     if (FindDependencies)
@@ -3168,8 +3151,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
-            return Execute
-            (
+            return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
                 (p, searchPattern) => Directory.GetDirectories(p, searchPattern),
@@ -3189,8 +3171,7 @@ namespace Microsoft.Build.Tasks
                     => GetAssemblyPathInGac(assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists, fullFusionName, specificVersion),
                 (string fullPath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd)
                     => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
-                p => ReferenceTable.ReadMachineTypeFromPEHeader(p)
-            );
+                p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
         }
 
         #endregion

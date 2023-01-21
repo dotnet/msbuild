@@ -166,8 +166,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // This is expected to throw because not all items contain a value for metadata "Culture".
                 // Only a.foo has a Culture metadata.  b.foo does not.
                 BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests the case where an unqualified metadata reference is used illegally.
@@ -188,8 +187,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // This is expected to throw because we have no idea what item list %(Culture) refers to.
                 BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Missing unittest found by mutation testing.

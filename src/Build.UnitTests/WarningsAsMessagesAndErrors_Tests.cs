@@ -169,9 +169,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         {"Foo", ExpectedEventCode},
                     },
-                    warningsAsMessages: "$(Foo)"
-                )
-            );
+                    warningsAsMessages: "$(Foo)"));
 
             VerifyBuildMessageEvent(logger);
         }
@@ -212,8 +210,7 @@ namespace Microsoft.Build.Engine.UnitTests
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(
                 GetTestProject(
                     warningsAsMessages: ExpectedEventCode,
-                    warningsAsErrors: ExpectedEventCode
-                    ));
+                    warningsAsErrors: ExpectedEventCode));
 
             VerifyBuildMessageEvent(logger);
         }

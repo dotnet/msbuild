@@ -43,8 +43,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
-                    engine.Log
-                );
+                    engine.Log);
                 Assert.Equal("en-GB", t.DirectoriesCreated[0].GetMetadata("Locale"));
 
                 // Output ItemSpec should not be overwritten.
@@ -105,11 +104,9 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
-                Assert.Contains
-                (
+                Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
-                    engine.Log
-                );
+                    engine.Log);
             }
             finally
             {
@@ -150,8 +147,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
-                    engine.Log
-                );
+                    engine.Log);
 
                 engine.Log = "";
                 success = t.Execute();

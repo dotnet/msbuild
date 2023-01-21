@@ -50,8 +50,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 verbosity,
                 new WriteHandler(Console.Out.Write),
                 new ColorSetter(SetColor),
-                new ColorResetter(ResetColor)
-            )
+                new ColorResetter(ResetColor))
         {
             // do nothing
         }
@@ -59,13 +58,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Initializes the logger, with alternate output handlers.
         /// </summary>
-        public ParallelConsoleLogger
-        (
+        public ParallelConsoleLogger(
             LoggerVerbosity verbosity,
             WriteHandler write,
             ColorSetter colorSet,
-            ColorResetter colorReset
-        )
+            ColorResetter colorReset)
         {
             InitializeConsoleMethods(verbosity, write, colorSet, colorReset);
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
@@ -1153,8 +1150,7 @@ namespace Microsoft.Build.BackEnd.Logging
                        _hasBuildStarted
                        && e.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId
                        && _buildEventManager.GetProjectStartedEvent(e.BuildEventContext) == null
-                       && IsVerbosityAtLeast(LoggerVerbosity.Normal)
-                    )
+                       && IsVerbosityAtLeast(LoggerVerbosity.Normal))
                 {
                     if (!_deferredMessages.TryGetValue(e.BuildEventContext, out List<BuildMessageEventArgs> messageList))
                     {

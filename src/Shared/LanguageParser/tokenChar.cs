@@ -44,8 +44,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     || cat == UnicodeCategory.TitlecaseLetter
                     || cat == UnicodeCategory.ModifierLetter
                     || cat == UnicodeCategory.OtherLetter
-                    || cat == UnicodeCategory.LetterNumber
-                )
+                    || cat == UnicodeCategory.LetterNumber)
             {
                 return true;
             }
@@ -64,8 +63,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // From 2.4.2 of the C# Language Specification
             // decimal-digit-character:
             if (
-                    cat == UnicodeCategory.DecimalDigitNumber
-                )
+                    cat == UnicodeCategory.DecimalDigitNumber)
             {
                 return true;
             }
@@ -85,8 +83,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // connecting-character:
             if
             (
-                cat == UnicodeCategory.ConnectorPunctuation
-            )
+                cat == UnicodeCategory.ConnectorPunctuation)
             {
                 return true;
             }
@@ -106,8 +103,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // combining-character:
             if (
                     cat == UnicodeCategory.NonSpacingMark // Mn
-                    || cat == UnicodeCategory.SpacingCombiningMark  // Mc 
-                )
+                    || cat == UnicodeCategory.SpacingCombiningMark)  // Mc 
             {
                 return true;
             }
@@ -126,8 +122,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // From 2.4.2 of the C# Language Specification
             // formatting-character:
             if (
-                    cat == UnicodeCategory.Format  // Cf
-                )
+                    cat == UnicodeCategory.Format)  // Cf
             {
                 return true;
             }
@@ -147,8 +142,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             (
                 (c >= '0' && c <= '9')
                 || (c >= 'A' && c <= 'F')
-                || (c >= 'a' && c <= 'f')
-            )
+                || (c >= 'a' && c <= 'f'))
             {
                 return true;
             }
@@ -164,8 +158,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         {
             if
             (
-                c >= '0' && c <= '7'
-            )
+                c >= '0' && c <= '7')
             {
                 return true;
             }

@@ -484,8 +484,7 @@ namespace Microsoft.Build.Graph
 
         internal string ToDot(
             Func<ProjectGraphNode, string> nodeIdProvider,
-            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = null
-        )
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(nodeIdProvider, nameof(nodeIdProvider));
 

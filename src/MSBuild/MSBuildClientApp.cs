@@ -40,8 +40,7 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            CancellationToken cancellationToken
-            )
+            CancellationToken cancellationToken)
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 

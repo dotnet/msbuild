@@ -28,14 +28,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .vb file). May be null</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <returns>Returns the manifest name</returns>
-        protected override string CreateManifestName
-        (
+        protected override string CreateManifestName(
             string fileName,
             string linkFileName,
             string rootNamespace, // May be null
             string dependentUponFileName, // May be null
-            Stream binaryStream // File contents binary stream, may be null
-        )
+            Stream binaryStream) // File contents binary stream, may be null
         {
             string culture = null;
             bool treatAsCultureNeutral = false;
@@ -53,8 +51,7 @@ namespace Microsoft.Build.Tasks
                 override of a method declared in the base class, but its convenient 
                 to expose a static version anyway for unittesting purposes.
             */
-            return CreateManifestNameImpl
-            (
+            return CreateManifestNameImpl(
                 fileName,
                 linkFileName,
                 PrependCultureAsDirectory,
@@ -63,8 +60,7 @@ namespace Microsoft.Build.Tasks
                 culture,
                 binaryStream,
                 Log,
-                treatAsCultureNeutral
-            );
+                treatAsCultureNeutral);
         }
 
         /// <summary>
@@ -84,8 +80,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
         /// <param name="treatAsCultureNeutral">Whether to treat the current file as 'culture-neutral' and retain the culture in the name.</param>
         /// <returns>Returns the manifest name</returns>
-        internal static string CreateManifestNameImpl
-        (
+        internal static string CreateManifestNameImpl(
             string fileName,
             string linkFileName,
             bool prependCultureAsDirectory, // true by default
@@ -94,8 +89,7 @@ namespace Microsoft.Build.Tasks
             string culture,
             Stream binaryStream, // File contents binary stream, may be null
             TaskLoggingHelper log,
-            bool treatAsCultureNeutral = false
-        )
+            bool treatAsCultureNeutral = false)
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
             string embeddedFileName = linkFileName;
@@ -160,8 +154,7 @@ namespace Microsoft.Build.Tasks
                         ||
                         string.Equals(sourceExtension, restextFileExtension, StringComparison.OrdinalIgnoreCase)
                         ||
-                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase)
-                    )
+                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase))
                 {
                     manifestName.Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
 

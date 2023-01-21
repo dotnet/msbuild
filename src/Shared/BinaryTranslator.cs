@@ -387,16 +387,14 @@ namespace Microsoft.Build.BackEnd
             /// <param name="value">The context to be translated.</param>
             public void Translate(ref BuildEventContext value)
             {
-                value = new BuildEventContext
-                    (
+                value = new BuildEventContext(
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
-                    _reader.ReadInt32()
-                    );
+                    _reader.ReadInt32());
             }
 
 #endif

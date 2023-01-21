@@ -212,12 +212,10 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        internal LoadedType Load
-        (
+        internal LoadedType Load(
             string typeName,
             AssemblyLoadInfo assembly,
-            bool useTaskHost = false
-        )
+            bool useTaskHost = false)
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost);
         }
@@ -228,11 +226,9 @@ namespace Microsoft.Build.Shared
         /// found will be returned.
         /// </summary>
         /// <returns>The loaded type, or null if the type was not found.</returns>
-        internal LoadedType ReflectionOnlyLoad
-        (
+        internal LoadedType ReflectionOnlyLoad(
             string typeName,
-            AssemblyLoadInfo assembly
-        )
+            AssemblyLoadInfo assembly)
         {
             return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false);
         }

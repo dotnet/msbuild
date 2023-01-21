@@ -241,8 +241,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Throws<InternalErrorException>(() =>
             {
                 new ReadOnlyCollection<string>(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify non generic enumeration does not recurse

@@ -56,11 +56,9 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initializes a new instance of the TargetSkippedEventArgs class.
         /// </summary>
-        public TargetSkippedEventArgs
-        (
+        public TargetSkippedEventArgs(
             string message,
-            params object[] messageArgs
-        )
+            params object[] messageArgs)
             : base(
                   subcategory: null,
                   code: null,

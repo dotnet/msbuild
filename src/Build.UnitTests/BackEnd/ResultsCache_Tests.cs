@@ -145,8 +145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 cache.AddResult(result);
 
                 cache.GetResultForRequest(request);
-            }
-           );
+            });
         }
         [Fact]
         public void TestRetrieveSubsetResults()

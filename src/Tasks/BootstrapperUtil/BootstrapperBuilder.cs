@@ -1653,12 +1653,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             // Bootstrapper is always signed with the SHA-256 algorithm, no matter which version of
             // the .NET Framework we are targeting.  In ideal situations, bootstrapper files will be
             // pre-signed anwyay; this is a fallback in case we ever encounter a bootstrapper that is
-            // not signed.  
+            // not signed.
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                 "System.Security.Cryptography.SHA256CryptoServiceProvider"
 #endif
                 );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
             using (Stream s = fi.OpenRead())
             {

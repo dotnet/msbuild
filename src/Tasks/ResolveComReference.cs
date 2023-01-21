@@ -853,13 +853,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Resolves the COM reference, and adds it to the appropriate item list.
         /// </summary>
-        private bool ResolveReferenceAndAddToList
-            (
+        private bool ResolveReferenceAndAddToList(
             ComDependencyWalker dependencyWalker,
             ComReferenceInfo projectRefInfo,
             List<ITaskItem> resolvedReferenceList,
-            List<ITaskItem> moduleList
-            )
+            List<ITaskItem> moduleList)
         {
             if (ResolveReference(dependencyWalker, projectRefInfo, WrapperOutputDirectory, out ITaskItem referencePath))
             {

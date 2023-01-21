@@ -1028,8 +1028,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (
                         (isBuiltInMetadata && ((_options & ExpanderOptions.ExpandBuiltInMetadata) != 0)) ||
-                       (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0))
-                        )
+                       (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0)))
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
@@ -1934,8 +1933,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 bool includeNullEntries,
                 out bool isTransformExpression,
-                out List<Pair<string, S>> itemsFromCapture
-                )
+                out List<Pair<string, S>> itemsFromCapture)
                 where S : class, IItem
             {
                 ErrorUtilities.VerifyThrow(evaluatedItems != null, "Cannot expand items without providing items");
@@ -2112,8 +2110,7 @@ namespace Microsoft.Build.Evaluation
                 IItemProvider<S> evaluatedItems,
                 IElementLocation elementLocation,
                 SpanBasedStringBuilder builder,
-                ExpanderOptions options
-                )
+                ExpanderOptions options)
                 where S : class, IItem
             {
                 List<Pair<string, S>> itemsFromCapture;
@@ -3038,15 +3035,13 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly.</remarks>
             internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex
-                    (
+                () => new Regex(
                     @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
                     ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
                     ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
                     ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
                     ItemVectorWithTransformRHS + @"))",
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled
-                    ));
+                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
@@ -3125,8 +3120,7 @@ namespace Microsoft.Build.Evaluation
                     BindingFlags,
                     Remainder,
                     UsedUninitializedProperties,
-                    FileSystem
-                    );
+                    FileSystem);
             }
         }
 
@@ -4320,8 +4314,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (args[0] is string value0 &&
                     args[1] is string value1 &&
-                    args[2] is string value2
-                    )
+                    args[2] is string value2)
                 {
                     arg0 = value0;
                     arg1 = value1;
@@ -4348,8 +4341,7 @@ namespace Microsoft.Build.Evaluation
                 if (args[0] is string value0 &&
                     args[1] is string value1 &&
                     args[2] is string value2 &&
-                    args[3] is string value3
-                    )
+                    args[3] is string value3)
                 {
                     arg0 = value0;
                     arg1 = value1;

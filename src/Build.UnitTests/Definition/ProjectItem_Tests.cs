@@ -46,8 +46,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// </summary>
         private static IList<ProjectItem> GetItemsFromFragment(string fragment)
         {
-            string content = String.Format
-                (
+            string content = String.Format(
                 ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
                         <ItemGroup>
@@ -55,8 +54,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         </ItemGroup>
                     </Project>
                 "),
-                 fragment
-                 );
+                 fragment);
 
             IList<ProjectItem> items = GetItems(content);
             return items;

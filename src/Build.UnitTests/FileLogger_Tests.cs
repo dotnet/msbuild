@@ -98,8 +98,7 @@ namespace Microsoft.Build.UnitTests
                         File.Delete(log);
                     }
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Specific verbosity overrides global verbosity
@@ -178,8 +177,7 @@ namespace Microsoft.Build.UnitTests
                 fl.Parameters = "verbosity=CookiesAndCream";
                 EventSourceSink es = new EventSourceSink();
                 fl.Initialize(es);
-            }
-           );
+            });
         }
         /// <summary>
         /// Invalid encoding setting
@@ -206,8 +204,7 @@ namespace Microsoft.Build.UnitTests
                         File.Delete(log);
                     }
                 }
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -543,8 +540,7 @@ namespace Microsoft.Build.UnitTests
                 fileLogger.Parameters = "logfile=";
                 fileLogger.Initialize(new EventSourceSink());
                 Assert.True(false);
-            }
-           );
+            });
         }
         #endregion
 

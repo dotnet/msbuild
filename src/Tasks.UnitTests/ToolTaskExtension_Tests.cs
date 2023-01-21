@@ -62,8 +62,7 @@ namespace Microsoft.Build.UnitTests
 
                 t.BuildEngine = engine;
                 t.Log.LogErrorFromResources("Beyond Good and Evil");
-            }
-           );
+            });
         }
         /// <summary>
         /// Retrieve a non-existent value but ask for a default.

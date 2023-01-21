@@ -54,8 +54,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 loggingService.LogBuildEvent(null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -105,8 +104,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogError(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), null, "MyTask");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -119,8 +117,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogError(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), string.Empty, "MyTask");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -157,8 +154,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogInvalidProjectFileError(null, new InvalidProjectFileException());
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -171,8 +167,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogInvalidProjectFileError(s_buildEventContext, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -220,8 +215,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogFatalError(null, new Exception("SuperException"), new BuildEventFileInfo("foo.cs"), "FatalTaskError", "TaskName");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -234,8 +228,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogFatalError(s_buildEventContext, new Exception("SuperException"), null, "FatalTaskError", "TaskName");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -267,8 +260,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogFatalError(s_buildEventContext, new Exception("SuperException"), fileInfo, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -282,8 +274,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogFatalError(s_buildEventContext, new Exception("SuperException"), fileInfo, string.Empty, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -343,8 +334,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogFatalTaskError(s_buildEventContext, new Exception("SuperException"), fileInfo, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -384,8 +374,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogErrorFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), "Message");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -398,8 +387,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogErrorFromText(s_buildEventContext, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", null, "Message");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -412,8 +400,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogErrorFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -522,8 +509,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogTaskWarningFromException(s_buildEventContext, null, fileInfo, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -537,8 +523,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogTaskWarningFromException(s_buildEventContext, null, fileInfo, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -581,8 +566,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogWarning(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), null, "MyTask");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -595,8 +579,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogWarning(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), string.Empty, "MyTask");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -623,8 +606,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogWarningFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), "Message");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -637,8 +619,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogWarningFromText(s_buildEventContext, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", null, "Message");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -651,8 +632,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogWarningFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -696,8 +676,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogComment(s_buildEventContext, MessageImportance.Low, null, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -710,8 +689,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogComment(s_buildEventContext, MessageImportance.Low, String.Empty, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -751,8 +729,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogCommentFromText(s_buildEventContext, MessageImportance.Low, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -775,8 +752,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogCommentFromText(null, MessageImportance.Low, "Hello");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -816,8 +792,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogProjectStarted(null, 1, 2, s_buildEventContext, "ProjectFile", "TargetNames", null, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -831,8 +806,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogProjectStarted(s_buildEventContext, 1, 2, null, "ProjectFile", "TargetNames", null, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1001,8 +975,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogProjectFinished(null, "ProjectFile", true);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1119,8 +1092,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogTaskStarted(null, "MyTask", "ProjectFile", "ProjectFileOfTask");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1155,8 +1127,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogTaskFinished(null, "MyTask", "ProjectFile", "ProjectFileOfTask", true);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1196,8 +1167,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogTargetStarted(null, "MyTarget", "ProjectFile", "ProjectFileOfTarget", null, TargetBuiltReason.None);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1245,8 +1215,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogTargetFinished(null, "MyTarget", "ProjectFile", "ProjectFileOfTarget", true, null);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1450,8 +1419,7 @@ namespace Microsoft.Build.UnitTests.Logging
             cache.AddConfiguration(config);
 
             // Now do it the right way -- with a matching ProjectStarted.
-            BuildEventContext projectContext = service.LogProjectStarted
-                (
+            BuildEventContext projectContext = service.LogProjectStarted(
                     new BuildEventContext(1, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId),
                     1,
                     2,
@@ -1459,8 +1427,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     projectFile,
                     null,
                     null,
-                    null
-                );
+                    null);
 
             service.LogProjectFinished(projectContext, projectFile, success);
 
@@ -1599,8 +1566,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="service">LoggingService mock object which overrides ProcessBuildEvent and can provide a ProcessedBuildEvent (the event which would have been sent to the loggers)</param>
         private void VerifyTargetFinishedEvent(string targetName, string projectFile, string projectFileOfTarget, bool succeeded, string message, ProcessBuildEventHelper service, IEnumerable targetOutputs)
         {
-            TargetFinishedEventArgs targetEvent = new TargetFinishedEventArgs
-                (
+            TargetFinishedEventArgs targetEvent = new TargetFinishedEventArgs(
                   message,
                   null,
                   targetName,
@@ -1608,8 +1574,7 @@ namespace Microsoft.Build.UnitTests.Logging
                   projectFileOfTarget,
                   succeeded,
                   service.ProcessedBuildEvent.Timestamp,
-                  targetOutputs
-                );
+                  targetOutputs);
             targetEvent.BuildEventContext = s_targetBuildEventContext;
             Assert.True(((TargetFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(targetEvent));
         }
@@ -1624,8 +1589,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="service">LoggingService mock object which overrides ProcessBuildEvent and can provide a ProcessedBuildEvent (the event which would have been sent to the loggers)</param>
         private void VerifyTargetStartedEvent(string targetName, string projectFile, string projectFileOfTarget, string message, ProcessBuildEventHelper service)
         {
-            TargetStartedEventArgs buildEvent = new TargetStartedEventArgs
-                       (
+            TargetStartedEventArgs buildEvent = new TargetStartedEventArgs(
                            message,
                            null, // no help keyword
                            targetName,
@@ -1633,8 +1597,7 @@ namespace Microsoft.Build.UnitTests.Logging
                            projectFileOfTarget,
                            String.Empty,
                            TargetBuiltReason.None,
-                           service.ProcessedBuildEvent.Timestamp
-                       );
+                           service.ProcessedBuildEvent.Timestamp);
             buildEvent.BuildEventContext = s_targetBuildEventContext;
             Assert.True(((TargetStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
@@ -1650,16 +1613,14 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="service">LoggingService mock object which overrides ProcessBuildEvent and can provide a ProcessedBuildEvent (the event which would have been sent to the loggers)</param>
         private void VerifyTaskFinishedEvent(string taskName, string projectFile, string projectFileOfTask, bool succeeded, string message, ProcessBuildEventHelper service)
         {
-            TaskFinishedEventArgs taskEvent = new TaskFinishedEventArgs
-                (
+            TaskFinishedEventArgs taskEvent = new TaskFinishedEventArgs(
                   message,
                   null,
                   projectFile,
                   projectFileOfTask,
                   taskName,
                   succeeded,
-                  service.ProcessedBuildEvent.Timestamp
-                );
+                  service.ProcessedBuildEvent.Timestamp);
             taskEvent.BuildEventContext = s_buildEventContext;
             Assert.True(((TaskFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(taskEvent));
         }
@@ -1674,15 +1635,13 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="service">LoggingService mock object which overrides ProcessBuildEvent and can provide a ProcessedBuildEvent (the event which would have been sent to the loggers)</param>
         private void VerifyTaskStartedEvent(string taskName, string projectFile, string projectFileOfTask, string message, ProcessBuildEventHelper service)
         {
-            TaskStartedEventArgs taskEvent = new TaskStartedEventArgs
-                (
+            TaskStartedEventArgs taskEvent = new TaskStartedEventArgs(
                  message,
                   null, // no help keyword
                   projectFile,
                   projectFileOfTask,
                   taskName,
-                  service.ProcessedBuildEvent.Timestamp
-                );
+                  service.ProcessedBuildEvent.Timestamp);
             taskEvent.BuildEventContext = s_buildEventContext;
             Assert.True(((TaskStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(taskEvent));
         }
@@ -1697,14 +1656,12 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="success">Success value to create the comparison event with</param>
         private void VerifyProjectFinishedEvent(ProcessBuildEventHelper service, BuildEventContext projectContext, string message, string projectFile, bool success)
         {
-            ProjectFinishedEventArgs projectEvent = new ProjectFinishedEventArgs
-                (
+            ProjectFinishedEventArgs projectEvent = new ProjectFinishedEventArgs(
                   message,
                   null,
                   projectFile,
                   success,
-                  service.ProcessedBuildEvent.Timestamp
-                );
+                  service.ProcessedBuildEvent.Timestamp);
             projectEvent.BuildEventContext = projectContext;
             Assert.True(((ProjectFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(projectEvent));
         }
@@ -1720,8 +1677,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="parentBuildEventContext">ParentBuildEventContext to create the comparison event with.</param>
         private void VerifyProjectStartedEventArgs(ProcessBuildEventHelper service, int projectId, string message, string projectFile, string targetNames, BuildEventContext parentBuildEventContext, BuildEventContext generatedContext)
         {
-            ProjectStartedEventArgs buildEvent = new ProjectStartedEventArgs
-                    (
+            ProjectStartedEventArgs buildEvent = new ProjectStartedEventArgs(
                         projectId,
                         message,
                         null,       // no help keyword
@@ -1730,8 +1686,7 @@ namespace Microsoft.Build.UnitTests.Logging
                         null,
                         null,
                       parentBuildEventContext,
-                        service.ProcessedBuildEvent.Timestamp
-                    );
+                        service.ProcessedBuildEvent.Timestamp);
             buildEvent.BuildEventContext = generatedContext;
             Assert.True(((ProjectStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
@@ -1744,14 +1699,12 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="message">Message to create the comparison event with</param>
         private void VerityBuildMessageEventArgs(ProcessBuildEventHelper service, MessageImportance messageImportance, string message)
         {
-            BuildMessageEventArgs buildMessageEvent = new BuildMessageEventArgs
-                (
+            BuildMessageEventArgs buildMessageEvent = new BuildMessageEventArgs(
                   message,
                   null,
                   "MSBuild",
                   messageImportance,
-                  service.ProcessedBuildEvent.Timestamp
-                );
+                  service.ProcessedBuildEvent.Timestamp);
 
             buildMessageEvent.BuildEventContext = s_buildEventContext;
             Assert.True(((BuildMessageEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildMessageEvent));
@@ -1768,8 +1721,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="subcategory">Subcategory to create the comparison event with</param>
         private void VerifyBuildWarningEventArgs(BuildEventFileInfo fileInfo, string warningCode, string helpKeyword, string message, ProcessBuildEventHelper service, string subcategory)
         {
-            BuildWarningEventArgs buildEvent = new BuildWarningEventArgs
-                (
+            BuildWarningEventArgs buildEvent = new BuildWarningEventArgs(
                     subcategory,
                     warningCode,
                     fileInfo.File,
@@ -1780,8 +1732,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     message,
                     helpKeyword,
                     "MSBuild",
-                    service.ProcessedBuildEvent.Timestamp
-                );
+                    service.ProcessedBuildEvent.Timestamp);
             buildEvent.BuildEventContext = s_buildEventContext;
             Assert.True(buildEvent.IsEquivalent((BuildWarningEventArgs)service.ProcessedBuildEvent));
         }
@@ -1797,8 +1748,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="subcategory">Subcategory to create the comparison event with</param>
         private void VerifyBuildErrorEventArgs(BuildEventFileInfo fileInfo, string errorCode, string helpKeyword, string message, ProcessBuildEventHelper service, string subcategory)
         {
-            BuildErrorEventArgs buildEvent = new BuildErrorEventArgs
-                (
+            BuildErrorEventArgs buildEvent = new BuildErrorEventArgs(
                     subcategory,
                     errorCode,
                     fileInfo.File,
@@ -1809,8 +1759,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     message,
                     helpKeyword,
                     "MSBuild",
-                    service.ProcessedBuildEvent.Timestamp
-                );
+                    service.ProcessedBuildEvent.Timestamp);
             buildEvent.BuildEventContext = s_buildEventContext;
             Assert.True(buildEvent.IsEquivalent((BuildErrorEventArgs)service.ProcessedBuildEvent));
         }

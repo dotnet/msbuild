@@ -41,9 +41,8 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
                             CreateTargetItemGroup(),
                             CreateTargetOnError(),
                             CreateTargetTask()
-                        }
-                    ),
-                    new ReadOnlyCollection<ProjectOnErrorInstance>(new[] {CreateTargetOnError()})
+                        }),
+                    new ReadOnlyCollection<ProjectOnErrorInstance>(new[] {CreateTargetOnError() })
                 };
 
                 yield return new object[]
@@ -59,8 +58,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
                             CreateTargetTask(),
                             CreateTargetOnError(),
                             CreateTargetTask()
-                        }
-                    ),
+                        }),
                     new ReadOnlyCollection<ProjectOnErrorInstance>(new[]
                     {
                         CreateTargetOnError(),

@@ -37,8 +37,7 @@ namespace Microsoft.Build.Construction
         // An example of a project line looks like this:
         //  Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{05A5AD00-71B5-4612-AF2F-9EA9121C4111}"
         private static readonly Lazy<Regex> s_crackProjectLine = new Lazy<Regex>(
-            () => new Regex
-                (
+            () => new Regex(
                 "^" // Beginning of line
                 + "Project\\(\"(?<PROJECTTYPEGUID>.*)\"\\)"
                 + "\\s*=\\s*" // Any amount of whitespace plus "=" plus any amount of whitespace
@@ -48,9 +47,7 @@ namespace Microsoft.Build.Construction
                 + "\\s*,\\s*" // Any amount of whitespace plus "," plus any amount of whitespace
                 + "\"(?<PROJECTGUID>.*)\""
                 + "$", // End-of-line
-                RegexOptions.Compiled
-                )
-            );
+                RegexOptions.Compiled));
 
         // An example of a property line looks like this:
         //      AspNetCompiler.VirtualPath = "/webprecompile"
@@ -58,16 +55,13 @@ namespace Microsoft.Build.Construction
         // one of their properties, <PROPERTYVALUE> may now have '=' in it. 
 
         private static readonly Lazy<Regex> s_crackPropertyLine = new Lazy<Regex>(
-            () => new Regex
-                (
+            () => new Regex(
                 "^" // Beginning of line
                 + "(?<PROPERTYNAME>[^=]*)"
                 + "\\s*=\\s*" // Any amount of whitespace plus "=" plus any amount of whitespace
                 + "(?<PROPERTYVALUE>.*)"
                 + "$", // End-of-line
-                RegexOptions.Compiled
-                )
-            );
+                RegexOptions.Compiled));
 
         internal const int slnFileMinUpgradableVersion = 7; // Minimum version for MSBuild to give a nice message
         internal const int slnFileMinVersion = 9; // Minimum version for MSBuild to actually do anything useful
@@ -325,28 +319,24 @@ namespace Microsoft.Build.Construction
 
                         if (!System.Version.TryParse(fileVersionFromHeader, out Version version))
                         {
-                            ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                                (
+                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(solutionFile),
                                     "SolutionParseVersionMismatchError",
                                     slnFileMinUpgradableVersion,
-                                    slnFileMaxVersion
-                                );
+                                    slnFileMaxVersion);
                         }
 
                         solutionVersion = version.Major;
 
                         // Validate against our min & max
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                            (
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                                 solutionVersion >= slnFileMinUpgradableVersion,
                                 "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(solutionFile),
                                 "SolutionParseVersionMismatchError",
                                 slnFileMinUpgradableVersion,
-                                slnFileMaxVersion
-                            );
+                                slnFileMaxVersion);
 
                         validVersionFound = true;
                     }
@@ -372,12 +362,10 @@ namespace Microsoft.Build.Construction
             }
 
             // Didn't find the header in lines 1-4, so the solution file is invalid.
-            ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                (
+            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(solutionFile),
-                    "SolutionParseNoHeaderError"
-                 );
+                    "SolutionParseNoHeaderError");
         }
 
         private void ParseSolutionFilter(string solutionFilterFile)
@@ -388,14 +376,12 @@ namespace Microsoft.Build.Construction
                 _solutionFile = ParseSolutionFromSolutionFilter(solutionFilterFile, out JsonElement solution);
                 if (!FileSystems.Default.FileExists(_solutionFile))
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                    (
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(_solutionFile),
                         "SolutionFilterMissingSolutionError",
                         solutionFilterFile,
-                        _solutionFile
-                    );
+                        _solutionFile);
                 }
 
                 SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
@@ -408,15 +394,13 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                (
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                     false, /* Just throw the exception */
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(solutionFilterFile),
                     e,
                     "SolutionFilterJsonParsingError",
-                    solutionFilterFile
-                );
+                    solutionFilterFile);
             }
         }
 
@@ -432,15 +416,13 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                (
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                     false, /* Just throw the exception */
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(solutionFilterFile),
                     e,
                     "SolutionFilterJsonParsingError",
-                    solutionFilterFile
-                );
+                    solutionFilterFile);
             }
             solution = new JsonElement();
             return string.Empty;
@@ -571,15 +553,13 @@ namespace Microsoft.Build.Construction
                 {
                     if (!projectPaths.Contains(project))
                     {
-                        ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                        (
+                        ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(FileUtilities.GetFullPath(project, Path.GetDirectoryName(_solutionFile))),
                             "SolutionFilterFilterContainsProjectNotInSolution",
                             _solutionFilterFile,
                             project,
-                            _solutionFile
-                        );
+                            _solutionFile);
                     }
                 }
             }
@@ -1062,12 +1042,10 @@ namespace Microsoft.Build.Construction
         /// Takes a property name / value that comes from the SLN file for a Venus project, and
         /// stores it appropriately in our data structures.
         /// </summary>
-        private static void ParseAspNetCompilerProperty
-            (
+        private static void ParseAspNetCompilerProperty(
             ProjectInSolution proj,
             string propertyName,
-            string propertyValue
-            )
+            string propertyValue)
         {
             // What we expect to find in the SLN file is something that looks like this:
             //
@@ -1241,10 +1219,8 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Strips a single pair of leading/trailing double-quotes from a string.
         /// </summary>
-        private static string TrimQuotes
-            (
-            string property
-            )
+        private static string TrimQuotes(
+            string property)
         {
             // If the incoming string starts and ends with a double-quote, strip the double-quotes.
             if (!string.IsNullOrEmpty(property) && (property[0] == '"') && (property[property.Length - 1] == '"'))
@@ -1265,11 +1241,9 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <param name="firstLine"></param>
         /// <param name="proj"></param>
-        internal void ParseFirstProjectLine
-        (
+        internal void ParseFirstProjectLine(
             string firstLine,
-            ProjectInSolution proj
-        )
+            ProjectInSolution proj)
         {
             Match match = s_crackProjectLine.Value.Match(firstLine);
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
@@ -1548,8 +1522,7 @@ namespace Microsoft.Build.Construction
                             var projectConfiguration = new ProjectConfigurationInSolution(
                                 configurationPlatformParts[0],
                                 (configurationPlatformParts.Length > 1) ? configurationPlatformParts[1] : string.Empty,
-                                rawProjectConfigurationsEntries.ContainsKey(entryNameBuild)
-                            );
+                                rawProjectConfigurationsEntries.ContainsKey(entryNameBuild));
 
                             project.SetProjectConfiguration(solutionConfiguration.FullName, projectConfiguration);
                         }

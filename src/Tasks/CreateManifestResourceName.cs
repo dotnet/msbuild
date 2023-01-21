@@ -85,14 +85,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependentUponFileName">The file name of the parent of this dependency. May be null</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <returns>Returns the manifest name</returns>
-        protected abstract string CreateManifestName
-        (
+        protected abstract string CreateManifestName(
             string fileName,
             string linkFileName,
             string rootNamespaceName,
             string dependentUponFileName,
-            Stream binaryStream
-        );
+            Stream binaryStream);
 
         /// <summary>
         /// The derived class chooses whether this is a valid source file to work against.
@@ -120,10 +118,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="createFileStream">CreateFileStream delegate</param>
         /// <returns>True if task succeeded.</returns>
-        internal bool Execute
-        (
-            CreateFileStream createFileStream
-        )
+        internal bool Execute(
+            CreateFileStream createFileStream)
         {
             ManifestResourceNames = new ITaskItem[ResourceFiles.Length];
             ResourceFilesWithManifestResourceNames = new ITaskItem[ResourceFiles.Length];
@@ -217,14 +213,12 @@ namespace Microsoft.Build.Tasks
                     // we're done with it.
                     using (binaryStream)
                     {
-                        manifestName = CreateManifestName
-                            (
+                        manifestName = CreateManifestName(
                                 fileName,
                                 resourceFile.GetMetadata(ItemMetadataNames.targetPath),
                                 RootNamespace,
                                 isDependentOnSourceFile ? dependentUpon : null,
-                                binaryStream
-                            );
+                                binaryStream);
                     }
 
                     // Emit an item with our manifest name.

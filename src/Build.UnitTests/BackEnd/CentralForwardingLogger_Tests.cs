@@ -56,8 +56,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 CentralForwardingLogger centralLogger = new CentralForwardingLogger();
                 centralLogger.Initialize(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the correct exception is thrown when the logger is initialized with a null 
@@ -70,8 +69,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 CentralForwardingLogger centralLogger = new CentralForwardingLogger();
                 centralLogger.Initialize(null, 4);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the shutdown method will null out the event redirector

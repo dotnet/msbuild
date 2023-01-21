@@ -283,8 +283,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var projectInstance = new ProjectInstance(
                 new ProjectRootElement(
-                    XmlReader.Create(new StringReader("<Project></Project>")), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, false, false)
-                );
+                    XmlReader.Create(new StringReader("<Project></Project>")), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, false, false));
 
             projectInstance.UsingDifferentToolsVersionFromProjectFile.ShouldBeFalse();
         }
@@ -738,7 +737,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     pi.AddItem("foo", "bar");
                     pi.TranslateEntireState = true;
 
-                    ((ITranslatable) pi).Translate(TranslationHelpers.GetWriteTranslator());
+                    ((ITranslatable)pi).Translate(TranslationHelpers.GetWriteTranslator());
                     var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
                     return copy;

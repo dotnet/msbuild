@@ -1125,20 +1125,17 @@ namespace Microsoft.Build.BackEnd
                         _componentHost,
                         RequestEntry.Request.BuildRequestDataFlags,
                         RequestEntry.Request.SubmissionId,
-                        _nodeLoggingContext.BuildEventContext.NodeId
-                    );
+                        _nodeLoggingContext.BuildEventContext.NodeId);
                 }
             }
             catch
             {
                 // make sure that any errors thrown by a child project are logged in the context of their parent project: create a temporary projectLoggingContext
-                _projectLoggingContext = new ProjectLoggingContext
-                    (
+                _projectLoggingContext = new ProjectLoggingContext(
                     _nodeLoggingContext,
                     _requestEntry.Request,
                     _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion
-                    );
+                    _requestEntry.RequestConfiguration.ToolsVersion);
 
                 throw;
             }

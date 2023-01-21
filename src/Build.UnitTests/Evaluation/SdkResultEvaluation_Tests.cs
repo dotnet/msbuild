@@ -119,9 +119,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         version: null,
                         propertiesToAdd,
                         itemsToAdd,
-                        warnings: null
-                    ))
-                );
+                        warnings: null)));
 
             string projectContent = @"
                     <Project>
@@ -258,9 +256,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         version: null,
                         propertiesToAdd,
                         itemsToAdd,
-                        warnings: null
-                    ))
-                );
+                        warnings: null)));
 
             string projectContent = @"
                     <Project>
@@ -359,9 +355,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         version: null,
                         propertiesToAdd,
                         itemsToAdd,
-                        warnings: null
-                    ))
-                );
+                        warnings: null)));
 
             string projectContent = @"
                     <Project Sdk=""TestPropsAndItemsFromResolverSdk"">
@@ -443,9 +437,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         version: null,
                         propertiesToAdd,
                         itemsToAdd,
-                        warnings: null
-                    ))
-                );
+                        warnings: null)));
 
             string projectContent = @"
                     <Project>

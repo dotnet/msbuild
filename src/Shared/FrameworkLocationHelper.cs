@@ -764,14 +764,12 @@ namespace Microsoft.Build.Shared
         /// <param name="getDirectories">Delegate to method that can return filesystem entries.</param>
         /// <param name="architecture">.NET framework architecture</param>
         /// <returns>Will return 'null' if there is no target frameworks on this machine.</returns>
-        internal static string FindDotNetFrameworkPath
-        (
+        internal static string FindDotNetFrameworkPath(
             string currentRuntimePath,
             string prefix,
             DirectoryExists directoryExists,
             GetDirectories getDirectories,
-            DotNetFrameworkArchitecture architecture
-        )
+            DotNetFrameworkArchitecture architecture)
         {
             if (!NativeMethodsShared.IsWindows)
             {
@@ -1115,8 +1113,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Look for the given registry value under the given key.
         /// </summary>
-        private static string FindRegistryValueUnderKey
-        (
+        private static string FindRegistryValueUnderKey(
             string registryBaseKeyName,
             string registryKeyName,
             RegistryView registryView = RegistryView.Default)
@@ -1387,8 +1384,7 @@ namespace Microsoft.Build.Shared
                 // variables to null when that's what they are already.
                 if (NativeMethodsShared.IsWindows && !CheckForFrameworkInstallation(
                     this._dotNetFrameworkRegistryKey,
-                    this._dotNetFrameworkSetupRegistryInstalledName
-                    ))
+                    this._dotNetFrameworkSetupRegistryInstalledName))
                 {
                     return null;
                 }
@@ -1409,8 +1405,7 @@ namespace Microsoft.Build.Shared
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
                     (!FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
-                     !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll")))
-                    )
+                     !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll"))))
                 {
                     return null;
                 }

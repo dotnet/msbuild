@@ -82,14 +82,12 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    string assemblyName = String.Format
-                    (
+                    string assemblyName = String.Format(
                         CultureInfo.InvariantCulture,
                         "{0}, Version=0.0.0.0, Culture={1}, PublicKeyToken={2}",
                         name,
                         culture,
-                        publicKeyToken
-                    );
+                        publicKeyToken);
 
                     try
                     {

@@ -138,14 +138,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectOutputElement CreateDisconnected(string taskParameter, string itemType, string propertyName, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgument
-                (
+            ErrorUtilities.VerifyThrowArgument(
                 String.IsNullOrEmpty(itemType) ^ String.IsNullOrEmpty(propertyName),
                 "OM_EitherAttributeButNotBoth",
                 XMakeElements.output,
                 XMakeAttributes.propertyName,
-                XMakeAttributes.itemName
-                );
+                XMakeAttributes.itemName);
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.output);
 

@@ -112,13 +112,11 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (Exception ex)
                 {
-                    CommunicationsUtilities.Trace
-                       (
+                    CommunicationsUtilities.Trace(
                            "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
                            msbuildLocation,
                            commandLineArgs,
-                           ex.ToString()
-                       );
+                           ex.ToString());
 
                     throw new NodeFailedToLaunchException(ex);
                 }
@@ -139,8 +137,7 @@ namespace Microsoft.Build.BackEnd
                 processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
                 threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
-                bool result = BackendNativeMethods.CreateProcess
-                    (
+                bool result = BackendNativeMethods.CreateProcess(
                         exeName,
                         commandLineArgs,
                         ref processSecurityAttributes,
@@ -150,22 +147,19 @@ namespace Microsoft.Build.BackEnd
                         BackendNativeMethods.NullPtr,
                         null,
                         ref startInfo,
-                        out processInfo
-                    );
+                        out processInfo);
 
                 if (!result)
                 {
                     // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
                     System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
 
-                    CommunicationsUtilities.Trace
-                        (
+                    CommunicationsUtilities.Trace(
                             "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
                             msbuildLocation,
                             e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
                             e.Message,
-                            commandLineArgs
-                        );
+                            commandLineArgs);
 
                     throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
                 }

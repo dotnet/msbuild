@@ -216,8 +216,7 @@ namespace Microsoft.Build.Graph.UnitTests
             int[] projectReferences = null,
             Dictionary<string, string[]> projectReferenceTargets = null,
             string defaultTargets = null,
-            string extraContent = null
-            )
+            string extraContent = null)
         {
             return Helpers.CreateProjectFile(
                 env,

@@ -74,8 +74,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                 // Project file path with color
                 $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default)} [{TargetFramework ?? "*"}]",
                 $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
-                Console.WindowWidth
-            );
+                Console.WindowWidth);
+
             // Create or update line
             if (Line is null)
             {

@@ -72,10 +72,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <comments>Assumes the itemspec passed in is escaped.</comments>
         /// <param name="itemSpec">The item-spec string.</param>
-        public TaskItem
-        (
-            string itemSpec
-        )
+        public TaskItem(
+            string itemSpec)
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemSpec, nameof(itemSpec));
 
@@ -91,11 +89,9 @@ namespace Microsoft.Build.Utilities
         /// </comments>
         /// <param name="itemSpec">The item-spec string.</param>
         /// <param name="itemMetadata">Custom metadata on the item.</param>
-        public TaskItem
-        (
+        public TaskItem(
             string itemSpec,
-            IDictionary itemMetadata
-        ) :
+            IDictionary itemMetadata) :
             this(itemSpec)
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemMetadata, nameof(itemMetadata));
@@ -120,10 +116,8 @@ namespace Microsoft.Build.Utilities
         /// This constructor creates a new TaskItem, using the given ITaskItem.
         /// </summary>
         /// <param name="sourceItem">The item to copy.</param>
-        public TaskItem
-        (
-            ITaskItem sourceItem
-        )
+        public TaskItem(
+            ITaskItem sourceItem)
         {
             ErrorUtilities.VerifyThrowArgumentNull(sourceItem, nameof(sourceItem));
 
@@ -259,11 +253,9 @@ namespace Microsoft.Build.Utilities
         /// </comments>
         /// <param name="metadataName">Name of metadata to set or change.</param>
         /// <param name="metadataValue">Value of metadata.</param>
-        public void SetMetadata
-        (
+        public void SetMetadata(
             string metadataName,
-            string metadataValue
-        )
+            string metadataValue)
         {
             ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
 

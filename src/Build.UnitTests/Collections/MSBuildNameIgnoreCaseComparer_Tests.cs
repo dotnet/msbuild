@@ -83,8 +83,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Throws<InternalErrorException>(() =>
             {
                 MSBuildNameIgnoreCaseComparer.Default.Equals("x", "y", -1, 0);
-            }
-           );
+            });
         }
         /// <summary>
         /// Invalid small end 
@@ -95,8 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Throws<InternalErrorException>(() =>
             {
                 MSBuildNameIgnoreCaseComparer.Default.Equals("x", "y", 0, -1);
-            }
-           );
+            });
         }
         /// <summary>
         /// Invalid large end 
@@ -107,8 +105,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Throws<InternalErrorException>(() =>
             {
                 MSBuildNameIgnoreCaseComparer.Default.Equals("x", "y", 0, 2);
-            }
-           );
+            });
         }
         /// <summary>
         /// End past the end of other string

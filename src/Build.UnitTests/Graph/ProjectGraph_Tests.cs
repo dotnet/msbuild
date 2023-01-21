@@ -989,8 +989,8 @@ $@"
 <ItemGroup>
     <ProjectReference Include='2.proj' Targets='T2' />
 </ItemGroup>
-"
-                ).Path;
+")
+                .Path;
             CreateProjectFile(
                 env: _env,
                 projectNumber: 2,
@@ -1586,8 +1586,8 @@ $@"
                 extraContent: @"
 <ItemGroup>
     <ProjectReference Include='2.proj' Foo='Bar' />
-</ItemGroup>"
-                ).Path;
+</ItemGroup>")
+                .Path;
             CreateProjectFile(
                 env: _env,
                 projectNumber: 2,
@@ -2014,8 +2014,7 @@ $@"
             var graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: edges,
-                extraContentForAllNodes: EnableTransitiveProjectReferencesPropertyGroup
-                );
+                extraContentForAllNodes: EnableTransitiveProjectReferencesPropertyGroup);
 
             foreach (var node in graph.ProjectNodes)
             {
@@ -2062,7 +2061,7 @@ $@"
                         {1, new[] {2, 3, 4}},
                         {2, new[] {3}},
                         {3, new[] {4}},
-                        {4, Array.Empty<int>()}
+                        {4, Array.Empty<int>() }
                     }
                 };
 
@@ -2127,7 +2126,7 @@ $@"
                         {3, new[] {4, 5, 6}},
                         {4, new[] {5}},
                         {5, new[] {6}},
-                        {6, Array.Empty<int>()},
+                        {6, Array.Empty<int>() },
                     }
                 };
             }
@@ -2138,14 +2137,12 @@ $@"
         public void TransitiveReferencesAreDefinedPerProject(
             Dictionary<int, int[]> edges,
             Dictionary<int, string> extraContentPerProjectNumber,
-            Dictionary<int, int[]> expectedReferences
-            )
+            Dictionary<int, int[]> expectedReferences)
         {
             var graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: edges,
-                extraContentPerProjectNumber: extraContentPerProjectNumber
-            );
+                extraContentPerProjectNumber: extraContentPerProjectNumber);
 
             graph.AssertReferencesIgnoringOrder(expectedReferences);
         }
@@ -2188,8 +2185,7 @@ $@"
                         6,
                         MultitargetingSpecificationPropertyGroup
                     }
-                }
-            );
+                });
 
             GetOuterBuild(graph, 1).AssertReferencesIgnoringOrder(new[] { 1, 1 });
 

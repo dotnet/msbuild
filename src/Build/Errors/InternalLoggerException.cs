@@ -80,15 +80,13 @@ namespace Microsoft.Build.Exceptions
         /// <param name="errorCode"></param>
         /// <param name="helpKeyword"></param>
         /// <param name="initializationException"></param>
-        internal InternalLoggerException
-        (
+        internal InternalLoggerException(
             string message,
             Exception innerException,
             BuildEventArgs e,
             string errorCode,
             string helpKeyword,
-            bool initializationException
-         )
+            bool initializationException)
             : base(message, innerException)
         {
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
@@ -216,14 +214,12 @@ namespace Microsoft.Build.Exceptions
         /// <param name="messageResourceName"></param>
         /// <param name="initializationException"></param>
         /// <param name="messageArgs"></param>
-        internal static void Throw
-        (
+        internal static void Throw(
             Exception innerException,
             BuildEventArgs e,
             string messageResourceName,
             bool initializationException,
-            params string[] messageArgs
-        )
+            params string[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
 

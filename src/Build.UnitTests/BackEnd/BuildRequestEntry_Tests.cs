@@ -37,8 +37,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestEntry entry = new BuildRequestEntry(null, null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestSimpleStateProgression()
@@ -189,8 +188,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequest waitingRequest1 = CreateNewBuildRequest(2, new string[1] { "bar" });
                 entry.WaitForResult(waitingRequest1);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -207,8 +205,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult requiredResult = new BuildResult(request);
                 requiredResult.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 entry.Complete(requiredResult);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -232,8 +229,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult requiredResult = new BuildResult(request);
                 requiredResult.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 entry.Complete(requiredResult);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -256,8 +252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequest waitingRequest1 = CreateNewBuildRequest(2, new string[1] { "bar" });
                 entry.WaitForResult(waitingRequest1);
-            }
-           );
+            });
         }
         [Fact]
         public void TestResultsWithNoMatch1()

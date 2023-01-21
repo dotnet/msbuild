@@ -288,8 +288,7 @@ namespace Microsoft.Build.UnitTests
                 c.AppendFileNameIfNotNull("string with \"quotes\"");
 
                 c.ShouldBe("\"string with \\\"quotes\\\"\"");
-            }
-           );
+            });
         }
         /// <summary>
         /// Trigger escaping of literal quotes.
@@ -484,8 +483,7 @@ namespace Microsoft.Build.UnitTests
                 TestCommandLineBuilder c = new TestCommandLineBuilder();
                 c.TestVerifyThrow("SuperSwitch", @"Parameter");
                 c.TestVerifyThrow("SuperSwitch", @"Para""meter");
-            }
-           );
+            });
         }
     }
 

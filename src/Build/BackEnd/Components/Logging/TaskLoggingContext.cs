@@ -66,15 +66,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            this.BuildEventContext = LoggingService.LogTaskStarted2
-                (
+            this.BuildEventContext = LoggingService.LogTaskStarted2(
                 targetLoggingContext.BuildEventContext,
                 _taskName,
                 projectFullPath,
                 task.Location.File,
                 task.Location.Line,
-                task.Location.Column
-                );
+                task.Location.Column);
             this.IsValid = true;
         }
 
@@ -127,14 +125,12 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
 
-            LoggingService.LogTaskFinished
-                (
+            LoggingService.LogTaskFinished(
                 BuildEventContext,
                 _taskName,
                 projectFullPath,
                 _task.Location.File,
-                success
-                );
+                success);
             this.IsValid = false;
         }
 

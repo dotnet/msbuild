@@ -165,8 +165,7 @@ namespace Microsoft.Build.UnitTests
                     <Import Project=`$(MSBuildBinPath)\\Microsoft.CSharp.Targets` />
                 </Project>
             ");
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify ProjectExtensions cannot exist twice
@@ -183,8 +182,7 @@ namespace Microsoft.Build.UnitTests
                     <ProjectExtensions/>
                 </Project>
             ");
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that we can correctly pass a CDATA tag containing less-than signs into a property value.

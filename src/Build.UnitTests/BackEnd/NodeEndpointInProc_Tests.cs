@@ -185,8 +185,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 NodeEndpointInProc.CreateInProcEndpoints(
                     NodeEndpointInProc.EndpointMode.Synchronous, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -196,8 +195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 NodeEndpointInProc.CreateInProcEndpoints(
                     NodeEndpointInProc.EndpointMode.Asynchronous, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify that the links:

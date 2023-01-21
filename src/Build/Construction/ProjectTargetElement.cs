@@ -269,13 +269,11 @@ namespace Microsoft.Build.Construction
                     return;
                 }
 
-                XmlAttributeWithLocation returnsAttribute = ProjectXmlUtilities.SetOrRemoveAttribute
-                    (
+                XmlAttributeWithLocation returnsAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(
                         XmlElement,
                         XMakeAttributes.returns,
                         value,
-                        true /* only remove the element if the value is null -- setting to empty string is OK */
-                    );
+                        true); /* only remove the element if the value is null -- setting to empty string is OK */
 
                 // if this target's Returns attribute is non-null, then there is at least one target in the 
                 // parent project that has the returns attribute.  

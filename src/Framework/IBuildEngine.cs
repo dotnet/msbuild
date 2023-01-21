@@ -94,12 +94,10 @@ namespace Microsoft.Build.Framework
         ///     to the child project (can be null).  The key and value should both be strings.</param>
         /// <param name="targetOutputs">The outputs of each specified target (can be null).</param>
         /// <returns>true, if build was successful</returns>
-        bool BuildProjectFile
-            (
+        bool BuildProjectFile(
             string projectFileName,
             string[] targetNames,
             IDictionary globalProperties,
-            IDictionary targetOutputs
-            );
+            IDictionary targetOutputs);
     }
 }

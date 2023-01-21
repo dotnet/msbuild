@@ -807,20 +807,16 @@ namespace Microsoft.Build.UnitTests
             var embedInteropTypes = tlbRefInfo.taskItem.GetMetadata(ItemMetadataNames.embedInteropTypes);
             Assert.Equal("false", embedInteropTypes); // "The tlb wrapper for the activex control should have EmbedInteropTypes=false not " + embedInteropTypes);
             Assert.True(ComReference.AreTypeLibAttrEqual(tlbRefInfo.attr, axRefInfo.attr)); // "reference information should be the same"
-            Assert.Equal(TlbReference.GetWrapperFileName
-                        (
+            Assert.Equal(TlbReference.GetWrapperFileName(
                         axRefInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.tlbReferenceName),
                         includeVersionInInteropName,
                         axRefInfo.attr.wMajorVerNum,
-                        axRefInfo.attr.wMinorVerNum
-                        ),
-                    TlbReference.GetWrapperFileName
-                        (
+                        axRefInfo.attr.wMinorVerNum),
+                    TlbReference.GetWrapperFileName(
                         tlbRefInfo.typeLibName,
                         includeVersionInInteropName,
                         tlbRefInfo.attr.wMajorVerNum,
-                        tlbRefInfo.attr.wMinorVerNum
-                        )); // "Expected Ax reference's RCW name to match the new TLB"
+                        tlbRefInfo.attr.wMinorVerNum)); // "Expected Ax reference's RCW name to match the new TLB"
         }
     }
 }

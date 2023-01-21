@@ -63,8 +63,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     warningsAsErrors: null,
                     warningsNotAsErrors: null,
                     warningsAsMessages: null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that an exception is thrown when the task name is empty. 
@@ -99,8 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     warningsAsErrors: null,
                     warningsNotAsErrors: null,
                     warningsAsMessages: null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is null
@@ -135,8 +133,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     warningsAsErrors: null,
                     warningsNotAsErrors: null,
                     warningsAsMessages: null);
-            }
-           );
+            });
         }
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
@@ -173,8 +170,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     warningsAsErrors: null,
                     warningsNotAsErrors: null,
                     warningsAsMessages: null);
-            }
-           );
+            });
         }
 #endif
 

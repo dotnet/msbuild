@@ -175,8 +175,7 @@ namespace Microsoft.Build.UnitTests
                             if
                                 (
                                     a1.CompareBaseNameTo(a2) == 0   // Only check version if basenames match
-                                    && a1.Version != a2.Version
-                                )
+                                    && a1.Version != a2.Version)
                             {
                                 if (a1.Version == null)
                                 {
@@ -331,8 +330,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Throws<FileLoadException>(() =>
                 {
                     AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
-                }
-               );
+                });
             }
         }
 
@@ -350,8 +348,7 @@ namespace Microsoft.Build.UnitTests
                     AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
                     AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
                     extension2.PartialNameCompare(extension);
-                }
-                                                 );
+                });
             }
         }
 

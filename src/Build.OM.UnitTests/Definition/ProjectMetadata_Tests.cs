@@ -461,8 +461,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Assert.True(metadata.IsImported);
 
                 metadata.UnevaluatedValue = "m1";
-            }
-           );
+            });
         }
         /// <summary>
         /// Escaping in metadata values

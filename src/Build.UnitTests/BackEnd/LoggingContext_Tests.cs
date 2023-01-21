@@ -60,8 +60,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 _ = new NodeLoggingContext(new MockLoggingService(), -2, true);
-            }
-           );
+            });
         }
 
         [Fact]

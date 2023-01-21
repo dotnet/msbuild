@@ -1657,8 +1657,7 @@ internal static class NativeMethods
         IntPtr lpSecurityAttributes,
         uint dwCreationDisposition,
         uint dwFlagsAndAttributes,
-        IntPtr hTemplateFile
-        );
+        IntPtr hTemplateFile);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [SupportedOSPlatform("windows")]
@@ -1666,8 +1665,7 @@ internal static class NativeMethods
         SafeFileHandle hFile,
         out FILETIME lpCreationTime,
         out FILETIME lpLastAccessTime,
-        out FILETIME lpLastWriteTime
-        );
+        out FILETIME lpLastWriteTime);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

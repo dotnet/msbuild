@@ -29,8 +29,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 CreateNewBuildRequest(0, null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructorGood()
@@ -100,8 +99,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 request.ResolveConfiguration(2);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -111,8 +109,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
                 request.ResolveConfiguration(-1);
-            }
-           );
+            });
         }
         [Fact]
         public void TestTranslation()

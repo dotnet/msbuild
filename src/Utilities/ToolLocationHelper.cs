@@ -476,8 +476,7 @@ namespace Microsoft.Build.Utilities
                     ||
                     (
                         platformSDK.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
-                        && platformSDK.TargetPlatformVersion <= targetPlatformVersion
-                    ) || platformSDK.ContainsPlatform(targetPlatformIdentifier, targetPlatformVersionString))
+                        && platformSDK.TargetPlatformVersion <= targetPlatformVersion) || platformSDK.ContainsPlatform(targetPlatformIdentifier, targetPlatformVersionString))
                 .OrderBy<TargetPlatformSDK, Version>(platform => platform.TargetPlatformVersion);
         }
 
@@ -532,8 +531,7 @@ namespace Microsoft.Build.Utilities
                         string.IsNullOrEmpty(platform.TargetPlatformIdentifier)
                         ||
                         (platform.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
-                        && platform.TargetPlatformVersion <= targetPlatformVersion)
-                    )
+                        && platform.TargetPlatformVersion <= targetPlatformVersion))
                     && platform.ExtensionSDKs.ContainsKey(sdkMoniker))
                 .OrderByDescending<TargetPlatformSDK, Version>(platform => platform.TargetPlatformVersion)
                 .DefaultIfEmpty(null).FirstOrDefault<TargetPlatformSDK>();
@@ -791,8 +789,7 @@ namespace Microsoft.Build.Utilities
             {
                 if (
                     (targetPlatformSdk.MinOSVersion == null || osVersion == null || targetPlatformSdk.MinOSVersion <= osVersion) && // filter based on OS version - let pass if not in manifest or parameter
-                    (targetPlatformSdk.MinVSVersion == null || vsVersion == null || targetPlatformSdk.MinVSVersion <= vsVersion)    // filter based on VS version - let pass if not in manifest or parameter
-                    )
+                    (targetPlatformSdk.MinVSVersion == null || vsVersion == null || targetPlatformSdk.MinVSVersion <= vsVersion))    // filter based on VS version - let pass if not in manifest or parameter
                 {
                     filteredTargetPlatformSdkList.Add(targetPlatformSdk);
                 }
@@ -941,8 +938,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="diskRoots">The disk roots used to gather installed SDKs.</param>
         /// <param name="extensionDiskRoots">The disk roots used to gather installed extension SDKs.</param>
         /// <param name="registryRoot">The registry root used to gather installed extension SDKs.</param>
-        public static string[] GetPlatformOrFrameworkExtensionSdkReferences
-            (
+        public static string[] GetPlatformOrFrameworkExtensionSdkReferences(
                 string extensionSdkMoniker,
                 string targetSdkIdentifier,
                 string targetSdkVersion,
@@ -950,8 +946,7 @@ namespace Microsoft.Build.Utilities
                 string extensionDiskRoots,
                 string registryRoot,
                 string targetPlatformIdentifier,
-                string targetPlatformVersion
-            )
+                string targetPlatformVersion)
         {
             lock (s_locker)
             {
@@ -1074,16 +1069,14 @@ namespace Microsoft.Build.Utilities
         /// Gathers the set of platform winmds for a particular {SDKI, SDKV, TPI, TPMinV, TPV} combination,
         /// based on the assumption that it is an SDK that has both {SDKI, SDKV} and TP* specifiers.
         /// </summary>
-        private static string[] GetTargetPlatformReferencesFromManifest
-            (
+        private static string[] GetTargetPlatformReferencesFromManifest(
                 string sdkIdentifier,
                 string sdkVersion,
                 string targetPlatformIdentifier,
                 string targetPlatformMinVersion,
                 string targetPlatformVersion,
                 string diskRoots,
-                string registryRoot
-            )
+                string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentLength(sdkIdentifier, nameof(sdkIdentifier));
             ErrorUtilities.VerifyThrowArgumentLength(sdkVersion, nameof(sdkVersion));
@@ -3285,8 +3278,7 @@ namespace Microsoft.Build.Utilities
                 version,
                 visualStudioVersion,
                 UtilitiesDotNetFrameworkArchitecture.Current,
-                canFallBackIfNecessary: true /* If the file is not found for the current architecture, it's OK to follow fallback mechanisms. */
-            );
+                canFallBackIfNecessary: true); /* If the file is not found for the current architecture, it's OK to follow fallback mechanisms. */
 
         /// <summary>
         /// Get a fully qualified path to a file in the .NET Framework SDK. Error if the .NET Framework SDK can't be found.
@@ -3311,8 +3303,7 @@ namespace Microsoft.Build.Utilities
                 version,
                 visualStudioVersion,
                 architecture,
-                false /* Do _not_ fall back -- if the user is specifically requesting a particular architecture, they want that architecture. */
-            );
+                false); /* Do _not_ fall back -- if the user is specifically requesting a particular architecture, they want that architecture. */
 
         /// <summary>
         /// Get a fully qualified path to a file in the .NET Framework SDK. Error if the .NET Framework SDK can't be found.
@@ -3459,8 +3450,7 @@ namespace Microsoft.Build.Utilities
                 version,
                 visualStudioVersion,
                 UtilitiesDotNetFrameworkArchitecture.Current,
-                true /* If the file is not found for the current architecture, it's OK to follow fallback mechanisms. */
-            );
+                true); /* If the file is not found for the current architecture, it's OK to follow fallback mechanisms. */
 
         /// <summary>
         /// Returns the path to a file in the Windows SDK for the desired .NET Framework and Visual Studio version and the desired
@@ -3478,8 +3468,7 @@ namespace Microsoft.Build.Utilities
                 version,
                 visualStudioVersion,
                 architecture,
-                false /* Do _not_ fall back -- if the user is specifically requesting a particular architecture, they want that architecture. */
-            );
+                false); /* Do _not_ fall back -- if the user is specifically requesting a particular architecture, they want that architecture. */
 
         /// <summary>
         /// Returns the path to a file in the Windows SDK for the desired .NET Framework and Visual Studio version and the desired
@@ -3808,9 +3797,7 @@ namespace Microsoft.Build.Utilities
                     if (programFilesReferenceAssemblyLocationFound &&
                         (
                             string.Equals(folder.Name, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV30, StringComparison.OrdinalIgnoreCase)
-                            || string.Equals(folder.Name, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV35, StringComparison.OrdinalIgnoreCase)
-                        )
-                       )
+                            || string.Equals(folder.Name, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV35, StringComparison.OrdinalIgnoreCase)))
                     {
                         bAddDotNetFrameworkIdentifier = true;
                         continue;

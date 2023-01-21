@@ -34,12 +34,10 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of sender</param>
-        protected CustomBuildEventArgs
-        (
+        protected CustomBuildEventArgs(
             string message,
             string helpKeyword,
-            string senderName
-        )
+            string senderName)
             : this(message, helpKeyword, senderName, DateTime.UtcNow)
         {
             // do nothing
@@ -52,13 +50,11 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of sender</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        protected CustomBuildEventArgs
-        (
+        protected CustomBuildEventArgs(
             string message,
             string helpKeyword,
             string senderName,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : this(message, helpKeyword, senderName, eventTimestamp, null)
         {
             // do nothing
@@ -72,14 +68,12 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of sender</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         /// <param name="messageArgs">Message arguments</param>
-        protected CustomBuildEventArgs
-        (
+        protected CustomBuildEventArgs(
             string message,
             string helpKeyword,
             string senderName,
             DateTime eventTimestamp,
-            params object[] messageArgs
-        )
+            params object[] messageArgs)
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
             // do nothing

@@ -239,8 +239,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
         /// <param name="specificVersion">Whether to check for a specific version.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
-        internal static string GetLocation
-        (
+        internal static string GetLocation(
             AssemblyNameExtension strongName,
             ProcessorArchitecture targetProcessorArchitecture,
             GetAssemblyRuntimeVersion getRuntimeVersion,
@@ -249,8 +248,7 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetPathFromFusionName getPathFromFusionName,
             GetGacEnumerator getGacEnumerator,
-            bool specificVersion
-        )
+            bool specificVersion)
         {
             return GetLocation(null, strongName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, getPathFromFusionName, getGacEnumerator, specificVersion);
         }
@@ -269,8 +267,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
         /// <param name="specificVersion">Whether to check for a specific version.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
-        internal static string GetLocation
-        (
+        internal static string GetLocation(
             IBuildEngine4 buildEngine,
             AssemblyNameExtension strongName,
             ProcessorArchitecture targetProcessorArchitecture,
@@ -280,8 +277,7 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetPathFromFusionName getPathFromFusionName,
             GetGacEnumerator getGacEnumerator,
-            bool specificVersion
-        )
+            bool specificVersion)
         {
             ConcurrentDictionary<AssemblyNameExtension, string> fusionNameToResolvedPath = null;
             bool useGacRarCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEGACRARCACHE") == null;

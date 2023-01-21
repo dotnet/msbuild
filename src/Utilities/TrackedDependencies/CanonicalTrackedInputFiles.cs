@@ -389,8 +389,7 @@ namespace Microsoft.Build.Utilities
             string newestSourceDependencyFile;
             if (
                 CanonicalTrackedFilesHelper.FilesExistAndRecordNewestWriteTime(sourcesNeedingCompilationList, _log, out newestSourceDependencyTime, out newestSourceDependencyFile) &&
-                CanonicalTrackedFilesHelper.FilesExistAndRecordOldestWriteTime(_outputFileGroup, _log, out oldestOutputTime, out oldestOutputFile)
-                )
+                CanonicalTrackedFilesHelper.FilesExistAndRecordOldestWriteTime(_outputFileGroup, _log, out oldestOutputTime, out oldestOutputFile))
             {
                 if (newestSourceDependencyTime <= oldestOutputTime)
                 {

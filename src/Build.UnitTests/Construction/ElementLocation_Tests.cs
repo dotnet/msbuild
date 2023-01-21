@@ -212,8 +212,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Throws<InternalErrorException>(() =>
             {
                 ElementLocation.Create("file", -1, 2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests constructor specifying file, line, negative column
@@ -224,8 +223,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Throws<InternalErrorException>(() =>
             {
                 ElementLocation.Create("file", 1, -2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests constructor with invalid null file.
@@ -355,8 +353,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(_pathToCommonTargets);
                 Assert.True(doc.IsReadOnly);
                 doc.Save(FileUtilities.GetTemporaryFile());
-            }
-           );
+            });
         }
 
         /// <summary>

@@ -24,8 +24,7 @@ namespace Microsoft.Build.UnitTests
                 this.root = new DirectoryInfo(
                     this.Parent != null ?
                           this.Parent.GetAbsolutePath(this.SubFolder)
-                        : FileUtilities.GetTemporaryDirectory(true)
-                );
+                        : FileUtilities.GetTemporaryDirectory(true));
             }
 
             return this.root;

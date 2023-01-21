@@ -33,14 +33,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="isPrerequisite">Whether this assembly will be available on target machines.</param>
         /// <param name="isRedistRoot">May be true, false or null. Null means there was no IsRedistRoot in the redist list.</param>
         /// <param name="redistName">Name of the corresponding Resist specified in the redist list.</param>
-        internal void GetInfo
-        (
+        internal void GetInfo(
             AssemblyNameExtension assemblyName,
             out Version unifiedVersion,
             out bool isPrerequisite,
             out bool? isRedistRoot,
-            out string redistName
-        )
+            out string redistName)
         {
             unifiedVersion = assemblyName.Version;
             isPrerequisite = false;

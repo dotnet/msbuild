@@ -316,12 +316,10 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
                         {
-                            CommunicationsUtilities.Trace
-                            (
+                            CommunicationsUtilities.Trace(
                                 "Failed to launch node from {0}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {1}",
                                 msbuildLocation,
-                                commandLineArgs
-                            );
+                                commandLineArgs);
 
                             string nodeFailedToLaunchError = ResourceUtilities.GetResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
                             throw new NodeFailedToLaunchException(null, nodeFailedToLaunchError);
@@ -442,11 +440,17 @@ namespace Microsoft.Build.BackEnd
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
 
-            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            NamedPipeClientStream nodeStream = new NamedPipeClientStream(
+                serverName: ".",
+                pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                                                                         | PipeOptions.CurrentUserOnly
+                | PipeOptions.CurrentUserOnly
 #endif
-                                                                         );
+            );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
 
             try

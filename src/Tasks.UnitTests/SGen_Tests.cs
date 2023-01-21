@@ -153,8 +153,7 @@ namespace Microsoft.Build.UnitTests
                 // This should result in a quoted parameter...
                 sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
                 string commandLine = sgen.CommandLine();
-            }
-           );
+            });
         }
 
         [Fact]
@@ -173,8 +172,7 @@ namespace Microsoft.Build.UnitTests
                 sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
 
                 string commandLine = sgen.CommandLine();
-            }
-           );
+            });
         }
         [Fact]
         public void TestInputPlatform()

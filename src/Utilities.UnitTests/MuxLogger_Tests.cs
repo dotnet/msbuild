@@ -69,8 +69,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             {
                 MuxLogger muxLogger = new MuxLogger();
                 muxLogger.RegisterLogger(1, new MockLogger());
-            }
-           );
+            });
         }
         /// <summary>
         /// Verifies that building with a logger attached to the mux logger is equivalent to building with the logger directly.

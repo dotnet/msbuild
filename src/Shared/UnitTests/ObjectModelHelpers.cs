@@ -418,26 +418,22 @@ namespace Microsoft.Build.UnitTests
 
                         Assert.True(
                                 actualMetadataValue.Length > 0 || expectedMetadataValue.Length == 0,
-                                string.Format("Item '{0}' does not have expected metadata '{1}'.", actualItem.ItemSpec, metadataName)
-                            );
+                                string.Format("Item '{0}' does not have expected metadata '{1}'.", actualItem.ItemSpec, metadataName));
 
                         Assert.True(
                                 actualMetadataValue.Length == 0 || expectedMetadataValue.Length > 0,
-                                string.Format("Item '{0}' has unexpected metadata {1}={2}.", actualItem.ItemSpec, metadataName, actualMetadataValue)
-                            );
+                                string.Format("Item '{0}' has unexpected metadata {1}={2}.", actualItem.ItemSpec, metadataName, actualMetadataValue));
 
-                        Assert.Equal(
-                                expectedMetadataValue,
-                                actualMetadataValue
-                            // string.Format
-                            //    (
-                            //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
-                            //        actualItem.ItemSpec,
-                            //        metadataName,
-                            //        actualMetadataValue,
-                            //        expectedMetadataValue
-                            //    )
-                            );
+                        Assert.Equal(expectedMetadataValue, actualMetadataValue);
+
+                        // string.Format
+                        //    (
+                        //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
+                        //        actualItem.ItemSpec,
+                        //        metadataName,
+                        //        actualMetadataValue,
+                        //        expectedMetadataValue
+                        //    )
                     }
                 }
                 expectedItems.RemoveAt(expectedItemIndex);
@@ -710,23 +706,19 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="logger">May be null</param>
         /// <param name="toolsVersion">May be null</param>
-        internal static Project CreateInMemoryProject
-            (
+        internal static Project CreateInMemoryProject(
             ProjectCollection projectCollection,
             string xml,
             ILogger logger /* May be null */,
-            string toolsVersion /* may be null */
-            )
+            string toolsVersion) /* may be null */
         {
             XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
 
-            Project project = new Project
-                (
+            Project project = new Project(
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
                 null,
                 toolsVersion,
-                projectCollection
-                );
+                projectCollection);
 
             Guid guid = Guid.NewGuid();
             project.FullPath = Path.Combine(TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
@@ -746,22 +738,18 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectContents"></param>
         /// <returns></returns>
-        internal static MockLogger BuildProjectExpectSuccess
-            (
+        internal static MockLogger BuildProjectExpectSuccess(
             string projectContents,
-            ITestOutputHelper testOutputHelper = null
-            )
+            ITestOutputHelper testOutputHelper = null)
         {
             MockLogger logger = new MockLogger(testOutputHelper);
             BuildProjectExpectSuccess(projectContents, logger);
             return logger;
         }
 
-        internal static void BuildProjectExpectSuccess
-            (
+        internal static void BuildProjectExpectSuccess(
             string projectContents,
-            params ILogger[] loggers
-            )
+            params ILogger[] loggers)
         {
             Project project = CreateInMemoryProject(projectContents, logger: null); // logger is null so we take care of loggers ourselves
             project.Build(loggers).ShouldBeTrue();
@@ -773,10 +761,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectContents"></param>
         /// <returns></returns>
-        internal static MockLogger BuildProjectExpectFailure
-            (
-            string projectContents
-            )
+        internal static MockLogger BuildProjectExpectFailure(
+            string projectContents)
         {
             MockLogger logger = new MockLogger();
             BuildProjectExpectFailure(projectContents, logger);
@@ -784,11 +770,9 @@ namespace Microsoft.Build.UnitTests
             return logger;
         }
 
-        internal static void BuildProjectExpectFailure
-            (
+        internal static void BuildProjectExpectFailure(
             string projectContents,
-            ILogger logger
-           )
+            ILogger logger)
         {
             Project project = CreateInMemoryProject(projectContents, logger);
 
@@ -802,11 +786,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="project"></param>
         /// <param name="newExpectedProjectContents"></param>
-        internal static void CompareProjectContents
-            (
+        internal static void CompareProjectContents(
             Project project,
-            string newExpectedProjectContents
-            )
+            string newExpectedProjectContents)
         {
             // Get the new XML for the project, normalizing the whitespace.
             string newActualProjectContents = project.Xml.RawXml;
@@ -996,13 +978,11 @@ namespace Microsoft.Build.UnitTests
         /// <param name="additionalProperties">Can be null.</param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        internal static bool BuildTempProjectFileWithTargets
-        (
+        internal static bool BuildTempProjectFileWithTargets(
             string projectFileRelativePath,
             string[] targets,
             IDictionary<string, string> globalProperties,
-            ILogger logger
-        )
+            ILogger logger)
         {
             // Build the default targets.
             List<ILogger> loggers = new List<ILogger>(1);
@@ -1663,8 +1643,7 @@ namespace Microsoft.Build.UnitTests
             int[] projectReferences = null,
             Dictionary<string, string[]> projectReferenceTargets = null,
             string defaultTargets = null,
-            string extraContent = null
-            )
+            string extraContent = null)
         {
             var sb = new StringBuilder(64);
 
@@ -1770,8 +1749,7 @@ namespace Microsoft.Build.UnitTests
                 entryProjectFiles,
                 globalProperties ?? new Dictionary<string, string>(),
                 projectCollection ?? env.CreateProjectCollection()
-                    .Collection
-                );
+                    .Collection);
 
             string GetExtraContent(int projectNum)
             {
@@ -2211,8 +2189,7 @@ namespace Microsoft.Build.UnitTests
             public override IEnumerable<string> EnumerateFiles(
                 string path,
                 string searchPattern = "*",
-                SearchOption searchOption = SearchOption.TopDirectoryOnly
-            )
+                SearchOption searchOption = SearchOption.TopDirectoryOnly)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
@@ -2222,8 +2199,7 @@ namespace Microsoft.Build.UnitTests
             public override IEnumerable<string> EnumerateDirectories(
                 string path,
                 string searchPattern = "*",
-                SearchOption searchOption = SearchOption.TopDirectoryOnly
-            )
+                SearchOption searchOption = SearchOption.TopDirectoryOnly)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
@@ -2233,8 +2209,7 @@ namespace Microsoft.Build.UnitTests
             public override IEnumerable<string> EnumerateFileSystemEntries(
                 string path,
                 string searchPattern = "*",
-                SearchOption searchOption = SearchOption.TopDirectoryOnly
-            )
+                SearchOption searchOption = SearchOption.TopDirectoryOnly)
             {
                 IncrementCalls(ref _fileSystemCalls);
 

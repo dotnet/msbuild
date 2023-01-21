@@ -51,8 +51,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="foundPath">The path where the file was found.</param>
         /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
         /// <returns>True if the file was resolved.</returns>
-        public override bool Resolve
-        (
+        public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
@@ -63,8 +62,7 @@ namespace Microsoft.Build.Tasks
             string assemblyFolderKey,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
-            out bool userRequestedSpecificFile
-        )
+            out bool userRequestedSpecificFile)
         {
             foundPath = null;
             userRequestedSpecificFile = false;

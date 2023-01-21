@@ -38,8 +38,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="foundPath">The path where the file was found.</param>
         /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
         /// <returns>True if the file was resolved.</returns>
-        public override bool Resolve
-        (
+        public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
@@ -50,8 +49,7 @@ namespace Microsoft.Build.Tasks
             string assemblyFolderKey,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
-            out bool userRequestedSpecificFile
-        )
+            out bool userRequestedSpecificFile)
         {
             // If there is newline or white space `FileUtilities.NormalizePath` will get garbage result(throw on fullframework).
             // Adding FileUtilities.NormalizePath (https://github.com/dotnet/msbuild/pull/4414) caused https://github.com/dotnet/msbuild/issues/4593

@@ -139,8 +139,7 @@ namespace Microsoft.Build.Execution
         /// All parameters are in the unevaluated state.
         /// All location parameters may be null if not applicable, except for the main location parameter.
         /// </summary>
-        internal ProjectTargetInstance
-            (
+        internal ProjectTargetInstance(
             string name,
             string condition,
             string inputs,
@@ -161,8 +160,7 @@ namespace Microsoft.Build.Execution
             ElementLocation afterTargetsLocation,
             ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild> children,
             ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance> onErrorChildren,
-            bool parentProjectSupportsReturnsAttribute
-            )
+            bool parentProjectSupportsReturnsAttribute)
         {
             ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
             ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));

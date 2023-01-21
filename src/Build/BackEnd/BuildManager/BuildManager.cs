@@ -1905,8 +1905,7 @@ namespace Microsoft.Build.Execution
         private Dictionary<ProjectGraphNode, BuildResult> BuildGraph(
             ProjectGraph projectGraph,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
-            GraphBuildRequestData graphBuildRequestData
-        )
+            GraphBuildRequestData graphBuildRequestData)
         {
             var waitHandle = new AutoResetEvent(true);
             var graphBuildStateLock = new object();
@@ -2675,8 +2674,7 @@ namespace Microsoft.Build.Execution
                 ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent(BuildComponentType.LoggingService) as ILoggingService;
                 var remoteLoggers = new List<LoggerDescription>(loggingService.LoggerDescriptions);
 
-                _nodeConfiguration = new NodeConfiguration
-                (
+                _nodeConfiguration = new NodeConfiguration(
                 -1, /* must be assigned by the NodeManager */
                 _buildParameters,
                 remoteLoggers.ToArray()
@@ -2687,8 +2685,7 @@ namespace Microsoft.Build.Execution
                     loggingService.IncludeEvaluationMetaprojects,
                     loggingService.IncludeEvaluationProfile,
                     loggingService.IncludeEvaluationPropertiesAndItems,
-                    loggingService.IncludeTaskInputs)
-                );
+                    loggingService.IncludeTaskInputs));
             }
 
             return _nodeConfiguration;

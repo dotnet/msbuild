@@ -53,8 +53,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ParseSolutionHelper(solutionFileContents);
                 Assert.True(false, "Should not get here");
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that a project with the C++ project guid and an arbitrary extension is seen as valid -- 
@@ -219,8 +218,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expected version numbers less than 7 to cause an invalid project file exception.
@@ -237,8 +235,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test to parse a very basic .sln file to validate that description property in a solution file 
@@ -788,8 +785,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
@@ -815,8 +811,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
@@ -842,8 +837,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure the project configurations in solution configurations get parsed correctly 

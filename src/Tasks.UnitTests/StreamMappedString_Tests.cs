@@ -138,8 +138,7 @@ namespace Microsoft.Build.UnitTests
                 StreamMappedString s = new StreamMappedString(stream, false);
 
                 Assert.Equal(String.Empty, s.Substring(1, 30));
-            }
-           );
+            });
         }
         [Fact]
         public void Regress_Mutation_SubstringOnLastPageWorks()
@@ -226,8 +225,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Read something way past the end. This should result in a range exception.
                 s.GetAt(1000000);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -239,8 +237,7 @@ namespace Microsoft.Build.UnitTests
                 StreamMappedString s = new StreamMappedString(stream, false, 256);
 
                 s.GetAt(256);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -253,8 +250,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Read something way past the end. This should result in a range exception.
                 s.GetAt(1000000);
-            }
-           );
+            });
         }
 
 

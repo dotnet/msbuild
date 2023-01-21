@@ -109,8 +109,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 GetParameterGroupXml(s_contentDuplicateParameters);
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Read parameterGroup with a attribute
@@ -130,8 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Helper to get a UsingTaskParameterGroupElement from xml

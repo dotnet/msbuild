@@ -60,8 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read metadatum with invalid name characters (but legal xml)
@@ -82,8 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         [Theory]
@@ -106,8 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -129,8 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         [Theory]
@@ -153,8 +149,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -176,8 +171,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -203,8 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -257,8 +250,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectMetadataElement metadatum = GetMetadataXml();
 
                 metadatum.Name = "ImportGroup";
-            }
-           );
+            });
         }
 
         [Fact]
@@ -270,8 +262,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 metadatum.Name = "Include";
-            }
-           );
+            });
         }
 
 
@@ -284,8 +275,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 metadatum.ExpressedAsAttribute = true;
-            }
-           );
+            });
         }
 
         [Theory]
@@ -371,8 +361,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectMetadataElement metadatum = GetMetadataXml();
 
                 metadatum.Value = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is an ItemDefinitionGroup
@@ -393,8 +382,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is NOT an ItemDefinitionGroup

@@ -47,8 +47,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             {
                 var dictionary = new CopyOnWriteDictionary<object>();
                 object value = dictionary[string.Empty];
-            }
-           );
+            });
         }
         /// <summary>
         /// Find with the same key inserted using TryGetValue

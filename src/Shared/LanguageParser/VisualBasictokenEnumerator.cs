@@ -103,8 +103,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 //      Date is a keyword but,
                 //      [Date] is an identifier.
                 _reader.CurrentCharacter == '[' ||
-                _reader.MatchNextIdentifierStart()
-            )
+                _reader.MatchNextIdentifierStart())
             {
                 bool escapedIdentifier = false;
                 if (_reader.CurrentCharacter == '[')

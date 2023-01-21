@@ -157,8 +157,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem(null, "i1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item empty item type
@@ -170,8 +169,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem(String.Empty, "i1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item null include
@@ -183,8 +181,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem("i", null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item null metadata
@@ -349,8 +346,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build(new string[] { null }, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Null logger in array should give ArgumentNullException
@@ -362,8 +358,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build("t", new ILogger[] { null });
-            }
-           );
+            });
         }
         /// <summary>
         /// Null remote logger in array should give ArgumentNullException
@@ -375,8 +370,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build("t", null, new ForwardingLoggerRecord[] { null });
-            }
-           );
+            });
         }
         /// <summary>
         /// Null target name should imply the default target

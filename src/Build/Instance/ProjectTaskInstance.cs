@@ -94,11 +94,9 @@ namespace Microsoft.Build.Execution
         /// All parameters are in the unevaluated state.
         /// Locations other than the main location may be null.
         /// </summary>
-        internal ProjectTaskInstance
-            (
+        internal ProjectTaskInstance(
             ProjectTaskElement element,
-            IList<ProjectTaskInstanceChild> outputs
-            )
+            IList<ProjectTaskInstanceChild> outputs)
         {
             ErrorUtilities.VerifyThrowInternalNull(element, nameof(element));
             ErrorUtilities.VerifyThrowInternalNull(outputs, nameof(outputs));
@@ -133,8 +131,7 @@ namespace Microsoft.Build.Execution
             string condition,
             string continueOnError,
             string msbuildRuntime,
-            string msbuildArchitecture
-        ) : this(
+            string msbuildArchitecture) : this(
             name,
             condition,
             continueOnError,
@@ -150,8 +147,7 @@ namespace Microsoft.Build.Execution
         {
         }
 
-        internal ProjectTaskInstance
-            (
+        internal ProjectTaskInstance(
             string name,
             string condition,
             string continueOnError,

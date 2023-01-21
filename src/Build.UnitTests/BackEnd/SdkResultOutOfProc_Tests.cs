@@ -255,8 +255,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             {
                                 { "ItemFromResolver", new SdkResultItem("ItemValueFromResolver", null) }
                             },
-                        warnings: null
-                    ));
+                        warnings: null));
 
             EvaluationContext.TestOnlyHookOnCreate = context =>
             {

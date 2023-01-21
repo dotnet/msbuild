@@ -369,8 +369,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.TargetFrameworkMonikerDisplayName = "Foo";
             t.SearchPaths = new string[] { @"c:\Frameworks\" };
             Assert.True(
-                t.Execute
-                (
+                t.Execute(
                     fileExists,
                     directoryExists,
                     getDirectories,
@@ -387,9 +386,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #endif
                     checkIfAssemblyIsInGac,
                     isWinMDFile,
-                    readMachineTypeFromPEHeader
-                )
-            );
+                    readMachineTypeFromPEHeader));
 
 
             Assert.Equal(0, e.Warnings); // "No warning expected in this scenario."

@@ -24,13 +24,10 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         ///     Regex for breaking up the search path pieces.
         /// </summary>
         private static readonly Lazy<Regex> s_crackAssemblyFoldersFromConfigSentinel = new Lazy<Regex>(
-            () => new Regex
-                (
+            () => new Regex(
                 AssemblyResolutionConstants.assemblyFoldersFromConfigSentinel +
                 "(?<ASSEMBLYFOLDERCONFIGFILE>[^,]*),(?<TARGETRUNTIMEVERSION>[^,]*)}",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled
-                )
-            );
+                RegexOptions.IgnoreCase | RegexOptions.Compiled));
 
         /// <summary>
         /// Whether or not the search path could be cracked.
@@ -169,8 +166,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <param name="foundPath">The path where the file was found.</param>
         /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
         /// <returns>True if the file was resolved.</returns>
-        public override bool Resolve
-        (
+        public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
@@ -181,8 +177,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             string assemblyFolderKey,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
-            out bool userRequestedSpecificFile
-        )
+            out bool userRequestedSpecificFile)
         {
             foundPath = null;
             userRequestedSpecificFile = false;
