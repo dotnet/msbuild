@@ -14,7 +14,7 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class UpdateOperation : LazyItemOperation
+        private class UpdateOperation : LazyItemOperation
         {
             private readonly ImmutableList<ProjectMetadataElement> _metadata;
             private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            readonly struct MatchResult
+            private readonly struct MatchResult
             {
                 public bool IsMatch { get; }
                 public Dictionary<string, I> CapturedItemsFromReferencedItemTypes { get; }
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I itemToMatch);
+            private delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I itemToMatch);
 
             protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {

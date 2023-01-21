@@ -8,7 +8,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// This class is shared between LocalNode and LocalNodeProvider and contains all the global name generation logic
     /// </summary>
-    static class LocalNodeProviderGlobalNames
+    internal static class LocalNodeProviderGlobalNames
     {
         #region Methods
 
@@ -160,7 +160,7 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Data
-        static string nodePostfix = null;
+        private static string nodePostfix = null;
         #endregion
     }
 }

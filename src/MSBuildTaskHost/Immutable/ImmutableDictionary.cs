@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace System.Collections.Immutable
 {
-    static class ImmutableExtensions
+    internal static class ImmutableExtensions
     {
         public static ImmutableDictionary<K,V> ToImmutableDictionary<K,V>(this IDictionary<K,V> dictionary)
         {
@@ -16,7 +16,7 @@ namespace System.Collections.Immutable
         }
     }
 
-    static class ImmutableDictionary
+    internal static class ImmutableDictionary
     {
         internal static ImmutableDictionary<K, V> Create<K, V>(IEqualityComparer<K> comparer)
         {
@@ -29,7 +29,7 @@ namespace System.Collections.Immutable
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
-    sealed class ImmutableDictionary<K, V> : IDictionary<K, V>, IDictionary
+    internal sealed class ImmutableDictionary<K, V> : IDictionary<K, V>, IDictionary
     {
         /// <summary>
         /// The underlying dictionary.

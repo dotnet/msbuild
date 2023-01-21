@@ -14,7 +14,7 @@ namespace Microsoft.Build.BuildEngine
     /// </summary>
     internal class TaskWorkerThread
     {
-        enum NodeLoopExecutionMode
+        private enum NodeLoopExecutionMode
         {
             /// <summary>
             /// This is a mode of a thread that is not executing a task but is responsible for picking up

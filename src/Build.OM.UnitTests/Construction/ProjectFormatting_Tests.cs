@@ -351,13 +351,13 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        void VerifyFormattingPreserved(string projectContents)
+        private void VerifyFormattingPreserved(string projectContents)
         {
             VerifyFormattingPreservedFromString(projectContents);
             VerifyFormattingPreservedFromFile(projectContents);
         }
 
-        void VerifyFormattingPreservedFromString(string projectContents)
+        private void VerifyFormattingPreservedFromString(string projectContents)
         {
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectContents)),
                 ProjectCollection.GlobalProjectCollection,
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        void VerifyFormattingPreservedFromFile(string projectContents)
+        private void VerifyFormattingPreservedFromFile(string projectContents)
         {
             string directory = null;
 
@@ -403,13 +403,13 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             }
         }
 
-        void VerifyProjectReformatting(string originalContents, string expectedContents)
+        private void VerifyProjectReformatting(string originalContents, string expectedContents)
         {
             VerifyProjectReformattingFromString(originalContents, expectedContents);
             VerifyProjectReformattingFromFile(originalContents, expectedContents);
         }
 
-        void VerifyProjectReformattingFromString(string originalContents, string expectedContents)
+        private void VerifyProjectReformattingFromString(string originalContents, string expectedContents)
         {
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(originalContents)),
                 ProjectCollection.GlobalProjectCollection,
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        void VerifyProjectReformattingFromFile(string originalContents, string expectedContents)
+        private void VerifyProjectReformattingFromFile(string originalContents, string expectedContents)
         {
             string directory = null;
 
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             }
         }
 
-        void VerifyAssertLineByLine(string expected, string actual)
+        private void VerifyAssertLineByLine(string expected, string actual)
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false, _testOutput);
         }

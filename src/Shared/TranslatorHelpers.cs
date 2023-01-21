@@ -45,7 +45,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        static ObjectTranslator<T> AdaptFactory<T>(NodePacketValueFactory<T> valueFactory) where T : ITranslatable
+        private static ObjectTranslator<T> AdaptFactory<T>(NodePacketValueFactory<T> valueFactory) where T : ITranslatable
         {
             void TranslateUsingValueFactory(ITranslator translator, ref T objectToTranslate)
             {

@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class TaskTranslatorHelpers
     {
-        MemoryStream _serializationStream;
+        private MemoryStream _serializationStream;
 
         [Fact]
         public void NullFrameworkName()

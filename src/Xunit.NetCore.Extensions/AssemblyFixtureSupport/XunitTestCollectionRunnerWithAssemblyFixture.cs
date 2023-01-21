@@ -11,9 +11,9 @@ namespace Xunit.NetCore.Extensions
 {
     public class XunitTestCollectionRunnerWithAssemblyFixture : XunitTestCollectionRunner
     {
-        readonly Dictionary<Type, object> assemblyFixtureMappings;
-        readonly IMessageSink diagnosticMessageSink;
-        readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
+        private readonly Dictionary<Type, object> assemblyFixtureMappings;
+        private readonly IMessageSink diagnosticMessageSink;
+        private readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
 
         public XunitTestCollectionRunnerWithAssemblyFixture(Dictionary<Type, object> assemblyFixtureMappings,
                                                             List<AssemblyFixtureAttribute> assemblyFixtureAttributes,

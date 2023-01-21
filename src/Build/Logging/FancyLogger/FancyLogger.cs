@@ -52,7 +52,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             });
         }
 
-        void Render()
+        private void Render()
         {
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
@@ -102,17 +102,17 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
 
         // Build
-        void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
+        private void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
         {
         }
 
-        void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
+        private void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
             Succeeded = e.Succeeded;
         }
 
         // Project
-        void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
+        private void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.ShouldRerender = true;
         }
 
-        void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
+        private void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
 
         // Target
-        void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
+        private void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.ShouldRerender = true;
         }
 
-        void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
+        private void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
@@ -172,7 +172,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
 
         // Task
-        void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
+        private void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
@@ -187,13 +187,13 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.ShouldRerender = true;
         }
 
-        void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
+        private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
             completedTasks++;
         }
 
         // Raised messages, warnings and errors
-        void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
+        private void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
             if (e is TaskCommandLineEventArgs)
             {
@@ -211,7 +211,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.ShouldRerender = true;
         }
 
-        void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
+        private void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
@@ -224,7 +224,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Log
             node.ShouldRerender = true;
         }
-        void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
+
+        private void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
@@ -238,7 +239,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.ShouldRerender = true;
         }
 
-        void console_CancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs)
+        private void console_CancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs)
         {
             // Shutdown logger
             Shutdown();

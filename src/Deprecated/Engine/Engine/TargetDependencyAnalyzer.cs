@@ -1210,22 +1210,27 @@ namespace Microsoft.Build.BuildEngine
         private XmlAttribute targetInputsAttribute;
         // The XmlAttribute for the "Outputs"
         private XmlAttribute targetOutputsAttribute;
+
         // Details of the dependency analysis for logging
-        ArrayList dependencyAnalysisDetail = new ArrayList();
+        private ArrayList dependencyAnalysisDetail = new ArrayList();
+
         // The unique target inputs
-        Hashtable uniqueTargetInputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private Hashtable uniqueTargetInputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+
         // The unique target outputs;
-        Hashtable uniqueTargetOutputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private Hashtable uniqueTargetOutputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+
         // Engine logging service which to log message to
-        EngineLoggingServices loggingService;
+        private EngineLoggingServices loggingService;
+
         // Event context information where event is raised from
-        BuildEventContext buildEventContext;
+        private BuildEventContext buildEventContext;
     }
 
     /// <summary>
     /// Why TLDA decided this entry was out of date
     /// </summary>
-    enum OutofdateReason
+    internal enum OutofdateReason
     {
         MissingInput, // The input file was missing
         MissingOutput, // The output file was missing
@@ -1235,7 +1240,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// A logging detail entry. Describes what TLDA decided about inputs / outputs
     /// </summary>
-    class DependencyAnalysisLogDetail
+    internal class DependencyAnalysisLogDetail
     {
         private OutofdateReason reason;
         private string inputItemName;

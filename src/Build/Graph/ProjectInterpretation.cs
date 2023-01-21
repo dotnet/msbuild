@@ -294,7 +294,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        delegate GlobalPropertyPartsForMSBuildTask GlobalPropertiesModifier(GlobalPropertyPartsForMSBuildTask defaultParts, ProjectItemInstance projectReference);
+        private delegate GlobalPropertyPartsForMSBuildTask GlobalPropertiesModifier(GlobalPropertyPartsForMSBuildTask defaultParts, ProjectItemInstance projectReference);
 
         /// <summary>
         ///     Gets the effective global properties for an item that will get passed to <see cref="MSBuild.Projects"/>.

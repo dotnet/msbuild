@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
     internal class ProjectXmlPair : ElementLinkPair<ProjectRootElement>
     {
-        ProjectPair Project { get; }
+        private ProjectPair Project { get; }
         public ProjectXmlPair(ProjectPair pair) : base(null, pair.View.Xml, pair.Real.Xml) { this.Project = pair; this.PRE = this; }
         public ProjectXmlPair(ProjectRootElement viewXml, ProjectRootElement realXml) : base(null, viewXml, realXml) { this.PRE = this; }
 

@@ -113,11 +113,11 @@ namespace Microsoft.Build.Utilities
         // Static cache of the path separator character in an array for use in String.Split.
         private static readonly string pathSeparator = Path.PathSeparator.ToString();
 
-#endregion
+        #endregion
 
-#region Static Member Initializers
+        #region Static Member Initializers
 
-        static List<string> InitializeCommonApplicationDataPaths()
+        private static List<string> InitializeCommonApplicationDataPaths()
         {
             List<string> commonApplicationDataPaths = new();
 

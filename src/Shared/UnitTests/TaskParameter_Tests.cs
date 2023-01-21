@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(15, wrappedParameter2[1]);
         }
 
-        enum TestEnumForParameter
+        private enum TestEnumForParameter
         {
             Something,
             SomethingElse

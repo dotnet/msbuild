@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System.Collections.Generic;
     using Microsoft.Build.Construction;
 
-    static class CollectionHelpers
+    internal static class CollectionHelpers
     {
         public static IList<A> ConvertCollection<A,B>(this IEnumerable<B> source, Func<B, A> converter)
         {

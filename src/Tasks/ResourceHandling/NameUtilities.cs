@@ -7,7 +7,7 @@ using System;
 
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
-    static class NameUtilities
+    internal static class NameUtilities
     {
         /// <summary>
         /// Extract the full name of a type from an assembly-qualified name string.

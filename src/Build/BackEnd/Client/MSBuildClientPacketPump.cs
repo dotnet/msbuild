@@ -64,7 +64,7 @@ namespace Microsoft.Build.BackEnd.Client
         /// <summary>
         /// The binary translator for reading packets.
         /// </summary>
-        readonly ITranslator _binaryReadTranslator;
+        private readonly ITranslator _binaryReadTranslator;
 
         /// <summary>
         /// True if this side is gracefully disconnecting.

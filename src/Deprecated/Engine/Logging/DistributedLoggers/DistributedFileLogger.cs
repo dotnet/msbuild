@@ -194,12 +194,15 @@ namespace Microsoft.Build.BuildEngine
         private FileLogger nodeFileLogger;
         // Reference for the central logger 
         private IEventRedirector buildEventRedirector;
+
         // The Id of the node the forwardingLogger is attached to
-        int nodeId;
+        private int nodeId;
+
         // Directory to place the log files, by default this will be in the current directory when the node is created
-        string logFile = "msbuild.log";
+        private string logFile = "msbuild.log";
+
         // Logger parameters
-        string parameters;
+        private string parameters;
         // File logger parameters delimiters.
         private static readonly char[] fileLoggerParameterDelimiters = { ';' };
         // File logger parameter value split character.

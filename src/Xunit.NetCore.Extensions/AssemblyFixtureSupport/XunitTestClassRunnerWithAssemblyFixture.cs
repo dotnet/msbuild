@@ -12,8 +12,8 @@ namespace Xunit.NetCore.Extensions
 {
     public class XunitTestClassRunnerWithAssemblyFixture : XunitTestClassRunner
     {
-        readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
-        readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
+        private readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
+        private readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
 
         public XunitTestClassRunnerWithAssemblyFixture(
             List<AssemblyFixtureAttribute> assemblyFixtureAttributes,

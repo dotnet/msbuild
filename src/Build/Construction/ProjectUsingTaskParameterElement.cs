@@ -16,7 +16,7 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("Name={Name} ParameterType={ParameterType} Output={Output} Required={Required}")]
     public class ProjectUsingTaskParameterElement : ProjectElement
     {
-        ProjectUsingTaskParameterElementLink TaskParameterLink => (ProjectUsingTaskParameterElementLink)Link;
+        private ProjectUsingTaskParameterElementLink TaskParameterLink => (ProjectUsingTaskParameterElementLink)Link;
         /// <summary>
         /// External projects support
         /// </summary>

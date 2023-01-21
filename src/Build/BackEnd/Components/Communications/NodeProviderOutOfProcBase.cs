@@ -519,7 +519,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal class NodeContext
         {
-            enum ExitPacketState
+            private enum ExitPacketState
             {
                 None,
                 ExitPacketQueued,

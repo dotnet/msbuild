@@ -591,14 +591,16 @@ namespace Microsoft.Build.BuildEngine
         /// Callback interface to communicate with the engine
         /// </summary>
         private EngineCallback engineCallback;
+
         /// <summary>
         /// The mode in which the TEM is running
         /// </summary>
-        TaskExecutionModuleMode moduleMode;
+        private TaskExecutionModuleMode moduleMode;
+
         /// <summary>
         /// The class used to execute user tasks.
         /// </summary>
-        TaskWorkerThread workerThread;
+        private TaskWorkerThread workerThread;
 
         // Data shared between all worker threads within the TEM
         /// <summary>

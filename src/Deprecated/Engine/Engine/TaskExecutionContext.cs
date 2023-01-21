@@ -165,8 +165,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Task outputs
         /// </summary>
-        bool                taskExecutedSuccessfully; 
-        Exception           thrownException;
+        private bool                taskExecutedSuccessfully;
+        private Exception           thrownException;
 
         #endregion
     }

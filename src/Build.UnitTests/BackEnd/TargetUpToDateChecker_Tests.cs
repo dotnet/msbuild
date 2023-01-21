@@ -999,7 +999,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         [SupportedOSPlatform("windows")]
-        static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, UInt32 dwFlags);
+        private static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, UInt32 dwFlags);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [SupportedOSPlatform("windows")]

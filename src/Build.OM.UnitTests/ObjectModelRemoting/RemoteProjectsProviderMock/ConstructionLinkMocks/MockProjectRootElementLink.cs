@@ -15,7 +15,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
     internal class MockProjectRootElementLinkRemoter : MockProjectElementContainerLinkRemoter
     {
-        ProjectRootElement ProjectXml => (ProjectRootElement)Source;
+        private ProjectRootElement ProjectXml => (ProjectRootElement)Source;
 
         public override ProjectElement CreateLinkedObject(IImportHolder holder)
         {

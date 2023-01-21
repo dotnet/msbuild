@@ -21,10 +21,10 @@ namespace Microsoft.Build.BuildEngine
     {
         #region Fields
 
-        Project parentProject;
-        List<ItemDefinitionLibrary.BuildItemDefinitionGroupXml> itemDefinitions;
-        ItemDefinitionsDictionary itemDefinitionsDictionary;
-        bool evaluated;
+        private Project parentProject;
+        private List<ItemDefinitionLibrary.BuildItemDefinitionGroupXml> itemDefinitions;
+        private ItemDefinitionsDictionary itemDefinitionsDictionary;
+        private bool evaluated;
 
         #endregion
 
@@ -176,10 +176,10 @@ namespace Microsoft.Build.BuildEngine
         {
             #region Fields
 
-            XmlElement element;
-            Project parentProject;
-            XmlAttribute conditionAttribute;
-            string condition;
+            private XmlElement element;
+            private Project parentProject;
+            private XmlAttribute conditionAttribute;
+            private string condition;
 
             #endregion
 
@@ -317,8 +317,8 @@ namespace Microsoft.Build.BuildEngine
     /// </summary>
     internal class SpecificItemDefinitionLibrary
     {
-        string itemType;
-        ItemDefinitionLibrary itemDefinitionLibrary;
+        private string itemType;
+        private ItemDefinitionLibrary itemDefinitionLibrary;
 
         /// <summary>
         /// Constructor

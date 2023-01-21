@@ -16,7 +16,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public sealed class TaskHostFactory_Tests
     {
-        ITestOutputHelper _output;
+        private ITestOutputHelper _output;
 
         public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
         {

@@ -2,7 +2,7 @@
 
 namespace Microsoft.Build.Unittest.BackEnd
 {
-    class IntegrationTests
+    internal class IntegrationTests
     {
     }
 }

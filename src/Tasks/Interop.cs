@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [Guid("79EAC9EE-BAF9-11CE-8C82-00AA004BA90B")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 [ComConversionLoss]
-interface IInternetSecurityManager
+internal interface IInternetSecurityManager
 {
 	[MethodImpl(MethodImplOptions.InternalCall)]
 	void SetSecuritySite([In] [MarshalAs(UnmanagedType.Interface)] IInternetSecurityMgrSite pSite);
@@ -41,7 +41,7 @@ interface IInternetSecurityManager
 [ComConversionLoss]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 [Guid("79EAC9ED-BAF9-11CE-8C82-00AA004BA90B")]
-interface IInternetSecurityMgrSite
+internal interface IInternetSecurityMgrSite
 {
     [MethodImpl(MethodImplOptions.InternalCall)]
     void GetWindow([Out] [ComAliasName("UrlMonTypeLib.wireHWND")] IntPtr phwnd);
@@ -51,7 +51,7 @@ interface IInternetSecurityMgrSite
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 4)]
-struct GUID
+internal struct GUID
 {
     public int Data1;
 
@@ -66,7 +66,7 @@ struct GUID
 [ComImport]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 [Guid("00000101-0000-0000-C000-000000000046")]
-interface IEnumString
+internal interface IEnumString
 {
     [MethodImpl(MethodImplOptions.InternalCall)]
     void RemoteNext([In] int celt, [MarshalAs(UnmanagedType.LPWStr)] out string rgelt, out int pceltFetched);

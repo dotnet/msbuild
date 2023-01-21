@@ -17,7 +17,7 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     public sealed class ChangeWaves_Tests
     {
-        ITestOutputHelper _output;
+        private ITestOutputHelper _output;
         public ChangeWaves_Tests(ITestOutputHelper output)
         {
             _output = output;

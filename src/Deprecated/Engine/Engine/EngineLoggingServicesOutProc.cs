@@ -154,7 +154,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The number of events in one array posted to the parent.
         /// </summary>
-        const int eventArrayChunkSize = 100;
+        private const int eventArrayChunkSize = 100;
         #endregion
     }
 }

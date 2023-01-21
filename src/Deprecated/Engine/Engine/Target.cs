@@ -84,7 +84,7 @@ namespace Microsoft.Build.BuildEngine
         private XmlAttribute outputsAttribute = null;
 
         // This contains all of the child task nodes in this <Target> node.
-        ArrayList taskElementList = null;
+        private ArrayList taskElementList = null;
 
         // If this is a persisted <Target> element, this boolean tells us whether
         // it came from the main parentProject.file or an imported parentProject.file.
@@ -103,10 +103,8 @@ namespace Microsoft.Build.BuildEngine
 
         // We check the target's condition to ensure it doesn't reference item metadata in an attempt to batch.
         private bool conditionCheckedForInvalidMetadataReferences = false;
-
-        TargetExecutionWrapper executionState = null;
-
-        List<string> batchableTargetParameters = null;
+        private TargetExecutionWrapper executionState = null;
+        private List<string> batchableTargetParameters = null;
         
         // TargetId
         private int id;

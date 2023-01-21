@@ -748,7 +748,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        struct RecursiveStepResult
+        private struct RecursiveStepResult
         {
             public string RemainingWildcardDirectory;
             public bool ConsiderFiles;
@@ -757,7 +757,7 @@ namespace Microsoft.Build.Shared
             public bool NeedsDirectoryRecursion;
         }
 
-        class FilesSearchData
+        private class FilesSearchData
         {
             public FilesSearchData(
                 string filespec,                // can be null
@@ -793,7 +793,7 @@ namespace Microsoft.Build.Shared
             public bool NeedsRecursion { get; }
         }
 
-        struct RecursionState
+        private struct RecursionState
         {
             /// <summary>
             /// The directory to search in
@@ -1910,7 +1910,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        class TaskOptions
+        private class TaskOptions
         {
             public TaskOptions(int maxTasks)
             {

@@ -1259,7 +1259,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             return metadata;
         }
 
-        void VerifyAssertLineByLine(string expected, string actual)
+        private void VerifyAssertLineByLine(string expected, string actual)
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false, _testOutput);
         }

@@ -18,15 +18,12 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class IncludeOperation : LazyItemOperation
+        private class IncludeOperation : LazyItemOperation
         {
-            readonly int _elementOrder;
-
-            readonly string _rootDirectory;
-
-            readonly ImmutableSegmentedList<string> _excludes;
-
-            readonly ImmutableList<ProjectMetadataElement> _metadata;
+            private readonly int _elementOrder;
+            private readonly string _rootDirectory;
+            private readonly ImmutableSegmentedList<string> _excludes;
+            private readonly ImmutableList<ProjectMetadataElement> _metadata;
 
             public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
@@ -170,7 +167,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        class IncludeOperationBuilder : OperationBuilderWithMetadata
+        private class IncludeOperationBuilder : OperationBuilderWithMetadata
         {
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }

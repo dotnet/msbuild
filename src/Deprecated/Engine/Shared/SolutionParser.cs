@@ -93,9 +93,8 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         // unit-testing only
         private ArrayList solutionParserErrorCodes = null;
-
-        StreamReader reader = null;
-        int currentLineNumber = 0;
+        private StreamReader reader = null;
+        private int currentLineNumber = 0;
 
         #endregion
 

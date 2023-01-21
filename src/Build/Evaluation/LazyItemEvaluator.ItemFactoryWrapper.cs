@@ -12,10 +12,10 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class ItemFactoryWrapper : IItemFactory<I, I>
+        private class ItemFactoryWrapper : IItemFactory<I, I>
         {
-            ProjectItemElement _itemElement;
-            IItemFactory<I, I> _wrappedItemFactory;
+            private ProjectItemElement _itemElement;
+            private IItemFactory<I, I> _wrappedItemFactory;
 
             public ItemFactoryWrapper(ProjectItemElement itemElement, IItemFactory<I, I> wrappedItemFactory)
             {
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Evaluation
                 _wrappedItemFactory = wrappedItemFactory;
             }
 
-            void SetItemElement()
+            private void SetItemElement()
             {
                 _wrappedItemFactory.ItemElement = _itemElement;
             }

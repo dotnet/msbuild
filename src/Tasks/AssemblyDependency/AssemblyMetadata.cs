@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     /// After initial construction, this object is readonly and data-only,
     /// allowing it to be safely cached.
     /// </remarks>
-    class AssemblyMetadata
+    internal class AssemblyMetadata
     {
         public readonly AssemblyNameExtension[] Dependencies;
         public readonly FrameworkName FrameworkName;

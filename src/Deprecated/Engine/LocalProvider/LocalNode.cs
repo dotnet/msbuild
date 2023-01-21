@@ -101,7 +101,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// This method causes the reader and writer threads to start and create the shared memory structures
         /// </summary>
-        void StartCommunicationThreads()
+        private void StartCommunicationThreads()
         {
             // The writer thread should be created before the
             // reader thread because some LocalCallDescriptors
@@ -138,7 +138,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// This method causes the reader and writer threads to exit and dispose of the shared memory structures
         /// </summary>
-        void StopCommunicationThreads()
+        private void StopCommunicationThreads()
         {
             communicationThreadExitEvent.Set();
 

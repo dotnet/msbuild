@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// </summary>
     public class ImportFromMSBuildExtensionsPathTests : IDisposable
     {
-        string toolsVersionToUse = null;
+        private string toolsVersionToUse = null;
 
         public ImportFromMSBuildExtensionsPathTests()
         {
@@ -844,7 +844,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        void CreateAndBuildProjectForImportFromExtensionsPath(string extnPathPropertyName, Action<Project, MockLogger> action)
+        private void CreateAndBuildProjectForImportFromExtensionsPath(string extnPathPropertyName, Action<Project, MockLogger> action)
         {
             string extnDir1 = null, extnDir2 = null, mainProjectPath = null;
             try
@@ -877,7 +877,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        void CreateAndBuildProjectForImportFromExtensionsPath(string mainProjectPath, string extnPathPropertyName, string[] extnDirs, Action<string[]> setExtensionsPath,
+        private void CreateAndBuildProjectForImportFromExtensionsPath(string mainProjectPath, string extnPathPropertyName, string[] extnDirs, Action<string[]> setExtensionsPath,
                 Action<Project, MockLogger> action)
         {
             try
@@ -957,7 +957,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return projColln;
         }
 
-        string GetNewExtensionsPathAndCreateFile(string extnDirName, string relativeFilePath, string fileContents)
+        private string GetNewExtensionsPathAndCreateFile(string extnDirName, string relativeFilePath, string fileContents)
         {
             var extnDir = Path.Combine(ObjectModelHelpers.TempProjectDir, extnDirName);
             Directory.CreateDirectory(Path.Combine(extnDir, Path.GetDirectoryName(relativeFilePath)));
@@ -966,7 +966,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return extnDir;
         }
 
-        string GetMainTargetFileContent(string extensionsPathPropertyName = "MSBuildExtensionsPath")
+        private string GetMainTargetFileContent(string extensionsPathPropertyName = "MSBuildExtensionsPath")
         {
             string mainTargetsFileContent = @"
                 <Project>
@@ -980,7 +980,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return String.Format(mainTargetsFileContent, extensionsPathPropertyName);
         }
 
-        string GetExtensionTargetsFileContent1(string extensionsPathPropertyName = "MSBuildExtensionsPath")
+        private string GetExtensionTargetsFileContent1(string extensionsPathPropertyName = "MSBuildExtensionsPath")
         {
             string extnTargetsFileContent1 = @"
                 <Project>
@@ -998,7 +998,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return String.Format(extnTargetsFileContent1, extensionsPathPropertyName);
         }
 
-        string GetExtensionTargetsFileContent2(string extensionsPathPropertyName = "MSBuildExtensionsPath")
+        private string GetExtensionTargetsFileContent2(string extensionsPathPropertyName = "MSBuildExtensionsPath")
         {
             string extnTargetsFileContent2 = @"
                 <Project>

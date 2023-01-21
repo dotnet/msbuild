@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
-    static class SdkResultTranslationHelpers
+    internal static class SdkResultTranslationHelpers
     {
         public static void Translate(this ITranslator t, ref SdkReference sdkReference)
         {

@@ -656,7 +656,7 @@ namespace Microsoft.Build.Execution
 
         // Create another set containing architecture-specific task entries.
         // Then when we look for them, check if the name exists in that.
-        Dictionary<string, List<RegisteredTaskRecord>> overriddenTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
+        private Dictionary<string, List<RegisteredTaskRecord>> overriddenTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
 
         /// <summary>
         /// Registers an evaluated using task tag for future
@@ -1838,13 +1838,13 @@ namespace Microsoft.Build.Execution
         }
 
         // todo make nested after C# 7
-        void TranslateTaskRegistrationKey(ITranslator translator, ref RegisteredTaskIdentity taskIdentity)
+        private void TranslateTaskRegistrationKey(ITranslator translator, ref RegisteredTaskIdentity taskIdentity)
         {
             translator.Translate(ref taskIdentity);
         }
 
         // todo make nested after C# 7
-        void TranslateTaskRegistrationValue(ITranslator translator, ref List<RegisteredTaskRecord> taskRecords)
+        private void TranslateTaskRegistrationValue(ITranslator translator, ref List<RegisteredTaskRecord> taskRecords)
         {
             translator.Translate(ref taskRecords, RegisteredTaskRecord.FactoryForDeserialization);
         }

@@ -17,10 +17,10 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class EvaluatorData : IEvaluatorData<P, I, M, D>
+        private class EvaluatorData : IEvaluatorData<P, I, M, D>
         {
-            IEvaluatorData<P, I, M, D> _wrappedData;
-            Func<string, ICollection<I>> _itemGetter;
+            private IEvaluatorData<P, I, M, D> _wrappedData;
+            private Func<string, ICollection<I>> _itemGetter;
 
             public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, Func<string, ICollection<I>> itemGetter)
             {

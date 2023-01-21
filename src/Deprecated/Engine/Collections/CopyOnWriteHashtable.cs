@@ -22,7 +22,7 @@ namespace Microsoft.Build.BuildEngine
         private object sharedLock;
 
         // Carry around the StringComparer when possible to make Clear less expensive.
-        StringComparer stringComparer = null;
+        private StringComparer stringComparer = null;
 
 #region Construct
         /// <summary>

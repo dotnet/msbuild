@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
 {
     public class MSBuildTestAssemblyFixture : IDisposable
     {
-        bool _disposed;
+        private bool _disposed;
         private TestEnvironment _testEnvironment;
 
         public MSBuildTestAssemblyFixture()
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
 
     public class MSBuildTestEnvironmentFixture : IDisposable
     {
-        bool _disposed;
+        private bool _disposed;
         private TestEnvironment _testEnvironment;
 
         public MSBuildTestEnvironmentFixture()

@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class RemoveDir_Tests
     {
-        ITestOutputHelper _output;
+        private ITestOutputHelper _output;
         public RemoveDir_Tests(ITestOutputHelper output)
         {
             _output = output;

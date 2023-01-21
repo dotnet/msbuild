@@ -14,9 +14,9 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class RemoveOperation : LazyItemOperation
+        private class RemoveOperation : LazyItemOperation
         {
-            readonly ImmutableList<string> _matchOnMetadata;
+            private readonly ImmutableList<string> _matchOnMetadata;
             private MetadataTrie<P, I> _metadataSet;
 
             public RemoveOperation(RemoveOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        class RemoveOperationBuilder : OperationBuilder
+        private class RemoveOperationBuilder : OperationBuilder
         {
             public ImmutableList<string>.Builder MatchOnMetadata { get; } = ImmutableList.CreateBuilder<string>();
 

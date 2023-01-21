@@ -201,10 +201,10 @@ namespace Microsoft.Build.BuildEngine
         [StructLayout(LayoutKind.Sequential)]
         internal struct PROCESS_INFORMATION
         {
-            IntPtr hProcess;
-            IntPtr hThread;
-            int dwProcessId;
-            int dwThreadId;
+            private IntPtr hProcess;
+            private IntPtr hThread;
+            private int dwProcessId;
+            private int dwThreadId;
         }
 
         [StructLayout(LayoutKind.Sequential)]

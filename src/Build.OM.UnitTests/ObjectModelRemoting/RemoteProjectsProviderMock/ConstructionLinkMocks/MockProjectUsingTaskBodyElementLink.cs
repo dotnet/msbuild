@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
 namespace Microsoft.Build.Engine.OM.UnitTests.ObjectModelRemoting.RemoteProjectsProviderMock.ConstructionLinkMocks
 {
-    class MockProjectUsingTaskBodyElementLink
+    internal class MockProjectUsingTaskBodyElementLink
     {
     }
 }

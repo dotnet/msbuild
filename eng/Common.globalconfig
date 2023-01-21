@@ -1172,9 +1172,6 @@ dotnet_diagnostic.IDE0037.severity = suggestion
 # Use local function
 dotnet_diagnostic.IDE0039.severity = suggestion
 
-# Accessibility modifiers required
-dotnet_diagnostic.IDE0040.severity = suggestion
-
 # Null check can be simplified
 dotnet_diagnostic.IDE0041.severity = suggestion
 

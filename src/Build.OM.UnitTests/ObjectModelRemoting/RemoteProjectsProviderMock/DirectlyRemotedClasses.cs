@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public bool IsImported { get; }
 
-        ResolvedImport Import(ProjectCollectionLinker importer)
+        private ResolvedImport Import(ProjectCollectionLinker importer)
         {
             var importElement = (ProjectImportElement)importer.Import<ProjectElement, MockProjectImportElementLinkRemoter>(this.ImportingElement);
             var projectElement = (ProjectRootElement)importer.Import<ProjectElement, MockProjectRootElementLinkRemoter>(this.ImportedProject);

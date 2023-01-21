@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.Internal
 {
-    partial class ProjectXmlUtilities
+    internal partial class ProjectXmlUtilities
     {
         // Iterating an element's nodes allocates an non-trivial amount of data in certain
         // large solutions with lots of targets, so we have our own struct-based iterator

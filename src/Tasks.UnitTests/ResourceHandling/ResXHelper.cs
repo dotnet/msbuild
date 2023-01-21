@@ -5,7 +5,7 @@
 
 namespace Microsoft.Build.Tasks.UnitTests.ResourceHandling
 {
-    static class ResXHelper
+    internal static class ResXHelper
     {
         public static string SurroundWithBoilerplate(string input)
         {

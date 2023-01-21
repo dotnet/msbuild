@@ -31,7 +31,7 @@ namespace Microsoft.Build.BuildEngine
 
         // If this is a persisted <ItemGroup>, this boolean tells us whether
         // it came from the main project file, or an imported project file.
-        bool importedFromAnotherProject = false;
+        private bool importedFromAnotherProject = false;
 
         // These are the loose Items beneath this BuildItemGroup.  This is
         // valid for both persisted and virtual ItemGroups.

@@ -297,21 +297,27 @@ namespace Microsoft.Build.BuildEngine
         #region Data
 
         // Unique identifier for the target
-        TargetIdWrapper targetId;
+        private TargetIdWrapper targetId;
+
         // List of targets waiting on the current target
-        List<TargetIdWrapper> parentTargets;
+        private List<TargetIdWrapper> parentTargets;
+
         // List of build requests waiting on the current target
-        List<BuildRequest> parentBuildRequests;
+        private List<BuildRequest> parentBuildRequests;
+
         // List of the build requests the target is waiting on
-        BuildRequest[] outstandingBuildRequests;
+        private BuildRequest[] outstandingBuildRequests;
+
         // Mapping between list of build requests waiting on the current target and targets
         // from which these build reuquests originated
-        TargetIdWrapper [] parentTargetsForBuildRequests;
+        private TargetIdWrapper [] parentTargetsForBuildRequests;
+
         // Name of the project containing the target (only used for logging)
-        string projectName;
+        private string projectName;
+
         // Set to true if the target had a been requested by host (direct requests from host only occur on
         // parent node)
-        bool requestedByHost;
+        private bool requestedByHost;
         #endregion
 
         #region CustomSerializationToStream

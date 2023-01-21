@@ -325,16 +325,21 @@ namespace Microsoft.Build.BuildEngine
         private EngineLoggingServices loggingServices;
         // event contextual information where the event is fired from
         private BuildEventContext buildEventContext;
+
         // whether the backing type is a property group, or an item group
-        BackingType backingType;
+        private BackingType backingType;
+
         // backing property group, if any
-        BuildPropertyGroup backingPropertyGroup;
+        private BuildPropertyGroup backingPropertyGroup;
+
         // backing xml for a backing item group, if any
-        BuildItemGroupXml backingItemGroupXml;
+        private BuildItemGroupXml backingItemGroupXml;
+
         // children of the backing item group, if any
-        List<BuildItemGroupChildXml> backingBuildItemGroupChildren = null;
+        private List<BuildItemGroupChildXml> backingBuildItemGroupChildren = null;
+
         // directory in which the project is executing -- the current directory needed to expand wildcards
-        string executionDirectory;
+        private string executionDirectory;
         // the conditional expression that controls task execution
         private XmlAttribute conditionAttribute;
         // the library of default metadata that any new items should inherit
