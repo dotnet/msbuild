@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 #else
-                Log.LogError("Certificate signing not supported on .NET Core");
+                Log.LogError("PFX signing not supported on .NET Core");
 #endif
             }
             else if (!certInStore && !string.IsNullOrEmpty(CertificateFile) && !string.IsNullOrEmpty(CertificateThumbprint))
