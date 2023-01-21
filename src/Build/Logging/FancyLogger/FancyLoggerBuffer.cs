@@ -103,10 +103,12 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static void Terminate()
         {
             IsTerminated = true;
+            Console.Write(
+                ANSIBuilder.Cursor.Home() +
+                ANSIBuilder.Eraser.DisplayCursorToEnd()
+            );
             // Reset configuration for buffer and cursor, and clear screen
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.Write(ANSIBuilder.Eraser.Display());
-            Console.Clear();
             Console.Write(ANSIBuilder.Cursor.Visible());
             Lines = new();
         }

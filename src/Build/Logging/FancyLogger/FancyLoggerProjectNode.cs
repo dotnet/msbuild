@@ -55,23 +55,33 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
+        public string ToANSIString()
+        {
+            ANSIBuilder.Formatting.ForegroundColor color = ANSIBuilder.Formatting.ForegroundColor.Default;
+            string icon = ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner()) + " ";
+
+            if (Finished && WarningCount + ErrorCount == 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Green;
+                icon = "✓";
+            }
+            else if (ErrorCount > 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Red;
+                icon = "X";
+            }
+            else if (WarningCount > 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Yellow;
+                icon = "✓";
+            }
+            return icon + " " + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), color) + " " + ANSIBuilder.Formatting.Inverse(TargetFramework);
+        }
+
         public void Log()
         {
             // Project details
-            string lineContents = ANSIBuilder.Alignment.SpaceBetween(
-                // Show indicator
-                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner())) +
-                // Project file path with color
-                $" {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )}" +
-                // TFM
-                $" {ANSIBuilder.Formatting.Inverse(TargetFramework)} "
-                // Show project output executable inline
-                // (ProjectOutputExecutable is not null ? $"-> { ANSIBuilder.Formatting.Hyperlink(ProjectOutputExecutable, Path.GetDirectoryName(ProjectOutputExecutable)!) }" : string.Empty)
-                ,
-                $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)",
-                // ProjectOutputExecutable, 
-                Console.WindowWidth
-            );
+            string lineContents = ANSIBuilder.Alignment.SpaceBetween(ToANSIString(), $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)", Console.BufferWidth - 1);
             // Create or update line
             if (Line == null) Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
             else FancyLoggerBuffer.UpdateLine(Line.Id, lineContents);

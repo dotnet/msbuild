@@ -89,13 +89,11 @@ namespace Microsoft.Build.Logging.FancyLogger
 
             public static string SpaceBetween(string leftText, string rightText, int width)
             {
-                // Edge case when text doesnt fit
-                if (leftText.Length + rightText.Length > width) return leftText + rightText;
                 string result = String.Empty;
                 string leftNoFormatString = ANSIRemove(leftText);
                 string rightNoFormatString = ANSIRemove(rightText);
-                if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth) return leftText + rightText;
-                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length);
+                if (leftNoFormatString.Length + rightNoFormatString.Length >= width) return leftText + rightText;
+                int space = width - (leftNoFormatString.Length + rightNoFormatString.Length);
                 result += leftText;
                 result += new string(' ', space - 1);
                 result += rightText;
