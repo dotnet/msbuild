@@ -302,7 +302,9 @@ namespace Microsoft.Build.BuildEngine
             {
                 GenericExpressionNode child = Expr(expression);
                 if (Same(expression, Token.TokenType.RightParenthesis))
+                {
                     return child;
+                }
                 else
                 {
                     errorPosition = lexer.GetErrorPosition();
@@ -332,7 +334,9 @@ namespace Microsoft.Build.BuildEngine
         private void Arglist(string expression, ArrayList arglist)
         {
             if (!lexer.IsNext(Token.TokenType.RightParenthesis))
+            {
                 Args(expression, arglist);
+            }
         }
 
         private void Args(string expression, ArrayList arglist)
@@ -393,7 +397,9 @@ namespace Microsoft.Build.BuildEngine
                 return true;
             }
             else
+            {
                 return false;
+            }
         }
     }
 }

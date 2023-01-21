@@ -551,7 +551,9 @@ namespace Microsoft.Build.BackEnd
             itemsCount += allAdds?.Count ?? 0;          // Add all the additions
             itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
             if (itemsCount < 0)
+            {
                 itemsCount = 0;
+            }
 
             // We have adds and/or removes and/or modifies to incorporate.
             // We can't modify the group, because that might

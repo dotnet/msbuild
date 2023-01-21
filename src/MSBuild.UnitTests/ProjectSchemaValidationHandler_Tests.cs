@@ -56,7 +56,11 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (projectFilename != null) File.Delete(projectFilename);
+                if (projectFilename != null)
+                {
+                    File.Delete(projectFilename);
+                }
+
                 CleanupSchemaFiles(msbuildTempXsdFilenames);
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
                 Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
@@ -95,8 +99,16 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (projectFilename != null) File.Delete(projectFilename);
-                if (invalidSchemaFile != null) File.Delete(invalidSchemaFile);
+                if (projectFilename != null)
+                {
+                    File.Delete(projectFilename);
+                }
+
+                if (invalidSchemaFile != null)
+                {
+                    File.Delete(invalidSchemaFile);
+                }
+
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
                 Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
@@ -147,8 +159,16 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (invalidSchemaFile != null) File.Delete(invalidSchemaFile);
-                if (projectFilename != null) File.Delete(projectFilename);
+                if (invalidSchemaFile != null)
+                {
+                    File.Delete(invalidSchemaFile);
+                }
+
+                if (projectFilename != null)
+                {
+                    File.Delete(projectFilename);
+                }
+
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
                 Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }

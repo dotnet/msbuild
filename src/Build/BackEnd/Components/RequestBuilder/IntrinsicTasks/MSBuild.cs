@@ -421,7 +421,10 @@ namespace Microsoft.Build.BackEnd
             var projectToBuildInParallel = projectsToBuildList.ToArray();
 
             // Make the call to build the projects
-            if (projectToBuildInParallel.Length <= 0) return success;
+            if (projectToBuildInParallel.Length <= 0)
+            {
+                return success;
+            }
 
             bool executeResult = await ExecuteTargets
             (

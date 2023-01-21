@@ -313,20 +313,32 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 {
                     int lastIndexOfQuote = stringValue.LastIndexOf("\"");
                     if (lastIndexOfQuote - 1 < 0)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     fileName = stringValue.Substring(1, lastIndexOfQuote - 1); // remove the quotes in" ..... "
                     if (lastIndexOfQuote + 2 > stringValue.Length)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     remainingString = stringValue.Substring(lastIndexOfQuote + 2);
                 }
                 else
                 {
                     int nextSemiColumn = stringValue.IndexOf(";");
                     if (nextSemiColumn == -1)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     fileName = stringValue.Substring(0, nextSemiColumn);
                     if (nextSemiColumn + 1 > stringValue.Length)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     remainingString = stringValue.Substring(nextSemiColumn + 1);
                 }
                 string[] parts = remainingString.Split(';');

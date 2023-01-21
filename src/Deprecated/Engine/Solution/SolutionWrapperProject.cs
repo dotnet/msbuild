@@ -134,7 +134,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception ex)
             {
                 if (ExceptionHandling.IsCriticalException(ex))
+                {
                     throw;
+                }
                 // Eat any regular exceptions: we'll just not use the cache
                 parentEngine.LoggingServices.LogComment(projectBuildEventContext, "SolutionCacheReadError", solutionProjectCache, ex.Message);
             }
@@ -160,7 +162,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception ex)
             {
                 if (ExceptionHandling.IsCriticalException(ex))
+                {
                     throw;
+                }
                 // Eat any regular exceptions: we'll just not use the cache
                 parentEngine.LoggingServices.LogComment(projectBuildEventContext, "SolutionCacheWriteError", solutionProjectCache, ex.Message);
             }
@@ -834,7 +838,9 @@ namespace Microsoft.Build.BuildEngine
                 referenceItemName.ToString(), importLibraryItemName.ToString(), out referenceGuidsToRemove);
 
             if (string.IsNullOrEmpty(referenceGuidsToRemove))
+            {
                 referenceGuidsToRemove = string.Empty;
+            }
 
             string fullProjectPath = null;
             string projectPath = null;
@@ -848,7 +854,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e)
             {
                 if (ExceptionHandling.NotExpectedException(e))
+                {
                     throw;
+                }
 
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false,
                     "SubCategoryForSolutionParsingErrors",
@@ -921,7 +929,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e)
             {
                 if (ExceptionHandling.NotExpectedException(e))
+                {
                     throw;
+                }
 
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false,
                     "SubCategoryForSolutionParsingErrors",
@@ -1195,7 +1205,9 @@ namespace Microsoft.Build.BuildEngine
                 catch (Exception e)
                 {
                     if (ExceptionHandling.NotExpectedException(e))
+                    {
                         throw;
+                    }
 
                     ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false,
                         "SubCategoryForSolutionParsingErrors",
@@ -2080,7 +2092,10 @@ namespace Microsoft.Build.BuildEngine
                     // We don't want any problems scanning the project file to result in aborting the build.
                     catch (Exception e)
                     {
-                        if (ExceptionHandling.IsCriticalException(e)) throw;
+                        if (ExceptionHandling.IsCriticalException(e))
+                        {
+                            throw;
+                        }
 
                         parentEngine.LoggingServices.LogWarning(projectBuildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo(project.RelativePath),
                             "SolutionScanProjectDependenciesFailed", project.RelativePath, e.Message);
@@ -2119,7 +2134,10 @@ namespace Microsoft.Build.BuildEngine
                     // We don't want any problems scanning the project file to result in aborting the build.
                     catch (Exception e)
                     {
-                        if (ExceptionHandling.IsCriticalException(e)) throw;
+                        if (ExceptionHandling.IsCriticalException(e))
+                        {
+                            throw;
+                        }
 
                         parentEngine.LoggingServices.LogWarning(projectBuildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo(project.RelativePath),
                             "SolutionScanProjectDependenciesFailed", project.RelativePath, e.Message);

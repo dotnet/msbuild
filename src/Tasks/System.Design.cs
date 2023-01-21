@@ -129,7 +129,10 @@ namespace Microsoft.Build.Tasks
         {
             SR sys = GetLoader();
             if (sys == null)
+            {
                 return null;
+            }
+
             string res = sys._resources.GetString(name, SR.Culture);
 
             if (args?.Length > 0)
@@ -154,7 +157,10 @@ namespace Microsoft.Build.Tasks
         {
             SR sys = GetLoader();
             if (sys == null)
+            {
                 return null;
+            }
+
             return sys._resources.GetString(name, SR.Culture);
         }
 
@@ -169,7 +175,10 @@ namespace Microsoft.Build.Tasks
         {
             SR sys = GetLoader();
             if (sys == null)
+            {
                 return null;
+            }
+
             return sys._resources.GetObject(name, SR.Culture);
         }
     }

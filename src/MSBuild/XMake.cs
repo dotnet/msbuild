@@ -3301,7 +3301,10 @@ namespace Microsoft.Build.CommandLine
             for (int i = 0; i < groupedFileLoggerParameters.Length; i++)
             {
                 // If we had no, say, "/fl5" then continue; we may have a "/fl6" and so on
-                if (groupedFileLoggerParameters[i] == null) continue;
+                if (groupedFileLoggerParameters[i] == null)
+                {
+                    continue;
+                }
 
                 string fileParameters = "SHOWPROJECTFILE=TRUE;";
                 // Use a default log file name of "msbuild.log", "msbuild1.log", "msbuild2.log", etc; put this first on the parameter

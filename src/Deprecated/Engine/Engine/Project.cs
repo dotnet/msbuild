@@ -4029,7 +4029,9 @@ namespace Microsoft.Build.BuildEngine
                 catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
                 {
                     if (ExceptionHandling.NotExpectedException(e))
+                    {
                         throw;
+                    }
 
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, importElement, "InvalidAttributeValueWithException", importedFilename, XMakeAttributes.project, XMakeElements.import, e.Message);
                 }
@@ -4155,7 +4157,9 @@ namespace Microsoft.Build.BuildEngine
                             catch (Exception e)
                             {
                                 if (ExceptionHandling.NotExpectedException(e))
+                                {
                                     throw;
+                                }
 
                                 BuildEventFileInfo fileInfo = new BuildEventFileInfo(import.EvaluatedProjectPath);
                                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false,

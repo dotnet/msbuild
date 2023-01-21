@@ -63,20 +63,32 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string ByteArrayToHex(Byte[] a)
         {
             if (a == null)
+            {
                 return null;
+            }
+
             StringBuilder s = new StringBuilder(a.Length);
             foreach (Byte b in a)
+            {
                 s.Append(b.ToString("X02", CultureInfo.InvariantCulture));
+            }
+
             return s.ToString();
         }
 
         public static string ByteArrayToString(Byte[] a)
         {
             if (a == null)
+            {
                 return null;
+            }
+
             StringBuilder s = new StringBuilder(a.Length);
             foreach (Byte b in a)
+            {
                 s.Append(Convert.ToChar(b));
+            }
+
             return s.ToString();
         }
 
@@ -105,9 +117,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             while (i < sb.Length)
             {
                 if (sb[i] < ' ')
+                {
                     sb.Remove(i, 1);
+                }
                 else
+                {
                     ++i;
+                }
             }
 
             return sb.ToString();
@@ -139,7 +155,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string GetClrVersion(string targetFrameworkVersion)
         {
             if (string.IsNullOrEmpty(targetFrameworkVersion))
+            {
                 return GetClrVersion();
+            }
 
             Version clrVersion;
 #if RUNTIME_TYPE_NETCORE
@@ -252,10 +270,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static string GetLogPath()
         {
-            if (!logging) return null;
+            if (!logging)
+            {
+                return null;
+            }
+
             string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Microsoft\VisualStudio\8.0\VSPLOG");
             if (!FileSystems.Default.DirectoryExists(logPath))
+            {
                 Directory.CreateDirectory(logPath);
+            }
+
             return logPath;
         }
 
@@ -268,7 +293,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 string org = (string)key.GetValue("RegisteredOrganization");
                 org = org?.Trim();
                 if (!String.IsNullOrEmpty(org))
+                {
                     return org;
+                }
             }
             return null;
         }
@@ -281,9 +308,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static bool IsValidCulture(string value)
         {
             if (String.Equals(value, "neutral", StringComparison.OrdinalIgnoreCase))
+            {
                 return true; // "neutral" is valid in a manifest but not in CultureInfo class
+            }
+
             if (String.Equals(value, "*", StringComparison.OrdinalIgnoreCase))
+            {
                 return true; // "*" is same as "neutral"
+            }
+
             CultureInfo culture;
             try
             {
@@ -330,13 +363,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             if (octets >= 1 && version.Major < 0)
+            {
                 return false;
+            }
+
             if (octets >= 2 && version.Minor < 0)
+            {
                 return false;
+            }
+
             if (octets >= 3 && version.Build < 0)
+            {
                 return false;
+            }
+
             if (octets >= 4 && version.Revision < 0)
+            {
                 return false;
+            }
 
             return true;
         }
@@ -344,7 +388,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static bool IsValidFrameworkVersion(string value)
         {
             if (value.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            {
                 return IsValidVersion(value.Substring(1), 2);
+            }
+
             return IsValidVersion(value, 2);
         }
 
@@ -353,7 +400,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             for (int i = 0; i < s_platforms.Length; ++i)
             {
                 if (String.Equals(platform, s_platforms[i], StringComparison.OrdinalIgnoreCase))
+                {
                     return s_processorArchitectures[i];
+                }
             }
 
             return null;
@@ -362,9 +411,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static ITaskItem[] RemoveDuplicateItems(ITaskItem[] items)
         {
             if (items == null)
+            {
                 return null;
+            }
+
             if (items.Length <= 1)
+            {
                 return items;
+            }
+
             var list = new Dictionary<string, ITaskItem>();
             foreach (ITaskItem item in items)
             {
@@ -397,7 +452,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             ITaskItem[] outputItems = RemoveDuplicateItems(items);
             if (outputItems != null)
+            {
                 Array.Sort(outputItems, s_itemComparer);
+            }
+
             return outputItems;
         }
 
@@ -418,7 +476,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void WriteLog(string text)
         {
             if (!logging)
+            {
                 return;
+            }
+
             if (s_logFileWriter == null)
             {
                 try
@@ -450,7 +511,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void WriteLogFile(string filename, Stream s)
         {
             if (!logging)
+            {
                 return;
+            }
+
             string path = Path.Combine(logPath, filename);
             StreamReader r = new StreamReader(s);
             string text = r.ReadToEnd();
@@ -476,7 +540,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void WriteLogFile(string filename, string s)
         {
             if (!logging)
+            {
                 return;
+            }
+
             string path = Path.Combine(logPath, filename);
             try
             {
@@ -503,7 +570,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void WriteLogFile(string filename, System.Xml.XmlElement element)
         {
             if (!logging)
+            {
                 return;
+            }
+
             WriteLogFile(filename, element.OuterXml);
         }
 

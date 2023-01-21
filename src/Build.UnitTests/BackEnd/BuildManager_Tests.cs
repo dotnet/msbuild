@@ -1575,7 +1575,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildWithDelay20()
         {
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null) return;
+            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
+            {
+                return;
+            }
 
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='2.0'>
@@ -1611,7 +1614,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildInTaskHostWithDelay20()
         {
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null) return;
+            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
+            {
+                return;
+            }
 
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>

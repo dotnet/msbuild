@@ -419,11 +419,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             SecurityElement se = new SecurityElement(xe.Name);
             foreach (XmlAttribute xa in xe.Attributes)
+            {
                 se.AddAttribute(xa.Name, xa.Value);
+            }
+
             foreach (XmlNode xn in xe.ChildNodes)
             {
                 if (xn.NodeType == XmlNodeType.Element)
+                {
                     se.AddChild(XmlElementToSecurityElement((XmlElement)xn));
+                }
             }
 
             return se;
@@ -434,7 +439,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(psElement.OwnerDocument.NameTable);
             XmlNodeList nodes = psElement.SelectNodes(XPaths.permissionClassAttributeQuery, nsmgr);
             if (nodes == null || nodes.Count == 0)
+            {
                 nodes = psElement.SelectNodes(XmlUtil.TrimPrefix(XPaths.permissionClassAttributeQuery));
+            }
+
             string[] a;
             if (nodes != null)
             {
@@ -660,9 +668,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (PathUtil.IsPEFile(path))
             {
                 if (IsCertInStore(cert))
+                {
                     SignPEFile(cert, timestampUrl, path, resources, useSha256);
+                }
                 else
+                {
                     throw new InvalidOperationException(resources.GetString("SignFile.CertNotInStore"));
+                }
             }
             else
             {
@@ -675,7 +687,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
                 {
                     if (rsa == null)
+                    {
                         throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
+                    }
+
                     try
                     {
                         var doc = new XmlDocument { PreserveWhitespace = true };
@@ -711,9 +726,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
 #endif
                         if (timestampUrl == null)
+                        {
                             manifest.Sign(signer);
+                        }
                         else
+                        {
                             manifest.Sign(signer, timestampUrl.ToString(), disallowMansignTimestampFallback);
+                        }
+
                         doc.Save(path);
                     }
                     catch (Exception ex)
@@ -887,7 +907,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 personalStore.Open(OpenFlags.ReadOnly);
                 X509Certificate2Collection foundCerts = personalStore.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, false);
                 if (foundCerts.Count == 1)
+                {
                     return true;
+                }
             }
             finally
             {

@@ -33,14 +33,18 @@ namespace Xunit.NetCore.Extensions
             {
                 // Instantiate all the fixtures
                 foreach (var fixtureAttr in assemblyFixtureAttributes.Where(a => a.LifetimeScope == AssemblyFixtureAttribute.Scope.Class))
+                {
                     assemblyFixtureMappings[fixtureAttr.FixtureType] = Activator.CreateInstance(fixtureAttr.FixtureType);
+                }
             });
         }
         protected override Task BeforeTestClassFinishedAsync()
         {
             // Make sure we clean up everybody who is disposable, and use Aggregator.Run to isolate Dispose failures
             foreach (var disposable in assemblyFixtureMappings.Values.OfType<IDisposable>())
+            {
                 Aggregator.Run(disposable.Dispose);
+            }
 
             return base.BeforeTestClassFinishedAsync();
         }

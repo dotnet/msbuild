@@ -316,7 +316,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -351,7 +354,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -385,7 +391,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -419,7 +428,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -561,7 +573,9 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 if (Directory.Exists(folder))
+                {
                     FileUtilities.DeleteWithoutTrailingBackslash(folder, true);
+                }
             }
 
             return;
@@ -596,9 +610,13 @@ namespace Microsoft.Build.UnitTests
         {
             Exec exec;
             if (NativeMethodsShared.IsWindows)
+            {
                 exec = PrepareExec("echo Some output & echo Some output & echo Some output & echo Some output ");
+            }
             else
+            {
                 exec = PrepareExec("echo Some output ; echo Some output ; echo Some output ; echo Some output ");
+            }
 
             exec.CustomErrorRegularExpression = "~!@#$%^_)(*&^%$#@@#XF &%^%T$REd((((([[[[";
             exec.CustomWarningRegularExpression = "*";
@@ -615,9 +633,14 @@ namespace Microsoft.Build.UnitTests
         {
             string cmdLine;
             if (NativeMethodsShared.IsWindows)
+            {
                 cmdLine = "echo Some output & echo ALERT:This is an error & echo Some more output";
+            }
             else
+            {
                 cmdLine = "echo Some output ; echo ALERT:This is an error ; echo Some more output";
+            }
+
             Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
 
@@ -641,9 +664,13 @@ namespace Microsoft.Build.UnitTests
         {
             string cmdLine;
             if (NativeMethodsShared.IsWindows)
+            {
                 cmdLine = "echo Some output & echo YOOHOO:This is a warning & echo Some more output";
+            }
             else
+            {
                 cmdLine = "echo Some output ; echo YOOHOO:This is a warning ; echo Some more output";
+            }
 
             Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();

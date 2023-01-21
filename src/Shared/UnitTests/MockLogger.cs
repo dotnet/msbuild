@@ -434,7 +434,10 @@ namespace Microsoft.Build.UnitTests
                     if (currentLine.Contains(comparer))
                     {
                         index++;
-                        if (index == contains.Length) break;
+                        if (index == contains.Length)
+                        {
+                            break;
+                        }
                     }
 
                     currentLine = reader.ReadLine();

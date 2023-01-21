@@ -215,7 +215,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 // Reflection related exception
                 ProjectErrorUtilities.VerifyThrowInvalidProject(false, taskNode, "TaskInstantiationFailureError", TaskName, TaskClass.Assembly.ToString(), e.Message);
@@ -539,7 +541,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 // Reflection related exception
                 loggingServices.LogError(buildEventContext, CreateBuildEventFileInfoForTask(),
@@ -666,7 +670,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 // Reflection related exception
                 loggingServices.LogError(buildEventContext, CreateBuildEventFileInfoForTask(), "AttributeTypeLoadError", TaskName, e.Message);
@@ -961,7 +967,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject(false, taskOutputSpecification.TaskParameterAttribute,
                     "FailedToRetrieveTaskOutputs", TaskName, taskParameterName, e.Message);
@@ -1283,7 +1291,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 // Reflection related exception
                 loggingServices.LogError(buildEventContext, CreateBuildEventFileInfoForTask(), "TaskParametersError", TaskName, e.Message);
@@ -1560,7 +1570,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 loggingServices.LogFatalTaskError(buildEventContext, e,
                     CreateBuildEventFileInfoForTask(),

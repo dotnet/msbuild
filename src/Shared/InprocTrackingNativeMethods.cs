@@ -235,7 +235,9 @@ namespace Microsoft.Build.Shared
                 IntPtr entryPoint = GetProcAddress(s_fileTrackerDllHandle, entryPointName);
 
                 if (IntPtr.Zero == entryPoint)
+                {
                     throw new EntryPointNotFoundException(fileTrackerDllName.Value + "!" + entryPointName);
+                }
 
                 return (DT)(Object)Marshal.GetDelegateForFunctionPointer(entryPoint, typeof(DT));
             }

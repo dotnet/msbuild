@@ -20,7 +20,9 @@ namespace Microsoft.Build.UnitTests
             get
             {
                 if (s_existingFiles.Count != 0)
+                {
                     return s_existingFiles;
+                }
 
                 s_existingFiles.Add(@"C:\test\typelib1.dll", string.Empty);
                 s_existingFiles.Add(@"C:\test\typelib2\2.dll", string.Empty);

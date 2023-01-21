@@ -425,7 +425,9 @@ namespace Microsoft.Build.BuildEngine
             // NO OP if the value we set is the same we already have
             // This will prevent making the project dirty
             if (value == this.propertyValue)
+            {
                 return;
+            }
 
             // NOTE: allow output properties to be modified -- they're just like normal properties (except for their
             // precedence), and it doesn't really matter if they are modified, since they are transient (virtual)

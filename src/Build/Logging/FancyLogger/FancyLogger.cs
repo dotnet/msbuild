@@ -70,7 +70,10 @@ namespace Microsoft.Build.Logging.FancyLogger
                 Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
                     // Rerender projects only when needed
-                    foreach (var project in projects) project.Value.Log();
+                    foreach (var project in projects)
+                    {
+                        project.Value.Log();
+                    }
                     // Rerender buffer
                     FancyLoggerBuffer.Render();
                 });
@@ -81,7 +84,10 @@ namespace Microsoft.Build.Logging.FancyLogger
                     switch (key)
                     {
                         case ConsoleKey.UpArrow:
-                            if (FancyLoggerBuffer.TopLineIndex > 0) FancyLoggerBuffer.TopLineIndex--;
+                            if (FancyLoggerBuffer.TopLineIndex > 0)
+                            {
+                                FancyLoggerBuffer.TopLineIndex--;
+                            }
                             FancyLoggerBuffer.ShouldRerender = true;
                             break;
                         case ConsoleKey.DownArrow:
@@ -111,7 +117,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             // If id already exists...
-            if (projects.ContainsKey(id)) return;
+            if (projects.ContainsKey(id))
+            {
+                return;
+            }
             // Add project
             FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
             projects[id] = node;
@@ -123,7 +132,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            {
+                return;
+            }
             // Update line
             node.Finished = true;
             // Log
@@ -135,7 +147,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            {
+                return;
+            }
             // Update
             node.AddTarget(e);
             // Log
@@ -146,7 +161,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            {
+                return;
+            }
             // Update
             node.FinishedTargets++;
             // Log
@@ -158,7 +176,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            {
+                return;
+            }
             // Update
             node.AddTask(e);
             existingTasks++;
@@ -174,10 +195,16 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Raised messages, warnings and errors
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
-            if (e is TaskCommandLineEventArgs) return;
+            if (e is TaskCommandLineEventArgs)
+            {
+                return;
+            }
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            {
+                return;
+            }
             // Update
             node.AddMessage(e);
             // Log
@@ -188,7 +215,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            {
+                return;
+            }
             // Update
             node.AddWarning(e);
             // Log
@@ -198,7 +228,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            {
+                return;
+            }
             // Update
             node.AddError(e);
             // Log

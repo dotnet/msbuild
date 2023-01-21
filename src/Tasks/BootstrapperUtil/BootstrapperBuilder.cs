@@ -1107,7 +1107,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 XmlNode packageFilesNode = node.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":Package/" + BOOTSTRAPPER_PREFIX + ":PackageFiles", _xmlNamespaceManager);
                 string copyAllPackageFiles = String.Empty;
 
-                if (packageFilesNode != null) copyAllPackageFiles = ReadAttribute(packageFilesNode, "CopyAllPackageFiles");
+                if (packageFilesNode != null)
+                {
+                    copyAllPackageFiles = ReadAttribute(packageFilesNode, "CopyAllPackageFiles");
+                }
 
                 product = new Product(node, productCode, results, copyAllPackageFiles);
                 XmlNodeList packageNodeList = node.SelectNodes(BOOTSTRAPPER_PREFIX + ":Package", _xmlNamespaceManager);
@@ -1124,7 +1127,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
 
             if (fPackageAdded)
+            {
                 return product;
+            }
+
             return null;
         }
 
@@ -1625,7 +1631,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private static string ByteArrayToString(byte[] byteArray)
         {
-            if (byteArray == null) return null;
+            if (byteArray == null)
+            {
+                return null;
+            }
 
             var output = new StringBuilder(byteArray.Length);
             foreach (byte byteValue in byteArray)
@@ -1687,7 +1696,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (ci != null)
             {
                 package = builder.Product.Packages.Package(ci.Name);
-                if (package != null) return package;
+                if (package != null)
+                {
+                    return package;
+                }
 
                 // Target culture not found?  Go through the progression of parent cultures (up until but excluding the invariant culture) -> fallback culture -> parent fallback culture -> default culture -> parent default culture -> any culture available
                 // Note: there is no warning if the parent culture of the requested culture is found
@@ -1697,7 +1709,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 while (parentCulture != CultureInfo.InvariantCulture)
                 {
                     package = GetPackageForSettings_Helper(ci, parentCulture, builder, results, false);
-                    if (package != null) return package;
+                    if (package != null)
+                    {
+                        return package;
+                    }
 
                     parentCulture = parentCulture.Parent;
                 }
@@ -1706,26 +1721,41 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (fallbackCI != null)
             {
                 package = GetPackageForSettings_Helper(ci, fallbackCI, builder, results, true);
-                if (package != null) return package;
+                if (package != null)
+                {
+                    return package;
+                }
 
                 if (!fallbackCI.IsNeutralCulture)
                 {
                     package = GetPackageForSettings_Helper(ci, fallbackCI.Parent, builder, results, true);
-                    if (package != null) return package;
+                    if (package != null)
+                    {
+                        return package;
+                    }
                 }
             }
 
             package = GetPackageForSettings_Helper(ci, Util.DefaultCultureInfo, builder, results, true);
-            if (package != null) return package;
+            if (package != null)
+            {
+                return package;
+            }
 
             if (!Util.DefaultCultureInfo.IsNeutralCulture)
             {
                 package = GetPackageForSettings_Helper(ci, Util.DefaultCultureInfo.Parent, builder, results, true);
-                if (package != null) return package;
+                if (package != null)
+                {
+                    return package;
+                }
             }
 
             if (results != null && ci != null)
+            {
                 results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.UsingProductCulture", ci.Name, builder.Name, builder.Product.Packages.Item(0).Culture));
+            }
+
             return builder.Product.Packages.Item(0);
         }
 
@@ -1806,14 +1836,21 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 // Work through the progression of parent cultures (up until but excluding the invariant culture) -> fallback culture -> parent fallback culture -> default culture -> parent default culture -> any available culture
                 cultureNode = GetResourcesNodeForSettings_Helper(ci, ci, results, ref codepage, false);
-                if (cultureNode != null) return cultureNode;
+                if (cultureNode != null)
+                {
+                    return cultureNode;
+                }
+
                 CultureInfo parentCulture = ci.Parent;
 
                 // Keep going up the chain of parents, stopping at the invariant culture
                 while (parentCulture != CultureInfo.InvariantCulture)
                 {
                     cultureNode = GetResourcesNodeForSettings_Helper(ci, parentCulture, results, ref codepage, false);
-                    if (cultureNode != null) return cultureNode;
+                    if (cultureNode != null)
+                    {
+                        return cultureNode;
+                    }
 
                     parentCulture = parentCulture.Parent;
                 }
@@ -1822,22 +1859,34 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (fallbackCI != null)
             {
                 cultureNode = GetResourcesNodeForSettings_Helper(ci, fallbackCI, results, ref codepage, true);
-                if (cultureNode != null) return cultureNode;
+                if (cultureNode != null)
+                {
+                    return cultureNode;
+                }
 
                 if (!fallbackCI.IsNeutralCulture)
                 {
                     cultureNode = GetResourcesNodeForSettings_Helper(ci, fallbackCI.Parent, results, ref codepage, true);
-                    if (cultureNode != null) return cultureNode;
+                    if (cultureNode != null)
+                    {
+                        return cultureNode;
+                    }
                 }
             }
 
             cultureNode = GetResourcesNodeForSettings_Helper(ci, Util.DefaultCultureInfo, results, ref codepage, true);
-            if (cultureNode != null) return cultureNode;
+            if (cultureNode != null)
+            {
+                return cultureNode;
+            }
 
             if (!Util.DefaultCultureInfo.IsNeutralCulture)
             {
                 cultureNode = GetResourcesNodeForSettings_Helper(ci, Util.DefaultCultureInfo.Parent, results, ref codepage, true);
-                if (cultureNode != null) return cultureNode;
+                if (cultureNode != null)
+                {
+                    return cultureNode;
+                }
             }
 
             KeyValuePair<string, XmlNode> altCulturePair = _cultures.FirstOrDefault();
@@ -2173,7 +2222,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private static string GetLogPath()
         {
-            if (!s_logging) return null;
+            if (!s_logging)
+            {
+                return null;
+            }
+
             string logPath = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 @"Microsoft\VisualStudio\" + VisualStudioConstants.CurrentVisualStudioVersion + @"\VSPLOG");

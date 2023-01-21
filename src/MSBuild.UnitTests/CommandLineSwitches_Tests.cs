@@ -1028,7 +1028,10 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if (File.Exists(filename)) File.Delete(filename);
+                    if (File.Exists(filename))
+                    {
+                        File.Delete(filename);
+                    }
                 }
             }
            );

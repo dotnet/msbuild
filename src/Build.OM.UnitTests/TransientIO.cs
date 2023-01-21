@@ -45,7 +45,11 @@ namespace Microsoft.Build.UnitTests
 
         public bool IsControled(string path)
         {
-            if (this.root == null || path == null) return false;
+            if (this.root == null || path == null)
+            {
+                return false;
+            }
+
             var tempRoot = this.RootFolder;
             path = Path.GetFullPath(path);
             return path != null && tempRoot != null

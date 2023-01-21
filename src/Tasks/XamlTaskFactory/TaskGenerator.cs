@@ -942,7 +942,9 @@ namespace Microsoft.Build.Tasks.Xaml
         private bool ContainsCurrentPlatform(Property property)
         {
             if (Platform == null)
+            {
                 return true;
+            }
 
             if (property.Values.Count > 0)
             {
@@ -966,7 +968,9 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             // If we don't have a platform defined it meens all
             if (Platform == null)
+            {
                 return true;
+            }
 
             if (_relationsParser.SwitchRelationsList.TryGetValue(SwitchValue, out SwitchRelations rel))
             {
@@ -975,7 +979,9 @@ namespace Microsoft.Build.Tasks.Xaml
                     foreach (string excludedPlatform in rel.ExcludedPlatforms)
                     {
                         if (Platform == excludedPlatform)
+                        {
                             return false;
+                        }
                     }
                 }
                 if (rel.IncludedPlatforms.Count > 0)
@@ -984,7 +990,9 @@ namespace Microsoft.Build.Tasks.Xaml
                     foreach (string includedPlatform in rel.IncludedPlatforms)
                     {
                         if (Platform == includedPlatform)
+                        {
                             isIncluded = true;
+                        }
                     }
                     return isIncluded;
                 }

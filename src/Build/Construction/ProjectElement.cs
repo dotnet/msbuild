@@ -544,7 +544,11 @@ namespace Microsoft.Build.Construction
 
         internal string GetAttributeValue(string attributeName, ref string cache)
         {
-            if (cache != null) return cache;
+            if (cache != null)
+            {
+                return cache;
+            }
+
             var value = GetAttributeValue(attributeName, false);
             if (Link == null)
             {

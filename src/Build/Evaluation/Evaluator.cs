@@ -1648,7 +1648,9 @@ namespace Microsoft.Build.Evaluation
                 // In the rare case that the property we've enabled for search paths hasn't been defined
                 // we will skip it, but continue with other paths in the fallback order.
                 if (string.IsNullOrEmpty(extensionPath))
+                {
                     continue;
+                }
 
                 string extensionPathExpanded = _data.ExpandString(extensionPath);
 
@@ -1791,7 +1793,11 @@ namespace Microsoft.Build.Evaluation
                 // for backward compatibility, we shouldn't change that. But resolvers should be exposed to a string
                 // that's null or a full path, so correct that here.
                 var solutionPath = _data.GetProperty(SolutionProjectGenerator.SolutionPathPropertyName)?.EvaluatedValue;
-                if (solutionPath == "*Undefined*") solutionPath = null;
+                if (solutionPath == "*Undefined*")
+                {
+                    solutionPath = null;
+                }
+
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 CompareInfo compareInfo = CultureInfo.InvariantCulture.CompareInfo;
@@ -1810,13 +1816,17 @@ namespace Microsoft.Build.Evaluation
                     if (mode != SdkReferencePropertyExpansionMode.NoExpansion)
                     {
                         if (mode == SdkReferencePropertyExpansionMode.DefaultExpand)
+                        {
                             mode = SdkReferencePropertyExpansionMode.ExpandUnescape;
+                        }
 
                         static string EvaluateProperty(string value, IElementLocation location,
                             Expander<P, I> expander, SdkReferencePropertyExpansionMode mode)
                         {
                             if (value == null)
+                            {
                                 return null;
+                            }
 
                             const ExpanderOptions Options = ExpanderOptions.ExpandProperties;
 

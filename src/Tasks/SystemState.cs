@@ -245,7 +245,9 @@ namespace Microsoft.Build.Tasks
         public override void Translate(ITranslator translator)
         {
             if (instanceLocalFileStateCache is null)
+            {
                 throw new NullReferenceException(nameof(instanceLocalFileStateCache));
+            }
 
             translator.TranslateDictionary(
                 ref instanceLocalFileStateCache,

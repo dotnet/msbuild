@@ -1304,7 +1304,9 @@ namespace Microsoft.Build.Tasks
 
             var buffer = new StringBuilder(a.Length * 2);
             for (int i = 0; i < a.Length; ++i)
+            {
                 buffer.Append(a[i].ToString("x2", CultureInfo.InvariantCulture));
+            }
 
             return buffer.ToString();
         }
@@ -2664,10 +2666,14 @@ namespace Microsoft.Build.Tasks
         private static IReadOnlyCollection<DependentAssembly> CombineRemappedAssemblies(IReadOnlyCollection<DependentAssembly> first, IReadOnlyCollection<DependentAssembly> second)
         {
             if (first == null)
+            {
                 return second;
+            }
 
             if (second == null)
+            {
                 return first;
+            }
 
             var combined = new List<DependentAssembly>(first.Count + second.Count);
             combined.AddRange(first);

@@ -250,7 +250,9 @@ namespace Microsoft.Build.BuildEngine
                 catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
                 {
                     if (ExceptionHandling.NotExpectedReflectionException(e))
+                    {
                         throw;
+                    }
 
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, taskNode, "TaskLoadFailure", taskName, assembly.ToString(), e.Message);
                 }

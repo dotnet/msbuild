@@ -144,7 +144,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public AssemblyIdentity(AssemblyIdentity identity)
         {
             if (identity == null)
+            {
                 return;
+            }
+
             _name = identity._name;
             _version = identity._version;
             _publicKeyToken = identity._publicKeyToken;

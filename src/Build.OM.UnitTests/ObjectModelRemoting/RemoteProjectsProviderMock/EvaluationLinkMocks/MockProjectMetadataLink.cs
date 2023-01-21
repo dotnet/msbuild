@@ -23,7 +23,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             get
             {
                 var parent = ProjectMetadataLink.GetParent(this.Source);
-                if (parent == null) return null;
+                if (parent == null)
+                {
+                    return null;
+                }
+
                 var itemParent = parent as ProjectItem;
                 if (itemParent != null)
                 {
@@ -58,7 +62,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             get
             {
                 var parentRemoter = this.Proxy.Parent;
-                if (parentRemoter == null) return null;
+                if (parentRemoter == null)
+                {
+                    return null;
+                }
+
                 var itemParent = parentRemoter as MockProjectItemLinkRemoter;
                 if (itemParent != null)
                 {

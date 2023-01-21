@@ -90,11 +90,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 EntityHandle ctorHandle = _reader.GetCustomAttribute(handle).Constructor;
                 if (ctorHandle.Kind != HandleKind.MemberReference)
+                {
                     continue;
+                }
 
                 EntityHandle mHandle = _reader.GetMemberReference((MemberReferenceHandle)ctorHandle).Parent;
                 if (mHandle.Kind != HandleKind.TypeReference)
+                {
                     continue;
+                }
 
                 string type = GetTypeName((TypeReferenceHandle)mHandle);
 
@@ -173,7 +177,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             if (!String.IsNullOrEmpty(publicKeyToken))
+            {
                 publicKeyToken = publicKeyToken.ToUpperInvariant();
+            }
 
             return publicKeyToken;
         }
@@ -346,9 +352,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             string version = refid.GetAttribute(null, "version");
             string publicKeyToken = refid.GetAttribute(null, "publicKeyToken");
             if (String.Equals(publicKeyToken, "neutral", StringComparison.OrdinalIgnoreCase))
+            {
                 publicKeyToken = String.Empty;
+            }
             else if (!String.IsNullOrEmpty(publicKeyToken))
+            {
                 publicKeyToken = publicKeyToken.ToUpperInvariant();
+            }
+
             string culture = refid.GetAttribute(null, "culture");
             string processorArchitecture = refid.GetAttribute(null, "processorArchitecture");
             if (!String.IsNullOrEmpty(processorArchitecture))

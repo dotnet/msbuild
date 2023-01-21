@@ -171,7 +171,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private bool TryAddAssemblyManifestFromXml(string pathToManifest, string manifestFolder, List<SdkResolverManifest> manifestsList, ElementLocation location)
         {
-            if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest)) return false;
+            if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest))
+            {
+                return false;
+            }
 
             SdkResolverManifest manifest = null;
             try
@@ -213,7 +216,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private bool TryAddAssemblyManifestFromDll(string assemblyPath, List<SdkResolverManifest> manifestsList)
         {
-            if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath)) return false;
+            if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath))
+            {
+                return false;
+            }
 
             manifestsList.Add(new SdkResolverManifest(DisplayName: assemblyPath, Path: assemblyPath, ResolvableSdkRegex: null));
             return true;

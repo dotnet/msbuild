@@ -68,9 +68,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
@@ -150,9 +154,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
 
@@ -197,9 +205,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
@@ -226,9 +238,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
@@ -253,9 +269,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
@@ -274,9 +294,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             return b.ToString();
         }

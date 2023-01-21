@@ -90,7 +90,10 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedException(e))
-                   throw;
+                {
+                    throw;
+                }
+
                 string errorCode;
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", logFileName, e.Message);
@@ -121,7 +124,10 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception ex) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedException(ex))
-                   throw;
+                {
+                    throw;
+                }
+
                 string errorCode;
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", logFileName, ex.Message);

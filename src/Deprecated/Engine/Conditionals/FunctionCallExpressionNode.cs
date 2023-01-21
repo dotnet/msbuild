@@ -47,7 +47,9 @@ namespace Microsoft.Build.BuildEngine
                     catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
                     {
                         if (ExceptionHandling.NotExpectedException(e))
+                        {
                             throw;
+                        }
 
                         // Ignore invalid characters or path related exceptions
 

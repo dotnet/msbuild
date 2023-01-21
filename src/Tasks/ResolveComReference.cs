@@ -1164,7 +1164,9 @@ namespace Microsoft.Build.Tasks
 
             // if we have a strong name, strip off everything but the assembly name
             if (commaIndex != -1)
+            {
                 assemblyName = assemblyName.Substring(0, commaIndex);
+            }
 
             assemblyName += ".dll";
 

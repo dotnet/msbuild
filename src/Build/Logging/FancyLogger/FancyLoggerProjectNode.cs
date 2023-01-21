@@ -59,7 +59,11 @@ namespace Microsoft.Build.Logging.FancyLogger
         // TODO: Rename to Render() after FancyLogger's API becomes internal
         public void Log()
         {
-            if (!ShouldRerender) return;
+            if (!ShouldRerender)
+            {
+                return;
+            }
+
             ShouldRerender = false;
             // Project details
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
@@ -73,32 +77,67 @@ namespace Microsoft.Build.Logging.FancyLogger
                 Console.WindowWidth
             );
             // Create or update line
-            if (Line is null) Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
-            else Line.Text = lineContents;
+            if (Line is null)
+            {
+                Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
+            }
+            else
+            {
+                Line.Text = lineContents;
+            }
 
             // For finished projects
             if (Finished)
             {
-                if (CurrentTargetLine is not null) FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                if (CurrentTargetLine is not null)
+                {
+                    FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                }
+
                 foreach (FancyLoggerMessageNode node in AdditionalDetails.ToList())
                 {
                     // Only delete high priority messages
-                    if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
-                    if (node.Line is not null) FancyLoggerBuffer.DeleteLine(node.Line.Id);
+                    if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage)
+                    {
+                        continue;
+                    }
+
+                    if (node.Line is not null)
+                    {
+                        FancyLoggerBuffer.DeleteLine(node.Line.Id);
+                    }
                 }
             }
 
             // Current target details
-            if (CurrentTargetNode is null) return;
+            if (CurrentTargetNode is null)
+            {
+                return;
+            }
+
             string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
-            if (CurrentTargetLine is null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
-            else CurrentTargetLine.Text = currentTargetLineContents;
+            if (CurrentTargetLine is null)
+            {
+                CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
+            }
+            else
+            {
+                CurrentTargetLine.Text = currentTargetLineContents;
+            }
 
             // Messages, warnings and errors
             foreach (FancyLoggerMessageNode node in AdditionalDetails)
             {
-                if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
-                if (node.Line is null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage)
+                {
+                    continue;
+                }
+
+                if (node.Line is null)
+                {
+                    node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                }
+
                 node.Log();
             }
         }
@@ -112,12 +151,22 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get target id
             int targetId = args.BuildEventContext!.TargetId;
-            if (CurrentTargetNode?.Id == targetId) return CurrentTargetNode.AddTask(args);
-            else return null;
+            if (CurrentTargetNode?.Id == targetId)
+            {
+                return CurrentTargetNode.AddTask(args);
+            }
+            else
+            {
+                return null;
+            }
         }
         public FancyLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
         {
-            if (args.Importance != MessageImportance.High) return null;
+            if (args.Importance != MessageImportance.High)
+            {
+                return null;
+            }
+
             MessageCount++;
             FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
             AdditionalDetails.Add(node);

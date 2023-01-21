@@ -93,7 +93,9 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         private void LazyInitialize()
         {
             if (_isInitialized)
+            {
                 return;
+            }
 
             _isInitialized = true;
 

@@ -139,7 +139,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void Initialize()
         {
-            if (s_initialized) return;
+            if (s_initialized)
+            {
+                return;
+            }
 
             s_assemblylocationProperty = typeof(Assembly).GetProperty("Location", typeof(string));
             s_cultureInfoGetCultureMethod = typeof(CultureInfo).GetMethod("GetCultures");

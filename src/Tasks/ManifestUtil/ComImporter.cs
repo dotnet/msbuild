@@ -46,7 +46,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             _outputDisplayName = outputDisplayName;
 
             if (NativeMethods.SfcIsFileProtected(IntPtr.Zero, path) != 0)
+            {
                 outputMessages.AddWarningMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.ProtectedFile"));
+            }
 
             object obj = null;
             try { NativeMethods.LoadTypeLibEx(path, NativeMethods.RegKind.RegKind_None, out obj); }

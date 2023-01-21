@@ -286,11 +286,16 @@ namespace System.Deployment.Internal.CodeSigning
         {
             // We only care about Id references inside of the KeyInfo section
             if (_verify)
+            {
                 return base.GetIdElement(document, idValue);
+            }
 
             KeyInfo keyInfo = this.KeyInfo;
             if (keyInfo.Id != idValue)
+            {
                 return null;
+            }
+
             return keyInfo.GetXml();
         }
     }
@@ -382,7 +387,10 @@ namespace System.Deployment.Internal.CodeSigning
             nsm.AddNamespace("asm", AssemblyNamespaceUri);
             XmlNode assemblyIdentityNode = _manifestDom.SelectSingleNode("asm:assembly/asm:assemblyIdentity", nsm);
             if (assemblyIdentityNode == null)
+            {
                 throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
+            }
+
             return assemblyIdentityNode as XmlElement;
         }
 
@@ -442,7 +450,9 @@ namespace System.Deployment.Internal.CodeSigning
             nsm.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
             XmlNode signatureNode = manifestDom.SelectSingleNode("asm:assembly/ds:Signature", nsm);
             if (signatureNode != null)
+            {
                 signatureNode.ParentNode.RemoveChild(signatureNode);
+            }
         }
 
         /// <summary>
@@ -836,13 +846,19 @@ namespace System.Deployment.Internal.CodeSigning
                 finally
                 {
                     if (ppTsContext != IntPtr.Zero)
+                    {
                         Win32.CryptMemFree(ppTsContext);
+                    }
 
                     if (ppTsSigner != IntPtr.Zero)
+                    {
                         Win32.CertFreeCertificateContext(ppTsSigner);
+                    }
 
                     if (phStore != IntPtr.Zero)
+                    {
                         Win32.CertCloseStore(phStore, 0);
+                    }
                 }
             }
 
@@ -1063,12 +1079,16 @@ namespace System.Deployment.Internal.CodeSigning
         internal CmiManifestSigner2(AsymmetricAlgorithm strongNameKey, X509Certificate2 certificate, bool useSha256)
         {
             if (strongNameKey == null)
+            {
                 throw new ArgumentNullException(nameof(strongNameKey));
+            }
 
 #if (true) // BUGBUG: Fusion only supports RSA. Do we throw if not RSA???
             RSA rsa = strongNameKey as RSA;
             if (rsa == null)
+            {
                 throw new ArgumentNullException(nameof(strongNameKey));
+            }
 #endif
             _strongNameKey = strongNameKey;
             _certificate = certificate;
@@ -1143,9 +1163,15 @@ namespace System.Deployment.Internal.CodeSigning
             set
             {
                 if (value < X509IncludeOption.None || value > X509IncludeOption.WholeChain)
+                {
                     throw new ArgumentException("value");
+                }
+
                 if (_includeOption == X509IncludeOption.None)
+                {
                     throw new NotSupportedException();
+                }
+
                 _includeOption = value;
             }
         }
@@ -1161,7 +1187,9 @@ namespace System.Deployment.Internal.CodeSigning
                 unchecked
                 {
                     if ((value & ((CmiManifestSignerFlag)~CimManifestSignerFlagMask)) != 0)
+                    {
                         throw new ArgumentException("value");
+                    }
                 }
                 _signerFlag = value;
             }

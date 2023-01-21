@@ -42,7 +42,10 @@ namespace Microsoft.Build.Shared
                 {
                     // Call e.Next to query for the next instance (single item or nothing returned).
                     e.Next(1, instances, out fetched);
-                    if (fetched <= 0) continue;
+                    if (fetched <= 0)
+                    {
+                        continue;
+                    }
 
                     var instance = instances[0];
                     var state = ((ISetupInstance2) instance).GetState();

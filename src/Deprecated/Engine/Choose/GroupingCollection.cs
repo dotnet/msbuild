@@ -448,7 +448,9 @@ namespace Microsoft.Build.BuildEngine
                 ChangePropertyGroupCount(1);
             }
             else if (newGroup is Choose)
+            {
                 this.chooseCount++;
+            }
         }
 
         /// <summary>
@@ -478,7 +480,9 @@ namespace Microsoft.Build.BuildEngine
                 ChangePropertyGroupCount(1);
             }
             else if (newGroup is Choose)
+            {
                 this.chooseCount++;
+            }
         }
 
         /// <summary>

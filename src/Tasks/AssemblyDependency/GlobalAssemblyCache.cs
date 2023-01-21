@@ -192,7 +192,10 @@ namespace Microsoft.Build.Tasks
 
                 assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
 
-                if (assemblyInfo.cbAssemblyInfo == 0) return null;
+                if (assemblyInfo.cbAssemblyInfo == 0)
+                {
+                    return null;
+                }
 
                 assemblyInfo.pszCurrentAssemblyPathBuf = new string(new char[assemblyInfo.cchBuf]);
 

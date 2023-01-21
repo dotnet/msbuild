@@ -352,11 +352,17 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private void CorePopulateMetadata()
         {
-            if (_metadataRead) return;
+            if (_metadataRead)
+            {
+                return;
+            }
 
             lock (this)
             {
-                if (_metadataRead) return;
+                if (_metadataRead)
+                {
+                    return;
+                }
 
                 using (var stream = File.OpenRead(_sourceFile))
                 using (var peFile = new PEReader(stream))
@@ -1093,7 +1099,9 @@ namespace Microsoft.Build.Tasks
             foreach (var s in sections)
             {
                 if (rva >= s.VirtualAddress && rva < s.VirtualAddress + s.Size)
+                {
                     return s.FileOffset + (rva - s.VirtualAddress);
+                }
             }
             return 0;
         }

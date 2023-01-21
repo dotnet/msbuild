@@ -342,14 +342,20 @@ namespace Microsoft.Build.Collections
         public T Get(string key, int index, int length)
         {
             if (length < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(length));
+            }
 
             if (index < 0 || index > (key == null ? 0 : key.Length) - length)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index));
+            }
 
             if (_constrainedComparer == null)
+            {
                 throw new InvalidOperationException("Cannot do a constrained lookup on this collection.");
-        
+            }
+
             return GetCore(key, index, length);
         }
 
@@ -595,7 +601,9 @@ namespace Microsoft.Build.Collections
         void IDictionary<string, T>.Add(string key, T item)
         {
             if (key != item.Key)
+            {
                 throw new InvalidOperationException();
+            }
 
             AddEvenIfPresent(item);
         }
@@ -988,7 +996,9 @@ namespace Microsoft.Build.Collections
         void ICollection<KeyValuePair<string, T>>.CopyTo(KeyValuePair<string, T>[] array, int index)
         {
             if (index < 0 || Count > array.Length - index)
+            {
                 throw new ArgumentException("index");
+            }
 
             int i = index;
             foreach (var entry in this)
@@ -1703,7 +1713,9 @@ namespace Microsoft.Build.Collections
         {
             // No need to check for null 'item' as we own all comparers
             if (_constrainedComparer != null)
+            {
                 return _constrainedComparer.GetHashCode(item, index, length) & Lower31BitMask;
+            }
 
             return InternalGetHashCode(item);
         }

@@ -60,7 +60,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static Stream Read(string path)
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
 
             if (!path.EndsWith(".manifest", StringComparison.Ordinal) && !path.EndsWith(".dll", StringComparison.Ordinal))
             {

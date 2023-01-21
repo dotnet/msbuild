@@ -953,7 +953,11 @@ namespace Microsoft.Build.Tasks
             {
                 string targetPath = GetItemTargetPath(item);
                 Debug.Assert(!String.IsNullOrEmpty(targetPath));
-                if (String.IsNullOrEmpty(targetPath)) return;
+                if (String.IsNullOrEmpty(targetPath))
+                {
+                    return;
+                }
+
                 string key = targetPath.ToLowerInvariant();
                 Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same '{0}' attribute detected", ItemMetadataNames.targetPath));
                 var entry = new MapEntry(item, includedByDefault);

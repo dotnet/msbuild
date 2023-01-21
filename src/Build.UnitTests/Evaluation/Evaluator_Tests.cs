@@ -4885,7 +4885,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 if (!string.IsNullOrWhiteSpace(envVarValue))
+                {
                     env.SetEnvironmentVariable("MsBuildLogPropertyTracking", envVarValue);
+                }
 
                 env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE", "It's Defined!");
                 env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE2", "It's also Defined!");

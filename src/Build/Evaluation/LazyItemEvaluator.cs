@@ -271,7 +271,9 @@ namespace Microsoft.Build.Evaluation
                 foreach (ItemData data in GetItemData(globsToIgnore))
                 {
                     if (data.ConditionResult)
+                    {
                         items.Add(data.Item);
+                    }
                 }
 
                 return items.ToImmutable();

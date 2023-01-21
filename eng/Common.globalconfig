@@ -1121,9 +1121,6 @@ dotnet_diagnostic.IDE0008.severity = suggestion
 # Populate switch
 dotnet_diagnostic.IDE0010.severity = suggestion
 
-# Add braces to statement
-dotnet_diagnostic.IDE0011.severity = suggestion
-
 # Null check can be simplified
 dotnet_diagnostic.IDE0016.severity = suggestion
 

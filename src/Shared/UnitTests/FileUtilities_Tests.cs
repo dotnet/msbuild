@@ -203,7 +203,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (file != null) File.Delete(file);
+                if (file != null)
+                {
+                    File.Delete(file);
+                }
             }
         }
 

@@ -75,11 +75,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void ParseParameters()
         {
-            if (Parameters == null) return;
+            if (Parameters == null)
+            {
+                return;
+            }
 
             foreach (string parameter in Parameters.Split(parameterDelimiters))
             {
-                if (string.IsNullOrWhiteSpace(parameter)) continue;
+                if (string.IsNullOrWhiteSpace(parameter))
+                {
+                    continue;
+                }
 
                 string[] parameterAndValue = parameter.Split(s_parameterValueSplitCharacter);
                 ApplyParameter(parameterAndValue[0], parameterAndValue.Length > 1 ? parameterAndValue[1] : null);
@@ -127,7 +133,10 @@ namespace Microsoft.Build.BackEnd.Logging
         internal string IndentString(string s, int indent)
         {
             // It's possible the event has a null message
-            if (s == null) return string.Empty;
+            if (s == null)
+            {
+                return string.Empty;
+            }
 
             // This will never return an empty array.  The returned array will always
             // have at least one non-null element, even if "s" is totally empty.
@@ -578,7 +587,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WriteItems(SortedList itemTypes)
         {
-            if (Verbosity != LoggerVerbosity.Diagnostic || !showItemAndPropertyList || itemTypes.Count == 0) return;
+            if (Verbosity != LoggerVerbosity.Diagnostic || !showItemAndPropertyList || itemTypes.Count == 0)
+            {
+                return;
+            }
 
             // Write the banner
             setColor(ConsoleColor.Green);

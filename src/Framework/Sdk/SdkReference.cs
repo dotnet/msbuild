@@ -53,8 +53,16 @@ namespace Microsoft.Build.Framework
         /// </returns>
         public bool Equals(SdkReference other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(MinimumVersion, other.MinimumVersion, StringComparison.OrdinalIgnoreCase);
@@ -71,12 +79,22 @@ namespace Microsoft.Build.Framework
         public static bool TryParse(string sdk, out SdkReference sdkReference)
         {
             sdkReference = null;
-            if (string.IsNullOrWhiteSpace(sdk)) return false;
+            if (string.IsNullOrWhiteSpace(sdk))
+            {
+                return false;
+            }
 
             var parts = sdk.Split(MSBuildConstants.ForwardSlash).Select(i => i.Trim()).ToArray();
 
-            if (parts.Length < 1 || parts.Length > 2) return false;
-            if (string.IsNullOrWhiteSpace(parts[0])) return false;
+            if (parts.Length < 1 || parts.Length > 2)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(parts[0]))
+            {
+                return false;
+            }
 
             if (parts.Length == 1 || string.IsNullOrWhiteSpace(parts[1]))
             {
@@ -97,8 +115,16 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
             return obj is SdkReference && Equals((SdkReference) obj);
         }
 

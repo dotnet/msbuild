@@ -222,7 +222,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
             {
                 if (ExceptionHandling.NotExpectedException(e))
+                {
                     throw;
+                }
 
                 // There was some problem reading the config file: let the configuration reader
                 // encounter it
@@ -464,7 +466,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
             {
                 if (ExceptionHandling.NotExpectedException(e))
+                {
                     throw;
+                }
                 // This means that the path looked relative, but was an invalid path. In this case, we'll
                 // just not expand it, and carry on - to be consistent with what happens when there's a
                 // non-relative bin path with invalid characters. The problem will be detected later when

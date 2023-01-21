@@ -564,8 +564,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                if (inputFile != null) File.Delete(inputFile);
-                if (outputFile != null) File.Delete(outputFile);
+                if (inputFile != null)
+                {
+                    File.Delete(inputFile);
+                }
+
+                if (outputFile != null)
+                {
+                    File.Delete(outputFile);
+                }
             }
         }
 
@@ -650,8 +657,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                if (File.Exists(projectAbsolutePath)) File.Delete(projectAbsolutePath);
-                if (Directory.Exists(path)) FileUtilities.DeleteWithoutTrailingBackslash(path);
+                if (File.Exists(projectAbsolutePath))
+                {
+                    File.Delete(projectAbsolutePath);
+                }
+
+                if (Directory.Exists(path))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(path);
+                }
             }
         }
 

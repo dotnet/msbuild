@@ -187,7 +187,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private XmlElement GetInputRequestedPrivilegeElement()
         {
             if (_inputTrustInfoDocument == null)
+            {
                 return null;
+            }
+
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(_inputTrustInfoDocument.NameTable);
             XmlElement trustInfoElement = _inputTrustInfoDocument.DocumentElement;
             XmlElement securityElement = (XmlElement) trustInfoElement?.SelectSingleNode(XPaths.securityElement, nsmgr);
@@ -506,7 +509,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
             XmlAttribute sameSiteAttribute = (XmlAttribute)psElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.sameSiteAttribute));
             if (sameSiteAttribute != null)
+            {
                 _sameSiteSetting = sameSiteAttribute.Value;
+            }
         }
 
         /// <summary>
@@ -733,7 +738,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             XmlNodeList permissionSetNodes = applicationRequestMinimumElement.SelectNodes(XPaths.permissionSetElement, nsmgr);
             foreach (XmlNode permissionSetNode in permissionSetNodes)
+            {
                 applicationRequestMinimumElement.RemoveChild(permissionSetNode);
+            }
 
             XmlElement fullTrustPermissionSetElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.permissionSetElement), XmlNamespaces.asmv2);
             XmlAttribute unrestrictedAttribute = document.CreateAttribute(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute), XmlNamespaces.asmv2);

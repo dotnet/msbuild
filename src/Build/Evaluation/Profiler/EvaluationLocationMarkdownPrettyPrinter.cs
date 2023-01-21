@@ -41,7 +41,9 @@ namespace Microsoft.Build.Evaluation
             text = text.Replace(Separator, "\\" + Separator);
 
             if (text.Length > 100)
+            {
                 text = text.Remove(100) + "...";
+            }
 
             return '`' + text + '`';
         }

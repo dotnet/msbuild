@@ -278,7 +278,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             get
             {
-                if (String.IsNullOrEmpty(_oSMajor)) return null;
+                if (String.IsNullOrEmpty(_oSMajor))
+                {
+                    return null;
+                }
+
                 Version v;
                 try
                 {
@@ -509,9 +513,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private void ValidateConfig()
         {
-            if (String.IsNullOrEmpty(ConfigFile)) return;
+            if (String.IsNullOrEmpty(ConfigFile))
+            {
+                return;
+            }
+
             FileReference configFile = FileReferences.FindTargetPath(ConfigFile);
-            if (configFile == null) return;
+            if (configFile == null)
+            {
+                return;
+            }
 
             if (!TrustInfo.IsFullTrust)
             {

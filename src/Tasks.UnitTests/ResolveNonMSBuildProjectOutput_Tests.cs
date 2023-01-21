@@ -30,11 +30,19 @@ namespace Microsoft.Build.UnitTests
             TaskItem reference = new TaskItem(itemSpec);
 
             if (projectGuid != null)
+            {
                 reference.SetMetadata(attributeProject, projectGuid);
+            }
+
             if (package != null)
+            {
                 reference.SetMetadata("Package", package);
+            }
+
             if (name != null)
+            {
                 reference.SetMetadata("Name", name);
+            }
 
             return reference;
         }

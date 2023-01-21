@@ -106,7 +106,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
         public static Manifest ReadManifest(string path, bool preserveStream)
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
             string manifestType = null;
             if (path.EndsWith(".application", StringComparison.Ordinal))
             {

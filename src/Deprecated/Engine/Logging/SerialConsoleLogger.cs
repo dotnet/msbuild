@@ -183,7 +183,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void ShowErrorWarningSummary()
         {
-            if (warningCount == 0 && errorCount == 0) return;
+            if (warningCount == 0 && errorCount == 0)
+            {
+                return;
+            }
 
             // Make some effort to distinguish the summary from the previous output
             WriteNewLine();

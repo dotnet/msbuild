@@ -589,18 +589,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 var result = new StringBuilder(256);
                 if (Mode.HasValue)
+                {
                     result.Append(Mode);
+                }
                 else
+                {
                     result.Append($"{nameof(Mode)}: <null>");
+                }
 
                 result.Append($", {Template}, {nameof(TemplateName)}: {TemplateName}, {nameof(TemplateVersion)}: {TemplateVersion}");
 
                 if (SetNameProperty)
+                {
                     result.Append(", SetName");
+                }
+
                 if (SetVersionProperty)
+                {
                     result.Append(", SetVersion");
+                }
+
                 if (ExpectedSuccess)
+                {
                     result.Append(", ExpectedSuccess");
+                }
 
                 return result.ToString();
             }
@@ -632,15 +644,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 (projectOptions.GlobalProperties ??= new Dictionary<string, string>()).Add(name, value);
 
             if (data.SetNameProperty)
+            {
                 AddProperty(SdkNamePropertyName, SdkName);
+            }
 
             if (data.SetVersionProperty)
+            {
                 AddProperty(SdkVersionPropertyName, SdkExpectedVersion);
+            }
 
             using var xmlReader = XmlReader.Create(new StringReader(projectContents));
 
             if (!data.ExpectedSuccess)
+            {
                 projectOptions.LoadSettings |= ProjectLoadSettings.IgnoreMissingImports;
+            }
 
             var project = Project.FromXmlReader(xmlReader, projectOptions);
 

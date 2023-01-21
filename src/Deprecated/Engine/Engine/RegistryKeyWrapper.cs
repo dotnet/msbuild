@@ -75,7 +75,9 @@ namespace Microsoft.Build.BuildEngine
                 catch (Exception ex)
                 {
                     if (NotExpectedException(ex))
+                    {
                         throw;
+                    }
 
                     throw new RegistryException(ex.Message, ex);
                 }
@@ -96,7 +98,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception ex)
             {
                 if (NotExpectedException(ex))
+                {
                     throw;
+                }
 
                 throw new RegistryException(ex.Message, Name + "@" + name, ex);
             }
@@ -115,7 +119,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception ex)
             {
                 if (NotExpectedException(ex))
+                {
                     throw;
+                }
 
                 throw new RegistryException(ex.Message, Name, ex);
             }
@@ -134,7 +140,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception ex)
             {
                 if (NotExpectedException(ex))
+                {
                     throw;
+                }
 
                 throw new RegistryException(ex.Message, Name, ex);
             }
@@ -162,7 +170,9 @@ namespace Microsoft.Build.BuildEngine
                 catch (Exception ex)
                 {
                     if (NotExpectedException(ex))
+                    {
                         throw;
+                    }
 
                     throw new RegistryException(ex.Message, wrapper.Name + "\\" + keyNames[i], ex);
                 }
@@ -199,7 +209,9 @@ namespace Microsoft.Build.BuildEngine
                     catch (Exception ex)
                     {
                         if (NotExpectedException(ex))
+                        {
                             throw;
+                        }
 
                         throw new RegistryException(ex.Message, Name, ex);
                     }

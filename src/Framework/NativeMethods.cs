@@ -692,7 +692,10 @@ internal static class NativeMethods
     {
         get
         {
-            if (_isMono != null) return _isMono.Value;
+            if (_isMono != null)
+            {
+                return _isMono.Value;
+            }
 
             lock (IsMonoLock)
             {

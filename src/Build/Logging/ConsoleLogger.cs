@@ -105,7 +105,10 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void InitializeBaseConsoleLogger()
         {
-            if (_consoleLogger != null) return;
+            if (_consoleLogger != null)
+            {
+                return;
+            }
 
             bool useMPLogger = false;
             bool disableConsoleColor = false;
@@ -116,7 +119,10 @@ namespace Microsoft.Build.Logging
                 string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
                 foreach (string param in parameterComponents)
                 {
-                    if (param.Length <= 0) continue;
+                    if (param.Length <= 0)
+                    {
+                        continue;
+                    }
 
                     if (string.Equals(param, "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
                     {

@@ -861,7 +861,9 @@ namespace Microsoft.Build.Conversion
                     // $(MSBuildExtensionsPath)\Microsoft.VisualStudio.OfficeTools.targets
                     if (importElement.Project.Equals(XMakeProjectStrings.officeTargetsVS2005Import, StringComparison.OrdinalIgnoreCase)
                         || importElement.Project.Equals(XMakeProjectStrings.officeTargetsVS2005Import2, StringComparison.OrdinalIgnoreCase))
+                    {
                         bHasRepairPattern = true;
+                    }
                 }
             }
 
@@ -1005,10 +1007,14 @@ namespace Microsoft.Build.Conversion
 
             // no other F# imports - do nothing
             if (fsharpTargetsFS10Import == null && fsharpTargetsFS40Import == null && fsharpTargetsFS45Import == null && fsharpTargetsDev11PortableImport == null)
+            {
                 return false;
+            }
 
             if (!actuallyMakeChanges)
+            {
                 return true;
+            }
 
             // both branches adds this elements to the project
             var chooseElement = xmakeProject.CreateChooseElement(); // (1)
@@ -1085,13 +1091,24 @@ namespace Microsoft.Build.Conversion
             chooseElement.Parent.InsertAfterChild(dev12PlusImportElement, chooseElement);
 
             if (fsharpTargetsFS10Import != null)
+            {
                 xmakeProject.RemoveChild(fsharpTargetsFS10Import);
+            }
+
             if (fsharpTargetsFS40Import != null)
+            {
                 xmakeProject.RemoveChild(fsharpTargetsFS40Import);
+            }
+
             if (fsharpTargetsFS45Import != null)
+            {
                 xmakeProject.RemoveChild(fsharpTargetsFS45Import);
+            }
+
             if (fsharpTargetsDev11PortableImport != null)
+            {
                 xmakeProject.RemoveChild(fsharpTargetsDev11PortableImport);
+            }
 
             const string ReferenceItemType = "Reference";
 
@@ -2101,7 +2118,9 @@ namespace Microsoft.Build.Conversion
             if (!string.IsNullOrEmpty(outputPath))
             {
                 if (outputPath[outputPath.Length-1] != Path.DirectorySeparatorChar)
+                {
                     outputPath += Path.DirectorySeparatorChar;
+                }
 
                 configElement.RemoveAttribute(VSProjectAttributes.outputPath);
                 configPropertyGroup.AddProperty(VSProjectAttributes.outputPath, ProjectCollection.Escape(outputPath));
@@ -3342,7 +3361,9 @@ namespace Microsoft.Build.Conversion
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedException(e))
+                {
                     throw;
+                }
                 // if we can't say for sure it's empty, play safe and return false
                 return false;
             }

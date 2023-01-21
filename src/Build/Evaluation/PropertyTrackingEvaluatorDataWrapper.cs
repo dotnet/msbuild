@@ -165,7 +165,10 @@ namespace Microsoft.Build.Evaluation
             // MSBuild looks up a property called "InnerBuildProperty". If that isn't present,
             // an empty string is returned and it then attempts to look up the value for that property
             // (which is an empty string). Thus this check.
-            if (string.IsNullOrEmpty(name)) return;
+            if (string.IsNullOrEmpty(name))
+            {
+                return;
+            }
 
             // If a property matches the name of an environment variable, but has NOT been overwritten by a non-environment-variable property
             // track it as an environment variable read.
@@ -185,7 +188,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="name">The name of the environment variable read.</param>
         private void TrackEnvironmentVariableRead(string name)
         {
-            if ((_settings & PropertyTrackingSetting.EnvironmentVariableRead) != PropertyTrackingSetting.EnvironmentVariableRead) return;
+            if ((_settings & PropertyTrackingSetting.EnvironmentVariableRead) != PropertyTrackingSetting.EnvironmentVariableRead)
+            {
+                return;
+            }
 
             var args = new EnvironmentVariableReadEventArgs(
                 name,
@@ -201,7 +207,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="name">The name of the uninitialized property read.</param>
         private void TrackUninitializedPropertyRead(string name)
         {
-            if ((_settings & PropertyTrackingSetting.UninitializedPropertyRead) != PropertyTrackingSetting.UninitializedPropertyRead) return;
+            if ((_settings & PropertyTrackingSetting.UninitializedPropertyRead) != PropertyTrackingSetting.UninitializedPropertyRead)
+            {
+                return;
+            }
 
             var args = new UninitializedPropertyReadEventArgs(
                 name,
@@ -240,7 +249,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="source">The source of the property.</param>
         private void TrackPropertyInitialValueSet(P property, PropertySource source)
         {
-            if ((_settings & PropertyTrackingSetting.PropertyInitialValueSet) != PropertyTrackingSetting.PropertyInitialValueSet) return;
+            if ((_settings & PropertyTrackingSetting.PropertyInitialValueSet) != PropertyTrackingSetting.PropertyInitialValueSet)
+            {
+                return;
+            }
 
             var args = new PropertyInitialValueSetEventArgs(
                     property.Name,

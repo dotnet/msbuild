@@ -173,7 +173,9 @@ namespace Microsoft.Build.Internal
                 catch (Exception ex)
                 {
                     if (ExceptionHandling.NotExpectedRegistryException(ex))
+                    {
                         throw;
+                    }
 
                     throw new RegistryException(ex.Message, wrapper.Name + "\\" + keyNames[i], ex);
                 }

@@ -37,9 +37,10 @@ namespace Xunit.NetCore.Extensions
             // so instead we'll just let collection fixtures override assembly fixtures.
             var combinedFixtures = new Dictionary<Type, object>(assemblyFixtureMappings);
             foreach (var kvp in CollectionFixtureMappings)
+            {
                 combinedFixtures[kvp.Key] = kvp.Value;
+            }
 
-            
             return new XunitTestClassRunnerWithAssemblyFixture(assemblyFixtureAttributes, testClass, @class, testCases, diagnosticMessageSink, MessageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), CancellationTokenSource, combinedFixtures).RunAsync();
         }
     }

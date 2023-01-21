@@ -49,7 +49,9 @@ namespace Microsoft.Build.BuildEngine.Shared
         static private string RemoveSpaceFromAnyCpuPlatform(string platformName)
         {
             if (string.Equals(platformName, "Any CPU", StringComparison.OrdinalIgnoreCase))
+            {
                 return "AnyCPU";
+            }
 
             return platformName;
         }

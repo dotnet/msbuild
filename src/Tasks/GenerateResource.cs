@@ -3132,13 +3132,17 @@ namespace Microsoft.Build.Tasks
                 {
                     satCulture = assemblyName.CultureInfo;
                     if (!satCulture.Equals(CultureInfo.InvariantCulture))
+                    {
                         expectedExt = '.' + satCulture.Name + ".resources";
+                    }
                 }
 
                 foreach (String resName in resources)
                 {
                     if (!resName.EndsWith(".resources", StringComparison.OrdinalIgnoreCase)) // Skip non-.resources assembly blobs
+                    {
                         continue;
+                    }
 
                     if (mainAssembly)
                     {
@@ -3190,7 +3194,9 @@ namespace Microsoft.Build.Tasks
                             {
                                 // Remove the culture from the filename
                                 if (reader.outputFileName.EndsWith("." + reader.cultureName, StringComparison.OrdinalIgnoreCase))
+                                {
                                     reader.outputFileName = reader.outputFileName.Remove(reader.outputFileName.Length - (reader.cultureName.Length + 1));
+                                }
                             }
                             _readers.Add(reader);
 
@@ -3234,7 +3240,9 @@ namespace Microsoft.Build.Tasks
                     neutralResourcesLanguageAttribute = (NeutralResourcesLanguageAttribute)attrs[0];
                     bool fallbackToSatellite = neutralResourcesLanguageAttribute.Location == UltimateResourceFallbackLocation.Satellite;
                     if (!fallbackToSatellite && neutralResourcesLanguageAttribute.Location != UltimateResourceFallbackLocation.MainAssembly)
+                    {
                         _logger.LogWarningWithCodeFromResources(null, name, 0, 0, 0, 0, "GenerateResource.UnrecognizedUltimateResourceFallbackLocation", neutralResourcesLanguageAttribute.Location, name);
+                    }
                     // This MSBuild task needs to not report an error for main assemblies that don't have managed resources.
                 }
             }
@@ -3253,7 +3261,9 @@ namespace Microsoft.Build.Tasks
                 }
 
                 if (!ContainsProperlyNamedResourcesFiles(a, false))
+                {
                     _logger.LogWarningWithCodeFromResources("GenerateResource.SatelliteAssemblyContainsNoResourcesFile", assemblyName.CultureInfo.Name);
+                }
             }
             return neutralResourcesLanguageAttribute;
         }
@@ -3264,7 +3274,9 @@ namespace Microsoft.Build.Tasks
             foreach (String manifestResourceName in a.GetManifestResourceNames())
             {
                 if (manifestResourceName.EndsWith(postfix, StringComparison.OrdinalIgnoreCase))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -3575,15 +3587,21 @@ namespace Microsoft.Build.Tasks
                     while (ch != '=')
                     {
                         if (ch == '\r' || ch == '\n')
+                        {
                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.NoEqualsInLine", name), fileName, sr.LineNumber, sr.LinePosition);
+                        }
 
                         name.Append((char)ch);
                         ch = sr.Read();
                         if (ch == -1)
+                        {
                             break;
+                        }
                     }
                     if (name.Length == 0)
+                    {
                         throw new TextFileException(_logger.FormatResourceString("GenerateResource.NoNameInLine"), fileName, sr.LineNumber, sr.LinePosition);
+                    }
 
                     // For the INF file, we must allow a space on both sides of the equals
                     // sign.  Deal with it.
@@ -3594,7 +3612,9 @@ namespace Microsoft.Build.Tasks
                     ch = sr.Read(); // move past =
                     // If it exists, move past the first space after the equals sign.
                     if (ch == ' ')
+                    {
                         ch = sr.Read();
+                    }
 
                     // Read in value
                     value.Length = 0;
@@ -3633,7 +3653,10 @@ namespace Microsoft.Build.Tasks
                                     {
                                         int n = sr.Read(hex, index, numChars);
                                         if (n == 0)
+                                        {
                                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.InvalidEscape", name.ToString(), (char)ch), fileName, sr.LineNumber, sr.LinePosition);
+                                        }
+
                                         index += n;
                                         numChars -= n;
                                     }

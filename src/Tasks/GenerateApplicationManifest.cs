@@ -133,7 +133,10 @@ namespace Microsoft.Build.Tasks
         protected override bool OnManifestResolved(Manifest manifest)
         {
             if (UseApplicationTrust)
+            {
                 return BuildResolvedSettings(manifest as ApplicationManifest);
+            }
+
             return true;
         }
 

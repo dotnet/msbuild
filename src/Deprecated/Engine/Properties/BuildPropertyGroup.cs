@@ -491,11 +491,20 @@ namespace Microsoft.Build.BuildEngine
             get
             {
                 if (!this.importedFromAnotherProject)
+                {
                     return string.Empty;
+                }
+
                 if (this.importedFromFilename != null)
+                {
                     return this.importedFromFilename;
+                }
+
                 if (this.PropertyGroupElement != null)
+                {
                     return XmlUtilities.GetXmlNodeFile(this.PropertyGroupElement, string.Empty);
+                }
+
                 ErrorUtilities.VerifyThrow(false, "BuildPropertyGroup is imported, doesn't have an ownerDocument, and importedFilename is null.");
                 return string.Empty;
             }

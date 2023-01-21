@@ -51,7 +51,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private ITranslator GetReadTranslator()
         {
             if (_serializationStream == null)
+            {
                 throw new InvalidOperationException("GetWriteTranslator has to be called before GetReadTranslator");
+            }
 
             _serializationStream.Seek(0, SeekOrigin.Begin);
             return BinaryTranslator.GetReadTranslator(_serializationStream, null);

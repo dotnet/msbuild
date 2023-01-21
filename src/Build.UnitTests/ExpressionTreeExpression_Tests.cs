@@ -413,7 +413,10 @@ namespace Microsoft.Build.UnitTests
         {
             foreach (string file in FilesWithExistenceChecks)
             {
-                if (File.Exists(file)) File.Delete(file);
+                if (File.Exists(file))
+                {
+                    File.Delete(file);
+                }
             }
         }
 

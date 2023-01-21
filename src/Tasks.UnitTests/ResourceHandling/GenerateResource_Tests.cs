@@ -137,7 +137,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(resxFile2);
             File.Delete(resxFile3);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -217,8 +219,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             finally
             {
                 File.Delete(systemDll);
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
 
@@ -266,7 +275,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(t.OutputResources[0].ItemSpec);
             File.Delete(t2a.OutputResources[0].ItemSpec);
             foreach (ITaskItem item in t2b.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -298,7 +309,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -757,10 +770,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -831,10 +859,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (stateFile != null) File.Delete(stateFile);
-                if (localSystemDll != null) File.Delete(localSystemDll);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (stateFile != null)
+                {
+                    File.Delete(stateFile);
+                }
+
+                if (localSystemDll != null)
+                {
+                    File.Delete(localSystemDll);
+                }
             }
         }
 
@@ -889,10 +932,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (additionalInputs?[0] != null && File.Exists(additionalInputs[0].ItemSpec)) File.Delete(additionalInputs[0].ItemSpec);
-                if (additionalInputs?[1] != null && File.Exists(additionalInputs[1].ItemSpec)) File.Delete(additionalInputs[1].ItemSpec);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (additionalInputs?[0] != null && File.Exists(additionalInputs[0].ItemSpec))
+                {
+                    File.Delete(additionalInputs[0].ItemSpec);
+                }
+
+                if (additionalInputs?[1] != null && File.Exists(additionalInputs[1].ItemSpec))
+                {
+                    File.Delete(additionalInputs[1].ItemSpec);
+                }
             }
         }
 
@@ -925,7 +983,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -971,7 +1031,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(t.OutputResources[0].ItemSpec);
             File.Delete(t2a.OutputResources[0].ItemSpec);
             foreach (ITaskItem item in t2b.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1012,10 +1074,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
+
             File.Delete(t2.Sources[0].ItemSpec);
             foreach (ITaskItem item in t2.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1052,9 +1119,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -1112,9 +1183,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -1235,9 +1310,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (strFile != null) File.Delete(strFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (strFile != null)
+                {
+                    File.Delete(strFile);
+                }
             }
         }
 
@@ -1290,9 +1376,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (strFile != null) File.Delete(strFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (strFile != null)
+                {
+                    File.Delete(strFile);
+                }
             }
         }
 
@@ -1329,9 +1426,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -1554,7 +1655,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Done, so clean up.
                 File.Delete(t.Sources[0].ItemSpec);
                 foreach (ITaskItem item in t.FilesWritten)
+                {
                     File.Delete(item.ItemSpec);
+                }
             }
 
             // text file uses the strings token; since it's only a warning we have to have special asserts
@@ -1571,7 +1674,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1618,10 +1723,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile1 != null) File.Delete(resxFile1);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile1 != null)
+                {
+                    File.Delete(resxFile1);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -1675,10 +1795,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile1 != null) File.Delete(resxFile1);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile1 != null)
+                {
+                    File.Delete(resxFile1);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -1702,7 +1837,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1728,7 +1865,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(t.Sources[0].ItemSpec);
             File.Delete(bitmap);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1759,8 +1898,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
 
@@ -1792,7 +1938,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         [Theory]
@@ -1848,7 +1996,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(t.Sources[0].ItemSpec);
             File.Delete(t.StronglyTypedFileName);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1882,7 +2032,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
     }
@@ -1934,7 +2087,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1962,7 +2117,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1991,9 +2148,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             // Done, so clean up.
             foreach (ITaskItem item in t.Sources)
+            {
                 File.Delete(item.ItemSpec);
+            }
+
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -2233,7 +2395,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2297,8 +2461,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
 
@@ -2333,7 +2504,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                     foreach (ITaskItem item in t.FilesWritten)
                     {
                         if (item.ItemSpec != null)
+                        {
                             File.Delete(item.ItemSpec);
+                        }
                     }
                 }
             }
@@ -2365,7 +2538,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2395,7 +2570,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2425,7 +2602,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2456,7 +2635,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2489,10 +2670,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resxFile != null) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
-                if (resxFile2 != null) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resxFile != null)
+                {
+                    File.Delete(Path.ChangeExtension(resxFile, ".resources"));
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                }
             }
         }
 
@@ -2529,7 +2725,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2563,7 +2762,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2597,7 +2799,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2631,7 +2836,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2673,9 +2881,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (dir != null) FileUtilities.DeleteWithoutTrailingBackslash(dir);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (dir != null)
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(dir);
+                }
             }
         }
 
@@ -2702,7 +2921,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
     }
@@ -3493,9 +3715,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             string sourceFile;
             if (useResX)
+            {
                 sourceFile = WriteTestResX(false, null, null);
+            }
             else
+            {
                 sourceFile = WriteTestText(null, null);
+            }
 
             t.Sources = new ITaskItem[] { new TaskItem(sourceFile) };
 
@@ -3682,7 +3908,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 );
 
             if (extraToken != null)
+            {
                 resgenFileContents.Append(extraToken);
+            }
 
             if (useType)
             {
@@ -3865,9 +4093,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 string codeFileExtension = null;
                 if (strLanguage == "CSharp")
+                {
                     codeFileExtension = ".cs";
+                }
                 else if (strLanguage == "VB")
+                {
                     codeFileExtension = ".vb";
+                }
 
                 // Execute task
                 Utilities.ExecuteTask(t);
@@ -3918,9 +4150,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 string typeName;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
                 // Verify that the type is generated correctly

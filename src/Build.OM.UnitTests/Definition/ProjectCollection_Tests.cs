@@ -132,7 +132,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (path != null) File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -838,8 +841,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 
@@ -874,8 +884,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 
@@ -910,8 +927,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 

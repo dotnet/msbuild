@@ -233,7 +233,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public void ResolveFiles(string[] searchPaths)
         {
             if (searchPaths == null)
+            {
                 throw new ArgumentNullException(nameof(searchPaths));
+            }
+
             CollectionToArray();
             ResolveFiles_1(searchPaths);
             ResolveFiles_2(searchPaths);

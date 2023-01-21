@@ -510,7 +510,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -967,7 +969,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
@@ -1329,7 +1333,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 if (!UseHardLinks)
                 {

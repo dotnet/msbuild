@@ -1735,9 +1735,13 @@ namespace Microsoft.Build.BuildEngine
                     if (Engine.debugMode)
                     {
                         if (taskExecutionContext.BuildContext.BuildRequest != null)
+                        {
                             Console.WriteLine("NodeId: " + NodeId + " Got output update " + taskExecutionContext.ParentProject.FullFileName + " HandleId: " + taskExecutionContext.BuildContext.BuildRequest.HandleId + " Time: " + DateTime.Now.ToLongTimeString() + ":" + DateTime.Now.Millisecond);
+                        }
                         else
+                        {
                             Console.WriteLine("NodeId: " + NodeId + " Got output update " + taskExecutionContext.ParentProject.FullFileName + " HandleId: None Time: " + DateTime.Now.ToLongTimeString() + ":" + DateTime.Now.Millisecond);
+                        }
                     }
 
                     // In inproc scenario we may receive a task done notification for a build context
@@ -1752,9 +1756,13 @@ namespace Microsoft.Build.BuildEngine
                         if (Engine.debugMode)
                         {
                             if (taskExecutionContext.BuildContext.BuildRequest != null)
+                            {
                                 Console.WriteLine("Ignoring task output notification. NodeId: " + NodeId + " Got output update " + taskExecutionContext.ParentProject.FullFileName + " HandleId: " + taskExecutionContext.BuildContext.BuildRequest.HandleId);
+                            }
                             else
+                            {
                                 Console.WriteLine("Ignoring task output notification. NodeId: " + NodeId + " Got output update " + taskExecutionContext.ParentProject.FullFileName);
+                            }
                         }
                     }
 

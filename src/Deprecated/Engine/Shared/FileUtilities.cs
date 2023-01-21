@@ -485,7 +485,10 @@ namespace Microsoft.Build.BuildEngine.Shared
                 catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
                 {
                     if (ExceptionHandling.NotExpectedException(e))
+                    {
                         throw;
+                    }
+
                     ErrorUtilities.VerifyThrowInvalidOperation(false, "Shared.InvalidFilespecForTransform", modifier, itemSpec, e.Message);
                 }
 
@@ -733,7 +736,9 @@ namespace Microsoft.Build.BuildEngine.Shared
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedException(e))
+                {
                     throw;
+                }
 
                 // Invalid or inaccessible path: treat as if nonexistent file, just as File.Exists does
                 return null;

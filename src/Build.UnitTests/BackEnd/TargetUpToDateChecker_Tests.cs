@@ -583,7 +583,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // finally clean up
                 foreach (string path in filesToDelete)
                 {
-                    if (File.Exists(path)) File.Delete(path);
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
                 }
 
                 ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -898,20 +901,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     File.SetLastWriteTime(output2, (DateTime)output2Time);
                 }
 
-                if (includeInput1) inputs.Add(input1);
-                if (includeInput2) inputs.Add(input2);
-                if (includeOutput1) outputs.Add(output1);
-                if (includeOutput2) outputs.Add(output2);
+                if (includeInput1)
+                {
+                    inputs.Add(input1);
+                }
+
+                if (includeInput2)
+                {
+                    inputs.Add(input2);
+                }
+
+                if (includeOutput1)
+                {
+                    outputs.Add(output1);
+                }
+
+                if (includeOutput2)
+                {
+                    outputs.Add(output2);
+                }
 
                 DependencyAnalysisLogDetail detail;
                 Assert.Equal(expectedAnyOutOfDate, TargetUpToDateChecker.IsAnyOutOfDate(out detail, Directory.GetCurrentDirectory(), inputs, outputs));
             }
             finally
             {
-                if (File.Exists(input1)) File.Delete(input1);
-                if (File.Exists(input2)) File.Delete(input2);
-                if (File.Exists(output1)) File.Delete(output1);
-                if (File.Exists(output2)) File.Delete(output2);
+                if (File.Exists(input1))
+                {
+                    File.Delete(input1);
+                }
+
+                if (File.Exists(input2))
+                {
+                    File.Delete(input2);
+                }
+
+                if (File.Exists(output1))
+                {
+                    File.Delete(output1);
+                }
+
+                if (File.Exists(output2))
+                {
+                    File.Delete(output2);
+                }
             }
         }
 
@@ -1036,9 +1069,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             finally
             {
-                if (File.Exists(inputTarget)) File.Delete(inputTarget);
-                if (File.Exists(inputSymlink)) File.Delete(inputSymlink);
-                if (File.Exists(outputTarget)) File.Delete(outputTarget);
+                if (File.Exists(inputTarget))
+                {
+                    File.Delete(inputTarget);
+                }
+
+                if (File.Exists(inputSymlink))
+                {
+                    File.Delete(inputSymlink);
+                }
+
+                if (File.Exists(outputTarget))
+                {
+                    File.Delete(outputTarget);
+                }
             }
         }
     }

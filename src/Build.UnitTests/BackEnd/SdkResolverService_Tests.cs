@@ -717,7 +717,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolver1 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("1"))
+                {
                     return factory.IndicateSuccess("resolverpath1", "version1");
+                }
 
                 return factory.IndicateFailure(new[] { "ERROR1" });
             }
@@ -734,7 +736,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolver2 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("2"))
+                {
                     return factory.IndicateSuccess("resolverpath2", "version2", new[] {"WARNING2"});
+                }
 
                 return factory.IndicateFailure(new[] {"ERROR2"}, new[] {"WARNING2"});
             }
@@ -751,7 +755,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolverWithResolvableSdkPattern1 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("11"))
+                {
                     return factory.IndicateSuccess("resolverpathwithresolvablesdkpattern1", "version3");
+                }
 
                 return factory.IndicateFailure(new[] { "ERROR3" });
             }
@@ -768,7 +774,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolverWithResolvableSdkPattern2 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("2"))
+                {
                     return factory.IndicateSuccess("resolverpathwithresolvablesdkpattern2", "version4", new[] { "WARNING4" });
+                }
 
                 return factory.IndicateFailure(new[] { "ERROR4" }, new[] { "WARNING4" });
             }

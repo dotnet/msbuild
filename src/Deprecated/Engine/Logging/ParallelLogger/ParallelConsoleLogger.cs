@@ -187,7 +187,10 @@ namespace Microsoft.Build.BuildEngine
             buildStarted = e.Timestamp;
             hasBuildStarted = true;
 
-            if (showOnlyErrors || showOnlyWarnings) return; 
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
             {
@@ -306,12 +309,18 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void ShowFlatErrorWarningSummary()
         {
-            if (warningList.Count == 0 && errorList.Count == 0) return;
+            if (warningList.Count == 0 && errorList.Count == 0)
+            {
+                return;
+            }
 
             // If we're showing only warnings and/or errors, don't summarize.
             // This is the buildc.err case. There's no point summarizing since we'd just 
             // repeat the entire log content again.
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
 
             // Make some effort to distinguish this summary from the output above, since otherwise
             // it's not clear in lower verbosities
@@ -345,12 +354,18 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void ShowNestedErrorWarningSummary()
         {
-            if (warningList.Count == 0 && errorList.Count == 0) return;
+            if (warningList.Count == 0 && errorList.Count == 0)
+            {
+                return;
+            }
 
             // If we're showing only warnings and/or errors, don't summarize.
             // This is the buildc.err case. There's no point summarizing since we'd just 
             // repeat the entire log content again.
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
 
             if (warningCount > 0)
             {
@@ -598,7 +613,11 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="properties">List of properties</param>
         internal void WriteProperties(BuildEventArgs e, IEnumerable properties)
         {
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
+
             ArrayList propertyList = ExtractPropertyList(properties);
 
             // if there are no properties to display return out of the method and dont print out anything related to displaying
@@ -636,7 +655,11 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="items">List of items</param>
         internal void WriteItems(BuildEventArgs e, IEnumerable items)
         {
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
+
             SortedList itemList = ExtractItemList(items);
   
             // if there are no Items to display return out of the method and dont print out anything related to displaying
@@ -917,7 +940,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
 
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
             bool print = false;
@@ -987,7 +1013,10 @@ namespace Microsoft.Build.BuildEngine
 
         private void DisplayDeferredStartedEvents(BuildEventContext e)
         {
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
 
             // Display any project started events which were deferred until a visible 
             // message from their project is displayed
@@ -1208,7 +1237,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void DisplayDeferredTargetStartedEvent(BuildEventContext e)
         {
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
 
             // Get the deferred target started event
             TargetStartedEventMinimumFields targetStartedEvent = buildEventManager.GetTargetStartedEvent(e);
@@ -1259,7 +1291,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void DisplayDeferredProjectStartedEvent(BuildEventContext e)
         {
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
 
             if (!SkipProjectStartedText)
             {
@@ -1327,7 +1362,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public override void CustomEventHandler(object sender, CustomBuildEventArgs e)
         {
-            if (showOnlyErrors || showOnlyWarnings) return;
+            if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
 
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
             if (IsVerbosityAtLeast(LoggerVerbosity.Detailed))

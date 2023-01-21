@@ -26,7 +26,10 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
+
                 FileInfo file = new FileInfo(sourceFile);
                 file.Attributes |= FileAttributes.ReadOnly; // mark read only
 
@@ -68,7 +71,10 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
+
                 FileInfo file = new FileInfo(sourceFile);
                 file.Attributes |= FileAttributes.ReadOnly; // mark read only
 
@@ -119,7 +125,9 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(sourceFile);
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -139,7 +147,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a destination temp file.", destinationFileContents); // "Expected the destination file to still contain the contents of destination file."
             }
@@ -196,10 +206,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -218,7 +232,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a destination temp file.", destinationFileContents); // "Expected the destination file to be unchanged."
 
@@ -245,10 +261,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -264,7 +284,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
             }
@@ -291,10 +313,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -314,7 +340,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -339,10 +367,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -362,7 +394,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -652,7 +686,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 // Don't create the dest folder, let task do that
 
@@ -671,7 +707,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -753,7 +791,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };

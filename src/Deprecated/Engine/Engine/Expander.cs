@@ -1955,7 +1955,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private string GetValueFromMetadataTable(string itemType, string metadataName, string metadataValue)
         {
-            if (itemMetadata == null) return null;
+            if (itemMetadata == null)
+            {
+                return null;
+            }
 
             if (implicitMetadataItemType == null)
             {
@@ -1993,7 +1996,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private string GetDefaultMetadataValue(string itemType, string metadataName, string metadataValue)
         {
-            if (specificItemDefinitionLibrary == null) return null;
+            if (specificItemDefinitionLibrary == null)
+            {
+                return null;
+            }
 
             if (itemType == null || String.Equals(itemType, specificItemDefinitionLibrary.ItemType, StringComparison.OrdinalIgnoreCase))
             {

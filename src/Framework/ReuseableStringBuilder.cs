@@ -358,11 +358,15 @@ namespace Microsoft.Build.Framework
                 const int minimumCapacity = 0x100; // 256 characters, 512 bytes
 
                 if (requiredCapacity <= minimumCapacity)
+                {
                     return minimumCapacity;
+                }
 
                 // If user wants bigger capacity than maximum respect it as it could be used as buffer in P/Invoke.
                 if (requiredCapacity >= MaxBuilderSizeCapacity)
+                {
                     return requiredCapacity;
+                }
 
                 // Find next power of two http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
                 int v = requiredCapacity;

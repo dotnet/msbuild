@@ -253,7 +253,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 foreach (var p in linker.Collection.LoadedProjects)
                 {
                     if (!toKeep.Contains(p))
+                    {
                         toUnload.Add(p);
+                    }
                 }
 
                 foreach (var p in toUnload)

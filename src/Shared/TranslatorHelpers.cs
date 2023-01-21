@@ -117,7 +117,9 @@ namespace Microsoft.Build.BackEnd
             NodePacketCollectionCreator<HashSet<T>> collectionFactory) where T : class, ITranslatable
         {
             if (!translator.TranslateNullable(hashSet))
+            {
                 return;
+            }
 
             int count = default;
             if (translator.Mode == TranslationDirection.WriteToStream)
@@ -150,7 +152,9 @@ namespace Microsoft.Build.BackEnd
         public static void Translate(this ITranslator translator, ref CultureInfo cultureInfo)
         {
             if (!translator.TranslateNullable(cultureInfo))
+            {
                 return;
+            }
 
             int lcid = default;
 
@@ -170,7 +174,9 @@ namespace Microsoft.Build.BackEnd
         public static void Translate(this ITranslator translator, ref Version version)
         {
             if (!translator.TranslateNullable(version))
+            {
                 return;
+            }
 
             int major = 0;
             int minor = 0;
@@ -210,7 +216,9 @@ namespace Microsoft.Build.BackEnd
         public static void Translate(this ITranslator translator, ref AssemblyName assemblyName)
         {
             if (!translator.TranslateNullable(assemblyName))
+            {
                 return;
+            }
 
             string name = null;
             Version version = null;

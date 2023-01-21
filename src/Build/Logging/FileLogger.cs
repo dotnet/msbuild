@@ -163,11 +163,17 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void ParseFileLoggerParameters()
         {
-            if (Parameters == null) return;
+            if (Parameters == null)
+            {
+                return;
+            }
 
             foreach (string parameter in Parameters.Split(s_fileLoggerParameterDelimiters))
             {
-                if (parameter.Length <= 0) continue;
+                if (parameter.Length <= 0)
+                {
+                    continue;
+                }
 
                 var parameterAndValue = parameter.Split(s_fileLoggerParameterValueSplitCharacter);
 

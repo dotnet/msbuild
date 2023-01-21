@@ -1109,7 +1109,9 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                 //Fixing bug 555577: Solution file can have description information, in which case we ignore.
                 if (String.Equals(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
+                }
 
                 // Both names must be identical
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(fullConfigurationName == configurationNames[1].Trim(), "SubCategoryForSolutionParsingErrors",

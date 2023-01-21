@@ -1042,7 +1042,10 @@ namespace Microsoft.Build.UnitTests
         {
             for (int i = 0; i < files.Length; i++)
             {
-                if (FileSystems.Default.FileExists(files[i])) File.Delete(files[i]);
+                if (FileSystems.Default.FileExists(files[i]))
+                {
+                    File.Delete(files[i]);
+                }
             }
         }
 

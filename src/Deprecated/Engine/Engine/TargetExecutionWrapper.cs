@@ -842,9 +842,13 @@ namespace Microsoft.Build.BuildEngine
                                                 howToBuild == DependencyAnalysisResult.IncrementalBuild,
                                                 "We can only see a failure for an execution stage");
                     if (howToBuild != DependencyAnalysisResult.FullBuild)
+                    {
                         howToBuild = DependencyAnalysisResult.SkipUpToDate;
+                    }
                     else
+                    {
                         exitBatchDueToError = true;
+                    }
                 }
             }
 

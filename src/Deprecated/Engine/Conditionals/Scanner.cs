@@ -146,10 +146,14 @@ namespace Microsoft.Build.BuildEngine
         internal bool Advance()
         {
             if (errorState)
+            {
                 return false;
+            }
 
             if (lookahead?.IsToken(Token.TokenType.EndOfInput) == true)
-                return true;          
+            {
+                return true;
+            }
 
             SkipWhiteSpace();
 
@@ -178,7 +182,10 @@ namespace Microsoft.Build.BuildEngine
                         break;
                     case '$':
                         if (!ParseProperty())
+                        {
                             return false;
+                        }
+
                         break;
                     case '%':
                         // If the caller specified that he DOESN'T want to allow item metadata ...
@@ -191,7 +198,10 @@ namespace Microsoft.Build.BuildEngine
                             return false;
                         }
                         if (!ParseItemMetadata())
+                        {
                             return false;
+                        }
+
                         break;
                     case '@':
                         int start = this.parsePoint;
@@ -207,7 +217,10 @@ namespace Microsoft.Build.BuildEngine
                             }
                         }
                         if (!ParseItemList())
+                        {
                             return false;
+                        }
+
                         break;
                     case '!':
                         // negation and not-equal
@@ -274,12 +287,18 @@ namespace Microsoft.Build.BuildEngine
                         break;
                     case '\'':
                         if (!ParseQuotedString())
+                        {
                             return false;
+                        }
+
                         break;
                     default:
                         // Simple strings, function calls, decimal numbers, hex numbers
                         if (!ParseRemaining())
+                        {
                             return false;
+                        }
+
                         break;
                 }
             }
@@ -532,12 +551,16 @@ namespace Microsoft.Build.BuildEngine
             if (CharacterUtilities.IsNumberStart(expression[parsePoint])) // numeric
             {
                 if (!ParseNumeric(start))
+                {
                     return false;
+                }
             }
             else if (CharacterUtilities.IsSimpleStringStart(expression[parsePoint])) // simple string (handle 'and' and 'or')
             {
                 if (!ParseSimpleStringOrFunction(start))
+                {
                     return false;
+                }
             }
             else
             {
@@ -622,25 +645,37 @@ namespace Microsoft.Build.BuildEngine
         private void SkipWhiteSpace()
         {
             while (parsePoint < expression.Length && char.IsWhiteSpace(expression[parsePoint]))
+            {
                 parsePoint++;
+            }
+
             return;
         }
         private void SkipDigits()
         {
             while (parsePoint < expression.Length && char.IsDigit(expression[parsePoint]))
+            {
                 parsePoint++;
+            }
+
             return;
         }
         private void SkipHexDigits()
         {
             while (parsePoint < expression.Length && CharacterUtilities.IsHexDigit(expression[parsePoint]))
+            {
                 parsePoint++;
+            }
+
             return;
         }
         private void SkipSimpleStringChars()
         {
             while (parsePoint < expression.Length && CharacterUtilities.IsSimpleStringChar(expression[parsePoint]))
+            {
                 parsePoint++;
+            }
+
             return;
         }
     }

@@ -295,7 +295,10 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
                 ObjectModelHelpers.DeleteDirectory(newTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 

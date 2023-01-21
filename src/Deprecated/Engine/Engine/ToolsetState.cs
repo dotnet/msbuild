@@ -204,7 +204,9 @@ namespace Microsoft.Build.BuildEngine
                     catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
                     {
                         if (ExceptionHandling.NotExpectedException(e))
+                        {
                             throw;
+                        }
 
                         loggingServices.LogWarning( buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                             "DefaultTasksFileLoadFailureWarning",

@@ -1680,7 +1680,9 @@ namespace Microsoft.Build.Execution
                 foreach (var item in GetItems(itemType))
                 {
                     if (string.Equals(item.EvaluatedInclude, evaluatedInclude, StringComparison.OrdinalIgnoreCase))
+                    {
                         yield return item;
+                    }
                 }
             }
             else
@@ -1688,7 +1690,9 @@ namespace Microsoft.Build.Execution
                 foreach (var item in GetItemsByEvaluatedInclude(evaluatedInclude))
                 {
                     if (string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase))
+                    {
                         yield return item;
+                    }
                 }
             }
         }

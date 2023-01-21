@@ -37,7 +37,9 @@ namespace Xunit.NetCore.Extensions
             {
                 // Instantiate all the fixtures
                 foreach (var fixtureAttr in assemblyFixtureAttributes.Where(a => a.LifetimeScope == AssemblyFixtureAttribute.Scope.Method))
+                {
                     assemblyFixtureMappings[fixtureAttr.FixtureType] = Activator.CreateInstance(fixtureAttr.FixtureType);
+                }
             });
         }
 
@@ -45,7 +47,9 @@ namespace Xunit.NetCore.Extensions
         {
             // Make sure we clean up everybody who is disposable, and use Aggregator.Run to isolate Dispose failures
             foreach (var disposable in assemblyFixtureMappings.Values.OfType<IDisposable>())
+            {
                 Aggregator.Run(disposable.Dispose);
+            }
 
             base.BeforeTestMethodFinished();
         }

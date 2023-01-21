@@ -327,7 +327,9 @@ namespace Microsoft.Build.Tasks
             {
                 res = RmEndSession(handle);
                 if (res != 0)
+                {
                     throw GetException(res, "RmEndSession", "Failed to end the restart manager session.");
+                }
             }
 
             return Enumerable.Empty<ProcessInfo>();

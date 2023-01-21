@@ -14,7 +14,9 @@ namespace Microsoft.Build.Tasks
         public static void Translate(this ITranslator translator, ref FrameworkName frameworkName)
         {
             if (!translator.TranslateNullable(frameworkName))
+            {
                 return;
+            }
 
             string identifier = null;
             Version version = null;

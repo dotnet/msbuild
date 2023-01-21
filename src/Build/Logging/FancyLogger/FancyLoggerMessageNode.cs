@@ -28,7 +28,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
-            if (Message.Length > MAX_LENGTH) Message = Message.Substring(0, MAX_LENGTH - 1) + "…";
+            if (Message.Length > MAX_LENGTH)
+            {
+                Message = Message.Substring(0, MAX_LENGTH - 1) + "…";
+            }
             // Get type
             switch (args)
             {
@@ -73,7 +76,11 @@ namespace Microsoft.Build.Logging.FancyLogger
         // TODO: Rename to Log after FancyLogger's API becomes internal
         public void Log()
         {
-            if (Line == null) return;
+            if (Line == null)
+            {
+                return;
+            }
+
             Line.Text = $"    └── {ToANSIString()}";
         }
     }

@@ -13,7 +13,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public static IList<A> ConvertCollection<A,B>(this IEnumerable<B> source, Func<B, A> converter)
         {
-            if (source == null) return null;
+            if (source == null)
+            {
+                return null;
+            }
             // Just copy ...
             List<A> result = new List<A>();
             foreach (var b in source)
@@ -27,7 +30,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public static IList<T> ImportCollection<T>(this ProjectCollectionLinker importer, IEnumerable<MockProjectElementLinkRemoter> source)
             where T : ProjectElement
         {
-            if (source == null) return null;
+            if (source == null)
+            {
+                return null;
+            }
             // Just copy ...
             List<T> result = new List<T>();
             foreach (var sRemoter in source)
@@ -43,7 +49,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             where T : class
             where RMock : MockLinkRemoter<T>, new()
         {
-            if (source == null) return null;
+            if (source == null)
+            {
+                return null;
+            }
             // Just copy ...
             List<T> result = new List<T>();
             foreach (var sRemoter in source)
@@ -58,7 +67,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public static IList<MockProjectElementLinkRemoter> ExportCollection<T>(this ProjectCollectionLinker exporter, IEnumerable<T> source)
             where T : ProjectElement
         {
-            if (source == null) return null;
+            if (source == null)
+            {
+                return null;
+            }
             // Just copy ...
             List<MockProjectElementLinkRemoter> result = new List<MockProjectElementLinkRemoter>();
             foreach (var s in source)
@@ -73,7 +85,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             where T : class
             where RMock : MockLinkRemoter<T>, new()
         {
-            if (source == null) return null;
+            if (source == null)
+            {
+                return null;
+            }
             // Just copy ...
             List<RMock> result = new List<RMock>();
             foreach (var s in source)
@@ -89,7 +104,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             where TValue : class
             where RMock : MockLinkRemoter<TValue>, new()
         {
-            if (source == null) return null;
+            if (source == null)
+            {
+                return null;
+            }
             // Just copy ...
             Dictionary<TKey, TValue> result = new Dictionary<TKey, TValue>();
             foreach (var sRemoter in source)
@@ -105,7 +123,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             where TValue : class
             where RMock : MockLinkRemoter<TValue>, new()
         {
-            if (source == null) return null;
+            if (source == null)
+            {
+                return null;
+            }
             // Just copy ...
             Dictionary<TKey, RMock> result = new Dictionary<TKey, RMock>();
             foreach (var s in source)
