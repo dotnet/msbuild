@@ -12,7 +12,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// This class contains only static methods, which are useful throughout many
     /// of the MSBuild classes and don't really belong in any specific class.   
     /// </summary>
-    internal static class ConversionUtilities 
+    internal static class ConversionUtilities
     {
         /// <summary>
         /// Converts a string to a bool.  We consider "true/false", "on/off", and 

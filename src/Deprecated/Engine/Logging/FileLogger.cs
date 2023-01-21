@@ -33,7 +33,7 @@ namespace Microsoft.Build.BuildEngine
         {
             this.WriteHandler = new WriteHandler(Write);
         }
-        
+
         #endregion
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace Microsoft.Build.BuildEngine
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", logFileName, e.Message);
                 fileWriter?.Close();
-                throw new LoggerException(message,e.InnerException,errorCode, helpKeyword);
+                throw new LoggerException(message, e.InnerException, errorCode, helpKeyword);
             }
         }
 

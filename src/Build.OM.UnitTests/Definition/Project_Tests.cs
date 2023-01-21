@@ -3677,28 +3677,28 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-// [InlineData(
-//            @"
-// <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-// <A Remove=`e*;f*`/>
-// ",
-//        new[] {"ba"},
-//        new[] {"a", "ca", "da", "ea", "fa"}
-//        )]
-//        [InlineData(
-//            @"
-// <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-// ",
-//        new[] {"ba", "ea", "fa"},
-//        new[] {"a", "ca", "da"}
-//        )]
-//        [InlineData(
-//            @"
-// <A Include=`a;b*;c*;d*;e*;f*`/>
-// ",
-//        new[] {"ba", "ca", "da", "ea", "fa"},
-//        new[] {"a"}
-//        )]
+        // [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+        // <A Remove=`e*;f*`/>
+        // ",
+        //        new[] {"ba"},
+        //        new[] {"a", "ca", "da", "ea", "fa"}
+        //        )]
+        //        [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+        // ",
+        //        new[] {"ba", "ea", "fa"},
+        //        new[] {"a", "ca", "da"}
+        //        )]
+        //        [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*`/>
+        // ",
+        //        new[] {"ba", "ca", "da", "ea", "fa"},
+        //        new[] {"a"}
+        //        )]
         [InlineData(
             @"
 <E Include=`b`/>

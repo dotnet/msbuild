@@ -127,7 +127,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             {
 #if DEBUG
 
-    #if VALIDATERESOURCESTRINGS
+#if VALIDATERESOURCESTRINGS
                 // The code below reveals many places in our codebase where
                 // we're not using all of the data given to us to format
                 // strings -- but there are too many to presently fix.
@@ -166,8 +166,8 @@ namespace Microsoft.Build.BuildEngine.Shared
                     caughtFormatException,
                     String.Format("The provided format string '{0}' had fewer format parameters than the number of format args, '{1}'.", unformatted, args.Length)
                 );
-    #endif 
-               
+#endif
+
 #endif
                 // Format the string, using the variable arguments passed in.
                 // NOTE: all String methods are thread-safe

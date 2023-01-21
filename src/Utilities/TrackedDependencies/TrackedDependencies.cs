@@ -17,6 +17,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public static class TrackedDependencies
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Methods
         /// <summary>
         /// Expand wildcards in the item list.
@@ -91,5 +92,6 @@ namespace Microsoft.Build.Utilities
             return allExist;
         }
         #endregion
+#pragma warning restore format
     }
 }

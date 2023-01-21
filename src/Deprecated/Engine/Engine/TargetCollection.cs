@@ -22,8 +22,8 @@ namespace Microsoft.Build.BuildEngine
         #region Member Data
 
         // This is the hashtable of Targets (indexed by name) contained in this collection.
-        private Hashtable       targetTable = null;
-        private Project        parentProject = null;
+        private Hashtable targetTable = null;
+        private Project parentProject = null;
 
         #endregion
 

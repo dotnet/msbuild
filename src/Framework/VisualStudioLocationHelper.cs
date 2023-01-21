@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared
     internal class VisualStudioLocationHelper
     {
 #if FEATURE_VISUALSTUDIOSETUP
-        private const int REGDB_E_CLASSNOTREG = unchecked((int) 0x80040154);
+        private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
 #endif // FEATURE_VISUALSTUDIOSETUP
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Shared
             try
             {
                 // This code is not obvious. See the sample (link above) for reference.
-                var query = (ISetupConfiguration2) GetQuery();
+                var query = (ISetupConfiguration2)GetQuery();
                 var e = query.EnumAllInstances();
 
                 int fetched;
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Shared
                     }
 
                     var instance = instances[0];
-                    var state = ((ISetupInstance2) instance).GetState();
+                    var state = ((ISetupInstance2)instance).GetState();
                     Version version;
 
                     try
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Shared
             catch (COMException)
             { }
             catch (DllNotFoundException)
-            { 
+            {
                 // This is OK, VS "15" or greater likely not installed.
             }
 #endif

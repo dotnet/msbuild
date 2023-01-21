@@ -958,7 +958,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void NewSymlinkOldDestinationIsUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: New,
-                targetWriteTime: Old, 
+                targetWriteTime: Old,
                 outputWriteTime: Middle,
                 expectedOutOfDate: false);
         }

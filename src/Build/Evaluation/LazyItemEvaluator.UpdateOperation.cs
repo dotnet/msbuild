@@ -169,7 +169,7 @@ namespace Microsoft.Build.Evaluation
 
             private static bool ItemSpecContainsItemReferences(ItemSpec<P, I> itemSpec)
             {
-                return itemSpec.Fragments.Any(f => f is ItemSpec<P,I>.ItemExpressionFragment);
+                return itemSpec.Fragments.Any(f => f is ItemSpec<P, I>.ItemExpressionFragment);
             }
         }
     }

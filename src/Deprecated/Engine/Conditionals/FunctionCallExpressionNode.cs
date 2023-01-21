@@ -40,7 +40,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (Project.PerThreadProjectDirectory != null && !String.IsNullOrEmpty(expandedValue))
                 {
-                    try 
+                    try
                     {
                         expandedValue = Path.GetFullPath(Path.Combine(Project.PerThreadProjectDirectory, expandedValue));
                     }
@@ -90,9 +90,9 @@ namespace Microsoft.Build.BuildEngine
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(
                     false,
-                    state.conditionAttribute, 
+                    state.conditionAttribute,
                     "UndefinedFunctionCall",
-                    state.parsedCondition, 
+                    state.parsedCondition,
                     this.functionName);
 
                 return false;
@@ -111,7 +111,7 @@ namespace Microsoft.Build.BuildEngine
         {
             string argument = argumentNode.GetUnexpandedValue(state);
 
-            List<TaskItem> items = state.expanderToUse.ExpandAllIntoTaskItems(argument, state.conditionAttribute); 
+            List<TaskItem> items = state.expanderToUse.ExpandAllIntoTaskItems(argument, state.conditionAttribute);
 
             string expandedValue = String.Empty;
 

@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 enumerator.MoveNext().ShouldBeFalse();
                 Should.Throw<InvalidOperationException>(() =>
                 {
-                    object o = ((IEnumerator) enumerator).Current;
+                    object o = ((IEnumerator)enumerator).Current;
                 });
                 enumerator.Current.ShouldBeNull();
             }

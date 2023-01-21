@@ -564,7 +564,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (expectSuccess)
                 {
-                    ((MockEngine) exec.BuildEngine).AssertLogContains("[hello]");
+                    ((MockEngine)exec.BuildEngine).AssertLogContains("[hello]");
                 }
 
                 Assert.Equal(expectedEncoding, exec.StdOutEncoding);

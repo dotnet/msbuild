@@ -92,7 +92,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Should not contain the first value
             //
             Assert.DoesNotContain("EE2493A167D24F00996DE7C8E769EAE6", engine.Log);
-            
+
             // Should contain the second value
             //
             Assert.Contains("4ADE3D2622CA400B8B95A039DF540037", engine.Log);

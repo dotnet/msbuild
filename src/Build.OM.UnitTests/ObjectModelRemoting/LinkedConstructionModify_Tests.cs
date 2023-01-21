@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             newTarget1.Add2NewLabeledChildrenWithVerify<ProjectPropertyGroupElement>(NewPropertyGroup, (t, l) => t.AddPropertyGroup(), out var newPropertyGroup1, out var newPropertyGroup2);
 
             // Add property groups
-            newTarget1.Append2NewChildrenWithVerify<ProjectOnErrorElement>("errTarget", (p, et) => p.CreateOnErrorElement(et), (oe, et)=>oe.ExecuteTargetsAttribute == et, out var newOnErr1, out var newOnErr2);
+            newTarget1.Append2NewChildrenWithVerify<ProjectOnErrorElement>("errTarget", (p, et) => p.CreateOnErrorElement(et), (oe, et) => oe.ExecuteTargetsAttribute == et, out var newOnErr1, out var newOnErr2);
 
 
             // string setters
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             // removes
             newTarget1.View.RemoveChild(newTask2.View);
-            Assert.ThrowsAny<ArgumentException>( () => newTarget1.Real.RemoveChild(newTask2.Real) );
+            Assert.ThrowsAny<ArgumentException>(() => newTarget1.Real.RemoveChild(newTask2.Real));
             Assert.Equal(1, newTarget1.View.Tasks.Count);
             newTarget1.Real.RemoveChild(newTask1.Real);
             Assert.ThrowsAny<ArgumentException>(() => newTarget1.View.RemoveChild(newTask1.View));
@@ -264,9 +264,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 newTask.VerifySetter(paramValue.Ver(i), (t) => t.GetParameter(paramName.Ver(i)), (t, v) => t.SetParameter(paramName.Ver(i), v));
             }
 
-            newTask.Verify(); 
+            newTask.Verify();
             Assert.Equal(5, newTask.View.Parameters.Count);
-            for (int i = 1; i<= 5; i++)
+            for (int i = 1; i <= 5; i++)
             {
                 Assert.Equal(paramValue.Ver(i), newTask.View.Parameters[paramName.Ver(i)]);
             }
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             const string NewOutputItem = "NewOutputItem";
             const string ItemType = "CPPSource";
-            var newOutputItem =  newTask.AddNewChaildWithVerify<ProjectOutputElement>(ObjectType.View, NewOutputItem, (t, n) => t.AddOutputItem(n, ItemType), (oi, n) => oi.TaskParameter == n);
+            var newOutputItem = newTask.AddNewChaildWithVerify<ProjectOutputElement>(ObjectType.View, NewOutputItem, (t, n) => t.AddOutputItem(n, ItemType), (oi, n) => oi.TaskParameter == n);
 
             Assert.True(newOutputItem.View.IsOutputItem);
             Assert.False(newOutputItem.View.IsOutputProperty);
@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             Assert.Null(choose.View.OtherwiseElement);
 
-            var otherWise = choose.AppendNewChaildWithVerify<ProjectOtherwiseElement>(ObjectType.View, "when", (p, l) => p.CreateOtherwiseElement(), (p,l) => true);
+            var otherWise = choose.AppendNewChaildWithVerify<ProjectOtherwiseElement>(ObjectType.View, "when", (p, l) => p.CreateOtherwiseElement(), (p, l) => true);
             Assert.Same(otherWise.View, choose.View.OtherwiseElement);
             Assert.Same(otherWise.Real, choose.Real.OtherwiseElement);
 
@@ -410,7 +410,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var xmlPair = new ProjectXmlPair(pair);
 
             var choose = xmlPair.AppendNewChaildWithVerify<ProjectChooseElement>(ObjectType.View, "choose", (p, s) => p.CreateChooseElement(), (p, s) => true);
-            var when  = choose.AppendNewChaildWithVerify<ProjectWhenElement>(ObjectType.View, "when", (p, s) => p.CreateWhenElement("true"), (p, s) => true);
+            var when = choose.AppendNewChaildWithVerify<ProjectWhenElement>(ObjectType.View, "when", (p, s) => p.CreateWhenElement("true"), (p, s) => true);
 
             when.VerifySetter("Condition", (we) => we.Condition, (we, v) => we.Condition = v);
             Assert.Empty(when.View.ChooseElements);

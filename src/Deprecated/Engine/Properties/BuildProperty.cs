@@ -116,7 +116,7 @@ namespace Microsoft.Build.BuildEngine
             else
             {
                 writer.Write((byte)0);
-                  writer.Write(finalValueEscaped);
+                writer.Write(finalValueEscaped);
             }
             writer.Write((Int32)type);
         }
@@ -181,8 +181,8 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>rgoel</owner>
         internal BuildProperty
         (
-            XmlElement      propertyElement,
-            PropertyType    propertyType
+            XmlElement propertyElement,
+            PropertyType propertyType
         ) :
             this(propertyElement,
                  propertyElement != null ? Utilities.GetXmlNodeInnerContents(propertyElement) : null,
@@ -579,7 +579,7 @@ namespace Microsoft.Build.BuildEngine
 
             set
             {
-                ErrorUtilities.VerifyThrow( ((value == null) && (this.parentPersistedPropertyGroup != null)) || ((value != null) && (this.parentPersistedPropertyGroup == null)),
+                ErrorUtilities.VerifyThrow(((value == null) && (this.parentPersistedPropertyGroup != null)) || ((value != null) && (this.parentPersistedPropertyGroup == null)),
                     "Either new parent cannot be assigned because we already have a parent, or old parent cannot be removed because none exists.");
 
                 this.parentPersistedPropertyGroup = value;
@@ -699,9 +699,9 @@ namespace Microsoft.Build.BuildEngine
             return
                 (compareToProperty != null) &&
                 (String.Equals(compareToProperty.propertyName, this.propertyName, StringComparison.OrdinalIgnoreCase)) &&
-                (compareToProperty.propertyValue                == this.propertyValue) &&
-                (compareToProperty.FinalValue                   == this.FinalValue) &&
-                (compareToProperty.type                         == this.type);
+                (compareToProperty.propertyValue == this.propertyValue) &&
+                (compareToProperty.FinalValue == this.FinalValue) &&
+                (compareToProperty.type == this.type);
         }
 
         /// <summary>
@@ -712,7 +712,7 @@ namespace Microsoft.Build.BuildEngine
             (
             )
         {
-            return (string) this;
+            return (string)this;
         }
 
         #endregion

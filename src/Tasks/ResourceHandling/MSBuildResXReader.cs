@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
         }
 
-        private static void ParseAssemblyAlias(Dictionary<string,string> aliases, XElement elem)
+        private static void ParseAssemblyAlias(Dictionary<string, string> aliases, XElement elem)
         {
             string alias = elem.Attribute("alias")?.Value;
             string name = elem.Attribute("name").Value;
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             return aliasedTypeName;
         }
 
-        private static void ParseData(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
+        private static void ParseData(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, Dictionary<string, string> aliases, XElement elem)
         {
             string name = elem.Attribute("name").Value;
             string value;

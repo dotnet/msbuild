@@ -283,7 +283,7 @@ namespace Microsoft.Build.Evaluation
                     string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
 
                     // Get the Sdk attribute of the Project element if specified
-                    string projectSdk = source.NodeType == XmlNodeType.Element && String.Equals(XMakeElements.project, source.Name, StringComparison.Ordinal) ? ((XmlElement) source).GetAttribute(XMakeAttributes.sdk) : String.Empty;
+                    string projectSdk = source.NodeType == XmlNodeType.Element && String.Equals(XMakeElements.project, source.Name, StringComparison.Ordinal) ? ((XmlElement)source).GetAttribute(XMakeAttributes.sdk) : String.Empty;
 
                     IList<ProjectRootElement> resolvedList;
                     if (!_importTable.TryGetValue((XmlElement)child, out resolvedList))

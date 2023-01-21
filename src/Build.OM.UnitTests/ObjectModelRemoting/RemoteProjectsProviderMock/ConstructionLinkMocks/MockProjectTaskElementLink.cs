@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public override IEnumerable<KeyValuePair<string, ElementLocation>> ParameterLocations => this.Proxy.ParameterLocations;
         public override string GetParameter(string name) { return this.Proxy.GetParameter(name); }
         // hmm did not know can use => on functions, can clean the milion other cases some tiem ...
-        public override void SetParameter(string name, string unevaluatedValue) =>  this.Proxy.SetParameter(name, unevaluatedValue);
+        public override void SetParameter(string name, string unevaluatedValue) => this.Proxy.SetParameter(name, unevaluatedValue);
         public override void RemoveParameter(string name) => Proxy.RemoveParameter(name);
         public override void RemoveAllParameters() => Proxy.RemoveAllParameters();
 

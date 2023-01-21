@@ -207,7 +207,7 @@ namespace Microsoft.Build.BuildEngine
             }
             if (!containsCycle && requiredTargets?.Count > 0)
             {
-                containsCycle = 
+                containsCycle =
                     (String.Equals(name, (string)targetNamesToBuild[indexOfTargetInProgress], StringComparison.OrdinalIgnoreCase));
             }
             return containsCycle;
@@ -244,7 +244,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     string[] requiredTargetsArray = requiredTargets.ToArray();
 
-                    for (int i = requiredTargetsArray.Length-1; i >= 0; i--)
+                    for (int i = requiredTargetsArray.Length - 1; i >= 0; i--)
                     {
                         if (string.CompareOrdinal(requiredTargetsArray[i], name) != 0)
                         {

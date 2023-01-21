@@ -49,9 +49,9 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private static void SetResolverForContext(EvaluationContext context, SdkResolver resolver)
         {
-            var sdkService = (SdkResolverService) context.SdkResolverService;
+            var sdkService = (SdkResolverService)context.SdkResolverService;
 
-            sdkService.InitializeForTests(null, new List<SdkResolver> {resolver});
+            sdkService.InitializeForTests(null, new List<SdkResolver> { resolver });
         }
 
         [Theory]
@@ -408,7 +408,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(projectDirectory2, $"2.{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(projectDirectory1, "1"),
@@ -464,7 +464,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(project2GlobDirectory, $"2.{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(project1Directory, "1"),
@@ -526,7 +526,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(project1GlobDirectory, $"{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     // first project uses a relative path
                     new ProjectSpecification(
@@ -594,7 +594,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(project1Directory.Path, "1"),
@@ -642,7 +642,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ContextCachesCommonOutOfProjectCone(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
-        [Theory (Skip="https://github.com/dotnet/msbuild/issues/3889")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/3889")]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         // projects should cache glob expansions when the __relative__ glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeRelativeGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
@@ -822,7 +822,7 @@ namespace Microsoft.Build.UnitTests.Definition
             int evaluationCount = 0;
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     $@"<Project>
                       <PropertyGroup>
@@ -876,7 +876,7 @@ namespace Microsoft.Build.UnitTests.Definition
             int evaluationCount = 0;
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     $@"<Project>
                       <PropertyGroup>

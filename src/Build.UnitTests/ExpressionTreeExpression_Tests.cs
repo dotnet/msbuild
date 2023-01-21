@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
 
         private readonly Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
 
-        public static readonly IEnumerable<object[]> TrueTests = new []
+        public static readonly IEnumerable<object[]> TrueTests = new[]
         {
             "true or (SHOULDNOTEVALTHIS)", // short circuit
             "(true and false) or true",
@@ -160,9 +160,9 @@ namespace Microsoft.Build.UnitTests
             "'59264.59264' == '59264.59264'",
             "1" + new String('0', 500) + "==" + "1" + new String('0', 500), /* too big for double, eval as string */
             "'1" + new String('0', 500) + "'=='" + "1" + new String('0', 500) + "'" /* too big for double, eval as string */
-        }.Select(s => new[] {s});
+        }.Select(s => new[] { s });
 
-        public static readonly IEnumerable<object[]> FalseTests = new [] {
+        public static readonly IEnumerable<object[]> FalseTests = new[] {
             "false and SHOULDNOTEVALTHIS", // short circuit
             "$(a)!=no",
             "$(b)==1.1",
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests
             "'1" + new String('0', 500) + "'=='01" + new String('0', 500) + "'" /* too big for double, eval as string */
         }.Select(s => new[] { s });
 
-        public static readonly IEnumerable<object[]> ErrorTests = new [] {
+        public static readonly IEnumerable<object[]> ErrorTests = new[] {
             "$",
             "$(",
             "$()",

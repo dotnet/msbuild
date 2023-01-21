@@ -594,7 +594,7 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
         }
 
-#region Debug only intrinsics
+        #region Debug only intrinsics
 
         /// <summary>
         /// returns if the string contains escaped wildcards
@@ -604,7 +604,7 @@ namespace Microsoft.Build.Evaluation
             return new List<string> { "A", "B", "C", "D" };
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Following function will parse a keyName and returns the basekey for it.

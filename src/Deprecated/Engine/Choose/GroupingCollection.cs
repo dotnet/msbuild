@@ -77,7 +77,7 @@ namespace Microsoft.Build.BuildEngine
                 return this.propertyGroupCount;
             }
         }
-        
+
         /// <summary>
         /// </summary>
         internal object SyncRoot
@@ -563,7 +563,7 @@ namespace Microsoft.Build.BuildEngine
             ArrayList propertiesToRemove = new ArrayList();
             foreach (BuildPropertyGroup propertyGroup in this.PropertyGroupsAll)
             {
-                if (String.Equals(condition.Trim(), propertyGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase) 
+                if (String.Equals(condition.Trim(), propertyGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase)
                     && (!propertyGroup.IsImported || includeImportedPropertyGroups))
                 {
                     propertiesToRemove.Add(propertyGroup);
@@ -623,7 +623,7 @@ namespace Microsoft.Build.BuildEngine
 
             foreach (BuildItemGroup itemGroup in this.ItemGroupsAll)
             {
-                if (String.Equals(condition.Trim(), itemGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase) 
+                if (String.Equals(condition.Trim(), itemGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase)
                     && !itemGroup.IsImported)
                 {
                     itemsToRemove.Add(itemGroup);

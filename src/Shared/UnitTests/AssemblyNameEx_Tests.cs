@@ -706,7 +706,7 @@ namespace Microsoft.Build.UnitTests
             using (MemoryStream ms = new MemoryStream(bytes))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-                assemblyNameDeserialized = (AssemblyNameExtension) formatter.Deserialize(ms);
+                assemblyNameDeserialized = (AssemblyNameExtension)formatter.Deserialize(ms);
             }
 
             assemblyNameDeserialized.ShouldBe(assemblyNameOriginal);

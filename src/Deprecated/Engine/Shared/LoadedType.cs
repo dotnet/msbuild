@@ -70,7 +70,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <param name="propertyName">property name</param>
         /// <returns>PropertyInfo</returns>
         public PropertyInfo GetProperty(string propertyName)
-        {   
+        {
             if (propertyInfoCache == null)
             {
                 PopulatePropertyInfoCache();

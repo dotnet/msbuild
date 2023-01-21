@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region ITask Members
-        
+
         /// <summary>
         /// Execute.
         /// </summary>
@@ -174,8 +174,8 @@ namespace Microsoft.Build.Tasks
 #if DEBUG
                 catch (Exception e)
                 {
-                    Debug.Assert(false, "Unexpected exception in AssignCulture.Execute. " + 
-                        "Please log a MSBuild bug specifying the steps to reproduce the problem. " + 
+                    Debug.Assert(false, "Unexpected exception in AssignCulture.Execute. " +
+                        "Please log a MSBuild bug specifying the steps to reproduce the problem. " +
                         e);
                     throw;
                 }

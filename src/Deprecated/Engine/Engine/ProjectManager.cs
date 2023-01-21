@@ -80,7 +80,7 @@ namespace Microsoft.Build.BuildEngine
                     project_index = i;
                 }
             }
-            
+
             // The project should be in the table
             ErrorUtilities.VerifyThrow(project_index != -1, "Project missing from the list");
 
@@ -153,11 +153,11 @@ namespace Microsoft.Build.BuildEngine
             )
         {
             // Get the list of projects that have this full path.
-            ArrayList projectsWithThisFullPath = (ArrayList) this.projects[projectFileFullPath];
+            ArrayList projectsWithThisFullPath = (ArrayList)this.projects[projectFileFullPath];
 
             if ((projectsWithThisFullPath?.Count > 0))
             {
-                return (Project) projectsWithThisFullPath[0];
+                return (Project)projectsWithThisFullPath[0];
             }
 
             // No project was found that matched the full path specified.
@@ -434,7 +434,7 @@ namespace Microsoft.Build.BuildEngine
             internal string toolsVersion;
             internal int nodeIndex;
         }
-        
+
         #endregion
     }
 }

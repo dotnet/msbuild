@@ -861,7 +861,7 @@ namespace Microsoft.Build.UnitTests
         public void NoLinkMetadataSynthesisWhenDefinedInProject()
         {
             string[] files = null;
-            string outputPath = Path.Combine(Path.GetTempPath(),Guid.NewGuid().ToString("N"));
+            string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
             try
             {

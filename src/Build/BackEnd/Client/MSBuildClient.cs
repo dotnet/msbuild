@@ -412,7 +412,7 @@ namespace Microsoft.Build.Experimental
 
             return (acceptAnsiColorCodes: acceptAnsiColorCodes, outputIsScreen: outputIsScreen);
         }
-        
+
         private int QueryConsoleBufferWidth()
         {
             int consoleBufferWidth = -1;
@@ -492,7 +492,7 @@ namespace Microsoft.Build.Experimental
             }
             catch (IOException ex) when (ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}",  ex);
+                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
                 CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
@@ -526,7 +526,7 @@ namespace Microsoft.Build.Experimental
         private bool TrySendShutdownCommand()
         {
             _packetPump.ServerWillDisconnect();
-            return  TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
+            return TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
         }
 
         private ServerNodeBuildCommand GetServerNodeBuildCommand()

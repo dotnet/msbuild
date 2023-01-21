@@ -118,7 +118,7 @@ namespace Microsoft.Build.Tasks
 #if DEBUG
                     catch (Exception e)
                     {
-                        Debug.Assert(false, "Unexpected exception in AssemblyRegistration.Execute. " + 
+                        Debug.Assert(false, "Unexpected exception in AssemblyRegistration.Execute. " +
                             "Please log a MSBuild bug specifying the steps to reproduce the problem. " +
                             e.Message);
                         throw;
@@ -267,7 +267,7 @@ namespace Microsoft.Build.Tasks
                     else
                     {
 #if DEBUG
-                        Debug.Assert(false, "Unexpected exception in UnregisterAssembly.DoExecute. " + 
+                        Debug.Assert(false, "Unexpected exception in UnregisterAssembly.DoExecute. " +
                             "Please log a MSBuild bug specifying the steps to reproduce the problem.");
 #endif
                         throw;

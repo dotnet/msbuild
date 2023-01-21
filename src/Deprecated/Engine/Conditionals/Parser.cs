@@ -13,13 +13,13 @@ namespace Microsoft.Build.BuildEngine
     [Flags]
     internal enum ParserOptions
     {
-        None                = 0x0,
-        AllowProperties     = 0x1,
-        AllowItemLists      = 0x2,
+        None = 0x0,
+        AllowProperties = 0x1,
+        AllowItemLists = 0x2,
         AllowPropertiesAndItemLists = AllowProperties | AllowItemLists,
-        AllowItemMetadata   = 0x4,
+        AllowItemMetadata = 0x4,
         AllowPropertiesAndItemMetadata = AllowProperties | AllowItemMetadata,
-        AllowAll            = AllowProperties | AllowItemLists | AllowItemMetadata
+        AllowAll = AllowProperties | AllowItemLists | AllowItemMetadata
     };
 
     /// <summary>
@@ -38,10 +38,10 @@ namespace Microsoft.Build.BuildEngine
         private ParserOptions options;
         internal int errorPosition = 0; // useful for unit tests
 
-#region REMOVE_COMPAT_WARNING
+        #region REMOVE_COMPAT_WARNING
 
         private bool warnedForExpression = false;
-        
+
         private BuildEventContext logBuildEventContext;
         /// <summary>
         ///  Location contextual information which are attached to logging events to 
@@ -68,13 +68,13 @@ namespace Microsoft.Build.BuildEngine
             {
                 this.loggingServices = value;
             }
-            
+
             get
             {
                 return this.loggingServices;
             }
         }
-#endregion 
+        #endregion
 
         internal Parser()
         {
@@ -133,7 +133,7 @@ namespace Microsoft.Build.BuildEngine
                 warnedForExpression = true;
                 // Try to figure out where this expression was located
                 string projectFile = String.Empty;
-                int lineNumber   = 0;
+                int lineNumber = 0;
                 int columnNumber = 0;
                 if (this.conditionAttribute != null)
                 {
@@ -142,7 +142,7 @@ namespace Microsoft.Build.BuildEngine
                 }
                 // Log a warning regarding the fact the expression may have been evaluated
                 // incorrectly in earlier version of MSBuild
-                LoggingServices.LogWarning(logBuildEventContext,new BuildEventFileInfo(projectFile, lineNumber, columnNumber), "ConditionMaybeEvaluatedIncorrectly", expression);
+                LoggingServices.LogWarning(logBuildEventContext, new BuildEventFileInfo(projectFile, lineNumber, columnNumber), "ConditionMaybeEvaluatedIncorrectly", expression);
             }
             #endregion
 
@@ -161,7 +161,7 @@ namespace Microsoft.Build.BuildEngine
                 GenericExpressionNode rhs = BooleanTerm(expression);
                 orNode.LeftChild = lhs;
                 orNode.RightChild = rhs;
-                return ExprPrime( expression, orNode );
+                return ExprPrime(expression, orNode);
             }
             else
             {
@@ -217,7 +217,7 @@ namespace Microsoft.Build.BuildEngine
 
         private GenericExpressionNode RelationalExpr(string expression)
         {
-         {
+            {
                 GenericExpressionNode lhs = Factor(expression);
                 if (lhs == null)
                 {
@@ -296,7 +296,7 @@ namespace Microsoft.Build.BuildEngine
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, this.conditionAttribute, "UnexpectedTokenInCondition", expression, lexer.IsNextString(), errorPosition);
                     return null;
                 }
-                return new FunctionCallExpressionNode( current.String, arglist);
+                return new FunctionCallExpressionNode(current.String, arglist);
             }
             else if (Same(expression, Token.TokenType.LeftParenthesis))
             {

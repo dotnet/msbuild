@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public MockProjectPropertyElementLinkRemoter Xml => (MockProjectPropertyElementLinkRemoter)this.ExportElement(this.Source.Xml);
         public string Name => this.Source.Name;
         public string EvaluatedIncludeEscaped => ProjectPropertyLink.GetEvaluatedValueEscaped(this.Source);
-        public string UnevaluatedValue { get => this.Source.UnevaluatedValue; set=> this.Source.UnevaluatedValue = value; }
+        public string UnevaluatedValue { get => this.Source.UnevaluatedValue; set => this.Source.UnevaluatedValue = value; }
         public bool IsEnvironmentProperty => this.Source.IsEnvironmentProperty;
         public bool IsGlobalProperty => this.Source.IsGlobalProperty;
         public bool IsReservedProperty => this.Source.IsReservedProperty;

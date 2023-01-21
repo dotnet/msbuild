@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             ViewValidation.Verify(preView, preReal);
         }
-        
+
         [Fact]
         public void ProjectChooseElementReadOnly()
         {

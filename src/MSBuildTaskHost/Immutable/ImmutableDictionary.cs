@@ -10,7 +10,7 @@ namespace System.Collections.Immutable
 {
     internal static class ImmutableExtensions
     {
-        public static ImmutableDictionary<K,V> ToImmutableDictionary<K,V>(this IDictionary<K,V> dictionary)
+        public static ImmutableDictionary<K, V> ToImmutableDictionary<K, V>(this IDictionary<K, V> dictionary)
         {
             return new ImmutableDictionary<K, V>(dictionary);
         }

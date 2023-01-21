@@ -363,7 +363,7 @@ namespace Microsoft.Build.Tasks
             DateTime lastModified = GetAndCacheLastModified(path);
             bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
             bool isCachedInProcess = s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
-            
+
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
@@ -440,7 +440,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             // Not a well-known FX assembly so now check the cache.
             FileState fileState = GetFileState(path);
             if (fileState.Assembly == null)

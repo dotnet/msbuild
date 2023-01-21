@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.True(TypeLoader.IsPartialTypeNameMatch("Csc", "Microsoft.Build.Tasks.Csc"));
         }
-        
+
 
         [Fact]
         public void LoadNonExistingAssembly()
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact (Skip = "https://github.com/dotnet/msbuild/issues/325")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/325")]
         public void LoadInsideAssemblyWhenGivenOutsideAssemblyWithSameName()
         {
             using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))

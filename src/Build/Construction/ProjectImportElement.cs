@@ -144,7 +144,7 @@ namespace Microsoft.Build.Construction
         internal static ProjectImportElement CreateDisconnected(string project, ProjectRootElement containingProject)
         {
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.import);
-            return new ProjectImportElement(element, containingProject) {Project = project};
+            return new ProjectImportElement(element, containingProject) { Project = project };
         }
 
         /// <summary>

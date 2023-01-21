@@ -78,7 +78,7 @@ namespace Microsoft.Build.Shared
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"
         /// </summary>
         internal const string CurrentProductVersion = "17.0";
-        
+
         /// <summary>
         /// Symbol used in ProjectReferenceTarget items to represent default targets
         /// </summary>
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Shared
         /// with fallback to default targets if the ProjectReference item has no targets specified.
         /// </summary>
         internal const string ProjectReferenceTargetsOrDefaultTargetsMarker = ".projectReferenceTargetsOrDefaultTargets";
-        
+
         // One-time allocations to avoid implicit allocations for Split(), Trim().
         internal static readonly char[] SemicolonChar = { ';' };
         internal static readonly char[] SpaceChar = { ' ' };

@@ -270,7 +270,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return Link != null ? Link.DirectMetadata.Count  : _directMetadata != null ? _directMetadata.Count : 0; }
+            { return Link != null ? Link.DirectMetadata.Count : _directMetadata != null ? _directMetadata.Count : 0; }
         }
 
         /// <summary>

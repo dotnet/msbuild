@@ -32,7 +32,7 @@ namespace Microsoft.Build.Evaluation
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
             internal ItemSpec<P, I> Spec => _itemSpec;
-            
+
             protected LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
                 _itemElement = builder.ItemElement;
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Evaluation
                 public IMetadataTable GetMetadataTable()
                 {
                     return CapturedItems == null
-                        ? (IMetadataTable) OperationItem
+                        ? (IMetadataTable)OperationItem
                         : new ItemOperationMetadataTable(OperationItem, CapturedItems);
                 }
 

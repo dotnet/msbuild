@@ -270,113 +270,113 @@ namespace Microsoft.Build.UnitTests
                         }
                         break;
                     case BuildErrorEventArgs e:
-                    {
-                        string logMessage = $"{e.File}({e.LineNumber},{e.ColumnNumber}): {e.Subcategory} error {e.Code}: {e.Message}";
-                        _fullLog.AppendLine(logMessage);
-                        _testOutputHelper?.WriteLine(logMessage);
-
-                        ++ErrorCount;
-                        Errors.Add(e);
-                        break;
-                    }
-                    default:
-                    {
-                        // Log the message unless we are a build finished event and logBuildFinished is set to false.
-                        bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
-                        if (logMessage)
                         {
-                            _fullLog.AppendLine(eventArgs.Message);
-                            _testOutputHelper?.WriteLine(eventArgs.Message);
+                            string logMessage = $"{e.File}({e.LineNumber},{e.ColumnNumber}): {e.Subcategory} error {e.Code}: {e.Message}";
+                            _fullLog.AppendLine(logMessage);
+                            _testOutputHelper?.WriteLine(logMessage);
+
+                            ++ErrorCount;
+                            Errors.Add(e);
+                            break;
                         }
-                        break;
-                    }
+                    default:
+                        {
+                            // Log the message unless we are a build finished event and logBuildFinished is set to false.
+                            bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
+                            if (logMessage)
+                            {
+                                _fullLog.AppendLine(eventArgs.Message);
+                                _testOutputHelper?.WriteLine(eventArgs.Message);
+                            }
+                            break;
+                        }
                 }
 
                 // Log the specific type of event it was
                 switch (eventArgs)
                 {
                     case ExternalProjectStartedEventArgs args:
-                    {
-                        ExternalProjectStartedEvents.Add(args);
-                        break;
-                    }
-                    case ExternalProjectFinishedEventArgs finishedEventArgs:
-                    {
-                        ExternalProjectFinishedEvents.Add(finishedEventArgs);
-                        break;
-                    }
-                    case ProjectEvaluationStartedEventArgs evaluationStartedEventArgs:
-                    {
-                        EvaluationStartedEvents.Add(evaluationStartedEventArgs);
-                        break;
-                    }
-                    case ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs:
-                    {
-                        EvaluationFinishedEvents.Add(evaluationFinishedEventArgs);
-                        break;
-                    }
-                    case ProjectStartedEventArgs startedEventArgs:
-                    {
-                        ProjectStartedEvents.Add(startedEventArgs);
-                        break;
-                    }
-                    case ProjectFinishedEventArgs finishedEventArgs:
-                    {
-                        ProjectFinishedEvents.Add(finishedEventArgs);
-                        break;
-                    }
-                    case TargetStartedEventArgs targetStartedEventArgs:
-                    {
-                        TargetStartedEvents.Add(targetStartedEventArgs);
-                        break;
-                    }
-                    case TargetFinishedEventArgs targetFinishedEventArgs:
-                    {
-                        TargetFinishedEvents.Add(targetFinishedEventArgs);
-                        break;
-                    }
-                    case TaskStartedEventArgs taskStartedEventArgs:
-                    {
-                        TaskStartedEvents.Add(taskStartedEventArgs);
-                        break;
-                    }
-                    case TaskFinishedEventArgs taskFinishedEventArgs:
-                    {
-                        TaskFinishedEvents.Add(taskFinishedEventArgs);
-                        break;
-                    }
-                    case BuildMessageEventArgs buildMessageEventArgs:
-                    {
-                        BuildMessageEvents.Add(buildMessageEventArgs);
-                        break;
-                    }
-                    case BuildStartedEventArgs buildStartedEventArgs:
-                    {
-                        BuildStartedEvents.Add(buildStartedEventArgs);
-                        break;
-                    }
-                    case BuildFinishedEventArgs buildFinishedEventArgs:
-                    {
-                        BuildFinishedEvents.Add(buildFinishedEventArgs);
-
-                        if (!AllowTaskCrashes)
                         {
-                            // We should not have any task crashes. Sometimes a test will validate that their expected error
-                            // code appeared, but not realize it then crashed.
-                            AssertLogDoesntContain("MSB4018");
+                            ExternalProjectStartedEvents.Add(args);
+                            break;
                         }
+                    case ExternalProjectFinishedEventArgs finishedEventArgs:
+                        {
+                            ExternalProjectFinishedEvents.Add(finishedEventArgs);
+                            break;
+                        }
+                    case ProjectEvaluationStartedEventArgs evaluationStartedEventArgs:
+                        {
+                            EvaluationStartedEvents.Add(evaluationStartedEventArgs);
+                            break;
+                        }
+                    case ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs:
+                        {
+                            EvaluationFinishedEvents.Add(evaluationFinishedEventArgs);
+                            break;
+                        }
+                    case ProjectStartedEventArgs startedEventArgs:
+                        {
+                            ProjectStartedEvents.Add(startedEventArgs);
+                            break;
+                        }
+                    case ProjectFinishedEventArgs finishedEventArgs:
+                        {
+                            ProjectFinishedEvents.Add(finishedEventArgs);
+                            break;
+                        }
+                    case TargetStartedEventArgs targetStartedEventArgs:
+                        {
+                            TargetStartedEvents.Add(targetStartedEventArgs);
+                            break;
+                        }
+                    case TargetFinishedEventArgs targetFinishedEventArgs:
+                        {
+                            TargetFinishedEvents.Add(targetFinishedEventArgs);
+                            break;
+                        }
+                    case TaskStartedEventArgs taskStartedEventArgs:
+                        {
+                            TaskStartedEvents.Add(taskStartedEventArgs);
+                            break;
+                        }
+                    case TaskFinishedEventArgs taskFinishedEventArgs:
+                        {
+                            TaskFinishedEvents.Add(taskFinishedEventArgs);
+                            break;
+                        }
+                    case BuildMessageEventArgs buildMessageEventArgs:
+                        {
+                            BuildMessageEvents.Add(buildMessageEventArgs);
+                            break;
+                        }
+                    case BuildStartedEventArgs buildStartedEventArgs:
+                        {
+                            BuildStartedEvents.Add(buildStartedEventArgs);
+                            break;
+                        }
+                    case BuildFinishedEventArgs buildFinishedEventArgs:
+                        {
+                            BuildFinishedEvents.Add(buildFinishedEventArgs);
 
-                        // We should not have any Engine crashes.
-                        AssertLogDoesntContain("MSB0001");
+                            if (!AllowTaskCrashes)
+                            {
+                                // We should not have any task crashes. Sometimes a test will validate that their expected error
+                                // code appeared, but not realize it then crashed.
+                                AssertLogDoesntContain("MSB4018");
+                            }
 
-                        // Console.Write in the context of a unit test is very expensive.  A hundred
-                        // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
-                        // do the Console.Write once at the end of the build.
+                            // We should not have any Engine crashes.
+                            AssertLogDoesntContain("MSB0001");
 
-                        PrintFullLog();
+                            // Console.Write in the context of a unit test is very expensive.  A hundred
+                            // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
+                            // do the Console.Write once at the end of the build.
 
-                        break;
-                    }
+                            PrintFullLog();
+
+                            break;
+                        }
                 }
             }
         }

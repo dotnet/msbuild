@@ -175,7 +175,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 foreach (var graph in Graphs)
                 {
                     foreach (
-                        var currentSolutionConfigurationPlatform in SolutionFileBuilder.SolutionConfigurationPlatformsDefaults.Concat(new SolutionConfigurationInSolution[] {null}))
+                        var currentSolutionConfigurationPlatform in SolutionFileBuilder.SolutionConfigurationPlatformsDefaults.Concat(new SolutionConfigurationInSolution[] { null }))
                     {
                         yield return new[]
                         {
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 {
                     {"1", _env.CreateFile("1.csproj", string.Empty).Path}
                 },
-                SolutionConfigurationPlatforms = new[] {new SolutionConfigurationInSolution("Foo", "Bar")},
+                SolutionConfigurationPlatforms = new[] { new SolutionConfigurationInSolution("Foo", "Bar") },
                 ProjectConfigurations = new Dictionary<string, Dictionary<SolutionConfigurationInSolution, ProjectConfigurationInSolution>>
                 {
                     {
@@ -579,7 +579,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     {"3", GraphTestingUtilities.CreateProjectFile(_env, 3, new[] {4}, extraContent: MultitargetingSpecificationPropertyGroup).Path},
                     {"4", GraphTestingUtilities.CreateProjectFile(_env, 4).Path}
                 },
-                SolutionDependencies = new[] {("1", "2"), ("3", "4")}
+                SolutionDependencies = new[] { ("1", "2"), ("3", "4") }
             }.BuildSolution();
 
             var graph = new ProjectGraph(_env.CreateFile("solution.sln", solutionContents).Path);
@@ -617,8 +617,8 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             var solutionContents = SolutionFileBuilder.FromGraphEdges(
                 _env,
-                new Dictionary<int, int[]> {{1, null}, {2, null}},
-                new[] {("1", new[] {Guid.NewGuid().ToString("B")})}).BuildSolution();
+                new Dictionary<int, int[]> { { 1, null }, { 2, null } },
+                new[] { ("1", new[] { Guid.NewGuid().ToString("B") }) }).BuildSolution();
 
             var solutionFile = _env.CreateFile(
                 "solution.sln",

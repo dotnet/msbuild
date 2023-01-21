@@ -33,7 +33,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public DateTime GetLastWriteTimeUtc(string path)
         {
-            return _lastWriteTimeCache.GetOrAdd(path, p =>_fileSystem.GetLastWriteTimeUtc(p));
+            return _lastWriteTimeCache.GetOrAdd(path, p => _fileSystem.GetLastWriteTimeUtc(p));
         }
 
         public bool DirectoryExists(string path)

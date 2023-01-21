@@ -75,7 +75,7 @@ namespace Microsoft.Build.Construction
                 XmlElementWithLocation newElement = XmlUtilities.RenameXmlElement(XmlElement, value, XmlElement.NamespaceURI);
                 ReplaceElement(newElement);
 
-                 // SetOrRemoveAttribute(XMakeAttributes.name, value, "Set usingtaskparameter {0}", value);
+                // SetOrRemoveAttribute(XMakeAttributes.name, value, "Set usingtaskparameter {0}", value);
             }
         }
 

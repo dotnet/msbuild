@@ -903,7 +903,7 @@ class X
                                       ? tempPath
                                       : FileUtilities.EnsureTrailingSlash(
                                           NativeMethodsShared.GetLongFilePath(tempPath).ToUpperInvariant());
-            
+
             // We don't want to be including these as dependencies or outputs:
             // 1. Files under %USERPROFILE%\Application Data in XP and %USERPROFILE%\AppData\Roaming in Vista and later.
             // 2. Files under %USERPROFILE%\Local Settings\Application Data in XP and %USERPROFILE%\AppData\Local in Vista and later.

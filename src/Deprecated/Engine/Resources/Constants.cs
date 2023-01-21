@@ -14,23 +14,23 @@ namespace Microsoft.Build.BuildEngine
     /// <owner>RGoel</owner>
     internal static class ReservedPropertyNames
     {
-        internal const string projectDirectory        = "MSBuildProjectDirectory";
-        internal const string projectDirectoryNoRoot  = "MSBuildProjectDirectoryNoRoot";
-        internal const string projectFile             = "MSBuildProjectFile";
-        internal const string projectExtension        = "MSBuildProjectExtension";
-        internal const string projectFullPath         = "MSBuildProjectFullPath";
-        internal const string projectName             = "MSBuildProjectName";
-        internal const string binPath                 = "MSBuildBinPath";
-        internal const string projectDefaultTargets   = "MSBuildProjectDefaultTargets";
-        internal const string extensionsPath          = "MSBuildExtensionsPath";
-        internal const string extensionsPath32        = "MSBuildExtensionsPath32";
-        internal const string toolsPath               = "MSBuildToolsPath";
-        internal const string toolsVersion            = "MSBuildToolsVersion";
-        internal const string startupDirectory        = "MSBuildStartupDirectory";
-        internal const string buildNodeCount          = "MSBuildNodeCount";
-        internal const string extensionsPathSuffix    = "MSBuild";
-        internal const string programFiles32          = "MSBuildProgramFiles32";
-        internal const string assemblyVersion         = "MSBuildAssemblyVersion";
+        internal const string projectDirectory = "MSBuildProjectDirectory";
+        internal const string projectDirectoryNoRoot = "MSBuildProjectDirectoryNoRoot";
+        internal const string projectFile = "MSBuildProjectFile";
+        internal const string projectExtension = "MSBuildProjectExtension";
+        internal const string projectFullPath = "MSBuildProjectFullPath";
+        internal const string projectName = "MSBuildProjectName";
+        internal const string binPath = "MSBuildBinPath";
+        internal const string projectDefaultTargets = "MSBuildProjectDefaultTargets";
+        internal const string extensionsPath = "MSBuildExtensionsPath";
+        internal const string extensionsPath32 = "MSBuildExtensionsPath32";
+        internal const string toolsPath = "MSBuildToolsPath";
+        internal const string toolsVersion = "MSBuildToolsVersion";
+        internal const string startupDirectory = "MSBuildStartupDirectory";
+        internal const string buildNodeCount = "MSBuildNodeCount";
+        internal const string extensionsPathSuffix = "MSBuild";
+        internal const string programFiles32 = "MSBuildProgramFiles32";
+        internal const string assemblyVersion = "MSBuildAssemblyVersion";
 
         /// <summary>
         /// Indicates if the given property is a reserved property.
@@ -73,7 +73,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal const string defaultFallbackToolsVersion = "4.0";
 
-        
+
         internal const string defaultSolutionWrapperProjectToolsVersion = "4.0";
 
         /// <summary>

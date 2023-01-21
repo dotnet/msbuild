@@ -277,7 +277,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Dictionary<string, string> globalProperties = new (StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> globalProperties = new(StringComparer.OrdinalIgnoreCase);
             globalProperties["ThreeIn"] = "3";
 
             Project project = new Project(
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 // Check if } do not cause it to crash due to usage of String.Format or such on code path
-                string problematicTmpPath = Path.Combine(originalTmp,  "}", "blabla", "temp");
+                string problematicTmpPath = Path.Combine(originalTmp, "}", "blabla", "temp");
                 Environment.SetEnvironmentVariable("TMP", problematicTmpPath);
                 Environment.SetEnvironmentVariable("TEMP", problematicTmpPath);
 

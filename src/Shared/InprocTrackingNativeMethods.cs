@@ -31,6 +31,7 @@ namespace Microsoft.Build.Shared
     /// </comments>
     internal static class InprocTrackingNativeMethods
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Delegates for the tracking functions
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -146,7 +147,7 @@ namespace Microsoft.Build.Shared
         }
 
         #endregion // Public API
-
+#pragma warning restore format
         private static class FileTrackerDllStub
         {
             private static readonly Lazy<string> fileTrackerDllName = new Lazy<string>(() => RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "FileTrackerA4.dll" : (IntPtr.Size == sizeof(Int32)) ? "FileTracker32.dll" : "FileTracker64.dll");
@@ -154,7 +155,7 @@ namespace Microsoft.Build.Shared
             // Handle for FileTracker.dll itself
             [SecurityCritical]
             private static SafeHandle s_fileTrackerDllHandle;
-
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
             #region Function pointers to native functions
 
             internal static StartTrackingContextDelegate startTrackingContextDelegate;
@@ -273,7 +274,7 @@ namespace Microsoft.Build.Shared
             }
 
             #endregion  // Initialization code
-
+#pragma warning restore format
             // Specialized handle to make sure we free FileTracker.dll 
             [SecurityCritical]
             private class SafeLibraryHandle : SafeHandle

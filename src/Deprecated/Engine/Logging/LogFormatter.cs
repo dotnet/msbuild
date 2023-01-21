@@ -10,7 +10,7 @@ namespace Microsoft.Build.BuildEngine
     /// Utility helper functions for formatting logger output.
     /// </summary>
     /// <owner>JomoF</owner>
-    internal static class LogFormatter 
+    internal static class LogFormatter
     {
         /// <summary>
         /// Formats the timestamp in the log as  Hours:Minutes:Seconds.Milliseconds
@@ -42,7 +42,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>JomoF</owner>
         /// <param name="t"></param>
         /// <returns>String representation of time-span.</returns>
-        internal static string FormatTimeSpan(TimeSpan t) 
+        internal static string FormatTimeSpan(TimeSpan t)
         {
             string rawTime = t.ToString(); // Timespan is a value type and can't be null.
             int rawTimeLength = rawTime.Length;

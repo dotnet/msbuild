@@ -23,6 +23,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class FlatTrackingData
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Constants
         // The maximum number of outputs that should be logged, if more than this, then no outputs are logged
         private const int MaxLogCount = 100;
@@ -886,6 +887,7 @@ namespace Microsoft.Build.Utilities
             }
         }
         #endregion
+#pragma warning restore format
     }
 
     /// <summary>

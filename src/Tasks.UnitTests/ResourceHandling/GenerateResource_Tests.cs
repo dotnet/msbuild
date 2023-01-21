@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", resxFile, resourcesFile);
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
@@ -237,7 +237,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
         [Fact]
 #else
-        [Fact (Skip = "ResGen.exe not supported on .NET Core MSBuild")]
+        [Fact(Skip = "ResGen.exe not supported on .NET Core MSBuild")]
 #endif
         public void BasicResources2ResX()
         {
@@ -327,7 +327,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(_env.GetTempFile(".cache").Path);
-            t.Sources = new ITaskItem[] {new TaskItem(resxFileInput)};
+            t.Sources = new ITaskItem[] { new TaskItem(resxFileInput) };
 
             Utilities.ExecuteTask(t);
 
@@ -336,13 +336,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Path.GetExtension(resourceOutput).ShouldBe(".resources");
             Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
 
+
+            /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
+            Before:
             Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
             
+            Utilities.AssertStateFileWasWritten(t);
+            After:
+            Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
+
+            Utilities.AssertStateFileWasWritten(t);
+            */
+            Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
+
             Utilities.AssertStateFileWasWritten(t);
 
             GenerateResource t2 = Utilities.CreateTask(_output);
             t2.StateFile = new TaskItem(t.StateFile);
-            t2.Sources = new ITaskItem[] {new TaskItem(resxFileInput)};
+            t2.Sources = new ITaskItem[] { new TaskItem(resxFileInput) };
 
             // Execute the task again when the input (5m ago) is newer than the previous outputs (10m ago)
             File.SetLastWriteTime(resxFileInput, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)));
@@ -459,7 +470,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 usePreserialized,
                 _env,
                 useSystemResourcesExtensions);
- 
+
             try
             {
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -617,7 +628,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             GenerateResource createResources = Utilities.CreateTask(_output);
             createResources.StateFile = new TaskItem(cache);
-            createResources.Sources = new ITaskItem[] {new TaskItem(firstResx), new TaskItem(secondResx)};
+            createResources.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
             _output.WriteLine("Transform both");
             Utilities.ExecuteTask(createResources);
@@ -629,7 +640,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             _output.WriteLine("Create a new task to transform them again");
             GenerateResource t2 = Utilities.CreateTask(_output);
             t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
-            t2.Sources = new ITaskItem[] {new TaskItem(firstResx), new TaskItem(secondResx)};
+            t2.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
             System.Threading.Thread.Sleep(200);
             if (!NativeMethodsShared.IsWindows)
@@ -743,7 +754,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile1);
                 Assert.Equal(t.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t.FilesWritten[1].ItemSpec, resourcesFile2);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Repeat, and it should do nothing as they are up to date
@@ -762,7 +773,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t2.FilesWritten[0].ItemSpec, resourcesFile1);
                 Assert.Equal(t2.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t2.FilesWritten[1].ItemSpec, resourcesFile2);
-                
+
                 Utilities.AssertStateFileWasWritten(t2);
 
                 Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
@@ -1706,8 +1717,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 File.Delete(resourcesFile2);
                 bool success = t.Execute();
                 // Task should have failed
+
+                /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
+                Before:
                 Assert.False(success);
                 
+                Utilities.AssertStateFileWasWritten(t);
+                After:
+                Assert.False(success);
+
+                Utilities.AssertStateFileWasWritten(t);
+                */
+                Assert.False(success);
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Should not have created an output for the invalid resx
@@ -1774,8 +1796,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 bool success = t.Execute();
                 // Task should have failed
+
+                /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
+                Before:
                 Assert.False(success);
                 
+                Utilities.AssertStateFileWasWritten(t);
+                After:
+                Assert.False(success);
+
+                Utilities.AssertStateFileWasWritten(t);
+                */
+                Assert.False(success);
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Should not have created an output for the invalid resx
@@ -2185,7 +2218,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[i].ItemSpec, t.OutputResources[i].ItemSpec);
                 Assert.True(File.Exists(t.FilesWritten[i].ItemSpec));
             }
-            
+
             Utilities.AssertStateFileWasWritten(t);
 
             // Done, so clean up.
@@ -2245,8 +2278,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // FilesWritten should contain only the 3 successfully output .resources and the cache
                 Assert.Equal(t.FilesWritten[0].ItemSpec, Path.ChangeExtension(t.Sources[0].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[1].ItemSpec, Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
+
+                /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
+                Before:
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
                 
+                Utilities.AssertStateFileWasWritten(t);
+                After:
+                Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
+
+                Utilities.AssertStateFileWasWritten(t);
+                */
+                Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Make sure there was an error on the second resource
@@ -2911,7 +2955,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = Utilities.WriteTestResX(false, null, null);
 
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
-                t.OutputResources = new ITaskItem[] { new TaskItem( "||" ) };
+                t.OutputResources = new ITaskItem[] { new TaskItem("||") };
 
                 bool success = t.Execute();
 
@@ -3620,7 +3664,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         {
             Assert.Contains(
                 String.Format(AssemblyResources.GetString(messageID), replacements),
-                ((MockEngine) t.BuildEngine).Log
+                ((MockEngine)t.BuildEngine).Log
             );
         }
 
@@ -3985,7 +4029,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             {
                 if (string.IsNullOrEmpty(resgenFile))
                 {
-                        resgenFile = GetTempFileName(".resx");
+                    resgenFile = GetTempFileName(".resx");
                 }
 
                 File.WriteAllText(resgenFile, contents);

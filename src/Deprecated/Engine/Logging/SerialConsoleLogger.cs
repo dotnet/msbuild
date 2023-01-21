@@ -194,7 +194,7 @@ namespace Microsoft.Build.BuildEngine
             if (warningCount > 0)
             {
                 setColor(ConsoleColor.Yellow);
-                foreach(BuildWarningEventArgs warningEventArgs in warningList)
+                foreach (BuildWarningEventArgs warningEventArgs in warningList)
                 {
                     WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, runningWithCharacterFileType));
                 }

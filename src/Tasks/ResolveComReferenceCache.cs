@@ -36,7 +36,7 @@ namespace Microsoft.Build.Tasks
         /// indicates whether the cache contents have changed since it's been created
         /// </summary>
         internal bool Dirty => _dirty;
-        
+
         [NonSerialized]
         private bool _dirty;
 

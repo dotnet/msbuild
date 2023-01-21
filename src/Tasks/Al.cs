@@ -309,7 +309,7 @@ namespace Microsoft.Build.Tasks
             {
                 // The bitness of al.exe should match the platform being built
                 // Yoda condition prevents null reference exception if Platform is null.
-                string archToLookFor =  "x86".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? Platform :
+                string archToLookFor = "x86".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? Platform :
                                         "x64".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? ProcessorArchitecture.AMD64 : // x64 maps to AMD64 in GeneratePathToTool
                                         ProcessorArchitecture.CurrentProcessArchitecture;
 

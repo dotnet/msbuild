@@ -435,7 +435,7 @@ namespace Microsoft.Build.Tasks
 
             // Mark the Culture property as advanced
             culture.CustomAttributes.Add(editorBrowsableAdvancedAttribute);
-            
+
             /*
               // Here's what I'm trying to emit.  Since not all languages support
               // try/finally, we'll avoid our double lock pattern here.

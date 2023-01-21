@@ -68,7 +68,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         /// <summary>
         /// Access to remote <see cref="Project.ItemsIgnoringCondition"/>.
         /// </summary>
-        public abstract  ICollection<ProjectItem> ItemsIgnoringCondition { get; }
+        public abstract ICollection<ProjectItem> ItemsIgnoringCondition { get; }
 
         /// <summary>
         /// Access to remote <see cref="Project.Imports"/>.

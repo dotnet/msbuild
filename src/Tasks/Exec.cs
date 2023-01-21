@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
         private string _command;
 
         // '^' before _any_ character escapes that character, don't escape it.
-        private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' '};
+        private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' ' };
 
         #endregion
 

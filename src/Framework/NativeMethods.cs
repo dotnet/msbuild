@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework;
 
 internal static class NativeMethods
 {
-#region Constants
+    #region Constants
 
     internal const uint ERROR_INSUFFICIENT_BUFFER = 0x8007007A;
     internal const uint STARTUP_LOADER_SAFEMODE = 0x10;
@@ -72,9 +72,9 @@ internal static class NativeMethods
     internal const uint WAIT_OBJECT_0 = 0x00000000;
     internal const uint WAIT_TIMEOUT = 0x00000102;
 
-#endregion
+    #endregion
 
-#region Enums
+    #region Enums
 
     private enum PROCESSINFOCLASS : int
     {
@@ -573,9 +573,9 @@ internal static class NativeMethods
         return -1;
     }
 
-#endregion
+    #endregion
 
-#region Member data
+    #region Member data
 
     internal static bool HasMaxPath => MaxPath == MAX_PATH;
 
@@ -658,7 +658,7 @@ internal static class NativeMethods
     internal static bool IsLinux
     {
 #if CLR2COMPATIBILITY
-            get { return false; }
+        get { return false; }
 #else
         get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); }
 #endif
@@ -670,7 +670,7 @@ internal static class NativeMethods
     internal static bool IsBSD
     {
 #if CLR2COMPATIBILITY
-            get { return false; }
+        get { return false; }
 #else
         get
         {
@@ -722,7 +722,7 @@ internal static class NativeMethods
     internal static bool IsWindows
     {
 #if CLR2COMPATIBILITY
-            get { return true; }
+        get { return true; }
 #else
         get
         {
@@ -742,7 +742,7 @@ internal static class NativeMethods
     internal static bool IsOSX
     {
 #if CLR2COMPATIBILITY
-            get { return false; }
+        get { return false; }
 #else
         get
         {
@@ -885,9 +885,9 @@ internal static class NativeMethods
     /// </summary>
     internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
 
-#endregion
+    #endregion
 
-#region Wrapper methods
+    #region Wrapper methods
 
 
     [DllImport("kernel32.dll", SetLastError = true)]
@@ -1563,7 +1563,7 @@ internal static class NativeMethods
     [DllImport("kernel32.dll")]
     [SupportedOSPlatform("windows")]
     internal static extern uint GetFileType(IntPtr hFile);
-    
+
     [DllImport("kernel32.dll")]
     internal static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
 
@@ -1734,6 +1734,6 @@ internal static class NativeMethods
         return GetFileAttributesEx(path, 0, ref data);
     }
 
-#endregion
+    #endregion
 
 }

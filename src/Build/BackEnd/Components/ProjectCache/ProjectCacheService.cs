@@ -234,7 +234,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             try
             {
-                return (ProjectCachePluginBase) Activator.CreateInstance(pluginType)!;
+                return (ProjectCachePluginBase)Activator.CreateInstance(pluginType)!;
             }
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             IEnumerable<Type> GetTypes<T>(Assembly assembly)
             {
                 return assembly.ExportedTypes
-                    .Select(type => new {type, info = type.GetTypeInfo()})
+                    .Select(type => new { type, info = type.GetTypeInfo() })
                     .Where(
                         t => t.info.IsClass &&
                              t.info.IsPublic &&

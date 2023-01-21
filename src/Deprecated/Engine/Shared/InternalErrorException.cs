@@ -73,8 +73,8 @@ namespace Microsoft.Build.BuildEngine.Shared
             // Do nothing: no fields
         }
 
-	// Base implementation of GetObjectData() is sufficient; we have no fields
+        // Base implementation of GetObjectData() is sufficient; we have no fields
 
         #endregion
-   }
+    }
 }

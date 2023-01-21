@@ -140,10 +140,10 @@ namespace Microsoft.Build.Tasks
                     try
                     {
 #endif
-                    if (!ExtractFromManifest(NativeReferences[reference], path, containingReferenceFilesTable, containedPrerequisiteAssembliesTable, containedComComponentsTable, containedTypeLibrariesTable, containedLooseTlbFilesTable, containedLooseEtcFilesTable))
-                    {
-                        retValue = false;
-                    }
+                        if (!ExtractFromManifest(NativeReferences[reference], path, containingReferenceFilesTable, containedPrerequisiteAssembliesTable, containedComComponentsTable, containedTypeLibrariesTable, containedLooseTlbFilesTable, containedLooseEtcFilesTable))
+                        {
+                            retValue = false;
+                        }
 #if DEBUG
                     }
                     catch (Exception)

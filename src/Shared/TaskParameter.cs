@@ -179,9 +179,9 @@ namespace Microsoft.Build.BackEnd
                     _parameterType = TaskParameterType.String;
                     _wrappedParameter = (string)Convert.ChangeType(wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
                 }
-                    // Also stringify known common value types, to avoid calling
-                    // TranslateDotNet when they'll just be stringified on the
-                    // output side
+                // Also stringify known common value types, to avoid calling
+                // TranslateDotNet when they'll just be stringified on the
+                // output side
                 else if (wrappedParameterType == typeof(bool))
                 {
                     _parameterType = TaskParameterType.Bool;
@@ -549,7 +549,7 @@ namespace Microsoft.Build.BackEnd
             ITaskItem,
             ITaskItem2
 #if !TASKHOST
-            ,IMetadataContainer
+            , IMetadataContainer
 #endif
         {
             /// <summary>

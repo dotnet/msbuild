@@ -34,8 +34,8 @@ namespace Microsoft.Build.BuildEngine
         {
             // Make certain we don't cache a reference to a Project object, which would defeat 
             // the purpose of this cache
-            scopeProperties.ClearParentProject(); 
-            
+            scopeProperties.ClearParentProject();
+
             this.scopeName = scopeName;
             this.scopeToolsVersion = scopeToolsVersion;
             this.scopeProperties = scopeProperties;
@@ -54,7 +54,7 @@ namespace Microsoft.Build.BuildEngine
                 return this.scopeProperties;
             }
         }
-        
+
         /// <summary>
         /// Usually the project file name
         /// </summary>
@@ -157,7 +157,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 return (CacheEntry)cacheContents[name];
             }
-            
+
             return null;
         }
 
@@ -242,15 +242,15 @@ namespace Microsoft.Build.BuildEngine
                     // If the project file is malformed the build may fail without initializing the initialtargets or
                     // the default targests fields. The retrieval code expects non-null values
                     // so it is necessary to replace null with empty string
-                    ErrorUtilities.VerifyThrow(!buildResult.EvaluationResult || (buildResult.InitialTargets != null 
-                                               && buildResult.DefaultTargets != null), 
+                    ErrorUtilities.VerifyThrow(!buildResult.EvaluationResult || (buildResult.InitialTargets != null
+                                               && buildResult.DefaultTargets != null),
                                                "Expect initial targets to be non-null for successful builds");
                     string defaultTargets = buildResult.DefaultTargets ?? String.Empty;
                     PropertyCacheEntry defaultTargetsCacheEntry = new PropertyCacheEntry(Constants.defaultTargetCacheName, defaultTargets);
                     AddCacheEntryInternal(defaultTargetsCacheEntry);
 
                     string initialTargets = buildResult.InitialTargets ?? String.Empty;
-                    PropertyCacheEntry initialTargetsCacheEntry = new PropertyCacheEntry(Constants.initialTargetCacheName, initialTargets );
+                    PropertyCacheEntry initialTargetsCacheEntry = new PropertyCacheEntry(Constants.initialTargetCacheName, initialTargets);
                     AddCacheEntryInternal(initialTargetsCacheEntry);
                 }
 
@@ -350,7 +350,7 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrow(defaultTargetsCacheEntry != null && initialTargetsCacheEntry != null,
                 "We should have both the initial and default targets in the cache");
 
-            ArrayList targetsToBuild = new ArrayList(initialTargetsCacheEntry.Value.Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries));
+            ArrayList targetsToBuild = new ArrayList(initialTargetsCacheEntry.Value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
 
             if (buildRequest.TargetNames == null || buildRequest.TargetNames.Length == 0)
             {
@@ -413,8 +413,8 @@ namespace Microsoft.Build.BuildEngine
 
             actuallyBuiltTargets = targetsToBuild;
 
-            return new BuildResult(outputsByTargetName, resultByTarget, overallSuccess, buildRequest.HandleId, buildRequest.RequestId, 
-                int.Parse(projectIdCacheEntry.Value, CultureInfo.InvariantCulture), false /* use results cache */, 
+            return new BuildResult(outputsByTargetName, resultByTarget, overallSuccess, buildRequest.HandleId, buildRequest.RequestId,
+                int.Parse(projectIdCacheEntry.Value, CultureInfo.InvariantCulture), false /* use results cache */,
                 defaultTargetsCacheEntry.Value, initialTargetsCacheEntry.Value, 0, 0, 0);
         }
 

@@ -157,7 +157,7 @@ namespace Microsoft.Build.BuildEngine
         public virtual RegistryKeyWrapper OpenSubKey(string name)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            
+
             RegistryKeyWrapper wrapper = this;
             string[] keyNames = name.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -224,7 +224,7 @@ namespace Microsoft.Build.BuildEngine
                 return wrappedKey;
             }
         }
-    
+
         /// <summary>
         /// Returns false if this is a known exception thrown by the registry API.
         /// </summary>

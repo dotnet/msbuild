@@ -154,7 +154,7 @@ namespace Microsoft.Build.BuildEngine
             string errorCode;
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, resourceName, args);
-            
+
             throw new InvalidToolsetDefinitionException(message, errorCode, innerException);
         }
 

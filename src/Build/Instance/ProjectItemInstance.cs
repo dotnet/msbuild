@@ -1137,7 +1137,7 @@ namespace Microsoft.Build.Execution
 
             IEnumerable<ProjectMetadataInstance> IItem<ProjectMetadataInstance>.Metadata => MetadataCollection;
 
-#region Operators
+            #region Operators
 
             /// <summary>
             /// This allows an explicit typecast from a "TaskItem" to a "string", returning the ItemSpec for this item.
@@ -1178,7 +1178,7 @@ namespace Microsoft.Build.Execution
                 return !(left == right);
             }
 
-#endregion
+            #endregion
 
             /// <summary>
             /// Produce a string representation.
@@ -1200,7 +1200,7 @@ namespace Microsoft.Build.Execution
             }
 #endif
 
-#region IItem and ITaskItem2 Members
+            #region IItem and ITaskItem2 Members
 
             /// <summary>
             /// Returns the metadata with the specified key.
@@ -1451,9 +1451,9 @@ namespace Microsoft.Build.Execution
                 return clonedMetadata;
             }
 
-#endregion
+            #endregion
 
-#region INodePacketTranslatable Members
+            #region INodePacketTranslatable Members
 
             /// <summary>
             /// Reads or writes the packet to the serializer.
@@ -1483,9 +1483,9 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-#endregion
+            #endregion
 
-#region IEquatable<TaskItem> Members
+            #region IEquatable<TaskItem> Members
 
             /// <summary>
             /// Override of GetHashCode.
@@ -1594,7 +1594,7 @@ namespace Microsoft.Build.Execution
                 return thisNames.Count == 0;
             }
 
-#endregion
+            #endregion
 
             /// <summary>
             /// Returns true if a particular piece of metadata is defined on this item (even if
@@ -1655,7 +1655,7 @@ namespace Microsoft.Build.Execution
                 var key = interner.Intern(str);
                 translator.Writer.Write(key);
             }
-            
+
             private void ReadInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
             {
                 var val = translator.Reader.ReadInt32();

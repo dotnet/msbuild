@@ -9,7 +9,7 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Logging.FancyLogger
 {
     public class FancyLogger : ILogger
-    {   
+    {
         private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
 
         private bool Succeeded;
@@ -17,7 +17,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         private float existingTasks = 1;
         private float completedTasks = 0;
 
-        public string Parameters {  get; set; }
+        public string Parameters { get; set; }
 
         public LoggerVerbosity Verbosity { get; set; }
 
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Cancelled
             Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
-            
+
             Task.Run(() =>
             {
                 Render();

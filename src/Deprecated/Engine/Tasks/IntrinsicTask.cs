@@ -29,7 +29,7 @@ namespace Microsoft.Build.BuildEngine
             this.buildEventContext = eventContext;
             this.executionDirectory = executionDirectory;
             this.itemDefinitionLibrary = itemDefinitionLibrary;
-            
+
             ErrorUtilities.VerifyThrow(IsIntrinsicTaskName(taskNodeXmlElement.Name), "Only PropertyGroup and ItemGroup are known intrinsic tasks");
 
             switch (taskNodeXmlElement.Name)
@@ -70,7 +70,7 @@ namespace Microsoft.Build.BuildEngine
         {
             ErrorUtilities.VerifyThrow(lookup != null, "Need to specify lookup.");
 
-            if ((conditionAttribute != null) 
+            if ((conditionAttribute != null)
                 && !Utilities.EvaluateCondition(conditionAttribute.Value, conditionAttribute, new Expander(lookup.ReadOnlyLookup), null, ParserOptions.AllowPropertiesAndItemLists, loggingServices, buildEventContext))
             {
                 return;
@@ -93,7 +93,7 @@ namespace Microsoft.Build.BuildEngine
         /// Execute a PropertyGroup element, including each child property
         /// </summary>
         private void ExecutePropertyGroup(Lookup lookup)
-        {          
+        {
             foreach (BuildProperty property in backingPropertyGroup)
             {
                 ArrayList buckets = null;

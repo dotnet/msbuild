@@ -33,7 +33,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 (?<TRANSFORM_SPECIFICATION>(?<ARROW>\s*->\s*)(?<TRANSFORM>'[^']*'))
                 (?<SEPARATOR_SPECIFICATION>\s*,\s*'[^']*')?
               (?<SUFFIX>\s*\))";
-                                                      // )
+        // )
 
         // regular expression used to match item vector transforms
         // internal for unit testing only
@@ -112,8 +112,8 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             // don't write an XML declaration unless the project already has one or has non-default encoding
-            writeXmlDeclaration = 
-                ((projectXmlDeclaration != null) || 
+            writeXmlDeclaration =
+                ((projectXmlDeclaration != null) ||
                 ((documentEncoding != Encoding.UTF8) && (documentEncoding != null)));
         }
 
@@ -183,7 +183,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 }
 
                 // write the terminal piece of text after the last transform
-                base.WriteString(surroundingTextPieces[surroundingTextPieces.Length-1]);
+                base.WriteString(surroundingTextPieces[surroundingTextPieces.Length - 1]);
             }
             // if the string has no item vector transforms in it, write it out as usual
             else

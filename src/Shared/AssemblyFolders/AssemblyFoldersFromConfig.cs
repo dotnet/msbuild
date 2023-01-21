@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         {
             ErrorUtilities.VerifyThrowArgumentNull(configFile, nameof(configFile));
             ErrorUtilities.VerifyThrowArgumentNull(targetRuntimeVersion, nameof(targetRuntimeVersion));
-            
+
             var collection = AssemblyFolderCollection.Load(configFile);
             var assemblyTargets = GatherVersionStrings(targetRuntimeVersion, collection);
 
@@ -76,12 +76,12 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 
         private static List<AssemblyFolderItem> GatherVersionStrings(string targetRuntimeVersion, AssemblyFolderCollection collection)
         {
-            return 
+            return
                 (from folder in collection.AssemblyFolders
                  let targetVersion = VersionUtilities.ConvertToVersion(targetRuntimeVersion)
                  let replacementVersion = GetFrameworkVersion(folder.FrameworkVersion)
                  where targetVersion != null && targetVersion >= replacementVersion
-                 orderby folder.FrameworkVersion descending 
+                 orderby folder.FrameworkVersion descending
                  select folder).ToList();
         }
 

@@ -42,7 +42,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
         {
             var original = CreateTargetItem(null, metadata);
 
-            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)original).Translate(TranslationHelpers.GetWriteTranslator());
             var clone = ProjectItemGroupTaskItemInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, clone, new TargetItemComparer());

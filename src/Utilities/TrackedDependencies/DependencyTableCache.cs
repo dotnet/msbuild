@@ -29,7 +29,7 @@ namespace Microsoft.Build.Utilities
         /// The dictionary that maps the root of the tlog filenames to the dependencytable built from their content
         /// </summary>
         internal static Dictionary<string, DependencyTableCacheEntry> DependencyTable { get; } = new Dictionary<string, DependencyTableCacheEntry>(StringComparer.OrdinalIgnoreCase);
-
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Methods
         /// <summary>
         /// Determine if a cache entry is up to date
@@ -227,6 +227,7 @@ namespace Microsoft.Build.Utilities
 
         #endregion
     }
+#pragma warning restore format
 
     /// <summary>
     /// A cache entry
@@ -270,3 +271,4 @@ namespace Microsoft.Build.Utilities
 }
 
 #endif
+

@@ -38,7 +38,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal static CacheEntry CreateFromStream(BinaryReader reader)
         {
-            CacheEntryTypes entryType = (CacheEntryTypes) reader.ReadByte();
+            CacheEntryTypes entryType = (CacheEntryTypes)reader.ReadByte();
             CacheEntry entry = null;
 
             switch (entryType)

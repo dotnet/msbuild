@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests
                   </Target>
                 </Project>");
 
-            logger.ErrorCount.ShouldBe (1);
+            logger.ErrorCount.ShouldBe(1);
         }
 
         /// <summary>

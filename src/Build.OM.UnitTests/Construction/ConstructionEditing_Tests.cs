@@ -1014,7 +1014,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Theory(Skip= "https://github.com/dotnet/msbuild/issues/1253")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1253")]
         [MemberData(nameof(InsertMetadataAttributeAfterSiblingsTestData))]
         public void InsertMetadataAttributeAfterSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
@@ -1078,7 +1078,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Theory(Skip= "https://github.com/dotnet/msbuild/issues/1253")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1253")]
         [MemberData(nameof(InsertMetadataAttributeBeforeSiblingsTestData))]
         public void InsertMetadataAttributeBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {

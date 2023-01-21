@@ -24,9 +24,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// </summary>
         /// <value></value>
         internal new string[] DefaultPaths
-            {
-                get { return new string[] { s_myApp_V10Path, @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
-            }
+        {
+            get { return new string[] { s_myApp_V10Path, @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
+        }
 
         /// <summary>
         /// In this case,
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// We automatically unify FX dependencies.
         /// </summary>
         [Fact]
-            [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void Exists()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-                t.SearchPaths = new string[] { s_myApp_V10Path, @"C:\Framework\Everett" }; 
+            t.SearchPaths = new string[] { s_myApp_V10Path, @"C:\Framework\Everett" };
 
             bool succeeded = Execute(t);
 
@@ -133,8 +133,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         {
             MockEngine e = new MockEngine(_output);
 
-                string actualFrameworkDirectory = s_myVersion20Path;
-                string alternativeFrameworkDirectory = s_myVersion40Path;
+            string actualFrameworkDirectory = s_myVersion20Path;
+            string alternativeFrameworkDirectory = s_myVersion40Path;
 
             ITaskItem[] items = new TaskItem[] { new TaskItem(Path.Combine(actualFrameworkDirectory, "System.dll")) };
 

@@ -934,7 +934,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_REGISTRY_SDKS
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
 #else
-        [Fact (Skip="Registry SDKs not supported")]
+        [Fact(Skip = "Registry SDKs not supported")]
 #endif
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetPathToDotNetFrameworkSdk()

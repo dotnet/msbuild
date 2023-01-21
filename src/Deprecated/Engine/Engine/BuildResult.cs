@@ -25,8 +25,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildResult
         (
-            IDictionary outputsByTarget, Hashtable resultByTarget, bool evaluationResult, 
-            int handleId, int requestId, int projectId, bool useResultCache, 
+            IDictionary outputsByTarget, Hashtable resultByTarget, bool evaluationResult,
+            int handleId, int requestId, int projectId, bool useResultCache,
             string defaultTargets, string initialTargets,
             int totalTime, int engineTime, int taskTime
         )
@@ -36,7 +36,7 @@ namespace Microsoft.Build.BuildEngine
             this.handleId = handleId;
             this.requestId = requestId;
             this.projectId = projectId;
-            this.flags = (byte)((evaluationResult ? 1 : 0 ) | (useResultCache ? 2 : 0));
+            this.flags = (byte)((evaluationResult ? 1 : 0) | (useResultCache ? 2 : 0));
             this.defaultTargets = defaultTargets;
             this.initialTargets = initialTargets;
             this.totalTime = totalTime;
@@ -86,7 +86,7 @@ namespace Microsoft.Build.BuildEngine
                             itemArray[i] = new BuildItem(null, originalArray[i].FinalItemSpecEscaped);
                         }
                     }
-                    
+
                     this.outputsByTarget.Add(entry.Key, itemArray);
                 }
             }

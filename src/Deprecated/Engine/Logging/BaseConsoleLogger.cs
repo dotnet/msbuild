@@ -218,7 +218,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="resourceString"></param>
         /// <param name="args"></param>
-        internal  void WriteLinePrettyFromResource(string resourceString, params object[] args)
+        internal void WriteLinePrettyFromResource(string resourceString, params object[] args)
         {
             int indentLevel = IsVerbosityAtLeast(LoggerVerbosity.Normal) ? this.currentIndentLevel : 0;
             WriteLinePrettyFromResource(indentLevel, resourceString, args);
@@ -227,7 +227,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Writes a line from a resource string to the log, using the specified indentation.
         /// </summary>
-        internal  void WriteLinePrettyFromResource(int indentLevel, string resourceString, params object[] args)
+        internal void WriteLinePrettyFromResource(int indentLevel, string resourceString, params object[] args)
         {
             string formattedString = ResourceUtilities.FormatResourceString(resourceString, args);
             WriteLinePretty(indentLevel, formattedString);
@@ -237,7 +237,7 @@ namespace Microsoft.Build.BuildEngine
         /// Writes to the log, using the default indentation. Does not 
         /// terminate with a newline.
         /// </summary>
-        internal  void WritePretty(string formattedString)
+        internal void WritePretty(string formattedString)
         {
             int indentLevel = IsVerbosityAtLeast(LoggerVerbosity.Normal) ? this.currentIndentLevel : 0;
             WritePretty(indentLevel, formattedString);
@@ -634,7 +634,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     reentrantCounterExists = true;
                 }
- 
+
                 counter.PrintCounterMessage(lineWriter, setColor, resetColor);
             }
 
@@ -701,7 +701,7 @@ namespace Microsoft.Build.BuildEngine
             /// <summary>
             /// Whether or not this task or target is executing right now.
             /// </summary>
-            internal  bool InScope 
+            internal bool InScope
             {
                 get { return inScope; }
                 set
@@ -735,29 +735,29 @@ namespace Microsoft.Build.BuildEngine
 
             internal virtual void PrintCounterMessage(WriteLinePrettyFromResourceDelegate WriteLinePrettyFromResource, ColorSetter setColor, ColorResetter resetColor)
             {
-                    string time;
-                    if (!reenteredScope)
-                    {
-                        // round: submillisecond values are not meaningful
-                        time = String.Format(CultureInfo.CurrentCulture,
-                            "{0,5}", Math.Round(elapsedTime.TotalMilliseconds, 0));
-                    }
-                    else
-                    {
-                        // no value available; instead display an asterisk
-                        time = "    *";
-                    }
+                string time;
+                if (!reenteredScope)
+                {
+                    // round: submillisecond values are not meaningful
+                    time = String.Format(CultureInfo.CurrentCulture,
+                        "{0,5}", Math.Round(elapsedTime.TotalMilliseconds, 0));
+                }
+                else
+                {
+                    // no value available; instead display an asterisk
+                    time = "    *";
+                }
 
-                    WriteLinePrettyFromResource
-                        (
-                            2,
-                            "PerformanceLine",
-                            time,
-                            String.Format(CultureInfo.CurrentCulture,
-                                    "{0,-40}" /* pad to 40 align left */, scopeName),
-                            String.Format(CultureInfo.CurrentCulture,
-                                    "{0,3}", calls)
-                        );
+                WriteLinePrettyFromResource
+                    (
+                        2,
+                        "PerformanceLine",
+                        time,
+                        String.Format(CultureInfo.CurrentCulture,
+                                "{0,-40}" /* pad to 40 align left */, scopeName),
+                        String.Format(CultureInfo.CurrentCulture,
+                                "{0,3}", calls)
+                    );
             }
 
             /// <summary>
@@ -957,7 +957,7 @@ namespace Microsoft.Build.BuildEngine
 
         public abstract void BuildStartedHandler(object sender, BuildStartedEventArgs e);
 
-        public abstract  void BuildFinishedHandler(object sender, BuildFinishedEventArgs e);
+        public abstract void BuildFinishedHandler(object sender, BuildFinishedEventArgs e);
 
         public abstract void ProjectStartedHandler(object sender, ProjectStartedEventArgs e);
 
@@ -1005,13 +1005,13 @@ namespace Microsoft.Build.BuildEngine
         /// Delegate used to change text color.
         /// </summary>
         /// <owner>t-jeffv, sumedhk</owner>
-        internal  ColorSetter setColor = null;
+        internal ColorSetter setColor = null;
 
         /// <summary>
         /// Delegate used to reset text color
         /// </summary>
         /// <owner>t-jeffv, sumedhk</owner>
-        internal  ColorResetter resetColor = null;
+        internal ColorResetter resetColor = null;
 
         /// <summary>
         /// Indicates if project header should not be displayed.

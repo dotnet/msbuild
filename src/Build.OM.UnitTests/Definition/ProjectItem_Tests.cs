@@ -837,7 +837,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Project project = new Project(projectCollection);
 
                     // Add item
-                    _= project.AddItem("i", unevaluatedInclude);
+                    _ = project.AddItem("i", unevaluatedInclude);
 
                     // Verify
                     collectionLogger.WarningCount.ShouldBe(1);
@@ -927,7 +927,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void LogWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
             content = string.Format(content, placeHolder, excludePlaceHolder);
-                CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
+            CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
         }
 
         private static void CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(string content, bool throwException)
@@ -1133,7 +1133,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(
             "../a.cs;b.cs", // include string
             "**/*.cs", // exclude string
-            new[] {"a.cs", "ProjectDir/b.cs"}, // files to create relative to the test root dir
+            new[] { "a.cs", "ProjectDir/b.cs" }, // files to create relative to the test root dir
             "ProjectDir", // relative path from test root to project
             new[] { "../a.cs" } // expected items
             )]
@@ -2482,7 +2482,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
                 <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
                 <I1 Include='e1' M1='a/b/../c/./d' M2='1'/>
-                <I1 Include='f1' M1='{ Environment.CurrentDirectory }\b\c' M2='6'/>
+                <I1 Include='f1' M1='{Environment.CurrentDirectory}\b\c' M2='6'/>
 
                 <I2 Include='a2' M1='FOO.TXT' m2='c'/>
                 <I2 Include='b2' M1='foo/bar.txt' m2='x'/>

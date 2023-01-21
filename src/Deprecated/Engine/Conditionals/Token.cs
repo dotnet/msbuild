@@ -14,7 +14,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Valid tokens
         /// </summary>
-        internal enum TokenType 
+        internal enum TokenType
         {
             Comma, LeftParenthesis, RightParenthesis,
             LessThan, GreaterThan, LessThanOrEqualTo, GreaterThanOrEqualTo,
@@ -33,7 +33,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="type"></param>
         /// <param name="tokenString"></param>
-        internal Token( TokenType type, string tokenString )
+        internal Token(TokenType type, string tokenString)
         {
             this.tokenType = type;
             this.tokenString = tokenString;
@@ -44,7 +44,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        internal bool IsToken( TokenType type )
+        internal bool IsToken(TokenType type)
         {
             return tokenType == type;
         }

@@ -53,8 +53,8 @@ namespace Microsoft.Build.Tasks
                 SecurityUtilities.SignFile(
                     CertificateThumbprint,
                     TimestampUrl == null ? null : new Uri(TimestampUrl),
-                    SigningTarget.ItemSpec, 
-                    TargetFrameworkVersion, 
+                    SigningTarget.ItemSpec,
+                    TargetFrameworkVersion,
                     TargetFrameworkIdentifier,
                     DisallowMansignTimestampFallback);
                 return true;

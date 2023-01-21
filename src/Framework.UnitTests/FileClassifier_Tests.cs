@@ -24,7 +24,7 @@ namespace Microsoft.Build.Framework.UnitTests
             FileClassifier classifier = new();
 
             var volume = NativeMethodsShared.IsWindows ? @"X:\" : "/home/usr";
-            classifier.RegisterImmutableDirectory($"{Path.Combine(volume,"Test1")}");
+            classifier.RegisterImmutableDirectory($"{Path.Combine(volume, "Test1")}");
             classifier.RegisterImmutableDirectory($"{Path.Combine(volume, "Test2")}");
 
             classifier.IsNonModifiable(Path.Combine(volume, "Test1", "File.ext")).ShouldBeTrue();

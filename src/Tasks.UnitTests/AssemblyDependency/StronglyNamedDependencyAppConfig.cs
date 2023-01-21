@@ -23,8 +23,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// </summary>
         /// <value></value>
         internal new string[] DefaultPaths
-            {
-                get { return new string[] { s_myApp_V05Path, s_myApp_V10Path, s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
+        {
+            get { return new string[] { s_myApp_V05Path, s_myApp_V10Path, s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
         }
 
 

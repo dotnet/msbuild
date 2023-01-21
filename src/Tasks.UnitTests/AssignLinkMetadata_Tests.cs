@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests
             AssignLinkMetadata t = new AssignLinkMetadata
             {
                 BuildEngine = new MockEngine(),
-                Items = new ITaskItem[] {new TaskItem(item)}
+                Items = new ITaskItem[] { new TaskItem(item) }
             };
             bool success = t.Execute();
 
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
             AssignLinkMetadata t = new AssignLinkMetadata
             {
                 BuildEngine = new MockEngine(),
-                Items = new ITaskItem[] {new TaskItem(item)}
+                Items = new ITaskItem[] { new TaskItem(item) }
             };
             bool success = t.Execute();
 
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests
             AssignLinkMetadata t = new AssignLinkMetadata
             {
                 BuildEngine = new MockEngine(),
-                Items = new ITaskItem[] {new TaskItem(item1), new TaskItem(item2)}
+                Items = new ITaskItem[] { new TaskItem(item1), new TaskItem(item2) }
             };
             bool success = t.Execute();
 
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
             AssignLinkMetadata t = new AssignLinkMetadata
             {
                 BuildEngine = new MockEngine(),
-                Items = new ITaskItem[] {new TaskItem(item)}
+                Items = new ITaskItem[] { new TaskItem(item) }
             };
             bool success = t.Execute();
 
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests
             AssignLinkMetadata t = new AssignLinkMetadata
             {
                 BuildEngine = new MockEngine(),
-                Items = new ITaskItem[] {new TaskItem(item)}
+                Items = new ITaskItem[] { new TaskItem(item) }
             };
             bool success = t.Execute();
 
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests
             AssignLinkMetadata t = new AssignLinkMetadata
             {
                 BuildEngine = new MockEngine(),
-                Items = new ITaskItem[] {item}
+                Items = new ITaskItem[] { item }
             };
             bool success = t.Execute();
 

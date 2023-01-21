@@ -83,7 +83,7 @@ namespace Microsoft.Build.BuildEngine
                 // If there are event - post them to the parent
                 if (current != 0)
                 {
-                    NodeLoggingEvent [] trimmedEventArray = new NodeLoggingEvent[current];
+                    NodeLoggingEvent[] trimmedEventArray = new NodeLoggingEvent[current];
                     Array.Copy(eventArray, trimmedEventArray, current);
                     parentNode.PostLoggingMessagesToHost(trimmedEventArray);
                     current = 0;

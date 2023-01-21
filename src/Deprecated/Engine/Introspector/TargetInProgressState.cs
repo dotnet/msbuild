@@ -24,10 +24,10 @@ namespace Microsoft.Build.BuildEngine
         internal TargetInProgessState
         (
             EngineCallback engineCallback,
-            Target target, 
+            Target target,
             List<ProjectBuildState> waitingBuildStates,
             ProjectBuildState initiatingRequest,
-            BuildRequest [] outstandingBuildRequests,
+            BuildRequest[] outstandingBuildRequests,
             string projectName
         )
         {
@@ -172,7 +172,7 @@ namespace Microsoft.Build.BuildEngine
         (
             EngineCallback engineCallback,
             ProjectBuildState buildContext,
-            Target target, 
+            Target target,
             out BuildRequest parentRequest
         )
         {
@@ -310,7 +310,7 @@ namespace Microsoft.Build.BuildEngine
 
         // Mapping between list of build requests waiting on the current target and targets
         // from which these build reuquests originated
-        private TargetIdWrapper [] parentTargetsForBuildRequests;
+        private TargetIdWrapper[] parentTargetsForBuildRequests;
 
         // Name of the project containing the target (only used for logging)
         private string projectName;

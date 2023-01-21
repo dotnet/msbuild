@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
 #if !RUNTIME_TYPE_NETCORE
         private const string pfxFileContainerPrefix = "VS_KEY_";
 #endif
-        
+
         #region Properties
 
         public string KeyFile { get; set; }

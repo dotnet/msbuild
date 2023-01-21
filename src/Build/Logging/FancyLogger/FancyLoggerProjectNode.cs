@@ -9,7 +9,7 @@ using System.Linq;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
-{ 
+{
     internal class FancyLoggerProjectNode
     {
         /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 // Project
                 ANSIBuilder.Formatting.Dim("Project: ") +
                 // Project file path with color
-                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework ?? "*"}]",
+                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default)} [{TargetFramework ?? "*"}]",
                 $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
                 Console.WindowWidth
             );

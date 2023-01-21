@@ -192,9 +192,9 @@ namespace Microsoft.Build.BuildEngine
         (
             XmlNode parentNode,
             Dictionary<string, MetadataReference> consumedMetadataReferences,   // Key is [string] potentially qualified metadata name
-                                                    // Value is [struct MetadataReference]
+                                                                                // Value is [struct MetadataReference]
             Hashtable consumedItemReferenceNames,       // Key is [string] item name.
-                                                    // Value is always String.Empty (unused).
+                                                        // Value is always String.Empty (unused).
             Lookup lookup
         )
         {
@@ -267,7 +267,7 @@ namespace Microsoft.Build.BuildEngine
 
             return itemListsToBeBatched;
         }
-    
+
         /// <summary>
         /// Partitions the items consumed by the batchable object into buckets, where each bucket contains a set of items that
         /// have the same value set on all item metadata consumed by the object.
@@ -387,7 +387,7 @@ namespace Microsoft.Build.BuildEngine
                 string metadataItemName = consumedMetadataReference.Value.itemName;
                 string metadataName = consumedMetadataReference.Value.metadataName;
 
-                if  (
+                if (
                         (metadataItemName != null) &&
                         (!String.Equals(item.Name, metadataItemName, StringComparison.OrdinalIgnoreCase))
                     )

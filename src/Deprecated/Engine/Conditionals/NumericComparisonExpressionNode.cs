@@ -23,7 +23,7 @@ namespace Microsoft.Build.BuildEngine
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject
                 (LeftChild.CanNumericEvaluate(state) && RightChild.CanNumericEvaluate(state),
-                 state.conditionAttribute, 
+                 state.conditionAttribute,
                 "ComparisonOnNonNumericExpression",
                  state.parsedCondition,
                  /* helpfully display unexpanded token and expanded result in error message */

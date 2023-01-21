@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks
 
         public string AssemblyName { get; set; }
 
-        public bool LauncherBasedDeployment {get; set; } = false;
+        public bool LauncherBasedDeployment { get; set; } = false;
 
         public string TargetFrameworkVersion
         {
@@ -853,7 +853,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                       fusionName = Path.GetFileNameWithoutExtension(item.ItemSpec);
+                        fusionName = Path.GetFileNameWithoutExtension(item.ItemSpec);
                     }
                 }
 

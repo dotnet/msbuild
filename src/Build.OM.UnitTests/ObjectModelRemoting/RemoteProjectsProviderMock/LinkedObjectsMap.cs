@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
         private UInt32 CollectionId { get; set; }
 
-        public static LinkedObjectsMap<KeyType>  Create()
+        public static LinkedObjectsMap<KeyType> Create()
         {
             lock (Lock)
             {

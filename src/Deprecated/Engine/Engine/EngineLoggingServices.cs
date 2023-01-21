@@ -33,7 +33,7 @@ namespace Microsoft.Build.BuildEngine
         protected void Initialize(ManualResetEvent flushRequestEventIn)
         {
             this.loggingQueueOfBuildEvents = new DualQueue<BuildEventArgs>();
-            this.loggingQueueOfNodeEvents  = new DualQueue<NodeLoggingEvent>();
+            this.loggingQueueOfNodeEvents = new DualQueue<NodeLoggingEvent>();
             this.lastFlushTime = DateTime.Now.Ticks;
             this.flushRequestEvent = flushRequestEventIn;
             this.requestedQueueFlush = false;
@@ -185,7 +185,7 @@ namespace Microsoft.Build.BuildEngine
         /// implementation, this will send the events from the node process to the engine.
         /// </summary>
         internal abstract bool ProcessPostedLoggingEvents();
-        
+
         /// <summary>
         /// This method is to process a single build event, by default if this method is used
         /// the event should be posted and processed
@@ -196,7 +196,7 @@ namespace Microsoft.Build.BuildEngine
             PostLoggingEvent(buildEventArgs);
             ProcessPostedLoggingEvents();
         }
-        
+
         /// <summary>
         /// Return true if the queue needs to be flushed
         /// </summary>
@@ -338,7 +338,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Logs a custom-priority comment with all registered loggers using the given text.
         /// </summary>
-        internal virtual void LogCommentFromText(BuildEventContext buildEventContext,MessageImportance importance, string message)
+        internal virtual void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -513,9 +513,9 @@ namespace Microsoft.Build.BuildEngine
             string errorCode;
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, messageResourceName, messageArgs);
-            #if DEBUG
+#if DEBUG
             message += Environment.NewLine + "This is an unhandled exception -- PLEASE OPEN A BUG.";
-            #endif
+#endif
             if (exception != null)
             {
                 message += Environment.NewLine + exception.ToString();
@@ -550,9 +550,9 @@ namespace Microsoft.Build.BuildEngine
             string warningCode;
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceString(out warningCode, out helpKeyword, "FatalTaskError", taskName);
-            #if DEBUG
+#if DEBUG
             message += Environment.NewLine + "This is an unhandled exception -- PLEASE OPEN A BUG.";
-            #endif
+#endif
 
             if (exception != null)
             {
@@ -569,9 +569,9 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-         internal virtual void LogWarning(BuildEventContext buildEventContext, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        internal virtual void LogWarning(BuildEventContext buildEventContext, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            LogWarning(buildEventContext,null, file, messageResourceName, messageArgs);
+            LogWarning(buildEventContext, null, file, messageResourceName, messageArgs);
         }
 
         /// <summary>
@@ -739,7 +739,7 @@ namespace Microsoft.Build.BuildEngine
             if (!OnlyLogCriticalEvents)
             {
                 ProjectStartedEventArgs e;
-              
+
                 if (!string.IsNullOrEmpty(targetNames))
                 {
                     e = new ProjectStartedEventArgs
@@ -768,7 +768,7 @@ namespace Microsoft.Build.BuildEngine
                             parentBuildEventContext
                         );
                 }
- 
+
                 e.BuildEventContext = projectBuildEventContext;
 
                 PostLoggingEvent(e);
@@ -1010,7 +1010,7 @@ namespace Microsoft.Build.BuildEngine
         protected ManualResetEvent flushRequestEvent;
 
         internal const int flushTimeoutInMS = 500;          // flush the queue at least every 1/2 second
-        internal const int flushTimeoutInTicks = 500*10000; // flush the queue at least every 1/2 second
+        internal const int flushTimeoutInTicks = 500 * 10000; // flush the queue at least every 1/2 second
         internal const int flushQueueSize = 1000;            // flush the queue every time 1000 events accumulate
 
         #endregion

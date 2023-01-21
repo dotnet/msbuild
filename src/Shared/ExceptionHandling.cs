@@ -43,9 +43,28 @@ namespace Microsoft.Build.Shared
         private static string GetDebugDumpPath()
         {
             string debugPath =
-// Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+
+                /* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (net7.0)'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                /* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (net472)'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                /* Unmerged change from project 'MSBuildTaskHost'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
 #if CLR2COMPATIBILITY || MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                        Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
                 DebugUtils.DebugPath;
 #endif

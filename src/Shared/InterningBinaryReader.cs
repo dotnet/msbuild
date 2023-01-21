@@ -210,7 +210,7 @@ namespace Microsoft.Build
             return new Buffer();
         }
 
-#region IDisposable pattern
+        #region IDisposable pattern
 
         /// <summary>
         /// Returns our buffer to the pool if we were not passed one by the caller.
@@ -226,7 +226,7 @@ namespace Microsoft.Build
             base.Dispose(disposing);
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Create a BinaryReader. It will either be an interning reader or standard binary reader

@@ -128,7 +128,7 @@ namespace Microsoft.Build.CommandLine
         private static readonly CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
 
         private static readonly char[] s_commaSemicolon = { ',', ';' };
- 
+
         /// <summary>
         /// Static constructor
         /// </summary>
@@ -246,7 +246,7 @@ namespace Microsoft.Build.CommandLine
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
-                
+
                 // Use the client app to execute build in msbuild server. Opt-in feature.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(
 #if FEATURE_GET_COMMANDLINE
@@ -656,7 +656,8 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStart(commandLine);
 #else
-                if (MSBuildEventSource.Log.IsEnabled()) {
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
                     MSBuildEventSource.Log.MSBuildExeStart(string.Join(" ", commandLine));
                 }
 #endif
@@ -813,9 +814,9 @@ namespace Microsoft.Build.CommandLine
                                     inputResultsCaches,
                                     outputResultsCache,
                                     commandLine))
-                            {
-                                exitType = ExitType.BuildError;
-                            }
+                        {
+                            exitType = ExitType.BuildError;
+                        }
                     } // end of build
 
                     DateTime t2 = DateTime.Now;
@@ -966,7 +967,8 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
 #else
-                if (MSBuildEventSource.Log.IsEnabled()) {
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
                     MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
                 }
 #endif
@@ -1009,7 +1011,7 @@ namespace Microsoft.Build.CommandLine
             // We're already on a threadpool thread anyway.
             WaitCallback callback = delegate
             {
-                try 
+                try
                 {
                     s_cancelComplete.Reset();
 
@@ -1375,7 +1377,7 @@ namespace Microsoft.Build.CommandLine
                             {
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new[]{ new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
                                 }
                                 else
                                 {
@@ -2424,7 +2426,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.FancyLogger], 
+                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.FancyLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -2565,7 +2567,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (parameter.Trim().Equals("NoBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    options = options with {Build = false};
+                    options = options with { Build = false };
                 }
                 else
                 {
@@ -3052,7 +3054,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 // if there are no project, solution filter, or solution files in the directory, we can't build
                 else if (actualProjectFiles.Count == 0 &&
-                         actualSolutionFiles.Count== 0 &&
+                         actualSolutionFiles.Count == 0 &&
                          solutionFilterFiles.Count == 0)
                 {
                     InitializationException.Throw("MissingProjectError", null, null, false);
@@ -3209,7 +3211,7 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
-            bool fancyLoggerCommandLineOptIn, 
+            bool fancyLoggerCommandLineOptIn,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3360,7 +3362,7 @@ namespace Microsoft.Build.CommandLine
 
             string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
 
-            BinaryLogger logger = new BinaryLogger {Parameters = arguments};
+            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.Build.Shared.AssemblyFoldersFromConfig
 {
-    [DataContract(Name="AssemblyFolder", Namespace = "")]
+    [DataContract(Name = "AssemblyFolder", Namespace = "")]
     [DebuggerDisplay("{Name}: FrameworkVersion = {FrameworkVersion}, Platform = {Platform}, Path= {Path}")]
     internal class AssemblyFolderItem
     {

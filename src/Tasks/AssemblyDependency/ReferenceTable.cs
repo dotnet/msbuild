@@ -2674,7 +2674,7 @@ namespace Microsoft.Build.Tasks
             serializationAssemblyFiles = serializationAssemblyItems.ToArray();
             scatterFiles = scatterItems.ToArray();
 
-             // Sort for stable outputs. (These came from a dictionary, which has undefined enumeration order.)
+            // Sort for stable outputs. (These came from a dictionary, which has undefined enumeration order.)
             Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.GenericComparer);
 
             // Find the copy-local items.
@@ -2932,7 +2932,7 @@ namespace Microsoft.Build.Tasks
                         dllArchitecture = SystemProcessorArchitecture.Arm;
                         break;
                     case NativeMethods.IMAGE_FILE_MACHINE_ARM64:
-                        dllArchitecture = (SystemProcessorArchitecture) 6; // There's no entry for ARM64 in SystemProcessorArchitecture, use the next available constant
+                        dllArchitecture = (SystemProcessorArchitecture)6; // There's no entry for ARM64 in SystemProcessorArchitecture, use the next available constant
                         break;
                     case NativeMethods.IMAGE_FILE_MACHINE_I386:
                         dllArchitecture = SystemProcessorArchitecture.X86;

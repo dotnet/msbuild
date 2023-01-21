@@ -355,7 +355,7 @@ namespace Microsoft.Build.Internal
                         // This is higher than the 'legacy' toolsversion values.
                         // Therefore we need to enter best effort mode and
                         // present the current one.
-                        if (toolsVersionAsVersion > new Version(15,0))
+                        if (toolsVersionAsVersion > new Version(15, 0))
                         {
                             toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
                         }

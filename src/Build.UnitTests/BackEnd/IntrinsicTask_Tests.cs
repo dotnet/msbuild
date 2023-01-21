@@ -1739,7 +1739,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var items = lookup.GetItems("I2");
 
-            items.Select(i => i.EvaluatedInclude).ShouldBe(new []{"a2", "d2"});
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "d2" });
 
             items.ElementAt(0).GetMetadataValue("M1").ShouldBe("x");
             items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
@@ -1796,7 +1796,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
                             <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
                             <I1 Include='e1' M1='a/b/../c/./d' M2='1'/>
-                            <I1 Include='f1' M1='{ Environment.CurrentDirectory }\b\c' M2='6'/>
+                            <I1 Include='f1' M1='{Environment.CurrentDirectory}\b\c' M2='6'/>
 
                             <I2 Include='a2' M1='FOO.TXT' m2='c'/>
                             <I2 Include='b2' M1='foo/bar.txt' m2='x'/>

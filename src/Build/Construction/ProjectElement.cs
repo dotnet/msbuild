@@ -90,7 +90,7 @@ namespace Microsoft.Build.Construction
                     _expressedAsAttribute = value;
                     Parent?.AddToXml(this);
                     MarkDirty("Set express as attribute: {0}", value.ToString());
-                }                
+                }
             }
         }
 
@@ -210,7 +210,7 @@ namespace Microsoft.Build.Construction
         public ProjectElement PreviousSibling
         {
             [DebuggerStepThrough]
-            get => Link != null? Link.PreviousSibling : _previousSibling;
+            get => Link != null ? Link.PreviousSibling : _previousSibling;
             [DebuggerStepThrough]
             internal set => _previousSibling = value;
         }
@@ -291,10 +291,10 @@ namespace Microsoft.Build.Construction
         /// In the case of an unsaved edit, the location only
         /// contains the path to the file that the element originates from.
         /// </summary>
-        public ElementLocation Location => Link != null ? Link.Location :  XmlElement.Location;
+        public ElementLocation Location => Link != null ? Link.Location : XmlElement.Location;
 
         /// <inheritdoc/>
-        public string ElementName => Link != null? Link.ElementName : XmlElement.Name;
+        public string ElementName => Link != null ? Link.ElementName : XmlElement.Name;
 
         // Using ILinkedXml to share single field for either Linked (external) and local (XML backed) nodes.
         private ILinkedXml _xmlSource;
@@ -331,7 +331,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return (XmlDocumentWithLocation) XmlElement?.OwnerDocument;
+                return (XmlDocumentWithLocation)XmlElement?.OwnerDocument;
             }
         }
 

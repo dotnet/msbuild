@@ -91,7 +91,7 @@ namespace Microsoft.Build.BuildEngine
     }
     #endregion
 
-   #region ChangeTraversalType
+    #region ChangeTraversalType
     /// <summary>
     /// Wrapper class for a changing the traversal approach used by the TEM
     /// </summary>

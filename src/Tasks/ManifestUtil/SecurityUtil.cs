@@ -766,7 +766,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true);
             }
-            catch(ApplicationException) when (timestampUrl != null)
+            catch (ApplicationException) when (timestampUrl != null)
             {
                 // error, retry with signtool /t if timestamp url was given
                 SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);

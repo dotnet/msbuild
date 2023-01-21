@@ -153,7 +153,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         /// <returns>Target node</returns>
         private Target GetOrAddTargetByName(string targetName, TargetStartedEventArgs e = null)
         {
-            Target result = _targetNameToTargetMap.GetOrAdd(targetName, key=> new Target(key, e));
+            Target result = _targetNameToTargetMap.GetOrAdd(targetName, key => new Target(key, e));
 
             if (e != null)
             {

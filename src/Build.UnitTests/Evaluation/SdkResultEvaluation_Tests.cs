@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public SdkResultEvaluation_Tests(ITestOutputHelper log)
         {
             _log = log;
-    
+
             _env = TestEnvironment.Create();
 
             _originalWarnOnUnitializedProperty = BuildParameters.WarnOnUninitializedProperty;

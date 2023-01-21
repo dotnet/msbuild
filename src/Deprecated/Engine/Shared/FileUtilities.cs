@@ -109,7 +109,7 @@ namespace Microsoft.Build.BuildEngine.Shared
              * therefore is not an item spec modifier.
              * 
              */
-            switch (name.Length) 
+            switch (name.Length)
             {
                 case 7: // RootDir
                     switch (name[0])
@@ -122,12 +122,12 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'r':        
+                        case 'r':
                             break;
                     }
                     break;
                 case 8: // FullPath, Filename, Identity
-     
+
                     switch (name[0])
                     {
                         default:
@@ -150,7 +150,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'i':        
+                        case 'i':
                             break;
                     }
                     break;
@@ -165,7 +165,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'd':        
+                        case 'd':
                             break;
                         case 'E': // Extension
                             if (name == ItemSpecModifiers.Extension)
@@ -173,9 +173,9 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'e':        
+                        case 'e':
                             break;
-                    }             
+                    }
                     break;
                 case 11: // RelativeDir, CreatedTime
                     switch (name[0])
@@ -196,10 +196,10 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'r':        
+                        case 'r':
                             break;
                     }
-                    break; 
+                    break;
                 case 12: // RecursiveDir, ModifiedTime, AccessedTime
 
                     switch (name[0])
@@ -212,7 +212,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'a':        
+                        case 'a':
                             break;
                         case 'M': // ModifiedTime
                             if (name == ItemSpecModifiers.ModifiedTime)
@@ -220,7 +220,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'm':        
+                        case 'm':
                             break;
                         case 'R': // RecursiveDir
                             if (name == ItemSpecModifiers.RecursiveDir)
@@ -228,7 +228,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'r':        
+                        case 'r':
                             break;
                     }
                     break;
@@ -236,7 +236,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     // Not the right length for a match.
                     return false;
             }
-                   
+
 
             // Could still be a case-insensitive match.
             bool result = ItemSpecModifiers.TableOfItemSpecModifiers.ContainsKey(name);
@@ -266,7 +266,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             return isItemSpecModifier;
-       }
+        }
 
         /// <summary>
         /// Performs path manipulations on the given item-spec as directed.
@@ -500,7 +500,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     if (cachedModifiers == null)
                     {
                         cachedModifiers = new Hashtable(StringComparer.OrdinalIgnoreCase);
-     
+
                         // mark the cache to indicate the item-spec for which it was created
                         // NOTE: we've intentionally picked a key here that will never conflict with any modifier name -- if we
                         // use the item-spec as the key, it's possible for it to conflict with the name of a modifier

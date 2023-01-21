@@ -17,7 +17,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal ExecutionContext(int handleId, int nodeIndex, BuildEventContext buildEventContext)
         {
-            this.handleId  = handleId;
+            this.handleId = handleId;
             this.nodeIndex = nodeIndex;
             this.buildEventContext = buildEventContext;
         }

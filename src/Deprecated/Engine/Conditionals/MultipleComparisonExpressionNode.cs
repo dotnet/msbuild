@@ -56,9 +56,9 @@ namespace Microsoft.Build.BuildEngine
                 string rightExpandedValue = RightChild.GetExpandedValue(state);
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (leftExpandedValue != null && rightExpandedValue != null, 
-                     state.conditionAttribute, 
-                     "IllFormedCondition", 
+                    (leftExpandedValue != null && rightExpandedValue != null,
+                     state.conditionAttribute,
+                     "IllFormedCondition",
                      state.parsedCondition);
 
                 if (!conditionedPropertiesUpdated)
@@ -69,16 +69,16 @@ namespace Microsoft.Build.BuildEngine
                     if (leftUnexpandedValue != null)
                     {
                         Utilities.UpdateConditionedPropertiesTable
-                            (state.conditionedPropertiesInProject, 
-                             leftUnexpandedValue, 
+                            (state.conditionedPropertiesInProject,
+                             leftUnexpandedValue,
                              rightExpandedValue);
                     }
 
                     if (rightUnexpandedValue != null)
                     {
                         Utilities.UpdateConditionedPropertiesTable
-                            (state.conditionedPropertiesInProject, 
-                             rightUnexpandedValue, 
+                            (state.conditionedPropertiesInProject,
+                             rightUnexpandedValue,
                              leftExpandedValue);
                     }
 

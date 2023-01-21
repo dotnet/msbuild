@@ -275,6 +275,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Helper Functions
 
         /// <summary>
@@ -393,6 +394,7 @@ namespace Microsoft.Build.UnitTests
         private const string msbuildDefaultToolsVersion = "4.0";
 
         #endregion // Helper Functions
+#pragma warning restore format
     }
 }
 #endif

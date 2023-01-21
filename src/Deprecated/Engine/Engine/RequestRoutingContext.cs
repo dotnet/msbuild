@@ -24,12 +24,12 @@ namespace Microsoft.Build.BuildEngine
             int nodeIndex,
             int parentHandleId,
             int parentNodeIndex,
-            int parentRequestId, 
+            int parentRequestId,
             CacheScope cacheScope,
             BuildRequest triggeringBuildRequest,
             BuildEventContext buildEventContext
         )
-            :base(handleId, nodeIndex, buildEventContext)
+            : base(handleId, nodeIndex, buildEventContext)
         {
             this.parentHandleId = parentHandleId;
             this.parentNodeIndex = parentNodeIndex;

@@ -2660,9 +2660,9 @@ namespace Microsoft.Build.Evaluation
             {
                 return (excludeGlob, removeGlob) switch
                 {
-                    (null,     null)     => includeGlob,
-                    (not null, null)     => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
-                    (null,     not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
+                    (null, null) => includeGlob,
+                    (not null, null) => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
+                    (null, not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
                     (not null, not null) => new MSBuildGlobWithGaps(includeGlob, new CompositeGlob(excludeGlob, removeGlob))
                 };
             }

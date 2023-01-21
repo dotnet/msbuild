@@ -1108,7 +1108,7 @@ namespace Microsoft.Build.BackEnd
                     // flag an error if we find a parameter that has no .NET property equivalent
                     _taskLoggingContext.LogError
                         (
-                        new BuildEventFileInfo( parameterLocation ),
+                        new BuildEventFileInfo(parameterLocation),
                         "UnexpectedTaskAttribute",
                         parameterName,
                         _taskName,

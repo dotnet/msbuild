@@ -14,7 +14,7 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
 
         internal NodeRequestMapping
-            (int handleId, int requestId, CacheScope resultsCache )
+            (int handleId, int requestId, CacheScope resultsCache)
         {
             ErrorUtilities.VerifyThrow(resultsCache != null, "Expect a non-null build result");
             this.handleId = handleId;

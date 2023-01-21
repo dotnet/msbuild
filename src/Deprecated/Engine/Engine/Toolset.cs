@@ -80,7 +80,7 @@ namespace Microsoft.Build.BuildEngine
                 // they don't end up with a double-backslash in the middle.  (It doesn't
                 // technically hurt anything, but it doesn't look nice.)
                 string toolsPathToUse = value;
-                
+
                 if (FileUtilities.EndsWithSlash(toolsPathToUse))
                 {
                     string rootPath = Path.GetPathRoot(Path.GetFullPath(toolsPathToUse));

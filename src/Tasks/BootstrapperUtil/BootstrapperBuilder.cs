@@ -552,7 +552,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         }
 
                         XmlNode rootNode = resourceDoc.SelectSingleNode("Resources");
-                        XmlAttribute cultureAttribute = (XmlAttribute) rootNode?.Attributes.GetNamedItem("Culture");
+                        XmlAttribute cultureAttribute = (XmlAttribute)rootNode?.Attributes.GetNamedItem("Culture");
                         if (cultureAttribute != null)
                         {
                             XmlNode stringsNode = rootNode.SelectSingleNode("Strings");
@@ -1565,7 +1565,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         else
                         {
                             string configFileKey = string.Format(CultureInfo.InvariantCulture, "EULA{0}", eulas.Count);
-                            var de = new KeyValuePair<string ,string>(configFileKey, eulaAttribute.Value);
+                            var de = new KeyValuePair<string, string>(configFileKey, eulaAttribute.Value);
                             eulas[key] = de;
                             eulaAttribute.Value = configFileKey;
                         }
@@ -1831,7 +1831,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             CultureInfo ci = Util.GetCultureInfoFromString(settings.Culture);
             CultureInfo fallbackCI = Util.GetCultureInfoFromString(settings.FallbackCulture);
             XmlNode cultureNode;
-            
+
             if (ci != null)
             {
                 // Work through the progression of parent cultures (up until but excluding the invariant culture) -> fallback culture -> parent fallback culture -> default culture -> parent default culture -> any available culture

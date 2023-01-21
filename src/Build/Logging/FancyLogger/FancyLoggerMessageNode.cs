@@ -6,7 +6,7 @@ using System;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
-{ 
+{
 
     public class FancyLoggerMessageNode
     {

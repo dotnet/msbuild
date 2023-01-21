@@ -613,7 +613,7 @@ namespace Microsoft.Build.Evaluation
                 using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _loggingService.Loggers == null
-                        ? (ICollection<ILogger>) ReadOnlyEmptyCollection<ILogger>.Instance
+                        ? (ICollection<ILogger>)ReadOnlyEmptyCollection<ILogger>.Instance
                         : new List<ILogger>(_loggingService.Loggers);
                 }
             }
@@ -1090,7 +1090,7 @@ namespace Microsoft.Build.Evaluation
             List<Project> loaded;
             using (_locker.EnterDisposableWriteLock())
             {
-                    loaded = fullPath == null ? new List<Project>(_loadedProjects) : new List<Project>(_loadedProjects.GetMatchingProjectsIfAny(fullPath));
+                loaded = fullPath == null ? new List<Project>(_loadedProjects) : new List<Project>(_loadedProjects.GetMatchingProjectsIfAny(fullPath));
             }
 
             if (includeExternal)
@@ -1495,7 +1495,7 @@ namespace Microsoft.Build.Evaluation
             GC.SuppressFinalize(this);
         }
 
-#region IBuildComponent Members
+        #region IBuildComponent Members
 
         /// <summary>
         /// Initializes the component with the component host.
@@ -1512,7 +1512,7 @@ namespace Microsoft.Build.Evaluation
         {
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Unloads a project XML root element from the cache entirely, if it is not
@@ -1934,7 +1934,7 @@ namespace Microsoft.Build.Evaluation
                 _originalLogger = originalLogger;
             }
 
-#region IEventSource Members
+            #region IEventSource Members
 
             /// <summary>
             /// The Message logging event
@@ -2161,7 +2161,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-#endregion
+            #endregion
 
             /// <summary>
             /// Registers for all of the events on the specified event source.

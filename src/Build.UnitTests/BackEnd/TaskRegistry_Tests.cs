@@ -629,7 +629,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData("x64","true","x86","", "x64")] // x64 wins
+        [InlineData("x64", "true", "x86", "", "x64")] // x64 wins
         [InlineData("x64", "false", "x86", "true", "x86")] // x86 wins
         public void OverriddenTask_AlwaysWins(string firstArch, string firstOverride, string secondArch, string secondOverride, string expectedArch)
         {
@@ -1319,7 +1319,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
-            
+
             ProjectUsingTaskElement element = project.AddUsingTask("Task1", AssemblyUtilities.GetAssemblyLocation(typeof(TaskRegistry_Tests.NullTaskTypeTaskFactory).GetTypeInfo().Assembly), null);
 
             element.TaskFactory = typeof(NullTaskTypeTaskFactory).FullName;
@@ -1328,7 +1328,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => registry.GetRegisteredTask("Task1", "none", null, false, new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1)), ElementLocation.Create("none", 1, 2)));
-            
+
             exception.ErrorCode.ShouldBe("MSB4175");
 
             exception.Message.ShouldContain("The task factory must return a value for the \"TaskType\" property.");

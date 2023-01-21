@@ -26,7 +26,7 @@ namespace Microsoft.Build.BuildEngine
         {
             return ConversionUtilities.ConvertStringToBool(GetExpandedValue(state));
         }
-        
+
         /// <summary>
         /// Evaluate as numeric
         /// </summary>

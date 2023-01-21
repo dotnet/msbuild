@@ -45,42 +45,42 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
-                // Lock as multiple threads may throw simultaneously
-                lock (dumpFileLocker)
+            // Lock as multiple threads may throw simultaneously
+            lock (dumpFileLocker)
+            {
+                if (dumpFileName == null)
                 {
-                    if (dumpFileName == null)
+                    Guid guid = Guid.NewGuid();
+                    string tempPath = Path.GetTempPath();
+
+                    // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
+                    // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
+                    if (!Directory.Exists(tempPath))
                     {
-                        Guid guid = Guid.NewGuid();
-                        string tempPath = Path.GetTempPath();
-
-                        // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
-                        // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                        if (!Directory.Exists(tempPath))
-                        {
-                            // If this throws, no sense catching it, we can't log it now, and we're here
-                            // because we're a child node with no console to log to, so die
-                            Directory.CreateDirectory(tempPath);
-                        }
-
-                        dumpFileName = Path.Combine(tempPath, "MSBuild_" + guid.ToString());
-
-                        using (StreamWriter writer = new StreamWriter(dumpFileName, true /*append*/))
-                        {
-                            writer.WriteLine("UNHANDLED EXCEPTIONS FROM CHILD NODE:");
-                            writer.WriteLine("===================");
-                        }
+                        // If this throws, no sense catching it, we can't log it now, and we're here
+                        // because we're a child node with no console to log to, so die
+                        Directory.CreateDirectory(tempPath);
                     }
+
+                    dumpFileName = Path.Combine(tempPath, "MSBuild_" + guid.ToString());
 
                     using (StreamWriter writer = new StreamWriter(dumpFileName, true /*append*/))
                     {
-                        writer.WriteLine(DateTime.Now.ToLongTimeString());
-                        writer.WriteLine(ex.ToString());
+                        writer.WriteLine("UNHANDLED EXCEPTIONS FROM CHILD NODE:");
                         writer.WriteLine("===================");
                     }
                 }
+
+                using (StreamWriter writer = new StreamWriter(dumpFileName, true /*append*/))
+                {
+                    writer.WriteLine(DateTime.Now.ToLongTimeString());
+                    writer.WriteLine(ex.ToString());
+                    writer.WriteLine("===================");
+                }
+            }
         }
 
-#endregion
+        #endregion
 
         #region Constructors
 
@@ -320,7 +320,7 @@ namespace Microsoft.Build.BuildEngine
 
             globalNodeActive.Close();
             globalNodeInUse.Close();
-         }
+        }
 
         #endregion
 
@@ -370,7 +370,7 @@ namespace Microsoft.Build.BuildEngine
                                 {
                                     // Process the reply from the parent so it can be looked in a hashtable based
                                     // on the call descriptor who requested the reply.
-                                    engineCallback.PostReplyFromParent((LocalReplyCallDescriptor) callDescriptor);
+                                    engineCallback.PostReplyFromParent((LocalReplyCallDescriptor)callDescriptor);
                                 }
                             }
                         }
@@ -413,11 +413,11 @@ namespace Microsoft.Build.BuildEngine
                             new LocalCallDescriptorForShutdownComplete(shutdownLevel, node.TotalTaskTime);
                         // Post the message indicating that the shutdown is complete
                         engineCallback.PostMessageToParent(callDescriptor, true);
-                     }
+                    }
                 }
                 catch (Exception e)
                 {
-                     if (shutdownLevel != Node.NodeShutdownLevel.ErrorShutdown)
+                    if (shutdownLevel != Node.NodeShutdownLevel.ErrorShutdown)
                     {
                         ReportNonFatalCommunicationError(e);
                     }
@@ -437,7 +437,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 // Even if we completed a build, if we are goign to exit the process we need to null out the node and set the notInUseEvent, this is
                 // accomplished by calling this method again with the ErrorShutdown handle
-                if ( shutdownLevel == Node.NodeShutdownLevel.BuildCompleteSuccess || shutdownLevel == Node.NodeShutdownLevel.BuildCompleteFailure )
+                if (shutdownLevel == Node.NodeShutdownLevel.BuildCompleteSuccess || shutdownLevel == Node.NodeShutdownLevel.BuildCompleteFailure)
                 {
                     ShutdownNode(Node.NodeShutdownLevel.ErrorShutdown, false, true);
                 }
@@ -476,9 +476,9 @@ namespace Microsoft.Build.BuildEngine
                 Environment.SetEnvironmentVariable(variableName, null);
             }
 
-            foreach(string key in environmentVariables.Keys)
+            foreach (string key in environmentVariables.Keys)
             {
-                Environment.SetEnvironmentVariable(key,(string)environmentVariables[key]);
+                Environment.SetEnvironmentVariable(key, (string)environmentVariables[key]);
             }
 
             // Host the msbuild engine and system
@@ -613,7 +613,7 @@ namespace Microsoft.Build.BuildEngine
         /// Indicates the node is now in use. This means the node has recieved an activate command with initialization
         /// data from the parent procss
         /// </summary>
-        private static ManualResetEvent inUseEvent    = new ManualResetEvent(false);
+        private static ManualResetEvent inUseEvent = new ManualResetEvent(false);
 
         /// <summary>
         /// Randomly generated file name for all exceptions thrown by this node that need to be dumped to a file.
@@ -622,7 +622,7 @@ namespace Microsoft.Build.BuildEngine
         private static string dumpFileName = null;
 
         // Timeouts && Constants
-        private const int inactivityTimeout   = 60 * 1000; // 60 seconds of inactivity to exit
+        private const int inactivityTimeout = 60 * 1000; // 60 seconds of inactivity to exit
         private const int parentCheckInterval = 5 * 1000; // Check if the parent process is there every 5 seconds
 
         #endregion

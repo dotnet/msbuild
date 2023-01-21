@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests
                 // don't set text
             };
 
-            
+
 
             bool retval = err.Execute();
 

@@ -93,7 +93,7 @@ namespace Microsoft.Build.Framework
                 StringBuilderCache.t_cachedInstance = sb;
             }
 #if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-            MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, returningLength: sb.Length, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-return" :  "sbc-discard");
+            MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, returningLength: sb.Length, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-return" : "sbc-discard");
 #endif
         }
 

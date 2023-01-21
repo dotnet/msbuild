@@ -71,7 +71,7 @@ namespace Microsoft.Build.CommandLine
             string msbuildLocation,
             CancellationToken cancellationToken)
         {
-            MSBuildClient msbuildClient = new MSBuildClient(commandLine, msbuildLocation); 
+            MSBuildClient msbuildClient = new MSBuildClient(commandLine, msbuildLocation);
             MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||

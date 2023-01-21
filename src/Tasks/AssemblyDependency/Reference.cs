@@ -421,7 +421,7 @@ namespace Microsoft.Build.Tasks
         internal void AddRelatedFileExtension(string filenameExtension)
         {
 #if DEBUG
-            Debug.Assert(filenameExtension[0]=='.', "Expected extension to start with '.'");
+            Debug.Assert(filenameExtension[0] == '.', "Expected extension to start with '.'");
 #endif
             _relatedFileExtensions.Add(filenameExtension);
         }

@@ -21,7 +21,7 @@ namespace Microsoft.Build.BuildEngine
                      state.conditionAttribute,
                      "ExpressionDoesNotEvaluateToBoolean",
                      LeftChild.GetUnexpandedValue(state),
-                     LeftChild.GetExpandedValue(state), 
+                     LeftChild.GetExpandedValue(state),
                      state.parsedCondition);
 
             if (!LeftChild.BoolEvaluate(state))

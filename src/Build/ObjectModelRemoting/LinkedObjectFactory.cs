@@ -107,7 +107,7 @@ namespace Microsoft.Build.ObjectModelRemoting
             return new LinkedProjectMetadata(parent, link);
         }
 
-        public ProjectProperty Create(ProjectPropertyLink link, Project project = null )
+        public ProjectProperty Create(ProjectPropertyLink link, Project project = null)
         {
             project ??= link.Project;
 

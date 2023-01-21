@@ -32,7 +32,7 @@ namespace Microsoft.Build.BuildEngine
             dependencyGraph = new Hashtable();
             outstandingExternalRequests = new Hashtable();
             cycleParent = null;
-            cycleChild  = null;
+            cycleChild = null;
         }
         #endregion
 
@@ -179,7 +179,7 @@ namespace Microsoft.Build.BuildEngine
                 TargetInProgessState.TargetIdWrapper[] parentsForBuildRequests =
                     new TargetInProgessState.TargetIdWrapper[node.targetState.ParentBuildRequests.Count];
 
-                for (int j = 0; j < node.targetState.ParentBuildRequests.Count; j++ )
+                for (int j = 0; j < node.targetState.ParentBuildRequests.Count; j++)
                 {
                     BuildRequest buildRequest = node.targetState.ParentBuildRequests[j];
                     int nodeIndex = buildRequest.NodeIndex;
@@ -210,9 +210,9 @@ namespace Microsoft.Build.BuildEngine
 
                             if (nextExecutionContext is RequestRoutingContext)
                             {
-                                nodeIndex   = nextExecutionContext.NodeIndex;
+                                nodeIndex = nextExecutionContext.NodeIndex;
                                 handleId = routingContext.ParentHandleId;
-                                requestId   = routingContext.ParentRequestId;
+                                requestId = routingContext.ParentRequestId;
                             }
                         }
                         else
@@ -293,10 +293,10 @@ namespace Microsoft.Build.BuildEngine
             for (int i = 0; i < node.children.Count; i++)
             {
                 // Check for a back edge
-                if (node.children[i].traversalIndex > node.traversalIndex )
+                if (node.children[i].traversalIndex > node.traversalIndex)
                 {
                     cycleParent = node.targetState;
-                    cycleChild  = node.children[i].targetState;
+                    cycleChild = node.children[i].targetState;
                     DumpCycleSequence(node.children[i], node);
                     break;
                 }
@@ -304,7 +304,7 @@ namespace Microsoft.Build.BuildEngine
                 if (node.children[i].targetState.TargetId == node.targetState.TargetId)
                 {
                     cycleParent = node.targetState;
-                    cycleChild  = node.targetState;
+                    cycleChild = node.targetState;
                     break;
                 }
             }
@@ -327,7 +327,7 @@ namespace Microsoft.Build.BuildEngine
 
         private bool DumpCycleSequenceOutput(GraphNode parent, GraphNode child, BuildEventContext buildEventContext)
         {
-            if (parent == child )
+            if (parent == child)
             {
                 engineLoggingService.LogComment(buildEventContext, "cycleTraceTitle");
                 engineLoggingService.LogComment
@@ -408,7 +408,7 @@ namespace Microsoft.Build.BuildEngine
             internal bool isRoot;
             internal int traversalIndex;
 
-            internal const int InvalidIndex    = -1;
+            internal const int InvalidIndex = -1;
             internal const int InProgressIndex = -2;
             #endregion
         }

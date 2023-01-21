@@ -75,7 +75,7 @@ namespace Microsoft.Build.Shared
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
 #if CLR2COMPATIBILITY
-            return (AssemblyName) assemblyNameToClone.Clone();
+            return (AssemblyName)assemblyNameToClone.Clone();
 #else
 
             // NOTE: In large projects, this is called a lot. Avoid calling AssemblyName.Clone
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Shared
 
             var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
 
-            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] {allCulturesEnumValue}) as CultureInfo[];
+            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] { allCulturesEnumValue }) as CultureInfo[];
 
             FrameworkErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
 

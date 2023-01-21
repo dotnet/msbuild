@@ -513,9 +513,9 @@ namespace Microsoft.Build.Utilities
 #endif
         }
 
-#endregion
+        #endregion
 
-#region ExternalProjectStarted/Finished logging methods
+        #region ExternalProjectStarted/Finished logging methods
 
         /// <summary>
         /// Small helper for logging the custom ExternalProjectStarted build event
@@ -559,9 +559,9 @@ namespace Microsoft.Build.Utilities
             BuildEngine.LogCustomEvent(epf);
         }
 
-#endregion
+        #endregion
 
-#region Command line logging methods
+        #region Command line logging methods
 
         /// <summary>
         /// Logs the command line for a task's underlying tool/executable/shell command.
@@ -603,9 +603,9 @@ namespace Microsoft.Build.Utilities
             BuildEngine.LogMessageEvent(e);
         }
 
-#endregion
+        #endregion
 
-#region Error logging methods
+        #region Error logging methods
 
         /// <summary>
         /// Logs an error using the specified string.
@@ -968,9 +968,9 @@ namespace Microsoft.Build.Utilities
             LogError(null, null, null, file, 0, 0, 0, 0, message);
         }
 
-#endregion
+        #endregion
 
-#region Warning logging methods
+        #region Warning logging methods
 
         /// <summary>
         /// Logs a warning using the specified string.
@@ -1301,9 +1301,9 @@ namespace Microsoft.Build.Utilities
             LogWarning(message);
         }
 
-#endregion
+        #endregion
 
-#region Bulk logging methods
+        #region Bulk logging methods
 
         /// <summary>
         /// Logs errors/warnings/messages for each line of text in the given file. Errors/warnings are only logged for lines that
@@ -1456,9 +1456,9 @@ namespace Microsoft.Build.Utilities
             return isError;
         }
 
-#endregion
+        #endregion
 
-#region Telemetry logging methods
+        #region Telemetry logging methods
 
         /// <summary>
         /// Logs telemetry with the specified event name and properties.
@@ -1470,10 +1470,10 @@ namespace Microsoft.Build.Utilities
             (BuildEngine as IBuildEngine5)?.LogTelemetry(eventName, properties);
         }
 
-#endregion
+        #endregion
 
 #if FEATURE_APPDOMAIN
-#region AppDomain Code
+        #region AppDomain Code
 
         /// <summary>
         /// InitializeLifetimeService is called when the remote object is activated.
@@ -1559,7 +1559,7 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-#endregion
+        #endregion
 #endif
     }
 }

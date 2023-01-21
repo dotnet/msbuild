@@ -62,7 +62,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Used when the assembly name comes from a user-controlled source like a project file or config file.
         /// Does extra checking on the assembly name and will throw exceptions if something is invalid.
         /// </param>
-        internal AssemblyNameExtension(string assemblyName, bool validate) 
+        internal AssemblyNameExtension(string assemblyName, bool validate)
         {
             asString = assemblyName;
 
@@ -87,7 +87,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
             return new AssemblyNameExtension(assemblyName);
         }
-        
+
         /// <summary>
         /// Assume there is a string version, create the AssemblyName version.
         /// </summary>
@@ -348,7 +348,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             // If the lengths are the same then we can compare without copying.
-            if (baseLenThis == baseLenThat) 
+            if (baseLenThis == baseLenThat)
             {
                 return String.Compare(asString1, 0, asString2, 0, baseLenThis, StringComparison.OrdinalIgnoreCase);
             }
@@ -356,7 +356,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // Lengths are different, so string copy is required.
             string nameThis = asString1.Substring(0, baseLenThis);
             string nameThat = asString2.Substring(0, baseLenThat);
-            return String.Compare(nameThis, nameThat, StringComparison.OrdinalIgnoreCase);   
+            return String.Compare(nameThis, nameThat, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -392,7 +392,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                 // If they weren't identical then they might still differ only by
                 // case. So we can't assume that they don't match. So fall through...
-                
+
             }
 
             // Do the names match?

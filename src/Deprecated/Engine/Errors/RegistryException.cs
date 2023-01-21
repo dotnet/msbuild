@@ -51,16 +51,16 @@ namespace Microsoft.Build.BuildEngine
             base.Source = source;
         }
 
-	/// <summary>
+        /// <summary>
         /// Since this class implements Iserializable this constructor is required to be implemented.
         /// </summary>
-	protected RegistryException(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected RegistryException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             // We don't have any reason at the moment to do any custom serizlization or deserialization, this methods was added
             // to conform to the implementation of the standard constructors for ISerializable classes
-        }	
-	        	
-	/// <summary>
+        }
+
+        /// <summary>
         /// Constructor that takes a string description of the registry
         /// key or value causing the error.
         /// </summary>

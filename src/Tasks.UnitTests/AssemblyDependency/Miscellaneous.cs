@@ -3437,7 +3437,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // There should have been no warning about the exception because it's only a dependency
             Assert.Equal(0, engine.Warnings);
-        
+
             // There should have been no ugly callstack dumped
             engine.AssertLogDoesntContain("Microsoft.Build.UnitTests");
         }

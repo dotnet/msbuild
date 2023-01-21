@@ -29,8 +29,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         (
             "^"                                             // Beginning of line
             + "Project\\(\"(?<PROJECTTYPEGUID>.*)\"\\)"
-            +"\\s*=\\s*"                                    // Any amount of whitespace plus "=" plus any amount of whitespace
-            +"\"(?<PROJECTNAME>.*)\""
+            + "\\s*=\\s*"                                    // Any amount of whitespace plus "=" plus any amount of whitespace
+            + "\"(?<PROJECTNAME>.*)\""
             + "\\s*,\\s*"                                   // Any amount of whitespace plus "," plus any amount of whitespace
             + "\"(?<RELATIVEPATH>.*)\""
             + "\\s*,\\s*"                                   // Any amount of whitespace plus "," plus any amount of whitespace
@@ -45,13 +45,13 @@ namespace Microsoft.Build.BuildEngine.Shared
         (
             "^"                                             // Beginning of line
             + "(?<PROPERTYNAME>[^=]*)"
-            +"\\s*=\\s*"                                    // Any amount of whitespace plus "=" plus any amount of whitespace
-            +"(?<PROPERTYVALUE>[^=]*)"
+            + "\\s*=\\s*"                                    // Any amount of whitespace plus "=" plus any amount of whitespace
+            + "(?<PROPERTYVALUE>[^=]*)"
             + "$"                                           // End-of-line
         );
 
         internal const int slnFileMinUpgradableVersion = 7; // Minimum version for MSBuild to give a nice message
-        internal const int slnFileMinVersion           = 9; // Minimum version for MSBuild to actually do anything useful
+        internal const int slnFileMinVersion = 9; // Minimum version for MSBuild to actually do anything useful
         internal const int slnFileMaxVersion = VisualStudioConstants.CurrentVisualStudioSolutionFileVersion;
 
         private const string vbProjectGuid = "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}";
@@ -263,7 +263,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         {
             get
             {
-                return (ProjectInSolution[]) this.projectsInOrder.ToArray(typeof(ProjectInSolution));
+                return (ProjectInSolution[])this.projectsInOrder.ToArray(typeof(ProjectInSolution));
             }
         }
 
@@ -424,7 +424,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             const string slnFileHeaderNoVersion = "Microsoft Visual Studio Solution File, Format Version ";
 
             // Read the file header.  This can be on either of the first two lines.
-            for (int i=1 ; i<=2 ; i++)
+            for (int i = 1; i <= 2; i++)
             {
                 string str = ReadLine();
                 if (str == null)
@@ -472,14 +472,14 @@ namespace Microsoft.Build.BuildEngine.Shared
                 // This happens if the version stamp wasn't a properly formed version number,
                 // as in "1.a.b.c".
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), "SolutionParseVersionMismatchError", 
+                    new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), "SolutionParseVersionMismatchError",
                     slnFileMinUpgradableVersion, slnFileMaxVersion);
             }
             catch (ArgumentException)
             {
                 // This happens if the version stamp wasn't a properly formed version number.
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), "SolutionParseVersionMismatchError", 
+                    new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), "SolutionParseVersionMismatchError",
                     slnFileMinUpgradableVersion, slnFileMaxVersion);
             }
 
@@ -489,8 +489,8 @@ namespace Microsoft.Build.BuildEngine.Shared
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                 this.slnFileActualVersion >= slnFileMinUpgradableVersion,
                 "SubCategoryForSolutionParsingErrors",
-                new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), 
-                "SolutionParseVersionMismatchError", 
+                new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0),
+                "SolutionParseVersionMismatchError",
                 slnFileMinUpgradableVersion, slnFileMaxVersion);
 
             // If the solution file version is greater than the maximum one we will create a comment rather than warn
@@ -641,7 +641,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 {
                     etpProjectDocument.Load(xmlReader);
                 }
-                
+
                 // We need to parse the .etp project file to get the names of projects contained
                 // in the .etp Project. The projects are listed under /EFPROJECT/GENERAL/References/Reference node in the .etp project file.
                 // The /EFPROJECT/GENERAL/Views/ProjectExplorer node will not necessarily contain 
@@ -742,7 +742,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                    etpProj.RelativePath, e.Message);
                 solutionParserWarnings.Add(warning);
                 solutionParserErrorCodes.Add(errorCode);
-            }  
+            }
         }
 
         /// <summary>
@@ -757,7 +757,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
             projectsInOrder.Add(proj);
         }
-        
+
         /// <summary>
         /// Checks whether a given project has a .etp extension.
         /// </summary>
@@ -951,7 +951,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                             // Cut out the guid part
                             if ((indexOfOpeningBrace != -1) && (indexOfClosingBrace != -1))
                             {
-                                string referencedProjectGuid = projectReferenceEntry.Substring(indexOfOpeningBrace, 
+                                string referencedProjectGuid = projectReferenceEntry.Substring(indexOfOpeningBrace,
                                     indexOfClosingBrace - indexOfOpeningBrace + 1);
 
                                 proj.Dependencies.Add(referencedProjectGuid);
@@ -1008,10 +1008,10 @@ namespace Microsoft.Build.BuildEngine.Shared
             proj.ProjectName = match.Groups["PROJECTNAME"].Value.Trim();
             proj.RelativePath = match.Groups["RELATIVEPATH"].Value.Trim();
             proj.ProjectGuid = match.Groups["PROJECTGUID"].Value.Trim();
-            
+
             // Validate project relative path
             ValidateProjectRelativePath(proj);
-            
+
             // Figure out what type of project this is.
             if ((String.Equals(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
                 (String.Equals(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
@@ -1189,7 +1189,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // the entry name instead of constructing it and looking it up. Although it's pretty unlikely that
             // this would ever be a problem, it's safer to do it the same way VS IDE does it.
             char[] configPlatformSeparators = new char[] { ConfigurationInSolution.configurationPlatformSeparator };
-            
+
             foreach (ProjectInSolution project in this.projectsInOrder)
             {
                 // Solution folders don't have configurations
@@ -1199,7 +1199,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     {
                         // The "ActiveCfg" entry defines the active project configuration in the given solution configuration
                         // This entry must be present for every possible solution configuration/project combination.
-                        string entryNameActiveConfig = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.ActiveCfg", 
+                        string entryNameActiveConfig = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.ActiveCfg",
                             project.ProjectGuid, solutionConfiguration.FullName);
 
                         // The "Build.0" entry tells us whether to build the project configuration in the given solution configuration.
@@ -1207,7 +1207,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                         // more flexible design of solution configurations (as well as the '.0' suffix - no higher values are ever used). 
                         // The configuration name is not used, and the whole entry means "build the project configuration" 
                         // if it's present in the solution file, and "don't build" if it's not.
-                        string entryNameBuild = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.Build.0", 
+                        string entryNameBuild = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.Build.0",
                             project.ProjectGuid, solutionConfiguration.FullName);
 
                         if (rawProjectConfigurationsEntries.ContainsKey(entryNameActiveConfig))
@@ -1311,7 +1311,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>RGoel</owner>
         internal string GetProjectUniqueNameByGuid(string projectGuid)
         {
-            ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
+            ProjectInSolution proj = (ProjectInSolution)projects[projectGuid];
             return proj?.GetUniqueProjectName();
         }
 
@@ -1324,7 +1324,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>RGoel</owner>
         internal string GetProjectRelativePathByGuid(string projectGuid)
         {
-            ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
+            ProjectInSolution proj = (ProjectInSolution)projects[projectGuid];
             return proj?.RelativePath;
         }
 

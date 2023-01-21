@@ -29,10 +29,10 @@ namespace Microsoft.Build.BuildEngine
         private bool errorState;
         private int errorPosition;
         // What we found instead of what we were looking for
-        private string unexpectedlyFound = null; 
+        private string unexpectedlyFound = null;
         private ParserOptions options;
         private string errorResource = null;
-        
+
         // Shared instances of "hardcoded" token strings. These are only used 
         // in error messages.
         private const string comma = ",";
@@ -104,7 +104,7 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        internal bool IsNext( Token.TokenType type )
+        internal bool IsNext(Token.TokenType type)
         {
             return lookahead.IsToken(type);
         }
@@ -573,7 +573,7 @@ namespace Microsoft.Build.BuildEngine
             }
             return true;
         }
-        private bool ParseSimpleStringOrFunction( int start )
+        private bool ParseSimpleStringOrFunction(int start)
         {
             SkipSimpleStringChars();
             if (string.Equals(expression.Substring(start, parsePoint - start), "and", StringComparison.OrdinalIgnoreCase))
@@ -600,16 +600,16 @@ namespace Microsoft.Build.BuildEngine
             }
             return true;
         }
-        private bool ParseNumeric( int start )
+        private bool ParseNumeric(int start)
         {
-            if ((expression.Length-parsePoint) > 2 && expression[parsePoint] == '0' && (expression[parsePoint + 1] == 'x' || expression[parsePoint + 1] == 'X'))
+            if ((expression.Length - parsePoint) > 2 && expression[parsePoint] == '0' && (expression[parsePoint + 1] == 'x' || expression[parsePoint + 1] == 'X'))
             {
                 // Hex number
                 parsePoint += 2;
                 SkipHexDigits();
                 lookahead = new Token(Token.TokenType.Numeric, expression.Substring(start, parsePoint - start));
             }
-            else if ( CharacterUtilities.IsNumberStart(expression[parsePoint]))
+            else if (CharacterUtilities.IsNumberStart(expression[parsePoint]))
             {
                 // Decimal number
                 if (expression[parsePoint] == '+')

@@ -15,10 +15,10 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
         internal Introspector(Engine parentEngine, ProjectManager projectManager, NodeManager nodeManager)
         {
-            this.parentEngine   = parentEngine;
+            this.parentEngine = parentEngine;
             this.projectManager = projectManager;
-            this.nodeManager    = nodeManager;
-            this.ignoreTimeout  = 0;
+            this.nodeManager = nodeManager;
+            this.ignoreTimeout = 0;
         }
         #endregion
 
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BuildEngine
         /// to break it. If no cause for deadlock can be determined the system is shutdown.
         /// </summary>
         /// <returns>New inactivity timeout</returns>
-        internal int DetectDeadlock( int queueCounts, long lastLoopActivity, int currentTimeout)
+        internal int DetectDeadlock(int queueCounts, long lastLoopActivity, int currentTimeout)
         {
             // Don't try to detect deadlock in single threaded mode or on a child node
             if (parentEngine.Router.ChildMode || parentEngine.Router.SingleThreadedMode)
@@ -161,7 +161,7 @@ namespace Microsoft.Build.BuildEngine
 
             // There was some activity between previous and current status checks on the local node
             if (localStatus.LastLoopActivity != previousLocalStatus.LastLoopActivity ||
-                localStatus.LastTaskActivity != previousLocalStatus.LastTaskActivity )
+                localStatus.LastTaskActivity != previousLocalStatus.LastTaskActivity)
             {
                 previousStatus = nodeStatus;
                 previousLocalStatus = localStatus;
@@ -214,7 +214,7 @@ namespace Microsoft.Build.BuildEngine
         {
             for (int i = 0; i < nodeStatus.Length; i++)
             {
-               cycleDetector.AddTargetsToGraph(nodeStatus[i].StateOfInProgressTargets);
+                cycleDetector.AddTargetsToGraph(nodeStatus[i].StateOfInProgressTargets);
             }
         }
 
@@ -256,7 +256,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void SystemShutdown()
         {
-	    ErrorUtilities.LaunchMsBuildDebuggerOnFatalError();
+            ErrorUtilities.LaunchMsBuildDebuggerOnFatalError();
             nodeManager.ShutdownNodes(Node.NodeShutdownLevel.ErrorShutdown);
         }
 
@@ -272,12 +272,12 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void BreakCycle(TargetInProgessState child, TargetInProgessState parent)
         {
-            ErrorUtilities.VerifyThrow( child.TargetId.nodeId == parentEngine.NodeId,
+            ErrorUtilities.VerifyThrow(child.TargetId.nodeId == parentEngine.NodeId,
                                         "Expect the child target to be on the node");
 
             Project parentProject = projectManager.GetProject(child.TargetId.projectId);
 
-            ErrorUtilities.VerifyThrow(parentProject  != null,
+            ErrorUtilities.VerifyThrow(parentProject != null,
                                         "Expect the parent project to be on the node");
 
             Target childTarget = parentProject.Targets[child.TargetId.name];
@@ -345,7 +345,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (currentTimeout < maxLoopTimeout)
             {
-                currentTimeout = 2*currentTimeout;
+                currentTimeout = 2 * currentTimeout;
             }
 
             return currentTimeout;

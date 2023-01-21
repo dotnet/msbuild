@@ -1043,7 +1043,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #endregion
 
         #region ITestTaskHost Members
-        #pragma warning disable xUnit1013
+#pragma warning disable xUnit1013
 
         /// <summary>
         /// Records that a parameter was set on the task.
@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             throw new NotImplementedException();
         }
 
-        #pragma warning restore xUnit1013
+#pragma warning restore xUnit1013
         #endregion
 
         #region Validation Routines

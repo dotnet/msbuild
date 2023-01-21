@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             };
 
             var itemsForI = items.Where(i => i.ItemType == "i").ToList();
-            ObjectModelHelpers.AssertItems(new [] {"a", "b", "c"}, itemsForI, mI2_1);
+            ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, itemsForI, mI2_1);
 
             var mI2_2 = new Dictionary<string, string>
             {
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ObjectModelHelpers.AssertItems(
                 new[] { "a", "b", "c", "d", "e", "f", "a", "b", "c" },
                 itemsForI2,
-                new [] { mI2_1, mI2_1 , mI2_1, mI2_2, mI2_2, mI2_2, mI2_2, mI2_2, mI2_2 });
+                new[] { mI2_1, mI2_1, mI2_1, mI2_2, mI2_2, mI2_2, mI2_2, mI2_2, mI2_2 });
         }
 
         [Theory]
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             };
 
             var itemsForI = items.Where(i => i.ItemType == "i").ToList();
-            ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, itemsForI, new [] {a, b, c});
+            ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, itemsForI, new[] { a, b, c });
 
             var metadataForI2 = new Dictionary<string, string>
             {
@@ -458,7 +458,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             var items = ObjectModelHelpers.GetItems(projectContent);
 
-            ObjectModelHelpers.AssertItems(new []{"2"}, items);
+            ObjectModelHelpers.AssertItems(new[] { "2" }, items);
         }
 
         [Fact]
@@ -586,7 +586,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 ".Cleanup();
             using (var env = TestEnvironment.Create())
             {
-                var projectFiles = env.CreateTestProjectWithFiles(content, new[] {"foo/extra.props", "foo/a.cs", "foo/b.cs", "bar/c.cs", "bar/d.cs"});
+                var projectFiles = env.CreateTestProjectWithFiles(content, new[] { "foo/extra.props", "foo/a.cs", "foo/b.cs", "bar/c.cs", "bar/d.cs" });
 
                 File.WriteAllText(projectFiles.CreatedFiles[0], import);
 
@@ -650,8 +650,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     ObjectModelHelpers.AssertItemEvaluationFromProject(
                         projectContents,
-                        inputFiles: new[] {"a.cs", "b.cs", "c.cs"},
-                        expectedInclude: new[] {"a.cs", "b.cs", "c.cs", "b.cs", "c.cs", "b.cs"});
+                        inputFiles: new[] { "a.cs", "b.cs", "c.cs" },
+                        expectedInclude: new[] { "a.cs", "b.cs", "c.cs", "b.cs", "c.cs", "b.cs" });
                 }
             }
             finally

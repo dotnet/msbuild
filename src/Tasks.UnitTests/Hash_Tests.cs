@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void HashTaskEmptyInputTest()
         {
             // Hash should be valid for empty item
-            var emptyItemHash = ExecuteHashTask(new ITaskItem[] {new TaskItem("")});
+            var emptyItemHash = ExecuteHashTask(new ITaskItem[] { new TaskItem("") });
             Assert.False(string.IsNullOrWhiteSpace(emptyItemHash));
             Assert.NotEmpty(emptyItemHash);
 

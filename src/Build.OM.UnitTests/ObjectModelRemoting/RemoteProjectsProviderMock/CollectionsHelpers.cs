@@ -11,7 +11,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
     internal static class CollectionHelpers
     {
-        public static IList<A> ConvertCollection<A,B>(this IEnumerable<B> source, Func<B, A> converter)
+        public static IList<A> ConvertCollection<A, B>(this IEnumerable<B> source, Func<B, A> converter)
         {
             if (source == null)
             {

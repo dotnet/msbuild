@@ -62,7 +62,7 @@ namespace Microsoft.Build.Tasks
                 foundPath = resolvedPath;
                 return true;
             }
-            
+
             return false;
         }
     }

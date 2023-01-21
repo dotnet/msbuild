@@ -145,7 +145,7 @@ namespace Microsoft.Build.Evaluation
         ///     The expander needs to have a default item factory set.
         /// </summary>
         // todo Make this type immutable. Dealing with an Expander change is painful. See the ItemExpressionFragment
-            public Expander<P, I> Expander { get; set; }
+        public Expander<P, I> Expander { get; set; }
 
         /// <summary>
         ///     The xml attribute where this itemspec comes from
@@ -583,7 +583,7 @@ namespace Microsoft.Build.Evaluation
                 options == MatchOnMetadataOptions.CaseInsensitive || FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase :
                 StringComparer.Ordinal;
             _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
-            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>) (p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
+            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>)(p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)

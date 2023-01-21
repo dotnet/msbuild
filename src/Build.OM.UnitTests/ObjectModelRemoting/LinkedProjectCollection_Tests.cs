@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var pcRemote = this.StdGroup.Remote[0];
 
             var proj1Path = this.StdGroup.StdProjectFiles[0];
-            var proj2Path = this.StdGroup.StdProjectFiles[1]; 
+            var proj2Path = this.StdGroup.StdProjectFiles[1];
 
             var proj1 = pcLocal.LoadProject(proj1Path);
             var proj2 = pcRemote.LoadProject(proj2Path);
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.Equal(2, prj2Coll.Count);
             Assert.False(prj2Coll.Contains(proj2remote0));
             Assert.False(prj2Coll.Contains(proj2remote1));
-            foreach(var p in prj2Coll)
+            foreach (var p in prj2Coll)
             {
                 ViewValidation.VerifyLinkedNotNull(p);
             }

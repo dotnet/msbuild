@@ -388,11 +388,11 @@ namespace Microsoft.Build.BuildEngine
                 int insertionIndex = items.Count;
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if ( String.Equals(itemToAdd.Name, items[i].Name, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(itemToAdd.Name, items[i].Name, StringComparison.OrdinalIgnoreCase))
                     {
                         insertionIndex = i + 1;
 
-                        if ( 0 > String.Compare(itemToAdd.Include, items[i].Include, StringComparison.OrdinalIgnoreCase))
+                        if (0 > String.Compare(itemToAdd.Include, items[i].Include, StringComparison.OrdinalIgnoreCase))
                         {
                             insertionIndex = i;
                             break;
@@ -597,7 +597,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 MustNotBeImported();
 
-                foreach(BuildItem itemToRemove in items)
+                foreach (BuildItem itemToRemove in items)
                 {
                     XmlElement itemElement = itemToRemove.ItemElement;
                     MustHaveThisParentElement(itemToRemove);

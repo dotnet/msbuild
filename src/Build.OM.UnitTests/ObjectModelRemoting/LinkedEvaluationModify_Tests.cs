@@ -215,7 +215,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 var fooRealFast = pair.GetSingleItemWithVerify(ObjectType.Real, "fooFast.cpp");
                 Assert.NotNull(fooRealFast);
                 ViewValidation.Verify(fooViewFast, fooRealFast, validationContext);
-                var toRemoveReal = new List<ProjectItem>() { fooRealFast, barRealFast};
+                var toRemoveReal = new List<ProjectItem>() { fooRealFast, barRealFast };
 
                 Assert.Throws<ArgumentException>(() =>
                 {

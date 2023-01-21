@@ -121,12 +121,12 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void PostDoneNotice(int nodeId, BuildResult buildResult)
         {
-               
-            
-                // Notify the scheduler that a given node(nodeId) will be getting a buildResult.
-                // This method is a no-op if the router is on a child process
-                scheduler?.NotifyOfBuildResult(nodeId, buildResult);
-            
+
+
+            // Notify the scheduler that a given node(nodeId) will be getting a buildResult.
+            // This method is a no-op if the router is on a child process
+            scheduler?.NotifyOfBuildResult(nodeId, buildResult);
+
 
             if (nodeId == EngineCallback.inProcNode)
             {
@@ -169,13 +169,13 @@ namespace Microsoft.Build.BuildEngine
                                     (nodeIndex, currentRequest.HandleId, currentRequest.NodeIndex,
                                      currentRequest.RequestId, cacheScope, currentRequest, null);
 
-                       
-                    
-                        // Check to see if we need to change the traversal strategy of the system
-                        // parentHandleId and node index are not used in the function so it can be ignored
-                        scheduler?.NotifyOfBuildRequest(nodeIndex, currentRequest, parentHandleId);
-                    
-                    
+
+
+                    // Check to see if we need to change the traversal strategy of the system
+                    // parentHandleId and node index are not used in the function so it can be ignored
+                    scheduler?.NotifyOfBuildRequest(nodeIndex, currentRequest, parentHandleId);
+
+
                     nodeManager.PostBuildRequestToNode(nodeIndex, currentRequest);
                 }
             }

@@ -19,9 +19,9 @@ namespace Microsoft.Build.BuildEngine
         private XmlElement element;
         // The Condition attribute on it, if any, to save lookup
         private XmlAttribute conditionAttribute;
-        
+
         #endregion
-        
+
         #region Constructors
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         #endregion
-        
+
         #region Properties
 
         internal string Condition

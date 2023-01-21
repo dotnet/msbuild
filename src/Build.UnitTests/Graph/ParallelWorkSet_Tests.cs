@@ -267,7 +267,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             _workSet.WaitForAllWorkAndComplete();
             _workSet.IsCompleted.ShouldBeTrue();
-            _workSet.CompletedWork.ShouldBeSameIgnoringOrder((IReadOnlyCollection<KeyValuePair<string, string>>) tt.ExpectedCompletedWork);
+            _workSet.CompletedWork.ShouldBeSameIgnoringOrder((IReadOnlyCollection<KeyValuePair<string, string>>)tt.ExpectedCompletedWork);
         }
     }
 }

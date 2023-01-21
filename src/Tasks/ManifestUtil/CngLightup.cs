@@ -586,7 +586,7 @@ namespace System.Security.Cryptography
             return cspParameters;
         }
 
-        private static Type GetSystemCoreType(string namespaceQualifiedTypeName, bool throwOnError=true)
+        private static Type GetSystemCoreType(string namespaceQualifiedTypeName, bool throwOnError = true)
         {
 #if CNG_LIGHTUP_NO_SYSTEM_CORE
             string assemblyQualifiedTypeName = namespaceQualifiedTypeName + ", " + AssemblyRef.SystemCore;

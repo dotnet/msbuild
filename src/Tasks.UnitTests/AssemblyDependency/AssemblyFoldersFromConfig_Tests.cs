@@ -28,7 +28,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll")
             });
         }
-        
+
         [Fact]
         public void AssemblyFoldersFromConfigTest()
         {
@@ -42,10 +42,10 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
-                    Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig2")},
-                    SearchPaths = new[] {moniker}
+                    Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig2") },
+                    SearchPaths = new[] { moniker }
                 };
-                
+
                 Execute(t);
 
                 Assert.Single(t.ResolvedFiles);
@@ -71,8 +71,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
-                    Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig_common.dll")},
-                    SearchPaths = new[] {moniker},
+                    Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig_common.dll") },
+                    SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "x86"
                 };
 
@@ -145,8 +145,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
-                    Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig_common.dll")},
-                    SearchPaths = new[] {moniker},
+                    Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig_common.dll") },
+                    SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "x86"
                 };
 

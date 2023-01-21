@@ -215,7 +215,7 @@ namespace Microsoft.Build.BackEnd
                 return _configurations.OrderBy(kvp => kvp.Key).First().Key;
             }
         }
-    
+
         /// <summary>
         /// Clears configurations from the configuration cache which have not been explicitly loaded.
         /// </summary>

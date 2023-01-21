@@ -55,10 +55,10 @@ namespace Microsoft.Build.BuildEngine
                 // and we don't touch the table.
 
                 // Split up the leftValue into pieces based on the vertical bar character.
-                string[] leftValuePieces = leftValue.Split(new char[]{'|'});
+                string[] leftValuePieces = leftValue.Split(new char[] { '|' });
 
                 // Loop through each of the pieces.
-                for (int i = 0 ; i < leftValuePieces.Length ; i++)
+                for (int i = 0; i < leftValuePieces.Length; i++)
                 {
                     Match singlePropertyMatch = singlePropertyRegex.Match(leftValuePieces[i]);
 
@@ -91,8 +91,8 @@ namespace Microsoft.Build.BuildEngine
                         string propertyName = singlePropertyMatch.Groups[1].ToString();
 
                         // Get the string collection for this property name, if one already exists.
-                        StringCollection conditionedPropertyValues = 
-                            (StringCollection) conditionedPropertiesTable[propertyName];
+                        StringCollection conditionedPropertyValues =
+                            (StringCollection)conditionedPropertiesTable[propertyName];
 
                         // If this property is not already represented in the table, add a new entry
                         // for it.
@@ -124,10 +124,10 @@ namespace Microsoft.Build.BuildEngine
          */
         internal static void GatherReferencedPropertyNames
         (
-            string          condition,                  // Can be null
-            XmlAttribute    conditionAttribute,         // XML attribute on which the condition is evaluated
-            Expander        expander,                   // The set of properties to use for expansion
-            Hashtable       conditionedPropertiesTable  // Can be null
+            string condition,                  // Can be null
+            XmlAttribute conditionAttribute,         // XML attribute on which the condition is evaluated
+            Expander expander,                   // The set of properties to use for expansion
+            Hashtable conditionedPropertiesTable  // Can be null
         )
         {
             EvaluateCondition(condition, conditionAttribute, expander, conditionedPropertiesTable, ParserOptions.AllowProperties | ParserOptions.AllowItemLists, null, null);
@@ -137,9 +137,9 @@ namespace Microsoft.Build.BuildEngine
         // and parser options
         private static volatile Hashtable[] cachedExpressionTrees = new Hashtable[8 /* == ParserOptions.AllowAll*/]
             {
-                new Hashtable(StringComparer.OrdinalIgnoreCase), new Hashtable(StringComparer.OrdinalIgnoreCase), 
-                new Hashtable(StringComparer.OrdinalIgnoreCase), new Hashtable(StringComparer.OrdinalIgnoreCase), 
-                new Hashtable(StringComparer.OrdinalIgnoreCase), new Hashtable(StringComparer.OrdinalIgnoreCase), 
+                new Hashtable(StringComparer.OrdinalIgnoreCase), new Hashtable(StringComparer.OrdinalIgnoreCase),
+                new Hashtable(StringComparer.OrdinalIgnoreCase), new Hashtable(StringComparer.OrdinalIgnoreCase),
+                new Hashtable(StringComparer.OrdinalIgnoreCase), new Hashtable(StringComparer.OrdinalIgnoreCase),
                 new Hashtable(StringComparer.OrdinalIgnoreCase), new Hashtable(StringComparer.OrdinalIgnoreCase)
             };
 
@@ -241,7 +241,7 @@ namespace Microsoft.Build.BuildEngine
             Hashtable cachedExpressionTreesForCurrentOptions = cachedExpressionTrees[(int)itemListOptions];
 
             // Try and see if we have an expression tree for this condition already
-            GenericExpressionNode parsedExpression = (GenericExpressionNode) cachedExpressionTreesForCurrentOptions[condition];
+            GenericExpressionNode parsedExpression = (GenericExpressionNode)cachedExpressionTreesForCurrentOptions[condition];
 
             if (parsedExpression == null)
             {
@@ -303,7 +303,7 @@ namespace Microsoft.Build.BuildEngine
                     // XML.  Eat the exception and fall through below ...
                 }
             }
-                
+
             // The value does not contain valid XML markup.  Store it as text, so it gets 
             // escaped properly.
             node.InnerText = s;

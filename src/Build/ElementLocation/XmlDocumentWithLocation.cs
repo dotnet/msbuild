@@ -174,7 +174,7 @@ namespace Microsoft.Build.Construction
 
             _fullPath = fullPath;
 
-            using(var xtr = XmlReaderExtension.Create(fullPath, _loadAsReadOnly ?? false))
+            using (var xtr = XmlReaderExtension.Create(fullPath, _loadAsReadOnly ?? false))
             {
                 this.Load(xtr.Reader);
             }

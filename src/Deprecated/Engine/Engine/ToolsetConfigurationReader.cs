@@ -104,11 +104,11 @@ namespace Microsoft.Build.BuildEngine
                 {
                     InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location);
                 }
-                
+
                 yield return new PropertyDefinition(propertyElement.Name, propertyElement.Value, location);
             }
         }
-        
+
         /// <summary>
         /// Reads the application configuration file.
         /// NOTE: this is abstracted into a method to support unit testing GetToolsetDataFromConfiguration().
@@ -156,8 +156,8 @@ namespace Microsoft.Build.BuildEngine
                     {
                         string location = ResourceUtilities.FormatResourceString
                                           (
-                                             "ConfigFileLocation", 
-                                             ex.Filename, 
+                                             "ConfigFileLocation",
+                                             ex.Filename,
                                              ex.Line
                                           );
 
@@ -294,7 +294,7 @@ namespace Microsoft.Build.BuildEngine
 
                 throw new ConfigurationErrorsException(message, element.ElementInformation.Source, element.ElementInformation.LineNumber);
             }
-            
+
             previouslySeenToolsVersions.Add(toolsVersion, string.Empty);
         }
 
@@ -410,7 +410,7 @@ namespace Microsoft.Build.BuildEngine
             /// won't perform this check without respect for case.
             /// </summary>
             private Dictionary<string, string> previouslySeenPropertyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            
+
             /// <summary>
             /// Creates a new element
             /// </summary>
@@ -462,7 +462,7 @@ namespace Microsoft.Build.BuildEngine
 
                 previouslySeenPropertyNames.Add(propertyName, string.Empty);
             }
-            
+
             /// <summary>
             /// Gets the key for the element
             /// </summary>

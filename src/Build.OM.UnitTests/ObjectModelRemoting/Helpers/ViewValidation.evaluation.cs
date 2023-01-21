@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.NotNull(realProps);
             Assert.Equal(realProps.Count, viewProps.Count);
 
-            for (int i = 0; i< realProps.Count; i++)
+            for (int i = 0; i < realProps.Count; i++)
             {
                 Assert.Equal(realProps[i], viewProps[i]);
             }

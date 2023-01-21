@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
-#region Private Data
+        #region Private Data
 
 #if NETCOREAPP2_1_OR_GREATER || MONO
         /// <summary>
@@ -113,18 +113,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Events
+        #region INodeEndpoint Events
 
         /// <summary>
         /// Raised when the link status has changed.
         /// </summary>
         public event LinkStatusChangedDelegate OnLinkStatusChanged;
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Properties
+        #region INodeEndpoint Properties
 
         /// <summary>
         /// Returns the link status of this node.
@@ -134,13 +134,13 @@ namespace Microsoft.Build.BackEnd
             get { return _status; }
         }
 
-#endregion
+        #endregion
 
-#region Properties
+        #region Properties
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Methods
+        #region INodeEndpoint Methods
 
         /// <summary>
         /// Causes this endpoint to wait for the remote endpoint to connect
@@ -193,9 +193,9 @@ namespace Microsoft.Build.BackEnd
             _isClientDisconnecting = true;
         }
 
-#endregion
+        #endregion
 
-#region Construction
+        #region Construction
 
         /// <summary>
         /// Instantiates an endpoint to act as a client
@@ -260,10 +260,10 @@ namespace Microsoft.Build.BackEnd
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize  // Default output buffer
                 );
-             }
+            }
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Returns the host handshake for this node endpoint
@@ -291,7 +291,7 @@ namespace Microsoft.Build.BackEnd
             OnLinkStatusChanged?.Invoke(this, newStatus);
         }
 
-#region Private Methods
+        #region Private Methods
 
         /// <summary>
         /// This does the actual work of changing the status and shutting down any threads we may have for
@@ -312,7 +312,7 @@ namespace Microsoft.Build.BackEnd
             ChangeLinkStatus(LinkStatus.Inactive);
         }
 
-#region Asynchronous Mode Methods
+        #region Asynchronous Mode Methods
 
         /// <summary>
         /// Adds a packet to the packet queue when asynchronous mode is enabled.
@@ -454,7 +454,7 @@ namespace Microsoft.Build.BackEnd
                         // 2. The host is too old sending us bits we automatically reject in the handshake
                         // 3. We expected to read the EndOfHandshake signal, but we received something else
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
-                        
+
                         gotValidConnection = false;
                     }
                     catch (InvalidOperationException)
@@ -676,8 +676,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }

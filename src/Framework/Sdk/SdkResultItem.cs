@@ -8,8 +8,8 @@ using System.Linq;
 namespace Microsoft.Build.Framework
 {
 
-    #nullable enable
-    
+#nullable enable
+
     /// <summary>
     /// The value of an item and any associated metadata to be added by an SDK resolver.  See <see cref="SdkResult.ItemsToAdd"/>
     /// </summary>

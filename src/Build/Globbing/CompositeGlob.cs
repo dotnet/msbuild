@@ -30,7 +30,7 @@ namespace Microsoft.Build.Globbing
         /// <param name="globs">Children globs. Input gets shallow cloned</param>
         public CompositeGlob(IEnumerable<IMSBuildGlob> globs)
             : this(globs.ToImmutableArray())
-        {}
+        { }
 
         /// <summary>
         ///     Constructor
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Globbing
         /// <param name="globs">Children globs. Input gets shallow cloned</param>
         public CompositeGlob(params IMSBuildGlob[] globs)
             : this(ImmutableArray.Create(globs))
-        {}
+        { }
 
         /// <summary>
         ///     Constructor
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Globbing
         /// <param name="glob2">Second child glob.</param>
         internal CompositeGlob(IMSBuildGlob glob1, IMSBuildGlob glob2)
             : this(ImmutableArray.Create(glob1, glob2))
-        {}
+        { }
 
         /// <summary>
         ///     Constructor

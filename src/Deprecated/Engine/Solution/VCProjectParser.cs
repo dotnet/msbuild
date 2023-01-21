@@ -7,8 +7,8 @@ using System.Xml;
 
 namespace Microsoft.Build.BuildEngine
 {
-	internal static class VCProjectParser
-	{
+    internal static class VCProjectParser
+    {
         /// <summary>
         /// For a given VC project, retrieves the projects it references 
         /// </summary>

@@ -65,7 +65,7 @@ namespace Microsoft.Build.BuildEngine
             if (childElements.Count > 0)
             {
                 ThrowProjectInvalidChildElement(element.FirstChild);
-            }            
+            }
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal static void VerifyThrowProjectNoAttributes(XmlElement element)
         {
-            foreach(XmlAttribute attribute in element.Attributes)
+            foreach (XmlAttribute attribute in element.Attributes)
             {
                 ThrowProjectInvalidAttribute(attribute);
             }

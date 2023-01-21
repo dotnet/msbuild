@@ -105,7 +105,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             public int Compare(DictionaryEntry a, DictionaryEntry b)
             {
-                return string.Compare((string) a.Key, (string) b.Key, StringComparison.CurrentCultureIgnoreCase);
+                return string.Compare((string)a.Key, (string)b.Key, StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
@@ -599,8 +599,8 @@ namespace Microsoft.Build.BackEnd.Logging
             // Write each item type and its itemspec, one per line
             foreach (DictionaryEntry entry in itemTypes)
             {
-                string itemType = (string) entry.Key;
-                ArrayList itemTypeList = (ArrayList) entry.Value;
+                string itemType = (string)entry.Key;
+                ArrayList itemTypeList = (ArrayList)entry.Value;
 
                 if (itemTypeList.Count == 0)
                 {
@@ -973,7 +973,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (eventSource != null)
             {
                 eventSource.BuildStarted += BuildStartedHandler;
-                eventSource.BuildFinished +=BuildFinishedHandler;
+                eventSource.BuildFinished += BuildFinishedHandler;
                 eventSource.ProjectStarted += ProjectStartedHandler;
                 eventSource.ProjectFinished += ProjectFinishedHandler;
                 eventSource.TargetStarted += TargetStartedHandler;

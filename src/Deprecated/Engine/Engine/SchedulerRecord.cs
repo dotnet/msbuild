@@ -17,12 +17,12 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
         internal ScheduleRecord
         (
-            ScheduleRecordKey recordKey, 
-            ScheduleRecordKey parentKey, 
+            ScheduleRecordKey recordKey,
+            ScheduleRecordKey parentKey,
             int evaluationNode,
             string projectName,
             string toolsVersion,
-            string [] targetsBuild
+            string[] targetsBuild
         )
         {
             this.recordKey = recordKey;
@@ -175,7 +175,7 @@ namespace Microsoft.Build.BuildEngine
     /// This class is used as a key combining both HandleId and RequestId into a single class.
     /// </summary>
     [DebuggerDisplay("Key ({handleId},{requestId})")]
-    internal class ScheduleRecordKey 
+    internal class ScheduleRecordKey
     {
         #region Constructors
         internal ScheduleRecordKey(int handleId, int requestId)

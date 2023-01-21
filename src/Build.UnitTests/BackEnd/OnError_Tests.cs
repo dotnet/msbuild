@@ -583,7 +583,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             else
             {
                 logger.ErrorCount.ShouldBe(0);
-                logger.AssertLogContains( String.Format(MockLogger.GetString("TaskReturnedFalseButDidNotLogError"), "FailingTask") );
+                logger.AssertLogContains(String.Format(MockLogger.GetString("TaskReturnedFalseButDidNotLogError"), "FailingTask"));
             }
         }
 

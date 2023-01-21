@@ -57,24 +57,24 @@ namespace Microsoft.Build.Shared
                 (
                 // Beginning of line and any amount of whitespace.
                 @"^\s*"
-                    // Match a [optional project number prefix 'ddd>'], single letter + colon + remaining filename, or
-                    // string with no colon followed by a colon.
+                // Match a [optional project number prefix 'ddd>'], single letter + colon + remaining filename, or
+                // string with no colon followed by a colon.
                 + @"(((?<ORIGIN>(((\d+>)?[a-zA-Z]?:[^:]*)|([^:]*))):)"
-                    // Origin may also be empty. In this case there's no trailing colon.
+                // Origin may also be empty. In this case there's no trailing colon.
                 + "|())"
-                    // Match the empty string or a string without a colon that ends with a space
+                // Match the empty string or a string without a colon that ends with a space
                 + "(?<SUBCATEGORY>(()|([^:]*? )))"
-                    // Match 'error' or 'warning'.
+                // Match 'error' or 'warning'.
                 + @"(?<CATEGORY>(error|warning))"
-                    // Match anything starting with a space that's not a colon/space, followed by a colon.
-                    // Error code is optional in which case "error"/"warning" can be followed immediately by a colon.
+                // Match anything starting with a space that's not a colon/space, followed by a colon.
+                // Error code is optional in which case "error"/"warning" can be followed immediately by a colon.
                 + @"( \s*(?<CODE>[^: ]*))?\s*:"
-                    // Whatever's left on this line, including colons.
+                // Whatever's left on this line, including colons.
                 + "(?<TEXT>.*)$",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled
                 ));
 
-		private static readonly Lazy<Regex> s_originCategoryCodeTextExpression2 = new Lazy<Regex>(
+        private static readonly Lazy<Regex> s_originCategoryCodeTextExpression2 = new Lazy<Regex>(
             () => new Regex
                 (
                 @"^\s*(?<ORIGIN>(?<FILENAME>.*):(?<LOCATION>(?<LINE>[0-9]*):(?<COLUMN>[0-9]*))):(?<CATEGORY> error| warning):(?<TEXT>.*)",

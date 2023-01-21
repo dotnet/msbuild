@@ -24,7 +24,7 @@ namespace Microsoft.Build.Unittest
 
         public static TargetResult GetNonEmptySucceedingTargetResult()
         {
-            return new TargetResult(new TaskItem[1] { new TaskItem("i", "v")}, BuildResultUtilities.GetSuccessResult());
+            return new TargetResult(new TaskItem[1] { new TaskItem("i", "v") }, BuildResultUtilities.GetSuccessResult());
         }
 
         public static WorkUnitResult GetSuccessResult()

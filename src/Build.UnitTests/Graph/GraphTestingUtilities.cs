@@ -17,7 +17,7 @@ namespace Microsoft.Build.Graph.UnitTests
 {
     internal static class GraphTestingUtilities
     {
-        public static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}}.ToImmutableDictionary();
+        public static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> { { PropertyNames.IsGraphBuild, "true" } }.ToImmutableDictionary();
 
         public const string InnerBuildPropertyName = "InnerBuild";
         public const string InnerBuildPropertiesName = "InnerBuildProperties";

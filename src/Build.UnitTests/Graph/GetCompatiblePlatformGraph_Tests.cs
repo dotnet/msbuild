@@ -137,7 +137,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                         <Platforms>x64;x86;AnyCPU</Platforms>
                                                     </PropertyGroup>
                                                     </Project>");
-                
+
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x64");
             }
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                         <PlatformLookupTable>win32=x86</PlatformLookupTable>
                                                     </PropertyGroup>
                                                     </Project>");
-               
+
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
             }
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                         <Platforms>x86;x64;AnyCPU</Platforms>
                                                     </PropertyGroup>
                                                     </Project>");
-             
+
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
             }
@@ -247,7 +247,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                         <Platforms>x64</Platforms>
                                                     </PropertyGroup>
                                                     </Project>");
-              
+
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 // Here we are checking if platform is defined. in this case it should not be since Platorm would be set to the value this project defaults as
                 // in order to avoid dual build errors we remove platform in order to avoid the edge case where a project has global platform set and does not have global platform set
@@ -277,7 +277,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                         <Platforms>x86;AnyCPU</Platforms>
                                                     </PropertyGroup>
                                                     </Project>");
-              
+
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GetPropertyValue("Platform").ShouldBe(GetFirstNodeWithProjectNumber(graph, 1).ProjectInstance.GetPropertyValue("Platform"));
             }

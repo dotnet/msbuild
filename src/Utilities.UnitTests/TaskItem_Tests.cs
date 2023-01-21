@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem to = new TaskItem((ITaskItem)from);
             to.ItemSpec.ShouldBe("Monkey.txt");
             ((string)to).ShouldBe("Monkey.txt");
-            
+
             to.GetMetadata("Dog").ShouldBe("Bingo");
             to.GetMetadata("Cat").ShouldBe("Morris");
 

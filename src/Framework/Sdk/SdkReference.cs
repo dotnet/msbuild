@@ -125,7 +125,7 @@ namespace Microsoft.Build.Framework
                 return true;
             }
 
-            return obj is SdkReference && Equals((SdkReference) obj);
+            return obj is SdkReference && Equals((SdkReference)obj);
         }
 
         /// <inheritdoc />

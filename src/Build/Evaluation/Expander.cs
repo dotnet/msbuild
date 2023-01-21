@@ -3236,7 +3236,7 @@ namespace Microsoft.Build.Evaluation
                 IFileSystem fileSystem)
             {
                 // Used to aggregate all the components needed for a Function
-                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> {FileSystem = fileSystem};
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem };
 
                 // By default the expression root is the whole function expression
                 ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -3453,7 +3453,7 @@ namespace Microsoft.Build.Evaluation
                             //
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new []
+                            args = new[]
                             {
                                 args[0],
                                 startingDirectory,
@@ -3852,7 +3852,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (ElementsOfType(args, typeof(string)))
                             {
-                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string) o));
+                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string)o));
                                 return true;
                             }
                         }
@@ -4158,7 +4158,7 @@ namespace Microsoft.Build.Evaluation
                                 default:
                                     if (ElementsOfType(args, typeof(string)))
                                     {
-                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string) o));
+                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string)o));
                                         return true;
                                     }
                                     break;

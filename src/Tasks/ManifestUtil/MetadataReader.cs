@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 Close();
             }
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 an.SetPublicKey(pk);
                 byte[] pkt = an.GetPublicKeyToken();
 
-                publicKeyToken = BitConverter.ToString(pkt).Replace("-","");
+                publicKeyToken = BitConverter.ToString(pkt).Replace("-", "");
             }
 
             if (!String.IsNullOrEmpty(publicKeyToken))
@@ -408,7 +408,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int DefineScope();
             [PreserveSig]
-            int OpenScope([In][MarshalAs(UnmanagedType.LPWStr)]  string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid, [Out][MarshalAs(UnmanagedType.Interface)] out object obj);
+            int OpenScope([In][MarshalAs(UnmanagedType.LPWStr)] string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid, [Out][MarshalAs(UnmanagedType.Interface)] out object obj);
             int OpenScopeOnMemory();
         }
     }

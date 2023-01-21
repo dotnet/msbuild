@@ -166,12 +166,12 @@ namespace Microsoft.Build.Utilities
 
         private static int ParseComponent(ReadOnlySpan<char> span)
         {
-        #if NETFRAMEWORK
+#if NETFRAMEWORK
             // Cannot parse int from span on .NET Framework, so allocate the substring
             var spanOrString = span.ToString();
-        #else
+#else
             var spanOrString = span;
-        #endif
+#endif
 
             if (!int.TryParse(spanOrString, NumberStyles.None, CultureInfo.InvariantCulture, out int value))
             {

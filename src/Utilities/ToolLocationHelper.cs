@@ -1473,7 +1473,7 @@ namespace Microsoft.Build.Utilities
                     foldersString = string.Join(";", folders);
                 }
             }
-            catch(Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 // This method will be used in vc props and we don't want to fail project load if it throws for some non critical reason.
             }

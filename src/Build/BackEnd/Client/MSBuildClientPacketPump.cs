@@ -262,7 +262,7 @@ namespace Microsoft.Build.BackEnd.Client
 
                                 while (packetBytesRead < packetLength)
                                 {
-                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength-packetBytesRead);
+                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength - packetBytesRead);
                                     if (bytesRead == 0)
                                     {
                                         // Incomplete read.  Abort.
@@ -271,7 +271,7 @@ namespace Microsoft.Build.BackEnd.Client
 
                                     packetBytesRead += bytesRead;
                                 }
-                                
+
                                 try
                                 {
                                     _packetFactory.DeserializeAndRoutePacket(0, packetType, _binaryReadTranslator);

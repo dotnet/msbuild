@@ -21,7 +21,7 @@ namespace Microsoft.Build.BuildEngine
         private BuildItemGroup backingItemGroup;
 
         private BuildItemGroupProxy()
-        { 
+        {
             // Do nothing
         }
 

@@ -111,7 +111,7 @@ namespace Microsoft.Build.BackEnd
 
             // We wait for child nodes to exit to avoid them changing the terminal
             // after this process terminates.
-            bool waitForExit =  !enableReuse &&
+            bool waitForExit = !enableReuse &&
                                 !Console.IsInputRedirected &&
                                 Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
 

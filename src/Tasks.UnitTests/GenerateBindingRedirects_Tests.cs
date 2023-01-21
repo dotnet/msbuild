@@ -281,7 +281,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
 
             var oldTimestamp = DateTime.Now.Subtract(TimeSpan.FromDays(30));
-            
+
             File.SetCreationTime(outputAppConfigFile, oldTimestamp);
             File.SetLastWriteTime(outputAppConfigFile, oldTimestamp);
 

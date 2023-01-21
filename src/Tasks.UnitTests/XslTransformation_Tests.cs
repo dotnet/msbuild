@@ -872,7 +872,7 @@ namespace Microsoft.Build.UnitTests
             // load transformed xsl and assert it is well formatted
             {
                 XslTransformation t = new XslTransformation();
-                
+
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlPaths;

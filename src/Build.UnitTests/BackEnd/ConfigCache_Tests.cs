@@ -24,13 +24,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 var brq1 = new BuildRequestConfiguration(
                     1,
-                    new BuildRequestData("path1", new Dictionary<string, string> {["a1"] = "b1"}, Constants.defaultToolsVersion, new[] {"target1"}, null),
+                    new BuildRequestData("path1", new Dictionary<string, string> { ["a1"] = "b1" }, Constants.defaultToolsVersion, new[] { "target1" }, null),
                     Constants.defaultToolsVersion);
 
                 var configCache1 = new ConfigCache();
                 configCache1.AddConfiguration(brq1.ShallowCloneWithNewId(1));
 
-                yield return new[] {configCache1};
+                yield return new[] { configCache1 };
 
                 var brq2 = new BuildRequestConfiguration(
                     2,
@@ -46,8 +46,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new BuildRequestData("path3", new Dictionary<string, string> { ["a3"] = "b3" }, Constants.defaultToolsVersion, new[] { "target3" }, null),
                     Constants.defaultToolsVersion);
 
-                brq3.ProjectDefaultTargets = new List<string> {"target3"};
-                brq3.ProjectInitialTargets = new List<string> {"targetInitial"};
+                brq3.ProjectDefaultTargets = new List<string> { "target3" };
+                brq3.ProjectInitialTargets = new List<string> { "targetInitial" };
 
                 var configCache3 = new ConfigCache();
                 configCache3.AddConfiguration(brq3.ShallowCloneWithNewId(3));
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [MemberData(nameof(CacheSerializationTestData))]
         public void ConfigCacheShouldBeTranslatable(object obj)
         {
-            var initial = (ConfigCache) obj;
+            var initial = (ConfigCache)obj;
 
             TranslationHelpers.GetWriteTranslator().Translate(ref initial);
 

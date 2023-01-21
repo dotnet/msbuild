@@ -298,7 +298,7 @@ namespace Microsoft.Build.Execution
                 // rough guess for an average number of bytes needed to store them.  This doesn't have to be accurate, just
                 // big enough to avoid unnecessary buffer reallocations in most cases.
                 var defaultBufferCapacity = _items.Length * 128;
-                
+
                 using var itemsStream = new MemoryStream(defaultBufferCapacity);
                 var itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
 

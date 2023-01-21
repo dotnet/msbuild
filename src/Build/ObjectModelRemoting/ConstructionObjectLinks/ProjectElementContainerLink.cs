@@ -66,7 +66,7 @@ namespace Microsoft.Build.ObjectModelRemoting
     /// External projects support.
     /// Allow for creating a local representation to external object of type <see cref="ProjectChooseElement"/>
     /// </summary>
-    public abstract class ProjectChooseElementLink : ProjectElementContainerLink  { }
+    public abstract class ProjectChooseElementLink : ProjectElementContainerLink { }
 
     /// <summary>
     /// External projects support.

@@ -36,7 +36,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public static new WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
 
-        private WindowsFileSystem(){ }
+        private WindowsFileSystem() { }
 
         public override IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
         {

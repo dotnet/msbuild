@@ -174,7 +174,7 @@ namespace Microsoft.Build.BuildEngine
         internal ProjectStartedEventMinimumFields GetProjectStartedEvent(BuildEventContext e)
         {
             ProjectStartedEventMinimumFields buildEvent;
-            if ( projectStartedEvents.ContainsKey(e) )
+            if (projectStartedEvents.ContainsKey(e))
             {
                 buildEvent = projectStartedEvents[e];
             }
@@ -191,7 +191,7 @@ namespace Microsoft.Build.BuildEngine
         internal TargetStartedEventMinimumFields GetTargetStartedEvent(BuildEventContext e)
         {
             TargetStartedEventMinimumFields buildEvent;
-            if ( targetStartedEvents.ContainsKey(e))
+            if (targetStartedEvents.ContainsKey(e))
             {
                 buildEvent = targetStartedEvents[e];
             }
@@ -560,7 +560,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 return false;
             }
-           return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Equals(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase));
+            return eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Equals(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase));
         }
 
         public override int GetHashCode()
@@ -607,7 +607,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Output the projectKey or the projectKey and the entrypointKey depending on the verbosity level of the logger
         /// </summary>
-        
+
         public string ToString(LoggerVerbosity verbosity)
         {
             string fullProjectKey;

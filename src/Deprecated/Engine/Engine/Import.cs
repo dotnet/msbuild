@@ -55,9 +55,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public string ProjectPath
         {
-            get 
-            { 
-                return this.projectPathAttribute?.Value; 
+            get
+            {
+                return this.projectPathAttribute?.Value;
             }
             set
             {
@@ -94,9 +94,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public string Condition
         {
-            get 
-            { 
-                return this.conditionAttribute?.Value; 
+            get
+            {
+                return this.conditionAttribute?.Value;
             }
             set
             {
@@ -136,11 +136,11 @@ namespace Microsoft.Build.BuildEngine
                 "Need an XML node representing the <Import> element.");
 
             this.importElement = importElement;
-            
+
             // Make sure we have a valid parent Project
             ErrorUtilities.VerifyThrow(parentProject != null,
                 "Need a parent Project object to instantiate an Import.");
-            
+
             this.parentProject = parentProject;
 
             // Make sure this really is the <Import> node.

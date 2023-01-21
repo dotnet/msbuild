@@ -567,7 +567,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.Equal("unix", allPaths.GetElement(2).OS);
             Assert.Single(allPaths.GetElement(2).PropertyElements);
-            Assert.Equal( @"/tmp/bar", allPaths.GetElement(2).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
+            Assert.Equal(@"/tmp/bar", allPaths.GetElement(2).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
 
             var reader = GetStandardConfigurationReader();
             Dictionary<string, Toolset> toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -578,17 +578,17 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, ProjectImportPathMatch> pathsTable = toolsets["2.0"].ImportPropertySearchPathsTable;
             if (NativeMethodsShared.IsWindows)
             {
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"c:\\foo"});
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath64", new string[] {"c:\\foo64", "c:\\bar64"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] { "c:\\foo" });
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath64", new string[] { "c:\\foo64", "c:\\bar64" });
             }
             else if (NativeMethodsShared.IsOSX)
             {
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"/tmp/foo"});
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath32", new string[] {"/tmp/foo32", "/tmp/bar32"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] { "/tmp/foo" });
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath32", new string[] { "/tmp/foo32", "/tmp/bar32" });
             }
             else
             {
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"/tmp/bar"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] { "/tmp/bar" });
             }
         }
 

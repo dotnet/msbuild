@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have an error."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have an error."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -440,7 +440,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -468,7 +468,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -524,7 +524,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\|one|.write.tlog"))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have an error."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have an error."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -589,7 +589,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -608,7 +608,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -627,7 +627,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -646,7 +646,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -3099,7 +3099,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -3118,7 +3118,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -3137,7 +3137,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -3156,7 +3156,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
             Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
@@ -3175,7 +3175,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(0, ((MockEngine) task.BuildEngine).Warnings); // "Should not warn -- root markers are ignored by default"
+            Assert.Equal(0, ((MockEngine)task.BuildEngine).Warnings); // "Should not warn -- root markers are ignored by default"
             Assert.Single(data.DependencyTable); // "DependencyTable should only contain one entry."
         }
 
@@ -3680,7 +3680,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             return itemList.ToArray();
         }
 
-        public static MockTask MockTask => new MockTask(AssemblyResources.PrimaryResources) {BuildEngine = new MockEngine()};
+        public static MockTask MockTask => new MockTask(AssemblyResources.PrimaryResources) { BuildEngine = new MockEngine() };
 
         public static void WriteAll(string filename, string content) => File.WriteAllText(filename, content);
     }

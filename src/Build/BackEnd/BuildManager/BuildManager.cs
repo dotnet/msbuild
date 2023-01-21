@@ -49,7 +49,7 @@ namespace Microsoft.Build.Execution
         // TODO: Figure out a more elegant way to do this.
         //       The rationale for this is that we can detect during design-time builds in the Evaluator (which populates this) that the project cache will be used so that we don't
         //       need to evaluate the project at build time just to figure that out, which would regress perf for scenarios which don't use the project cache.
-        internal static ConcurrentDictionary<ProjectCacheDescriptor, ProjectCacheDescriptor> ProjectCacheDescriptors { get; } = new (ProjectCacheDescriptorEqualityComparer.Instance);
+        internal static ConcurrentDictionary<ProjectCacheDescriptor, ProjectCacheDescriptor> ProjectCacheDescriptors { get; } = new(ProjectCacheDescriptorEqualityComparer.Instance);
 
         /// <summary>
         /// The object used for thread-safe synchronization of static members.
@@ -1386,7 +1386,7 @@ namespace Microsoft.Build.Execution
                 config.GlobalProperties,
                 config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
                 _buildParameters,
-                ((IBuildComponentHost) this).LoggingService,
+                ((IBuildComponentHost)this).LoggingService,
                 request.BuildEventContext,
                 false /* loaded by solution parser*/,
                 config.TargetNames,
@@ -1404,7 +1404,8 @@ namespace Microsoft.Build.Execution
                 // metaproject as well.
                 var newConfig = new BuildRequestConfiguration(
                     GetNewConfigurationId(),
-                    instances[i]) { ExplicitlyLoaded = config.ExplicitlyLoaded };
+                    instances[i])
+                { ExplicitlyLoaded = config.ExplicitlyLoaded };
                 if (_configCache.GetMatchingConfiguration(newConfig) == null)
                 {
                     _configCache.AddConfiguration(newConfig);
@@ -1623,7 +1624,7 @@ namespace Microsoft.Build.Execution
             // this has to be called out of the lock (_syncLock)
             // because processing events can callback to 'this' instance and cause deadlock
             Debug.Assert(!Monitor.IsEntered(_syncLock));
-            ((LoggingService) ((IBuildComponentHost) this).LoggingService).WaitForLoggingToProcessEvents();
+            ((LoggingService)((IBuildComponentHost)this).LoggingService).WaitForLoggingToProcessEvents();
         }
 
         /// <summary>
@@ -1759,7 +1760,7 @@ namespace Microsoft.Build.Execution
                             }
                         }
 
-                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] {submission.BuildRequest});
+                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] { submission.BuildRequest });
 
                         HandleNewRequest(Scheduler.VirtualNode, blocker);
                     }
@@ -3096,7 +3097,7 @@ namespace Microsoft.Build.Execution
             public string Parameters
             {
                 get => String.Empty;
-                set{ }
+                set { }
             }
 
             /// <summary>

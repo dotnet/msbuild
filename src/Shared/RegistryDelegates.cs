@@ -7,8 +7,8 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-   /// Given a registry hive and a request view open the base key for that registry location.
-   /// </summary>
+    /// Given a registry hive and a request view open the base key for that registry location.
+    /// </summary>
     internal delegate RegistryKey OpenBaseKey(RegistryHive hive, RegistryView view);
 
     /// <summary>

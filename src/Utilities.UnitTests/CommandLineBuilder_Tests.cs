@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
 
 
             string[] actual = c.ToString().Split(MSBuildConstants.EnvironmentNewLine, StringSplitOptions.None);
-            string[] expected = 
+            string[] expected =
             {
                 "/foo:bar",
                 "18056896847C4FFC9706F1D585C077B4",

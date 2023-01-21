@@ -635,7 +635,7 @@ namespace Microsoft.Build.Construction
                         if (onError != null)
                         {
                             ProjectErrorUtilities.ThrowInvalidProject(onError.Location, "NodeMustBeLastUnderElement", XMakeElements.onError, XMakeElements.target, childElement.Name);
-                        }                       
+                        }
                         if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
                         {
                             if (childElement.ChildNodes.Count == 1 && childElement.FirstChild.NodeType == XmlNodeType.Text)

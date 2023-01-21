@@ -1124,7 +1124,7 @@ namespace Microsoft.Build.Tasks
 
         public string FullName { get; }
         public bool InGAC { get; }
-        public bool? IsRedistRoot { get;  }
+        public bool? IsRedistRoot { get; }
         public string RedistName { get; }
         public string SimpleName { get; }
         public string FrameworkDirectory { get; }

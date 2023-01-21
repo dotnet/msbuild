@@ -439,7 +439,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (assembly.ReferenceType == AssemblyReferenceType.NativeAssembly && !assembly.IsPrerequisite && !String.IsNullOrEmpty(assembly.ResolvedPath))
                 {
-                    ComInfo[] comInfoArray = ManifestReader.GetComInfo(assembly.ResolvedPath); 
+                    ComInfo[] comInfoArray = ManifestReader.GetComInfo(assembly.ResolvedPath);
                     if (comInfoArray != null)
                     {
                         foreach (ComInfo comInfo in comInfoArray)

@@ -104,7 +104,7 @@ namespace Microsoft.Build.BuildEngine
                 lock (cacheManagerLock)
                 {
                     cacheScope = GetCacheScopeIfExists(scopeName, scopeProperties, scopeToolsVersion, cacheContentType);
-                    
+
                     if (cacheScope == null)
                     {
                         // If the list of scopes doesn't exist create it

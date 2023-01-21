@@ -184,7 +184,7 @@ namespace Microsoft.Build.BuildEngine
         /// Given a cache loaded into a project, determines whether it is up to date with respect to the projects and the solution file listed
         /// with it, and was created with the same configuration/platform and tools version values as the ones currently in use.
         /// </summary>
-        private static bool IsCacheUpToDate(Engine parentEngine, string solutionFile,  string solutionFileDirectory, Project msbuildProject, BuildEventContext projectBuildEventContext, string fullSolutionConfigurationName, string wrapperProjectToolsVersion)
+        private static bool IsCacheUpToDate(Engine parentEngine, string solutionFile, string solutionFileDirectory, Project msbuildProject, BuildEventContext projectBuildEventContext, string fullSolutionConfigurationName, string wrapperProjectToolsVersion)
         {
             // Check the full solution configuration matches, eg "Debug|AnyCPU"
             string cacheSolutionConfigurationName = msbuildProject.GetEvaluatedProperty(cacheSolutionConfigurationPropertyName);
@@ -209,8 +209,8 @@ namespace Microsoft.Build.BuildEngine
                 return false;
             }
 
-	    // We also store the version of MSBuild that wrote the file and verify it's the same as ours: that ensures that we 
-	    // don't read possibly incompatible caches.
+            // We also store the version of MSBuild that wrote the file and verify it's the same as ours: that ensures that we 
+            // don't read possibly incompatible caches.
             string thisVersion = Constants.AssemblyVersion;
             if (!String.Equals(cacheVersion, thisVersion, StringComparison.OrdinalIgnoreCase))
             {
@@ -1985,7 +1985,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (configurationProperty != null)
             {
-                activeSolutionConfiguration= configurationProperty.FinalValue;
+                activeSolutionConfiguration = configurationProperty.FinalValue;
             }
             else
             {
@@ -1994,7 +1994,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (platformProperty != null)
             {
-                activeSolutionPlatform  = platformProperty.FinalValue;
+                activeSolutionPlatform = platformProperty.FinalValue;
             }
             else
             {
@@ -2239,7 +2239,7 @@ namespace Microsoft.Build.BuildEngine
                 // First, go through dependencies and ensure they have their dependency level set correctly.
                 foreach (string dependencyGuid in project.Dependencies)
                 {
-                    ProjectInSolution referencedProject = (ProjectInSolution) solution.ProjectsByGuid[dependencyGuid];
+                    ProjectInSolution referencedProject = (ProjectInSolution)solution.ProjectsByGuid[dependencyGuid];
 
                     AssignDependencyLevel(referencedProject, solution, projectsByDependencyLevel);
 

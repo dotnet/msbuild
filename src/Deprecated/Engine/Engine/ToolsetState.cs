@@ -102,7 +102,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildPropertyGroup BuildProperties
         {
-            get 
+            get
             {
                 return this.toolset.BuildProperties;
             }
@@ -188,7 +188,7 @@ namespace Microsoft.Build.BuildEngine
 
                         if (defaultTasksFiles.Length == 0)
                         {
-                            loggingServices.LogWarning( buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
+                            loggingServices.LogWarning(buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                                 "DefaultTasksFileLoadFailureWarning",
                                 defaultTasksFilePattern, toolset.ToolsPath, String.Empty);
                         }
@@ -196,7 +196,7 @@ namespace Microsoft.Build.BuildEngine
                     // handle security problems when finding the default tasks files
                     catch (UnauthorizedAccessException e)
                     {
-                        loggingServices.LogWarning( buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
+                        loggingServices.LogWarning(buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                             "DefaultTasksFileLoadFailureWarning",
                             defaultTasksFilePattern, toolset.ToolsPath, e.Message);
                     }
@@ -208,7 +208,7 @@ namespace Microsoft.Build.BuildEngine
                             throw;
                         }
 
-                        loggingServices.LogWarning( buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
+                        loggingServices.LogWarning(buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                             "DefaultTasksFileLoadFailureWarning",
                             defaultTasksFilePattern, toolset.ToolsPath, e.Message);
                     }
@@ -237,7 +237,7 @@ namespace Microsoft.Build.BuildEngine
                                     // the <Project> tag can only the XML namespace -- no other attributes
                                     foreach (XmlAttribute projectAttribute in topLevelNode.Attributes)
                                     {
-                                        ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(projectAttribute.Name == XMakeAttributes.xmlns, projectAttribute); 
+                                        ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(projectAttribute.Name == XMakeAttributes.xmlns, projectAttribute);
                                     }
 
                                     // look at all the child tags of the <Project> root tag we found

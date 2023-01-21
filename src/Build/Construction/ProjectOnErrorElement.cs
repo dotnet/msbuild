@@ -76,7 +76,7 @@ namespace Microsoft.Build.Construction
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.onError);
 
             var onError = new ProjectOnErrorElement(element, containingProject) { ExecuteTargetsAttribute = executeTargets };
-            
+
             return onError;
         }
 

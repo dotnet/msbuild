@@ -143,7 +143,7 @@ namespace Microsoft.Build.Execution
         internal static ProjectPropertyGroupTaskPropertyInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectPropertyGroupTaskPropertyInstance();
-            ((ITranslatable) instance).Translate(translator);
+            ((ITranslatable)instance).Translate(translator);
 
             return instance;
         }

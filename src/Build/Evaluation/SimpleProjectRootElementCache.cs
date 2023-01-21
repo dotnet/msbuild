@@ -143,7 +143,7 @@ namespace Microsoft.Build.Evaluation
 
         protected override void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
         {
-             throw new NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

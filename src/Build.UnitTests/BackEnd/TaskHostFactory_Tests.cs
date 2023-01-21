@@ -89,6 +89,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
             ProjectInstance projectInstance = new(project.ProjectFile);
             projectInstance.Build(new[] { new MockLogger(env.Output) }).ShouldBeTrue();
-            }
+        }
     }
 }

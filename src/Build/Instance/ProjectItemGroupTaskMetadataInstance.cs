@@ -145,7 +145,7 @@ namespace Microsoft.Build.Execution
         internal static ProjectItemGroupTaskMetadataInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectItemGroupTaskMetadataInstance();
-            ((ITranslatable) instance).Translate(translator);
+            ((ITranslatable)instance).Translate(translator);
 
             return instance;
         }

@@ -487,7 +487,7 @@ namespace Microsoft.Build.CommandLine
                 if (String.Empty.Equals(switchParameters) && emptyParametersAllowed)
                 {
                     // Store a null parameter if its allowed
-                    _parameterizedSwitches[(int) parameterizedSwitch].parameters.Add(null);
+                    _parameterizedSwitches[(int)parameterizedSwitch].parameters.Add(null);
                     parametersStored = true;
                 }
                 else

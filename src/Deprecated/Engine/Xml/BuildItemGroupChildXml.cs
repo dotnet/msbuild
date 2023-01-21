@@ -45,7 +45,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectXmlUtilities.VerifyThrowProjectValidNameAndNamespace(element);
 
             this.element = element;
-    
+
             // Loop through each of the attributes on the item element.
             foreach (XmlAttribute attribute in element.Attributes)
             {
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
                         this.includeAttribute = attribute;
                         break;
 
-                    case XMakeAttributes.exclude:  
+                    case XMakeAttributes.exclude:
                         this.excludeAttribute = attribute;
                         break;
 
@@ -159,7 +159,7 @@ namespace Microsoft.Build.BuildEngine
         internal string Name
         {
             get
-            { 
+            {
                 return element.Name;
             }
 
@@ -252,7 +252,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get { return childType; }
         }
-        
+
         #endregion
 
         #region Methods

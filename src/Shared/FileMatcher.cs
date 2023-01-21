@@ -2675,7 +2675,7 @@ namespace Microsoft.Build.Shared
 
             // Ensure that the prefix match wasn't to a distinct directory, so that
             // x\y\prefix doesn't falsely match x\y\prefixmatch.
-            if (directorySeparatorCharacters.Contains(possibleParent[possibleParent.Length-1]))
+            if (directorySeparatorCharacters.Contains(possibleParent[possibleParent.Length - 1]))
             {
                 return true;
             }

@@ -268,9 +268,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("foo.txt",      new[] { ".txt" })]
-        [InlineData("foo.txt",      new[] { ".TXT" })]
-        [InlineData("foo.txt",      new[] { ".EXE", ".TXT" })]
+        [InlineData("foo.txt", new[] { ".txt" })]
+        [InlineData("foo.txt", new[] { ".TXT" })]
+        [InlineData("foo.txt", new[] { ".EXE", ".TXT" })]
         public void HasExtension_WhenFileNameHasExtension_ReturnsTrue(string fileName, string[] allowedExtensions)
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
@@ -282,13 +282,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("foo.txt",      new[] { ".DLL" })]
-        [InlineData("foo.txt",      new[] { ".EXE", ".DLL" })]
-        [InlineData("foo.exec",     new[] { ".exe", })]
-        [InlineData("foo.exe",      new[] { ".exec", })]
-        [InlineData("foo",          new[] { ".exe", })]
-        [InlineData("",             new[] { ".exe" })]
-        [InlineData(null,           new[] { ".exe" })]
+        [InlineData("foo.txt", new[] { ".DLL" })]
+        [InlineData("foo.txt", new[] { ".EXE", ".DLL" })]
+        [InlineData("foo.exec", new[] { ".exe", })]
+        [InlineData("foo.exe", new[] { ".exec", })]
+        [InlineData("foo", new[] { ".exe", })]
+        [InlineData("", new[] { ".exe" })]
+        [InlineData(null, new[] { ".exe" })]
         public void HasExtension_WhenFileNameDoesNotHaveExtension_ReturnsFalse(string fileName, string[] allowedExtensions)
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [Fact(Skip="https://github.com/dotnet/msbuild/issues/4205")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4205")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadGlobalroot()
         {

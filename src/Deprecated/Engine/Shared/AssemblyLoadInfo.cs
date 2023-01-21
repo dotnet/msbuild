@@ -101,7 +101,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         /// <returns></returns>
         /// <owner>RGoel</owner>
-        public override bool Equals(Object obj) 
+        public override bool Equals(Object obj)
         {
             if (obj == null)
             {
@@ -109,7 +109,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             AssemblyLoadInfo otherAssemblyInfo = obj as AssemblyLoadInfo;
-            
+
             if (otherAssemblyInfo == null)
             {
                 return false;

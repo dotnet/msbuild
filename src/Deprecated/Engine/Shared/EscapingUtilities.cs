@@ -64,7 +64,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             {
                 // There must be two hex characters following the percent sign
                 // for us to even consider doing anything with this.
-                if  (
+                if (
                         (indexOfPercent <= (escapedString.Length - 3)) &&
                         Uri.IsHexDigit(escapedString[indexOfPercent + 1]) &&
                         Uri.IsHexDigit(escapedString[indexOfPercent + 2])
@@ -76,7 +76,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                     // Convert the %XX to an actual real character.
                     string hexString = escapedString.Substring(indexOfPercent + 1, 2);
-                    char unescapedCharacter = (char) int.Parse(hexString, System.Globalization.NumberStyles.HexNumber,
+                    char unescapedCharacter = (char)int.Parse(hexString, System.Globalization.NumberStyles.HexNumber,
                         CultureInfo.InvariantCulture);
 
                     // if the unescaped character is not on the exception list, append it
@@ -164,7 +164,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             if (-1 != escapedString.IndexOf('%'))
             {
                 // It has a '%' sign.  We have promise.
-                if  (
+                if (
                         (-1 != escapedString.IndexOf("%2", StringComparison.Ordinal)) ||
                         (-1 != escapedString.IndexOf("%3", StringComparison.Ordinal))
                     )

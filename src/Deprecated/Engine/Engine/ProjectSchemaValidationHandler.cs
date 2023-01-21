@@ -18,7 +18,7 @@ namespace Microsoft.Build.BuildEngine
     internal sealed class ProjectSchemaValidationHandler
     {
         // The parent Engine object for this project.
-        private EngineLoggingServices engineLoggingServices ;
+        private EngineLoggingServices engineLoggingServices;
 
         // the location of the MSBuild binaries
         private string binPath;
@@ -114,7 +114,7 @@ namespace Microsoft.Build.BuildEngine
             validatorSettings.ValidationType = ValidationType.Schema;
             validatorSettings.XmlResolver = null;
             validatorSettings.ValidationEventHandler += this.OnSchemaValidationError;
-            
+
             if (string.IsNullOrEmpty(schemaFile))
             {
                 schemaFile = Path.Combine(binPath, "Microsoft.Build.xsd");

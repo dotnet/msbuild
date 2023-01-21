@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Toolset t = new Toolset("4.0", "c:\\bar", buildProperties, environmentProperties, globalProperties,
                 subToolsets, "c:\\foo", "4.0", new Dictionary<string, ProjectImportPathMatch>
                 {
-                    ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> {@"c:\foo"})
+                    ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> { @"c:\foo" })
                 });
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());

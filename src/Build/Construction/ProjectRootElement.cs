@@ -238,7 +238,7 @@ namespace Microsoft.Build.Construction
         /// <remarks>
         /// Do not make public: we do not wish to expose particular XML API's.
         /// </remarks>
-        private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCacheBase  projectRootElementCache)
+        private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCacheBase projectRootElementCache)
         {
             ErrorUtilities.VerifyThrowArgumentNull(document, nameof(document));
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
@@ -789,7 +789,8 @@ namespace Microsoft.Build.Construction
 
             var projectRootElement = new ProjectRootElement(
                 projectCollection.ProjectRootElementCache,
-                newProjectFileOptions) { FullPath = path };
+                newProjectFileOptions)
+            { FullPath = path };
 
             return projectRootElement;
         }
@@ -1239,7 +1240,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectChooseElement CreateChooseElement()
         {
-            return Link!=null ? RootLink.CreateChooseElement() : ProjectChooseElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreateChooseElement() : ProjectChooseElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1266,7 +1267,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemElement CreateItemElement(string itemType, string include)
         {
-            if (Link != null )
+            if (Link != null)
             {
                 return RootLink.CreateItemElement(itemType, include);
             }
@@ -2054,7 +2055,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);
 
-            var document = new XmlDocumentWithLocation(loadAsReadOnly ? true : (bool?) null)
+            var document = new XmlDocumentWithLocation(loadAsReadOnly ? true : (bool?)null)
             {
                 FullPath = fullPath,
                 PreserveWhitespace = preserveFormatting
@@ -2104,7 +2105,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static XmlDocumentWithLocation LoadDocument(XmlReader reader, bool preserveFormatting)
         {
-            var document = new XmlDocumentWithLocation {PreserveWhitespace = preserveFormatting};
+            var document = new XmlDocumentWithLocation { PreserveWhitespace = preserveFormatting };
 
             try
             {

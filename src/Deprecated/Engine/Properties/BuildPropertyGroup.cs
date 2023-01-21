@@ -251,7 +251,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // Handle XML comments under the <PropertyGroup> node (just ignore them).
                     case XmlNodeType.Comment:
-                        // fall through
+                    // fall through
                     case XmlNodeType.Whitespace:
                         // ignore whitespace
                         break;
@@ -443,7 +443,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     if (this.propertyGroupElement.ParentNode is XmlElement)
                     {
-                        return (XmlElement) this.propertyGroupElement.ParentNode;
+                        return (XmlElement)this.propertyGroupElement.ParentNode;
                     }
                 }
 

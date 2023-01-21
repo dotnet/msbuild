@@ -72,7 +72,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     return this.loggerClassName + ":" + this.loggerAssembly.AssemblyFile;
                 }
-                else if ( !string.IsNullOrEmpty(this.loggerClassName) )
+                else if (!string.IsNullOrEmpty(this.loggerClassName))
                 {
                     return this.loggerClassName;
                 }
@@ -229,7 +229,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (loggerAssembly.AssemblyFile != null)
             {
-                loggerAssembly = 
+                loggerAssembly =
                     new AssemblyLoadInfo(loggerAssembly.AssemblyName, Path.GetFullPath(loggerAssembly.AssemblyFile));
             }
         }
@@ -239,7 +239,7 @@ namespace Microsoft.Build.BuildEngine
         #region Data
         private string loggerClassName;
         private string loggerSwitchParameters;
-        private AssemblyLoadInfo loggerAssembly; 
+        private AssemblyLoadInfo loggerAssembly;
         private LoggerVerbosity verbosity;
         private int loggerId;
         #endregion
@@ -305,7 +305,7 @@ namespace Microsoft.Build.BuildEngine
         internal void CreateFromStream(BinaryReader reader)
         {
             #region LoggerClassName
-            if (reader.ReadByte() ==0)
+            if (reader.ReadByte() == 0)
             {
                 loggerClassName = null;
             }

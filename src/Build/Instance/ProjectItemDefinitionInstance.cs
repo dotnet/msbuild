@@ -231,7 +231,7 @@ namespace Microsoft.Build.Execution
         internal static ProjectItemDefinitionInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectItemDefinitionInstance();
-            ((ITranslatable) instance).Translate(translator);
+            ((ITranslatable)instance).Translate(translator);
 
             return instance;
         }

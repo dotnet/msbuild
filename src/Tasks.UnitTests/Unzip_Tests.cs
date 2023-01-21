@@ -171,7 +171,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain($"D6DFD219DACE48F8B86EFCDF98433333.txt{ (NativeMethodsShared.IsMono ? "\"" : "'") } is denied", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain($"D6DFD219DACE48F8B86EFCDF98433333.txt{(NativeMethodsShared.IsMono ? "\"" : "'")} is denied", () => _mockEngine.Log);
             }
         }
 
@@ -230,14 +230,14 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
                 Unzip unzip = new Unzip
-                                  {
-                                      BuildEngine = _mockEngine,
-                                      DestinationFolder = new TaskItem(destination.Path),
-                                      OverwriteReadOnlyFiles = true,
-                                      SkipUnchangedFiles = false,
-                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Include = "BE78A17D30144B549D21F71D5C633F7D.txt"
-                                  };
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    Include = "BE78A17D30144B549D21F71D5C633F7D.txt"
+                };
 
                 unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
@@ -259,14 +259,14 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
                 Unzip unzip = new Unzip
-                                  {
-                                      BuildEngine = _mockEngine,
-                                      DestinationFolder = new TaskItem(destination.Path),
-                                      OverwriteReadOnlyFiles = true,
-                                      SkipUnchangedFiles = false,
-                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Exclude = "BE78A17D30144B549D21F71D5C633F7D.txt"
-                                  };
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    Exclude = "BE78A17D30144B549D21F71D5C633F7D.txt"
+                };
 
                 unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
@@ -292,15 +292,15 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
                 Unzip unzip = new Unzip
-                                  {
-                                      BuildEngine = _mockEngine,
-                                      DestinationFolder = new TaskItem(destination.Path),
-                                      OverwriteReadOnlyFiles = true,
-                                      SkipUnchangedFiles = false,
-                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Include = "*.js",
-                                      Exclude = "*.js.map;sub\\*.js"
-                                  };
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    Include = "*.js",
+                    Exclude = "*.js.map;sub\\*.js"
+                };
 
                 unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
@@ -325,14 +325,14 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
                 Unzip unzip = new Unzip
-                                  {
-                                      BuildEngine = _mockEngine,
-                                      DestinationFolder = new TaskItem(destination.Path),
-                                      OverwriteReadOnlyFiles = true,
-                                      SkipUnchangedFiles = false,
-                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Include = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
-                                  };
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    Include = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
+                };
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
@@ -353,14 +353,14 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
                 Unzip unzip = new Unzip
-                                  {
-                                      BuildEngine = _mockEngine,
-                                      DestinationFolder = new TaskItem(destination.Path),
-                                      OverwriteReadOnlyFiles = true,
-                                      SkipUnchangedFiles = false,
-                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Include = "$(Include)"
-                                  };
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    Include = "$(Include)"
+                };
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
@@ -381,14 +381,14 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
                 Unzip unzip = new Unzip
-                                  {
-                                      BuildEngine = _mockEngine,
-                                      DestinationFolder = new TaskItem(destination.Path),
-                                      OverwriteReadOnlyFiles = true,
-                                      SkipUnchangedFiles = false,
-                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Exclude = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
-                                  };
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    Exclude = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
+                };
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
@@ -409,14 +409,14 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
                 Unzip unzip = new Unzip
-                                  {
-                                      BuildEngine = _mockEngine,
-                                      DestinationFolder = new TaskItem(destination.Path),
-                                      OverwriteReadOnlyFiles = true,
-                                      SkipUnchangedFiles = false,
-                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Exclude = "$(Include)"
-                                  };
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    Exclude = "$(Include)"
+                };
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 

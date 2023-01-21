@@ -170,18 +170,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             using (RegistryKey userKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\CLASSES\\CLSID"))
             {
-               if (GetRegisteredClassInfo(userKey, clsid, ref info))
-               {
-                   return info;
-               }
+                if (GetRegisteredClassInfo(userKey, clsid, ref info))
+                {
+                    return info;
+                }
             }
 
             using (RegistryKey machineKey = Registry.ClassesRoot.OpenSubKey("CLSID"))
             {
-               if (GetRegisteredClassInfo(machineKey, clsid, ref info))
-               {
-                  return info;
-               }
+                if (GetRegisteredClassInfo(machineKey, clsid, ref info))
+                {
+                    return info;
+                }
             }
 
             // Check Wow6432Node of HKCR incase the COM reference is to a 32-bit binary.

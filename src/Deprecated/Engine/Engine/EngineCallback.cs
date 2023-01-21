@@ -42,7 +42,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 // We can safely assume that all requests need to be routed to the same engine because
                 // they originated from the same task 
-                for(int i = 0; i < buildRequests.Length; i++)
+                for (int i = 0; i < buildRequests.Length; i++)
                 {
                     ProcessBuildRequest(buildRequests[i]);
                 }
@@ -491,7 +491,7 @@ namespace Microsoft.Build.BuildEngine
         internal int CreateTaskContext
         (
             Project parentProject,
-            Target  parentTarget,
+            Target parentTarget,
             ProjectBuildState buildContext,
             XmlElement taskNode,
             int nodeIndex,
@@ -594,7 +594,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// List of contexts that should be removed from the hashtable by the engine thread
         /// </summary>
-        private List<ExecutionContext> freedContexts = new List<ExecutionContext>(2*freeListThreshold);
+        private List<ExecutionContext> freedContexts = new List<ExecutionContext>(2 * freeListThreshold);
         /// <summary>
         /// The counter used to generate unique identifiers for each context
         /// </summary>

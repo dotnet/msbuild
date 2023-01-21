@@ -192,7 +192,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                TryGetValue((string) key, out V? val);
+                TryGetValue((string)key, out V? val);
                 return val;
             }
 #nullable disable

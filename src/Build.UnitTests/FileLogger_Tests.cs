@@ -368,7 +368,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Note: Only the ParallelConsoleLogger supports this scenario (log file empty on no error/warn). We
                 // need to explicitly enable it here with the 'ENABLEMPLOGGING' flag.
-                FileLogger fileLogger = new FileLogger {Parameters = $"{loggerOption};logfile={logFile};ENABLEMPLOGGING" };
+                FileLogger fileLogger = new FileLogger { Parameters = $"{loggerOption};logfile={logFile};ENABLEMPLOGGING" };
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(@"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>

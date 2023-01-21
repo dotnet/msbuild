@@ -414,7 +414,7 @@ namespace Microsoft.Build.Execution
         )
         {
             TaskFactoryWrapper taskFactory = null;
-            
+
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
             RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out bool retrievedFromCache);
 
@@ -1433,7 +1433,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
                                 factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
 #else
-                                factory = (ITaskFactory) Activator.CreateInstance(loadedType.Type);
+                                factory = (ITaskFactory)Activator.CreateInstance(loadedType.Type);
 #endif
                                 TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext);
 
@@ -1811,7 +1811,7 @@ namespace Microsoft.Build.Execution
 
                 if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
                 {
-                    _taskFactoryParameters = (Dictionary<string, string>) localParameters;
+                    _taskFactoryParameters = (Dictionary<string, string>)localParameters;
                 }
             }
 
@@ -1833,7 +1833,7 @@ namespace Microsoft.Build.Execution
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>) copy;
+                _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
             }
         }
 

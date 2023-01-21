@@ -254,7 +254,7 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Given a project reference task item and an XML document containing project configurations, 
         /// find the configuration for that task item.

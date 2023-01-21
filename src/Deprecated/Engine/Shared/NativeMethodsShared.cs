@@ -147,7 +147,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <summary>
         /// Gets the fully qualified filename of the currently executing .exe
         /// </summary>
-        [DllImport(kernel32Dll, SetLastError=true, CharSet = CharSet.Unicode)]
+        [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern int GetModuleFileName(HandleRef hModule, StringBuilder buffer, int length);
 
         [DllImport("kernel32.dll")]

@@ -242,7 +242,7 @@ namespace Microsoft.Build.BackEnd
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                _resultsByConfiguration = (ConcurrentDictionary<int, BuildResult>) localReference;
+                _resultsByConfiguration = (ConcurrentDictionary<int, BuildResult>)localReference;
             }
         }
 

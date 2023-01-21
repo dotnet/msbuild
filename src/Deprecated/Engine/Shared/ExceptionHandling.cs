@@ -26,7 +26,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 e is StackOverflowException
                 || e is OutOfMemoryException
                 || e is AccessViolationException
-                // ExecutionEngineException has been deprecated by the CLR
+            // ExecutionEngineException has been deprecated by the CLR
             )
             {
                 return true;

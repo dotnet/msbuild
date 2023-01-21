@@ -139,7 +139,7 @@ namespace Microsoft.Build.BuildEngine
             this.cloneTable = that.cloneTable;
         }
 
-#endregion
+        #endregion
 
         #region Properties
 
@@ -227,7 +227,7 @@ namespace Microsoft.Build.BuildEngine
             set { lookupEntries.First.Next.Value.PropertySets = value; }
         }
 
-#endregion
+        #endregion
 
         #region Internal Methods
 
@@ -662,7 +662,7 @@ namespace Microsoft.Build.BuildEngine
         {
             MustBeOwningThread();
 
-             // Adding to outer scope could be easily implemented, but our code does not do it at present
+            // Adding to outer scope could be easily implemented, but our code does not do it at present
             MustNotBeOuterScope();
 
 #if DEBUG
@@ -802,7 +802,7 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-#endregion
+        #endregion
 
         #region Private Methods
 
@@ -1213,6 +1213,6 @@ namespace Microsoft.Build.BuildEngine
             set { truncateLookupsAtThisScope = value; }
         }
     }
-#endregion
+    #endregion
 
 }

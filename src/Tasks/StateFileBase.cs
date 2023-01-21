@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks
                                 retVal = constructor.Invoke(new object[] { translator }) as StateFileBase;
                             }
                         }
-                        
+
                         if (retVal == null || !requiredReturnType.IsInstanceOfType(retVal))
                         {
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile,

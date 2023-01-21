@@ -67,7 +67,7 @@ namespace Microsoft.Build.Construction
             {
                 if (value)
                 {
-                    ValidateValidMetadataAsAttributeName(Name, Parent?.ElementName ?? "null" , Parent?.Location);
+                    ValidateValidMetadataAsAttributeName(Name, Parent?.ElementName ?? "null", Parent?.Location);
                 }
                 base.ExpressedAsAttribute = value;
             }

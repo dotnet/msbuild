@@ -646,7 +646,7 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(88, assemblyPath, numberOfPublicTypesSearched);
         }
-        
+
         [Event(89, Keywords = Keywords.All)]
         public void MSBuildServerBuildStart(string commandLine)
         {

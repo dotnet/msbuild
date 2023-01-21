@@ -587,7 +587,7 @@ namespace Microsoft.Build.Execution
         internal static ProjectTargetInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectTargetInstance();
-            var translatable = (ITranslatable) instance;
+            var translatable = (ITranslatable)instance;
 
             translatable.Translate(translator);
 

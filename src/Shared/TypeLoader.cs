@@ -193,7 +193,8 @@ namespace Microsoft.Build.Shared
 
             // Deduplicate between MSBuild assemblies and task dependencies. 
             Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
-            foreach (string localPath in localAssemblies) {
+            foreach (string localPath in localAssemblies)
+            {
                 assembliesDictionary.Add(Path.GetFileName(localPath), localPath);
             }
 

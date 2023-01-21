@@ -46,7 +46,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal NodeLoggingEvent(BuildEventArgs eventToLog)
         {
-           this.e = eventToLog;
+            this.e = eventToLog;
         }
         #endregion
 
@@ -156,7 +156,7 @@ namespace Microsoft.Build.BuildEngine
                 case LoggingEventType.BuildStartedEvent:
                     return new BuildStartedEventArgs(null, null);
                 case LoggingEventType.BuildWarningEvent:
-                    return new BuildWarningEventArgs(null, null, null, -1, -1, -1, -1,null,null,null);
+                    return new BuildWarningEventArgs(null, null, null, -1, -1, -1, -1, null, null, null);
                 case LoggingEventType.ProjectFinishedEvent:
                     return new ProjectFinishedEventArgs(null, null, null, false);
                 case LoggingEventType.ProjectStartedEvent:
@@ -249,24 +249,24 @@ namespace Microsoft.Build.BuildEngine
                         customEventsLoaded.Add(fileLocation, null);
                     }
                 }
+                if (resolveAssembly)
+                {
+                    resolver = new TaskEngineAssemblyResolver();
+                    resolver.InstallHandler();
+                    resolver.Initialize(fileLocation);
+                }
+                try
+                {
+                    e = (BuildEventArgs)binaryFormatter.Deserialize(reader.BaseStream);
+                }
+                finally
+                {
                     if (resolveAssembly)
                     {
-                        resolver = new TaskEngineAssemblyResolver();
-                        resolver.InstallHandler();
-                        resolver.Initialize(fileLocation);
+                        resolver.RemoveHandler();
+                        resolver = null;
                     }
-                    try
-                    {
-                        e = (BuildEventArgs)binaryFormatter.Deserialize(reader.BaseStream);
-                    }
-                    finally
-                    {
-                        if (resolveAssembly)
-                        {
-                            resolver.RemoveHandler();
-                            resolver = null;
-                        }
-                    }
+                }
             }
         }
         #endregion
@@ -297,7 +297,7 @@ namespace Microsoft.Build.BuildEngine
         /// Create a wrapper for a given event associated with a particular loggerId
         /// </summary>
         internal NodeLoggingEventWithLoggerId(BuildEventArgs eventToLog, int loggerId)
-            :base(eventToLog)
+            : base(eventToLog)
         {
             this.loggerId = loggerId;
         }

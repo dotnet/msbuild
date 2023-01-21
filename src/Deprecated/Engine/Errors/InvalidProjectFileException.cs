@@ -133,7 +133,7 @@ namespace Microsoft.Build.BuildEngine
             string errorSubcategory,
             string errorCode,
             string helpKeyword
-        ) : 
+        ) :
             base(message)
         {
             ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
@@ -174,7 +174,7 @@ namespace Microsoft.Build.BuildEngine
             string errorSubcategory,
             string errorCode,
             string helpKeyword
-        ) : 
+        ) :
             base(message)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));

@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             var factoryRemote = xml.Linker.Export<ProjectElement, MockProjectRootElementLinkRemoter>(factory);
             var parentRemote = (MockProjectElementContainerLinkRemoter)xml.Linker.ExportElement(parent);
-            var result  = xml.ContainerProxy.DeepClone(factoryRemote, parentRemote);
+            var result = xml.ContainerProxy.DeepClone(factoryRemote, parentRemote);
 
             return (ProjectElementContainer)result.Import(xml.Linker);
         }

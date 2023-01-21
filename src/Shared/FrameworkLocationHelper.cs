@@ -126,9 +126,9 @@ namespace Microsoft.Build.Shared
         private const string ToolsVersionsRegistryPath = @"SOFTWARE\Microsoft\MSBuild\ToolsVersions";
 #endif // FEATURE_WIN32_REGISTRY
 
-#endregion // Constants
+        #endregion // Constants
 
-#region Static member variables
+        #region Static member variables
 
         /// <summary>
         /// By default when a root path is not specified we would like to use the program files directory \ reference assemblies\framework as the root location
@@ -398,9 +398,9 @@ namespace Microsoft.Build.Shared
         private static readonly Lazy<IReadOnlyDictionary<Version, DotNetFrameworkSpec>> DotNetFrameworkSpecDict = new(() => DotNetFrameworkSpecs().ToDictionary(spec => spec.Version));
         private static readonly Lazy<IReadOnlyDictionary<Version, VisualStudioSpec>> VisualStudioSpecDict = new(() => VisualStudioSpecs.Value.ToDictionary(spec => spec.Version));
 
-#endregion // Static member variables
+        #endregion // Static member variables
 
-#region Static properties
+        #region Static properties
 
         internal static string PathToDotNetFrameworkV11
         {
@@ -622,9 +622,9 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#endregion // Static properties
+        #endregion // Static properties
 
-#region Internal methods
+        #region Internal methods
 
         internal static string GetDotNetFrameworkSdkRootRegistryKey(Version dotNetFrameworkVersion, Version visualStudioVersion)
         {
@@ -1090,9 +1090,9 @@ namespace Microsoft.Build.Shared
         }
 #endif
 
-#endregion // Internal methods
+        #endregion // Internal methods
 
-#region Private methods
+        #region Private methods
 
         /// <summary>
         /// Will return the path to the dot net framework reference assemblies if they exist under the program files\reference assembies\microsoft\framework directory
@@ -1179,7 +1179,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#endregion
+        #endregion
 
         private class VisualStudioSpec
         {
@@ -1728,7 +1728,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public override string GetPathToDotNetFrameworkReferenceAssemblies()
             {
-                if (this._pathToDotNetFrameworkReferenceAssemblies== null)
+                if (this._pathToDotNetFrameworkReferenceAssemblies == null)
                 {
 #if FEATURE_WIN32_REGISTRY
                     this._pathToDotNetFrameworkReferenceAssemblies = FindRegistryValueUnderKey(

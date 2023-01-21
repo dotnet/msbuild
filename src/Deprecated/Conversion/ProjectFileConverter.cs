@@ -185,7 +185,7 @@ namespace Microsoft.Build.Conversion
         private ArrayList conversionWarnings = null;
 
         // A list of property names whose values we need to escape when converting to Whidbey.
-        private Dictionary<string,string> propertiesToEscape = null;
+        private Dictionary<string, string> propertiesToEscape = null;
 
         /// <summary>
         /// Default constructor.  We need a constructor that takes zero parameters,
@@ -300,7 +300,7 @@ namespace Microsoft.Build.Conversion
         {
             get
             {
-                return (string[]) conversionWarnings.ToArray(typeof(string));
+                return (string[])conversionWarnings.ToArray(typeof(string));
             }
         }
 
@@ -400,7 +400,7 @@ namespace Microsoft.Build.Conversion
             this.isMyTypeAlreadySetInOriginalProject = false;
             this.conversionWarnings = new ArrayList();
 
-            this.propertiesToEscape = new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);
+            this.propertiesToEscape = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             this.propertiesToEscape.Add("ApplicationIcon", null);
             this.propertiesToEscape.Add("AssemblyKeyContainerName", null);
             this.propertiesToEscape.Add("AssemblyName", null);
@@ -464,13 +464,13 @@ namespace Microsoft.Build.Conversion
             // but since XML comments may appear outside of the <VisualStudioProject> scope,
             // it's possible to get more than one child node.  Just find the first
             // non-comment node.  That should be the <VisualStudioProject> element.
-            foreach(XmlNode childNode in rootNodes)
+            foreach (XmlNode childNode in rootNodes)
             {
                 if ((childNode.NodeType != XmlNodeType.Comment) &&
                     (childNode.NodeType != XmlNodeType.XmlDeclaration) &&
                     (childNode.NodeType != XmlNodeType.Whitespace))
                 {
-                    visualStudioProjectElement = (XmlElementWithLocation) childNode;
+                    visualStudioProjectElement = (XmlElementWithLocation)childNode;
                     break;
                 }
             }
@@ -814,9 +814,9 @@ namespace Microsoft.Build.Conversion
         {
             // check if the project has the to-repair pattern in the Imports
             // pattern: $(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\
-            var toRepairImports =  from import in xmakeProject.Imports
-                                   where HasRepairPattern(import)
-                                   select import;
+            var toRepairImports = from import in xmakeProject.Imports
+                                  where HasRepairPattern(import)
+                                  select import;
 
             return toRepairImports;
         }
@@ -882,13 +882,13 @@ namespace Microsoft.Build.Conversion
 
             foreach (ProjectPropertyElement propertyElement in xmakeProject.Properties)
             {
-                if (String.Equals(propertyElement.Name , XMakeProjectStrings.TargetFrameworkSubset, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(propertyElement.Name, XMakeProjectStrings.TargetFrameworkSubset, StringComparison.OrdinalIgnoreCase))
                 {
                     // For the Client profile, which was the only profile supported in Orcas SP1, we want to replace 
                     // <TargetFrameworkSubset/> with <TargetFrameworkProfile/>.
                     if (String.Equals(propertyElement.Value, XMakeProjectStrings.ClientProfile, StringComparison.OrdinalIgnoreCase))
                     {
-                        ProjectPropertyGroupElement parentGroup = (ProjectPropertyGroupElement) propertyElement.Parent;
+                        ProjectPropertyGroupElement parentGroup = (ProjectPropertyGroupElement)propertyElement.Parent;
                         parentGroup.SetProperty(XMakeProjectStrings.TargetFrameworkProfile, XMakeProjectStrings.ClientProfile);
                         changedProject = true;
                     }
@@ -995,7 +995,7 @@ namespace Microsoft.Build.Conversion
                 else if (equals(importElement.Project, fsharpPortableDev11TargetsPath))
                 {
                     fsharpTargetsDev11PortableImport = importElement;
-                    isAtLeastDev10Project= true;
+                    isAtLeastDev10Project = true;
                 }
             }
 
@@ -1205,7 +1205,7 @@ namespace Microsoft.Build.Conversion
             const string MinimumVisualStudioVersionProperty = "MinimumVisualStudioVersion";
             var hasMinimumVSVersion = xmakeProject.Properties.Any(prop => prop.Name == MinimumVisualStudioVersionProperty);
 
-            foreach(var group in xmakeProject.PropertyGroups)
+            foreach (var group in xmakeProject.PropertyGroups)
             {
                 // find first non-conditional property group to add TargetFSharpCoreVersion property
                 if (string.IsNullOrEmpty(group.Condition))
@@ -1408,7 +1408,7 @@ namespace Microsoft.Build.Conversion
         private void AddXMakePropertiesFromXMLAttributes
             (
             ProjectPropertyGroupElement propertyGroup,
-            XmlElement          xmlElement
+            XmlElement xmlElement
             )
         {
             error.VerifyThrow(propertyGroup != null, "Expected valid ProjectPropertyElementGroup to add properties to.");
@@ -1434,7 +1434,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessVisualStudioProjectElement
             (
-            XmlElementWithLocation      visualStudioProjectElement
+            XmlElementWithLocation visualStudioProjectElement
             )
         {
             // Make sure this is the <VisualStudioProject> element.
@@ -1459,7 +1459,7 @@ namespace Microsoft.Build.Conversion
             bool languageFound = false;
 
             // Loop through all the direct children of the <VisualStudioProject> element.
-            foreach(XmlNode visualStudioProjectChildNode in visualStudioProjectElement)
+            foreach (XmlNode visualStudioProjectChildNode in visualStudioProjectElement)
             {
                 // Handle XML comments under the <VisualStudioProject> node (just ignore them)
                 if ((visualStudioProjectChildNode.NodeType == XmlNodeType.Comment) ||
@@ -1510,7 +1510,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessLanguageElement
             (
-            XmlElementWithLocation      languageElement
+            XmlElementWithLocation languageElement
             )
         {
             // Make sure we have a valid XML element to process.
@@ -1610,24 +1610,24 @@ namespace Microsoft.Build.Conversion
             {
                 if (languageElement.Name == VSProjectElements.ECSharp)
                 {
-                    this.globalPropertyGroup.AddProperty ( XMakeProjectStrings.projectTypeGuids,
+                    this.globalPropertyGroup.AddProperty(XMakeProjectStrings.projectTypeGuids,
                                                               "{" +
                                                               XMakeProjectStrings.VSDCSProjectTypeGuid +
                                                               "};{" +
                                                               XMakeProjectStrings.cSharpGuid +
-                                                              "}" );
-                    string visualStudioProjectExtensions =  GetProjectExtensionsString(XMakeProjectStrings.visualStudio);
+                                                              "}");
+                    string visualStudioProjectExtensions = GetProjectExtensionsString(XMakeProjectStrings.visualStudio);
                     visualStudioProjectExtensions += XMakeProjectStrings.disableCSHostProc;
                     SetProjectExtensionsString(XMakeProjectStrings.visualStudio, visualStudioProjectExtensions);
                 }
                 else if (languageElement.Name == VSProjectElements.EVisualBasic)
                 {
-                    this.globalPropertyGroup.AddProperty ( XMakeProjectStrings.projectTypeGuids,
+                    this.globalPropertyGroup.AddProperty(XMakeProjectStrings.projectTypeGuids,
                                                               "{" +
                                                               XMakeProjectStrings.VSDVBProjectTypeGuid +
                                                               "};{" +
                                                               XMakeProjectStrings.visualBasicGuid +
-                                                              "}" );
+                                                              "}");
                     string visualStudioProjectExtensions = GetProjectExtensionsString(XMakeProjectStrings.visualStudio);
                     visualStudioProjectExtensions += XMakeProjectStrings.disableVBHostProc;
                     SetProjectExtensionsString(XMakeProjectStrings.visualStudio, visualStudioProjectExtensions);
@@ -1635,7 +1635,7 @@ namespace Microsoft.Build.Conversion
             }
 
             // Loop through all the direct child elements of the language element.
-            foreach(XmlNode languageChildNode in languageElement)
+            foreach (XmlNode languageChildNode in languageElement)
             {
                 // Handle XML comments under the the language node (just ignore them).
                 if ((languageChildNode.NodeType == XmlNodeType.Comment) ||
@@ -1824,7 +1824,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessBuildElement
             (
-            XmlElementWithLocation      buildElement
+            XmlElementWithLocation buildElement
             )
         {
             // Make sure this is the <Build> element.
@@ -1841,7 +1841,7 @@ namespace Microsoft.Build.Conversion
                 "NoAttributesExpected", VSProjectElements.build);
 
             // Loop through all the direct child elements of the <Build> element.
-            foreach(XmlNode buildChildNode in buildElement)
+            foreach (XmlNode buildChildNode in buildElement)
             {
                 // Handle XML comments under the the <Build> node (just ignore them).
                 if ((buildChildNode.NodeType == XmlNodeType.Comment) ||
@@ -1891,7 +1891,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessSettingsElement
             (
-            XmlElementWithLocation      settingsElement
+            XmlElementWithLocation settingsElement
             )
         {
             // Make sure this is the <Settings> element.
@@ -1970,7 +1970,7 @@ namespace Microsoft.Build.Conversion
             this.AddXMakePropertiesFromXMLAttributes(this.globalPropertyGroup, settingsElement);
 
             // Loop through all the direct child elements of the <Build> element.
-            foreach(XmlNode settingsChildNode in settingsElement)
+            foreach (XmlNode settingsChildNode in settingsElement)
             {
                 // Handle XML comments under the the <Settings> node (just ignore them).
                 if ((settingsChildNode.NodeType == XmlNodeType.Comment) ||
@@ -2016,7 +2016,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessConfigElement
             (
-            XmlElementWithLocation      configElement
+            XmlElementWithLocation configElement
             )
         {
             // Make sure this is the <Config> element.
@@ -2083,14 +2083,14 @@ namespace Microsoft.Build.Conversion
             // In the case of VSD projects, the "Name" attribute will have a pipe in it,
             // followed by the device platform.  This last part needs to be removed,
             // leaving just the config name.
-            if ( ( this.language == VSProjectElements.ECSharp ) ||
-                 ( this.language == VSProjectElements.EVisualBasic ) )
+            if ((this.language == VSProjectElements.ECSharp) ||
+                 (this.language == VSProjectElements.EVisualBasic))
             {
-                int pipeLocation = configName.IndexOf ( '|' );
-                if ( pipeLocation != -1 )
+                int pipeLocation = configName.IndexOf('|');
+                if (pipeLocation != -1)
                 {
-                    configName = configName.Remove ( pipeLocation,
-                                                     configName.Length - pipeLocation );
+                    configName = configName.Remove(pipeLocation,
+                                                     configName.Length - pipeLocation);
                 }
             }
 
@@ -2117,7 +2117,7 @@ namespace Microsoft.Build.Conversion
             string outputPath = configElement.GetAttribute(VSProjectAttributes.outputPath);
             if (!string.IsNullOrEmpty(outputPath))
             {
-                if (outputPath[outputPath.Length-1] != Path.DirectorySeparatorChar)
+                if (outputPath[outputPath.Length - 1] != Path.DirectorySeparatorChar)
                 {
                     outputPath += Path.DirectorySeparatorChar;
                 }
@@ -2128,23 +2128,23 @@ namespace Microsoft.Build.Conversion
 
             // If the "SelectedDevice" or "DeploymentPlatform" attributes exist in the per-user
             //   project file, we should get rid of them.
-            string selectedDevice = configElement.GetAttribute ( VSProjectAttributes.selectedDevice );
+            string selectedDevice = configElement.GetAttribute(VSProjectAttributes.selectedDevice);
             if (isUserFile && (selectedDevice?.Length > 0))
             {
-                configElement.RemoveAttribute ( VSProjectAttributes.selectedDevice );
+                configElement.RemoveAttribute(VSProjectAttributes.selectedDevice);
             }
 
-            string deploymentPlatform = configElement.GetAttribute ( VSProjectAttributes.deploymentPlatform );
+            string deploymentPlatform = configElement.GetAttribute(VSProjectAttributes.deploymentPlatform);
             if (isUserFile && (deploymentPlatform?.Length > 0))
             {
-                configElement.RemoveAttribute ( VSProjectAttributes.deploymentPlatform );
+                configElement.RemoveAttribute(VSProjectAttributes.deploymentPlatform);
             }
 
             // Get rid of the "IncrementalBuild" attribute
-            string incrementalBuild = configElement.GetAttribute ( VSProjectAttributes.incrementalBuild );
+            string incrementalBuild = configElement.GetAttribute(VSProjectAttributes.incrementalBuild);
             if (!string.IsNullOrEmpty(incrementalBuild))
             {
-                configElement.RemoveAttribute ( VSProjectAttributes.incrementalBuild );
+                configElement.RemoveAttribute(VSProjectAttributes.incrementalBuild);
             }
 
             // VSWhidbey bug 261464.  For VB projects migrated from VS7/Everett, the VB team would
@@ -2187,11 +2187,11 @@ namespace Microsoft.Build.Conversion
                 if (String.IsNullOrEmpty(debugType))
                 {
                     string debugSymbols = configElement.GetAttribute(XMakeProjectStrings.debugSymbols);
-                    if (  String.Equals ( debugSymbols, "true", StringComparison.OrdinalIgnoreCase ) )
+                    if (String.Equals(debugSymbols, "true", StringComparison.OrdinalIgnoreCase))
                     {
                         configPropertyGroup.AddProperty(VSProjectAttributes.debugType, VSProjectAttributes.debugTypeFull);
                     }
-                    else if ( String.Equals(debugSymbols, "false", StringComparison.OrdinalIgnoreCase) )
+                    else if (String.Equals(debugSymbols, "false", StringComparison.OrdinalIgnoreCase))
                     {
                         configPropertyGroup.AddProperty(VSProjectAttributes.debugType, VSProjectAttributes.debugTypeNone);
                     }
@@ -2200,7 +2200,7 @@ namespace Microsoft.Build.Conversion
 
             // VSWhidbey bug 472064.  For all VC# projects that are converted, we add an ErrorReport
             // property, always set to "prompt"
-            if ( !this.isUserFile && this.language == VSProjectElements.cSharp )
+            if (!this.isUserFile && this.language == VSProjectElements.cSharp)
             {
                 configPropertyGroup.AddProperty(VSProjectAttributes.errorReport, VSProjectAttributes.errorReportPrompt);
             }
@@ -2216,7 +2216,7 @@ namespace Microsoft.Build.Conversion
                 ProjectCollection.Escape(platform) + XMakeProjectStrings.configplatformSuffix;
 
             // Loop through all the direct child elements of the <Config> element.
-            foreach(XmlNode configChildNode in configElement)
+            foreach (XmlNode configChildNode in configElement)
             {
                 // Handle XML comments under the the <Config> node (just ignore them).
                 if ((configChildNode.NodeType == XmlNodeType.Comment) ||
@@ -2257,10 +2257,10 @@ namespace Microsoft.Build.Conversion
         /// <owner>BCham</owner>
         private void ProcessPlatformElement
             (
-            XmlElementWithLocation      platformElement
+            XmlElementWithLocation platformElement
             )
         {
-            if ( !IsUserFile )
+            if (!IsUserFile)
             {
                 // Make sure this is the <Platform> element.
                 error.VerifyThrow((platformElement?.Name == VSProjectElements.platform),
@@ -2298,7 +2298,7 @@ namespace Microsoft.Build.Conversion
 
                 frameworkVersionForVSD = XMakeProjectStrings.vOne;
 
-                switch ( platformForVSD )
+                switch (platformForVSD)
                 {
                     case VSProjectElements.PocketPC:
                         platformID = "3C41C503-53EF-4c2a-8DD4-A8217CAD115E";
@@ -2333,7 +2333,7 @@ namespace Microsoft.Build.Conversion
                 //   add a property for the deployment target path.  Note, we only need a suffix.
                 //   The prefix will be defaulted to based on the selected device.
 
-                platformPropertyGroup.AddProperty(XMakeProjectStrings.deployTargetSuffix, "$(AssemblyName)" );
+                platformPropertyGroup.AddProperty(XMakeProjectStrings.deployTargetSuffix, "$(AssemblyName)");
 
                 // And, we should also set the Target Framework version.  For
                 //   VSD projects, we want to stay with v1.0
@@ -2350,7 +2350,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessInteropRegistrationElement
             (
-            XmlElementWithLocation      interopRegistrationElement,
+            XmlElementWithLocation interopRegistrationElement,
             ProjectPropertyGroupElement configPropertyGroup
             )
         {
@@ -2407,7 +2407,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessReferencesElement
             (
-            XmlElementWithLocation      referencesElement
+            XmlElementWithLocation referencesElement
             )
         {
             // Make sure this is the <References> element.
@@ -2445,7 +2445,7 @@ namespace Microsoft.Build.Conversion
             ProjectItemGroupElement referencesItemGroup = null;
 
             // Loop through all the direct child elements of the <References> element.
-            foreach(XmlNode referencesChildNode in referencesElement)
+            foreach (XmlNode referencesChildNode in referencesElement)
             {
                 // Handle XML comments under the the <References> node (just ignore them).
                 if ((referencesChildNode.NodeType == XmlNodeType.Comment) ||
@@ -2490,7 +2490,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessReferenceElement
             (
-            XmlElementWithLocation      referenceElement,
+            XmlElementWithLocation referenceElement,
             ProjectItemGroupElement referencesItemGroup
             )
         {
@@ -2514,7 +2514,7 @@ namespace Microsoft.Build.Conversion
                     return;
                 }
 
-                referenceElement.RemoveAttribute ( VSProjectAttributes.platform );
+                referenceElement.RemoveAttribute(VSProjectAttributes.platform);
             }
 
             ProjectItemElement newReferenceItem;
@@ -2530,23 +2530,23 @@ namespace Microsoft.Build.Conversion
             if ((this.language == VSProjectElements.ECSharp) ||
                    (this.language == VSProjectElements.EVisualBasic))
             {
-                if ( ( this.frameworkVersionForVSD == XMakeProjectStrings.vTwo ) &&
-                     ( String.Equals ( referenceName, VSProjectElements.SystemDataCommon, StringComparison.OrdinalIgnoreCase ) ) )
+                if ((this.frameworkVersionForVSD == XMakeProjectStrings.vTwo) &&
+                     (String.Equals(referenceName, VSProjectElements.SystemDataCommon, StringComparison.OrdinalIgnoreCase)))
                 {
                     // We need to remove all references to "System.Data.Common" for VSD projects only.
                     //   Note : We only want to do this for projects that will be updated to v2.0
                     //          System.Data.Common is still valid for v1.0 upgraded projects.
                     return;
                 }
-                else if ( String.Equals ( referenceName, VSProjectElements.SystemSR, StringComparison.OrdinalIgnoreCase ) )
+                else if (String.Equals(referenceName, VSProjectElements.SystemSR, StringComparison.OrdinalIgnoreCase))
                 {
                     // We always want to remove all references to "System.SR"
                     return;
                 }
             }
 
-            if ( ( this.language == VSProjectElements.EVisualBasic ) &&
-                 ( String.Equals ( referenceName, VSProjectElements.MSCorLib, StringComparison.OrdinalIgnoreCase ) ) )
+            if ((this.language == VSProjectElements.EVisualBasic) &&
+                 (String.Equals(referenceName, VSProjectElements.MSCorLib, StringComparison.OrdinalIgnoreCase)))
             {
                 // We also want to get rid of all 'mscorlib' references for VB projects only.
                 return;
@@ -2939,7 +2939,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessImportsElement
             (
-            XmlElementWithLocation      importsElement
+            XmlElementWithLocation importsElement
             )
         {
             // Make sure this is the <Imports> element.
@@ -2957,7 +2957,7 @@ namespace Microsoft.Build.Conversion
             ProjectItemGroupElement importsItemGroup = null;
 
             // Loop through all the direct child elements of the <Imports> element.
-            foreach(XmlNode importsChildNode in importsElement)
+            foreach (XmlNode importsChildNode in importsElement)
             {
                 // Handle XML comments under the the <Imports> node (just ignore them).
                 if ((importsChildNode.NodeType == XmlNodeType.Comment) ||
@@ -3055,7 +3055,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessFilesElement
             (
-            XmlElementWithLocation      filesElement
+            XmlElementWithLocation filesElement
             )
         {
             // Make sure this is the <Files> element.
@@ -3071,7 +3071,7 @@ namespace Microsoft.Build.Conversion
                 "NoAttributesExpected", VSProjectElements.files);
 
             // Loop through all the direct child elements of the <Files> element.
-            foreach(XmlNode filesChildNode in filesElement)
+            foreach (XmlNode filesChildNode in filesElement)
             {
                 // Handle XML comments under the the <Files> node (just ignore them).
                 if ((filesChildNode.NodeType == XmlNodeType.Comment) ||
@@ -3121,7 +3121,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessIncludeElement
             (
-            XmlElementWithLocation      includeElement
+            XmlElementWithLocation includeElement
             )
         {
             // Make sure this is the <Include> element.
@@ -3139,7 +3139,7 @@ namespace Microsoft.Build.Conversion
             ProjectItemGroupElement filesItemGroup = null;
 
             // Loop through all the direct child elements of the <Include> element.
-            foreach(XmlNode includeChildNode in includeElement)
+            foreach (XmlNode includeChildNode in includeElement)
             {
                 // Handle XML comments under the the <Include> node (just ignore them).
                 if ((includeChildNode.NodeType == XmlNodeType.Comment) ||
@@ -3189,7 +3189,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessFileElement
             (
-            XmlElementWithLocation      fileElement,
+            XmlElementWithLocation fileElement,
             ProjectItemGroupElement filesItemGroup
             )
         {
@@ -3298,12 +3298,12 @@ namespace Microsoft.Build.Conversion
 
                 // If this is a VSD(devices) project and we're dealing with a content file,
                 // mark it to copy if newer.
-                if ( ((this.language == VSProjectElements.ECSharp) ||
+                if (((this.language == VSProjectElements.ECSharp) ||
                          (this.language == VSProjectElements.EVisualBasic)) &&
-                     ( String.Equals ( buildAction, XMakeProjectStrings.content, StringComparison.OrdinalIgnoreCase ) ) )
+                     (String.Equals(buildAction, XMakeProjectStrings.content, StringComparison.OrdinalIgnoreCase)))
                 {
-                    newFileItem.AddMetadata ( XMakeProjectStrings.copytooutput,
-                                              XMakeProjectStrings.preservenewest );
+                    newFileItem.AddMetadata(XMakeProjectStrings.copytooutput,
+                                              XMakeProjectStrings.preservenewest);
                 }
             }
             else
@@ -3378,7 +3378,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessFolderElement
             (
-            XmlElementWithLocation      folderElement,
+            XmlElementWithLocation folderElement,
             ProjectItemGroupElement filesItemGroup
             )
         {
@@ -3527,7 +3527,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessStartupServicesElement
             (
-            XmlElementWithLocation      startupServicesElement
+            XmlElementWithLocation startupServicesElement
             )
         {
             // Make sure this is the <StartupServices> element.
@@ -3545,7 +3545,7 @@ namespace Microsoft.Build.Conversion
             ProjectItemGroupElement startupServicesItemGroup = null;
 
             // Loop through all the direct child elements of the <StartupServices> element.
-            foreach(XmlNode startupServicesChildNode in startupServicesElement)
+            foreach (XmlNode startupServicesChildNode in startupServicesElement)
             {
                 // Handle XML comments under the the <StartupServices> node (just ignore them).
                 if ((startupServicesChildNode.NodeType == XmlNodeType.Comment) ||
@@ -3590,7 +3590,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessServiceElement
             (
-            XmlElementWithLocation      serviceElement,
+            XmlElementWithLocation serviceElement,
             ProjectItemGroupElement startupServicesItemGroup
             )
         {
@@ -3643,7 +3643,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>RGoel</owner>
         private void ProcessOtherProjectSettingsElement
             (
-            XmlElementWithLocation      otherProjectSettingsElement
+            XmlElementWithLocation otherProjectSettingsElement
             )
         {
             // Make sure this is the <OtherProjectSettings> element.
@@ -3698,8 +3698,8 @@ namespace Microsoft.Build.Conversion
         /// <owner>rgoel</owner>
         private void ProcessUserPropertiesElement
             (
-            XmlElementWithLocation      userPropertiesElement,
-            out bool                    isTriumphProject
+            XmlElementWithLocation userPropertiesElement,
+            out bool isTriumphProject
             )
         {
             // Make sure this is the <UserProperties> element.

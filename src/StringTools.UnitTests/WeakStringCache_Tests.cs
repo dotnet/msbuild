@@ -108,7 +108,7 @@ namespace Microsoft.NET.StringTools.Tests
             for (int i = 0; i < numberOfStrings; i++)
             {
                 InternableString stringCopy = new InternableString(new string(cachedStrings[i].ToCharArray()));
-                string cachedStringFromCache =_cache.GetOrCreateEntry(ref stringCopy, out bool cacheHit);
+                string cachedStringFromCache = _cache.GetOrCreateEntry(ref stringCopy, out bool cacheHit);
                 cacheHit.ShouldBeFalse();
                 cachedStringFromCache.ShouldNotBeSameAs(cachedStrings[i]);
             }

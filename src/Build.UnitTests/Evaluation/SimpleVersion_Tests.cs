@@ -241,7 +241,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             yield return new object[] { "1,2,3,4", typeof(FormatException) }; // Input contains invalid separator
             yield return new object[] { "1.2.3.4.5", typeof(FormatException) }; // Input has more than 4 version components
 
-            yield return new object[] { "1." , typeof(FormatException) }; // Input contains empty component
+            yield return new object[] { "1.", typeof(FormatException) }; // Input contains empty component
             yield return new object[] { "1.2,", typeof(FormatException) }; // Input contains empty component
             yield return new object[] { "1.2.3.", typeof(FormatException) }; // Input contains empty component
             yield return new object[] { "1.2.3.4.", typeof(FormatException) }; // Input contains empty component
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         public static IEnumerable<object[]> ToString_TestData()
         {
-            yield return new object[] { new SimpleVersion(1), "1.0.0.0"};
+            yield return new object[] { new SimpleVersion(1), "1.0.0.0" };
             yield return new object[] { new SimpleVersion(1, 2), "1.2.0.0" };
             yield return new object[] { new SimpleVersion(1, 2, 3), "1.2.3.0" };
             yield return new object[] { new SimpleVersion(1, 2, 3, 4), "1.2.3.4" };

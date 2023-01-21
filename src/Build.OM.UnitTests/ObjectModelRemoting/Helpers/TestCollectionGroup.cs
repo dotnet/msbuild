@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             this.Disk = this.ImmutableDisk.GetSubFolder("Mutable");
 
             List<string> stdFiles = new List<string>();
-            for (int i=0; i< stdFilesCount; i++)
+            for (int i = 0; i < stdFilesCount; i++)
             {
                 stdFiles.Add(this.ImmutableDisk.WriteProjectFile($"Proj{i}.proj", TestCollectionGroup.SampleProjectFile));
             }

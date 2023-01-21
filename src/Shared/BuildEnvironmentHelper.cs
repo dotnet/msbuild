@@ -28,12 +28,12 @@ namespace Microsoft.Build.Shared
         /// Name of the Visual Studio (and Blend) process.
         /// VS ASP intellisense server fails without Microsoft.VisualStudio.Web.Host. Remove when issue fixed: https://devdiv.visualstudio.com/DevDiv/_workitems/edit/574986
         /// </summary>
-        private static readonly string[] s_visualStudioProcess = {"DEVENV", "BLEND", "Microsoft.VisualStudio.Web.Host"};
+        private static readonly string[] s_visualStudioProcess = { "DEVENV", "BLEND", "Microsoft.VisualStudio.Web.Host" };
 
         /// <summary>
         /// Name of the MSBuild process(es)
         /// </summary>
-        private static readonly string[] s_msBuildProcess = {"MSBUILD", "MSBUILDTASKHOST"};
+        private static readonly string[] s_msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
 
         /// <summary>
         /// Name of MSBuild executable files.

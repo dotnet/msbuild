@@ -239,7 +239,7 @@ namespace Microsoft.Build.BuildEngine
 
             return result;
         }
-        
+
         /// <summary>
         /// Locate a file in either the directory specified or a location in the
         /// direcorty structure above that directory.

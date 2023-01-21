@@ -37,7 +37,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         internal virtual IList<SdkResolver> GetDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
         {
             var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
-                new List<SdkResolver> {new DefaultSdkResolver()}
+                new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
 
             return resolvers;
@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             ElementLocation location)
         {
             var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
-                new List<SdkResolver> {new DefaultSdkResolver()}
+                new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
 
             var potentialResolvers = FindPotentialSdkResolvers(
@@ -228,7 +228,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         protected virtual IEnumerable<Type> GetResolverTypes(Assembly assembly)
         {
             return assembly.ExportedTypes
-                .Select(type => new {type, info = type.GetTypeInfo()})
+                .Select(type => new { type, info = type.GetTypeInfo() })
                 .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
                 .Select(t => t.type);
         }

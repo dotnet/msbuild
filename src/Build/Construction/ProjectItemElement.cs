@@ -104,7 +104,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Update.Length == 0) , "OM_OneOfAttributeButNotMore", ElementName, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Update.Length == 0), "OM_OneOfAttributeButNotMore", ElementName, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
                 SetOrRemoveAttribute(XMakeAttributes.include, value, ref _include, "Set item Include {0}", value);
                 _includeHasWildcards = null;
             }

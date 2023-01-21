@@ -120,7 +120,7 @@ namespace Microsoft.Build.Collections
         // temporary variable needed during deserialization
         private SerializationInfo _siInfo;
 
-#region Constructors
+        #region Constructors
 
         public RetrievableEntryHashSet(IEqualityComparer<string> comparer)
         {
@@ -203,7 +203,7 @@ namespace Microsoft.Build.Collections
             _siInfo = info;
         }
 
-#endregion
+        #endregion
 
         // Convenience to minimise change to callers used to dictionaries
         public ICollection<string> Keys
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Collections
             get { return this; }
         }
 
-#region ICollection<T> methods
+        #region ICollection<T> methods
 
         // Convenience to minimise change to callers used to dictionaries
         internal T this[string name]
@@ -486,9 +486,9 @@ namespace Microsoft.Build.Collections
             _readOnly = true;
         }
 
-#endregion
+        #endregion
 
-#region IEnumerable methods
+        #region IEnumerable methods
 
         public Enumerator GetEnumerator()
         {
@@ -513,9 +513,9 @@ namespace Microsoft.Build.Collections
             return new Enumerator(this);
         }
 
-#endregion
+        #endregion
 
-#region ISerializable methods
+        #region ISerializable methods
 
         // [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         [SecurityCritical]
@@ -538,9 +538,9 @@ namespace Microsoft.Build.Collections
             }
         }
 
-#endregion
+        #endregion
 
-#region IDeserializationCallback methods
+        #region IDeserializationCallback methods
 
         public virtual void OnDeserialization(Object sender)
         {
@@ -585,9 +585,9 @@ namespace Microsoft.Build.Collections
             _siInfo = null;
         }
 
-#endregion
+        #endregion
 
-#region HashSet methods
+        #region HashSet methods
 
         /// <summary>
         /// Add item to this HashSet. 
@@ -1161,9 +1161,9 @@ namespace Microsoft.Build.Collections
 #endif
 #endif
 
-#endregion
+        #endregion
 
-#region Helper methods
+        #region Helper methods
 
         /// <summary>
         /// Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
@@ -1708,7 +1708,7 @@ namespace Microsoft.Build.Collections
                                                                                                                                                                 return set1.Comparer.Equals(set2.Comparer);
         }
 #endif
-       
+
         private int InternalGetHashCode(string item, int index, int length)
         {
             // No need to check for null 'item' as we own all comparers
@@ -1734,7 +1734,7 @@ namespace Microsoft.Build.Collections
             return _comparer.GetHashCode(item) & Lower31BitMask;
         }
 
-#endregion
+        #endregion
 
         // used for set checking operations (using enumerables) that rely on counting
         internal struct ElementCount

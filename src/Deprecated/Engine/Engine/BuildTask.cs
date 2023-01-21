@@ -30,7 +30,7 @@ namespace Microsoft.Build.BuildEngine
         private XmlAttribute continueOnErrorAttribute = null;
 
         // The target to which this task belongs.
-        private Target parentTarget= null;
+        private Target parentTarget = null;
 
         // The name of the task.
         private string taskName = String.Empty;
@@ -59,9 +59,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>rgoel</owner>
         internal BuildTask
         (
-            XmlElement      taskElement,
-            Target          parentTarget,
-            bool            importedFromAnotherProject
+            XmlElement taskElement,
+            Target parentTarget,
+            bool importedFromAnotherProject
         )
         {
             // Make sure a valid node has been given to us.
@@ -495,11 +495,11 @@ namespace Microsoft.Build.BuildEngine
             (
             )
         {
-               
-            
-                // This is a change to the contents of the target.
-                this.ParentTarget?.MarkTargetAsDirty();
-            
+
+
+            // This is a change to the contents of the target.
+            this.ParentTarget?.MarkTargetAsDirty();
+
         }
 
         #endregion

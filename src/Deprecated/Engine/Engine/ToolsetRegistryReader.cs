@@ -27,7 +27,7 @@ namespace Microsoft.Build.BuildEngine
     {
         // Registry location for storing tools version dependent data for msbuild
         private const string msbuildRegistryPath = @"SOFTWARE\Microsoft\MSBuild";
-        
+
         // Cached registry wrapper at root of the msbuild entries
         private RegistryKeyWrapper msbuildRegistryWrapper;
 
@@ -35,7 +35,7 @@ namespace Microsoft.Build.BuildEngine
         /// Default constructor
         /// </summary>
         internal ToolsetRegistryReader()
-            : this (new RegistryKeyWrapper(msbuildRegistryPath))
+            : this(new RegistryKeyWrapper(msbuildRegistryPath))
         {
         }
 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.BuildEngine
         internal ToolsetRegistryReader(RegistryKeyWrapper msbuildRegistryWrapper)
         {
             error.VerifyThrowArgumentNull(msbuildRegistryWrapper, nameof(msbuildRegistryWrapper));
-       
+
             this.msbuildRegistryWrapper = msbuildRegistryWrapper;
         }
 
@@ -105,7 +105,7 @@ namespace Microsoft.Build.BuildEngine
         protected override IEnumerable<PropertyDefinition> GetPropertyDefinitions(string toolsVersion)
         {
             RegistryKeyWrapper toolsVersionWrapper = null;
-            
+
             try
             {
                 toolsVersionWrapper = msbuildRegistryWrapper.OpenSubKey("ToolsVersions\\" + toolsVersion);
@@ -123,7 +123,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     InvalidToolsetDefinitionException.Throw("PropertyNameInRegistryHasZeroLength", toolsVersionWrapper.Name);
                 }
-                
+
                 try
                 {
                     propertyValue = GetValue(toolsVersionWrapper, propertyName);
@@ -136,7 +136,7 @@ namespace Microsoft.Build.BuildEngine
                 yield return new PropertyDefinition(propertyName, propertyValue, toolsVersionWrapper.Name + "@" + propertyName);
             }
         }
-        
+
         /// <summary>
         /// Reads a string value from the specified registry key
         /// </summary>

@@ -120,7 +120,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 
                     bool useCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
                     string key = "6f7de854-47fe-4ae2-9cfe-9b33682abd91" + searchPathElement;
-                    
+
                     if (useCache && _buildEngine != null)
                     {
                         _assemblyFoldersCache = _buildEngine.GetRegisteredTaskObject(key, RegisteredTaskObjectLifetime.Build) as AssemblyFoldersFromConfigCache;
@@ -214,7 +214,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                                     foundPath = candidatePath;
                                     return true;
                                 }
-                                
+
                                 // Lets see if the processor architecture matches, note this this method will cache the result when it was first called.
                                 AssemblyNameExtension foundAssembly = getAssemblyName(candidatePath);
 

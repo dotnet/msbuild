@@ -46,7 +46,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         internal static ProxyTargets FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProxyTargets();
-            ((ITranslatable) instance).Translate(translator);
+            ((ITranslatable)instance).Translate(translator);
 
             return instance;
         }

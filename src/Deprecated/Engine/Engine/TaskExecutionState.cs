@@ -169,7 +169,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     taskExecutedSuccessfully =
                       TaskEngineExecuteTask
-                        (   taskEngine,
+                        (taskEngine,
                             TaskExecutionMode.ExecuteTaskAndGatherOutputs,
                             lookupForExecution
                         );
@@ -230,7 +230,7 @@ namespace Microsoft.Build.BuildEngine
                  );
         }
         #endregion
-  
+
         #endregion
 
         #region Fields set by the Engine thread
@@ -239,7 +239,7 @@ namespace Microsoft.Build.BuildEngine
 
         private Lookup lookupForInference;
         private Lookup lookupForExecution;
-        
+
         private ITaskHost hostObject;
         private string projectFileOfTaskNode;
         private string parentProjectFullFileName;

@@ -119,7 +119,7 @@ namespace Microsoft.Build.BuildEngine
                 writingQueueCount++;
 
                 // if the queue transitions from empty to non-empty reset the queue empty event and raise queue ready event
-                if ( writingQueueCount == 1)
+                if (writingQueueCount == 1)
                 {
                     // raise the event saying queue contains data
                     queueReadyEvent.Set();
@@ -256,7 +256,7 @@ namespace Microsoft.Build.BuildEngine
                         Queue<T> postingQueue = queue;
                         queue = readingQueue;
                         readingQueue = postingQueue;
-                        
+
                         writingQueueCount = 0;
                     }
                 }

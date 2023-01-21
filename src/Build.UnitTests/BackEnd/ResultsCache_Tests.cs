@@ -211,10 +211,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                yield return new[] {new ResultsCache()};
+                yield return new[] { new ResultsCache() };
 
-                var request1 = new BuildRequest(1, 2, 3, new[] {"target1"}, null, BuildEventContext.Invalid, null);
-                var request2 = new BuildRequest(4, 5, 6, new[] {"target2"}, null, BuildEventContext.Invalid, null);
+                var request1 = new BuildRequest(1, 2, 3, new[] { "target1" }, null, BuildEventContext.Invalid, null);
+                var request2 = new BuildRequest(4, 5, 6, new[] { "target2" }, null, BuildEventContext.Invalid, null);
 
                 var br1 = new BuildResult(request1);
                 br1.AddResultsForTarget("target1", BuildResultUtilities.GetEmptySucceedingTargetResult());
@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var resultsCache = new ResultsCache();
                 resultsCache.AddResult(br1.Clone());
 
-                yield return new[] {resultsCache};
+                yield return new[] { resultsCache };
 
                 var br2 = new BuildResult(request2);
                 br2.AddResultsForTarget("target2", BuildResultUtilities.GetEmptyFailingTargetResult());
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 resultsCache2.AddResult(br1.Clone());
                 resultsCache2.AddResult(br2.Clone());
 
-                yield return new[] {resultsCache2};
+                yield return new[] { resultsCache2 };
             }
         }
 

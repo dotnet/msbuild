@@ -95,11 +95,11 @@ namespace Microsoft.Build.BuildEngine
                         }
                     }
                     // any problems with the task assembly? return null.
-                    catch (FileNotFoundException )
+                    catch (FileNotFoundException)
                     {
                         return null;
                     }
-                    catch (BadImageFormatException )
+                    catch (BadImageFormatException)
                     {
                         return null;
                     }

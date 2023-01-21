@@ -153,7 +153,7 @@ namespace Microsoft.Build.BuildEngine
                 return this.hasExited;
             }
         }
-        
+
         /// <summary>
         /// The token of the request to which this is a response (-1 if status is unrequested)
         /// </summary>
@@ -179,7 +179,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The state of the targets which are in progress on the node
         /// </summary>
-        internal TargetInProgessState [] StateOfInProgressTargets
+        internal TargetInProgessState[] StateOfInProgressTargets
         {
             get
             {
@@ -224,10 +224,10 @@ namespace Microsoft.Build.BuildEngine
 
         #region Data
         private long statusTimeStamp; // the timestamp indicating when this status structure was filled out
-        private int  requestId; // the token of the request to which this is a response (-1 if status is unrequested)
+        private int requestId; // the token of the request to which this is a response (-1 if status is unrequested)
         private bool isActive; // is the node active
         private bool isLaunchInProgress; // is the node in the process of being launched
-        private int  queueDepth; // the number of build request in the node's queue
+        private int queueDepth; // the number of build request in the node's queue
         private long lastTaskActivityTimeStamp; // the time stamp of the last task activity
         private long lastEngineActivityTimeStamp; // the time stamp of the last engine activity
         private TargetInProgessState[] stateOfInProgressTargets;
@@ -266,8 +266,8 @@ namespace Microsoft.Build.BuildEngine
                     }
                     else
                     {
-                       writer.Write((byte)1);
-                       stateOfInProgressTargets[i].WriteToStream(writer);
+                        writer.Write((byte)1);
+                        stateOfInProgressTargets[i].WriteToStream(writer);
                     }
                 }
             }

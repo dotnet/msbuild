@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     updatedItem.SetMetadata("IsRidAgnostic", isRidAgnosticArray[targetFrameworkIndex]);
-                    
+
                     return updatedItem;
                 })
                 .ToArray();

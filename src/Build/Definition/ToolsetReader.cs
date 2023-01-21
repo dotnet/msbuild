@@ -853,5 +853,5 @@ namespace Microsoft.Build.Evaluation
 
             return MSBuildExtensionsPathReferenceKind.None;
         }
-     }
+    }
 }

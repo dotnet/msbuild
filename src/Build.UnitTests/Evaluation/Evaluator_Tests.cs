@@ -4442,7 +4442,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(primaryProject, projectContents);
                 File.WriteAllText(import, importContents);
 
-                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>( () =>
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
                     {
                         Project unused = new Project(primaryProject, null, null);
                     })

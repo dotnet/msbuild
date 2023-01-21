@@ -21,7 +21,7 @@ namespace Microsoft.Build.BuildEngine
         private BuildPropertyGroup backingPropertyGroup;
 
         private BuildPropertyGroupProxy()
-        { 
+        {
             // Do nothing
         }
 

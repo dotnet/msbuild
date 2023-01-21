@@ -68,7 +68,7 @@ namespace Microsoft.Build.Globbing
         /// <param name="mainGlob">The main glob</param>
         /// <param name="gaps">The gap glob</param>
         public MSBuildGlobWithGaps(IMSBuildGlob mainGlob, params IMSBuildGlob[] gaps) : this(mainGlob, gaps.AsEnumerable())
-        {}
+        { }
 
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)

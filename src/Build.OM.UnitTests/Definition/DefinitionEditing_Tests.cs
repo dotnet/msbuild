@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
         public void RenameThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
-            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => {i.Rename("foo"); });
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.Rename("foo"); });
         }
 
         /// <summary>
@@ -1457,7 +1457,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
         public void RemoveItemsThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
-            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItems(new [] {i}); });
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItems(new[] { i }); });
         }
 
         /// <summary>

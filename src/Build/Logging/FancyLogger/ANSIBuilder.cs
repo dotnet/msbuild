@@ -261,7 +261,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             public static string UpAndScroll(int n)
             {
                 string result = "";
-                for (int i = 0; i < n; i++) {
+                for (int i = 0; i < n; i++)
+                {
                     result += "\x1bM";
                 }
                 return result;
@@ -297,7 +298,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                 return String.Format("\x1b[s");
             }
 
-            public static string RestorePosition() {
+            public static string RestorePosition()
+            {
                 return String.Format("\x1b[u");
             }
 
@@ -416,7 +418,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
             public static string Spinner(int n)
             {
-                char[] chars = { '\\', '|', '/', '-'};
+                char[] chars = { '\\', '|', '/', '-' };
                 return chars[n % (chars.Length - 1)].ToString();
             }
 

@@ -21,6 +21,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class CanonicalTrackedOutputFiles
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Member Data
         // The .write. tracking log files
         private ITaskItem[] _tlogFiles;
@@ -784,6 +785,7 @@ namespace Microsoft.Build.Utilities
             }
         }
         #endregion
+#pragma warning restore format
     }
 }
 

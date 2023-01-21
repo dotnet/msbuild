@@ -148,7 +148,7 @@ namespace Microsoft.Build.Framework
             if (version > 20)
             {
                 parentTarget = reader.ReadByte() == 0 ? null : reader.ReadString();
-                buildReason = (TargetBuiltReason) reader.ReadInt32();
+                buildReason = (TargetBuiltReason)reader.ReadInt32();
             }
         }
         #endregion

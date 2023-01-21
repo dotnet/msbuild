@@ -388,7 +388,7 @@ namespace Microsoft.Build.Execution
 
             if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
             {
-                _parameters = (CopyOnWriteDictionary<(string, ElementLocation)>) localParameters;
+                _parameters = (CopyOnWriteDictionary<(string, ElementLocation)>)localParameters;
             }
         }
 

@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks
 
         internal SR()
         {
-            _resources = new MainAssemblyFallbackResourceManager("System.Design", this.GetType().Assembly);            
+            _resources = new MainAssemblyFallbackResourceManager("System.Design", this.GetType().Assembly);
         }
 
         private static SR GetLoader()

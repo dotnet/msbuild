@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// occurred.  It is raised on every event.
         /// </summary>
         public event AnyEventHandler AnyEventRaised;
-        
+
         /// <summary>
         /// This event is raised to log telemetry.
         /// </summary>

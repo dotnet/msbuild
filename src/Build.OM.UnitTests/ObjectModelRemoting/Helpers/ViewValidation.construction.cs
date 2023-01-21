@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public ElementLinkPair<CT> AddNewLabeledChaildWithVerify<CT>(ObjectType where, string label, Func<T, string, CT> adder)
             where CT : ProjectElement
             => AddNewChaildWithVerify(where, label,
-                (t, l)=>
+                (t, l) =>
                 {
                     var ct = adder(t, l);
                     Assert.NotNull(ct);
@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return result;
         }
 
-        public ICollection<ElementLinkPair<CT>> QueryChildrenWithValidation<CT>(Func<T,IEnumerable> getter,  Func<CT, bool> matcher)
+        public ICollection<ElementLinkPair<CT>> QueryChildrenWithValidation<CT>(Func<T, IEnumerable> getter, Func<CT, bool> matcher)
             where CT : ProjectElement
         {
             var viewResult = new List<CT>();
@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return LinkedObjectsFactory.GetLink(obj) != null;
         }
 
-        private static bool dbgIgnoreLinked = false; 
+        private static bool dbgIgnoreLinked = false;
         public static void VerifyNotLinked(object obj)
         {
             if (dbgIgnoreLinked)
@@ -386,7 +386,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             VerifySameLocation(realXml.LabelLocation, viewXml.LabelLocation, context);
 
-            VerifySameLocationWithException(()=>realXml.ConditionLocation, ()=>viewXml.ConditionLocation, context);
+            VerifySameLocationWithException(() => realXml.ConditionLocation, () => viewXml.ConditionLocation, context);
 
             VerifyNotLinked(realXml.ContainingProject);
             VerifyLinked(viewXml.ContainingProject);
@@ -430,7 +430,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var realChild = realXml.FirstChild;
             var viewChild = viewXml.FirstChild;
 
-            while (realChild != null )
+            while (realChild != null)
             {
                 Assert.NotNull(viewChild);
                 Assert.Same(realChild.Parent, realXml);
@@ -899,15 +899,15 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.Equal(realXml.KeepDuplicates, viewXml.KeepDuplicates);
             Assert.Equal(realXml.HasMetadata, viewXml.HasMetadata);
 
-           Verify(viewXml.Metadata, realXml.Metadata, ViewValidation.Verify, context);
+            Verify(viewXml.Metadata, realXml.Metadata, ViewValidation.Verify, context);
 
-           VerifySameLocation(realXml.IncludeLocation, viewXml.IncludeLocation, context);
-           VerifySameLocation(realXml.ExcludeLocation, viewXml.ExcludeLocation, context);
-           VerifySameLocation(realXml.RemoveLocation, viewXml.RemoveLocation, context);
-           VerifySameLocation(realXml.UpdateLocation, viewXml.UpdateLocation, context);
-           VerifySameLocation(realXml.KeepMetadataLocation, viewXml.KeepMetadataLocation, context);
-           VerifySameLocation(realXml.RemoveMetadataLocation, viewXml.RemoveMetadataLocation, context);
-           VerifySameLocation(realXml.KeepDuplicatesLocation, viewXml.KeepDuplicatesLocation, context);
+            VerifySameLocation(realXml.IncludeLocation, viewXml.IncludeLocation, context);
+            VerifySameLocation(realXml.ExcludeLocation, viewXml.ExcludeLocation, context);
+            VerifySameLocation(realXml.RemoveLocation, viewXml.RemoveLocation, context);
+            VerifySameLocation(realXml.UpdateLocation, viewXml.UpdateLocation, context);
+            VerifySameLocation(realXml.KeepMetadataLocation, viewXml.KeepMetadataLocation, context);
+            VerifySameLocation(realXml.RemoveMetadataLocation, viewXml.RemoveMetadataLocation, context);
+            VerifySameLocation(realXml.KeepDuplicatesLocation, viewXml.KeepDuplicatesLocation, context);
         }
 
         public static void Verify(ProjectItemGroupElement viewXml, ProjectItemGroupElement realXml, ValidationContext context = null)

@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
-                PlatformLookupTable = "AnyCPU=x64", 
+                PlatformLookupTable = "AnyCPU=x64",
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("AnyCPU");
         }
-        
+
         [Fact]
         public void ResolvesViaAnyCPUDefaultWithDefaultPlatformEnabled()
         {
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
-                PlatformLookupTable = "AnyCPU=x64", 
+                PlatformLookupTable = "AnyCPU=x64",
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
             task.Log.HasLoggedErrors.ShouldBeFalse();
         }
-        
+
         // When `Platform` is retrieved in "GetTargetFrameworks" and that platform matches what the task has decided the project should be built as
         // through negotiation. build that project _without_ a global property for Platform.
         [Fact]

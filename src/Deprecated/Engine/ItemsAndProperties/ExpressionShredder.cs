@@ -87,7 +87,7 @@ namespace Microsoft.Build.BuildEngine
 
             return splitList;
         }
-        
+
         /// <summary>
         /// Given a list of expressions that may contain item list expressions,
         /// returns a pair of tables of all item names found, as K=Name, V=String.Empty;

@@ -21,7 +21,7 @@ namespace Microsoft.Build.CommandLine
     {
         // Set to true if there was a syntax error in the project file.
         private bool _syntaxError;
-
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Methods
 
         /// <summary>
@@ -303,6 +303,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion // Event Handlers
+#pragma warning restore format
     }
 }
 #endif

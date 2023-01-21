@@ -157,7 +157,7 @@ namespace Microsoft.Build.BuildEngine
                 // but wants to ignore the failures.  This implies that we shouldn't be logging
                 // errors either, because you should never have a successful build with errors.
                 BuildWarningEventArgs warningEvent = new BuildWarningEventArgs
-                        (   e.Subcategory,
+                        (e.Subcategory,
                             e.Code,
                             e.File,
                             e.LineNumber,
@@ -172,7 +172,7 @@ namespace Microsoft.Build.BuildEngine
                 loggingServices.LogWarningEvent(warningEvent);
 
                 // Log a message explaining why we converted the previous error into a warning.
-                loggingServices.LogComment(buildEventContext,MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                loggingServices.LogComment(buildEventContext, MessageImportance.Normal, "ErrorConvertedIntoWarning");
             }
             else
             {
@@ -291,7 +291,7 @@ namespace Microsoft.Build.BuildEngine
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
                 loggingServices.LogWarning(buildEventContext, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
-                    return;
+                return;
             }
             e.BuildEventContext = buildEventContext;
             loggingServices.LogMessageEvent(e);
@@ -308,7 +308,7 @@ namespace Microsoft.Build.BuildEngine
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
                 loggingServices.LogWarning(buildEventContext, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
-                    return;
+                return;
             }
 
             e.BuildEventContext = buildEventContext;
@@ -483,16 +483,16 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Not implemented for the proxy
         /// </summary>
-	public void Yield()
-	{
-	}
+        public void Yield()
+        {
+        }
 
         /// <summary>
         /// Not implemented for the proxy
         /// </summary>
-	public void Reacquire()
-	{
-	}
+        public void Reacquire()
+        {
+        }
 
         /// <summary>
         /// Stub implementation -- forwards to engine being proxied.
@@ -515,7 +515,7 @@ namespace Microsoft.Build.BuildEngine
             (
             string[] projectFileNames,
             string[] targetNames,
-            IDictionary [] globalProperties,
+            IDictionary[] globalProperties,
             IList<string>[] removeGlobalProperties,
             string[] toolsVersions,
             bool returnTargetOutputs
@@ -567,9 +567,9 @@ namespace Microsoft.Build.BuildEngine
             if (!String.IsNullOrEmpty(initialLeaseTimeFromEnvironment))
             {
                 int leaseTimeFromEnvironment;
-                if (int.TryParse(initialLeaseTimeFromEnvironment , out leaseTimeFromEnvironment) && leaseTimeFromEnvironment > 0)
+                if (int.TryParse(initialLeaseTimeFromEnvironment, out leaseTimeFromEnvironment) && leaseTimeFromEnvironment > 0)
                 {
-                      initialLeaseTime = leaseTimeFromEnvironment;
+                    initialLeaseTime = leaseTimeFromEnvironment;
                 }
             }
 
@@ -587,9 +587,9 @@ namespace Microsoft.Build.BuildEngine
             if (!String.IsNullOrEmpty(leaseExtensionTimeFromEnvironment))
             {
                 int leaseExtensionFromEnvironment;
-                if (int.TryParse(leaseExtensionTimeFromEnvironment , out leaseExtensionFromEnvironment) && leaseExtensionFromEnvironment > 0)
+                if (int.TryParse(leaseExtensionTimeFromEnvironment, out leaseExtensionFromEnvironment) && leaseExtensionFromEnvironment > 0)
                 {
-                      leaseExtensionTime = leaseExtensionFromEnvironment;
+                    leaseExtensionTime = leaseExtensionFromEnvironment;
                 }
             }
 

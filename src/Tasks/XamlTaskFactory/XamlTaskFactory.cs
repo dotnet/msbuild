@@ -245,7 +245,7 @@ namespace Microsoft.Build.Tasks
     public sealed class XamlTaskFactory : ITaskFactory
     {
         public string FactoryName => "XamlTaskFactory";
-    
+
         public Type TaskType { get; } = null;
 
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Tasks
                 TaskResources = AssemblyResources.PrimaryResources,
                 HelpKeywordPrefix = "MSBuild."
             };
-            
+
             log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(XamlTaskFactory));
 
             return false;

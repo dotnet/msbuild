@@ -240,7 +240,7 @@ namespace Microsoft.Build.Internal
                                     includeLocation,
                                     excludeLocation,
                                     excludeFileSpecIsEmpty,
-                                    disableExcludeDriveEnumerationWarning,                                
+                                    disableExcludeDriveEnumerationWarning,
                                     fileSpec);
 
                                 break;

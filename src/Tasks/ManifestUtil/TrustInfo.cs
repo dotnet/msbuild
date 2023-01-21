@@ -193,8 +193,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(_inputTrustInfoDocument.NameTable);
             XmlElement trustInfoElement = _inputTrustInfoDocument.DocumentElement;
-            XmlElement securityElement = (XmlElement) trustInfoElement?.SelectSingleNode(XPaths.securityElement, nsmgr);
-            XmlElement requestedPrivilegeElement = (XmlElement) securityElement?.SelectSingleNode(XPaths.requestedPrivilegeElement, nsmgr);
+            XmlElement securityElement = (XmlElement)trustInfoElement?.SelectSingleNode(XPaths.securityElement, nsmgr);
+            XmlElement requestedPrivilegeElement = (XmlElement)securityElement?.SelectSingleNode(XPaths.requestedPrivilegeElement, nsmgr);
             return requestedPrivilegeElement;
         }
 
@@ -245,7 +245,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 //  here so we can allow the passed-in node to override it if there is a comment present
                 //
                 System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-                commentString = resources.GetString("TrustInfo.RequestedExecutionLevelComment"); 
+                commentString = resources.GetString("TrustInfo.RequestedExecutionLevelComment");
             }
             else
             {
@@ -399,7 +399,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
 #if RUNTIME_TYPE_NETCORE
                 // Always use full-trust on .NET Core.
-               return true;
+                return true;
 #else
                 GetInputPermissionSet();
                 return _isFullTrust;

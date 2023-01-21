@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal XmlAttribute AssemblyFileAttribute
         {
-            get { return this.assemblyFileAttribute; } 
+            get { return this.assemblyFileAttribute; }
         }
 
         private XmlAttribute conditionAttribute = null;
@@ -174,12 +174,12 @@ namespace Microsoft.Build.BuildEngine
                     case XMakeAttributes.assemblyFile:
                         assemblyFileAttribute = usingTaskAttribute;
                         break;
-                        
+
                     // ignore any RequiredRuntime XML attribute
                     // (we'll make this actually do something when we run on a CLR other than v2.0)
                     case XMakeAttributes.requiredRuntime:
                         // Do nothing
-                        break;                       
+                        break;
 
                     // get the condition, if any
                     case XMakeAttributes.condition:
@@ -211,7 +211,7 @@ namespace Microsoft.Build.BuildEngine
                         break;
 
                     default:
-                        ProjectXmlUtilities.ThrowProjectInvalidAttribute(usingTaskAttribute); 
+                        ProjectXmlUtilities.ThrowProjectInvalidAttribute(usingTaskAttribute);
                         break;
                 }
             }

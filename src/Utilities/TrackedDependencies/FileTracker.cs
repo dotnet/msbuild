@@ -65,12 +65,13 @@ namespace Microsoft.Build.Utilities
         ManagedARM64 = 7
     }
 
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
     /// <summary>
     /// This class contains utility functions to encapsulate launching and logging for the Tracker
     /// </summary>
     public static class FileTracker
     {
-#region Static Member Data
+        #region Static Member Data
 
         // The default path to temp, used to create explicitly short and long paths
         private static readonly string s_tempPath = FileUtilities.TempFileDirectory;
@@ -142,9 +143,9 @@ namespace Microsoft.Build.Utilities
             return commonApplicationDataPaths;
         }
 
-#endregion
+        #endregion
 
-#region Native method wrappers
+        #region Native method wrappers
 
         /// <summary>
         /// Stops tracking file accesses.  
@@ -209,9 +210,9 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLogs", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public static void WriteContextTLogs(string intermediateDirectory, string taskName) => InprocTrackingNativeMethods.WriteContextTLogs(intermediateDirectory, taskName);
 
-#endregion // Native method wrappers
+        #endregion // Native method wrappers
 
-#region Methods
+        #region Methods
 
         /// <summary>
         /// Test to see if the specified file is excluded from tracked dependencies
@@ -640,7 +641,7 @@ namespace Microsoft.Build.Utilities
         public static string TrackerArguments(string command, string arguments, string dllName, string intermediateDirectory, string rootFiles, string cancelEventName)
             => TrackerResponseFileArguments(dllName, intermediateDirectory, rootFiles, cancelEventName) + TrackerCommandArguments(command, arguments);
 
-#region StartProcess methods
+        #region StartProcess methods
 
         /// <summary>
         /// Start the process; tracking the command.  
@@ -707,7 +708,7 @@ namespace Microsoft.Build.Utilities
         public static Process StartProcess(string command, string arguments, ExecutableType toolType)
             => StartProcess(command, arguments, toolType, null, null, null, null);
 
-#endregion // StartProcess methods
+        #endregion // StartProcess methods
 
         /// <summary>
         /// Logs a message of the given importance using the specified resource string. To the specified Log.
@@ -757,9 +758,9 @@ namespace Microsoft.Build.Utilities
             Log?.LogWarningWithCodeFromResources(messageResourceName, messageArgs);
         }
 
-#endregion
+        #endregion
     }
-
+#pragma warning restore format
     /// <summary>
     /// Dependency filter delegate. Used during TLog saves in order for tasks to selectively remove dependencies from the written
     /// graph.
@@ -770,3 +771,4 @@ namespace Microsoft.Build.Utilities
 }
 
 #endif
+

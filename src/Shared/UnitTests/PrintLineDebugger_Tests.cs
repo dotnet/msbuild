@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
             var writer2 = new MockWriter();
 
             var compositeWriter = new PrintLineDebuggerWriters.CompositeWriter(
-                new []
+                new[]
                 {
                     writer1.Writer(),
                     writer2.Writer()

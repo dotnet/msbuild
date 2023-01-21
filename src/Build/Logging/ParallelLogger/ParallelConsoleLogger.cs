@@ -617,7 +617,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Add the item value to the string to be printed in error/warning messages.
                     if (!descriptionEmpty)
                     {
-                        projectConfigurationDescription.Append(" "); 
+                        projectConfigurationDescription.Append(" ");
                     }
 
                     projectConfigurationDescription.Append(itemSpec);

@@ -90,10 +90,10 @@ namespace Microsoft.Build.Tasks
             }
 
             int retryAttemptCount = 0;
-            
+
             CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-            while(true)
+            while (true)
             {
                 try
                 {

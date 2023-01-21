@@ -82,21 +82,21 @@ namespace Microsoft.Build.UnitTests
 
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
-               List<TaskItem> list = new List<TaskItem>();
+                List<TaskItem> list = new List<TaskItem>();
 
                 for (int i = 0; i < 20; i++)
-               {
+                {
                     list.Add(new TaskItem(""));
-               }
+                }
 
-               RemoveDir t = new RemoveDir();
-               t.Directories = list.ToArray();
-               t.BuildEngine = new MockEngine(_output);
-               t.Execute().ShouldBeTrue();
+                RemoveDir t = new RemoveDir();
+                t.Directories = list.ToArray();
+                t.BuildEngine = new MockEngine(_output);
+                t.Execute().ShouldBeTrue();
 
                 t.RemovedDirectories.Length.ShouldBe(0);
                 ((MockEngine)t.BuildEngine).Warnings.ShouldBe(20);
-               ((MockEngine)t.BuildEngine).AssertLogContains("MSB3232");
+                ((MockEngine)t.BuildEngine).AssertLogContains("MSB3232");
             }
         }
     }

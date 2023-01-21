@@ -113,7 +113,7 @@ namespace Microsoft.Build.BuildEngine
         private InternalLoggerException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            this.e = (BuildEventArgs) info.GetValue("e", typeof(BuildEventArgs));
+            this.e = (BuildEventArgs)info.GetValue("e", typeof(BuildEventArgs));
             this.errorCode = info.GetString("errorCode");
             this.helpKeyword = info.GetString("helpKeyword");
             this.initializationException = info.GetBoolean("initializationException");

@@ -91,11 +91,11 @@ namespace Microsoft.Build.BackEnd
                     return constructor;
                 });
 
-            var targetInstanceChild = (ITranslatable) parameterlessConstructor.Invoke(Array.Empty<object>());
+            var targetInstanceChild = (ITranslatable)parameterlessConstructor.Invoke(Array.Empty<object>());
 
             targetInstanceChild.Translate(translator);
 
-            return (T) targetInstanceChild;
+            return (T)targetInstanceChild;
         }
 
         public static void TranslateOptionalBuildEventContext(this ITranslator translator, ref BuildEventContext buildEventContext)

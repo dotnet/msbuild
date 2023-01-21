@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void MultilineAttributeVB()
         {
-            var lines = new []{ "line 1", "line 2", "line 3" };
+            var lines = new[] { "line 1", "line 2", "line 3" };
             var multilineString = String.Join(Environment.NewLine, lines);
 
             WriteCodeFragment task = new WriteCodeFragment();

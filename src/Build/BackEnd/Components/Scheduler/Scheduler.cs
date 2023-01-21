@@ -618,7 +618,7 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
-            _inprocNodeContext =  new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
+            _inprocNodeContext = new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
         }
 
         /// <summary>
@@ -1631,7 +1631,7 @@ namespace Microsoft.Build.BackEnd
 
             // detect the case for https://github.com/dotnet/msbuild/issues/3047
             // if we have partial results AND blocked and blocking share the same configuration AND are blocked on each other
-            if (blocker.PartialBuildResult !=null &&
+            if (blocker.PartialBuildResult != null &&
                 blockingRequest.BuildRequest.ConfigurationId == blockedRequest.BuildRequest.ConfigurationId &&
                 blockingRequest.RequestsWeAreBlockedBy.Contains(blockedRequest))
             {
@@ -1964,7 +1964,7 @@ namespace Microsoft.Build.BackEnd
             emitNonErrorLogs = _ => { };
 
             var isIsolatedBuild = _componentHost.BuildParameters.IsolateProjects;
-            var configCache = (IConfigCache) _componentHost.GetComponent(BuildComponentType.ConfigCache);
+            var configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
 
             // do not check root requests as nothing depends on them
             if (!isIsolatedBuild || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)

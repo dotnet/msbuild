@@ -477,7 +477,7 @@ namespace Microsoft.Build.Evaluation
 
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
-            public ItemSpec<P,I> ItemSpec { get; set; }
+            public ItemSpec<P, I> ItemSpec { get; set; }
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
                 ImmutableDictionary.CreateBuilder<string, LazyItemList>() :

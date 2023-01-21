@@ -275,7 +275,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="filePath">Path to response file</param>
         internal void LogIncludeFile(string filePath)
-        { 
+        {
             ErrorUtilities.VerifyThrow(IsValid, "must be valid");
             _loggingService.LogIncludeFile(BuildEventContext, filePath);
         }

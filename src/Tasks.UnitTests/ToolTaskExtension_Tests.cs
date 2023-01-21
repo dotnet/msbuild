@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             MyToolTaskExtension t = new MyToolTaskExtension(useNewLineSeparators: true, addResponseFileCommands: addResponseFileCommands);
-            
+
             string[] actual = t.GetResponseFileCommands().Split(MSBuildConstants.EnvironmentNewLine, StringSplitOptions.None);
             string[] expected =
             {

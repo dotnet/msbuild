@@ -2251,13 +2251,16 @@ EndGlobal
                 ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
+#pragma warning disable format
 #if !FEATURE_ASPNET_COMPILER
-                Assert.Throws<InvalidProjectFileException>(() => {
+                Assert.Throws<InvalidProjectFileException>(() =>
+                {
 #endif
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
 #if !FEATURE_ASPNET_COMPILER
                 });
 #endif
+#pragma warning restore format
 
 #if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");

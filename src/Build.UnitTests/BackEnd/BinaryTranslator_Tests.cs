@@ -550,7 +550,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ContentType = AssemblyContentType.WindowsRuntime,
                 CultureName = "zh-HK",
             };
-            value.SetPublicKey(new byte[]{ 3, 2, 1});
+            value.SetPublicKey(new byte[] { 3, 2, 1 });
             value.SetPublicKeyToken(new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 });
 
             TranslationHelpers.GetWriteTranslator().Translate(ref value);
@@ -794,7 +794,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     return false;
                 }
 
-                return Equals((BaseClass) obj);
+                return Equals((BaseClass)obj);
             }
 
             public override int GetHashCode()

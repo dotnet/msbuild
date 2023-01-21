@@ -98,7 +98,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 // Try MSBuild.exe's resources
                 resource = msbuildExeResourceManager.GetString(name, CultureInfo.CurrentUICulture);
             }
-            
+
             return resource;
         }
 

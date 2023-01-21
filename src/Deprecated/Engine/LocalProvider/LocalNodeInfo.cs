@@ -15,13 +15,13 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
         internal LocalNodeInfo(int availableNodeNumberHint)
         {
-            this.nodeState              = LocalNodeProvider.NodeState.NotLaunched;
-            this.targetList             = new LinkedList<BuildRequest>();
-            this.nodeCommandQueue       = new DualQueue<LocalCallDescriptor>();
-            this.nodeHiPriCommandQueue  = new DualQueue<LocalCallDescriptor>();
-            this.nodeReserveHandle      = null;
-            this.communicationFailed    = false;
-            this.processId              = unInitializedProcessId;
+            this.nodeState = LocalNodeProvider.NodeState.NotLaunched;
+            this.targetList = new LinkedList<BuildRequest>();
+            this.nodeCommandQueue = new DualQueue<LocalCallDescriptor>();
+            this.nodeHiPriCommandQueue = new DualQueue<LocalCallDescriptor>();
+            this.nodeReserveHandle = null;
+            this.communicationFailed = false;
+            this.processId = unInitializedProcessId;
 
             // Figure out the next available node number
             ReserveNextAvailableNodeNumber(availableNodeNumberHint);
@@ -141,12 +141,12 @@ namespace Microsoft.Build.BuildEngine
 
         public bool ShutdownResponseReceived
         {
-            get 
+            get
             {
                 return shutdownResponseReceived;
             }
-            set 
-            { 
+            set
+            {
                 shutdownResponseReceived = value;
             }
         }
@@ -192,7 +192,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal void ReleaseNode()
         {
-            if ( nodeReserveHandle != null )
+            if (nodeReserveHandle != null)
             {
                 nodeReserveHandle.Close();
                 processId = invalidProcessId;
@@ -209,7 +209,7 @@ namespace Microsoft.Build.BuildEngine
             while (nodeReserveHandle == null)
             {
                 bool createdNew;
-                nodeReserveHandle = 
+                nodeReserveHandle =
                     new EventWaitHandle(false, EventResetMode.ManualReset, LocalNodeProviderGlobalNames.NodeReserveEventName(currentNodeNumber), out createdNew);
                 if (!createdNew)
                 {

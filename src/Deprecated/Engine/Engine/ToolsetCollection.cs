@@ -129,7 +129,7 @@ namespace Microsoft.Build.BuildEngine
             }
             else
             {
-                toolsetMap.Add(item.ToolsVersion,item);
+                toolsetMap.Add(item.ToolsVersion, item);
             }
 
             // The parent engine needs to handle this as well

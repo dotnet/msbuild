@@ -123,14 +123,14 @@ namespace Microsoft.Build.Execution
         public void RegisterHostObject(string projectFile, string targetName, string taskName, ITaskHost hostObject)
         {
 
-/* Unmerged change from project 'Microsoft.Build (netcoreapp2.1)'
-Before:
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
-After:
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile));
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName));
-*/
+            /* Unmerged change from project 'Microsoft.Build (netcoreapp2.1)'
+            Before:
+                        ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
+                        ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
+            After:
+                        ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile));
+                        ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName));
+            */
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentNull(targetName, nameof(targetName));
             ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));

@@ -122,7 +122,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         internal Expander(Expander expander, SpecificItemDefinitionLibrary itemDefinitionLibrary)
-            : this(expander.lookup, null , expander.options)
+            : this(expander.lookup, null, expander.options)
         {
             if (implicitMetadataItemType == null)
             {
@@ -131,7 +131,7 @@ namespace Microsoft.Build.BuildEngine
             this.specificItemDefinitionLibrary = itemDefinitionLibrary;
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Adds metadata to the table being used by this expander.
@@ -704,7 +704,7 @@ namespace Microsoft.Build.BuildEngine
 
             return (nestLevel == 0) ? index : -1;
         }
-        
+
         /// <summary>
         /// Expand the body of the property, including any functions that it may contain
         /// </summary>
@@ -871,7 +871,7 @@ namespace Microsoft.Build.BuildEngine
         private string ExpandRegistryValue(string registryExpression, XmlNode node)
         {
             string registryLocation = registryExpression.Substring(9);
-            
+
             // Split off the value name -- the part after the "@" sign. If there's no "@" sign, then it's the default value name
             // we want.
             int firstAtSignOffset = registryLocation.IndexOf('@');
@@ -879,9 +879,9 @@ namespace Microsoft.Build.BuildEngine
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(firstAtSignOffset == lastAtSignOffset, node, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", String.Empty);
 
-            string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1 
+            string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1
                 ? null : registryLocation.Substring(lastAtSignOffset + 1);
-            
+
             // If there's no '@', or '@' is first, then we'll use null or String.Empty for the location; otherwise
             // the location is the part before the '@'
             string registryKeyName = lastAtSignOffset != -1 ? registryLocation.Substring(0, lastAtSignOffset) : registryLocation;
@@ -1231,7 +1231,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         functionResult = EscapingUtilities.Escape((string)functionResult);
                     }
-                    
+
                     // There's nothing left to deal within the function expression, return the result from the execution
                     if (String.IsNullOrEmpty(remainder))
                     {
@@ -1474,7 +1474,7 @@ namespace Microsoft.Build.BuildEngine
 
                 return objectType;
             }
-            
+
             /// <summary>
             /// Factory method to construct a function for property evaluation
             /// </summary>
@@ -1584,7 +1584,7 @@ namespace Microsoft.Build.BuildEngine
             private static string[] ExtractFunctionArguments(string expressionFunction, string argumentsContent)
             {
                 List<string> arguments = new List<string>();
-                StringBuilder argumentBuilder = new StringBuilder(argumentsContent.Length); 
+                StringBuilder argumentBuilder = new StringBuilder(argumentsContent.Length);
 
                 // Iterate over the contents of the arguments extracting the
                 // the individual arguments as we go
@@ -1945,7 +1945,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 metadataValue = GetDefaultMetadataValue(itemType, metadataName, metadataValue);
             }
-            
+
             return metadataValue ?? String.Empty;
         }
 

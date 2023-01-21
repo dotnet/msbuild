@@ -95,7 +95,7 @@ namespace Microsoft.Build.Engine.UnitTests
             return new SolutionFileBuilder
             {
                 Projects = graph.ProjectNodes.ToDictionary(
-                    n => GraphTestingUtilities.GetProjectNumber((ProjectGraphNode) n).ToString(),
+                    n => GraphTestingUtilities.GetProjectNumber((ProjectGraphNode)n).ToString(),
                     n => n.ProjectInstance.FullPath),
                 ProjectConfigurations = projectConfigurations,
                 SolutionDependencies = solutionDependencies,
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     projectInfos.ShouldContainKey(parent);
                     projectInfos.ShouldContainKey(dependency);
 
-                    projectInfos[parent].AddDependency(projectInfos[dependency]); 
+                    projectInfos[parent].AddDependency(projectInfos[dependency]);
                 }
             }
 

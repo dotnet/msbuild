@@ -805,8 +805,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     SdkName when sdk.Version == SdkExpectedVersion =>
                     factory.IndicateSuccess(ResolvedPath, SdkExpectedVersion),
-                    SdkName => factory.IndicateFailure(new[] {ErrorVersion}),
-                    _ => factory.IndicateFailure(new[] {ErrorName})
+                    SdkName => factory.IndicateFailure(new[] { ErrorVersion }),
+                    _ => factory.IndicateFailure(new[] { ErrorName })
                 };
             }
         }

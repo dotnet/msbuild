@@ -218,7 +218,8 @@ namespace Microsoft.Build.Evaluation
                 "Reentrance to the ProjectRootElementCache.Get function detected."
             );
 
-            try {
+            try
+            {
 #endif
                 // Should already have been canonicalized
                 ErrorUtilities.VerifyThrowInternalRooted(projectFile);

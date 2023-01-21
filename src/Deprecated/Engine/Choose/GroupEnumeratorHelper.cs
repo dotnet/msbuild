@@ -74,11 +74,11 @@ namespace Microsoft.Build.BuildEngine
         /// </remarks>
         /// <owner>DavidLe</owner>
         /// <returns>IEnumerator</returns>
-        public IEnumerator GetEnumerator( )
+        public IEnumerator GetEnumerator()
         {
             foreach (IItemPropertyGrouping group in this.groupingCollection)
             {
-                if ((group is BuildItemGroup) && 
+                if ((group is BuildItemGroup) &&
                     ((this.type == ListType.ItemGroupsTopLevel) || (this.type == ListType.ItemGroupsTopLevelAndChoose) || (this.type == ListType.ItemGroupsAll)))
                 {
                     yield return group;

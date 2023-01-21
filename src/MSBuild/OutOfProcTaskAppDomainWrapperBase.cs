@@ -238,7 +238,7 @@ namespace Microsoft.Build.CommandLine
                         taskRunnerFinished.Set();
                     }
                 };
-                
+
                 Thread staThread = new Thread(taskRunnerDelegate);
                 staThread.SetApartmentState(ApartmentState.STA);
                 staThread.Name = "MSBuild STA task runner thread";

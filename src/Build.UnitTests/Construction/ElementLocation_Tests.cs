@@ -370,7 +370,8 @@ namespace Microsoft.Build.UnitTests.Construction
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
             doc.Load(_pathToCommonTargets);
             Assert.True(doc.IsReadOnly);
-            Assert.Throws<InvalidOperationException>(() => {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
                 doc.Save(new MemoryStream());
             });
         }

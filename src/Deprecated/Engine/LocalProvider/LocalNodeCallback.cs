@@ -61,7 +61,7 @@ namespace Microsoft.Build.BuildEngine
             // Start the thread that will be processing the calls to the parent engine
             ThreadStart threadState = new ThreadStart(this.SharedMemoryWriterThread);
             writerThread = new Thread(threadState);
-            writerThread.Name = "MSBuild Child->Parent Writer";            
+            writerThread.Name = "MSBuild Child->Parent Writer";
             writerThread.Start();
         }
 
@@ -115,8 +115,8 @@ namespace Microsoft.Build.BuildEngine
 
             lock (repliesFromParent)
             {
-                ReplyData replyData = (ReplyData) repliesFromParent[requestingCallNumber];
-                ErrorUtilities.VerifyThrow(replyData?.waitEvent != null, 
+                ReplyData replyData = (ReplyData)repliesFromParent[requestingCallNumber];
+                ErrorUtilities.VerifyThrow(replyData?.waitEvent != null,
                     "We must have an event for this call at this point");
 
                 replyData.reply = reply;
@@ -241,7 +241,7 @@ namespace Microsoft.Build.BuildEngine
 
             replyFromParentArrived.Reset();
             int requestingCallNumber = callDescriptor.CallNumber;
-            
+
             ReplyData replyData = new ReplyData();
             replyData.waitEvent = replyFromParentArrived;
 

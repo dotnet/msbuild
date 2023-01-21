@@ -171,7 +171,7 @@ namespace Microsoft.Build.BuildEngine
             }
             set
             {
-              // Dont really care about verbosity at this point, but dont want to throw exception as it is set for all distributed loggers
+                // Dont really care about verbosity at this point, but dont want to throw exception as it is set for all distributed loggers
             }
         }
 

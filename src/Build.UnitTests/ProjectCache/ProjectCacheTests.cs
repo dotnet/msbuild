@@ -186,7 +186,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         CacheResultType.CacheNotApplicable => 'N',
                         CacheResultType.None => 'E',
                         _ => throw new ArgumentOutOfRangeException()
-                        };
+                    };
                 }
             }
         }
@@ -1360,7 +1360,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [InlineData(true, true)]
         public void CacheShouldBeQueriedInParallelDuringGraphBuilds(bool useSynchronousLogging, bool disableInprocNode)
         {
-            var referenceNumbers = new []{2, 3, 4};
+            var referenceNumbers = new[] { 2, 3, 4 };
 
             var testData = new GraphCacheResponse(
                 new Dictionary<int, int[]?>
@@ -1608,7 +1608,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                                 Interlocked.Increment(ref cacheHitCount);
                                 return Task.FromResult(
                                     CacheResult.IndicateCacheHit(
-                                        new ProxyTargets(new Dictionary<string, string> {{proxyTarget, cacheHitTarget}})));
+                                        new ProxyTargets(new Dictionary<string, string> { { proxyTarget, cacheHitTarget } })));
                             }
                         }
                     }),
@@ -1653,7 +1653,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             foreach (var enumValue in Enum.GetValues(typeof(ErrorLocations)))
             {
-                var typedValue = (ErrorLocations) enumValue;
+                var typedValue = (ErrorLocations)enumValue;
                 if (errorLocations.HasFlag(typedValue))
                 {
                     var exceptionLocation = typedValue.ToString();

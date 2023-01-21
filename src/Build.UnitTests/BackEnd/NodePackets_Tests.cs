@@ -215,7 +215,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
-            try {
+            try
+            {
                 BuildEventArgs[] testArgs = new BuildEventArgs[]
                 {
                     new BuildFinishedEventArgs("Message", "Keyword", true),
@@ -252,7 +253,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     CompareLogMessagePackets(packet, deserializedPacket);
                 }
-            } finally {
+            }
+            finally
+            {
                 Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             }
         }

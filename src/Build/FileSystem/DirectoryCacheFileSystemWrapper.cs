@@ -103,9 +103,9 @@ namespace Microsoft.Build.FileSystem
             return Enumerable.Concat(directories, files);
         }
 
-#endregion
+        #endregion
 
-#region IFileSystem pass-through implementation
+        #region IFileSystem pass-through implementation
 
         public FileAttributes GetAttributes(string path) => _fileSystem.GetAttributes(path);
 
@@ -119,6 +119,6 @@ namespace Microsoft.Build.FileSystem
 
         public byte[] ReadFileAllBytes(string path) => _fileSystem.ReadFileAllBytes(path);
 
-#endregion
+        #endregion
     }
 }

@@ -83,7 +83,7 @@ namespace Microsoft.Build.Internal
         {
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
 
-            
+
             // Ignore loadAsReadOnly for now; using XmlReader.Create results in whitespace changes
             // of attribute text, specifically newline removal.
             // https://github.com/dotnet/msbuild/issues/4210

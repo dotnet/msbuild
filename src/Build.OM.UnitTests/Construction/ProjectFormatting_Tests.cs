@@ -267,7 +267,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
             var itemToRemove = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
             project.RemoveItem(itemToRemove);
-            
+
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
@@ -303,7 +303,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
             var itemToEdit = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
             itemToEdit.SetMetadataValue("ExcludeFromStyleCop", "true");
-            
+
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
@@ -503,8 +503,8 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
             Project project = new Project();
             project.AddItem("ProjectReference", @"..\CLREXE\CLREXE.vcxproj",
-                new[] {new KeyValuePair<string, string>("metadata", "value")});
-            
+                new[] { new KeyValuePair<string, string>("metadata", "value") });
+
             StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 

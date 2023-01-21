@@ -319,7 +319,8 @@ namespace Microsoft.Build.Tasks
                         keysToRemove.Add(key);
 
                         // The parameter will have an explicit type. The metadata value is the type name.
-                        parameterTypes[parameterNameKey] = new ParameterType {
+                        parameterTypes[parameterNameKey] = new ParameterType
+                        {
                             Kind = ParameterTypeKind.Typed,
                             TypeName = value
                         };
@@ -351,7 +352,8 @@ namespace Microsoft.Build.Tasks
                         // that needs to be written to the generated file for that parameter.
                         if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
                         {
-                            parameterTypes[parameterNameKey] = new ParameterType {
+                            parameterTypes[parameterNameKey] = new ParameterType
+                            {
                                 Kind = ParameterTypeKind.Literal
                             };
                         }

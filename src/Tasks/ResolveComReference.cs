@@ -141,6 +141,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed partial class ResolveComReference : Microsoft.Build.Tasks.TaskExtension, IResolveComReferenceTaskContract
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
 
         public ITaskItem[] TypeLibNames { get; set; }
@@ -196,6 +197,7 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+#pragma warning restore format 
     }
 
 #else
@@ -205,6 +207,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed partial class ResolveComReference : AppDomainIsolatedTaskExtension, IResolveComReferenceTaskContract, IComReferenceResolver
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
 
         public ITaskItem[] TypeLibNames { get; set; }
@@ -287,7 +290,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkVersion { get; set; } = String.Empty;
 
         private Version _projectTargetFramework;
-        
+
         /// <summary>version 4.0</summary>
         private static readonly Version s_targetFrameworkVersion_40 = new Version("4.0");
 
@@ -1769,6 +1772,7 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+#pragma warning restore format 
     }
 
 #endif

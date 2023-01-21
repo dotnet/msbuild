@@ -23,6 +23,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class CanonicalTrackedInputFiles
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Member Data
         // The most recently modified output time
         private DateTime _outputNewestTime = DateTime.MinValue;
@@ -1092,7 +1093,8 @@ namespace Microsoft.Build.Utilities
             }
         }
         #endregion
+#pragma warning restore format
     }
 }
-
 #endif
+

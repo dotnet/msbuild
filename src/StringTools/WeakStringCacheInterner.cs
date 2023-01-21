@@ -30,7 +30,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private readonly WeakStringCache _weakStringCache = new WeakStringCache();
 
-#region Statistics
+        #region Statistics
         /// <summary>
         /// Number of times the regular interning path found the string in the cache.
         /// </summary>
@@ -58,7 +58,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private Dictionary<string, int>? _internCallCountsByString;
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Try to intern the string.

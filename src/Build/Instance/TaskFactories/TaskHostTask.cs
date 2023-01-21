@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd
                         _taskLoggingContext.GetWarningsAsErrors(),
                         _taskLoggingContext.GetWarningsNotAsErrors(),
                         _taskLoggingContext.GetWarningsAsMessages()
-                        
+
                     );
 
             try

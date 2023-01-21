@@ -25,14 +25,14 @@ namespace Microsoft.Build.BuildEngine
         internal TaskExecutionContext
         (
             Project parentProject,
-            Target  parentTarget,
+            Target parentTarget,
             XmlElement taskNode,
             ProjectBuildState buildContext,
             int handleId,
             int nodeIndex,
             BuildEventContext taskBuildEventContext
         )
-            :base(handleId, nodeIndex, taskBuildEventContext)
+            : base(handleId, nodeIndex, taskBuildEventContext)
         {
             this.parentProject = parentProject;
             this.parentTarget = parentTarget;
@@ -165,8 +165,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Task outputs
         /// </summary>
-        private bool                taskExecutedSuccessfully;
-        private Exception           thrownException;
+        private bool taskExecutedSuccessfully;
+        private Exception thrownException;
 
         #endregion
     }

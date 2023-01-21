@@ -116,7 +116,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            return GetType() == obj.GetType() && InternalEquals((FullyQualifiedBuildRequest) obj);
+            return GetType() == obj.GetType() && InternalEquals((FullyQualifiedBuildRequest)obj);
         }
 
         /// <summary>

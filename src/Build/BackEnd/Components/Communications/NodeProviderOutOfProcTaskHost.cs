@@ -376,7 +376,8 @@ namespace Microsoft.Build.BackEnd
         internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
         {
             ErrorUtilities.VerifyThrowInternalErrorUnreachable((hostContext & HandshakeOptions.TaskHost) == HandshakeOptions.TaskHost);
-            if ((hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2) {
+            if ((hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+            {
                 return TaskHostNameForClr2TaskHost;
             }
             else

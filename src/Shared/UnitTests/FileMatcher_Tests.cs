@@ -1524,7 +1524,7 @@ namespace Microsoft.Build.UnitTests
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/").ToArray();
             Assert.Equal("1.file", strings[0]);
 
-            strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directory\\1.file" : "/directory/1.file"};
+            strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directory\\1.file" : "/directory/1.file" };
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/").ToArray();
             Assert.Equal(strings[0], NativeMethodsShared.IsWindows ? "directory\\1.file" : "directory/1.file");
 
@@ -1533,12 +1533,12 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("1.file", strings[0]);
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file" };
-            strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory" ).ToArray();
+            strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory").ToArray();
             Assert.Equal(strings[0], NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file");
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directorymorechars\\1.file" : "/directorymorechars/1.file" };
             strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory").ToArray();
-            Assert.Equal(strings[0], NativeMethodsShared.IsWindows ? "c:\\directorymorechars\\1.file" : "/directorymorechars/1.file" );
+            Assert.Equal(strings[0], NativeMethodsShared.IsWindows ? "c:\\directorymorechars\\1.file" : "/directorymorechars/1.file");
 
             if (NativeMethodsShared.IsWindows)
             {
@@ -2080,7 +2080,7 @@ namespace Microsoft.Build.UnitTests
             isLegalFileSpec.ShouldBe(expectedIsLegalFileSpec);
         }
 
-#region Support functions.
+        #region Support functions.
 
         /// <summary>
         /// This support class simulates a file system.
@@ -2761,7 +2761,7 @@ namespace Microsoft.Build.UnitTests
             return match.isMatch;
         }
 
-#endregion
+        #endregion
 
         private class FileSystemAdapter : IFileSystem
         {

@@ -2423,7 +2423,7 @@ namespace Microsoft.Build.Tasks
                     IReadOnlyCollection<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
                     List<DependentAssembly> idealAssemblyRemappings = autoUnifiedRemappedAssemblies;
                     List<AssemblyNameReference> idealAssemblyRemappingsIdentities = autoUnifiedRemappedAssemblyReferences;
-                    bool shouldRerunClosure = autoUnifiedRemappedAssemblies?.Count > 0  || excludedReferencesExist;
+                    bool shouldRerunClosure = autoUnifiedRemappedAssemblies?.Count > 0 || excludedReferencesExist;
 
                     if (!AutoUnify || !FindDependencies || shouldRerunClosure)
                     {

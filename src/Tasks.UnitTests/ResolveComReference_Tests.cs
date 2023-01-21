@@ -637,7 +637,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(rcr.CheckForConflictingReferences());
             Assert.Equal(3, rcr.allProjectRefs.Count);
 
-            
+
             // duplicate refs should not be treated as conflicts
             ComReferenceInfo referenceInfo = new ComReferenceInfo(tlbRefInfo);
             rcr.allProjectRefs.Add(referenceInfo);

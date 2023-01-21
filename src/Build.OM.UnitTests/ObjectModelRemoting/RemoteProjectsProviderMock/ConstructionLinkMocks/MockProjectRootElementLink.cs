@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
         public MockProjectItemElementLinkRemoter CreateItemElement(string itemType, string include)
         {
-            return (MockProjectItemElementLinkRemoter) this.Export(this.ProjectXml.CreateItemElement(itemType, include));
+            return (MockProjectItemElementLinkRemoter)this.Export(this.ProjectXml.CreateItemElement(itemType, include));
         }
         public MockProjectItemDefinitionElementLinkRemoter CreateItemDefinitionElement(string itemType)
         {

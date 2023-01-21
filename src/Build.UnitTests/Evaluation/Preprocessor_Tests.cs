@@ -954,7 +954,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                     new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
-                        new [] { testDirectory},
+                        new[] { testDirectory },
                         version: null,
                         propertiesToAdd,
                         itemsToAdd,

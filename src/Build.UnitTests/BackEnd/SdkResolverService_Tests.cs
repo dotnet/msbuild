@@ -381,7 +381,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             Dictionary<string, string> propertiesToAdd;
             Dictionary<string, SdkResultItem> itemsToAdd;
-           
+
             CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
 
             var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
@@ -430,7 +430,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new SdkResultImpl(
                     sdk,
-                    new []
+                    new[]
                     {
                         expectedPath1,
                         expectedPath2
@@ -654,7 +654,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             ElementLocation location)
             {
                 var manifests = new List<SdkResolverManifest>();
-                foreach(SdkResolver resolver in _resolvers)
+                foreach (SdkResolver resolver in _resolvers)
                 {
                     SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(resolver.Name, null, null);
                     manifests.Add(sdkResolverManifest);
@@ -737,10 +737,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 if (sdk.Name.StartsWith("2"))
                 {
-                    return factory.IndicateSuccess("resolverpath2", "version2", new[] {"WARNING2"});
+                    return factory.IndicateSuccess("resolverpath2", "version2", new[] { "WARNING2" });
                 }
 
-                return factory.IndicateFailure(new[] {"ERROR2"}, new[] {"WARNING2"});
+                return factory.IndicateFailure(new[] { "ERROR2" }, new[] { "WARNING2" });
             }
         }
 
@@ -798,7 +798,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
                 if (resolverContext.State != null)
                 {
-                    return factory.IndicateSuccess((string) resolverContext.State, "1.0");
+                    return factory.IndicateSuccess((string)resolverContext.State, "1.0");
                 }
 
                 resolverContext.State = Expected;

@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public ICollection<MockProjectItemLinkRemoter> GetItems(string itemType)
             => this.OwningCollection.ExportCollection<ProjectItem, MockProjectItemLinkRemoter>(this.Source.GetItems(itemType));
 
-        public  ICollection<MockProjectItemLinkRemoter> GetItemsByEvaluatedInclude(string evaluatedInclude)
+        public ICollection<MockProjectItemLinkRemoter> GetItemsByEvaluatedInclude(string evaluatedInclude)
             => this.OwningCollection.ExportCollection<ProjectItem, MockProjectItemLinkRemoter>(this.Source.GetItemsByEvaluatedInclude(evaluatedInclude));
 
         public ICollection<MockProjectItemLinkRemoter> GetItemsIgnoringCondition(string itemType)
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             => this.OwningCollection.ExportCollection(this.Source.GetLogicalProject());
 
         public MockProjectPropertyLinkRemoter GetProperty(string name) => this.OwningCollection.Export<ProjectProperty, MockProjectPropertyLinkRemoter>(this.Source.GetProperty(name));
-        public  string GetPropertyValue(string name) => this.Source.GetPropertyValue(name);
+        public string GetPropertyValue(string name) => this.Source.GetPropertyValue(name);
         public void MarkDirty() => this.Source.MarkDirty();
         public void ReevaluateIfNecessary(EvaluationContext evaluationContext) => this.Source.ReevaluateIfNecessary(evaluationContext);
         public bool RemoveGlobalProperty(string name) => this.Source.RemoveGlobalProperty(name);
@@ -107,9 +107,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             this.Source.SaveLogicalProject(writer);
         }
 
-        public  bool SetGlobalProperty(string name, string escapedValue) => this.Source.SetGlobalProperty(name, escapedValue);
+        public bool SetGlobalProperty(string name, string escapedValue) => this.Source.SetGlobalProperty(name, escapedValue);
 
-        public  MockProjectPropertyLinkRemoter SetProperty(string name, string unevaluatedValue)
+        public MockProjectPropertyLinkRemoter SetProperty(string name, string unevaluatedValue)
             => this.OwningCollection.Export<ProjectProperty, MockProjectPropertyLinkRemoter>(this.Source.SetProperty(name, unevaluatedValue));
         public void Unload() { }
     }
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public override ICollection<string> ItemTypes => this.Proxy.ItemTypes;
 
-        public override ICollection<ProjectProperty> Properties => this.Linker.ImportCollection<ProjectProperty,MockProjectPropertyLinkRemoter>(this.Proxy.Properties);
+        public override ICollection<ProjectProperty> Properties => this.Linker.ImportCollection<ProjectProperty, MockProjectPropertyLinkRemoter>(this.Proxy.Properties);
 
         public override IDictionary<string, List<string>> ConditionedProperties => this.Proxy.ConditionedProperties;
 
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             => throw new NotImplementedException();
         public override ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings, EvaluationContext evaluationContext) => throw new NotImplementedException();
         public override IDictionary<string, ProjectTargetInstance> Targets => throw new NotImplementedException();
-// --------------------------------------------------
+        // --------------------------------------------------
 
         public override string ExpandString(string unexpandedValue) => this.Proxy.ExpandString(unexpandedValue);
 
@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             throw new NotImplementedException();
         }
-// ---------------------------------------------------------------------------------------
+        // ---------------------------------------------------------------------------------------
 
         public override ICollection<ProjectItem> GetItems(string itemType)
             => this.Linker.ImportCollection<ProjectItem, MockProjectItemLinkRemoter>(this.Proxy.GetItems(itemType));

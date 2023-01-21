@@ -8,7 +8,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    public  class FailingBuilderTask : Task
+    public class FailingBuilderTask : Task
     {
         public FailingBuilderTask()
             : base(null)

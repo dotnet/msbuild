@@ -43,11 +43,11 @@ namespace Microsoft.Build.BuildEngine.Shared
                 newElement.AppendChild(newChildNode);
             }
 
-               
-            
-                // Add the new element in the same place the old element was.
-                oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
-            
+
+
+            // Add the new element in the same place the old element was.
+            oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
+
 
             return newElement;
         }
@@ -231,7 +231,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                 }
             }
-            catch(XmlException)
+            catch (XmlException)
             {
                 // Ignore any XML exceptions as it will be caught later on
             }

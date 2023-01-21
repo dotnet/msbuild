@@ -130,7 +130,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         public static string GetAttributeValue(ProjectElement xml, string attributeName, bool nullIfNotExists) => xml.GetAttributeValue(attributeName, nullIfNotExists);
         public static void SetOrRemoveAttribute(ProjectElement xml, string name, string value, bool clearAttributeCache, string reason, string param) => xml.SetOrRemoveAttributeForLink(name, value, clearAttributeCache, reason, param);
         public static void MarkDirty(ProjectElement xml, string reason, string param) => xml.MarkDirty(reason, param);
-        public static ProjectElement CreateNewInstance(ProjectElement xml, ProjectRootElement owner) =>  ProjectElement.CreateNewInstance(xml, owner);
+        public static ProjectElement CreateNewInstance(ProjectElement xml, ProjectRootElement owner) => ProjectElement.CreateNewInstance(xml, owner);
 
         public static string GetPureText(ProjectElement xml)
         {

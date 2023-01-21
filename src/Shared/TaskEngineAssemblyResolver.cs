@@ -63,7 +63,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #endif
         }
 
-        
+
 
         /// <summary>
         /// Removes the event handler.

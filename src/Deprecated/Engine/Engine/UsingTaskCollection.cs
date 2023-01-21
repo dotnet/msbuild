@@ -68,10 +68,10 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public int Count
         {
-            get 
+            get
             {
                 ErrorUtilities.VerifyThrow(this.usingTasks != null, "UsingTaskCollection's ArrayList not initialized!");
-                return this.usingTasks.Count; 
+                return this.usingTasks.Count;
             }
         }
 
@@ -81,10 +81,10 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public bool IsSynchronized
         {
-            get 
+            get
             {
                 ErrorUtilities.VerifyThrow(this.usingTasks != null, "UsingTaskCollection's ArrayList not initialized!");
-                return this.usingTasks.IsSynchronized; 
+                return this.usingTasks.IsSynchronized;
             }
         }
 
@@ -137,7 +137,7 @@ namespace Microsoft.Build.BuildEngine
             get
             {
                 ErrorUtilities.VerifyThrow(this.usingTasks != null, "UsingTaskCollection's ArrayList not initialized!");
-                return (UsingTask) this.usingTasks[index];
+                return (UsingTask)this.usingTasks[index];
             }
         }
 

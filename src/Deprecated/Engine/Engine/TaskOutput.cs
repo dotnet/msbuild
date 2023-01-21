@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildEngine
                 *  if PropertyName is specified, then ItemName cannot be specified
                 *  only Condition is truly optional
                 */
-            ProjectErrorUtilities.VerifyThrowInvalidProject((this.taskParameterAttribute != null) && (requiredData == 1), 
+            ProjectErrorUtilities.VerifyThrowInvalidProject((this.taskParameterAttribute != null) && (requiredData == 1),
                 node, "InvalidTaskOutputSpecification", taskName);
         }
 

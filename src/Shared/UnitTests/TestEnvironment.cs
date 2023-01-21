@@ -418,7 +418,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     // workaround for https://github.com/dotnet/msbuild/pull/3866
                     // if the initial environment had empty keys, then MSBuild will accidentally remove them via Environment.SetEnvironmentVariable
-                    if (operation != "removed" || !string.IsNullOrEmpty((string) subset[key]))
+                    if (operation != "removed" || !string.IsNullOrEmpty((string)subset[key]))
                     {
                         superset.Contains(key).ShouldBe(true, $"environment variable {operation}: {key}");
                         superset[key].ShouldBe(subset[key]);

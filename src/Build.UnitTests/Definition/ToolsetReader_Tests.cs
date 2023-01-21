@@ -988,7 +988,9 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(@"some>value", values["2>.0"].Properties["foo"].EvaluatedValue);
         }
 #endif
-        #endregion
+#pragma warning disable format
+    #endregion
+#pragma warning restore format
 
         #region "GetToolsetData tests"
 

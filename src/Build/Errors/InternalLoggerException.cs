@@ -95,7 +95,7 @@ namespace Microsoft.Build.Exceptions
             ErrorUtilities.VerifyThrow(innerException != null || initializationException, "Need the logger exception.");
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(errorCode), "Must specify the error message code.");
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(helpKeyword), "Must specify the help keyword for the IDE.");
-            
+
             this.e = e;
             this.errorCode = errorCode;
             this.helpKeyword = helpKeyword;

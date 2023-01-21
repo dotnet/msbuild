@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorGood()
         {
-            CreateNewBuildRequest(0, Array.Empty<string>() );
+            CreateNewBuildRequest(0, Array.Empty<string>());
         }
 
         [Fact]

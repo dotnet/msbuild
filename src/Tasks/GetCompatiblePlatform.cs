@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            
+
             AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
             for (int i = 0; i < AnnotatedProjects.Length; i++)
             {

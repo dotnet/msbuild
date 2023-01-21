@@ -584,7 +584,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event BuildErrorEventHandler ErrorRaised;
-        
+
         /// <summary>
         /// This event is raised to log a warning.
         /// </summary>
@@ -602,43 +602,43 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event BuildFinishedEventHandler BuildFinished;
-        
+
         /// <summary>
         /// this event is raised to log the start of a project build
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event ProjectStartedEventHandler ProjectStarted;
-        
+
         /// <summary>
         /// this event is raised to log the end of a project build
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event ProjectFinishedEventHandler ProjectFinished;
-        
+
         /// <summary>
         /// this event is raised to log the start of a target build
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event TargetStartedEventHandler TargetStarted;
-        
+
         /// <summary>
         /// this event is raised to log the end of a target build
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event TargetFinishedEventHandler TargetFinished;
-        
+
         /// <summary>
         /// this event is raised to log the start of task execution
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event TaskStartedEventHandler TaskStarted;
-        
+
         /// <summary>
         /// this event is raised to log the end of task execution
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
-        public event TaskFinishedEventHandler TaskFinished; 
-        
+        public event TaskFinishedEventHandler TaskFinished;
+
         /// <summary>
         /// this event is raised to log a custom event
         /// </summary>
