@@ -34,7 +34,7 @@ namespace Microsoft.Build.Shared.FileSystem
     {
         private static readonly WindowsFileSystem Instance = new();
 
-        public new static WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
+        public static new WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
 
         private WindowsFileSystem(){ }
 

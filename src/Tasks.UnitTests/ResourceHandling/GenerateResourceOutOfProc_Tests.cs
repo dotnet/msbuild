@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
     [Trait("Category", "mono-osx-failing")]
     [Trait("Category", "mono-windows-failing")]
-    sealed public class RequiredTransformations
+    public sealed class RequiredTransformations
     {
         private readonly ITestOutputHelper _output;
 
@@ -1280,7 +1280,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
     }
 
-    sealed public class TransformationErrors
+    public sealed class TransformationErrors
     {
         private readonly ITestOutputHelper _output;
 
@@ -1696,7 +1696,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
     }
 
-    sealed public class PropertyHandling
+    public sealed class PropertyHandling
     {
         private readonly ITestOutputHelper _output;
 
@@ -2011,7 +2011,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
     }
 
-    sealed public class PropertyErrors
+    public sealed class PropertyErrors
     {
         private readonly ITestOutputHelper _output;
 

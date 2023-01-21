@@ -353,7 +353,7 @@ namespace Microsoft.Build.Logging
             translator.Translate(ref _loggerId);
         }
 
-        static internal LoggerDescription FactoryForTranslation(ITranslator translator)
+        internal static LoggerDescription FactoryForTranslation(ITranslator translator)
         {
             LoggerDescription description = new LoggerDescription();
             ((ITranslatable)description).Translate(translator);

@@ -1166,9 +1166,6 @@ dotnet_diagnostic.IDE0032.severity = suggestion
 # 'default' expression can be simplified
 dotnet_diagnostic.IDE0034.severity = suggestion
 
-# Modifiers are not ordered
-dotnet_diagnostic.IDE0036.severity = suggestion
-
 # Member name can be simplified
 dotnet_diagnostic.IDE0037.severity = suggestion
 

@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the task which gets the reference assembly paths for a given target framework version / moniker
     /// </summary>
-    sealed public class GetReferenceAssmeblyPath_Tests
+    public sealed class GetReferenceAssmeblyPath_Tests
     {
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.

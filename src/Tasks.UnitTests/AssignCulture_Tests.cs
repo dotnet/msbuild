@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssignCulture_Tests
+    public sealed class AssignCulture_Tests
     {
         /*
         * Method:   Basic

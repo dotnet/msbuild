@@ -736,7 +736,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         /// <param name="solutionFileContents"></param>
         /// <returns></returns>
-        static internal SolutionFile ParseSolutionHelper(string solutionFileContents)
+        internal static SolutionFile ParseSolutionHelper(string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
             StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);

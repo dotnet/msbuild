@@ -337,7 +337,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <param name="projectName">The name to be cleansed</param>
         /// <returns>string</returns>
         /// <owner>KieranMo</owner>
-        static private string CleanseProjectName(string projectName)
+        private static string CleanseProjectName(string projectName)
         {
             ErrorUtilities.VerifyThrow(projectName != null, "Null strings not allowed.");
 
@@ -368,7 +368,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <param name="uniqueProjectName">The unique name for the project</param>
         /// <returns>string</returns>
         /// <owner>KieranMo</owner>
-        static internal string DisambiguateProjectTargetName(string uniqueProjectName)
+        internal static string DisambiguateProjectTargetName(string uniqueProjectName)
         {
             // Test our unique project name against those names that collide with Solution
             // entry point targets

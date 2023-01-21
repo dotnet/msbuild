@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ErrorWarningMessage_Tests
+    public sealed class ErrorWarningMessage_Tests
     {
         /// <summary>
         /// Simple case

@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ComReference_Tests
+    public sealed class ComReference_Tests
     {
         private static Dictionary<string, string> s_existingFiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 

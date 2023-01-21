@@ -14,7 +14,7 @@ namespace Microsoft.Build.UnitTests
 {
     public class ComReferenceWalker_Tests
     {
-        static private int MockReleaseComObject(object o)
+        private static int MockReleaseComObject(object o)
         {
             return 0;
         }

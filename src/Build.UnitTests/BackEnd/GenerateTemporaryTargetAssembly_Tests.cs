@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
-    sealed public class GenerateTemporaryTargetAssembly_Tests
+    public sealed class GenerateTemporaryTargetAssembly_Tests
     {
         [Fact]
         public void FailsWithOnlyTargetErrors()

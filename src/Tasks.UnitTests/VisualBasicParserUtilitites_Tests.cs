@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class VisualBasicParserUtilititesTests
+    public sealed class VisualBasicParserUtilititesTests
     {
         // Try just and empty file
         [Fact]

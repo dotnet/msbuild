@@ -580,7 +580,7 @@ namespace Microsoft.Build.UnitTests
         /// LogPrivate is a private property.
         /// </summary>
         /// <returns></returns>
-        static private TaskLoggingHelper GetPrivateLog(ToolTask task)
+        private static TaskLoggingHelper GetPrivateLog(ToolTask task)
         {
             PropertyInfo logPrivateProperty = typeof(ToolTask).GetProperty("LogPrivate", BindingFlags.Instance | BindingFlags.NonPublic);
             return (TaskLoggingHelper)logPrivateProperty.GetValue(task, null);

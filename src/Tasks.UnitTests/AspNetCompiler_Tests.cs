@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
      * Test the AspNetCompiler task in various ways.
      *
      */
-    sealed public class AspNetCompilerTests
+    public sealed class AspNetCompilerTests
     {
         [Fact]
         public void NoParameters()

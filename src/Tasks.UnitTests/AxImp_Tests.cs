@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    sealed public class AxImp_Tests
+    public sealed class AxImp_Tests
     {
         /// <summary>
         /// Tests that the assembly being imported is passed to the command line

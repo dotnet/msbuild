@@ -130,7 +130,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _executeTargetsLocation, ElementLocation.FactoryForDeserialization);
         }
 
-        internal new static ProjectOnErrorInstance FactoryForDeserialization(ITranslator translator)
+        internal static new ProjectOnErrorInstance FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectOnErrorInstance>();
         }

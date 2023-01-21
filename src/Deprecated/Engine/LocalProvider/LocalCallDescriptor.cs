@@ -47,14 +47,14 @@ namespace Microsoft.Build.BuildEngine
                 return this.callType;
             }
         }
-        virtual internal bool NeedsReply
+        internal virtual bool NeedsReply
         {
             get
             {
                 return false;
             }
         }
-        virtual internal bool IsReply
+        internal virtual bool IsReply
         {
             get
             {

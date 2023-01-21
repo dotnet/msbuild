@@ -12,7 +12,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class WinMDExpTests
+    public sealed class WinMDExpTests
     {
         /// <summary>
         /// Tests the "References" parameter on the winmdexp task, and confirms that it sets

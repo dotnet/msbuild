@@ -49,7 +49,7 @@ namespace Microsoft.Build.BuildEngine
         /// This function is thread safe and is called both from the engine thread and communication threads to 
         /// ensure that the events are delivered in coherent order.
         /// </summary>
-        override internal bool ProcessPostedLoggingEvents()
+        internal override bool ProcessPostedLoggingEvents()
         {
             lock (loggingQueueReadLock)
             {
@@ -114,7 +114,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Shutdown the logging service as appropriate
         /// </summary>
-        override internal void Shutdown()
+        internal override void Shutdown()
         {
             // Do nothing
         }

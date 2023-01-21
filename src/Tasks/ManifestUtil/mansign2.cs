@@ -124,26 +124,26 @@ namespace System.Deployment.Internal.CodeSigning
         // DllImport declarations.
         //
         [DllImport(KERNEL32, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         IntPtr GetProcessHeap();
 
         [DllImport(KERNEL32, CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal extern static
+        internal static extern
         bool HeapFree(
             [In]    IntPtr hHeap,
             [In]    uint dwFlags,
             [In]    IntPtr lpMem);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int CertTimestampAuthenticodeLicense(
             [In]      ref CRYPT_DATA_BLOB pSignedLicenseBlob,
             [In]      string pwszTimestampURI,
             [In, Out]  ref CRYPT_DATA_BLOB pTimestampSignatureBlob);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int CertVerifyAuthenticodeLicense(
             [In]      ref CRYPT_DATA_BLOB pLicenseBlob,
             [In]      uint dwFlags,
@@ -151,30 +151,30 @@ namespace System.Deployment.Internal.CodeSigning
             [In, Out]  ref AXL_TIMESTAMPER_INFO pTimestamperInfo);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int CertFreeAuthenticodeSignerInfo(
             [In]      ref AXL_SIGNER_INFO pSignerInfo);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int CertFreeAuthenticodeTimestamperInfo(
             [In]      ref AXL_TIMESTAMPER_INFO pTimestamperInfo);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int _AxlGetIssuerPublicKeyHash(
             [In]     IntPtr pCertContext,
             [In, Out] ref IntPtr ppwszPublicKeyHash);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int _AxlRSAKeyValueToPublicKeyToken(
             [In]     ref CRYPT_DATA_BLOB pModulusBlob,
             [In]     ref CRYPT_DATA_BLOB pExponentBlob,
             [In, Out] ref IntPtr ppwszPublicKeyToken);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int _AxlPublicKeyBlobToPublicKeyToken(
             [In]     ref CRYPT_DATA_BLOB pCspPublicKeyBlob,
             [In, Out] ref IntPtr ppwszPublicKeyToken);
@@ -213,7 +213,7 @@ namespace System.Deployment.Internal.CodeSigning
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [DllImport(CRYPT32, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal extern static
+        internal static extern
         bool CryptRetrieveTimeStamp(
             [In]     [MarshalAs(UnmanagedType.LPWStr)]  string wszUrl,
             [In]     uint dwRetrievalFlags,

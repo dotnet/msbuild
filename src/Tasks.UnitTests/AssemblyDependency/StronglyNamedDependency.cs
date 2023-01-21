@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-        new internal string[] DefaultPaths
+        internal new string[] DefaultPaths
             {
                 get { return new string[] { s_myApp_V10Path, @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
             }

@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ResolveNonMSBuildProjectOutput_Tests
+    public sealed class ResolveNonMSBuildProjectOutput_Tests
     {
         private const string attributeProject = "Project";
 
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
             _output = output;
         }
 
-        static internal ITaskItem CreateReferenceItem(string itemSpec, string projectGuid, string package, string name)
+        internal static ITaskItem CreateReferenceItem(string itemSpec, string projectGuid, string package, string name)
         {
             TaskItem reference = new TaskItem(itemSpec);
 
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
                 false, "Project");
         }
 
-        static internal string CreatePregeneratedPathDoc(IDictionary projectOutputs)
+        internal static string CreatePregeneratedPathDoc(IDictionary projectOutputs)
         {
             string xmlString = "<VSIDEResolvedNonMSBuildProjectOutputs>";
 

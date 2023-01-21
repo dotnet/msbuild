@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssemblyRegistrationCache_Tests
+    public sealed class AssemblyRegistrationCache_Tests
     {
         [Fact]
         public void ExerciseCache()

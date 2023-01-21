@@ -17,7 +17,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// each class get pulled into the resulting assembly.
     /// </summary>
     /// <owner>SumedhK</owner>
-    static internal class FileUtilities
+    internal static class FileUtilities
     {
         #region Item-spec modifiers
 
@@ -25,7 +25,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Encapsulates the definitions of the item-spec modifiers a.k.a. reserved item metadata.
         /// </summary>
         /// <owner>SumedhK</owner>
-        static internal class ItemSpecModifiers
+        internal static class ItemSpecModifiers
         {
             // NOTE: If you add an item here that starts with a new letter, you need to update the case 
             // statements in IsItemSpecModifier and IsDerivableItemSpecModifier.

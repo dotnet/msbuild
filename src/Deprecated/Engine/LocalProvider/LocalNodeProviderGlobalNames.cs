@@ -18,7 +18,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeActiveEventName(int nodeNumber)
+        internal static string NodeActiveEventName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -32,7 +32,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeInUseEventName(int nodeNumber)
+        internal static string NodeInUseEventName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeErrorShutdownEventName(int nodeNumber)
+        internal static string NodeErrorShutdownEventName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -63,7 +63,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeReserveEventName(int nodeNumber)
+        internal static string NodeReserveEventName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -110,7 +110,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeInputMemoryName(int nodeNumber)
+        internal static string NodeInputMemoryName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -124,7 +124,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeOutputMemoryName(int nodeNumber)
+        internal static string NodeOutputMemoryName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -138,7 +138,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Use reflection to figure out the version of Microsoft.Build.Engine.dll
         /// </summary>
-        static private void InitializeGlobalNamePostFixValues()
+        private static void InitializeGlobalNamePostFixValues()
         {
             AssemblyName name = new AssemblyName(Assembly.GetExecutingAssembly().FullName);
             string engineVersion = name.Version.ToString();

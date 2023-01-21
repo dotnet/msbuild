@@ -38,7 +38,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization
         /// </summary>
-        static internal INodePacket FactoryForDeserialization(ITranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslator translator)
         {
             return new LogMessagePacket(translator);
         }

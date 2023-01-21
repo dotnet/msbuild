@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
     /// in ResolveNonMSBuildProjectOutput_Tests.
     /// Here, only test the AssignProjectConfiguration specific code
     /// </summary>
-    sealed public class AssignProjectConfiguration_Tests
+    public sealed class AssignProjectConfiguration_Tests
     {
         private readonly ITestOutputHelper _output;
 

@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CommandLineGenerator_Tests
+    public sealed class CommandLineGenerator_Tests
     {
         private const string testXamlFile = @"<?xml version='1.0' encoding='utf-8'?>
 <Rule Name='mem' ToolName='mem.exe' PageTemplate='tool' SwitchPrefix='/' Order='10' xmlns='clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:sys='clr-namespace:System;assembly=mscorlib'>

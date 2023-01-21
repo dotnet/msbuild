@@ -22,7 +22,7 @@ using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ResolveComReference_Tests
+    public sealed class ResolveComReference_Tests
     {
         /// <summary>
         /// Creates a valid task item that's modified later

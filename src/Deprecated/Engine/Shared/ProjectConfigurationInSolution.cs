@@ -46,7 +46,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <param name="platformName"></param>
         /// <returns></returns>
         /// <owner>LukaszG</owner>
-        static private string RemoveSpaceFromAnyCpuPlatform(string platformName)
+        private static string RemoveSpaceFromAnyCpuPlatform(string platformName)
         {
             if (string.Equals(platformName, "Any CPU", StringComparison.OrdinalIgnoreCase))
             {

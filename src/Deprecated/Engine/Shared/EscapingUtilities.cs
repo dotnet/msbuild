@@ -12,7 +12,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// in the MSBuild file format.
     /// </summary>
     /// <owner>RGoel</owner>
-    static internal class EscapingUtilities
+    internal static class EscapingUtilities
     {
         /// <summary>
         /// Replaces all instances of %XX in the input string with the character represented

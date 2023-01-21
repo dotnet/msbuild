@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    sealed public class TlbImp_Tests
+    public sealed class TlbImp_Tests
     {
         /// <summary>
         /// Tests that /machine flag will be set.

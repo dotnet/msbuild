@@ -1654,7 +1654,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="scopeName">Task name or target name.</param>
         /// <param name="table">Table that has tasks or targets.</param>
-        internal new static MPPerformanceCounter GetPerformanceCounter(string scopeName, ref Dictionary<string, PerformanceCounter> table)
+        internal static new MPPerformanceCounter GetPerformanceCounter(string scopeName, ref Dictionary<string, PerformanceCounter> table)
         {
             // Lazily construct the performance counter table.
             if (table == null)

@@ -89,7 +89,7 @@ namespace Microsoft.Build.Internal
         protected readonly int fileVersionPrivate;
         private readonly int sessionId;
 
-        internal protected Handshake(HandshakeOptions nodeType)
+        protected internal Handshake(HandshakeOptions nodeType)
         {
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
 
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    static internal class CommunicationsUtilities
+    internal static class CommunicationsUtilities
     {
         /// <summary>
         /// Indicates to the NodeEndpoint that all the various parts of the Handshake have been sent.
@@ -235,7 +235,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Gets or sets the node connection timeout.
         /// </summary>
-        static internal int NodeConnectionTimeout
+        internal static int NodeConnectionTimeout
         {
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
         }
@@ -244,13 +244,13 @@ namespace Microsoft.Build.Internal
         /// Get environment block
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static unsafe extern char* GetEnvironmentStrings();
+        internal static extern unsafe char* GetEnvironmentStrings();
 
         /// <summary>
         /// Free environment block
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static unsafe extern bool FreeEnvironmentStrings(char* pStrings);
+        internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
 
         /// <summary>
         /// Copied from the BCL implementation to eliminate some expensive security asserts.

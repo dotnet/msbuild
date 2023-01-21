@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
      * Test the AL task in various ways.
      *
      */
-    sealed public class AlTests
+    public sealed class AlTests
     {
         /// <summary>
         /// Tests the AlgorithmId parameter

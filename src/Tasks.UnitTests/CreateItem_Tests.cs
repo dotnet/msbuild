@@ -18,7 +18,7 @@ using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CreateItem_Tests
+    public sealed class CreateItem_Tests
     {
         internal const string CreateItemWithInclude = @"
             <Project>

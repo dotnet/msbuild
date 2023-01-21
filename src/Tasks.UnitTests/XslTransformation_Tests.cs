@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
     /// 20. XslDocument that throws runtime exception.
     /// 21. Passing a dll that has two types to XsltCompiledDll parameter without specifying a type.
     /// </summary>
-    sealed public class XslTransformation_Tests
+    public sealed class XslTransformation_Tests
     {
         /// <summary>
         /// The "surround" regex.

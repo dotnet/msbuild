@@ -419,7 +419,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal new static ProjectTaskInstance FactoryForDeserialization(ITranslator translator)
+        internal static new ProjectTaskInstance FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectTaskInstance>();
         }

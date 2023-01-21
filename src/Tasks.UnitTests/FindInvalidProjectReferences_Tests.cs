@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class FindInvalidProjectReferences_Tests
+    public sealed class FindInvalidProjectReferences_Tests
     {
         /// <summary>
         /// Verify FindInvalidProjectReferences for several target platform monikers

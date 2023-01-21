@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CreateVisualBasicManifestResourceName_Tests
+    public sealed class CreateVisualBasicManifestResourceName_Tests
     {
         private readonly ITestOutputHelper _testOutput;
 

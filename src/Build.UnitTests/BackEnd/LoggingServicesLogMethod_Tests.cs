@@ -1880,7 +1880,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// </summary>
             /// <param name="mode">Logger mode, this is not used</param>
             /// <returns>Instantiated LoggingServiceOverrideProcessBuildEvent</returns>
-            public new static IBuildComponent CreateLoggingService(LoggerMode mode, int nodeId)
+            public static new IBuildComponent CreateLoggingService(LoggerMode mode, int nodeId)
             {
                 return new ProcessBuildEventHelper(mode, nodeId, null);
             }

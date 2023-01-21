@@ -120,7 +120,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The thread procedure executes the tasks and calls callback once it is done
         /// </summary>
-        virtual internal void ExecuteTask()
+        internal virtual void ExecuteTask()
         {
             bool taskExecutedSuccessfully = true;
 
@@ -217,7 +217,7 @@ namespace Microsoft.Build.BuildEngine
         /// engine, Interface or a non sealed TaskEngine these methods can disappear.
         /// </summary>
         /// <returns></returns>
-        virtual internal bool TaskEngineExecuteTask(
+        internal virtual bool TaskEngineExecuteTask(
             TaskEngine taskEngine,
             TaskExecutionMode howTaskShouldBeExecuted,
             Lookup lookup

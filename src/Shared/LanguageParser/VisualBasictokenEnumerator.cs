@@ -14,7 +14,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     * Given vb sources, enumerate over all tokens.
     *
     */
-    sealed internal class VisualBasicTokenEnumerator : TokenEnumerator
+    internal sealed class VisualBasicTokenEnumerator : TokenEnumerator
     {
         // Reader over the sources.
         private VisualBasicTokenCharReader _reader = null;
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         * 
         * Find the next token. Return 'true' if one was found. False, otherwise.
         */
-        override internal bool FindNextToken()
+        internal override bool FindNextToken()
         {
             int startPosition = _reader.Position;
 
@@ -321,7 +321,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         * 
         * Return the token char reader.
         */
-        override internal TokenCharReader Reader
+        internal override TokenCharReader Reader
         {
             get
             {

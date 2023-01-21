@@ -1455,7 +1455,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="scopeName">Task name or target name.</param>
         /// <param name="table">Table that has tasks or targets.</param>
-        internal new static MPPerformanceCounter GetPerformanceCounter(string scopeName, ref Hashtable table)
+        internal static new MPPerformanceCounter GetPerformanceCounter(string scopeName, ref Hashtable table)
         {
             // Lazily construct the performance counter table.
             if (table == null)

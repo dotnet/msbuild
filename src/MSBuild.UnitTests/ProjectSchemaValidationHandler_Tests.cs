@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests
         /// <remarks>Stolen from ObjectModelHelpers because we use relatively little
         /// of the ObjectModelHelpers functionality, so as to avoid having to include in
         /// this project everything that ObjectModelHelpers depends on</remarks>
-        static internal string CreateTempFileOnDisk(string fileContents, params object[] args)
+        internal static string CreateTempFileOnDisk(string fileContents, params object[] args)
         {
             return CreateTempFileOnDiskNoFormat(String.Format(fileContents, args));
         }
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests
         /// <remarks>Stolen from ObjectModelHelpers because we use relatively little
         /// of the ObjectModelHelpers functionality, so as to avoid having to include in
         /// this project everything that ObjectModelHelpers depends on</remarks>
-        static internal string CreateTempFileOnDiskNoFormat(string fileContents)
+        internal static string CreateTempFileOnDiskNoFormat(string fileContents)
         {
             string projectFilePath = FileUtilities.GetTemporaryFileName();
 
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests
         /// <remarks>Stolen from ObjectModelHelpers because we use relatively little
         /// of the ObjectModelHelpers functionality, so as to avoid having to include in
         /// this project everything that ObjectModelHelpers depends on</remarks>
-        static private string CleanupFileContents(string projectFileContents)
+        private static string CleanupFileContents(string projectFileContents)
         {
             // Replace reverse-single-quotes with double-quotes.
             projectFileContents = projectFileContents.Replace("`", "\"");

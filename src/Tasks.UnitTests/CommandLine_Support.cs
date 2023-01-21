@@ -18,14 +18,14 @@ namespace Microsoft.Build.UnitTests
      * Test the Csc task in various ways.
      *
      */
-    sealed internal class CommandLine
+    internal sealed class CommandLine
     {
         /// <summary>
         /// Invokes the ValidateParameters on the given ToolTask instance. We need to use reflection since
         /// ValidateParameters is inaccessible to Tasks unit tests.
         /// </summary>
         /// <returns></returns>
-        static internal bool CallValidateParameters(ToolTask task)
+        internal static bool CallValidateParameters(ToolTask task)
         {
             MethodInfo validateMethod = typeof(ToolTask).GetMethod("ValidateParameters", BindingFlags.Instance | BindingFlags.NonPublic);
             return (bool)validateMethod.Invoke(task, null);

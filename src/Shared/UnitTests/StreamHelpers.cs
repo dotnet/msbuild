@@ -7,14 +7,14 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed internal class StreamHelpers
+    internal sealed class StreamHelpers
     {
         /// <summary>
         /// Take a string and convert it to a StreamReader.
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        static internal StreamReader StringToStreamReader(string value)
+        internal static StreamReader StringToStreamReader(string value)
         {
             MemoryStream m = new MemoryStream();
 #if FEATURE_ENCODING_DEFAULT

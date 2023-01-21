@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #region Helper Methods
 
-        static internal bool AreResultsIdentical(BuildResult a, BuildResult b)
+        internal static bool AreResultsIdentical(BuildResult a, BuildResult b)
         {
             if (a.ConfigurationId != b.ConfigurationId)
             {
@@ -314,7 +314,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return true;
         }
 
-        static internal bool AreResultsIdenticalForTargets(BuildResult a, BuildResult b, string[] targets)
+        internal static bool AreResultsIdenticalForTargets(BuildResult a, BuildResult b, string[] targets)
         {
             foreach (string target in targets)
             {
@@ -327,7 +327,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return true;
         }
 
-        static private bool AreResultsIdenticalForTarget(BuildResult a, BuildResult b, string target)
+        private static bool AreResultsIdenticalForTarget(BuildResult a, BuildResult b, string target)
         {
             if (!a.HasResultsForTarget(target) || !b.HasResultsForTarget(target))
             {
@@ -347,7 +347,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return true;
         }
 
-        static private bool AreItemsIdentical(IList<ITaskItem> a, IList<ITaskItem> b)
+        private static bool AreItemsIdentical(IList<ITaskItem> a, IList<ITaskItem> b)
         {
             // Exhaustive comparison of items should not be necessary since we don't merge on the item level.
             return a.Count == b.Count;

@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class RemoveDir_Tests
+    public sealed class RemoveDir_Tests
     {
         ITestOutputHelper _output;
         public RemoveDir_Tests(ITestOutputHelper output)
