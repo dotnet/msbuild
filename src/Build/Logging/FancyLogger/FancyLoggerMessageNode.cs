@@ -70,10 +70,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
-        public void Log()
+        public void Render()
         {
             if (Line == null) return;
-            FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ToANSIString()}");
+            Line.Text = $"    └── {ToANSIString()}";
         }
     }
 }

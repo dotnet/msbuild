@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
@@ -26,6 +25,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                 _text = value;
                 if (ShouldWrapLines) WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
                 else WrappedText = new List<string> { value };
+                // Buffer should rerender
+                FancyLoggerBuffer.ShouldRerender = true;
             }
         }
 
@@ -53,51 +54,15 @@ namespace Microsoft.Build.Logging.FancyLogger
         private static List<FancyLoggerBufferLine> Lines = new();
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
-        private static bool AutoScrollEnabled = true;
-        private static bool IsTerminated = false;
+        // private static bool AutoScrollEnabled = true;
+        internal static bool IsTerminated = false;
+        internal static bool ShouldRerender = true;
         public static void Initialize()
         {
-
-            Task.Run(() =>
-            {
-                // Configure buffer, encoding and cursor
-                Console.OutputEncoding = Encoding.UTF8;
-                Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
-                Console.Write(ANSIBuilder.Cursor.Invisible());
-
-                // Counter for delaying render
-                int i = 0;
-
-                // Execute while the buffer is active
-                while (!IsTerminated)
-                {
-                    // Delay by 1/60 seconds
-                    i++;
-                    Task.Delay((i/60) * 1_000).ContinueWith((t) =>
-                    {
-                        Render();
-                    });
-                    if (Console.KeyAvailable)
-                    { 
-                        // Handle keyboard input
-                        ConsoleKey key = Console.ReadKey().Key;
-                        switch (key)
-                        {
-                            case ConsoleKey.UpArrow:
-                                if (TopLineIndex > 0) TopLineIndex--;
-                                break;
-                            case ConsoleKey.DownArrow:
-                                TopLineIndex++;
-                                break;
-                            case ConsoleKey.Spacebar:
-                                AutoScrollEnabled = !AutoScrollEnabled;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-            });
+            // Configure buffer, encoding and cursor
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
+            Console.Write(ANSIBuilder.Cursor.Invisible());
         }
 
         public static void Terminate()
@@ -114,7 +79,8 @@ namespace Microsoft.Build.Logging.FancyLogger
         #region Rendering
         public static void Render()
         {
-            if (IsTerminated) return;
+            if (IsTerminated || !ShouldRerender) return;
+            ShouldRerender = false;
             Console.Write(
                 // Write header
                 ANSIBuilder.Cursor.Home() +
@@ -127,31 +93,32 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (Lines.Count == 0) return;
 
             // Iterate over lines and display on terminal
-            // TODO: Delimit range to improve performance 
+            string contents = string.Empty;
             int accumulatedLineCount = 0;
             foreach (FancyLoggerBufferLine line in Lines)
             {
+                // Continue if accum line count + next lines < scrolling area
+                if (accumulatedLineCount + line.WrappedText.Count < TopLineIndex) {
+                    accumulatedLineCount += line.WrappedText.Count;
+                    continue;
+                }
+                // Break if exceeds scrolling area
+                if (accumulatedLineCount - TopLineIndex > Console.BufferHeight - 3) break;
                 foreach (string s in line.WrappedText) {
                     // Get line index relative to scroll area
                     int lineIndex = accumulatedLineCount - TopLineIndex;
                     // Print if line in scrolling area
-                    if (lineIndex >= 0 && lineIndex < Console.BufferHeight - 3)
-                    {
-                        Console.Write(ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s);
-                    }
+                    if (lineIndex >= 0 && lineIndex < Console.BufferHeight - 3) contents += ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s;
                     accumulatedLineCount++;
                 }
             }
+            Console.Write(contents);
         }
         #endregion
         #region Line identification
         public static int GetLineIndexById(int lineId)
         {
-            for (int i = 0; i < Lines.Count; i++)
-            {
-                if (Lines[i].Id == lineId) return i;
-            }
-            return -1;
+            return Lines.FindIndex(x => x.Id == lineId);
         }
 
         public static FancyLoggerBufferLine? GetLineById(int lineId)
@@ -187,7 +154,6 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 Lines.Add(line);
             }
-            // TODO: Handle autoscrolling
             return line;
         }
 
@@ -206,15 +172,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
 
         // Update line
+        // TODO: Remove. Use line.Text instead
         public static FancyLoggerBufferLine? UpdateLine(int lineId, string text)
         {
-            // Get line
-            FancyLoggerBufferLine? line = GetLineById(lineId);
-            if (line == null) return null;
-            line.Text = text;
-            // Return
-            return line;
-            // TODO: Handle autoscrolling
+            return null;
         }
 
         // Delete line
@@ -223,11 +184,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get line index
             int lineIndex = GetLineIndexById(lineId);
             if (lineIndex == -1) return;
-            // Save top line
-            int topLineId = Lines[TopLineIndex].Id;
             // Delete
             Lines.RemoveAt(lineIndex);
-            // TODO: Handle autoscrolling
+            ShouldRerender = true;
         }
         #endregion
     }

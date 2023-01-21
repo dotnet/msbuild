@@ -38,6 +38,8 @@ namespace Microsoft.Build.Logging.FancyLogger
         public int MessageCount = 0;
         public int WarningCount = 0;
         public int ErrorCount = 0;
+        // Bool if node should rerender
+        internal bool ShouldRerender = true;
         public FancyLoggerProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
@@ -54,8 +56,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
-        public void Log()
+        public void Render()
         {
+            if (!ShouldRerender) return;
+            ShouldRerender = false;
             // Project details
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
                 // Show indicator
@@ -68,34 +72,33 @@ namespace Microsoft.Build.Logging.FancyLogger
                 Console.WindowWidth
             );
             // Create or update line
-            if (Line == null) Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
-            else FancyLoggerBuffer.UpdateLine(Line.Id, lineContents);
+            if (Line is null) Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
+            else Line.Text = lineContents;
 
             // For finished projects
             if (Finished)
             {
-                if (CurrentTargetLine != null) FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                if (CurrentTargetLine is not null) FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
                 foreach (FancyLoggerMessageNode node in AdditionalDetails.ToList())
                 {
                     // Only delete high priority messages
                     if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
-                    if (node.Line != null) FancyLoggerBuffer.DeleteLine(node.Line.Id);
-                    // AdditionalDetails.Remove(node);
+                    if (node.Line is not null) FancyLoggerBuffer.DeleteLine(node.Line.Id);
                 }
             }
 
             // Current target details
-            if (CurrentTargetNode == null) return;
+            if (CurrentTargetNode is null) return;
             string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
-            if (CurrentTargetLine == null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
-            else FancyLoggerBuffer.UpdateLine(CurrentTargetLine.Id, currentTargetLineContents);
+            if (CurrentTargetLine is null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
+            else CurrentTargetLine.Text = currentTargetLineContents;
 
             // Messages, warnings and errors
             foreach (FancyLoggerMessageNode node in AdditionalDetails)
             {
                 if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
-                if (node.Line == null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
-                node.Log();
+                if (node.Line is null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                node.Render();
             }
         }
 

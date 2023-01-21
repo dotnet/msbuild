@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -44,11 +45,48 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
             // Cancelled
             Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
-            // Initialize FancyLoggerBuffer
-            FancyLoggerBuffer.Initialize();
-            // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            FancyLoggerBuffer.WriteNewLine(string.Empty);
-            FancyLoggerBuffer.Render();
+            
+            Task.Run(() =>
+            {
+                // Initialize FancyLoggerBuffer
+                FancyLoggerBuffer.Initialize();
+                // TODO: Fix. First line does not appear at top. Leaving empty line for now
+                FancyLoggerBuffer.WriteNewLine(string.Empty);
+                // First render
+                FancyLoggerBuffer.Render();
+                int i = 0;
+                // Rerender periodically
+                while (!FancyLoggerBuffer.IsTerminated)
+                {
+                    i++;
+                    // Delay by 1/60 seconds
+                    Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
+                    {
+                        // Rerender projects only when needed
+                        foreach (var project in projects) project.Value.Render();
+                        // Rerender buffer
+                        FancyLoggerBuffer.Render();
+                    });
+                    // Handle keyboard input
+                    if (Console.KeyAvailable)
+                    {
+                        ConsoleKey key = Console.ReadKey().Key;
+                        switch (key)
+                        {
+                            case ConsoleKey.UpArrow:
+                                if (FancyLoggerBuffer.TopLineIndex > 0) FancyLoggerBuffer.TopLineIndex--;
+                                FancyLoggerBuffer.ShouldRerender = true;
+                                break;
+                            case ConsoleKey.DownArrow:
+                                FancyLoggerBuffer.TopLineIndex++;
+                                FancyLoggerBuffer.ShouldRerender = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            });
         }
 
         // Build
@@ -72,7 +110,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
             projects[id] = node;
             // Log
-            node.Log();
+            node.ShouldRerender = true;
         }
 
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
@@ -83,7 +121,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update line
             node.Finished = true;
             // Log
-            node.Log();
+            node.ShouldRerender = true;
         }
 
         // Target
@@ -95,7 +133,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update
             node.AddTarget(e);
             // Log
-            node.Log();
+            node.ShouldRerender = true;
         }
 
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
@@ -106,7 +144,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update
             node.FinishedTargets++;
             // Log
-            node.Log();
+            node.ShouldRerender = true;
         }
 
         // Task
@@ -119,7 +157,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             node.AddTask(e);
             existingTasks++;
             // Log
-            node.Log();
+            node.ShouldRerender = true;
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
@@ -137,7 +175,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update
             node.AddMessage(e);
             // Log
-            node.Log();
+            node.ShouldRerender = true;
         }
 
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
@@ -148,7 +186,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update
             node.AddWarning(e);
             // Log
-            node.Log();
+            node.ShouldRerender = true;
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
         {
@@ -158,7 +196,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Update
             node.AddError(e);
             // Log
-            node.Log();
+            node.ShouldRerender = true;
         }
 
         void console_CancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs)
