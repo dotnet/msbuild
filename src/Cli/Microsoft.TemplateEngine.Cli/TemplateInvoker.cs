@@ -207,7 +207,6 @@ namespace Microsoft.TemplateEngine.Cli
 
                     return HandlePostActions(instantiateResult, templateArgs);
                 case CreationResultStatus.CreateFailed:
-                case CreationResultStatus.TemplateIssueDetected:
                 case CreationResultStatus.CondtionsEvaluationMismatch:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
                     return NewCommandStatus.CreateFailed;
@@ -281,6 +280,12 @@ namespace Microsoft.TemplateEngine.Cli
                         );
                     Reporter.Error.WriteCommand(Example.FromExistingTokens(templateArgs.ParseResult).WithOption(SharedOptions.ForceOption));
                     return NewCommandStatus.CannotCreateOutputFile;
+                case CreationResultStatus.TemplateIssueDetected:
+                    if (!string.IsNullOrEmpty(instantiateResult.ErrorMessage))
+                    {
+                        Reporter.Error.WriteLine(instantiateResult.ErrorMessage.Bold().Red());
+                    }
+                    return NewCommandStatus.TemplateIssueDetected;
                 case CreationResultStatus.Cancelled:
                     Reporter.Error.WriteLine(LocalizableStrings.OperationCancelled.Bold().Red());
                     return NewCommandStatus.Cancelled;
