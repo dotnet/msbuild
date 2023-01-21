@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.UnitTests;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using System;
