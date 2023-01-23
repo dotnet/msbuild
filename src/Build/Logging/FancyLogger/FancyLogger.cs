@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -43,18 +42,23 @@ namespace Microsoft.Build.Logging.FancyLogger
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
+            // Cancelled
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
+            // TODO: Fix. First line does not appear at top. Leaving empty line for now
+            FancyLoggerBuffer.WriteNewLine(string.Empty);
+            FancyLoggerBuffer.Render();
         }
 
         // Build
         void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
         {
         }
+
         void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
             Succeeded = e.Succeeded;
-            // Console.WriteLine(LoggerFormatting.Bold("[Build]") + "\t Finished");
         }
 
         // Project
@@ -70,6 +74,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Log
             node.Log();
         }
+
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             // Get project id
@@ -77,8 +82,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update line
             node.Finished = true;
+            // Log
             node.Log();
         }
+
         // Target
         void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
         {
@@ -87,8 +94,10 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTarget(e);
+            // Log
             node.Log();
         }
+
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
         {
             // Get project id
@@ -96,6 +105,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.FinishedTargets++;
+            // Log
             node.Log();
         }
 
@@ -104,12 +114,12 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddTask(e);
-            node.Log();
             existingTasks++;
+            // Log
+            node.Log();
         }
 
         void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
@@ -117,15 +127,19 @@ namespace Microsoft.Build.Logging.FancyLogger
             completedTasks++;
         }
 
+        // Raised messages, warnings and errors
         void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
         {
+            if (e is TaskCommandLineEventArgs) return;
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddMessage(e);
+            // Log
             node.Log();
         }
+
         void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
         {
             // Get project id
@@ -133,6 +147,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddWarning(e);
+            // Log
             node.Log();
         }
         void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
@@ -142,26 +157,46 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
             // Update
             node.AddError(e);
+            // Log
             node.Log();
         }
 
+        void console_CancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs)
+        {
+            // Shutdown logger
+            Shutdown();
+        }
 
         public void Shutdown()
         {
             FancyLoggerBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
-            // Console.WriteLine("Build status, warnings and errors will be shown here after the build has ended and the interactive logger has closed");
+            int errorCount = 0;
+            int warningCount = 0;
+            foreach (var project in projects)
+            {
+                errorCount += project.Value.ErrorCount;
+                warningCount += project.Value.WarningCount;
+                foreach (var message in project.Value.AdditionalDetails)
+                {
+                    Console.WriteLine(message.ToANSIString());
+                }
+            }
+
+            // Emmpty line
+            Console.WriteLine();
             if (Succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine("\tX Warning(s)");
+                Console.WriteLine($"\t{warningCount} Warning(s)");
+                Console.WriteLine($"\t{errorCount} Error(s)");
             }
             else
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-                Console.WriteLine("\tX Warnings(s)");
-                Console.WriteLine("\tX Errors(s)");
+                Console.WriteLine($"\t{warningCount} Warnings(s)");
+                Console.WriteLine($"\t{errorCount} Errors(s)");
             }
         }
     }

@@ -3,15 +3,52 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
     internal static class ANSIBuilder
     {
+        public static string ANSIRegex = @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~])";
         public static string ANSIRemove(string text)
         {
-            return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
+            return Regex.Replace(text, ANSIRegex, "");
+        }
+
+        public static int ANSIBreakpoint(string text, int position)
+        {
+            if (position >= text.Length) return text.Length;
+            int nonAnsiIndex = 0;
+            Match nextMatch = Regex.Match(text, ANSIRegex);
+            int i = 0;
+            while (i < text.Length && nonAnsiIndex != position)
+            {
+                // Jump over ansi codes
+                if (i == nextMatch.Index && nextMatch.Length > 0)
+                {
+                    i += nextMatch.Length;
+                    nextMatch = nextMatch.NextMatch();
+                }
+                // Increment non ansi index
+                nonAnsiIndex++;
+                i++;
+            }
+            return i;
+        }
+
+        public static List<string> ANSIWrap(string text, int position)
+        {
+            List<string> result = new();
+            int breakpoint = ANSIBreakpoint(text, position);
+            while (text.Length > breakpoint)
+            {
+                result.Add(text.Substring(0, breakpoint));
+                text = text.Substring(breakpoint);
+                breakpoint = ANSIBreakpoint(text, position);
+            }
+            result.Add(text);
+            return result;
         }
 
         public static class Alignment
@@ -56,9 +93,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                 string leftNoFormatString = ANSIRemove(leftText);
                 string rightNoFormatString = ANSIRemove(rightText);
                 if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth) return leftText + rightText;
-                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length) - 1;
+                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length);
                 result += leftText;
-                result += new string(' ', space);
+                result += new string(' ', space - 1);
                 result += rightText;
                 return result;
             }
@@ -234,6 +271,16 @@ namespace Microsoft.Build.Logging.FancyLogger
 
             public static string RestorePosition() {
                 return String.Format("\x1b[u");
+            }
+
+            public static string Invisible()
+            {
+                return "\x1b[?25l";
+            }
+
+            public static string Visible()
+            {
+                return "\x1b[?25h";
             }
         }
 

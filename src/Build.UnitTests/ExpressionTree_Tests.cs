@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests
             expander.Metadata = new StringMetadataTable(null);
             bool value;
 
-            string fileThatMustAlwaysExist = FileUtilities.GetTemporaryFile();
+            string fileThatMustAlwaysExist = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(fileThatMustAlwaysExist, "foo");
             string command = "Exists('" + fileThatMustAlwaysExist + "')";
             tree = p.Parse(command, ParserOptions.AllowAll, ElementLocation.EmptyLocation);

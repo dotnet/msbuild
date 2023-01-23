@@ -18,6 +18,7 @@ using System.Runtime.ExceptionServices;
 #endif
 using System.Text.RegularExpressions;
 using System.Runtime.Versioning;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -96,7 +97,7 @@ namespace Microsoft.Build.Tasks
         object DefineScope([In] ref Guid rclsid, [In] UInt32 dwCreateFlags, [In] ref Guid riid);
 
         [return: MarshalAs(UnmanagedType.Interface)]
-        object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)]  string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
+        object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)] string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
 
         [return: MarshalAs(UnmanagedType.Interface)]
         object OpenScopeOnMemory([In] IntPtr pData, [In] UInt32 cbData, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
@@ -521,7 +522,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class NativeMethods
     {
-#region Constants
+        #region Constants
 
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
         internal static readonly IntPtr InvalidIntPtr = new IntPtr(-1);
@@ -626,9 +627,9 @@ namespace Microsoft.Build.Tasks
             MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
         }
 
-#endregion
+        #endregion
 
-#region NT header stuff
+        #region NT header stuff
 
         internal const uint IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;
         internal const uint IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;
@@ -779,9 +780,9 @@ namespace Microsoft.Build.Tasks
             internal IntPtr pbData;
         }
 
-#endregion
+        #endregion
 
-#region PInvoke
+        #region PInvoke
         private const string Crypt32DLL = "crypt32.dll";
         private const string Advapi32DLL = "advapi32.dll";
 #if !RUNTIME_TYPE_NETCORE
@@ -797,7 +798,7 @@ namespace Microsoft.Build.Tasks
         [DllImport("libc", SetLastError = true)]
         internal static extern int link(string oldpath, string newpath);
 
-        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage)
+        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage, TaskLoggingHelper log)
         {
             bool hardLinkCreated;
             if (NativeMethodsShared.IsWindows)
@@ -808,7 +809,7 @@ namespace Microsoft.Build.Tasks
             else
             {
                 hardLinkCreated = link(exitingFileName, newFileName) == 0;
-                errorMessage = hardLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+                errorMessage = hardLinkCreated ? null : log.FormatResourceString("Copy.LinklibraryFailedPrefix", "link()", Marshal.GetLastWin32Error());
             }
 
             return hardLinkCreated;
@@ -1048,13 +1049,13 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         [DllImport(Crypt32DLL, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertCloseStore([In]   IntPtr CertStore, CertStoreClose Flags);
+        internal static extern bool CertCloseStore([In] IntPtr CertStore, CertStoreClose Flags);
 
         //------------------------------------------------------------------------------
         // CertEnumCertificatesInStore
         //------------------------------------------------------------------------------
         [DllImport(Crypt32DLL, SetLastError = true)]
-        internal static extern IntPtr CertEnumCertificatesInStore([In]   IntPtr CertStore, [In]   IntPtr PrevCertContext);
+        internal static extern IntPtr CertEnumCertificatesInStore([In] IntPtr CertStore, [In] IntPtr PrevCertContext);
 
         //------------------------------------------------------------------------------
         // CryptAcquireCertificatePrivateKey
@@ -1110,9 +1111,9 @@ namespace Microsoft.Build.Tasks
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern unsafe uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char* szBuffer, int cchBuffer, out int dwLength);
 #endif
-#endregion
+        #endregion
 
-#region Methods
+        #region Methods
 #if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
         /// <summary>
         /// Given a pointer to a metadata blob, read the string parameter from it.  Returns true if
@@ -1233,8 +1234,8 @@ namespace Microsoft.Build.Tasks
 
             return count;
         }
-#endregion
-#region InternalClass
+        #endregion
+        #region InternalClass
         /// <summary>
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
@@ -1472,6 +1473,6 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
         }
-#endregion
+        #endregion
     }
 }
