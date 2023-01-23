@@ -140,10 +140,12 @@ namespace Microsoft.Build.Tasks
                     try
                     {
 #endif
+#pragma warning disable format //invalid formatting in Release when try-catch is skipped
                         if (!ExtractFromManifest(NativeReferences[reference], path, containingReferenceFilesTable, containedPrerequisiteAssembliesTable, containedComComponentsTable, containedTypeLibrariesTable, containedLooseTlbFilesTable, containedLooseEtcFilesTable))
                         {
                             retValue = false;
                         }
+#pragma warning restore format
 #if DEBUG
                     }
                     catch (Exception)
