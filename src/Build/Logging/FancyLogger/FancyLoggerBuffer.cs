@@ -103,6 +103,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         public static void Terminate()
         {
             IsTerminated = true;
+            // Delete contents from alternate buffer before switching back to main buffer
             Console.Write(
                 ANSIBuilder.Cursor.Home() +
                 ANSIBuilder.Eraser.DisplayCursorToEnd()

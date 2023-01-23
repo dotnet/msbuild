@@ -27,31 +27,31 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (position >= text.Length) return text.Length;
             int nonAnsiIndex = 0;
             Match nextMatch = Regex.Match(text, ANSIRegex);
-            int i = 0;
-            while (i < text.Length && nonAnsiIndex != position)
+            int logicalIndex = 0;
+            while (logicalIndex < text.Length && nonAnsiIndex != position)
             {
                 // Jump over ansi codes
-                if (i == nextMatch.Index && nextMatch.Length > 0)
+                if (logicalIndex == nextMatch.Index && nextMatch.Length > 0)
                 {
-                    i += nextMatch.Length;
+                    logicalIndex += nextMatch.Length;
                     nextMatch = nextMatch.NextMatch();
                 }
                 // Increment non ansi index
                 nonAnsiIndex++;
-                i++;
+                logicalIndex++;
             }
-            return i;
+            return logicalIndex;
         }
 
-        public static List<string> ANSIWrap(string text, int position)
+        public static List<string> ANSIWrap(string text, int maxLength)
         {
             List<string> result = new();
-            int breakpoint = ANSIBreakpoint(text, position);
+            int breakpoint = ANSIBreakpoint(text, maxLength);
             while (text.Length > breakpoint)
             {
                 result.Add(text.Substring(0, breakpoint));
                 text = text.Substring(breakpoint);
-                breakpoint = ANSIBreakpoint(text, position);
+                breakpoint = ANSIBreakpoint(text, maxLength);
             }
             result.Add(text);
             return result;

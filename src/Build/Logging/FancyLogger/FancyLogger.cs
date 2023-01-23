@@ -170,8 +170,6 @@ namespace Microsoft.Build.Logging.FancyLogger
         public void Shutdown()
         {
             FancyLoggerBuffer.Terminate();
-            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
-            // Console.Clear();
             int errorCount = 0;
             int warningCount = 0;
             foreach (var project in projects)
