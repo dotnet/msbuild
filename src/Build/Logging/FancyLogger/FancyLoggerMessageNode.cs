@@ -13,7 +13,7 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Logging.FancyLogger
 { 
 
-    public class FancyLoggerMessageNode
+    internal class FancyLoggerMessageNode
     {
         public string Message;
         public FancyLoggerBufferLine? Line;
