@@ -68,6 +68,11 @@ namespace Microsoft.Build.CommandLine
         [MTAThread]
         public static int Main()
         {
+            while (true)
+            {
+                Microsoft.NET.StringTools.Strings.WeakIntern("hello");
+            }
+
             int exitCode = Execute() == ExitType.Success ? 0 : 1;
             return exitCode;
         }

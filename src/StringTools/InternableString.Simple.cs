@@ -237,9 +237,7 @@ namespace Microsoft.NET.StringTools
                 return hash ^ ((uint)ch << 16);
             }
 
-            // The JIT recognized the pattern and generates efficient code, e.g. the rol instruction on x86/x64.
             uint rotatedHash = (hash << 5) | (hash >> (32 - 5));
-
             return (rotatedHash + hash) ^ ch;
         }
     }
