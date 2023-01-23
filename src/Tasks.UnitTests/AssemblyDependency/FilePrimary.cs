@@ -210,8 +210,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 "<File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
                 "</FileList >";
 
-            string redistListPath = FileUtilities.GetTemporaryFile();
-            string subsetListPath = FileUtilities.GetTemporaryFile();
+            string redistListPath = FileUtilities.GetTemporaryFileName();
+            string subsetListPath = FileUtilities.GetTemporaryFileName();
             string appConfigFile = null;
             try
             {

@@ -788,7 +788,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             try
             {
-                importPath = FileUtilities.GetTemporaryFile();
+                importPath = FileUtilities.GetTemporaryFileName();
 
                 string import = ObjectModelHelpers.CleanupFileContents(@"
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
@@ -850,9 +850,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             try
             {
-                importPath = FileUtilities.GetTemporaryFile();
-                importPath2 = FileUtilities.GetTemporaryFile();
-                importPath3 = FileUtilities.GetTemporaryFile();
+                importPath = FileUtilities.GetTemporaryFileName();
+                importPath2 = FileUtilities.GetTemporaryFileName();
+                importPath3 = FileUtilities.GetTemporaryFileName();
 
                 string import = ObjectModelHelpers.CleanupFileContents(@"
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
@@ -926,8 +926,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             try
             {
-                importPath1 = FileUtilities.GetTemporaryFile();
-                importPath2 = FileUtilities.GetTemporaryFile();
+                importPath1 = FileUtilities.GetTemporaryFileName();
+                importPath2 = FileUtilities.GetTemporaryFileName();
 
                 // "import1" imports "import2" and vice versa.
                 string import1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -986,8 +986,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 try
                 {
-                    importPath1 = FileUtilities.GetTemporaryFile();
-                    importPath2 = FileUtilities.GetTemporaryFile();
+                    importPath1 = FileUtilities.GetTemporaryFileName();
+                    importPath2 = FileUtilities.GetTemporaryFileName();
 
                     // "import1" imports "import2" and vice versa.
                     string import1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -1761,7 +1761,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ProjectRootElement import = ProjectRootElement.Create();
                 import.AddItemDefinition("i").AddMetadata("m", "%(m);m1");
 
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 import.Save(file);
 
                 string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1907,7 +1907,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 // Should include imported items
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement import = ProjectRootElement.Create(file);
                 import.AddItem("i", "i10");
                 import.Save();
@@ -1991,7 +1991,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement import = ProjectRootElement.Create(file);
                 import.AddProperty("p", "0").Condition = "false";
                 import.AddProperty("p", "1");

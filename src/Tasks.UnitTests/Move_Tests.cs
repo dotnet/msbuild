@@ -467,7 +467,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 bool result;
                 Move move = null;
 

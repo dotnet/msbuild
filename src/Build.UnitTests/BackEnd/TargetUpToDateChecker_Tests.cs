@@ -872,28 +872,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 if (input1Time != null)
                 {
-                    input1 = FileUtilities.GetTemporaryFile();
+                    input1 = FileUtilities.GetTemporaryFileName();
                     File.WriteAllText(input1, String.Empty);
                     File.SetLastWriteTime(input1, (DateTime)input1Time);
                 }
 
                 if (input2Time != null)
                 {
-                    input2 = FileUtilities.GetTemporaryFile();
+                    input2 = FileUtilities.GetTemporaryFileName();
                     File.WriteAllText(input2, String.Empty);
                     File.SetLastWriteTime(input2, (DateTime)input2Time);
                 }
 
                 if (output1Time != null)
                 {
-                    output1 = FileUtilities.GetTemporaryFile();
+                    output1 = FileUtilities.GetTemporaryFileName();
                     File.WriteAllText(output1, String.Empty);
                     File.SetLastWriteTime(output1, (DateTime)output1Time);
                 }
 
                 if (output2Time != null)
                 {
-                    output2 = FileUtilities.GetTemporaryFile();
+                    output2 = FileUtilities.GetTemporaryFileName();
                     File.WriteAllText(output2, String.Empty);
                     File.SetLastWriteTime(output2, (DateTime)output2Time);
                 }
