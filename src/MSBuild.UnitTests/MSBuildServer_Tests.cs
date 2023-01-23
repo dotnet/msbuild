@@ -11,6 +11,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 #if NETFRAMEWORK
@@ -218,11 +219,11 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData(false)]
         public void CanShutdownServerProcess(bool byBuildManager)
         {
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
             // this log seems to be flaky, lets enable better logging to investigate it next time
             // TODO: delete after investigated its flakiness
-            _env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
-
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.WithTransientDebugEngineForNewProcesses(true);
 
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
 
@@ -243,9 +244,7 @@ namespace Microsoft.Build.Engine.UnitTests
             else
             {
                 bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
-                // serverIsDown.ShouldBeTrue();
-                // TODO: uncomment line above and delete line bellow, once tested if logging is sufficient
-                serverIsDown.ShouldBeFalse();
+                serverIsDown.ShouldBeTrue();
             }
 
             serverProcess.WaitForExit(10_000);

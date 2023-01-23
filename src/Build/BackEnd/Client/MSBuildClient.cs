@@ -525,6 +525,7 @@ namespace Microsoft.Build.Experimental
 
         private bool TrySendShutdownCommand()
         {
+            CommunicationsUtilities.Trace("Sending shutdown command to server.");
             _packetPump.ServerWillDisconnect();
             return  TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
         }
