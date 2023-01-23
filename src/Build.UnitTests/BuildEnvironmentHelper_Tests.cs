@@ -36,7 +36,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void FindBuildEnvironmentByEnvironmentVariable()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnvironment(MSBuildExeName))
             {
                 var path = env.BuildDirectory;
                 var msBuildPath = Path.Combine(path, MSBuildExeName);
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void FindVisualStudioEnvironmentByEnvironmentVariable()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 var msbuildBinDirectory = env.BuildDirectory;
 
@@ -92,10 +92,14 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void FindBuildEnvironmentFromCommandLineVisualStudio()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 // All we know about is path to msbuild.exe as the command-line arg[0]
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
+
+                string test = $"Architecture:{NativeMethodsShared.ProcessorArchitecture}; Build32Dir: {BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32}, Build64Dir: {BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32}";
+
+                test.ShouldBe("not expected");
 
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64.ShouldBe(env.BuildDirectory64);
@@ -109,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void FindBuildEnvironmentFromCommandLineStandalone()
         {
             // Path will not be under a Visual Studio install like path.
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnvironment(MSBuildExeName))
             {
                 // All we know about is path to msbuild.exe as the command-line arg[0]
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -127,7 +131,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void FindBuildEnvironmentFromRunningProcessVisualStudio()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 // All we know about is path to msbuild.exe as the current process
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -144,7 +148,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void FindBuildEnvironmentFromRunningProcessStandalone()
         {
             // Path will not be under a Visual Studio install like path.
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnvironment(MSBuildExeName))
             {
                 // All we know about is path to msbuild.exe as the current process
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -161,7 +165,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void FindBuildEnvironmentFromExecutingAssemblyAsDll()
         {
             // Ensure the correct file is found (.dll not .exe)
-            using (var env = new EmptyStandaloneEnviroment("MSBuild.dll"))
+            using (var env = new EmptyStandaloneEnvironment("MSBuild.dll"))
             {
                 // All we know about is path to msbuild.exe as the current process
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -177,7 +181,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void FindBuildEnvironmentFromAppContextDirectory()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnvironment(MSBuildExeName))
             {
                 // Only the app base directory will be available
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.BuildDirectory, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -198,7 +202,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void FindBuildEnvironmentFromVisualStudioRoot()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 // All we know about is path to DevEnv.exe
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.DevEnvPath, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -219,7 +223,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByEnvironment(string visualStudioVersion, bool shouldBeValid)
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 env.WithEnvironment("VSINSTALLDIR", env.TempFolderRoot);
                 env.WithEnvironment("VisualStudioVersion", visualStudioVersion);
@@ -244,7 +248,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByMSBuildProcess()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 // We only know we're in msbuild.exe, we should still be able to attempt to find Visual Studio
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -259,7 +263,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByMSBuildProcessAmd64()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 // We only know we're in amd64\msbuild.exe, we should still be able to attempt to find Visual Studio
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath64, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -277,7 +281,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData("16.0", false)]
         public void BuildEnvironmentDetectsVisualStudioFromSetupInstance(string visualStudioVersion, bool shouldBeValid)
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 env.WithVsInstance(new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version(visualStudioVersion)));
                 env.WithVsInstance(new VisualStudioInstance("VS", env.TempFolderRoot, new Version(visualStudioVersion)));
@@ -302,7 +306,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void BuildEnvironmentVisualStudioNotFoundWhenVersionMismatch()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 env.WithVsInstance(new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version("15.0")));
                 env.WithVsInstance(new VisualStudioInstance("VS", env.TempFolderRoot, new Version("14.0")));
@@ -327,7 +331,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByProcessName()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.DevEnvPath, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
@@ -342,7 +346,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByBlendProcess()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.BlendPath, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
@@ -357,7 +361,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.DevEnvPath, ReturnNull,
                     ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -373,7 +377,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64RunningInAmd64NoVS()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
+            using (var env = new EmptyStandaloneEnvironment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
             {
                 var msBuild64Exe = Path.Combine(env.BuildDirectory, "amd64", MSBuildExeName);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => msBuild64Exe, ReturnNull, ReturnNull,
@@ -391,7 +395,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64NoVS()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
+            using (var env = new EmptyStandaloneEnvironment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull,
                     ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -408,7 +412,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64RunningInAmd64()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath64, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
@@ -422,7 +426,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void BuildEnvironmentNoneWhenNotAvailable()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnvironment(MSBuildExeName))
             {
                 var entryProcess = Path.Combine(Path.GetTempPath(), "foo.exe");
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => entryProcess, ReturnNull, ReturnNull,
@@ -440,7 +444,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentVSFromMSBuildAssembly()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 var msBuildAssembly = Path.Combine(env.BuildDirectory, "Microsoft.Build.dll");
 
@@ -459,7 +463,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentVSFromMSBuildAssemblyAmd64()
         {
-            using (var env = new EmptyVSEnviroment())
+            using (var env = new EmptyVSEnvironment())
             {
                 var msBuildAssembly = Path.Combine(env.BuildDirectory64, "Microsoft.Build.dll");
 
@@ -478,7 +482,7 @@ namespace Microsoft.Build.Engine.UnitTests
             return null;
         }
 
-        private class EmptyVSEnviroment : EmptyStandaloneEnviroment
+        private class EmptyVSEnvironment : EmptyStandaloneEnvironment
         {
             public string DevEnvPath { get; }
 
@@ -488,7 +492,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             public string MSBuildExePath64 => Path.Combine(BuildDirectory64, MSBuildExeName);
 
-            public EmptyVSEnviroment(string toolsVersion = MSBuildConstants.CurrentToolsVersion) : base("MSBuild.exe", false)
+            public EmptyVSEnvironment(string toolsVersion = MSBuildConstants.CurrentToolsVersion) : base("MSBuild.exe", false)
             {
                 try
                 {
@@ -521,7 +525,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        private class EmptyStandaloneEnviroment : IDisposable
+        private class EmptyStandaloneEnvironment : IDisposable
         {
             public string TempFolderRoot { get; }
 
@@ -535,7 +539,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             private readonly List<VisualStudioInstance> _mockInstances = new List<VisualStudioInstance>();
 
-            public EmptyStandaloneEnviroment(string msBuildExeName, bool writeFakeFiles = true, bool includeAmd64Folder = false)
+            public EmptyStandaloneEnvironment(string msBuildExeName, bool writeFakeFiles = true, bool includeAmd64Folder = false)
             {
                 try
                 {
