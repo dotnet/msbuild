@@ -243,7 +243,7 @@ namespace Microsoft.Build.Engine.UnitTests
             else
             {
                 bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
-                //serverIsDown.ShouldBeTrue();
+                // serverIsDown.ShouldBeTrue();
                 // TODO: uncomment line above and delete line bellow, once tested if logging is sufficient
                 serverIsDown.ShouldBeFalse();
             }
