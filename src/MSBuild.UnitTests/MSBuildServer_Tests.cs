@@ -218,6 +218,10 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData(false)]
         public void CanShutdownServerProcess(bool byBuildManager)
         {
+            // this log seems to be flaky, lets enable better logging to investigate it next time
+            // TODO: delete after investigated its flakiness
+            _env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
+
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
@@ -239,7 +243,9 @@ namespace Microsoft.Build.Engine.UnitTests
             else
             {
                 bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
-                serverIsDown.ShouldBeTrue();
+                //serverIsDown.ShouldBeTrue();
+                // TODO: uncomment line above and delete line bellow, once tested if logging is sufficient
+                serverIsDown.ShouldBeFalse();
             }
 
             serverProcess.WaitForExit(10_000);
