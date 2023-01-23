@@ -1,23 +1,33 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
+
+#nullable disable
+
 using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Shouldly;
 using Xunit;
-
-#nullable disable
-
+using Xunit.Abstractions;
 namespace Microsoft.Build.UnitTests
 {
     public class DebugUtils_Tests
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public DebugUtils_Tests(ITestOutputHelper testOutput)
+        {
+            _testOutput = testOutput;
+        }
+
         [Fact]
         public void DumpExceptionToFileShouldWriteInTempPathByDefault()
         {
-            Directory.GetFiles(Path.GetTempPath(), "MSBuild_*failure.txt").ShouldBeEmpty();
+            var exceptionFilesBefore = Directory.GetFiles(FileUtilities.TempFileDirectory, "MSBuild_*failure.txt");
 
             string[] exceptionFiles = null;
 
@@ -28,10 +38,14 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                exceptionFiles.ShouldNotBeNull();
-                exceptionFiles.ShouldHaveSingleItem();
+                _testOutput.WriteLine($"DebugUtils.DebugPath: {DebugUtils.DebugPath}");
+                _testOutput.WriteLine($"Environment.GetEnvironmentVariable(\"MSBUILDDEBUGPATH\"): {Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH")}");
 
-                var exceptionFile = exceptionFiles.First();
+                exceptionFilesBefore.ShouldNotBeNull();
+                exceptionFiles.ShouldNotBeNull();
+                (exceptionFiles.Length - exceptionFilesBefore.Length).ShouldBe(1);
+
+                var exceptionFile = exceptionFiles.Except(exceptionFilesBefore).Single();
                 File.ReadAllText(exceptionFile).ShouldContain("hello world");
                 File.Delete(exceptionFile);
             }
