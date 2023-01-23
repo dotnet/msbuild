@@ -16,6 +16,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             return Regex.Replace(text, ANSIRegex, "");
         }
 
+        /// <summary>
+        /// Find a place to break a string after a number of visible characters, not counting VT-100 codes.
+        /// </summary>
+        /// <param name="text">String to split.</param>
+        /// <param name="position">Number of visible characters to split after.</param>
+        /// <returns>Index in <paramref name="text"/> that represents <paramref name="position"/> visible characters.</returns>
         public static int ANSIBreakpoint(string text, int position)
         {
             if (position >= text.Length) return text.Length;
