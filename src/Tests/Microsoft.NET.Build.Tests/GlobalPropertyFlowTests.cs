@@ -84,9 +84,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
 
-            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
-
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
             ValidateProperties(testAsset, _referencedProject, expectSelfContained: false, expectRuntimeIdentifier: false);
         }
 
@@ -101,10 +99,8 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
 
-            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
-
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
         }
 
 
@@ -137,11 +133,9 @@ namespace Microsoft.NET.Build.Tests
 
                 var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
 
-                bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
-
-                ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+                ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
                 //  SelfContained will only flow to referenced project if it's explicitly passed in this case
-                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
             }
         }
 
