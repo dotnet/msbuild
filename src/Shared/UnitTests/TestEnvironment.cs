@@ -1,6 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+
+
+#nullable disable
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +13,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
@@ -18,9 +23,6 @@ using Xunit.Abstractions;
 
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
-
-#nullable disable
-
 namespace Microsoft.Build.UnitTests
 {
     public partial class TestEnvironment : IDisposable
@@ -331,6 +333,16 @@ namespace Microsoft.Build.UnitTests
             return WithTransientTestState(transientTestProcess);
         }
 
+        /// <summary>
+        /// Register transient debug engine.
+        /// Usable for tests which investigating might need msbuild debug logs.
+        /// </summary>
+        public TransientDebugEngine WithTransientDebugEngineForNewProcesses(bool state)
+        {
+            TransientDebugEngine transient = new(state);
+            return WithTransientTestState(transient);
+        }
+
         #endregion
 
         private class DefaultOutput : ITestOutputHelper
@@ -430,16 +442,30 @@ namespace Microsoft.Build.UnitTests
 
     public class BuildFailureLogInvariant : TestInvariant
     {
+        private const string MSBuildLogFiles = "MSBuild_*.txt";
         private readonly string[] _originalFiles;
 
         public BuildFailureLogInvariant()
         {
-            _originalFiles = Directory.GetFiles(Path.GetTempPath(), "MSBuild_*.txt");
+            _originalFiles = GetMSBuildLogFiles();
+        }
+
+        private string[] GetMSBuildLogFiles()
+        {
+            List<string> files = new();
+            string debugPath = FileUtilities.TempFileDirectory;
+            if (debugPath != null)
+            {
+                files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
+            }
+            files.AddRange(Directory.GetFiles(Path.GetTempPath(), MSBuildLogFiles));
+
+            return files.ToArray();
         }
 
         public override void AssertInvariant(ITestOutputHelper output)
         {
-            var newFiles = Directory.GetFiles(Path.GetTempPath(), "MSBuild_*.txt");
+            var newFiles = GetMSBuildLogFiles();
 
             int newFilesCount = newFiles.Length;
             if (newFilesCount > _originalFiles.Length)
@@ -588,6 +614,34 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
+    public class TransientDebugEngine : TransientTestState
+    {
+        private readonly string _previousDebugEngineEnv;
+        private readonly string _previousDebugPath;
+
+        public TransientDebugEngine(bool state)
+        {
+            _previousDebugEngineEnv = Environment.GetEnvironmentVariable("MSBuildDebugEngine");
+            _previousDebugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+
+            if (state)
+            {
+                Environment.SetEnvironmentVariable("MSBuildDebugEngine", "1");
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", FileUtilities.TempFileDirectory);
+            }
+            else
+            {
+                Environment.SetEnvironmentVariable("MSBuildDebugEngine", null);
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", null);
+            }
+        }
+
+        public override void Revert()
+        {
+            Environment.SetEnvironmentVariable("MSBuildDebugEngine", _previousDebugEngineEnv);
+            Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", _previousDebugPath);
+        }
+    }
 
     public class TransientTestFile : TransientTestState
     {
