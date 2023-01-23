@@ -220,6 +220,7 @@ namespace Microsoft.Build.Evaluation
             try
             {
 #endif
+#pragma warning disable format // the release configuration fails as try-catch block is conditioned only for Debug; making the formatting in correct in Release.
                 // Should already have been canonicalized
                 ErrorUtilities.VerifyThrowInternalRooted(projectFile);
 
@@ -302,8 +303,8 @@ namespace Microsoft.Build.Evaluation
                     DebugTraceCache("Satisfied from XML cache: ", projectFile);
                 }
 
-
                 return projectRootElement;
+#pragma warning restore format
 #if DEBUG
             }
             finally
