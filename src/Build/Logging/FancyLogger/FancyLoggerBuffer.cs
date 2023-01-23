@@ -54,9 +54,16 @@ namespace Microsoft.Build.Logging.FancyLogger
         private static List<FancyLoggerBufferLine> Lines = new();
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
-        // private static bool AutoScrollEnabled = true;
         internal static bool IsTerminated = false;
         internal static bool ShouldRerender = true;
+        internal static int ScrollableAreaHeight
+        {
+            get
+            {
+                // Height of the buffer -3 (titlebar, footer, and footer line)
+                return Console.BufferHeight - 3;
+            }
+        }
         public static void Initialize()
         {
             // Configure buffer, encoding and cursor
@@ -95,6 +102,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Iterate over lines and display on terminal
             string contents = string.Empty;
             int accumulatedLineCount = 0;
+            int lineIndex = 0;
             foreach (FancyLoggerBufferLine line in Lines)
             {
                 // Continue if accum line count + next lines < scrolling area
@@ -103,14 +111,19 @@ namespace Microsoft.Build.Logging.FancyLogger
                     continue;
                 }
                 // Break if exceeds scrolling area
-                if (accumulatedLineCount - TopLineIndex > Console.BufferHeight - 3) break;
+                if (accumulatedLineCount - TopLineIndex > ScrollableAreaHeight) break;
                 foreach (string s in line.WrappedText) {
                     // Get line index relative to scroll area
-                    int lineIndex = accumulatedLineCount - TopLineIndex;
+                    lineIndex = accumulatedLineCount - TopLineIndex;
                     // Print if line in scrolling area
-                    if (lineIndex >= 0 && lineIndex < Console.BufferHeight - 3) contents += ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s;
+                    if (lineIndex >= 0 && lineIndex < ScrollableAreaHeight) contents += ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s;
                     accumulatedLineCount++;
                 }
+            }
+            // Iterate for the rest of the screen
+            for (int i = lineIndex; i < ScrollableAreaHeight; i++)
+            {
+                contents += ANSIBuilder.Cursor.Position(i + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd();
             }
             Console.Write(contents);
         }

@@ -48,45 +48,50 @@ namespace Microsoft.Build.Logging.FancyLogger
             
             Task.Run(() =>
             {
-                // Initialize FancyLoggerBuffer
-                FancyLoggerBuffer.Initialize();
-                // TODO: Fix. First line does not appear at top. Leaving empty line for now
-                FancyLoggerBuffer.WriteNewLine(string.Empty);
-                // First render
-                FancyLoggerBuffer.Render();
-                int i = 0;
-                // Rerender periodically
-                while (!FancyLoggerBuffer.IsTerminated)
+                task_Render();
+            });
+        }
+
+        void task_Render()
+        {
+            // Initialize FancyLoggerBuffer
+            FancyLoggerBuffer.Initialize();
+            // TODO: Fix. First line does not appear at top. Leaving empty line for now
+            FancyLoggerBuffer.WriteNewLine(string.Empty);
+            // First render
+            FancyLoggerBuffer.Render();
+            int i = 0;
+            // Rerender periodically
+            while (!FancyLoggerBuffer.IsTerminated)
+            {
+                i++;
+                // Delay by 1/60 seconds
+                Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
-                    i++;
-                    // Delay by 1/60 seconds
-                    Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
+                    // Rerender projects only when needed
+                    foreach (var project in projects) project.Value.Render();
+                    // Rerender buffer
+                    FancyLoggerBuffer.Render();
+                });
+                // Handle keyboard input
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKey key = Console.ReadKey().Key;
+                    switch (key)
                     {
-                        // Rerender projects only when needed
-                        foreach (var project in projects) project.Value.Render();
-                        // Rerender buffer
-                        FancyLoggerBuffer.Render();
-                    });
-                    // Handle keyboard input
-                    if (Console.KeyAvailable)
-                    {
-                        ConsoleKey key = Console.ReadKey().Key;
-                        switch (key)
-                        {
-                            case ConsoleKey.UpArrow:
-                                if (FancyLoggerBuffer.TopLineIndex > 0) FancyLoggerBuffer.TopLineIndex--;
-                                FancyLoggerBuffer.ShouldRerender = true;
-                                break;
-                            case ConsoleKey.DownArrow:
-                                FancyLoggerBuffer.TopLineIndex++;
-                                FancyLoggerBuffer.ShouldRerender = true;
-                                break;
-                            default:
-                                break;
-                        }
+                        case ConsoleKey.UpArrow:
+                            if (FancyLoggerBuffer.TopLineIndex > 0) FancyLoggerBuffer.TopLineIndex--;
+                            FancyLoggerBuffer.ShouldRerender = true;
+                            break;
+                        case ConsoleKey.DownArrow:
+                            FancyLoggerBuffer.TopLineIndex++;
+                            FancyLoggerBuffer.ShouldRerender = true;
+                            break;
+                        default:
+                            break;
                     }
                 }
-            });
+            }
         }
 
         // Build
