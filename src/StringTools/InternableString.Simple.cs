@@ -200,29 +200,47 @@ namespace Microsoft.NET.StringTools
         /// <returns>A stable hashcode of the string represented by this instance.</returns>
         public override int GetHashCode()
         {
-            int hashCode = 5381;
+            uint hash = (5381 << 16) + 5381;
+            bool isOddIndex = false;
 
             if (_firstString != null)
             {
                 foreach (char ch in _firstString)
                 {
-                    unchecked
-                    {
-                        hashCode = hashCode * 33 ^ ch;
-                    }
+                    hash = HashOneCharacter(hash, ch, isOddIndex);
+                    isOddIndex = !isOddIndex;
                 }
             }
             else if (_builder != null)
             {
                 for (int i = 0; i < _builder.Length; i++)
                 {
-                    unchecked
-                    {
-                        hashCode = hashCode * 33 ^ _builder[i];
-                    }
+                    hash = HashOneCharacter(hash, _builder[i], isOddIndex);
+                    isOddIndex = !isOddIndex;
                 }
             }
-            return hashCode;
+            return (int)hash;
+        }
+
+        /// <summary>
+        /// A helper to hash one character.
+        /// </summary>
+        /// <param name="hash">The running hash code.</param>
+        /// <param name="ch">The character to hash.</param>
+        /// <param name="isOddIndex">True if the index of the character in the string is odd.</param>
+        /// <returns></returns>
+        private static uint HashOneCharacter(uint hash, char ch, bool isOddIndex)
+        {
+            if (isOddIndex)
+            {
+                // The hash code was rotated for the previous character, just xor.
+                return hash ^ ((uint)ch << 16);
+            }
+
+            // The JIT recognized the pattern and generates efficient code, e.g. the rol instruction on x86/x64.
+            uint rotatedHash = (hash << 5) | (hash >> (32 - 5));
+
+            return (rotatedHash + hash) ^ ch;
         }
     }
 }
