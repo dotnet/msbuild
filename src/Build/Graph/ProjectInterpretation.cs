@@ -68,8 +68,8 @@ namespace Microsoft.Build.Graph
             public TargetSpecification(string target, bool skipIfNonexistent)
             {
                 ErrorUtilities.VerifyThrow(
-                    !skipIfNonexistent || target.Equals(MSBuildConstants.DefaultTargetsMarker)
-                    || target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker),
+                    !skipIfNonexistent || (!target.Equals(MSBuildConstants.DefaultTargetsMarker)
+                    && !target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker)),
                     target + " cannot be marked as SkipNonexistentTargets");
                 Target = target;
                 SkipIfNonexistent = skipIfNonexistent;
