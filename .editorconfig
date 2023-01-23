@@ -226,6 +226,7 @@ dotnet_diagnostic.IDE0018.severity = suggestion
 
 # Use pattern matching
 dotnet_diagnostic.IDE0019.severity = suggestion
+dotnet_diagnostic.IDE0020.severity = suggestion
 
 # Use expression body for constructor
 dotnet_diagnostic.IDE0021.severity = suggestion
