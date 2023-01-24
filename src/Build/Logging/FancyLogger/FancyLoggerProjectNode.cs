@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
@@ -32,7 +33,13 @@ namespace Microsoft.Build.Logging.FancyLogger
         public FancyLoggerBufferLine? CurrentTargetLine;
         public FancyLoggerTargetNode? CurrentTargetNode;
         // Messages, errors and warnings
-        List<FancyLoggerMessageNode> AdditionalDetails = new();
+        public List<FancyLoggerMessageNode> AdditionalDetails = new();
+        // Count messages, warnings and errors
+        public int MessageCount = 0;
+        public int WarningCount = 0;
+        public int ErrorCount = 0;
+        // Bool if node should rerender
+        internal bool ShouldRerender = true;
         public FancyLoggerProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
@@ -49,69 +56,86 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
+        // TODO: Rename to Render() after FancyLogger's API becomes internal
         public void Log()
         {
+            if (!ShouldRerender) return;
+            ShouldRerender = false;
             // Project details
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
-                $"{(Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner())} {ANSIBuilder.Formatting.Dim("Project: ")} {ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework}]",
-                $"({FinishedTargets} targets completed)",
+                // Show indicator
+                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner())) +
+                // Project
+                ANSIBuilder.Formatting.Dim("Project: ") +
+                // Project file path with color
+                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default )} [{TargetFramework ?? "*"}]",
+                $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
                 Console.WindowWidth
             );
-
             // Create or update line
-            if (Line == null) Line = FancyLoggerBuffer.WriteNewLine(lineContents);
-            else FancyLoggerBuffer.UpdateLine(Line.Id, lineContents);
+            if (Line is null) Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
+            else Line.Text = lineContents;
 
             // For finished projects
             if (Finished)
             {
-                if (CurrentTargetLine != null) FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
-                foreach (FancyLoggerMessageNode node in AdditionalDetails)
+                if (CurrentTargetLine is not null) FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                foreach (FancyLoggerMessageNode node in AdditionalDetails.ToList())
                 {
-                    if (node.Line != null) FancyLoggerBuffer.DeleteLine(node.Line.Id);
-                    node.Line = null;
+                    // Only delete high priority messages
+                    if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
+                    if (node.Line is not null) FancyLoggerBuffer.DeleteLine(node.Line.Id);
                 }
             }
 
             // Current target details
-            if (CurrentTargetNode == null) return;
+            if (CurrentTargetNode is null) return;
             string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
-            if (CurrentTargetLine == null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
-            else FancyLoggerBuffer.UpdateLine(CurrentTargetLine.Id, currentTargetLineContents);
+            if (CurrentTargetLine is null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
+            else CurrentTargetLine.Text = currentTargetLineContents;
 
             // Messages, warnings and errors
             foreach (FancyLoggerMessageNode node in AdditionalDetails)
             {
-                if (node.Line == null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
+                if (node.Line is null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
                 node.Log();
             }
         }
 
-        public void AddTarget(TargetStartedEventArgs args)
+        public FancyLoggerTargetNode AddTarget(TargetStartedEventArgs args)
         {
             CurrentTargetNode = new FancyLoggerTargetNode(args);
+            return CurrentTargetNode;
         }
-        public void AddTask(TaskStartedEventArgs args)
+        public FancyLoggerTaskNode? AddTask(TaskStartedEventArgs args)
         {
             // Get target id
             int targetId = args.BuildEventContext!.TargetId;
-            if (CurrentTargetNode?.Id == targetId)
-            {
-                CurrentTargetNode.AddTask(args);
-            }
+            if (CurrentTargetNode?.Id == targetId) return CurrentTargetNode.AddTask(args);
+            else return null;
         }
-        public void AddMessage(BuildMessageEventArgs args)
+        public FancyLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
         {
-            if (args.Importance != MessageImportance.High) return;
-            AdditionalDetails.Add(new FancyLoggerMessageNode(args));
+            if (args.Importance != MessageImportance.High) return null;
+            MessageCount++;
+            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            AdditionalDetails.Add(node);
+            return node;
         }
-        public void AddWarning(BuildWarningEventArgs args)
+        public FancyLoggerMessageNode? AddWarning(BuildWarningEventArgs args)
         {
-            AdditionalDetails.Add(new FancyLoggerMessageNode(args));
+            WarningCount++;
+            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            AdditionalDetails.Add(node);
+            return node;
         }
-        public void AddError(BuildErrorEventArgs args)
+        public FancyLoggerMessageNode? AddError(BuildErrorEventArgs args)
         {
-            AdditionalDetails.Add(new FancyLoggerMessageNode(args));
+            ErrorCount++;
+            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            AdditionalDetails.Add(node);
+            return node;
         }
     }
 }

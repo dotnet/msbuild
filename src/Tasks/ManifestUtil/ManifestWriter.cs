@@ -123,7 +123,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 else
                 {
                     // May throw IO-related exceptions
-                    string temp = FileUtilities.GetTemporaryFile();
+                    string temp = FileUtilities.GetTemporaryFileName();
 
                     am.TrustInfo.Write(temp);
                     if (Util.logging)

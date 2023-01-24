@@ -116,7 +116,7 @@ namespace Microsoft.Build.Graph
 
             AddEdgesFromProjectReferenceItems(allParsedProjects, Edges);
 
-            _projectInterpretation.ReparentInnerBuilds(allParsedProjects, this);
+            _projectInterpretation.AddInnerBuildEdges(allParsedProjects, this);
 
             if (_solutionDependencies != null && _solutionDependencies.Count != 0)
             {

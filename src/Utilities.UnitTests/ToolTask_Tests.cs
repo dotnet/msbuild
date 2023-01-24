@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OverrideStdOutImportanceToLow()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"hello world");
 
             using (MyTool t = new MyTool())
@@ -444,7 +444,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OverrideStdOutImportanceToHigh()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"hello world");
 
             using (MyTool t = new MyTool())
@@ -475,7 +475,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"
                 Main.cs(17,20): warning CS0168: The variable 'foo' is declared but never used.
                 BADTHINGHAPPENED: This is my custom error format that's not in canonical error format.

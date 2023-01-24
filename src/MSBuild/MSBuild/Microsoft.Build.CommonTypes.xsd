@@ -1303,6 +1303,11 @@ elementFormDefault="qualified">
 
     <xs:element name="VisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="MinimumVisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AccelerateBuildsInVisualStudio" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AccelerateBuildsInVisualStudio" _locComment="" -->Indicates whether to enable acceleration when building in Visual Studio (boolean).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="AdditionalFileItemNames" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AllowUnsafeBlocks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AnalysisMode" substitutionGroup="msb:Property">
