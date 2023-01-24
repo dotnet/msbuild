@@ -815,6 +815,13 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1048: для GenerateRuntimeConfigurationFiles были указаны пути "AdditionalProbingPaths", но они будут пропущены, так как "RuntimeConfigDevPath" пуст.</target>
         <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
+      <trans-unit id="SolutionProjectConfigurationsConflict">
+        <source>NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+{1}</source>
+        <target state="new">NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+{1}</target>
+        <note>{StrBegin="NETSDK1197: "}</note>
+      </trans-unit>
       <trans-unit id="TargetFrameworkIsEol">
         <source>NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
         <target state="translated">NETSDK1138: целевая платформа "{0}" больше не поддерживается и не будет получать обновления для системы безопасности в будущем. Дополнительные сведения о политике поддержки см. в {1}.</target>

@@ -242,13 +242,6 @@ El valor predeterminado es "true" si se especifica un identificador de entorno d
         <target state="translated">Eliminar</target>
         <note />
       </trans-unit>
-      <trans-unit id="SolutionProjectConfigurationsConflict">
-        <source>Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
-{1}</source>
-        <target state="new">Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
-{1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Update">
         <source>Update</source>
         <target state="translated">Actualizar</target>

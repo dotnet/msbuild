@@ -15,6 +15,7 @@ using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -202,7 +203,7 @@ namespace Microsoft.DotNet.Cli
                 // 1) This error should not be thrown in VS because it is part of the SDK CLI code
                 // 2) If PublishRelease or PackRelease is disabled via opt out, or Configuration is specified, we won't get to this code, so we won't error
                 // 3) This code only gets hit if we are in a solution publish setting, so we don't need to worry about it failing other publish scenarios
-                throw new GracefulException(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, _propertyToCheck, String.Join("\n", (configuredProjects).Select(x => x.FullPath)));
+                throw new GracefulException(Strings.SolutionProjectConfigurationsConflict, _propertyToCheck, String.Join("\n", (configuredProjects).Select(x => x.FullPath)));
             }
 
             return configuredProjects.Any() ? configuredProjects.First() : null;

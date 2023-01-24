@@ -708,8 +708,4 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="CorruptSolutionProjectFolderStructure" xml:space="preserve">
     <value>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</value>
   </data>
-  <data name="SolutionProjectConfigurationsConflict" xml:space="preserve">
-    <value>Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
-{1}</value>
-  </data>
 </root>

@@ -267,7 +267,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(String.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, PublishRelease, ""));
+                .HaveStdOutContaining("NETSDK1197");
         }
 
         [Fact]
@@ -285,7 +285,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(String.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, PublishRelease, ""));;
+                .HaveStdErrContaining(String.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease, ""));;
         }
 
         [Fact]
@@ -313,7 +313,7 @@ namespace Microsoft.NET.Publish.Tests
             var solutionAndProjects = Setup(Log, new List<string> { tfm }, new List<string> { tfm }, pReleaseVar, "true", "false");
             var sln = solutionAndProjects.Item1;
 
-            var expectedError = string.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, pReleaseVar, "");
+            var expectedError = string.Format(Strings.SolutionProjectConfigurationsConflict, pReleaseVar, "");
 
             new DotnetCommand(Log)
                 .Execute("dotnet", pReleaseVar == PublishRelease ? "publish" : "pack", sln.SolutionPath)
@@ -336,7 +336,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(string.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, PublishRelease, ""));
+                .HaveStdErrContaining(string.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease, ""));
         }
 
         [Fact]
