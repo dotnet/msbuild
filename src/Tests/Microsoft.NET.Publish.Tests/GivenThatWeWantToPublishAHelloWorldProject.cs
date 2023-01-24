@@ -556,7 +556,6 @@ public static class Program
 
         [Theory]
         [InlineData("DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE")]
-        [InlineData("DOTNET_CLI_DETECT_PUBLISH_RELEASE_FOR_SOLUTIONS")]
         public void It_doesnt_error_if_environment_variable_opt_out_enabled_but_PublishRelease_conflicts(string envVar)
         {
             var slnDir = _testAssetsManager
