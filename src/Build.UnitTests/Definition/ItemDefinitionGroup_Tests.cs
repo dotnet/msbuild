@@ -1188,7 +1188,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                importedFile = FileUtilities.GetTemporaryFile();
+                importedFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(importedFile, @"
                 <Project ToolsVersion='msbuilddefaulttoolsversion'>
                   <ItemDefinitionGroup>
@@ -1710,7 +1710,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                otherProject = FileUtilities.GetTemporaryFile();
+                otherProject = FileUtilities.GetTemporaryFileName();
                 string otherProjectContent = @"<Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -1766,7 +1766,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                otherProject = FileUtilities.GetTemporaryFile();
+                otherProject = FileUtilities.GetTemporaryFileName();
                 string otherProjectContent = @"<Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'>

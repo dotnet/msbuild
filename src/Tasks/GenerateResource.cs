@@ -40,7 +40,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using Microsoft.Win32;
+#endif
 
 #nullable disable
 
@@ -905,24 +907,29 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
         }
 
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
 
         private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
         private const uint ZoneInternet = 3;
         private static IInternetSecurityManager internetSecurityManager = null;
+#endif
 
         // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
         // so check to see if we should trust them before analyzing them
         private bool IsDangerous(String filename)
         {
+#if !FEATURE_RESXREADER_LIVEDESERIALIZATION
+            return false;
+        }
+#else
             // If they are opted out, there's no work to do
-            if (AllowMOTW || !NativeMethodsShared.IsWindows)
+            if (AllowMOTW)
             {
                 return false;
             }
 
             // First check the zone, if they are not an untrusted zone, they aren't dangerous
-
             if (internetSecurityManager == null)
             {
                 Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
@@ -989,7 +996,6 @@ namespace Microsoft.Build.Tasks
             return dangerous;
         }
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// For setting OutputResources and ensuring it can be read after the second AppDomain has been unloaded.
         /// </summary>

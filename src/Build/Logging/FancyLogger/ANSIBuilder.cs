@@ -3,15 +3,61 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
     internal static class ANSIBuilder
     {
+        public static string ANSIRegex = @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~])";
+        // TODO: This should replace ANSIRegex once FancyLogger's API is internal
+        public static Regex ANSIRegexRegex = new Regex(ANSIRegex);
         public static string ANSIRemove(string text)
         {
-            return Regex.Replace(text, "\\x1b(?:[@-Z\\-_]|\\[[0-?]*[ -\\/]*[@-~])", "");
+            return ANSIRegexRegex.Replace(text, "");
+        }
+
+        // TODO: This should be an optional parameter for ANSIBreakpoint(string text, int positioon, int initialPosition = 0)
+        public static int ANSIBreakpoint(string text, int position)
+        {
+            return ANSIBreakpoint(text, position, 0);
+        }
+        public static int ANSIBreakpoint(string text, int position, int initialPosition)
+        {
+            if (position >= text.Length) return text.Length;
+            int nonAnsiIndex = 0;
+            // Match nextMatch = Regex.Match(text, ANSIRegex);
+            Match nextMatch = ANSIRegexRegex.Match(text, initialPosition);
+            int i = 0;
+            while (i < text.Length && nonAnsiIndex != position)
+            {
+                // Jump over ansi codes
+                if (i == nextMatch.Index && nextMatch.Length > 0)
+                {
+                    i += nextMatch.Length;
+                    nextMatch = nextMatch.NextMatch();
+                }
+                // Increment non ansi index
+                nonAnsiIndex++;
+                i++;
+            }
+            return i;
+        }
+
+        public static List<string> ANSIWrap(string text, int position)
+        {
+            ReadOnlySpan<char> textSpan = text.AsSpan();
+            List<string> result = new();
+            int breakpoint = ANSIBreakpoint(text, position);
+            while (textSpan.Length > breakpoint)
+            {
+                result.Add(textSpan.Slice(0, breakpoint).ToString());
+                textSpan = textSpan.Slice(breakpoint);
+                breakpoint = ANSIBreakpoint(text, position, breakpoint);
+            }
+            result.Add(textSpan.ToString());
+            return result;
         }
 
         public static class Alignment
@@ -56,9 +102,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                 string leftNoFormatString = ANSIRemove(leftText);
                 string rightNoFormatString = ANSIRemove(rightText);
                 if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth) return leftText + rightText;
-                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length) - 1;
+                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length);
                 result += leftText;
-                result += new string(' ', space);
+                result += new string(' ', space - 1);
                 result += rightText;
                 return result;
             }

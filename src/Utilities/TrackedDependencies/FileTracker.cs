@@ -343,7 +343,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The response file path.</returns>
         public static string CreateRootingMarkerResponseFile(string rootMarker)
         {
-            string trackerResponseFile = FileUtilities.GetTemporaryFile(".rsp");
+            string trackerResponseFile = FileUtilities.GetTemporaryFileName(".rsp");
             File.WriteAllText(trackerResponseFile, "/r \"" + rootMarker + "\"", Encoding.Unicode);
 
             return trackerResponseFile;
