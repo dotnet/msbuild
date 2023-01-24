@@ -86,10 +86,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
+        // TODO: Rename to Log after FancyLogger's API becomes internal
         public void Log()
         {
             if (Line == null) return;
-            FancyLoggerBuffer.UpdateLine(Line.Id, $"    └── {ToANSIString()}");
+            Line.Text = $"    └── {ToANSIString()}";
         }
     }
 }

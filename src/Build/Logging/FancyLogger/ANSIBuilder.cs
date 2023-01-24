@@ -11,9 +11,11 @@ namespace Microsoft.Build.Logging.FancyLogger
     internal static class ANSIBuilder
     {
         public static string ANSIRegex = @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~]|(?:\]8;;.*?\x1b\\))";
+        // TODO: This should replace ANSIRegex once FancyLogger's API is internal
+        public static Regex ANSIRegexRegex = new Regex(ANSIRegex);
         public static string ANSIRemove(string text)
         {
-            return Regex.Replace(text, ANSIRegex, "");
+            return ANSIRegexRegex.Replace(text, "");
         }
 
         /// <summary>
@@ -22,11 +24,16 @@ namespace Microsoft.Build.Logging.FancyLogger
         /// <param name="text">String to split.</param>
         /// <param name="position">Number of visible characters to split after.</param>
         /// <returns>Index in <paramref name="text"/> that represents <paramref name="position"/> visible characters.</returns>
+        // TODO: This should be an optional parameter for ANSIBreakpoint(string text, int positioon, int initialPosition = 0)
         public static int ANSIBreakpoint(string text, int position)
+        {
+            return ANSIBreakpoint(text, position, 0);
+        }
+        public static int ANSIBreakpoint(string text, int position, int initialPosition)
         {
             if (position >= text.Length) return text.Length;
             int nonAnsiIndex = 0;
-            Match nextMatch = Regex.Match(text, ANSIRegex);
+            Match nextMatch = ANSIRegexRegex.Match(text, initialPosition);
             int logicalIndex = 0;
             while (logicalIndex < text.Length && nonAnsiIndex != position)
             {
@@ -45,15 +52,16 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public static List<string> ANSIWrap(string text, int maxLength)
         {
+            ReadOnlySpan<char> textSpan = text.AsSpan();
             List<string> result = new();
             int breakpoint = ANSIBreakpoint(text, maxLength);
-            while (text.Length > breakpoint)
+            while (textSpan.Length > breakpoint)
             {
-                result.Add(text.Substring(0, breakpoint));
-                text = text.Substring(breakpoint);
-                breakpoint = ANSIBreakpoint(text, maxLength);
+                result.Add(textSpan.Slice(0, breakpoint).ToString());
+                textSpan = textSpan.Slice(breakpoint);
+                breakpoint = ANSIBreakpoint(text, maxLength, breakpoint);
             }
-            result.Add(text);
+            result.Add(textSpan.ToString());
             return result;
         }
 
