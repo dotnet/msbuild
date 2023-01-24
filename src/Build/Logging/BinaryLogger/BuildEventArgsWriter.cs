@@ -473,11 +473,12 @@ Build
         private void Write(AssemblyLoadBuildEventArgs e)
         {
             Write(BinaryLogRecordKind.AssemblyLoad);
-            // Do we need this?? (not set in the arg ser/deser methods)
             WriteMessageFields(e, writeMessage: false, writeImportance: false);
             WriteDeduplicatedString(e.AssemblyName);
             WriteDeduplicatedString(e.AssemblyPath);
             Write(e.MVID);
+            Write(e.AppDomainId);
+            WriteDeduplicatedString(e.AppDomainFriendlyName);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)

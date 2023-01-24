@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 #endif
 
 using Microsoft.Build.Framework;
@@ -210,6 +211,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (appDomain != null)
                 {
+                    AssemblyLoadsTracker.StopTracking(appDomain);
                     // Unload the AppDomain asynchronously to avoid a deadlock that can happen because
                     // AppDomain.Unload blocks for the process's one Finalizer thread to finalize all
                     // objects. Some objects are RCWs for STA COM objects and as such would need the
@@ -372,6 +374,7 @@ namespace Microsoft.Build.BackEnd
                 ITask taskInstance = TaskLoader.CreateTask(_loadedType, _taskName, taskLocation.File, taskLocation.Line, taskLocation.Column, new TaskLoader.LogError(ErrorLoggingDelegate)
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
+                    , appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, appDomain)
 #endif
                     , isOutOfProc
 #if FEATURE_APPDOMAIN
@@ -380,9 +383,13 @@ namespace Microsoft.Build.BackEnd
                     );
 
 #if FEATURE_APPDOMAIN
-                if (taskAppDomain != null)
+                if (taskAppDomain != null && taskInstance != null)
                 {
                     _tasksAndAppDomains[taskInstance] = taskAppDomain;
+                }
+                else if (taskAppDomain != null)
+                {
+                    AssemblyLoadsTracker.StopTracking(taskAppDomain);
                 }
 #endif
 

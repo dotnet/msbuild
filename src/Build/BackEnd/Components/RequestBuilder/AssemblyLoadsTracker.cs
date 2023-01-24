@@ -3,6 +3,7 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 
@@ -10,16 +11,38 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 {
     internal class AssemblyLoadsTracker : IDisposable
     {
+        private static readonly ConcurrentDictionary<AppDomain, AssemblyLoadsTracker> s_instances =
+            new ConcurrentDictionary<AppDomain, AssemblyLoadsTracker>();
         private readonly LoggingContext _loggingContext;
+        private readonly AppDomain _appDomain;
 
-        private AssemblyLoadsTracker(LoggingContext loggingContext) => _loggingContext = loggingContext;
+        private AssemblyLoadsTracker(LoggingContext loggingContext)
+            : this(loggingContext, AppDomain.CurrentDomain)
+        { }
 
-        public static IDisposable StartTracking(LoggingContext loggingContext)
+        private AssemblyLoadsTracker(LoggingContext loggingContext, AppDomain appDomain)
         {
-            // Debugger.Launch();
-            var tracker = new AssemblyLoadsTracker(loggingContext);
+            _loggingContext = loggingContext;
+            _appDomain = appDomain;
+        }
+
+        public static IDisposable StartTracking(LoggingContext loggingContext, AppDomain? appDomain = null)
+        {
+            var tracker = new AssemblyLoadsTracker(loggingContext, appDomain ?? AppDomain.CurrentDomain);
+            if (appDomain != null)
+            {
+                s_instances.AddOrUpdate(appDomain, tracker, (_, loadsTracker) => loadsTracker);
+            }
             tracker.StartTracking();
             return tracker;
+        }
+
+        public static void StopTracking(AppDomain appDomain)
+        {
+            if (s_instances.TryRemove(appDomain, out AssemblyLoadsTracker? tracker))
+            {
+                tracker.StopTracking();
+            }
         }
 
         public void Dispose()
@@ -28,25 +51,24 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
         }
         private void StartTracking()
         {
-            AppDomain.CurrentDomain.AssemblyLoad += CurrentDomainOnAssemblyLoad;
+            _appDomain.AssemblyLoad += CurrentDomainOnAssemblyLoad;
         }
 
         private void StopTracking()
         {
-            AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomainOnAssemblyLoad;
+            _appDomain.AssemblyLoad -= CurrentDomainOnAssemblyLoad;
         }
 
         private void CurrentDomainOnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            // Is it correct to get the resource within the args? Or should the caller pass it
-            // (former seems as better separation of concerns)
-            // string? message = ResourceUtilities.GetResourceString("TaskAssemblyLoaded");
             string? assemblyName = args.LoadedAssembly.FullName;
             string? assemblyPath = args.LoadedAssembly.Location;
             Guid mvid = args.LoadedAssembly.ManifestModule.ModuleVersionId;
 
-            AssemblyLoadBuildEventArgs buildArgs = new(assemblyName, assemblyPath, mvid);
-            buildArgs.BuildEventContext = _loggingContext.BuildEventContext;
+            AssemblyLoadBuildEventArgs buildArgs = new(assemblyName, assemblyPath, mvid, _appDomain.Id, _appDomain.FriendlyName)
+            {
+                BuildEventContext = _loggingContext.BuildEventContext
+            };
             _loggingContext.LogBuildEvent(buildArgs);
         }
     }

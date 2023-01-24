@@ -10,8 +10,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
-    // [Serializable] TODO: this is likely not needed - custom serialization is happening
-    public class AssemblyLoadBuildEventArgs : BuildMessageEventArgs // or LazyFormattedBuildEventArgs?
+    public class AssemblyLoadBuildEventArgs : BuildMessageEventArgs
     {
         public AssemblyLoadBuildEventArgs()
         { }
@@ -20,17 +19,23 @@ namespace Microsoft.Build.Framework
             string assemblyName,
             string assemblyPath,
             Guid mvid,
+            int appDomainId,
+            string appDomainFriendlyName,
             MessageImportance importance = MessageImportance.Low)
             : base(null, null, null, importance, DateTime.UtcNow, assemblyName, assemblyPath, mvid)
         {
             AssemblyName = assemblyName;
             AssemblyPath = assemblyPath;
             MVID = mvid;
+            AppDomainId = appDomainId;
+            AppDomainFriendlyName = appDomainFriendlyName;
         }
 
         public string AssemblyName { get; private set; }
         public string AssemblyPath { get; private set; }
         public Guid MVID { get; private set; }
+        public int AppDomainId { get; private set; }
+        public string AppDomainFriendlyName { get; private set; }
 
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -39,6 +44,8 @@ namespace Microsoft.Build.Framework
             writer.WriteGuid(MVID);
             writer.WriteOptionalString(AssemblyName);
             writer.WriteOptionalString(AssemblyPath);
+            writer.Write7BitEncodedInt(AppDomainId);
+            writer.WriteOptionalString(AppDomainFriendlyName);
         }
 
         internal override void CreateFromStream(BinaryReader reader, int version)
@@ -48,6 +55,8 @@ namespace Microsoft.Build.Framework
             MVID = reader.ReadGuid();
             AssemblyName = reader.ReadOptionalString();
             AssemblyPath = reader.ReadOptionalString();
+            AppDomainId = reader.Read7BitEncodedInt();
+            AppDomainFriendlyName = reader.ReadOptionalString();
         }
 
         public override string Message
@@ -56,7 +65,7 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", AssemblyName, AssemblyPath, MVID.ToString());
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", AssemblyName, AssemblyPath, MVID.ToString(), AppDomainId.ToString(), AppDomainFriendlyName);
                 }
 
                 return RawMessage;

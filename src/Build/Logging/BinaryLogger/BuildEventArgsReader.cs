@@ -805,17 +805,20 @@ namespace Microsoft.Build.Logging
 
         private AssemblyLoadBuildEventArgs ReadAssemblyLoadEventArgs()
         {
-            // needed?? (not set in args ser/desr methods nor ctor)
             var fields = ReadBuildEventArgsFields(readImportance: false);
 
             string assemblyName = ReadDeduplicatedString();
             string assemblyPath = ReadDeduplicatedString();
             Guid mvid = ReadGuid();
+            int appDomainId = ReadInt32();
+            string appDomainName = ReadDeduplicatedString();
 
             var e = new AssemblyLoadBuildEventArgs(
                 assemblyName,
                 assemblyPath,
-                mvid);
+                mvid,
+                appDomainId,
+                appDomainName);
             SetCommonFields(e, fields);
 
             return e;

@@ -417,8 +417,8 @@
         <note />
       </trans-unit>
       <trans-unit id="TaskAssemblyLoaded">
-        <source>Assembly loaded during task run: {0} (location: {1}, MVID: {2})</source>
-        <target state="new">Assembly loaded during task run: {0} (location: {1}, MVID: {2})</target>
+        <source>Assembly loaded during task run: {0} (location: {1}, MVID: {2}, AppDomain: {3}|{4})</source>
+        <target state="new">Assembly loaded during task run: {0} (location: {1}, MVID: {2}, AppDomain: {3}|{4})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

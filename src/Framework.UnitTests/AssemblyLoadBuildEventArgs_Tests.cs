@@ -17,7 +17,9 @@ namespace Microsoft.Build.Framework.UnitTests
             string assemblyName = Guid.NewGuid().ToString();
             string assemblyPath = Guid.NewGuid().ToString();
             Guid mvid = Guid.NewGuid();
-            AssemblyLoadBuildEventArgs arg = new(assemblyName, assemblyPath, mvid);
+            int appDomainId = new Random().Next();
+            string appDomainName = Guid.NewGuid().ToString();
+            AssemblyLoadBuildEventArgs arg = new(assemblyName, assemblyPath, mvid, appDomainId, appDomainName);
 
             using MemoryStream stream = new MemoryStream();
             using BinaryWriter bw = new BinaryWriter(stream);
@@ -31,6 +33,8 @@ namespace Microsoft.Build.Framework.UnitTests
             argDeserialized.AssemblyName.ShouldBe(assemblyName);
             argDeserialized.AssemblyPath.ShouldBe(assemblyPath);
             argDeserialized.MVID.ShouldBe(mvid);
+            argDeserialized.AppDomainId.ShouldBe(appDomainId);
+            argDeserialized.AppDomainFriendlyName.ShouldBe(appDomainName);
         }
     }
 }

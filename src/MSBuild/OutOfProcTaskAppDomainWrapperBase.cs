@@ -297,13 +297,15 @@ namespace Microsoft.Build.CommandLine
                 wrappedTask = TaskLoader.CreateTask(taskType, taskName, taskFile, taskLine, taskColumn, new TaskLoader.LogError(LogErrorDelegate),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
+                    // custom app domain assembly loading won't be available for task host
+                    null,
 #endif
                     true /* always out of proc */
 #if FEATURE_APPDOMAIN
                     , out _taskAppDomain
 #endif
                     );
-
+                
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
