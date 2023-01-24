@@ -14,6 +14,11 @@
     <BuildHelixPayload Condition="'$(RunAoTTests)' != 'true'">false</BuildHelixPayload>
   </PropertyGroup>
 
+  <!-- Based on .NET 8 breaking change: Add SC like old behavior if RID is defined. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' and '$(SelfContained)' == ''">
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
   </ItemGroup>

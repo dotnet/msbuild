@@ -116,28 +116,12 @@ namespace Microsoft.NET.Build.Tests
 
             string identifier = passSelfContained.ToString() + "_" + passRuntimeIdentifier;
 
-            if (!passSelfContained && passRuntimeIdentifier)
-            {
-                //  This combination results in a build error because it ends up being a self-contained Exe referencing a framework dependent one
-                var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: identifier);
+            var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
 
-                new DotnetBuildCommand(testAsset, "-r", EnvironmentInfo.GetCompatibleRid())
-                    .Execute()
-                    .Should()
-                    .Fail()
-                    .And
-                    .HaveStdOutContaining("NETSDK1150");
-            }
-            else
-            {
-
-                var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
-
-                ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
-                //  SelfContained will only flow to referenced project if it's explicitly passed in this case
-                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
-            }
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
         }
+
 
         [RequiresMSBuildVersionTheory("17.4.0.41702")]
         [InlineData(true, true)]
@@ -176,18 +160,32 @@ namespace Microsoft.NET.Build.Tests
                 project.Root.Element("PropertyGroup").Add(XElement.Parse(@"<OutputType Condition=""'$(TargetFramework)' == 'net6.0'"">Library</OutputType>"));
             });
 
-            var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
+            string identifier = passSelfContained.ToString() + "_" + passRuntimeIdentifier;
 
-            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+            if (!passSelfContained && passRuntimeIdentifier)
+            {
+                var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: identifier);
 
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                targetFramework: "net6.0");
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                targetFramework: "net7.0");
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: false, expectRuntimeIdentifier: false,
-                targetFramework: "net6.0");
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                targetFramework: "net7.0");
+                new DotnetBuildCommand(testAsset, "-r", EnvironmentInfo.GetCompatibleRid())
+                    .Execute()
+                    .Should()
+                    .Fail()
+                    .And
+                    .HaveStdOutContaining("NETSDK1150");
+            }
+            else
+            {
+                var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
+
+                ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                    targetFramework: "net6.0");
+                ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                    targetFramework: "net7.0");
+                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                    targetFramework: "net6.0");
+                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                    targetFramework: "net7.0");
+            }
         }
 
         [RequiresMSBuildVersionTheory("17.4.0.41702", Skip = "https://github.com/dotnet/msbuild/issues/8154")]

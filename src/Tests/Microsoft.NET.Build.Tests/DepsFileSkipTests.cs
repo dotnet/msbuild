@@ -52,6 +52,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
+            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             string filenameToSkip = "Microsoft.CSharp.dll";
@@ -105,6 +106,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
+            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             string filenameToSkip = FileConstants.DynamicLibPrefix + "coreclr" + FileConstants.DynamicLibSuffix;
