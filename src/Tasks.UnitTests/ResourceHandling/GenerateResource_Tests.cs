@@ -2975,8 +2975,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             _output = output;
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
         [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
@@ -3153,7 +3152,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// which fails (LoadFile requires an absolute path).  The fix was to use
         /// Assembly.LoadFrom instead.
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
         [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()

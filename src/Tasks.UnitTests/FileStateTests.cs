@@ -44,8 +44,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() => { var time = state.LastWriteTime; });
         }
 
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [LongPathSupportEnabledFact]
         public void BadTooLongLastWriteTime()
         {
             Helpers.VerifyAssertThrowsSameWay(

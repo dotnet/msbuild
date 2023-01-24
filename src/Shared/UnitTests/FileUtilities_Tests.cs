@@ -422,9 +422,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
         }
 
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/4363")]
+        [LongPathSupportEnabledFact(fullFrameworkOnly: true, additionalMessage: "https://github.com/dotnet/msbuild/issues/4363")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>

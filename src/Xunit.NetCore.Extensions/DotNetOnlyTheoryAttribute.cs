@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.UnitTests;
+
 namespace Xunit.NetCore.Extensions
 {
     /// <summary>
@@ -14,7 +16,7 @@ namespace Xunit.NetCore.Extensions
         /// <param name="additionalMessage">The additional message that is appended to skip reason, when test is skipped.</param>
         public DotNetOnlyTheoryAttribute(string? additionalMessage = null)
         {
-            if (!Utilities.IsRunningOnNet)
+            if (!CustomXunitAttributesUtilities.IsRunningOnNet)
             {
                 this.Skip = "This test only runs on .NET.".AppendAdditionalMessage(additionalMessage);
             }

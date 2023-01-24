@@ -118,6 +118,12 @@
     <Compile Include="..\Shared\UnitTests\ImmutableDictionary_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full' and '$(MonoBuild)' != 'true'">
       <Link>Collections\ImmutableDictionary_Tests.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\UnitTests\CustomXunitAttributesUtilities.cs">
+      <Link>Shared\CustomXunitAttributesUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\LongPathSupportEnabledFactAttribute.cs">
+      <Link>Shared\LongPathSupportEnabledFactAttribute.cs</Link>
+    </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>

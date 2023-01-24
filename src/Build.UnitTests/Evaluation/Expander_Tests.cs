@@ -591,9 +591,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogContains("[foo;bar]");
         }
 
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/4363")]
+        [LongPathSupportEnabledFact(fullFrameworkOnly: true, additionalMessage: "https://github.com/dotnet/msbuild/issues/4363")]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -876,8 +874,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [LongPathSupportEnabledFact]
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -936,8 +933,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [LongPathSupportEnabledFact]
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -996,8 +992,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [LongPathSupportEnabledFact]
         public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1049,9 +1044,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4248");
         }
 
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "new enough dotnet.exe transparently opts into long paths")]
+        [LongPathSupportEnabledFact(fullFrameworkOnly: true, additionalMessage: "new enough dotnet.exe transparently opts into long paths")]
         public void PathTooLongInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(

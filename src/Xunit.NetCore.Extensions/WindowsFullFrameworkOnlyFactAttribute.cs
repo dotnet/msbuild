@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Runtime.InteropServices;
+using Microsoft.Build.UnitTests;
 
 namespace Xunit.NetCore.Extensions
 {
@@ -21,7 +22,7 @@ namespace Xunit.NetCore.Extensions
                 this.Skip = "This test only runs on Windows on full framework.".AppendAdditionalMessage(additionalMessage);
                 return;
             }
-            if (!Utilities.IsRunningOnNetFramework)
+            if (!CustomXunitAttributesUtilities.IsRunningOnNetFramework)
             {
                 this.Skip = "This test only runs on full framework.".AppendAdditionalMessage(additionalMessage);
             }

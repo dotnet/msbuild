@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Xunit.NetCore.Extensions
+namespace Microsoft.Build.UnitTests
 {
-    internal static class Utilities
+    internal static class CustomXunitAttributesUtilities
     {
 #if NETFRAMEWORK
         public static bool IsRunningOnNet => false;

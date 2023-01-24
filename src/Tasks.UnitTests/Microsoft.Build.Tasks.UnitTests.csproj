@@ -59,6 +59,13 @@
     <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
+    <Compile Include="..\Shared\UnitTests\CustomXunitAttributesUtilities.cs">
+      <Link>Shared\CustomXunitAttributesUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\LongPathSupportEnabledFactAttribute.cs">
+      <Link>Shared\LongPathSupportEnabledFactAttribute.cs</Link>
+    </Compile>
+
     <EmbeddedResource Include="SampleResx" />
     <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />
 

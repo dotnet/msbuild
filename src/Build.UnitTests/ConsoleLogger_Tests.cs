@@ -21,6 +21,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Build.Execution;
 using System.Runtime.Versioning;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -321,8 +322,7 @@ namespace Microsoft.Build.UnitTests
             output.ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + "::Number=2 TargetFramework=netcoreapp2.1]");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/6518")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Minimal path validation in Core allows expanding path containing quoted slashes.")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Minimal path validation in Core allows expanding path containing quoted slashes.", Skip = "https://github.com/dotnet/msbuild/issues/6518")]
         [SkipOnMono("Minimal path validation in Mono allows expanding path containing quoted slashes.")]
         public void TestItemsWithUnexpandableMetadata()
         {

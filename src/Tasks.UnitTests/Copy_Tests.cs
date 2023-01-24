@@ -1931,7 +1931,6 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3027");
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
         internal virtual void ErrorIfLinkFailedCheck()
         {
             using (var env = TestEnvironment.Create())
@@ -2375,7 +2374,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();
@@ -2456,7 +2455,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();
