@@ -16,6 +16,7 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -2520,8 +2521,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Read-only StateFile yields message
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask(_output);

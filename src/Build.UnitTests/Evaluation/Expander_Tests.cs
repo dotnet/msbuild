@@ -32,6 +32,7 @@ using Xunit;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -1710,8 +1711,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyString()
         {
@@ -1733,8 +1733,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyBinary()
         {
@@ -1759,8 +1758,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyDWord()
         {
@@ -1782,8 +1780,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyExpandString()
         {
@@ -1806,8 +1803,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyQWord()
         {
@@ -1829,8 +1825,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyMultiString()
         {
@@ -3466,8 +3461,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(String.Empty, result);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValue()
         {
@@ -3491,8 +3485,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValueDefault()
         {
@@ -3516,8 +3509,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView1()
         {
@@ -3541,8 +3533,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView2()
         {

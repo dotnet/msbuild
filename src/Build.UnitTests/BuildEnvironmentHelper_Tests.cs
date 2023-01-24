@@ -7,6 +7,7 @@ using System.IO;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -371,9 +372,8 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void BuildEnvironmentFindsAmd64RunningInAmd64NoVS()
         {
             using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
@@ -389,9 +389,8 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64NoVS()
         {
             using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
@@ -438,9 +437,8 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentVSFromMSBuildAssembly()
         {
             using (var env = new EmptyVSEnviroment())
@@ -457,9 +455,8 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentVSFromMSBuildAssemblyAmd64()
         {
             using (var env = new EmptyVSEnviroment())

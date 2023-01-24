@@ -19,6 +19,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -1177,8 +1178,7 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false. Variation with different casing/relativeness.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
+        [WindowsOnlyFact(additionalMessage: "File names under Unix are case-sensitive and this test is not useful.")]
         public void CopyFileOnItself2()
         {
             string currdir = Directory.GetCurrentDirectory();
@@ -2189,8 +2189,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // SMB share paths only work on Windows
+        [WindowsOnlyFact(additionalMessage: "SMB share paths only work on Windows.")]
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
@@ -2295,8 +2294,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // Only Windows has a (small) link limit, and this tests for an HRESULT
+        [WindowsOnlyFact(additionalMessage: "Only Windows has a (small) link limit, and this tests for an HRESULT.")]
         public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting

@@ -23,6 +23,7 @@ using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFra
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -68,8 +69,7 @@ namespace Microsoft.Build.UnitTests
             returnValue.Length.ShouldBe(0);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetApiContractReferencesFindsWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -93,8 +93,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetApiContractReferencesFindsVersionedWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -117,8 +116,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetWinBlueSDKLocation()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
@@ -127,8 +125,7 @@ namespace Microsoft.Build.UnitTests
             returnValue.ShouldBe(sdkRootPath);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetWinBlueContentFolderPath()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
@@ -137,8 +134,7 @@ namespace Microsoft.Build.UnitTests
             returnValue.ShouldBe(Path.Combine(sdkRootPath, @"DesignTime\CommonConfiguration\Neutral"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetSDKRootLocation()
         {
             string expectedValue = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
@@ -151,11 +147,10 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1250")]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/1250")]
 #else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/2569")]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/2569")]
 #endif
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetUnversionedSDKUnionMetadataLocation()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
@@ -165,8 +160,7 @@ namespace Microsoft.Build.UnitTests
             returnValue.ShouldBe(Path.Combine(sdkRootPath, "UnionMetadata"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetVersionedSDKUnionMetadataLocation()
         {
             // Create manifest file
@@ -533,8 +527,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Search for a whidbey when whidbey is the current version.
          */
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void FindFrameworksPathRunningUnderWhidbey()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
@@ -551,8 +544,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Search for a whidbey when orcas is the current version.
         */
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void FindFrameworksPathRunningUnderOrcas()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
@@ -569,8 +561,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Search for a whidbey when orcas is the current version.
         */
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void FindFrameworksPathRunningUnderEverett()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
@@ -907,11 +898,10 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_REGISTRY_SDKS
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
 #else
-        [Fact(Skip = "Registry SDKs not supported")]
+        [WindowsOnlyFact(Skip = "Registry SDKs not supported")]
 #endif
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetPathToDotNetFrameworkSdk()
         {
             // Test out of range .net version.
@@ -990,8 +980,7 @@ namespace Microsoft.Build.UnitTests
 
 #pragma warning disable 618 //The test below tests a deprecated API. We disable the warning for obsolete methods for this particular test
 #if FEATURE_WIN32_REGISTRY
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetPathToWindowsSdk()
         {
             // Test out of range .net version.
@@ -1219,8 +1208,7 @@ namespace Microsoft.Build.UnitTests
             success.ShouldBeTrue(); // "Build Failed.  See Std Out for details."
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs11()
         {
             string projectContents = @"
@@ -1971,8 +1959,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we choose the correct path for program files based on the operating system
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void TestGenerateProgramFiles32()
         {
             Environment.SpecialFolder folder = Environment.Is64BitOperatingSystem ? Environment.SpecialFolder.ProgramFilesX86 : Environment.SpecialFolder.ProgramFiles;
@@ -1987,8 +1974,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get the correct reference assembly path out of the framework location helper
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "No ProgramFiles known location outside Windows"
+        [WindowsOnlyFact(additionalMessage: "No ProgramFiles known location outside Windows.")]
         public void TestGeneratedReferenceAssemblyPath()
         {
             string programFiles32 = FrameworkLocationHelper.GenerateProgramFiles32();
@@ -2476,8 +2462,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can get a list of directories out of the public API.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetAssemblyFoldersExInfoTest()
         {
             SetupAssemblyFoldersExTestConditionRegistryKey();
@@ -3175,8 +3160,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify SDKManifest defaults values for MaxPlatformVersion, MinOSVersion, MaxOSVersion when these are not
         /// present in the manifest and the SDK is a framework extension SDK
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void VerifyFrameworkSdkWithOldManifest()
         {
             string tmpRootDirectory = Path.GetTempPath();
@@ -4147,15 +4131,13 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the list of platforms is empty if we ask for an sdk that is not installed.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void VerifyGetFoldersInVSInstalls_Unix()
         {
             ToolLocationHelper.GetFoldersInVSInstalls(null, null, "relativePath").Count().ShouldBe(0);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void VerifyFindRootFolderWhereAllFilesExist()
         {
             // create directories and files in them

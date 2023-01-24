@@ -16,6 +16,7 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -703,8 +704,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, excludeString, normalizeSlashes: true);
         }
 
-        [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyTheory]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/**/*.cs",
             new[]
@@ -793,8 +793,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(@"z:\**\*.log")]
         [InlineData(@"z:$(empty)\**\*.log")]
         [InlineData(@"z:\**")]
@@ -807,8 +806,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(@"/**/*.log")]
         [InlineData(@"$(empty)/**/*.log")]
         [InlineData(@"/$(empty)**/*.log")]
@@ -878,8 +876,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project instance created from a file that contains a drive enumerating wildcard results in a logged warning on the Windows platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             ImportProjectElement,
             @"z:\**\*.targets",
@@ -903,8 +900,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(
             ImportProjectElement,
             @"\**\*.targets",

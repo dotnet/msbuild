@@ -7,6 +7,7 @@ using Microsoft.Build.Tasks;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -66,8 +67,7 @@ namespace Microsoft.Build.UnitTests
         /// From the documentation, Path.GetFullPath(" ") should throw an ArgumentException, but it doesn't on macOS and Linux
         /// where whitespace characters are valid characters for filenames.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void WhitespaceTestOnUnix()
         {
             var t = new FormatUrl();
@@ -81,8 +81,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is white space.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void WhitespaceTestOnWindows()
         {
             var t = new FormatUrl();
@@ -139,8 +138,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is a *nix-style (macOS, Linux) local absolute file path.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void LocalUnixAbsolutePathTest()
         {
             var t = new FormatUrl();
@@ -154,8 +152,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is a Windows-style local absolute file path.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void LocalWindowsAbsolutePathTest()
         {
             var t = new FormatUrl();

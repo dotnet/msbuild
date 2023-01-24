@@ -10,6 +10,7 @@ using Xunit;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Shouldly;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -194,8 +195,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Bad directory path
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "No invalid characters on Unix"
+        [WindowsOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidDirectoryPath()
         {
             WriteCodeFragment task = new WriteCodeFragment();

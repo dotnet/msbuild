@@ -9,6 +9,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 using System.IO;
 using System.Threading;
 using Shouldly;
@@ -2123,9 +2124,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Non-existent StateFile yields message
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         [Trait("Category", "mono-windows-failing")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);

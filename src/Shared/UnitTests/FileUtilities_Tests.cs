@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -417,8 +418,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("recursivedir"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -445,8 +445,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetItemSpecModifierRootDirThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -507,15 +506,13 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void NormalizePathGoodUNC()
         {
             Assert.Equal(@"\\localhost\share", FileUtilities.NormalizePath(@"\\localhost\share"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void NormalizePathTooLongWithDots()
         {
             string longPart = new string('x', 300);
@@ -523,8 +520,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4205")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/4205")]
         public void NormalizePathBadGlobalroot()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -555,8 +551,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void CannotNormalizePathWithNewLineAndSpace()
         {
             string filePath = "\r\n      C:\\work\\sdk3\\artifacts\\tmp\\Debug\\SimpleNamesWi---6143883E\\NETFrameworkLibrary\\bin\\Debug\\net462\\NETFrameworkLibrary.dll\r\n      ";
@@ -910,8 +905,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void AbsolutePathLooksLikeUnixPathOnUnix()
         {
             var secondSlash = SystemSpecificAbsolutePath.Substring(1).IndexOf(Path.DirectorySeparatorChar) + 1;
@@ -921,8 +915,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(FileUtilities.LooksLikeUnixFilePath(rootLevelPath));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void PathDoesNotLookLikeUnixPathOnWindows()
         {
             Assert.False(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
@@ -930,8 +923,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(FileUtilities.LooksLikeUnixFilePath("/root"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void RelativePathLooksLikeUnixPathOnUnixWithBaseDirectory()
         {
             string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/second/file.txt", String.Empty);
@@ -961,8 +953,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void RelativePathMaybeAdjustFilePathWithBaseDirectory()
         {
             // <tmp_dir>/first/second/file.txt
