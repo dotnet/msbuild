@@ -43,6 +43,7 @@ namespace Microsoft.DotNet.Cli
         DependentCommandOptions _options;
 
         private IEnumerable<string> _slnOrProjectArgs;
+        private bool _isHandlingSolution = false;
 
         private static string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
         private static string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
@@ -95,7 +96,12 @@ namespace Microsoft.DotNet.Cli
                             (propertyToCheckValue.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)
                         }"
                     };
-
+                    
+                    if (_isHandlingSolution) // This will allow us to detect conflicting configuration values during evaluation.
+                    {
+                        newConfigurationArgs.Add($"-property:_SolutionLevel{_propertyToCheck}={propertyToCheckValue}");
+                    }
+                    
                     return newConfigurationArgs;
                 }
             }
@@ -154,13 +160,15 @@ namespace Microsoft.DotNet.Cli
                 return null; // This can be called if a solution doesn't exist. MSBuild will catch that for us.
             }
 
+            _isHandlingSolution = true;
             List<ProjectInstance> configuredProjects = new List<ProjectInstance>();
             HashSet<string> configValues = new HashSet<string>();
             object projectDataLock = new object();
 
-            if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE_SOLTUION), "true", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS), "true", StringComparison.OrdinalIgnoreCase))
             {
-                return null;
+                // Evaluate only one project for speed if this environment variable is used. Will break more customers if enabled (adding 8.0 project to SLN with other project TFMs with no Publish or PackRelease.)
+                return GetSingleProjectFromSolution(sln, globalProps);
             }
 
             Parallel.ForEach(sln.Projects.AsEnumerable(), (project, state) =>
@@ -168,7 +176,7 @@ namespace Microsoft.DotNet.Cli
 #pragma warning disable CS8604 // Possible null reference argument.
                 string projectFullPath = Path.Combine(Path.GetDirectoryName(sln.FullPath), project.FilePath);
 #pragma warning restore CS8604 // Possible null reference argument.
-                if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(projectFullPath))
+                if (IsUnanalyzableProjectInSolution(project, projectFullPath))
                     return;
 
                 var projectData = TryGetProjectInstance(projectFullPath, globalProps);
@@ -198,6 +206,43 @@ namespace Microsoft.DotNet.Cli
             }
 
             return configuredProjects.Any() ? configuredProjects.First() : null;
+        }
+
+        /// <summary>
+        /// Lazily gets an arbitrary project for the solution. This will not catch errors unlike where we evaluate all projects in parallel.
+        /// </summary>
+        /// <param name="sln">The solution to get an arbitrary project from.</param>
+        /// <param name="globalProps">The global properties to load into the project.</param>
+        /// <returns>null if no project exists in the solution that can be evaluated properly. Else, an arbitrary project in the solution which can be.</returns>
+        private ProjectInstance? GetSingleProjectFromSolution(SlnFile sln, Dictionary<string, string> globalProps)
+        {
+            foreach (var project in sln.Projects.AsEnumerable())
+            {
+#pragma warning disable CS8604 // Possible null reference argument.
+                string projectFullPath = Path.Combine(Path.GetDirectoryName(sln.FullPath), project.FilePath);
+#pragma warning restore CS8604 // Possible null reference argument.
+                if (IsUnanalyzableProjectInSolution(project, projectFullPath))
+                    continue;
+
+                var projectData = TryGetProjectInstance(projectFullPath, globalProps);
+                if (projectData != null)
+                {
+                    return projectData;
+                }
+            };
+
+            return null;
+        }
+
+        /// <summary>
+        /// Analyze if the project appears to be valid and something we can read into memory.
+        /// </summary>
+        /// <param name="project">The project under a solution to evaluate.</param>
+        /// <param name="projectFullPath">The full hard-coded path of the project.</param>
+        /// <returns>True if the project is not supported by ProjectInstance class or appears to be invalid.</returns>
+        private bool IsUnanalyzableProjectInSolution(SlnProject project, string projectFullPath)
+        {
+            return project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(projectFullPath);
         }
 
         /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails.</returns>

@@ -246,6 +246,28 @@ namespace Microsoft.NET.Publish.Tests
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
 
+        [InlineData("true")]
+        [InlineData("false")]
+        [InlineData("")]
+        [Theory]
+        public void ItFailsWithLazyEnvironmentVariableNet8ProjectAndNet7ProjectSolutionWithPublishReleaseUndefined(string publishReleaseValue)
+        {
+            var firstProjectTfm = "net7.0";
+            var secondProjectTfm = ToolsetInfo.CurrentTargetFramework; // This should work for Net8+, test name is for brevity
+
+            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "", publishReleaseValue);
+            var sln = solutionAndProjects.Item1;
+
+            var dotnetCommand = new DotnetPublishCommand(Log);
+            dotnetCommand
+                .WithEnvironmentVariable("DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS", "true")
+                .Execute(sln.SolutionPath)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(String.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, PublishRelease, ""));
+        }
+
         [Fact]
         public void ItFailsIfNet7DefinesPublishReleaseFalseButNet8PlusDefinesNone()
         {

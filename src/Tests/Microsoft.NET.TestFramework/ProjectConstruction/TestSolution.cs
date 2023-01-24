@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 using Xunit.Sdk;
@@ -29,9 +30,14 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             ProjectPaths = new List<string>();
 
             var slnCreator = new DotnetNewCommand(log, "sln", "-o", $"{newSolutionPath}", "-n", $"{name}");
-            slnCreator
+            var slnCreationResult = slnCreator
                 .WithVirtualHive()
                 .Execute();
+
+            if(slnCreationResult.ExitCode != 0)
+            {
+                throw new Exception($"This test failed during a call to dotnet new. If {newSolutionPath} is valid, it's likely this test is failing because of dotnet new. If there are failing .NET new tests, please fix those and then see if this test still fails.");
+            }
 
             foreach (var project in solutionProjects)
             {
