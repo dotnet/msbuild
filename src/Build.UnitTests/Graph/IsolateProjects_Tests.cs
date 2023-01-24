@@ -131,7 +131,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         public IsolateProjectsTests(ITestOutputHelper testOutput)
         {
             _testOutput = testOutput;
-            _env = TestEnvironment.Create(_testOutput);
+            _env = TestEnvironment.Create(_testOutput, ignoreBuildErrorFiles: false);
 
             if (NativeMethodsShared.IsOSX)
             {
@@ -139,6 +139,8 @@ BuildEngine5.BuildProjectFilesInParallel(
                 // this discrepancy fails the msbuild undeclared reference enforcements due to failed path equality checks
                 _env.SetTempPath(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")), deleteTempDirectory: true);
             }
+
+            _env.WithInvariant(new BuildFailureLogInvariant());
 
             // todo investigate why out of proc builds fail on macos https://github.com/dotnet/msbuild/issues/3915
             var disableInProcNode = !NativeMethodsShared.IsOSX;
