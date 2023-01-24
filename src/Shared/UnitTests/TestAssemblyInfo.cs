@@ -36,7 +36,8 @@ namespace Microsoft.Build.UnitTests
             var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             runningTestsField.SetValue(null, true);
 
-            _testEnvironment = TestEnvironment.Create();
+            // Note: build error files will be initialized in test environments for particular tests, also we don't have output to report error files into anyway...
+            _testEnvironment = TestEnvironment.Create(output: null, ignoreBuildErrorFiles: true);
 
             _testEnvironment.DoNotLaunchDebugger();
 
