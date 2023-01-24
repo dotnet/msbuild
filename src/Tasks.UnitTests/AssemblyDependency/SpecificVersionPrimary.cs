@@ -106,7 +106,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// </list>
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ExistsDifferentName()
         {
             // Create the engine.
@@ -159,7 +158,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     perf hit when loading large solutions.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ExistsOldVersionRange()
         {
             // Create the engine.
@@ -212,7 +210,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     perf hit when loading large solutions.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void HighVersionDoesntExist()
         {
             // Create the engine.

@@ -333,8 +333,6 @@ namespace Microsoft.Build.UnitTests
         /// Test that task items can be successfully constructed based on a task item from another appdomain.  
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void RemoteTaskItem()
         {
             AppDomain appDomain = null;

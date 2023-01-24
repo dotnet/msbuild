@@ -253,7 +253,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Make sure we get the correct folder list when asking for it.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetSDKReferenceFolders()
         {
             var getReferenceFolders = new GetSDKFolders(ToolLocationHelper.GetSDKReferenceFolders);
@@ -321,7 +320,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Make sure we get the correct folder list when asking for it.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetSDKRedistFolders()
         {
             var getRedistFolders = new GetSDKFolders(ToolLocationHelper.GetSDKRedistFolders);
@@ -334,7 +332,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Make sure we get the correct folder list when asking for it.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetSDKDesignTimeFolders()
         {
             var getDesignTimeFolders = new GetSDKFolders(ToolLocationHelper.GetSDKDesignTimeFolders);
@@ -416,7 +413,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify we get the correct set of reference assemblies and copy local files when the CopyLocal flag is true
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetReferenceAssembliesWhenExpandTrueCopyLocalTrue()
         {
             var engine = new MockEngine(_output);
@@ -482,7 +478,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify reference is not processed by GetSDKReferenceFiles when "ReferenceOnly" metadata is set.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyNoCopyWhenReferenceOnlyIsTrue()
         {
             var engine = new MockEngine(_output);
@@ -539,8 +534,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify we get the correct set of reference assemblies and copy local files when the CopyLocal flag is false
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void GetReferenceAssembliesWhenExpandTrueCopyLocalFalse()
         {
             var engine = new MockEngine(_output);
@@ -662,7 +655,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// added.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyReferencesLogged()
         {
             var engine = new MockEngine(_output);
@@ -711,7 +703,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// added.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyReferencesLoggedFilterOutWinmd()
         {
             var engine = new MockEngine(_output);
@@ -757,7 +748,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify we log an error if no configuration is on the sdk reference
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogErrorWhenNoConfiguration()
         {
             var engine = new MockEngine(_output);
@@ -781,7 +771,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify we log an error if no configuration is on the sdk reference
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogErrorWhenNoArchitecture()
         {
             var engine = new MockEngine(_output);
@@ -858,7 +847,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// added.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyReferencesLoggedX64()
         {
             var engine = new MockEngine(_output);
@@ -910,7 +898,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify the correct reference files are found and that if we do not want to log them we can set a property to do so.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyLogReferencesFalse()
         {
             var engine = new MockEngine(_output);
@@ -946,7 +933,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// added.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyRedistFilesLogRedistFalse()
         {
             var engine = new MockEngine(_output);
@@ -1012,7 +998,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// added.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyRedistFilesLogRedistTrue()
         {
             var engine = new MockEngine(_output);
@@ -1044,7 +1029,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// added.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyRedistFilesLogRedistTrueX64()
         {
             var engine = new MockEngine(_output);
@@ -1077,7 +1061,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// added.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyRedistFilesLogRedistTrueAmd64()
         {
             var engine = new MockEngine(_output);
@@ -1109,7 +1092,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Make sure by default conflicts between references are logged as a comment if they are within the sdk itself
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogNoWarningForReferenceConflictWithinSDK()
         {
             var engine = new MockEngine(_output);
@@ -1138,7 +1120,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Make sure that if the LogReferenceConflictsWithinSDKAsWarning is set log a warning for conflicts within an SDK for references.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogWarningForReferenceConflictWithinSDK()
         {
             var engine = new MockEngine(_output);
@@ -1168,7 +1149,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Make sure by default conflicts between references are logged as a comment if they are within the sdk itself
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogNoWarningForRedistConflictWithinSDK()
         {
             var engine = new MockEngine(_output);
@@ -1196,7 +1176,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Make sure that if the LogRedistConflictsWithinSDKAsWarning is set log a warning for conflicts within an SDK for redist files.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogWarningForRedistConflictWithinSDK()
         {
             var engine = new MockEngine(_output);
@@ -1225,7 +1204,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify if there are conflicts between references or redist files between sdks that we log a warning by default.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogReferenceAndRedistConflictBetweenSdks()
         {
             var engine = new MockEngine(_output);
@@ -1271,7 +1249,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// If a user create a target path that causes a conflict between two sdks then we want to warn
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogReferenceAndRedistConflictBetweenSdksDueToCustomTargetPath()
         {
             var engine = new MockEngine(_output);
@@ -1314,7 +1291,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify if there are conflicts between references or redist files between sdks that we do not log a warning if a certain property (LogxxxConflictBetweenSDKsAsWarning is set to false.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void LogReferenceAndRedistConflictBetweenSdksNowarning()
         {
             var engine = new MockEngine(_output);
@@ -1361,7 +1337,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// If there are conflicting redist files between two sdks but their target paths are different then we should copy both to the appx
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void TwoSDKSConflictRedistButDifferentTargetPaths()
         {
             var engine = new MockEngine(_output);

@@ -132,7 +132,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void DoNotNormallyCopyOverReadOnlyFile()
@@ -195,7 +194,6 @@ namespace Microsoft.Build.UnitTests
         /// OverwriteReadOnlyFiles is false
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyOverReadOnlyFileEnvironmentOverride()
@@ -261,7 +259,6 @@ namespace Microsoft.Build.UnitTests
         /// If MSBUILDALWAYSRETRY is set, keep retrying the copy.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void AlwaysRetryCopyEnvironmentOverride()
@@ -333,7 +330,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyOverReadOnlyFileParameterIsSet()
@@ -790,7 +786,6 @@ namespace Microsoft.Build.UnitTests
         /// Most important case is when destination is locked
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void DoRetryWhenDestinationLocked()
@@ -1226,7 +1221,6 @@ namespace Microsoft.Build.UnitTests
         /// or not skipUnchangedFiles is true or false. Variation with a second copy failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyFileOnItselfAndFailACopy()

@@ -260,7 +260,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsItemSpecModifier()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -321,7 +320,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChained1()
         {
             ProjectHelpers.CreateEmptyProjectInstance();
@@ -338,7 +336,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChained2()
         {
             ProjectHelpers.CreateEmptyProjectInstance();
@@ -366,7 +363,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChainedProject1()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -642,7 +638,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsItemSpecModifier2()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -1858,7 +1853,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGetPathToReferenceAssembliesAsFunction()
         {
             if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48) == null)
@@ -2191,7 +2185,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDictionaryReturn()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3206,7 +3199,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that tests for existence of the task host
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDoesTaskHostExist()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3223,7 +3215,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that tests for existence of the task host
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDoesTaskHostExist_Whitespace()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3279,7 +3270,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that tests for existence of the task host
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDoesTaskHostExist_Evaluated()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3332,7 +3322,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionStaticMethodFileAttributes()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();

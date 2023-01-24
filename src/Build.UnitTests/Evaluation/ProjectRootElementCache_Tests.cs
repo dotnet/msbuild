@@ -80,7 +80,6 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tests that a strong reference is held to a single item
         /// </summary>
-        [Trait("Category", "non-mono-tests")]
         [WindowsFullFrameworkOnlyFact(additionalMessage: "This test fails on .NET Core and Mono: https://github.com/dotnet/msbuild/issues/282")]
         public void AddEntryStrongReference()
         {

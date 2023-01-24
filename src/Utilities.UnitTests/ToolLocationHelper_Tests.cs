@@ -617,7 +617,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void ExerciseMiscToolLocationHelperMethods()
@@ -678,7 +677,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGetPathToBuildToolsFile()
         {
             string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version20);
@@ -701,7 +699,6 @@ namespace Microsoft.Build.UnitTests
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/722")]
 #else
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
 #endif
         public void TestGetPathToBuildToolsFile_32Bit()
         {
@@ -1123,7 +1120,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
         {
             string projectContents = @"
@@ -1165,7 +1161,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs10()
         {
             string projectContents = @"
@@ -1346,7 +1341,6 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if the moniker and the root make a too long path that an InvalidOperationException is raised
         /// which indicates there was a problem generating the reference assembly path.
         /// </summary>
-        [Trait("Category", "mono-osx-failing")]
         [WindowsFullFrameworkOnlyFact]
         public void GenerateReferencAssemblyPathTooLong()
         {
@@ -1375,7 +1369,6 @@ namespace Microsoft.Build.UnitTests
         /// do not have anything to chain with.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ChainReferenceAssembliesRedistExistsNoRedistList()
         {
             string path = ToolLocationHelper.ChainReferenceAssemblyPath(@"PathDoesNotExistSoICannotChain");
@@ -1620,7 +1613,6 @@ namespace Microsoft.Build.UnitTests
         /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
         /// </summary>
         [WindowsFullFrameworkOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void ChainReferenceAssembliesRedistPathTooLong()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1923,7 +1915,6 @@ namespace Microsoft.Build.UnitTests
         /// place, which means it just looks for a folder starting with v4.0 in the right spot for any higher version.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetPathToReferenceAssembliesDefaultLocation48()
         {
             if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48) != null)
@@ -2193,7 +2184,6 @@ namespace Microsoft.Build.UnitTests
         /// We expect to always get the same path which is returned by GetPathToReferenceAssemblies.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetPathToStandardLibraries64Bit40()
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
@@ -3097,7 +3087,6 @@ namespace Microsoft.Build.UnitTests
         ///
         /// </summary>
         [WindowsFullFrameworkOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void ResolveFromDirectoryPathTooLong()
         {
             Should.Throw<PathTooLongException>(() =>
@@ -3711,7 +3700,6 @@ namespace Microsoft.Build.UnitTests
         /// Setup some fake entries in the registry and verify we get the correct sdk from there.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyGetInstalledSDKLocations3()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations3");
@@ -3814,7 +3802,6 @@ namespace Microsoft.Build.UnitTests
         /// get the expected set out.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ResolveSDKFromDirectory()
         {
             var paths = new List<string> { _fakeStructureRoot, _fakeStructureRoot2 };
@@ -3941,7 +3928,6 @@ namespace Microsoft.Build.UnitTests
         /// and make sure we get the expected results.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ResolveSDKFromRegistryAndDisk()
         {
             var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
@@ -4172,7 +4158,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for pre-OneCore SDKs during evaluation time as a msbuild function.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyGetPreOneCoreSDKPropsLocation()
         {
             // This is the mockup layout for SDKs before One Core SDK.
@@ -4248,7 +4233,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for OneCore SDK during evaluation time as a msbuild function.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyGetOneCoreSDKPropsLocation()
         {
             // This is the mockup layout for One Core SDK.

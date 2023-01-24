@@ -22,8 +22,6 @@ using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
-    [Trait("Category", "mono-osx-failing")]
-    [Trait("Category", "mono-windows-failing")]
     public sealed class RequiredTransformations : IDisposable
     {
         private readonly TestEnvironment _env;
@@ -2315,8 +2313,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  STR class name derived from output file transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
+
         public void StronglyTypedClassName()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2362,8 +2359,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  STR class file name derived from class name transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2652,7 +2647,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Invalid StronglyTypedLanguage yields CodeDOM exception
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UnknownStronglyTypedLanguage()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2976,7 +2970,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [WindowsFullFrameworkOnlyFact(additionalMessage: "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
-        [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3153,8 +3146,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// Assembly.LoadFrom instead.
         /// </summary>
         [WindowsFullFrameworkOnlyFact(additionalMessage: "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
-        [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

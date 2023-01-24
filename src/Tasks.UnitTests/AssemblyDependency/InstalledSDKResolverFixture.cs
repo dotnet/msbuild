@@ -53,7 +53,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify when we are trying to match a name which is the reference assembly directory
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SDkNameMatchInRADirectory()
         {
             ResolveSDKFromRefereneAssemblyLocation("DebugX86SDKWinMD", @"C:\FakeSDK\References\Debug\X86\DebugX86SDKWinMD.Winmd", _output);

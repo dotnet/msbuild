@@ -21,7 +21,6 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void GetItemSpecModifier()
@@ -216,7 +215,6 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.EndsWithSlash
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EndsWithSlash()
@@ -241,7 +239,6 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.GetDirectory
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void GetDirectoryWithTrailingSlash()
@@ -574,7 +571,6 @@ namespace Microsoft.Build.UnitTests
         // These tests will need to be redesigned for Linux
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void FileOrDirectoryExistsNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -590,7 +586,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void FileOrDirectoryExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -644,7 +639,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void DirectoryExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -681,7 +675,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void FileExistsNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -697,7 +690,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void FileExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -725,7 +717,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetFileInfoNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -741,7 +732,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetFileInfoNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -863,7 +853,6 @@ namespace Microsoft.Build.UnitTests
         /// Extension is invalid
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void GenerateTempBatchFileWithBadExtension()
@@ -878,7 +867,6 @@ namespace Microsoft.Build.UnitTests
         /// Directory is invalid
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void GenerateTempBatchFileWithBadDirectory()

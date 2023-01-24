@@ -52,7 +52,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile()
@@ -75,7 +74,6 @@ namespace Microsoft.Build.UnitTests
         /// lying around.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
             using (var testEnvironment = TestEnvironment.Create())
@@ -965,7 +963,6 @@ echo line 3"" />
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EndToEndMultilineExec_EscapeSpecialCharacters()

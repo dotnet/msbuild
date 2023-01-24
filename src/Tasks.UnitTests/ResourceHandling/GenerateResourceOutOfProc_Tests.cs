@@ -18,8 +18,6 @@ using Shouldly;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
-    [Trait("Category", "mono-osx-failing")]
-    [Trait("Category", "mono-windows-failing")]
     public sealed class RequiredTransformations
     {
         private readonly ITestOutputHelper _output;
@@ -492,7 +490,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Allow the task to skip processing based on having nothing out of date
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NothingOutOfDate()
         {
             string resxFile = null;
@@ -572,8 +569,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
@@ -974,7 +969,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// STR class file is out of date, but resources are up to date. Should still generate it.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void StronglyTypedResourcesOutOfDate()
         {
             string resxFile = null;
@@ -1246,7 +1240,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR with resource namespace yields proper output, message (CS)
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void STRWithResourcesNamespaceCS()
         {
             Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null, _output);
@@ -1274,7 +1267,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR with resource namespace and STR namespace yields proper output, message (CS)
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void STRWithResourcesNamespaceAndSTRNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace", _output);
@@ -1294,7 +1286,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Text input failures, no name, no '=', 'strings' token, invalid token, invalid escape
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TextToResourcesBadFormat()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1360,8 +1351,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Cause failures in ResXResourceReader
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void FailedResXReader()
         {
             string resxFile1 = null;
@@ -1428,8 +1417,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Cause failures in ResXResourceReader, different codepath
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void FailedResXReaderWithAllOutputResourcesSpecified()
         {
             string resxFile1 = null;
@@ -1503,7 +1490,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Duplicate resource names
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DuplicateResourceNames()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1529,7 +1515,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Non-string resource with text output
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UnsupportedTextType()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1597,7 +1582,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Cause failures in ResourceReader
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1631,7 +1615,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Invalid STR Class name
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void FailedSTRProperty()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1819,8 +1802,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  FilesWritten contains OutputResources + StateFile
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void FilesWrittenSet()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1861,8 +1842,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Resource transformation fails on 3rd of 4 inputs, inputs 1 & 2 & 4 are in outputs and fileswritten.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void OutputFilesPartialInputs()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1929,8 +1908,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR class name derived from output file transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedClassName()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1972,8 +1949,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR class file name derived from class name transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -2082,7 +2057,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Source item not found
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SourceItemMissing()
         {
             string txtFile = null;
@@ -2125,7 +2099,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Non-existent StateFile yields message
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-windows-failing")]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -2165,7 +2138,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Bad file extension on input
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void InputFileExtension()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -2199,7 +2171,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Bad file extension on output
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void OutputFileExtension()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -2265,7 +2236,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Invalid StronglyTypedLanguage yields CodeDOM exception
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UnknownStronglyTypedLanguage()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -2349,8 +2319,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR class name derived from output file transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void BadStronglyTypedFilename()
         {
             string txtFile = null;
@@ -2506,7 +2474,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// Verify that passing a STR language with more than 1 sources errors
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void StronglyTypedResourceFileIsExistingDirectory()
         {
             string dir = null;
@@ -2602,7 +2569,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         // FIXME: mono: looks for csc.exe
         // https://github.com/dotnet/msbuild/issues/677
-        [Trait("Category", "mono-osx-failing")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2780,7 +2746,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         // FIXME: mono: looks for csc.exe
         // https://github.com/dotnet/msbuild/issues/677
-        [Trait("Category", "mono-osx-failing")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

@@ -125,7 +125,6 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure shutdown will correctly null out the send data delegate
         /// </summary>
         [WindowsFullFrameworkOnlyFact("https://github.com/dotnet/msbuild/issues/282")]
-        [Trait("Category", "mono-osx-failing")]
         public void TestShutDown()
         {
             SendDataDelegate transportDelegate = new(PacketProcessor);

@@ -227,7 +227,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void LastWriteTimeReset()
         {
             string file = null;
@@ -254,7 +253,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void LastWriteTimeUtcReset()
         {
             string file = null;
@@ -283,7 +281,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void LengthReset()
         {
             string file = null;
@@ -339,7 +336,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ReadOnlyOnDirectory()
         {
             Assert.Equal(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath()).IsReadOnly);

@@ -1546,7 +1546,6 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// and not resolve the SDK. We also add a good one as well to make sure resolution continues.
         /// </summary>
         [WindowsOnlyFact]
-        [Trait("Category", "mono-osx-failing")]
         public void SDKFoundButBadlyFormattedSDKManifestErrors()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SDKFoundButBadlyFormattedSDKManifestErrors");
