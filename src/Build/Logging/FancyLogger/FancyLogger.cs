@@ -66,6 +66,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 i++;
                 // Delay by 1/60 seconds
+                // Use task delay to avoid blocking the task, so that keyboard input is listened continously
                 Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
                     // Rerender projects only when needed
