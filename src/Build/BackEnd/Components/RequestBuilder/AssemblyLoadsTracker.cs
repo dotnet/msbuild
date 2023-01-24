@@ -45,7 +45,7 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             string? assemblyPath = args.LoadedAssembly.Location;
             Guid mvid = args.LoadedAssembly.ManifestModule.ModuleVersionId;
 
-            AssemblyLoadBuildEventArgs buildArgs = new(assemblyName, assemblyPath, mvid, null);
+            AssemblyLoadBuildEventArgs buildArgs = new(assemblyName, assemblyPath, mvid);
             buildArgs.BuildEventContext = _loggingContext.BuildEventContext;
             _loggingContext.LogBuildEvent(buildArgs);
         }

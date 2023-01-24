@@ -805,7 +805,8 @@ namespace Microsoft.Build.Logging
 
         private AssemblyLoadBuildEventArgs ReadAssemblyLoadEventArgs()
         {
-            var fields = ReadBuildEventArgsFields(readImportance: true);
+            // needed?? (not set in args ser/desr methods nor ctor)
+            var fields = ReadBuildEventArgsFields(readImportance: false);
 
             string assemblyName = ReadDeduplicatedString();
             string assemblyPath = ReadDeduplicatedString();
@@ -814,11 +815,7 @@ namespace Microsoft.Build.Logging
             var e = new AssemblyLoadBuildEventArgs(
                 assemblyName,
                 assemblyPath,
-                mvid,
-                fields.Message,
-                fields.HelpKeyword,
-                fields.SenderName,
-                fields.Importance);
+                mvid);
             SetCommonFields(e, fields);
 
             return e;

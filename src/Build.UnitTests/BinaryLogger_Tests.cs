@@ -221,8 +221,10 @@ namespace Microsoft.Build.UnitTests
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
                 BinaryLogger logger = new();
                 logger.Parameters = _logFile;
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{logger.Parameters}", out bool success);
+                Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{logger.Parameters}", out bool success);
                 success.ShouldBeTrue();
+                Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", null);
                 RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
                 success.ShouldBeTrue();
                 string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));

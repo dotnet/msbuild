@@ -20,11 +20,8 @@ namespace Microsoft.Build.Framework
             string assemblyName,
             string assemblyPath,
             Guid mvid,
-            string message,
-            string helpKeyword = null,
-            string senderName = null,
             MessageImportance importance = MessageImportance.Low)
-            : base(message, helpKeyword, senderName, importance, DateTime.UtcNow, assemblyName, assemblyPath, mvid)
+            : base(null, null, null, importance, DateTime.UtcNow, assemblyName, assemblyPath, mvid)
         {
             AssemblyName = assemblyName;
             AssemblyPath = assemblyPath;
