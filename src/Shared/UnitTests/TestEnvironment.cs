@@ -468,34 +468,31 @@ namespace Microsoft.Build.UnitTests
             var newFiles = GetMSBuildLogFiles();
 
             int newFilesCount = newFiles.Length;
-            if (newFilesCount > _originalFiles.Length)
+            foreach (FileInfo file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
             {
-                foreach (FileInfo file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
+                string contents = File.ReadAllText(file.FullName);
+
+                // Delete the file so we don't pollute the build machine
+                FileUtilities.DeleteNoThrow(file.FullName);
+
+                // Ignore clean shutdown trace logs.
+                if (Regex.IsMatch(file.Name, @"MSBuild_NodeShutdown_\d+\.txt") &&
+                    Regex.IsMatch(contents, @"Node shutting down with reason BuildComplete and exception:\s*"))
                 {
-                    string contents = File.ReadAllText(file.FullName);
-
-                    // Delete the file so we don't pollute the build machine
-                    FileUtilities.DeleteNoThrow(file.FullName);
-
-                    // Ignore clean shutdown trace logs.
-                    if (Regex.IsMatch(file.Name, @"MSBuild_NodeShutdown_\d+\.txt") &&
-                        Regex.IsMatch(contents, @"Node shutting down with reason BuildComplete and exception:\s*"))
-                    {
-                        newFilesCount--;
-                        continue;
-                    }
-
-                    // Com trace file. This is probably fine, but output it as it was likely turned on
-                    // for a reason.
-                    if (Regex.IsMatch(file.Name, @"MSBuild_CommTrace_PID_\d+\.txt"))
-                    {
-                        output.WriteLine($"{file.Name}: {contents}");
-                        newFilesCount--;
-                        continue;
-                    }
-
-                    output.WriteLine($"Build Error File {file.Name}: {contents}");
+                    newFilesCount--;
+                    continue;
                 }
+
+                // Com trace file. This is probably fine, but output it as it was likely turned on
+                // for a reason.
+                if (Regex.IsMatch(file.Name, @"MSBuild_CommTrace_PID_\d+\.txt"))
+                {
+                    output.WriteLine($"{file.Name}: {contents}");
+                    newFilesCount--;
+                    continue;
+                }
+
+                output.WriteLine($"Build Error File {file.Name}: {contents}");
             }
 
             // Assert file count is equal minus any files that were OK
