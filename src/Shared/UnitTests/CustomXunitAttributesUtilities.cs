@@ -6,27 +6,16 @@ namespace Microsoft.Build.UnitTests
     internal static class CustomXunitAttributesUtilities
     {
 #if NETFRAMEWORK
-        public static bool IsRunningOnNet => false;
+        internal static bool IsBuiltAgainstDotNet => false;
 
-        public static bool IsRunningOnNetStandard => false;
-
-        public static bool IsRunningOnNetFramework => true;
-#elif NETSTANDARD
-        public static bool IsRunningOnNet => false;
-
-        public static bool IsRunningOnNetFramework => false;
-
-        public static bool IsRunningOnNetStandard => true;
-
+        internal static bool IsBuiltAgainstNetFramework => true;
 #elif NET
-        public static bool IsRunningOnNet => true;
+        internal static bool IsBuiltAgainstDotNet => true;
 
-        public static bool IsRunningOnNetStandard => false;
-
-        public static bool IsRunningOnNetFramework => false;
+        internal static bool IsBuiltAgainstNetFramework => false;
 #endif
 
-        public static string AppendAdditionalMessage(this string message, string? additionalMessage)
+        internal static string AppendAdditionalMessage(this string message, string? additionalMessage)
             => !string.IsNullOrWhiteSpace(additionalMessage) ? $"{message} {additionalMessage}" : message;
     }
 }

@@ -22,7 +22,7 @@ namespace Xunit.NetCore.Extensions
                 this.Skip = "This test only runs on Windows on full framework.".AppendAdditionalMessage(additionalMessage);
                 return;
             }
-            if (!CustomXunitAttributesUtilities.IsRunningOnNetFramework)
+            if (!CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
                 this.Skip = "This test only runs on full framework.".AppendAdditionalMessage(additionalMessage);
             }

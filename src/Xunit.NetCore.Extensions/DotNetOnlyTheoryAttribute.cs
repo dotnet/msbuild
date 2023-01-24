@@ -16,7 +16,7 @@ namespace Xunit.NetCore.Extensions
         /// <param name="additionalMessage">The additional message that is appended to skip reason, when test is skipped.</param>
         public DotNetOnlyTheoryAttribute(string? additionalMessage = null)
         {
-            if (!CustomXunitAttributesUtilities.IsRunningOnNet)
+            if (!CustomXunitAttributesUtilities.IsBuiltAgainstDotNet)
             {
                 this.Skip = "This test only runs on .NET.".AppendAdditionalMessage(additionalMessage);
             }

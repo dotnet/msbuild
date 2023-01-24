@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
                 return;
             }
 
-            if (fullFrameworkOnly && !CustomXunitAttributesUtilities.IsRunningOnNetFramework)
+            if (fullFrameworkOnly && !CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
                 this.Skip = "This test only runs on full .NET Framework and when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
                 return;
