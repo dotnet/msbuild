@@ -1,4 +1,5 @@
 ﻿angular
+api
 blazorserver
 blazorserver-empty
 blazorwasm

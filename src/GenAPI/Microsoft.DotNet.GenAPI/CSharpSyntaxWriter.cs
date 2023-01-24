@@ -57,6 +57,8 @@ namespace Microsoft.DotNet.GenAPI
             // visit subtree first to normalize type names.
             MethodDeclarationSyntax? rs = (MethodDeclarationSyntax?)base.VisitMethodDeclaration(node);
             if (rs is null) return rs;
+            // TODO: Adds support for destructor generation. Remove after the issue https://github.com/dotnet/arcade/issues/11938 is fixed.
+            if (rs.ReturnType.ToString() == string.Empty) return rs;
 
             if (rs.Modifiers.Where(token => token.IsKind(SyntaxKind.AbstractKeyword)).Any() || rs.Body is null)
             {
@@ -86,6 +88,15 @@ namespace Microsoft.DotNet.GenAPI
         {
             // visit subtree first to normalize type names.
             OperatorDeclarationSyntax? rs = base.VisitOperatorDeclaration(node) as OperatorDeclarationSyntax;
+            return rs?
+                .WithBody(GetThrowNullBody())
+                .WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
+        }
+
+        /// <inheritdoc />
+        public override SyntaxNode? VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
+        {
+            ConversionOperatorDeclarationSyntax? rs = base.VisitConversionOperatorDeclaration(node) as ConversionOperatorDeclarationSyntax;
             return rs?
                 .WithBody(GetThrowNullBody())
                 .WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));

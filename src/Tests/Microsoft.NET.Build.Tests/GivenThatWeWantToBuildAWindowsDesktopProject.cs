@@ -151,7 +151,7 @@ namespace Microsoft.NET.Build.Tests
             getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "true" });
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/29968")]
         public void It_builds_successfully_when_targeting_net_framework()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
@@ -167,8 +167,10 @@ namespace Microsoft.NET.Build.Tests
             var project = XDocument.Load(projFile);
             var ns = project.Root.Name.Namespace;
             project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single().Value = "net472";
-            //  The template sets Nullable to "enable", which isn't supported on .NET Framework
+            // The template sets Nullable to "enable", which isn't supported on .NET Framework
             project.Root.Elements(ns + "PropertyGroup").Elements(ns + "Nullable").Remove();
+            // The template sets ImplicitUsings to "enable", which isn't supported on .NET Framework
+            project.Root.Elements(ns + "PropertyGroup").Elements(ns + "ImplicitUsings").Remove();
             project.Save(projFile);
 
             var buildCommand = new BuildCommand(Log, testDirectory);

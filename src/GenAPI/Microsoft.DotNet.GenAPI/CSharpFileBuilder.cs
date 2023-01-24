@@ -17,7 +17,7 @@ using Microsoft.DotNet.ApiSymbolExtensions;
 namespace Microsoft.DotNet.GenAPI
 {
     /// <summary>
-    /// Processes assemly symbols to build correspoding structures in C# language.
+    /// Processes assembly symbols to build corresponding structures in C# language.
     /// </summary>
     public class CSharpFileBuilder : IAssemblySymbolWriter, IDisposable
     {

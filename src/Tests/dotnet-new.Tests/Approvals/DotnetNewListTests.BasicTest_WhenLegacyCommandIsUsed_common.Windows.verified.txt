@@ -6,6 +6,7 @@ These templates matched your input:
 
 Template Name                                 Short Name                  Language    Tags                            
 --------------------------------------------  --------------------------  ----------  --------------------------------
+ASP.NET Core API                              api                         [C#]        Web/API                         
 ASP.NET Core Empty                            web                         [C#],F#     Web/Empty                       
 ASP.NET Core gRPC Service                     grpc                        [C#]        Web/gRPC                        
 ASP.NET Core Web API                          webapi                      [C#],F#     Web/WebAPI                      

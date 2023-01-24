@@ -111,9 +111,9 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             return string.Format(CultureInfo.InvariantCulture, "W/\"{0}{1}\"", EtagDiscriminator, Deltas[^1].SequenceId);
         }
 
-        private void AppendDeltas(UpdateDelta[] updateDeltas)
+        private void AppendDeltas(UpdateDelta[]? updateDeltas)
         {
-            if (updateDeltas.Length == 0)
+            if (updateDeltas == null || updateDeltas.Length == 0)
             {
                 return;
             }
