@@ -33,6 +33,14 @@ By default, if your project has a RuntimeIdentifier set, that value will be used
 <ContainerRuntimeIdentifier>linux-x64</ContainerRuntimeIdentifier>
 ```
 
+> **Note**
+> If you'd like to publish to a musl-based OS like alpine (as opposed to a libc-based OS), you will need to specify the base image _including architecture_, instead of relying on
+> any of the inference described above. For example, a `net7.0`-targeting application that wanted to run on alpine with the x64 architecture would use the `7.0-alpine-amd64` tag of the `mcr.microsoft.com/dotnet/runtime` image (or another base image as appropriate for your project type):
+>
+> ```xml
+> <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0-alpine-amd64</ContainerBaseImage>
+> ```
+
 ## ContainerRegistry
 
 This property controls the destination registry - the place that the newly-created image will be pushed to.
