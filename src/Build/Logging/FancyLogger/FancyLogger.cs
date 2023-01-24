@@ -48,11 +48,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             
             Task.Run(() =>
             {
-                task_Render();
+                Render();
             });
         }
 
-        void task_Render()
+        void Render()
         {
             // Initialize FancyLoggerBuffer
             FancyLoggerBuffer.Initialize();
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
                     // Rerender projects only when needed
-                    foreach (var project in projects) project.Value.Render();
+                    foreach (var project in projects) project.Value.Log();
                     // Rerender buffer
                     FancyLoggerBuffer.Render();
                 });

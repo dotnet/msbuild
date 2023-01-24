@@ -70,7 +70,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
-        public void Render()
+        // TODO: Rename to Log after FancyLogger's API becomes internal
+        public void Log()
         {
             if (Line == null) return;
             Line.Text = $"    └── {ToANSIString()}";

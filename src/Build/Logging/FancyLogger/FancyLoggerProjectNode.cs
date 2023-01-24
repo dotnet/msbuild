@@ -56,7 +56,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
-        public void Render()
+        // TODO: Rename to Render() after FancyLogger's API becomes internal
+        public void Log()
         {
             if (!ShouldRerender) return;
             ShouldRerender = false;
@@ -98,7 +99,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
                 if (node.Line is null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
-                node.Render();
+                node.Log();
             }
         }
 

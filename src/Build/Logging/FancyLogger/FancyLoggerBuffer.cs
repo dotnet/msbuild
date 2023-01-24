@@ -121,7 +121,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 }
             }
             // Iterate for the rest of the screen
-            for (int i = lineIndex; i < ScrollableAreaHeight; i++)
+            for (int i = lineIndex + 1; i < ScrollableAreaHeight; i++)
             {
                 contents += ANSIBuilder.Cursor.Position(i + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd();
             }
