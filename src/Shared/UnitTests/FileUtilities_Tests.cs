@@ -151,9 +151,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void GetItemSpecModifierOnBadPath()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -164,9 +162,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void GetItemSpecModifierOnBadPath2()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -295,9 +291,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(result);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void HasExtension_WhenInvalidFileName_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -473,9 +467,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathBadUNC1()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -484,9 +476,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathBadUNC2()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -495,9 +485,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathBadUNC3()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -538,9 +526,7 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathInvalid()
         {
             string filePath = @"c:\aardvark\|||";

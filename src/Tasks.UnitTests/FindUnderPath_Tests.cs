@@ -8,6 +8,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 
 
@@ -35,9 +36,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
         public void InvalidFile()
         {
             FindUnderPath t = new FindUnderPath();
@@ -53,9 +52,7 @@ namespace Microsoft.Build.UnitTests
             // Don't crash
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
         public void InvalidPath()
         {
             FindUnderPath t = new FindUnderPath();

@@ -10,15 +10,15 @@ namespace Xunit.NetCore.Extensions
     /// </summary>
     public class UnixOnlyTheoryAttribute : TheoryAttribute
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnixOnlyTheoryAttribute"/> class.
+        /// </summary>
+        /// <param name="additionalMessage">The additional message that is appended to skip reason, when test is skipped.</param>
         public UnixOnlyTheoryAttribute(string? additionalMessage = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                this.Skip = "This test requires Unix to run.";
-                if (!string.IsNullOrWhiteSpace(additionalMessage))
-                {
-                    this.Skip += " " + additionalMessage;
-                }
+                this.Skip = "This test requires Unix to run.".AppendAdditionalMessage(additionalMessage);
             }
         }
     }

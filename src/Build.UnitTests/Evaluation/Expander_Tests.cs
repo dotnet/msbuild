@@ -613,8 +613,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogContains("MSB4198");
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void ExpandItemVectorFunctionsBuiltIn_InvalidCharsError()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -898,9 +897,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->Metadata function
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -960,9 +957,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->WithMetadataValue function
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1022,9 +1017,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void InvalidPathAndMetadataItemInvalidWindowsPathChars3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1040,9 +1033,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void InvalidPathInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
@@ -2516,8 +2507,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that is only available when MSBUILDENABLEALLPROPERTYFUNCTIONS=1
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/coreclr/issues/15662")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "https://github.com/dotnet/coreclr/issues/15662")]
         public void PropertyStaticFunctionAllEnabled()
         {
             using (var env = TestEnvironment.Create())

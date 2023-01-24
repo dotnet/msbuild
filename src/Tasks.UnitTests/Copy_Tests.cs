@@ -652,8 +652,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void DoNotRetryCopyNotSupportedException()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -1020,9 +1019,7 @@ namespace Microsoft.Build.UnitTests
         /// CopiedFiles should only include files that were successfully copied
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Under Unix all filenames are valid and this test is not useful.")]
         public void OutputsOnlyIncludeSuccessfulCopies()
         {
             string temp = Path.GetTempPath();
@@ -1613,8 +1610,7 @@ namespace Microsoft.Build.UnitTests
         /// If the destination path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -1657,8 +1653,7 @@ namespace Microsoft.Build.UnitTests
         /// If the source path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
         {
             const string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";

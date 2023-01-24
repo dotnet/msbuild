@@ -779,8 +779,7 @@ namespace Microsoft.Build.UnitTests
         /// If the destination path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException 
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -816,8 +815,7 @@ namespace Microsoft.Build.UnitTests
         /// If the source path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException 
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
         {
             string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";

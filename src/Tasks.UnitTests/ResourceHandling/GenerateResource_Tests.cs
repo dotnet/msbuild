@@ -1524,8 +1524,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <remarks>
         /// Regression test for legacy-codepath-resources case of https://github.com/dotnet/msbuild/issues/4582
         /// </remarks>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/2272")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "https://github.com/dotnet/msbuild/issues/2272")]
         public void StronglyTypedResourcesEmitTypeIntoClass()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1947,8 +1946,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Cause failures in ResourceReader
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core MSBuild doesn't try to read binary input resources")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core MSBuild doesn't try to read binary input resources.")]
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -1977,10 +1975,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
-        [Theory]
+        [DotNetOnlyTheory(additionalMessage: "This error is .NET Core only.")]
         [InlineData(".resources")]
         [InlineData(".dll")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This error is .NET Core only")]
         public void ResourceReaderRejectsNonCoreCompatFormats(string inputExtension)
         {
             using var env = TestEnvironment.Create(_output);
@@ -2038,9 +2035,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// Reference passed in that can't be loaded should error
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,
-            reason: ".NET Core MSBuild doesn't load refs so it pushes this failure to runtime")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core MSBuild doesn't load refs so it pushes this failure to runtime.")]
         public void InvalidReference()
         {
             string txtFile = null;
@@ -2942,9 +2937,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;

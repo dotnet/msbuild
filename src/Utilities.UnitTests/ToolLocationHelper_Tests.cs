@@ -1346,9 +1346,8 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if the moniker and the root make a too long path that an InvalidOperationException is raised
         /// which indicates there was a problem generating the reference assembly path.
         /// </summary>
-        [Fact]
         [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void GenerateReferencAssemblyPathTooLong()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1620,9 +1619,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void ChainReferenceAssembliesRedistPathTooLong()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -3098,9 +3096,8 @@ namespace Microsoft.Build.UnitTests
         /// Verify we do not get any resolved paths when we pass in a root which is too long
         ///
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void ResolveFromDirectoryPathTooLong()
         {
             Should.Throw<PathTooLongException>(() =>
@@ -3120,9 +3117,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get no resolved paths when we pass in a root with invalid chars
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // No invalid characters on Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. No invalid characters on Unix.")]
         public void ResolveFromDirectoryInvalidChar()
         {
             var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();

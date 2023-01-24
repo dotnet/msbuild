@@ -7,6 +7,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -123,9 +124,8 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Make sure shutdown will correctly null out the send data delegate
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact("https://github.com/dotnet/msbuild/issues/282")]
         [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/282")]
         public void TestShutDown()
         {
             SendDataDelegate transportDelegate = new(PacketProcessor);

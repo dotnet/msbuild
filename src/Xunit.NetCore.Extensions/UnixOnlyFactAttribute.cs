@@ -10,15 +10,15 @@ namespace Xunit.NetCore.Extensions
     /// </summary>
     public class UnixOnlyFactAttribute : FactAttribute
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnixOnlyFactAttribute"/> class.
+        /// </summary>
+        /// <param name="additionalMessage">The additional message that is appended to skip reason, when test is skipped.</param>
         public UnixOnlyFactAttribute(string? additionalMessage = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                this.Skip = "This test requires Unix to run.";
-                if (!string.IsNullOrWhiteSpace(additionalMessage))
-                {
-                    this.Skip += " " + additionalMessage;
-                }
+                this.Skip = "This test requires Unix to run.".AppendAdditionalMessage(additionalMessage);
             }
         }
     }

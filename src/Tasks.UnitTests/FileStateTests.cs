@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -36,9 +37,7 @@ namespace Microsoft.Build.UnitTests
             new FileState(new String('x', 5000));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
         public void BadChars()
         {
             var state = new FileState("|");
