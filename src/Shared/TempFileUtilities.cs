@@ -38,6 +38,9 @@ namespace Microsoft.Build.Shared
         {
             string basePath = Path.Combine(Path.GetTempPath(), $"MSBuildTemp{Environment.UserName}");
 
+            if (basePath.StartsWith("/Users"))
+                throw new InvalidOperationException($"Weird OSX error 1: basePath: {basePath}, Path.GetTempPath(): {Path.GetTempPath()}, [TMP]: {Environment.GetEnvironmentVariable("TMP")}, [TMPDIR]: {Environment.GetEnvironmentVariable("TMPDIR")}");
+
             if (NativeMethodsShared.IsLinux && NativeMethodsShared.mkdir(basePath, userRWX) != 0)
             {
                 if (NativeMethodsShared.chmod(basePath, userRWX) == 0)
@@ -58,13 +61,26 @@ namespace Microsoft.Build.Shared
 
                     basePath = pathToCheck;
                 }
+
+                if (basePath.StartsWith("/Users"))
+                    throw new InvalidOperationException($"Weird OSX error 2a: basePath: {basePath}, Path.GetTempPath(): {Path.GetTempPath()}, [TMP]: {Environment.GetEnvironmentVariable("TMP")}, [TMPDIR]: {Environment.GetEnvironmentVariable("TMPDIR")}");
             }
             else
             {
                 Directory.CreateDirectory(basePath);
+                if (basePath.StartsWith("/Users"))
+                    throw new InvalidOperationException($"Weird OSX error 2b: basePath: {basePath}, Path.GetTempPath(): {Path.GetTempPath()}, [TMP]: {Environment.GetEnvironmentVariable("TMP")}, [TMPDIR]: {Environment.GetEnvironmentVariable("TMPDIR")}");
             }
 
-            return FileUtilities.EnsureTrailingSlash(basePath);
+            if (basePath.StartsWith("/Users"))
+                throw new InvalidOperationException($"Weird OSX error 3: basePath: {basePath}, Path.GetTempPath(): {Path.GetTempPath()}, [TMP]: {Environment.GetEnvironmentVariable("TMP")}, [TMPDIR]: {Environment.GetEnvironmentVariable("TMPDIR")}");
+
+            basePath = FileUtilities.EnsureTrailingSlash(basePath);
+
+            if (basePath.StartsWith("/Users"))
+                throw new InvalidOperationException($"Weird OSX error 3: basePath: {basePath}, Path.GetTempPath(): {Path.GetTempPath()}, [TMP]: {Environment.GetEnvironmentVariable("TMP")}, [TMPDIR]: {Environment.GetEnvironmentVariable("TMPDIR")}");
+
+            return basePath;
         }
 
         /// <summary>
