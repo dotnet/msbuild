@@ -167,6 +167,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(SolutionExt)' == '.sln' and
                             '$(_SolutionLevelPackRelease)' != '$(PackRelease)'"
           ResourceName="SolutionProjectConfigurationsConflict"
-          FormatArguments="PackRelease"/>
+          FormatArguments="PackRelease;$(ProjectName)"/>
   </Target>
+
 </Project>

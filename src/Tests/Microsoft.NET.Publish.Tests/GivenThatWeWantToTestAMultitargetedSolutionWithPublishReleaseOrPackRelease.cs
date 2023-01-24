@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using FluentAssertions;
 using Microsoft.DotNet.Tools;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
@@ -300,6 +302,78 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(sln.SolutionPath)
                 .Should()
                 .Pass();
+        }
+
+        [Theory]
+        [InlineData(PublishRelease)]
+        [InlineData(PackRelease)]
+        public void It_fails_with_conflicting_PublishRelease_or_PackRelease_values_in_solution_file(string pReleaseVar)
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var solutionAndProjects = Setup(Log, new List<string> { tfm }, new List<string> { tfm }, pReleaseVar, "true", "false");
+            var sln = solutionAndProjects.Item1;
+
+            var expectedError = string.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, pReleaseVar, "");
+
+            new DotnetCommand(Log)
+                .Execute("dotnet", pReleaseVar == PublishRelease ? "publish" : "pack", sln.SolutionPath)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(expectedError);
+        }
+
+        [Fact]
+        public void It_sees_PublishRelease_values_of_hardcoded_sln_argument()
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var solutionAndProjects = Setup(Log, new List<string> { tfm }, new List<string> { tfm }, PublishRelease, "true", "false");
+            var sln = solutionAndProjects.Item1;
+
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(Directory.GetParent(sln.SolutionPath).FullName) // code under test looks in CWD, ensure coverage outside this scenario
+                .Execute(sln.SolutionPath)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(string.Format(CommonLocalizableStrings.SolutionProjectConfigurationsConflict, PublishRelease, ""));
+        }
+
+        [Fact]
+        public void It_doesnt_error_if_environment_variable_opt_out_enabled_but_PublishRelease_conflicts()
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var solutionAndProjects = Setup(Log, new List<string> { tfm }, new List<string> { tfm }, PublishRelease, "true", "false");
+            var sln = solutionAndProjects.Item1;
+
+            new DotnetPublishCommand(Log)
+                .WithEnvironmentVariable("DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE", "true")
+                .Execute(sln.SolutionPath) // This property won't be set in VS, make sure the error doesn't occur because of this by mimicking behavior.
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void It_packs_with_Release_on_all_TargetFrameworks_If_8_or_above_is_included()
+        {
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = "net7.0;net8.0"
+            };
+            testProject.RecordProperties("Configuration");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new DotnetPackCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: "net7.0", configuration: "Release"); // this will fail if configuration is debug and TFM code didn't work.
+            string finalConfiguration = properties["Configuration"];
+            finalConfiguration.Should().BeEquivalentTo("Release");
         }
 
         private void VerifyCorrectConfiguration(List<Dictionary<string, string>> finalProperties, string expectedConfiguration)
