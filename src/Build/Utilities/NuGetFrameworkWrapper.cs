@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Linq;
+using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -27,6 +29,7 @@ namespace Microsoft.Build.Evaluation
         private static PropertyInfo VersionProperty;
         private static PropertyInfo PlatformProperty;
         private static PropertyInfo PlatformVersionProperty;
+        private static PropertyInfo AllFrameworkVersionsProperty;
 
         public NuGetFrameworkWrapper()
         {
@@ -47,6 +50,7 @@ namespace Microsoft.Build.Evaluation
                 VersionProperty = NuGetFramework.GetProperty("Version");
                 PlatformProperty = NuGetFramework.GetProperty("Platform");
                 PlatformVersionProperty = NuGetFramework.GetProperty("PlatformVersion");
+                AllFrameworkVersionsProperty = NuGetFramework.GetProperty("AllFrameworkVersions");
             }
             catch
             {
@@ -90,6 +94,43 @@ namespace Microsoft.Build.Evaluation
         {
             var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3 : 4;
             return version.ToString(Math.Max(nonZeroVersionParts, minVersionPartCount));
+        }
+
+        public string IntersectTargetFrameworks(string left, string right)
+        {
+            IEnumerable<(string originalTfm, object parsedTfm)> leftFrameworks = ParseTfms(left);
+            IEnumerable<(string originalTfm, object parsedTfm)> rightFrameworks = ParseTfms(right);
+            string tfmList = "";
+
+            // An incoming target framework from 'left' is kept if it is compatible with any of the desired target frameworks on 'right'
+            foreach (var l in leftFrameworks)
+            {
+                if (rightFrameworks.Any(r =>
+                        (FrameworkProperty.GetValue(l.parsedTfm) as string).Equals(FrameworkProperty.GetValue(r.parsedTfm) as string, StringComparison.OrdinalIgnoreCase) &&
+                        (((Convert.ToBoolean(AllFrameworkVersionsProperty.GetValue(l.parsedTfm))) && (Convert.ToBoolean(AllFrameworkVersionsProperty.GetValue(r.parsedTfm)))) ||
+                         ((VersionProperty.GetValue(l.parsedTfm) as Version) == (VersionProperty.GetValue(r.parsedTfm) as Version)))))
+                {
+                    if (string.IsNullOrEmpty(tfmList))
+                    {
+                        tfmList = l.originalTfm;
+                    }
+                    else
+                    {
+                        tfmList += $";{l.originalTfm}";
+                    }
+                }
+            }
+
+            return tfmList;
+
+            IEnumerable<(string originalTfm, object parsedTfm)> ParseTfms(string desiredTargetFrameworks)
+            {
+                return desiredTargetFrameworks.Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries).Select(tfm =>
+                {
+                    (string originalTfm, object parsedTfm) parsed = (tfm, Parse(tfm));
+                    return parsed;
+                });
+            }
         }
     }
 }

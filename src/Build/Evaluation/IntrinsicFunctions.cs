@@ -549,6 +549,11 @@ namespace Microsoft.Build.Evaluation
             return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
 
+        internal static string IntersectTargetFrameworks(string left, string right)
+        {
+            return NuGetFramework.Value.IntersectTargetFrameworks(left, right);
+        }
+
         internal static bool AreFeaturesEnabled(Version wave)
         {
             return ChangeWaves.AreFeaturesEnabled(wave);
