@@ -527,6 +527,11 @@ namespace Microsoft.Build.Execution
 
                 if (_buildParameters.UsesCachedResults() && parameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
+                    // If input or output caches are used and the project isolation mode is set to
+                    // ProjectIsolationMode.False, then set it to ProjectIsolationMode.True. The explicit
+                    // condition on ProjectIsolationMode is necessary to ensure that, if we're using input
+                    // or output caches and ProjectIsolationMode is set to ProjectIsolationMode.MessageUponIsolationViolation,
+                    // ProjectIsolationMode isn't changed to ProjectIsolationMode.True.
                     _buildParameters.ProjectIsolationMode = ProjectIsolationMode.True;
                 }
 

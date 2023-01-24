@@ -117,6 +117,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [MemberData(nameof(CacheData))]
         public void OnlySerializeResultsForSpecifiedTargets(object configCache, object resultsCache)
         {
+            // Setup:
+            // 1. Create a config with id 1 whose project is built with top-level targets target1
+            // and target2.
+            // 2. Send a build request and collect the BuildResults for targets target1, target2,
+            // and target3.
+            // 3. Ensure the BuildResult for target3 is excluded from output cache serialization
+            // since it's not a top-level target.
             string cacheFile = null;
             try
             {

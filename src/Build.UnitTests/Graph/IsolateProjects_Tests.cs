@@ -7,11 +7,14 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
+using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string>;
 
 #nullable disable
 
@@ -261,6 +264,108 @@ BuildEngine5.BuildProjectFilesInParallel(
                     logger.AssertMessageCount("MSB4260", 2);
                 },
                 isolateProjects: ProjectIsolationMode.MessageUponIsolationViolation);
+        }
+
+        [Fact]
+        public void UndeclaredReferenceBuildResultNotPresentInOutputCache()
+        {
+            // Create the graph 1 -> 2 -> 3, where 2 is a declared project reference
+            // and 3 is an undeclared project reference.
+            // 3 outputs an item UndeclaredReferenceTargetItem that 2 outputs.
+            // Run under ProjectIsolationMode.MessageUponIsolationViolation mode
+            // and verify that 3's build result is not present in 2's output results
+            // cache since, under this mode, only the results of the project
+            // to build under isolation (2) should be serialized.
+            // See CacheSerialization.SerializeCaches for more info.
+            string undeclaredReferenceFile = GraphTestingUtilities.CreateProjectFile(
+                _env,
+                3,
+                extraContent: @"
+                    <Target Name='UndeclaredReferenceTarget' Outputs='@(UndeclaredReferenceTargetItem)'>
+                        <ItemGroup>
+                            <UndeclaredReferenceTargetItem Include='Foo.cs' />
+                        </ItemGroup>
+                        <Message Text='Message from undeclared reference' Importance='High' />
+                    </Target>",
+                defaultTargets: "UndeclaredReferenceTarget").Path;
+            string declaredReferenceContents = string.Format(
+                @"
+                <Target Name='DeclaredReferenceTarget' Outputs='@(UndeclaredReferenceTargetItem)'>
+                    <MSBuild
+                        Projects='{0}'
+                        Targets='UndeclaredReferenceTarget'>
+                        <Output TaskParameter='TargetOutputs' ItemName='UndeclaredReferenceTargetItem' />
+                    </MSBuild>
+                </Target>".Cleanup(),
+                undeclaredReferenceFile).Cleanup();
+            string declaredReferenceFile = GraphTestingUtilities.CreateProjectFile(
+                _env,
+                2,
+                extraContent: declaredReferenceContents,
+                defaultTargets: "DeclaredReferenceTarget").Path;
+            string rootProjectContents = string.Format(
+                @"
+                <ItemGroup>
+                    <ProjectReference Include='{0}' />
+                </ItemGroup>
+                <Target Name='BuildDeclaredReference'>
+                    <MSBuild
+                        Projects='{1}'
+                        Targets='DeclaredReferenceTarget'
+                    />
+                </Target>".Cleanup(),
+                declaredReferenceFile,
+                declaredReferenceFile).Cleanup();
+            string rootFile = GraphTestingUtilities.CreateProjectFile(
+                _env,
+                1,
+                extraContent: rootProjectContents,
+                defaultTargets: "BuildDeclaredReference").Path;
+            var projectGraph = new ProjectGraph(
+                rootFile,
+                new Dictionary<string, string>(),
+                _env.CreateProjectCollection().Collection);
+            var expectedOutput = new ExpectedNodeBuildOutput();
+            var outputCaches = new OutputCacheDictionary();
+            ProjectGraphNode[] topoSortedProjectGraphNodes = projectGraph.ProjectNodesTopologicallySorted.ToArray();
+            Dictionary<string, (BuildResult Result, MockLogger Logger)> results = ResultCacheBasedBuilds_Tests.BuildUsingCaches(
+                _env,
+                topoSortedProjectGraphNodes,
+                expectedOutput,
+                outputCaches,
+                generateCacheFiles: true,
+                assertBuildResults: false,
+                projectIsolationMode: ProjectIsolationMode.MessageUponIsolationViolation);
+            var deserializedOutputCacheDeclaredReference = CacheSerialization.DeserializeCaches(outputCaches[topoSortedProjectGraphNodes[0]]);
+            var deserializedOutputCacheRoot = CacheSerialization.DeserializeCaches(outputCaches[topoSortedProjectGraphNodes[1]]);
+            deserializedOutputCacheDeclaredReference.exception.ShouldBeNull();
+            deserializedOutputCacheRoot.exception.ShouldBeNull();
+            BuildResult[] declaredReferenceBuildResults = deserializedOutputCacheDeclaredReference.ResultsCache.GetEnumerator().ToArray();
+            BuildResult[] rootBuildResults = deserializedOutputCacheRoot.ResultsCache.GetEnumerator().ToArray();
+
+            // Both the root and declared reference projects should only have one build result.
+            declaredReferenceBuildResults.Length.ShouldBe(1);
+            rootBuildResults.Length.ShouldBe(1);
+            declaredReferenceBuildResults[0].OverallResult.ShouldBe(BuildResultCode.Success);
+            rootBuildResults[0].OverallResult.ShouldBe(BuildResultCode.Success);
+            MockLogger rootLogger = results["1"].Logger;
+            MockLogger declaredReferenceLogger = results["2"].Logger;
+            rootLogger.ErrorCount.ShouldBe(0);
+            declaredReferenceLogger.ErrorCount.ShouldBe(0);
+            rootLogger.Errors.ShouldBeEmpty();
+            declaredReferenceLogger.Errors.ShouldBeEmpty();
+            rootLogger.AllBuildEvents.OfType<ProjectStartedEventArgs>().Count().ShouldBe(2);
+            declaredReferenceLogger.AllBuildEvents.OfType<ProjectStartedEventArgs>().Count().ShouldBe(2);
+
+            // One undeclared reference was built in isolation violation.
+            declaredReferenceLogger.AssertMessageCount("Message from undeclared reference", 1);
+            declaredReferenceLogger.AssertMessageCount("MSB4260", 1);
+
+            // The declared reference project's output item is that of the undeclared reference
+            // project.
+            declaredReferenceBuildResults[0]["DeclaredReferenceTarget"].Items.Length.ShouldBe(1);
+            declaredReferenceBuildResults[0]["DeclaredReferenceTarget"].Items[0].ItemSpec.ShouldBe("Foo.cs");
+            rootBuildResults[0]["BuildDeclaredReference"].Items.Length.ShouldBe(0);
         }
 
         [Theory]

@@ -726,7 +726,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         /// <param name="configId">The configuration id.</param>
         /// <param name="projectFullPath">The project's full path.</param>
-        /// <param name="configCache">The config cache in which to place to configuration.</param>
+        /// <param name="configCache">The config cache in which to place the configuration. If
+        /// <see cref="langword"="null" />, use the host's config cache.</param>
         private void CreateConfiguration(int configId, string projectFullPath, ConfigCache configCache = null)
         {
             BuildRequestData data = new(projectFullPath, new Dictionary<string, string>(), "4.0", Array.Empty<string>(), null);
@@ -748,7 +749,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// created and cached.</param>
         /// <param name="target">The target for which there will be a result.</param>
         /// <param name="workUnitResult">The result of executing the specified target.</param>
-        /// <param name="resultsCache">The results cache to contain the <see cref="BuildResult"/>.</param>
+        /// <param name="resultsCache">The results cache to contain the <see cref="BuildResult"/>.
+        /// If <see cref="langword"="null"/>, use the host's results cache.</param>
         /// <returns>The build result.</returns>
         private BuildResult CacheBuildResult(BuildRequest request, string target, WorkUnitResult workUnitResult, ResultsCache resultsCache = null)
         {

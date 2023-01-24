@@ -2056,8 +2056,8 @@ namespace Microsoft.Build.BackEnd
             // override cache, which can happen if we are building in the project isolation mode
             // ProjectIsolationMode.MessageUponIsolationViolation, and the received result was built by an
             // isolation-violating dependency project.
-            if (_configCache is not ConfigCacheWithOverride
-                || !((ConfigCacheWithOverride)_configCache).HasConfigurationInOverrideCache(result.ConfigurationId))
+            if (_configCache is not ConfigCacheWithOverride configCacheWithOverride
+                || !configCacheWithOverride.HasConfigurationInOverrideCache(result.ConfigurationId))
             {
                 _resultsCache.AddResult(result);
             }
