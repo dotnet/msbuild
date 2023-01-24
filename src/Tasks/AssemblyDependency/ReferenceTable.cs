@@ -2215,12 +2215,18 @@ namespace Microsoft.Build.Tasks
             Dictionary<string, List<AssemblyNameReference>> baseNameToReferences
         )
         {
+            List<string> toRemove = new(baseNameToReferences.Count);
             foreach (KeyValuePair<string, List<AssemblyNameReference>> kvp in baseNameToReferences)
             {
                 if (kvp.Value.Count == 1)
                 {
-                    baseNameToReferences.Remove(kvp.Key);
+                    toRemove.Add(kvp.Key);
                 }
+            }
+
+            foreach (string key in toRemove)
+            {
+                baseNameToReferences.Remove(key);
             }
         }
 
