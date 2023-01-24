@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
 using Xunit;
@@ -60,6 +61,7 @@ namespace Microsoft.Build.UnitTests
             var assemblyTempFolder = _testEnvironment.CreateFolder(newTempPath);
 
             _testEnvironment.SetTempPath(assemblyTempFolder.Path);
+            FileUtilities.ClearTempFileDirectory();
 
             _testEnvironment.CreateFile(
                 transientTestFolder: assemblyTempFolder,
