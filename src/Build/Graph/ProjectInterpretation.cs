@@ -469,14 +469,32 @@ namespace Microsoft.Build.Graph
             {
                 ImmutableList<string> RemoveNonexistentTargetsIfSkippable(ImmutableList<TargetSpecification> targets)
                 {
-                    // Keep targets that are non-skippable or that exist but are skippable.
-                    return targets
-                        .Where(t => !t.SkipIfNonexistent || reference.Targets.ContainsKey(t.Target))
-                        .Select(t => t.Target)
-                        .ToImmutableList();
+                    var targetsToKeep = new List<string>();
+                    bool getTargetFrameworksRemoved = false;
+                    foreach (TargetSpecification target in targets)
+                    {
+                        // Keep targets that are non-skippable or that exist but are skippable.
+                        if (!target.SkipIfNonexistent || reference.Targets.ContainsKey(target.Target))
+                        {
+                            targetsToKeep.Add(target.Target);
+                        }
+                        else if (target.Target.Equals("GetTargetFrameworks"))
+                        {
+                            getTargetFrameworksRemoved = true;
+                        }
+                    }
+
+                    // If GetTargetFrameworks is removed, also remove GetTargetFrameworksWithPlatformForSingleTargetFramework
+                    // since in the non-graph case it is only called when GetTargetFrameworks is called.
+                    if (getTargetFrameworksRemoved && targetsToKeep.Contains("GetTargetFrameworksWithPlatformForSingleTargetFramework"))
+                    {
+                        targetsToKeep.Remove("GetTargetFrameworksWithPlatformForSingleTargetFramework");
+                    }
+
+                    return targetsToKeep.ToImmutableList();
                 }
 
-                return (GetProjectType(reference)) switch
+                return GetProjectType(reference) switch
                 {
                     ProjectType.InnerBuild => RemoveNonexistentTargetsIfSkippable(_allTargets),
                     ProjectType.OuterBuild => RemoveNonexistentTargetsIfSkippable(_outerBuildTargets),

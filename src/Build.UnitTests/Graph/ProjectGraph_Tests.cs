@@ -1041,6 +1041,39 @@ $@"
         }
 
         [Fact]
+        public void GetTargetFrameworksWithPlatformForSingleTargetFrameworkRemovedIfGetTargetFrameworksRemoved()
+        {
+            string entryProject = CreateProjectFile(
+                _env,
+                1,
+                new int[] { 2 },
+                extraContent: @"
+                <ItemGroup>
+                    <ProjectReferenceTargets Include='A' Targets='C;GetTargetFrameworksWithPlatformForSingleTargetFramework' />
+                    <ProjectReferenceTargets Include='A' Targets='B' OuterBuild='true' />
+                    <ProjectReferenceTargets Include='A' Targets='GetTargetFrameworks' OuterBuild='true' SkipNonexistentTargets='true' />
+                </ItemGroup>").Path;
+            CreateProjectFile(
+                _env,
+                2,
+                extraContent: MultitargetingSpecificationPropertyGroup);
+            var graph = new ProjectGraph(entryProject);
+            graph.ToDot();
+            ProjectGraphNode rootOuterBuild = GetFirstNodeWithProjectNumber(graph, 1);
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(new[] { "A" });
+            targetLists[rootOuterBuild].ShouldBe(new[] { "A" });
+            ProjectGraphNode referencedNode = GetOuterBuild(graph, 2);
+            targetLists[referencedNode].ShouldBe(new[] { "B" });
+
+            // None of the inner builds should have GetTargetFrameworksWithPlatformForSingleTargetFramework
+            // in their target lists.
+            foreach (ProjectGraphNode projectGraphNode in GetInnerBuilds(graph, 2))
+            {
+                targetLists[projectGraphNode].ShouldBe(new[] { "B", "C" });
+            }
+        }
+
+        [Fact]
         public void GetTargetListsForComplexMultitargetingGraph()
         {
             using (var env = TestEnvironment.Create())
