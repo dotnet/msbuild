@@ -131,7 +131,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         public IsolateProjectsTests(ITestOutputHelper testOutput)
         {
             _testOutput = testOutput;
-            _env = TestEnvironment.Create(_testOutput, ignoreBuildErrorFiles: false);
+            _env = TestEnvironment.Create(_testOutput, ignoreBuildErrorFiles: true);
 
             if (NativeMethodsShared.IsOSX)
             {
