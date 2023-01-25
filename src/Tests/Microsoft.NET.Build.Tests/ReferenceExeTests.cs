@@ -242,7 +242,11 @@ public class ReferencedExeProgram
 
                 project.Root.Element(ns + "PropertyGroup")
                     .Add(XElement.Parse($@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+
+                project.Root.Element(ns + "PropertyGroup")
+                    .Add(new XElement(ns + "SelfContained", "true"));
             });
+
 
             RunTest();
         }

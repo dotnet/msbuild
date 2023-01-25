@@ -135,13 +135,9 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
 
-            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
-
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                //  Right now passing "--self-contained" also causes the RuntimeIdentifier to be passed as a global property.
-                //  That should change with https://github.com/dotnet/sdk/pull/26143, which will likely require updating this and other tests in this class
-                expectedRuntimeIdentifier: buildingSelfContained ? "" : _referencedProject.RuntimeIdentifier);
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                expectedRuntimeIdentifier: passRuntimeIdentifier ? "" : _referencedProject.RuntimeIdentifier);
         }
 
         [RequiresMSBuildVersionTheory("17.4.0.41702")]
