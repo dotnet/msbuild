@@ -137,7 +137,8 @@ BuildEngine5.BuildProjectFilesInParallel(
             {
                 // OSX links /var into /private, which makes Path.GetTempPath() to return "/var..." but Directory.GetCurrentDirectory to return "/private/var..."
                 // this discrepancy fails the msbuild undeclared reference enforcements due to failed path equality checks
-                _env.SetTempPath(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")), deleteTempDirectory: true);
+                var tempFolder = _env.CreateFolder(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")));
+                _env.SetTempPath(tempFolder.Path);
             }
 
             _env.WithInvariant(new BuildFailureLogInvariant());
