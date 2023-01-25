@@ -980,7 +980,7 @@ public static class Program
   <PropertyGroup>
     <RuntimeIdentifier>{rid}</RuntimeIdentifier>
     {(selfContained.HasValue ? $"<SelfContained>{selfContained}</SelfContained>" : "")}
-    {((!(selfContained ?? true) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
+    {((!(selfContained ?? false) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
   </PropertyGroup>
 </Project>
 ");
