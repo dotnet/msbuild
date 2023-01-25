@@ -38,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, "ResolvedFileToPublish", GetValuesCommand.ValueType.Item)
-           {
+            {
                 DependsOnTargets = "Publish"
             };
 
@@ -69,6 +69,7 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = true,
                 RuntimeIdentifier = "win-x64"
             };
+            testProject.AdditionalProperties["SelfContained"] = "true";
             // The Microsoft.TestPlatform.CLI package contains System.Runtime.CompilerServices.Unsafe.dll as content, which could cause a double write with the same dll originating from the 
             // runtime package. Without _HandleFileConflictsForPublish this would be caught when by the bundler when publishing single file, but a normal publish would succeed with double writes.
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.TestPlatform.CLI", "16.5.0"));
@@ -79,7 +80,8 @@ namespace Microsoft.NET.Publish.Tests
                 DependsOnTargets = "Publish"
             };
 
-            if (shouldPublishSingleFile) {
+            if (shouldPublishSingleFile)
+            {
                 getValuesCommand.Execute("/p:PublishSingleFile=true")
                     .Should()
                     .Pass();

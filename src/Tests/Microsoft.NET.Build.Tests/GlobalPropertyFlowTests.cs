@@ -181,7 +181,7 @@ namespace Microsoft.NET.Build.Tests
                     targetFramework: "net6.0");
                 ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
                     targetFramework: "net7.0");
-                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                ValidateProperties(testAsset, _referencedProject, expectSelfContained: false, expectRuntimeIdentifier: false,
                     targetFramework: "net6.0");
                 ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
                     targetFramework: "net7.0");

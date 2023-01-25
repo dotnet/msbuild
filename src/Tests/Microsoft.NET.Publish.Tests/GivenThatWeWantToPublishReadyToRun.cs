@@ -114,7 +114,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_supports_framework_dependent_publishing(string targetFramework)
         {
-            TestProjectPublishing_Internal("FrameworkDependent", targetFramework, isSelfContained: false, composite: false, emitNativeSymbols:true, identifier: targetFramework);
+            TestProjectPublishing_Internal("FrameworkDependent", targetFramework, isSelfContained: false, composite: false, emitNativeSymbols: true, identifier: targetFramework);
         }
 
         [Theory]
@@ -210,7 +210,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_can_publish_readytorun_for_selfcontained_library_projects(string targetFramework)
         {
-            TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, composite: true, makeExeProject: false, identifier: targetFramework);
+            TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained: true, composite: true, makeExeProject: false, identifier: targetFramework);
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -276,7 +276,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework, "win-x86", "windows", "X86,X64,Arm64,Arm", "_", "_")]
         public void It_supports_crossos_arch_compilation(string targetFramework, string runtimeIdentifier, string sdkSupportedOs, string sdkSupportedArch, string composite, string selfcontained)
         {
-            var projectName = $"CrossArchOs{targetFramework}{runtimeIdentifier.Replace("-",".")}{composite}{selfcontained}";
+            var projectName = $"CrossArchOs{targetFramework}{runtimeIdentifier.Replace("-", ".")}{composite}{selfcontained}";
             string sdkOs = "NOTHING";
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -301,7 +301,7 @@ namespace Microsoft.NET.Publish.Tests
 
             string sdkArch = RuntimeInformation.ProcessArchitecture.ToString();
             Log.WriteLine($"sdkArch = {sdkArch}");
-            Assert.Contains(sdkArch, new string[]{"Arm", "Arm64", "X64", "X86"}); // Assert that the Architecture in use is a known architecture
+            Assert.Contains(sdkArch, new string[] { "Arm", "Arm64", "X64", "X86" }); // Assert that the Architecture in use is a known architecture
             if (!sdkSupportedArch.Split(',').Contains(sdkArch))
             {
                 Log.WriteLine("Running test on processor architecture that doesn't support this cross platform build");
@@ -341,7 +341,7 @@ namespace Microsoft.NET.Publish.Tests
                      runtimeIdentifier.Contains("sles") ||
                      runtimeIdentifier.Contains("tizen"))
             {
-                return TargetOSEnum.Linux; 
+                return TargetOSEnum.Linux;
             }
 
             Assert.True(false, $"{runtimeIdentifier} could not be converted into a known OS type. Adjust the if statement above until this does not happen");
@@ -460,6 +460,9 @@ public class Classlib
                 RuntimeIdentifier = runtimeIdentifier ?? EnvironmentInfo.GetCompatibleRid(targetFramework),
                 ReferencedProjects = { referenceProject },
             };
+
+            testProject.AdditionalProperties["SelfContained"] = "true";
+
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"
 using System;
 public class Program
