@@ -289,6 +289,10 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void PropertyMSBuildStartupDirectoryOnServer()
         {
+            // This test seems to be flaky, lets enable better logging to investigate it next time
+            // TODO: delete after investigated its flakiness
+            _env.WithTransientDebugEngineForNewProcesses(true);
+
             string reportMSBuildStartupDirectoryProperty = @$"
 <Project>
     <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
