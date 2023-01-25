@@ -534,6 +534,7 @@ namespace FrameworkReferenceTest
             string targetingPackVersion = "3.0.0-targetingpackversion";
 
             testProject.AdditionalProperties["RuntimeFrameworkVersion"] = "3.0.0-runtimeframeworkversion-property";
+            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject,
                 project =>
@@ -566,6 +567,7 @@ namespace FrameworkReferenceTest
             string targetingPackVersion = "3.0.0-targetingpackversion";
 
             testProject.AdditionalProperties["RuntimeFrameworkVersion"] = runtimeFrameworkVersion;
+            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject);
 
@@ -590,6 +592,7 @@ namespace FrameworkReferenceTest
             string targetingPackVersion = "3.0.0-targetingpackversion";
 
             testProject.AdditionalProperties["TargetLatestRuntimePatch"] = (!attributeValue).ToString();
+            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject,
                 project =>
@@ -626,6 +629,7 @@ namespace FrameworkReferenceTest
             string targetingPackVersion = "3.0.0-targetingpackversion";
 
             testProject.AdditionalProperties["TargetLatestRuntimePatch"] = propertyValue.ToString();
+            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject, identifier: propertyValue.ToString());
 
@@ -648,6 +652,7 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject();
 
             string targetingPackVersion = "3.0.0-tpversionfromframeworkreference";
+            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject,
                 project =>
