@@ -111,7 +111,7 @@ namespace Microsoft.Build.Evaluation
                         (((Convert.ToBoolean(AllFrameworkVersionsProperty.GetValue(l.parsedTfm))) && (Convert.ToBoolean(AllFrameworkVersionsProperty.GetValue(r.parsedTfm)))) ||
                          ((VersionProperty.GetValue(l.parsedTfm) as Version) == (VersionProperty.GetValue(r.parsedTfm) as Version)))))
                 {
-                    if (string.IsNullOrEmpty(tfmList))
+                    if (tfmList.Length == 0)
                     {
                         tfmList.Append(l.originalTfm);
                     }
