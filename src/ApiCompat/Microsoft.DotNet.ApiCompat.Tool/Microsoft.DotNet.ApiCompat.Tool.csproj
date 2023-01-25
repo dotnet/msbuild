@@ -14,6 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Resources.resx" GenerateSource="true" SubType="Designer" Generator="MSBuild:_GenerateResxSource" ClassName="Microsoft.DotNet.ApiCompat.Resources" ManifestResourceName="Microsoft.DotNet.ApiCompat.Resources" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
     <ProjectReference Include="..\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" />

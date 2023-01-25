@@ -37,22 +37,18 @@ namespace Microsoft.DotNet.ApiCompat
         /// <summary>
         /// Log whether or not we found breaking changes. If we are writing to a suppression file, no need to log anything.
         /// </summary>
-        public static void LogApiCompatSuccessOrFailure(bool generateSuppressionFile, ISuppressableLog compatibilityLogger)
+        public static void LogApiCompatSuccessOrFailure(bool generateSuppressionFile, ISuppressableLog log)
         {
-            if (compatibilityLogger.SuppressionWasLogged)
+            if (log.SuppressionWasLogged)
             {
                 if (!generateSuppressionFile)
                 {
-                    compatibilityLogger.LogMessage(
-                    MessageImportance.High,
-                    CommonResources.BreakingChangesFound);
+                    log.LogMessage(MessageImportance.High, Resources.BreakingChangesFoundRegenerateSuppressionFileCommandHelp);
                 }
             }
             else
             {
-                compatibilityLogger.LogMessage(
-                    MessageImportance.Normal,
-                    CommonResources.NoBreakingChangesFound);
+                log.LogMessage(MessageImportance.Normal, CommonResources.NoBreakingChangesFound);
             }
         }
     }

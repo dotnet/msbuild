@@ -23,9 +23,14 @@
     <Compile Include="..\..\Tasks\Common\Message.cs" LinkBase="Common" />
     <Compile Include="..\..\Tasks\Common\MessageLevel.cs" LinkBase="Common" />
   </ItemGroup>
+
   <!-- Include MSBuild logger -->
   <ItemGroup>
     <Compile Include="..\..\Microsoft.DotNet.ApiSymbolExtensions\Logging\MSBuildLog.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx" GenerateSource="true" SubType="Designer" Generator="MSBuild:_GenerateResxSource" ClassName="Microsoft.DotNet.ApiCompat.Resources" ManifestResourceName="Microsoft.DotNet.ApiCompat.Resources" />
   </ItemGroup>
 
   <ItemGroup>

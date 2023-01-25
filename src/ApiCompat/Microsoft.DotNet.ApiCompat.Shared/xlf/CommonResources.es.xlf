@@ -2,11 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../CommonResources.resx">
     <body>
-      <trans-unit id="BreakingChangesFound">
-        <source>API breaking changes found. If those are intentional, the APICompat suppression file can be updated by rebuilding with /p:ApiCompatGenerateSuppressionFile=true or --generate-suppression-file.</source>
-        <target state="new">API breaking changes found. If those are intentional, the APICompat suppression file can be updated by rebuilding with /p:ApiCompatGenerateSuppressionFile=true or --generate-suppression-file.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CreateWorkItemPerAssemblyAssembliesNotEqual">
         <source>When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</source>
         <target state="translated">Al poner en cola los elementos de trabajo por ensamblado, el número de ensamblados pasados a la izquierda y a la derecha debe ser igual.</target>
