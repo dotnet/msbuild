@@ -448,25 +448,15 @@ namespace Microsoft.Build.UnitTests
 
         private string[] GetMSBuildLogFiles()
         {
-            try
+            List<string> files = new();
+            string debugPath = FileUtilities.TempFileDirectory;
+            if (debugPath != null)
             {
-                List<string> files = new();
-                string debugPath = FileUtilities.TempFileDirectory;
-                if (debugPath != null)
-                {
-                    files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
-                }
+                files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
+            }
 
-                files.AddRange(Directory.GetFiles(Path.GetTempPath(), MSBuildLogFiles));
-                return files.ToArray();
-            }
-            catch (Exception ex)
-            {
-                throw new AggregateException(
-                    ex,
-                    new InvalidOperationException($"Weird OSX error: debugPath: {FileUtilities.TempFileDirectory}, Path.GetTempPath(): {Path.GetTempPath()}, [TMP]: {Environment.GetEnvironmentVariable("TMP")}, [TMPDIR]: {Environment.GetEnvironmentVariable("TMPDIR")}")
-                );
-            }
+            files.AddRange(Directory.GetFiles(Path.GetTempPath(), MSBuildLogFiles));
+            return files.ToArray();
         }
 
         public override void AssertInvariant(ITestOutputHelper output)

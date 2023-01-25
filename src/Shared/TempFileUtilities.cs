@@ -64,10 +64,6 @@ namespace Microsoft.Build.Shared
             else
             {
                 Directory.CreateDirectory(basePath);
-                DirectoryInfo dInfo = new DirectoryInfo(basePath);
-                DirectorySecurity dSecurity = dInfo.GetAccessControl();
-                dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-                dInfo.SetAccessControl(dSecurity);
             }
 
             basePath = FileUtilities.EnsureTrailingSlash(basePath);
