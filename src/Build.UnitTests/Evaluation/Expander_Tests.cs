@@ -4295,6 +4295,23 @@ $(
             result.ShouldBe(expected);
         }
 
+        [Theory]
+        [InlineData("net6.0", "netstandard2.0", "")]
+        [InlineData("net6.0-windows", "netstandard2.0", "")]
+        [InlineData("net6.0-windows", "net6.0", "net6.0-windows")]
+        [InlineData("netstandard2.0;net6.0", "net6.0", "net6.0")]
+        [InlineData("netstandard2.0;net6.0-windows", "net6.0", "net6.0-windows")]
+        [InlineData("netstandard2.0;net6.0-windows", "net6.0;netstandard2.0;net472", "netstandard2.0;net6.0-windows")]
+        [InlineData("netstandard2.0;net472", "net6.0;netstandard2.0;net472", "netstandard2.0;net472")]
+        [InlineData("netstandard2.0;net472", "net6.0;netstandard2.0;net472", "netstandard2.0;net472")]
+        public void PropertyFunctionIntersectTargetFrameworks(string left, string right, string expected)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, $"$([MSBuild]::FilterTargetFrameworks('{left}', '{right}'))", expected);
+        }
+
         [Fact]
         public void ExpandItemVectorFunctions_GetPathsOfAllDirectoriesAbove()
         {

@@ -96,27 +96,27 @@ namespace Microsoft.Build.Evaluation
             return version.ToString(Math.Max(nonZeroVersionParts, minVersionPartCount));
         }
 
-        public string IntersectTargetFrameworks(string left, string right)
+        public string FilterTargetFrameworks(string incoming, string filter)
         {
-            IEnumerable<(string originalTfm, object parsedTfm)> leftFrameworks = ParseTfms(left);
-            IEnumerable<(string originalTfm, object parsedTfm)> rightFrameworks = ParseTfms(right);
-            string tfmList = "";
+            IEnumerable<(string originalTfm, object parsedTfm)> incomingFrameworks = ParseTfms(incoming);
+            IEnumerable<(string originalTfm, object parsedTfm)> filterFrameworks = ParseTfms(filter);
+            StringBuilder tfmList = new StringBuilder();
 
-            // An incoming target framework from 'left' is kept if it is compatible with any of the desired target frameworks on 'right'
-            foreach (var l in leftFrameworks)
+            // An incoming target framework from 'incoming' is kept if it is compatible with any of the desired target frameworks on 'filter'
+            foreach (var l in incomingFrameworks)
             {
-                if (rightFrameworks.Any(r =>
+                if (filterFrameworks.Any(r =>
                         (FrameworkProperty.GetValue(l.parsedTfm) as string).Equals(FrameworkProperty.GetValue(r.parsedTfm) as string, StringComparison.OrdinalIgnoreCase) &&
                         (((Convert.ToBoolean(AllFrameworkVersionsProperty.GetValue(l.parsedTfm))) && (Convert.ToBoolean(AllFrameworkVersionsProperty.GetValue(r.parsedTfm)))) ||
                          ((VersionProperty.GetValue(l.parsedTfm) as Version) == (VersionProperty.GetValue(r.parsedTfm) as Version)))))
                 {
                     if (string.IsNullOrEmpty(tfmList))
                     {
-                        tfmList = l.originalTfm;
+                        tfmList.Append(l.originalTfm);
                     }
                     else
                     {
-                        tfmList += $";{l.originalTfm}";
+                        tfmList.Append($";{l.originalTfm}");
                     }
                 }
             }
