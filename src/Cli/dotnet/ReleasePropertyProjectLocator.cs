@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Cli
 
             // Analyze Global Properties
             var globalProperties = GetUserSpecifiedExplicitMSBuildProperties();
-            globalProperties = InjectTargetFrameworkIntoGlobalProperties(globalProperties);
+            InjectTargetFrameworkIntoGlobalProperties(globalProperties);
 
             // Configuration doesn't work in a .proj file, but it does as a global property.
             // Detect either A) --configuration option usage OR /p:Configuration=Foo, if so, don't use these properties.
@@ -92,17 +92,18 @@ namespace Microsoft.DotNet.Cli
                 string propertyToCheckValue = project.GetPropertyValue(_propertyToCheck);
                 if (!string.IsNullOrEmpty(propertyToCheckValue))
                 {
-                    var newConfigurationArgs = new List<string> {
-                        $"-property:{MSBuildPropertyNames.CONFIGURATION}={
-                            (propertyToCheckValue.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)
-                        }"
-                    };
-                    
+                    var newConfigurationArgs = new List<string>();
+
+                    if (propertyToCheckValue.Equals("true", StringComparison.OrdinalIgnoreCase))
+                    {
+                        newConfigurationArgs.Add($"-property:{MSBuildPropertyNames.CONFIGURATION}={MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE}");
+                    }
+
                     if (_isHandlingSolution) // This will allow us to detect conflicting configuration values during evaluation.
                     {
                         newConfigurationArgs.Add($"-property:_SolutionLevel{_propertyToCheck}={propertyToCheckValue}");
                     }
-                    
+
                     return newConfigurationArgs;
                 }
             }
@@ -210,11 +211,11 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <summary>
-        /// Lazily gets an arbitrary project for the solution. This will not catch errors unlike where we evaluate all projects in parallel.
+        /// Returns an arbitrary project for the solution. Relies on MSBuild code to catch conflicting values of a given property, like PublishRelease or PackRelease.
         /// </summary>
         /// <param name="sln">The solution to get an arbitrary project from.</param>
         /// <param name="globalProps">The global properties to load into the project.</param>
-        /// <returns>null if no project exists in the solution that can be evaluated properly. Else, an arbitrary project in the solution which can be.</returns>
+        /// <returns>null if no project exists in the solution that can be evaluated properly. Else, the first project in the solution that can be.</returns>
         private ProjectInstance? GetSingleProjectFromSolution(SlnFile sln, Dictionary<string, string> globalProps)
         {
             foreach (var project in sln.Projects.AsEnumerable())
@@ -295,7 +296,7 @@ namespace Microsoft.DotNet.Cli
         /// </summary>
         /// <param name="oldGlobalProperties">The set of MSBuild properties that were specified explicitly like -p:Property=Foo or in other syntax sugars.</param>
         /// <returns>The same set of global properties for the project, but with the new potential TFM based on -f or --framework.</returns>
-        private Dictionary<string, string> InjectTargetFrameworkIntoGlobalProperties(Dictionary<string, string> oldGlobalProperties)
+        void InjectTargetFrameworkIntoGlobalProperties(Dictionary<string, string> oldGlobalProperties)
         {
             if (_options.FrameworkOption != null)
             {
@@ -303,7 +304,6 @@ namespace Microsoft.DotNet.Cli
                 // So we can replace the value in the globals non-dubiously if it exists.
                 oldGlobalProperties[MSBuildPropertyNames.TARGET_FRAMEWORK] = _options.FrameworkOption;
             }
-            return oldGlobalProperties;
         }
     }
 }
