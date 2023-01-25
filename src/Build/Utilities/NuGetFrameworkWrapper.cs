@@ -122,7 +122,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            return tfmList;
+            return tfmList.ToString();
 
             IEnumerable<(string originalTfm, object parsedTfm)> ParseTfms(string desiredTargetFrameworks)
             {
