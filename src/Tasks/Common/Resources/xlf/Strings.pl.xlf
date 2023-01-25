@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AotNotSupported">
         <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="new">NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</target>
+        <target state="translated">NETSDK1195: Zestaw SDK nie obsługuje kompilacji z wyprzedzeniem. Ustaw właściwość PublishAot na wartość false.</target>
         <note>{StrBegin="NETSDK1195: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
