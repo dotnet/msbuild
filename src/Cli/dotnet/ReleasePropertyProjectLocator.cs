@@ -290,9 +290,9 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <summary>
-        /// Because command-line-forwarded properties aren't in the global arguments from Properties, we need to add the TFM to the collection.
-        /// The TFM is the only property besides Configuration that isn't an MSBuild property that could affect the pre-evaluation.
-        /// This allows the pre-evaluation to correctly deduce its Publish or PackRelease value because it will know the actual TFM being used.
+        /// Because command-line options that translate to MSBuild properties aren't in the global arguments from Properties, we need to add the TargetFramework to the collection.
+        /// The TargetFramework is the only command-line option besides Configuration that could affect the pre-evaluation.
+        /// This allows the pre-evaluation to correctly deduce its Publish or PackRelease value because it will know the actual TargetFramework being used.
         /// </summary>
         /// <param name="oldGlobalProperties">The set of MSBuild properties that were specified explicitly like -p:Property=Foo or in other syntax sugars.</param>
         /// <returns>The same set of global properties for the project, but with the new potential TFM based on -f or --framework.</returns>
