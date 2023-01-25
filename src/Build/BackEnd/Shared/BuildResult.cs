@@ -440,7 +440,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The defined targets for the project associated with this build result.
         /// </summary>
-        public HashSet<string> ProjectTargets
+        internal HashSet<string> ProjectTargets
         {
             [DebuggerStepThrough]
             get => _projectTargets;
