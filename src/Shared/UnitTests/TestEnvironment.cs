@@ -450,10 +450,25 @@ namespace Microsoft.Build.UnitTests
             string debugPath = FileUtilities.TempFileDirectory;
             if (debugPath != null)
             {
-                files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
+                try
+                {
+                    files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // Temp folder might have been deleted by other TestEnvironment logic
+                }
             }
 
-            files.AddRange(Directory.GetFiles(Path.GetTempPath(), MSBuildLogFiles));
+            try
+            {
+                files.AddRange(Directory.GetFiles(Path.GetTempPath(), MSBuildLogFiles));
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // Temp folder might have been deleted by other TestEnvironment logic
+            }
+
             return files.ToArray();
         }
 
