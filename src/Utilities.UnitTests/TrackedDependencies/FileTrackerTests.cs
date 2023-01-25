@@ -68,11 +68,13 @@ namespace Microsoft.Build.UnitTests.FileTracking
                     Environment.ExpandEnvironmentVariables("%windir%\\system32;%windir%"));
             }
 
+#if ENABLE_TRACKER_TESTS // https://github.com/dotnet/msbuild/issues/649
             // Call StopTrackingAndCleanup here, just in case one of the unit tests failed before it called it
             // In real code StopTrackingAndCleanup(); would always be in a finally {} block.
             FileTracker.StopTrackingAndCleanup();
             FileTrackerTestHelper.CleanTlogs();
             FileTracker.SetThreadCount(1);
+#endif
         }
 
         public void Dispose()
@@ -83,7 +85,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
                 Environment.SetEnvironmentVariable("PATH", s_oldPath);
                 s_oldPath = null;
             }
-
             FileTrackerTestHelper.CleanTlogs();
         }
 
@@ -837,11 +838,9 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
 
-        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
+        [Fact]
         public void FileTrackerFileIsUnderPath()
         {
-            Console.WriteLine("Test: FileTrackerFileIsUnderPath");
-
             // YES: Both refer to something under baz, so yes this is on the path
             Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\", @"c:\foo\bar\baz\"));
 
@@ -883,11 +882,9 @@ class X
             Assert.False(FileTracker.FileIsUnderPath(@"c:\foo\rumble.cpp", @"c:\foo\rumble\"));
         }
 
-        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
+        [Fact]
         public void FileTrackerFileIsExcludedFromDependencies()
         {
-            Console.WriteLine("Test: FileTrackerFileIsExcludedFromDependencies");
-
             string applicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string localApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string localLowApplicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData\\LocalLow");
