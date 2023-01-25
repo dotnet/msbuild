@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Security.AccessControl;
-using System.Security.Principal;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable

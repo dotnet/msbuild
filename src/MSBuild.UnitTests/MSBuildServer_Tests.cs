@@ -221,7 +221,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
-            // this log seems to be flaky, lets enable better logging to investigate it next time
+            // This test seems to be flaky, lets enable better logging to investigate it next time
             // TODO: delete after investigated its flakiness
             _env.WithTransientDebugEngineForNewProcesses(true);
 

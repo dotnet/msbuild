@@ -1,18 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
-
-#nullable disable
-
 using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.Debugging;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class DebugUtils_Tests
