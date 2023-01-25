@@ -4301,8 +4301,8 @@ $(
         [InlineData("net6.0-windows", "net6.0", "net6.0-windows")]
         [InlineData("netstandard2.0;net6.0", "net6.0", "net6.0")]
         [InlineData("netstandard2.0;net6.0-windows", "net6.0", "net6.0-windows")]
-        [InlineData("netstandard2.0;net6.0-windows", "net6.0;netstandard2.0;net472", "netstandard2.0;net6.0-windows")]
-        [InlineData("netstandard2.0;net472", "net6.0;netstandard2.0;net472", "netstandard2.0;net472")]
+        [InlineData("netstandard2.0;net6.0-windows", "net6.0;netstandard2.0;net472", "netstandard2.0%3bnet6.0-windows")]
+        [InlineData("netstandard2.0;net472", "net6.0;netstandard2.0;net472", "netstandard2.0%3bnet472")]
         public void PropertyFunctionFilterTargetFrameworks(string incoming, string filter, string expected)
         {
             TestPropertyFunction($"$([MSBuild]::FilterTargetFrameworks('{incoming}', '{filter}'))", "_", "_", expected);
