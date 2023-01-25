@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
-    public class FancyLoggerBufferLine
+    internal class FancyLoggerBufferLine
     {
         private static int Counter = 0;
         public int Id;
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
     }
 
-    public class FancyLoggerBuffer
+    internal class FancyLoggerBuffer
     {
         private static List<FancyLoggerBufferLine> Lines = new();
         private static int TopLineIndex = 0;
