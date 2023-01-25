@@ -4303,12 +4303,9 @@ $(
         [InlineData("netstandard2.0;net6.0-windows", "net6.0", "net6.0-windows")]
         [InlineData("netstandard2.0;net6.0-windows", "net6.0;netstandard2.0;net472", "netstandard2.0;net6.0-windows")]
         [InlineData("netstandard2.0;net472", "net6.0;netstandard2.0;net472", "netstandard2.0;net472")]
-        public void PropertyFunctionFilterTargetFrameworks(string left, string right, string expected)
+        public void PropertyFunctionFilterTargetFrameworks(string incoming, string filter, string expected)
         {
-            var pg = new PropertyDictionary<ProjectPropertyInstance>();
-            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
-
-            AssertSuccess(expander, $"$([MSBuild]::FilterTargetFrameworks('{left}', '{right}'))", expected);
+            TestPropertyFunction($"$([MSBuild]::FilterTargetFrameworks('{incoming}', '{filter}'))", "_", "_", expected);
         }
 
         [Fact]
