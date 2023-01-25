@@ -424,6 +424,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework + defineSelfContained.ToString())
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -432,8 +433,10 @@ namespace Microsoft.NET.Build.Tests
                     propertyGroup.Add(new XElement(ns + "SelfContained", defineSelfContained ? "true" : ""));
                 });
 
-            var buildCommand = new BuildCommand(testAsset);
-            var commandResult = buildCommand.Execute();
+            var buildCommand = new DotnetBuildCommand(Log);
+            var commandResult = buildCommand
+                .WithWorkingDirectory(testAsset.Path)
+                .Execute("/bl");
 
             if (targetFramework == "net7.0" && !defineSelfContained)
             {
