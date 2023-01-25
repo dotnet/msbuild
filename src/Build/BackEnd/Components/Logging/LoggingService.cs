@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -1594,6 +1595,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             try
             {
+                // TODO: can we distinguish builtin and custom loggers here?
+                using var _ = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization);
                 INodeLogger nodeLogger = logger as INodeLogger;
                 if (nodeLogger != null)
                 {

@@ -16,6 +16,7 @@ namespace Microsoft.Build.Framework
         { }
 
         public AssemblyLoadBuildEventArgs(
+            AssemblyLoadingContext loadingContext,
             string assemblyName,
             string assemblyPath,
             Guid mvid,
@@ -24,6 +25,7 @@ namespace Microsoft.Build.Framework
             MessageImportance importance = MessageImportance.Low)
             : base(null, null, null, importance, DateTime.UtcNow, assemblyName, assemblyPath, mvid)
         {
+            LoadingContext = loadingContext;
             AssemblyName = assemblyName;
             AssemblyPath = assemblyPath;
             MVID = mvid;
@@ -31,6 +33,7 @@ namespace Microsoft.Build.Framework
             AppDomainFriendlyName = appDomainFriendlyName;
         }
 
+        public AssemblyLoadingContext LoadingContext { get; private set; }
         public string AssemblyName { get; private set; }
         public string AssemblyPath { get; private set; }
         public Guid MVID { get; private set; }
@@ -39,6 +42,7 @@ namespace Microsoft.Build.Framework
 
         internal override void WriteToStream(BinaryWriter writer)
         {
+            writer.Write7BitEncodedInt((int)LoadingContext);
             writer.WriteTimestamp(RawTimestamp);
             writer.WriteOptionalBuildEventContext(BuildEventContext);
             writer.WriteGuid(MVID);
@@ -50,6 +54,7 @@ namespace Microsoft.Build.Framework
 
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
+            LoadingContext = (AssemblyLoadingContext) reader.Read7BitEncodedInt();
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             MVID = reader.ReadGuid();
@@ -65,7 +70,7 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", AssemblyName, AssemblyPath, MVID.ToString(), AppDomainId.ToString(), AppDomainFriendlyName);
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", LoadingContext.ToString(), AssemblyName, AssemblyPath, MVID.ToString(), AppDomainId.ToString(), AppDomainFriendlyName);
                 }
 
                 return RawMessage;

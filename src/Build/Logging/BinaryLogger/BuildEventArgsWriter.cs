@@ -474,6 +474,7 @@ Build
         {
             Write(BinaryLogRecordKind.AssemblyLoad);
             WriteMessageFields(e, writeMessage: false, writeImportance: false);
+            Write((int)e.LoadingContext);
             WriteDeduplicatedString(e.AssemblyName);
             WriteDeduplicatedString(e.AssemblyPath);
             Write(e.MVID);

@@ -1978,6 +1978,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>SDK resolver "{0}" returned null.</value>
   </data>
   <data name="TaskAssemblyLoaded" xml:space="preserve">
-    <value>Assembly loaded during task run: {0} (location: {1}, MVID: {2}, AppDomain: {3}|{4})</value>
+    <value>Assembly loaded during {0}: {1} (location: {2}, MVID: {3}, AppDomain: {4}|{5})</value>
   </data>
 </root>

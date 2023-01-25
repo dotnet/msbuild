@@ -374,7 +374,7 @@ namespace Microsoft.Build.BackEnd
                 ITask taskInstance = TaskLoader.CreateTask(_loadedType, _taskName, taskLocation.File, taskLocation.Line, taskLocation.Column, new TaskLoader.LogError(ErrorLoggingDelegate)
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
-                    , appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, appDomain)
+                    , appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, appDomain)
 #endif
                     , isOutOfProc
 #if FEATURE_APPDOMAIN

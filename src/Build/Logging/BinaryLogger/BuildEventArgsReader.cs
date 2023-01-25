@@ -807,6 +807,7 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields(readImportance: false);
 
+            AssemblyLoadingContext context = (AssemblyLoadingContext)ReadInt32();
             string assemblyName = ReadDeduplicatedString();
             string assemblyPath = ReadDeduplicatedString();
             Guid mvid = ReadGuid();
@@ -814,6 +815,7 @@ namespace Microsoft.Build.Logging
             string appDomainName = ReadDeduplicatedString();
 
             var e = new AssemblyLoadBuildEventArgs(
+                context,
                 assemblyName,
                 assemblyPath,
                 mvid,
