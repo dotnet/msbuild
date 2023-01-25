@@ -64,6 +64,8 @@ namespace Microsoft.Build.UnitTests
             var assemblyTempFolder = _testEnvironment.CreateFolder(newTempPath);
 
             _testEnvironment.SetTempPath(assemblyTempFolder.Path);
+
+            // Lets clear FileUtilities.TempFileDirectory in case it was already initialized by other code, so it picks up new TempPath
             FileUtilities.ClearTempFileDirectory();
 
             _testEnvironment.CreateFile(
