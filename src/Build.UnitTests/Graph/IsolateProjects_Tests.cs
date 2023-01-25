@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Graph.UnitTests
 {
-    public class IsolateProjectsTests : IDisposable
+    public class IsolateProjectsTests : IDisposable, IClassFixture<IsolateProjectsTests.IsolateProjectsClassFixture>
     {
         private readonly string _project = @"
                 <Project DefaultTargets='BuildSelf'>
@@ -132,16 +132,6 @@ BuildEngine5.BuildProjectFilesInParallel(
         {
             _testOutput = testOutput;
             _env = TestEnvironment.Create(_testOutput, ignoreBuildErrorFiles: true);
-
-            if (NativeMethodsShared.IsOSX)
-            {
-                // OSX links /var into /private, which makes Path.GetTempPath() to return "/var..." but Directory.GetCurrentDirectory to return "/private/var..."
-                // this discrepancy fails the msbuild undeclared reference enforcements due to failed path equality checks
-                var tempFolder = _env.CreateFolder(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")));
-                _env.SetTempPath(tempFolder.Path);
-            }
-
-            _env.WithInvariant(new BuildFailureLogInvariant());
 
             // todo investigate why out of proc builds fail on macos https://github.com/dotnet/msbuild/issues/3915
             var disableInProcNode = !NativeMethodsShared.IsOSX;
@@ -492,6 +482,28 @@ BuildEngine5.BuildProjectFilesInParallel(
                 buildManagerSession.Logger.ErrorCount.ShouldBe(0);
                 // twice for the initial target, once for A, once for DefaultTarget
                 buildManagerSession.Logger.AssertMessageCount("Previously built successfully", 4);
+            }
+        }
+
+        internal class IsolateProjectsClassFixture : IDisposable
+        {
+            private readonly TestEnvironment _classFixtureEnv;
+
+            public IsolateProjectsClassFixture()
+            {
+                _classFixtureEnv = TestEnvironment.Create(output: null, ignoreBuildErrorFiles: true);
+                if (NativeMethodsShared.IsOSX)
+                {
+                    // OSX links /var into /private, which makes Path.GetTempPath() to return "/var..." but Directory.GetCurrentDirectory to return "/private/var..."
+                    // this discrepancy fails the msbuild undeclared reference enforcements due to failed path equality checks
+                    var tempFolder = _classFixtureEnv.CreateFolder(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")));
+                    _classFixtureEnv.SetTempPath(tempFolder.Path);
+                }
+            }
+
+            public void Dispose()
+            {
+                _classFixtureEnv.Dispose();
             }
         }
     }
