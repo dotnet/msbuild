@@ -87,8 +87,8 @@ namespace FrameworkReferenceTest
                 IsExe = true
             };
 
-            // Specifying RID makes the produced app self-contained.
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+            testProject.AdditionalProperties["SelfContained"] = "true";
 
             if (tfm == ToolsetInfo.CurrentTargetFramework)
             {
@@ -433,6 +433,8 @@ namespace FrameworkReferenceTest
                 RuntimeIdentifier = "linux-x64"
             };
 
+            testProject.AdditionalProperties["SelfContained"] = "true";
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project =>
                 {
@@ -469,6 +471,8 @@ namespace FrameworkReferenceTest
                 IsExe = true,
                 RuntimeIdentifier = "invalid-rid"
             };
+
+            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -1139,6 +1143,7 @@ namespace FrameworkReferenceTest
             testProject.TargetFrameworks = targetFramework;;
             testProject.IsExe = true;
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
             if (projectChanges != null)
