@@ -263,6 +263,8 @@ namespace Microsoft.NET.Build.Tests
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 
+            testProject.AdditionalProperties["SelfContained"] = "true";
+
             //  Set up test FrameworkReference that will use workload manifest to resolve versions
             testProject.ProjectChanges.Add(project =>
             {
