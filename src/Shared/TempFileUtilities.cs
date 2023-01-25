@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -62,6 +64,10 @@ namespace Microsoft.Build.Shared
             else
             {
                 Directory.CreateDirectory(basePath);
+                DirectoryInfo dInfo = new DirectoryInfo(basePath);
+                DirectorySecurity dSecurity = dInfo.GetAccessControl();
+                dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                dInfo.SetAccessControl(dSecurity);
             }
 
             basePath = FileUtilities.EnsureTrailingSlash(basePath);
