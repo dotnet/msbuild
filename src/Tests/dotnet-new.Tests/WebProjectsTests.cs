@@ -5,7 +5,6 @@
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
@@ -23,11 +22,10 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Theory]
-        // TODO: Reenable after https://github.com/dotnet/sdk/issues/30033 is fixed
-        // [InlineData("emptyweb_cs-latest", "web")]
-        // [InlineData("mvc_cs-latest", "mvc")]
-        // [InlineData("mvc_fs-latest", "mvc", "-lang", "F#")]
-        // [InlineData("api_cs-latest", "webapi")]
+        [InlineData("emptyweb_cs-latest", "web")]
+        [InlineData("mvc_cs-latest", "mvc")]
+        [InlineData("mvc_fs-latest", "mvc", "-lang", "F#")]
+        [InlineData("api_cs-latest", "webapi")]
         [InlineData("emptyweb_cs-60", "web", "-f", "net6.0")]
         [InlineData("mvc_cs-60", "mvc", "-f", "net6.0")]
         [InlineData("mvc_fs-60", "mvc", "-lang", "F#", "-f", "net6.0")]
@@ -38,7 +36,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("api_cs-70", "webapi", "-f", "net7.0")]
         public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
         {
-            string workingDir = Path.Combine(_fixture.BaseWorkingDirectory, testName);
+            string workingDir = Path.Combine(Path.GetRandomFileName(), testName);
             Directory.CreateDirectory(workingDir);
 
             new DotnetNewCommand(_log, args)
@@ -131,7 +129,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
     {
         public WebProjectsFixture(IMessageSink messageSink) : base(messageSink)
         {
-            BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(WebProjectsTests));
+            BaseWorkingDirectory = Utilities.CreateTemporaryFolder(nameof(WebProjectsTests));
 
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates60Path, BaseWorkingDirectory);
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates70Path, BaseWorkingDirectory);
