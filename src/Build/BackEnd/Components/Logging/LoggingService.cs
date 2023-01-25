@@ -1596,7 +1596,7 @@ namespace Microsoft.Build.BackEnd.Logging
             try
             {
                 // TODO: can we distinguish builtin and custom loggers here?
-                using var _ = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization);
+                // using var _ = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization);
                 INodeLogger nodeLogger = logger as INodeLogger;
                 if (nodeLogger != null)
                 {
