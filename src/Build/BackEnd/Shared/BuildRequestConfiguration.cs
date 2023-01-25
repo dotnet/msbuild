@@ -561,7 +561,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets or sets the targets defined for the project.
         /// </summary>
-        public HashSet<string> ProjectTargets
+        internal HashSet<string> ProjectTargets
         {
             [DebuggerStepThrough]
             get => _projectTargets;
