@@ -979,6 +979,7 @@ namespace FrameworkReferenceTest
             if (selfContained)
             {
                 testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+                testProject.AdditionalProperties["SelfContained"] = "true";
             }
 
             string identifier = selfContained ? "_selfcontained" : string.Empty;
