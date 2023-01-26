@@ -361,24 +361,25 @@ namespace Microsoft.Build.Tasks
             DateTime lastModified = GetAndCacheLastModified(path);
             bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
             bool isCachedInProcess = s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
-            
+
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
-            // If the process-wide cache contains an up-to-date FileState, always use it
-            if (isProcessFileStateUpToDate)
-            {
-                // For the next build, we may be using a different process. Update the file cache.
-                if (!isInstanceFileStateUpToDate)
-                {
-                    instanceLocalFileStateCache[path] = cachedProcessFileState;
-                    isDirty = true;
-                }
-                return cachedProcessFileState;
-            }
+            // first use the instance local cache
             if (isInstanceFileStateUpToDate)
             {
-                return s_processWideFileStateCache[path] = cachedInstanceFileState;
+                // update the process cache if it is missing.
+                if (!isProcessFileStateUpToDate)
+                {
+                    s_processWideFileStateCache[path] = cachedInstanceFileState;
+                }
+
+                return cachedInstanceFileState;
+            }
+            else if (isProcessFileStateUpToDate)
+            {
+                isDirty = true;
+                return instanceLocalFileStateCache[path] = cachedProcessFileState;
             }
 
             // If no up-to-date FileState exists at this point, create one and take ownership
@@ -438,7 +439,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             // Not a well-known FX assembly so now check the cache.
             FileState fileState = GetFileState(path);
             if (fileState.Assembly == null)
@@ -473,7 +474,9 @@ namespace Microsoft.Build.Tasks
             if (String.IsNullOrEmpty(fileState.RuntimeVersion))
             {
                 fileState.RuntimeVersion = getAssemblyRuntimeVersion(path);
-                isDirty = true;
+
+                if (!String.IsNullOrEmpty(fileState.RuntimeVersion))
+                    isDirty = true;
             }
 
             return fileState.RuntimeVersion;
@@ -509,7 +512,11 @@ namespace Microsoft.Build.Tasks
                     out fileState.frameworkName
                  );
 
-                isDirty = true;
+                // Don't diry the cache if results are unchanged.
+                if (fileState.dependencies != null)
+                {
+                    isDirty = true;
+                }
             }
 
             dependencies = fileState.dependencies;
