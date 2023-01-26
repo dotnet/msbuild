@@ -892,7 +892,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1196: "}</comment>
   </data>
   <data name="RuntimeIdentifierWillNoLongerImplySelfContained" xml:space="preserve">
-    <value>NETSDK1198: For projects with TargetFrameworks >= 8.0, RuntimeIdentifier no longer automatically gives a SelfContained app. To continue creating a .NET framework independent app after upgrading to 8.0, consider setting SelfContained explicitly.</value>
+    <value>NETSDK1198: For projects with TargetFramework >= 8.0, specifying a RuntimeIdentifier no longer produces a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use --self-contained argument.</value>
     <comment>{StrBegin="NETSDK1198: "}</comment>
   </data>
 </root>
