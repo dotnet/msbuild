@@ -140,7 +140,7 @@ namespace Microsoft.NET.Pack.Tests
         [InlineData("")]
         [InlineData("false")]
         [Theory]
-        public void It_packs_successfully_with_Mutlitargeting_where_net_8_and_net_7_project_defines_PackRelease_or_not(string packReleaseValue)
+        public void It_packs_successfully_with_Multitargeting_where_net_8_and_net_7_project_defines_PackRelease_or_not(string packReleaseValue)
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: packReleaseValue)
