@@ -296,7 +296,7 @@ namespace Microsoft.DotNet.Cli
         /// </summary>
         /// <param name="oldGlobalProperties">The set of MSBuild properties that were specified explicitly like -p:Property=Foo or in other syntax sugars.</param>
         /// <returns>The same set of global properties for the project, but with the new potential TFM based on -f or --framework.</returns>
-        void InjectTargetFrameworkIntoGlobalProperties(Dictionary<string, string> oldGlobalProperties)
+        void InjectTargetFrameworkIntoGlobalProperties(Dictionary<string, string> globalProperties)
         {
             if (_options.FrameworkOption != null)
             {
