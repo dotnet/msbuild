@@ -24,6 +24,7 @@
     <Compile Include="..\..\Tasks\Common\Message.cs" LinkBase="Common" />
     <Compile Include="..\..\Tasks\Common\MessageLevel.cs" LinkBase="Common" />
   </ItemGroup>
+
   <!-- Include MSBuild logger -->
   <ItemGroup>
     <Compile Include="..\..\Microsoft.DotNet.ApiSymbolExtensions\Logging\MSBuildLog.cs" />

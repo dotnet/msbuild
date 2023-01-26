@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Microsoft.DotNet.ApiSymbolExtensions.Logging
@@ -9,27 +9,47 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Logging
     public interface ILog
     {
         /// <summary>
-        /// Log an error based on a passed in code, format, and additional arguments.
-        /// <param name="code">The associated code</param>
-        /// <param name="format">The message format/param>
-        /// <param name="args">The message format arguments</param>
+        /// True if errors are logged.
         /// </summary>
-        void LogError(string code, string format, params string[] args);
+        bool HasLoggedErrors { get; }
 
         /// <summary>
-        /// Log a warning based on a passed in code, format, and additional arguments.
-        /// <param name="code">The associated code</param>
-        /// <param name="format">The message format/param>
-        /// <param name="args">The message format arguments</param>
+        /// Log an error.
+        /// <param name="message">The message</param>
         /// </summary>
-        void LogWarning(string code, string format, params string[] args);
+        void LogError(string message);
 
         /// <summary>
-        /// Log a message based on a passed in importance, format, and additional arguments.
+        /// Log an error with an error code.
+        /// <param name="code">The error code</param>
+        /// <param name="message">The message</param>
+        /// </summary>
+        void LogError(string code, string message);
+
+        /// <summary>
+        /// Log a warning.
+        /// <param name="message">The message</param>
+        /// </summary>
+        void LogWarning(string message);
+
+        /// <summary>
+        /// Log a warning with a warning code.
+        /// <param name="code">The warning code</param>
+        /// <param name="message">The message</param>
+        /// </summary>
+        void LogWarning(string code, string message);
+
+        /// <summary>
+        /// Log a message with normal importance.
+        /// <param name="message">The message</param>
+        /// </summary>
+        void LogMessage(string message);
+
+        /// <summary>
+        /// Log a message with a custom importance.
         /// <param name="importance">The message importance</param>
-        /// <param name="format">The message format/param>
-        /// <param name="args">The message format arguments</param>
+        /// <param name="message">The message</param>
         /// </summary>
-        void LogMessage(MessageImportance importance, string format, params string[] args);
+        void LogMessage(MessageImportance importance, string message);
     }
 }

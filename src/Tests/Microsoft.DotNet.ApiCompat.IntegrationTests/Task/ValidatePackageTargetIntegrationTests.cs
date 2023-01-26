@@ -339,9 +339,9 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             validator.Validate(new PackageValidatorOption(package));
 
             if (!useReferences)
-                Assert.Empty(log.errors.Where(e => e.Contains("CP1003")));
+                Assert.Empty(log.warnings.Where(e => e.Contains("CP1003")));
             else
-                Assert.NotEmpty(log.errors.Where(e => e.Contains("CP1003")));
+                Assert.NotEmpty(log.warnings.Where(e => e.Contains("CP1003")));
         }
 
         [RequiresMSBuildVersionFact("17.0.0.32901", Skip = "https://github.com/dotnet/sdk/issues/23533")]

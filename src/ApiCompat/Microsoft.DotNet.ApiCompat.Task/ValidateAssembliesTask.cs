@@ -183,7 +183,9 @@ namespace Microsoft.DotNet.ApiCompat.Task
 
                 if (string.IsNullOrWhiteSpace(replacementString))
                 {
-                    throw new ArgumentException(string.Format(CommonResources.InvalidRexegStringTransformationPattern, captureGroupPattern, replacementString));
+                    throw new ArgumentException(string.Format(CommonResources.InvalidRexegStringTransformationPattern,
+                        captureGroupPattern,
+                        replacementString));
                 }
 
                 patterns[i] = (captureGroupPattern, replacementString);
