@@ -444,7 +444,7 @@ public static class Program
                .CopyTestAsset("HelloWorld", $"{optedOut}")
                .WithSource();
 
-            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
+            File.WriteAllText(Path.Combine(helloWorldAsset.Path, "/Directory.Build.props"), "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
             new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
                 .WithEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, optedOut.ToString())
