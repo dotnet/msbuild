@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -23,6 +22,7 @@ namespace Microsoft.Build.Tasks
     using System.Reflection;
     using System.Text;
     using System.Xml;
+    using Microsoft.Build.Shared.FileSystem;
 
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it

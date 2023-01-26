@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
-#endif
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;

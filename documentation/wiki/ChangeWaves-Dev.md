@@ -51,7 +51,7 @@ Surround your feature with the following:
 
 If you need to condition a Task or Target, use the built in `AreFeaturesEnabled` function.
 ```xml
-<Target Name="SomeRiskyChange" Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))"">
+<Target Name="SomeRiskyChange" Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">
 <!-- Where '17.4' is the change wave assigned to your feature. -->
 ```
 

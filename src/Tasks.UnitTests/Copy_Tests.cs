@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
@@ -2208,6 +2207,9 @@ namespace Microsoft.Build.UnitTests
 
     public class CopyHardAndSymbolicLink_Tests
     {
+        /// <summary>
+        /// Verify build sucessfully when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true 
+        /// </summary>
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
         {
@@ -2234,10 +2236,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.False(success);
-
+                Assert.True(success);
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
             }
             finally
             {
@@ -2471,15 +2472,6 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(destFolder);
 
-                // Exhaust the number (1024) of directory entries that can be created for a file
-                // This is 1 + (1 x hard links)
-                // We need to test the fallback code path when we're out of directory entries for a file..
-                for (int n = 0; n < 1025 /* make sure */; n++)
-                {
-                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
-                    string linkError = String.Empty;
-                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError);
-                }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
@@ -2493,6 +2485,16 @@ namespace Microsoft.Build.UnitTests
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true
                 };
+
+                // Exhaust the number (1024) of directory entries that can be created for a file
+                // This is 1 + (1 x hard links)
+                // We need to test the fallback code path when we're out of directory entries for a file..
+                for (int n = 0; n < 1025 /* make sure */; n++)
+                {
+                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
+                    string linkError = String.Empty;
+                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError, t.Log);
+                }
 
                 bool success = t.Execute();
 
@@ -2556,77 +2558,63 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CopyToDestinationFolderWithSymbolicLinkCheck()
         {
-            var isPrivileged = true;
-
-            if (NativeMethodsShared.IsWindows)
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string temp = Path.GetTempPath();
+            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
+            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+            try
             {
-                if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)))
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+
+                // Don't create the dest folder, let task do that
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+
+                var me = new MockEngine(true);
+                var t = new Copy
                 {
-                    isPrivileged = false;
-                    Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
-                }
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true,
+                    UseSymboliclinksIfPossible = true
+                };
+
+                bool success = t.Execute();
+
+                Assert.True(success); // "success"
+                Assert.True(File.Exists(destFile)); // "destination exists"
+                Assert.True((File.GetAttributes(destFile) & FileAttributes.ReparsePoint) != 0, "File was copied but is not a symlink");
+
+                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
+
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
+
+                string destinationFileContents = File.ReadAllText(destFile);
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination symbolic linked file to contain the contents of source file."
+
+                Assert.Single(t.DestinationFiles);
+                Assert.Single(t.CopiedFiles);
+                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
+
+                // Now we will write new content to the source file
+                // we'll then check that the destination file automatically
+                // has the same content (i.e. it's been hard linked)
+
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+
+                // Read the destination file (it should have the same modified content as the source)
+                destinationFileContents = File.ReadAllText(destFile);
+                Assert.Equal("This is another source temp file.", destinationFileContents); // "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
             }
-
-            if (isPrivileged)
+            finally
             {
-                string sourceFile = FileUtilities.GetTemporaryFile();
-                string temp = Path.GetTempPath();
-                string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-                string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-                try
-                {
-                    File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
-
-                    // Don't create the dest folder, let task do that
-
-                    ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
-
-                    var me = new MockEngine(true);
-                    var t = new Copy
-                    {
-                        RetryDelayMilliseconds = 1,  // speed up tests!
-                        BuildEngine = me,
-                        SourceFiles = sourceFiles,
-                        DestinationFolder = new TaskItem(destFolder),
-                        SkipUnchangedFiles = true,
-                        UseSymboliclinksIfPossible = true
-                    };
-
-                    bool success = t.Execute();
-
-                    Assert.True(success); // "success"
-                    Assert.True(File.Exists(destFile)); // "destination exists"
-
-                    MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-
-                    me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
-
-                    string destinationFileContents = File.ReadAllText(destFile);
-                    Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination symbolic linked file to contain the contents of source file."
-
-                    Assert.Single(t.DestinationFiles);
-                    Assert.Single(t.CopiedFiles);
-                    Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                    Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
-
-                    // Now we will write new content to the source file
-                    // we'll then check that the destination file automatically
-                    // has the same content (i.e. it's been hard linked)
-
-                    File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
-
-                    // Read the destination file (it should have the same modified content as the source)
-                    destinationFileContents = File.ReadAllText(destFile);
-                    Assert.Equal("This is another source temp file.", destinationFileContents); // "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
-
-                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
-                }
-                finally
-                {
-                    File.Delete(sourceFile);
-                    File.Delete(destFile);
-                    FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
-                }
+                File.Delete(sourceFile);
+                File.Delete(destFile);
+                FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
 

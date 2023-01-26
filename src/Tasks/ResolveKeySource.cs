@@ -2,16 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.IO;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Build.Framework;
+#if FEATURE_PFX_SIGNING
+using System.Globalization;
+using System.Security.Cryptography;
+using Microsoft.Runtime.Hosting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_PFX_SIGNING
-using Microsoft.Runtime.Hosting;
 #endif
 
 #nullable disable

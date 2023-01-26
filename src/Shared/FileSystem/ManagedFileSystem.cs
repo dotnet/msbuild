@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +23,7 @@ namespace Microsoft.Build.Shared.FileSystem
             get
             {
 #if !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0) && NativeMethodsShared.IsWindows;
+                return NativeMethodsShared.IsWindows;
 #else
                 // We need to mock usage of ChangeWaves class,
                 // because Microsoft.Build.Engine.OM.UnitTests should not have access to internals of Microsoft.Build.Framework.

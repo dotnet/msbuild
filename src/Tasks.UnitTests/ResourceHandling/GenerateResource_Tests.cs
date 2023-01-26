@@ -3826,9 +3826,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// </summary>
         public static string GetTempFileName(string extension)
         {
-            string f = FileUtilities.GetTemporaryFile();
+            string f = FileUtilities.GetTemporaryFileName();
             string filename = Path.ChangeExtension(f, extension);
-            File.Delete(f);
             // Make sure that the new file doesn't already exist, since the test is probably
             // expecting it not to
             File.Delete(filename);

@@ -196,7 +196,7 @@ namespace Microsoft.Build.Tasks
             var encoding = EncodingUtilities.BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
 
             // Temporary file with the extension .Exec.bat
-            _batchFile = FileUtilities.GetTemporaryFile(".exec.cmd");
+            _batchFile = FileUtilities.GetTemporaryFileName(".exec.cmd");
 
             // UNICODE Batch files are not allowed as of WinXP. We can't use normal ANSI code pages either,
             // since console-related apps use OEM code pages "for historical reasons". Sigh.

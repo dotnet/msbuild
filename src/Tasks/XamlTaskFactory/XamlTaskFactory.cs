@@ -20,7 +20,6 @@ namespace Microsoft.Build.Tasks
     using System.Reflection;
     using System.Text;
     using System.Threading;
-    using System.Xml;
 
     /// <summary>
     /// The task factory provider for XAML tasks.

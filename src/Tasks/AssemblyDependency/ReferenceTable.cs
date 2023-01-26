@@ -409,7 +409,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            if (reference.FullPath.Length > 0 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            if (reference.FullPath.Length > 0)
             {
                 // Saves effort and makes deduplication possible downstream
                 reference.NormalizeFullPath();
@@ -1340,16 +1340,7 @@ namespace Microsoft.Build.Tasks
             // If the path was resolved, then specify the full path on the reference.
             if (resolvedPath != null)
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-                {
-                    resolvedPath = FileUtilities.NormalizePath(resolvedPath);
-                }
-                else if (!Path.IsPathRooted(resolvedPath))
-                {
-                    resolvedPath = Path.GetFullPath(resolvedPath);
-                }
-
-                reference.FullPath = resolvedPath;
+                reference.FullPath = FileUtilities.NormalizePath(resolvedPath);
                 reference.ResolvedSearchPath = resolvedSearchPath;
                 reference.UserRequestedSpecificFile = userRequestedSpecificFile;
             }
@@ -2628,48 +2619,50 @@ namespace Microsoft.Build.Tasks
                 AssemblyNameExtension assemblyName = kvp.Key;
                 Reference reference = kvp.Value;
 
+                reference.SetFinalCopyLocalState
+                (
+                    assemblyName,
+                    _frameworkPaths,
+                    _targetProcessorArchitecture,
+                    _getRuntimeVersion,
+                    _targetedRuntimeVersion,
+                    _fileExists,
+                    _getAssemblyPathInGac,
+                    _copyLocalDependenciesWhenParentReferenceInGac,
+                    _doNotCopyLocalIfInGac,
+                    this
+                );
+
                 // Conflict victims and badimages are filtered out.
-                if (!reference.IsBadImage)
+                if (reference.IsBadImage)
                 {
-                    reference.SetFinalCopyLocalState
-                    (
-                        assemblyName,
-                        _frameworkPaths,
-                        _targetProcessorArchitecture,
-                        _getRuntimeVersion,
-                        _targetedRuntimeVersion,
-                        _fileExists,
-                        _getAssemblyPathInGac,
-                        _copyLocalDependenciesWhenParentReferenceInGac,
-                        _doNotCopyLocalIfInGac,
-                        this
-                    );
+                    continue;
+                }
 
-                    // If mscorlib was found as a dependency and not a primary reference we will assume that mscorlib on the target machine will be ok to use.
-                    // If mscorlib was a primary reference then we may have resolved one which is a differnt version that is on the target
-                    // machine and we should gather it along with the other references.
-                    if (!reference.IsPrimary && IsPseudoAssembly(assemblyName.Name))
+                // If mscorlib was found as a dependency and not a primary reference we will assume that mscorlib on the target machine will be ok to use.
+                // If mscorlib was a primary reference then we may have resolved one which is a differnt version that is on the target
+                // machine and we should gather it along with the other references.
+                if (!reference.IsPrimary && IsPseudoAssembly(assemblyName.Name))
+                {
+                    continue;
+                }
+
+                if (reference.IsResolved)
+                {
+                    ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName);
+
+                    if (reference.IsPrimary)
                     {
-                        continue;
+                        if (!reference.IsBadImage)
+                        {
+                            // Add a primary item.
+                            primaryItems.Add(referenceItem);
+                        }
                     }
-
-                    if (reference.IsResolved)
+                    else
                     {
-                        ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName);
-
-                        if (reference.IsPrimary)
-                        {
-                            if (!reference.IsBadImage)
-                            {
-                                // Add a primary item.
-                                primaryItems.Add(referenceItem);
-                            }
-                        }
-                        else
-                        {
-                            // Add the reference item.
-                            dependencyItems.Add(referenceItem);
-                        }
+                        // Add the reference item.
+                        dependencyItems.Add(referenceItem);
                     }
                 }
             }

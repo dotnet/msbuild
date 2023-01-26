@@ -163,10 +163,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Validate that setting a non-existent parameter fails, but does not throw an exception.
         /// </summary>
         [Fact]
-        public void ValidateNonExistantParameter()
+        public void ValidateNonExistentParameter()
         {
             var parameters = new Dictionary<string, (string, ElementLocation)>(StringComparer.OrdinalIgnoreCase);
-            parameters["NonExistantParam"] = ("foo", ElementLocation.Create("foo.proj"));
+            parameters["NonExistentParam"] = ("foo", ElementLocation.Create("foo.proj"));
             Assert.False(_host.SetTaskParameters(parameters));
         }
 
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetBoolParamEmptyProperty()
         {
-            ValidateTaskParameterNotSet("BoolParam", "$(NonExistantProperty)");
+            ValidateTaskParameterNotSet("BoolParam", "$(NonExistentProperty)");
         }
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetBoolParamEmptyItem()
         {
-            ValidateTaskParameterNotSet("BoolParam", "@(NonExistantItem)");
+            ValidateTaskParameterNotSet("BoolParam", "@(NonExistentItem)");
         }
 
         #endregion
@@ -254,7 +254,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetBoolArrayParamEmptyProperty()
         {
-            ValidateTaskParameterNotSet("BoolArrayParam", "$(NonExistantProperty)");
+            ValidateTaskParameterNotSet("BoolArrayParam", "$(NonExistentProperty)");
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetBoolArrayParamEmptyItem()
         {
-            ValidateTaskParameterNotSet("BoolArrayParam", "@(NonExistantItem)");
+            ValidateTaskParameterNotSet("BoolArrayParam", "@(NonExistentItem)");
         }
 
         #endregion
@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetIntParamEmptyProperty()
         {
-            ValidateTaskParameterNotSet("IntParam", "$(NonExistantProperty)");
+            ValidateTaskParameterNotSet("IntParam", "$(NonExistentProperty)");
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetIntParamEmptyItem()
         {
-            ValidateTaskParameterNotSet("IntParam", "@(NonExistantItem)");
+            ValidateTaskParameterNotSet("IntParam", "@(NonExistentItem)");
         }
 
         #endregion
@@ -357,7 +357,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetIntArrayParamEmptyProperty()
         {
-            ValidateTaskParameterNotSet("IntArrayParam", "$(NonExistantProperty)");
+            ValidateTaskParameterNotSet("IntArrayParam", "$(NonExistentProperty)");
         }
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetIntArrayParamEmptyItem()
         {
-            ValidateTaskParameterNotSet("IntArrayParam", "@(NonExistantItem)");
+            ValidateTaskParameterNotSet("IntArrayParam", "@(NonExistentItem)");
         }
 
         #endregion
@@ -406,7 +406,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetStringParamEmptyProperty()
         {
-            ValidateTaskParameterNotSet("StringParam", "$(NonExistantProperty)");
+            ValidateTaskParameterNotSet("StringParam", "$(NonExistentProperty)");
         }
 
         /// <summary>
@@ -415,7 +415,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetStringParamEmptyItem()
         {
-            ValidateTaskParameterNotSet("StringParam", "@(NonExistantItem)");
+            ValidateTaskParameterNotSet("StringParam", "@(NonExistentItem)");
         }
 
         #endregion
@@ -455,7 +455,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetStringArrayParamEmptyProperty()
         {
-            ValidateTaskParameterNotSet("StringArrayParam", "$(NonExistantProperty)");
+            ValidateTaskParameterNotSet("StringArrayParam", "$(NonExistentProperty)");
         }
 
         /// <summary>
@@ -464,7 +464,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetStringArrayParamEmptyItem()
         {
-            ValidateTaskParameterNotSet("StringArrayParam", "@(NonExistantItem)");
+            ValidateTaskParameterNotSet("StringArrayParam", "@(NonExistentItem)");
         }
 
         #endregion
@@ -516,7 +516,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetItemParamEmptyProperty()
         {
-            ValidateTaskParameterNotSet("ItemParam", "$(NonExistantProperty)");
+            ValidateTaskParameterNotSet("ItemParam", "$(NonExistentProperty)");
         }
 
         /// <summary>
@@ -525,7 +525,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetItemParamEmptyItem()
         {
-            ValidateTaskParameterNotSet("ItemParam", "@(NonExistantItem)");
+            ValidateTaskParameterNotSet("ItemParam", "@(NonExistentItem)");
         }
 
         #endregion
@@ -583,7 +583,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetItemArrayParamEmptyProperty()
         {
-            ValidateTaskParameterNotSet("ItemArrayParam", "$(NonExistantProperty)");
+            ValidateTaskParameterNotSet("ItemArrayParam", "$(NonExistentProperty)");
         }
 
         /// <summary>
@@ -592,7 +592,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetItemArrayParamEmptyItem()
         {
-            ValidateTaskParameterNotSet("ItemArrayParam", "@(NonExistantItem)");
+            ValidateTaskParameterNotSet("ItemArrayParam", "@(NonExistentItem)");
         }
 
         #endregion
@@ -942,7 +942,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                Assert.False(_host.GatherTaskOutputs("NonExistantOutput", ElementLocation.Create(".", 1, 1), true, "output"));
+                Assert.False(_host.GatherTaskOutputs("NonExistentOutput", ElementLocation.Create(".", 1, 1), true, "output"));
             }
            );
         }
