@@ -41,9 +41,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] RemovedDirectories { get; set; }
 
-        public void SetQuestion(bool question) => this.question = question;
-
-        private bool question = false;
+        public bool Question { get; set; }
 
         //-----------------------------------------------------------------------------------
         // Execute -- this runs the task
@@ -65,7 +63,7 @@ namespace Microsoft.Build.Tasks
 
                 if (FileSystems.Default.DirectoryExists(directory.ItemSpec))
                 {
-                    if (question)
+                    if (Question)
                     {
                         Log.LogErrorFromResources("RemoveDir.Removing", directory.ItemSpec);
                         continue;

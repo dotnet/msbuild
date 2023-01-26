@@ -1039,9 +1039,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] UnresolvedAssemblyConflicts => _unresolvedConflicts.ToArray();
 
-        public void SetQuestion(bool question) => this.question = question;
+        public bool Question { get; set; }
 
-        private bool question = false;
 
         #endregion
         #region Logging
@@ -2055,7 +2054,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
-                if (question)
+                if (Question)
                 {
                     Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
                     return;

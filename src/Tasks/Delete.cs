@@ -61,10 +61,7 @@ namespace Microsoft.Build.Tasks
         /// Set question parameter to verify if this is incremental.
         /// </summary>
         /// <remarks></remarks>
-        public void SetQuestion(bool question) => this.question = question;
-
-        private bool question = false;
-
+        public bool Question { get; set; }
         /// <summary>
         /// Verify that the inputs are correct.
         /// </summary>
@@ -123,7 +120,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (FileSystems.Default.FileExists(file.ItemSpec))
                         {
-                            if (question)
+                            if (Question)
                             {
                                 Log.LogErrorFromResources("Delete.DeletingFile", file.ItemSpec);
                             }

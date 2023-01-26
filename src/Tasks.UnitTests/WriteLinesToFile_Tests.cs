@@ -193,7 +193,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents1") },
                 };
-                a2.SetQuestion(true);
+                a2.Question = true;
                 a2.Execute().ShouldBeTrue();
                 File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
 
@@ -206,7 +206,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents2") },
                 };
-                a3.SetQuestion(true);
+                a3.Question = true;
 
                 a3.Execute().ShouldBeFalse();
                 File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));

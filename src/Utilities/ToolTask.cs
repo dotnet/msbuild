@@ -353,11 +353,12 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         protected virtual bool SkipTaskExecution() { canBeIncremental = false; return false; }
 
-        private bool canBeIncremental { get; set; } = true;
+        /// <summary>
+        /// ToolTask is not incremental it can't be questioned.  However, when SkipTaskExecution is override, then Question feature can task effect.
+        /// </summary>
+        protected bool canBeIncremental { get; set; } = true;
 
-        public void SetQuestion(bool question) => this.question = question;
-
-        private bool question = false;
+        public bool Question { get; set; }
 
         /// <summary>
         /// Returns a string with those switches and other information that can go into a response file.
@@ -1330,7 +1331,7 @@ namespace Microsoft.Build.Utilities
                     // doing any actual work).
                     return true;
                 }
-                else if (canBeIncremental && question)
+                else if (canBeIncremental && Question)
                 {
                     LogPrivate.LogErrorWithCodeFromResources("ToolTask.NotUpToDate");
                     return false;

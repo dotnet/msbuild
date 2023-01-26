@@ -70,13 +70,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set question parameter for Move task.
         /// </summary>
-        /// <param name="question"></param>
         /// <remarks>Move can be chained A->B->C with location C as the final location.
         /// Incrementally, it is hard to question A->B if both files are gone.
         /// In short, question will always return false and author should use target inputs/outputs.</remarks>
-        public void SetQuestion(bool question) => this.question = question;
-
-        private bool question = false;
+        public bool Question { get; set; }
 
         /// <summary>
         /// Stop and return (in an undefined state) as soon as possible.
@@ -160,7 +157,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    if (!question && MoveFileWithLogging(sourceFile, destinationFile))
+                    if (!Question && MoveFileWithLogging(sourceFile, destinationFile))
                     {
                         SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
                         destinationFilesSuccessfullyMoved.Add(DestinationFiles[i]);

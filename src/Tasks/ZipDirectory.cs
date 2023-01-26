@@ -29,9 +29,7 @@ namespace Microsoft.Build.Tasks
         [Required]
         public ITaskItem SourceDirectory { get; set; }
 
-        public void SetQuestion(bool question) => this.question = question;
-
-        private bool question = false;
+        public bool Question { get; set; }
 
         public override bool Execute()
         {
@@ -51,7 +49,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (destinationFile.Exists)
                 {
-                    if (!Overwrite || question)
+                    if (!Overwrite || Question)
                     {
                         Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFileExists", destinationFile.FullName);
 
@@ -72,7 +70,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    if (question)
+                    if (Question)
                     {
                         Log.LogErrorFromResources("ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
                     }

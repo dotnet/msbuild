@@ -546,9 +546,8 @@ namespace Microsoft.Build.Tasks
             // do nothing
         }
 
-        public void SetQuestion(bool question) => this.question = question;
 
-        private bool question = false;
+        public bool Question { get; set; }
 
         /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
@@ -719,7 +718,7 @@ namespace Microsoft.Build.Tasks
 
                     Log.LogMessageFromResources("GenerateResource.NothingOutOfDate");
                 }
-                else if (question)
+                else if (Question)
                 {
                     Log.LogErrorFromResources("GenerateResource.OutOfDate");
                 }

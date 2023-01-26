@@ -10,6 +10,6 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public interface IIncrementalTask
     {
-        void SetQuestion(bool question);
+        bool Question { set; }
     }
 }

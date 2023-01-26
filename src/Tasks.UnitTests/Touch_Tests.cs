@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
-            t.SetQuestion(true);
+            t.Question = true;
 
             t.Files = new ITaskItem[]
             {
@@ -368,7 +368,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
-            t.SetQuestion(true);
+            t.Question = true;
             t.AlwaysCreate = true;
             t.Files = new ITaskItem[]
             {
@@ -393,7 +393,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
-            t.SetQuestion(true);
+            t.Question = true;
             t.Files = new ITaskItem[]
             {
                 new TaskItem(myexisting_txt)

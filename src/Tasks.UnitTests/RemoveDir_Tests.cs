@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
                     Directories = list.ToArray(),
                     BuildEngine = new MockEngine(_output),
                 };
-                t.SetQuestion(true);
+                t.Question = true;
                 t.Execute().ShouldBeFalse();
 
                 RemoveDir t2 = new RemoveDir()
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
                     Directories = list.ToArray(),
                     BuildEngine = new MockEngine(_output),
                 };
-                t3.SetQuestion(true);
+                t3.Question = true;
                 t3.Execute().ShouldBeTrue();
             }
         }

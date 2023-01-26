@@ -31,9 +31,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] DirectoriesCreated { get; private set; }
 
-        public void SetQuestion(bool question) => this.question = question;
-
-        private bool question = false;
+        public bool Question { get; set; }
 
         private ITaskItem[] _directories;
 
@@ -63,7 +61,7 @@ namespace Microsoft.Build.Tasks
                             // Only log a message if we actually need to create the folder
                             if (!FileUtilities.DirectoryExistsNoThrow(directory.ItemSpec))
                             {
-                                if (question)
+                                if (Question)
                                 {
                                     Log.LogErrorFromResources("MakeDir.Comment", directory.ItemSpec);
                                 }
