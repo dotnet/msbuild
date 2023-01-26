@@ -211,7 +211,7 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <summary>
-        /// Returns an arbitrary project for the solution. Relies on MSBuild code to catch conflicting values of a given property, like PublishRelease or PackRelease.
+        /// Returns an arbitrary project for the solution. Relies on the .NET SDK PrepareForPublish or _VerifyPackReleaseConfigurations MSBuild targets to catch conflicting values of a given property, like PublishRelease or PackRelease.
         /// </summary>
         /// <param name="sln">The solution to get an arbitrary project from.</param>
         /// <param name="globalProps">The global properties to load into the project.</param>
