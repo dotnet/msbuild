@@ -633,8 +633,8 @@ public static class Program
             var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, configuration: tfm == "net7.0" ? "Debug" : "Release");
             var finalConfiguration = properties["Configuration"];
             var finalDebugSymbols = properties["DebugSymbols"];
-            Assert.True(finalConfiguration == (tfm == "net7.0" ? "Debug" : "Release"));
-            Assert.True(finalDebugSymbols == (tfm == "net7.0" ? "true" : "false"));
+            Assert.Equal((tfm == "net7.0" ? "Debug" : "Release"), finalConfiguration);
+            Assert.Equal((tfm == "net7.0" ? "true" : "false"), finalDebugSymbols);
         }
 
         [Fact]
