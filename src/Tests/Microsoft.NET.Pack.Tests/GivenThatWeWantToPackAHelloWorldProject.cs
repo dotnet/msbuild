@@ -134,7 +134,7 @@ namespace Microsoft.NET.Pack.Tests
                 .Pass();
 
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", valueOfPackRelease == "true" ? "Release" : "Debug", "HelloWorld.1.0.0.nupkg");
-            Assert.True(File.Exists(expectedAssetPath));
+            new FileInfo(expectedAssetPath).Should().Exist();
         }
 
         [InlineData("")]
