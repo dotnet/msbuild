@@ -126,7 +126,7 @@ namespace Microsoft.Build.Evaluation
 
             IEnumerable<(string originalTfm, object parsedTfm)> ParseTfms(string desiredTargetFrameworks)
             {
-                return desiredTargetFrameworks.Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries).Select(tfm =>
+                return desiredTargetFrameworks.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(tfm =>
                 {
                     (string originalTfm, object parsedTfm) parsed = (tfm, Parse(tfm));
                     return parsed;
