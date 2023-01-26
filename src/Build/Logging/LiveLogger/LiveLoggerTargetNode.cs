@@ -4,22 +4,22 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 { 
 
-    public class FancyLoggerTargetNode
+    public class LiveLoggerTargetNode
     {
         public int Id;
         public string TargetName;
-        public FancyLoggerTaskNode? CurrentTaskNode;
-        public FancyLoggerTargetNode(TargetStartedEventArgs args)
+        public LiveLoggerTaskNode? CurrentTaskNode;
+        public LiveLoggerTargetNode(TargetStartedEventArgs args)
         {
             Id = args.BuildEventContext!.TargetId;
             TargetName = args.TargetName;
         }
-        public FancyLoggerTaskNode AddTask(TaskStartedEventArgs args)
+        public LiveLoggerTaskNode AddTask(TaskStartedEventArgs args)
         {
-            CurrentTaskNode = new FancyLoggerTaskNode(args);
+            CurrentTaskNode = new LiveLoggerTaskNode(args);
             return CurrentTaskNode;
         }
     }

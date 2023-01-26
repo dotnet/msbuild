@@ -5,10 +5,10 @@
 using System;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 { 
 
-    public class FancyLoggerMessageNode
+    public class LiveLoggerMessageNode
     {
         // Use this to change the max lenngth (relative to screen size) of messages
         private static int MAX_LENGTH = 3 * Console.BufferWidth;
@@ -19,13 +19,13 @@ namespace Microsoft.Build.Logging.FancyLogger
             Error
         }
         public string Message;
-        public FancyLoggerBufferLine? Line;
+        public LiveLoggerBufferLine? Line;
         public MessageType Type;
         public string? Code;
         public string? FilePath;
         public int? LineNumber;
         public int? ColumnNumber;
-        public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
+        public LiveLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
             if (Message.Length > MAX_LENGTH) Message = Message.Substring(0, MAX_LENGTH - 1) + "…";

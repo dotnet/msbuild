@@ -8,9 +8,9 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 { 
-    internal class FancyLoggerProjectNode
+    internal class LiveLoggerProjectNode
     {
         /// <summary>
         /// Given a list of paths, this method will get the shortest not ambiguous path for a project.
@@ -27,20 +27,20 @@ namespace Microsoft.Build.Logging.FancyLogger
         public string TargetFramework;
         public bool Finished;
         // Line to display project info
-        public FancyLoggerBufferLine? Line;
+        public LiveLoggerBufferLine? Line;
         // Targets
         public int FinishedTargets;
-        public FancyLoggerBufferLine? CurrentTargetLine;
-        public FancyLoggerTargetNode? CurrentTargetNode;
+        public LiveLoggerBufferLine? CurrentTargetLine;
+        public LiveLoggerTargetNode? CurrentTargetNode;
         // Messages, errors and warnings
-        public List<FancyLoggerMessageNode> AdditionalDetails = new();
+        public List<LiveLoggerMessageNode> AdditionalDetails = new();
         // Count messages, warnings and errors
         public int MessageCount = 0;
         public int WarningCount = 0;
         public int ErrorCount = 0;
         // Bool if node should rerender
         internal bool ShouldRerender = true;
-        public FancyLoggerProjectNode(ProjectStartedEventArgs args)
+        public LiveLoggerProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
             ProjectPath = args.ProjectFile!;
@@ -73,67 +73,67 @@ namespace Microsoft.Build.Logging.FancyLogger
                 Console.WindowWidth
             );
             // Create or update line
-            if (Line is null) Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
+            if (Line is null) Line = LiveLoggerBuffer.WriteNewLine(lineContents, false);
             else Line.Text = lineContents;
 
             // For finished projects
             if (Finished)
             {
-                if (CurrentTargetLine is not null) FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
-                foreach (FancyLoggerMessageNode node in AdditionalDetails.ToList())
+                if (CurrentTargetLine is not null) LiveLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                foreach (LiveLoggerMessageNode node in AdditionalDetails.ToList())
                 {
                     // Only delete high priority messages
-                    if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
-                    if (node.Line is not null) FancyLoggerBuffer.DeleteLine(node.Line.Id);
+                    if (node.Type != LiveLoggerMessageNode.MessageType.HighPriorityMessage) continue;
+                    if (node.Line is not null) LiveLoggerBuffer.DeleteLine(node.Line.Id);
                 }
             }
 
             // Current target details
             if (CurrentTargetNode is null) return;
             string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
-            if (CurrentTargetLine is null) CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
+            if (CurrentTargetLine is null) CurrentTargetLine = LiveLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
             else CurrentTargetLine.Text = currentTargetLineContents;
 
             // Messages, warnings and errors
-            foreach (FancyLoggerMessageNode node in AdditionalDetails)
+            foreach (LiveLoggerMessageNode node in AdditionalDetails)
             {
-                if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage) continue;
-                if (node.Line is null) node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                if (Finished && node.Type == LiveLoggerMessageNode.MessageType.HighPriorityMessage) continue;
+                if (node.Line is null) node.Line = LiveLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
                 node.Log();
             }
         }
 
-        public FancyLoggerTargetNode AddTarget(TargetStartedEventArgs args)
+        public LiveLoggerTargetNode AddTarget(TargetStartedEventArgs args)
         {
-            CurrentTargetNode = new FancyLoggerTargetNode(args);
+            CurrentTargetNode = new LiveLoggerTargetNode(args);
             return CurrentTargetNode;
         }
-        public FancyLoggerTaskNode? AddTask(TaskStartedEventArgs args)
+        public LiveLoggerTaskNode? AddTask(TaskStartedEventArgs args)
         {
             // Get target id
             int targetId = args.BuildEventContext!.TargetId;
             if (CurrentTargetNode?.Id == targetId) return CurrentTargetNode.AddTask(args);
             else return null;
         }
-        public FancyLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
+        public LiveLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
         {
             if (args.Importance != MessageImportance.High) return null;
             MessageCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            LiveLoggerMessageNode node = new LiveLoggerMessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }
-        public FancyLoggerMessageNode? AddWarning(BuildWarningEventArgs args)
+        public LiveLoggerMessageNode? AddWarning(BuildWarningEventArgs args)
         {
             WarningCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            LiveLoggerMessageNode node = new LiveLoggerMessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }
-        public FancyLoggerMessageNode? AddError(BuildErrorEventArgs args)
+        public LiveLoggerMessageNode? AddError(BuildErrorEventArgs args)
         {
             ErrorCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            LiveLoggerMessageNode node = new LiveLoggerMessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }

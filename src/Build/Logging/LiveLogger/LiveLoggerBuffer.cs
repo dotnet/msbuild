@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 {
-    public class FancyLoggerBufferLine
+    public class LiveLoggerBufferLine
     {
         private static int Counter = 0;
         private string _text = string.Empty;
@@ -26,22 +26,22 @@ namespace Microsoft.Build.Logging.FancyLogger
                 if (ShouldWrapLines) WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
                 else WrappedText = new List<string> { value };
                 // Buffer should rerender
-                FancyLoggerBuffer.ShouldRerender = true;
+                LiveLoggerBuffer.ShouldRerender = true;
             }
         }
 
-        public FancyLoggerBufferLine()
+        public LiveLoggerBufferLine()
         {
             Id = Counter++;
             Text = string.Empty;
             ShouldWrapLines = false;
         }
-        public FancyLoggerBufferLine(string text)
+        public LiveLoggerBufferLine(string text)
             : this()
         {
             Text = text;
         }
-        public FancyLoggerBufferLine(string text, bool shouldWrapLines)
+        public LiveLoggerBufferLine(string text, bool shouldWrapLines)
             : this()
         {
             ShouldWrapLines = shouldWrapLines;
@@ -49,9 +49,9 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
     }
 
-    public class FancyLoggerBuffer
+    public class LiveLoggerBuffer
     {
-        private static List<FancyLoggerBufferLine> Lines = new();
+        private static List<LiveLoggerBufferLine> Lines = new();
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
         internal static bool IsTerminated = false;
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             string contents = string.Empty;
             int accumulatedLineCount = 0;
             int lineIndex = 0;
-            foreach (FancyLoggerBufferLine line in Lines)
+            foreach (LiveLoggerBufferLine line in Lines)
             {
                 // Continue if accum line count + next lines < scrolling area
                 if (accumulatedLineCount + line.WrappedText.Count < TopLineIndex) {
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             return Lines.FindIndex(x => x.Id == lineId);
         }
 
-        public static FancyLoggerBufferLine? GetLineById(int lineId)
+        public static LiveLoggerBufferLine? GetLineById(int lineId)
         {
             int index = GetLineIndexById(lineId);
             if (index == -1) return null;
@@ -144,16 +144,16 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         #region Line create, update and delete
         // Write new line
-        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text)
+        public static LiveLoggerBufferLine? WriteNewLineAfter(int lineId, string text)
         {
             return WriteNewLineAfter(lineId, text, true);
         }
-        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, string text, bool shouldWrapLines)
+        public static LiveLoggerBufferLine? WriteNewLineAfter(int lineId, string text, bool shouldWrapLines)
         {
-            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text, shouldWrapLines);
+            LiveLoggerBufferLine line = new LiveLoggerBufferLine(text, shouldWrapLines);
             return WriteNewLineAfter(lineId, line);
         }
-        public static FancyLoggerBufferLine? WriteNewLineAfter(int lineId, FancyLoggerBufferLine line)
+        public static LiveLoggerBufferLine? WriteNewLineAfter(int lineId, LiveLoggerBufferLine line)
         {
             if (lineId != -1)
             {
@@ -170,23 +170,23 @@ namespace Microsoft.Build.Logging.FancyLogger
             return line;
         }
 
-        public static FancyLoggerBufferLine? WriteNewLine(string text)
+        public static LiveLoggerBufferLine? WriteNewLine(string text)
         {
             return WriteNewLine(text, true);
         }
-        public static FancyLoggerBufferLine? WriteNewLine(string text, bool shouldWrapLines)
+        public static LiveLoggerBufferLine? WriteNewLine(string text, bool shouldWrapLines)
         {
-            FancyLoggerBufferLine line = new FancyLoggerBufferLine(text, shouldWrapLines);
+            LiveLoggerBufferLine line = new LiveLoggerBufferLine(text, shouldWrapLines);
             return WriteNewLine(line);
         }
-        public static FancyLoggerBufferLine? WriteNewLine(FancyLoggerBufferLine line)
+        public static LiveLoggerBufferLine? WriteNewLine(LiveLoggerBufferLine line)
         {
             return WriteNewLineAfter(Lines.Count > 0 ? Lines.Last().Id : -1, line);
         }
 
         // Update line
         // TODO: Remove. Use line.Text instead
-        public static FancyLoggerBufferLine? UpdateLine(int lineId, string text)
+        public static LiveLoggerBufferLine? UpdateLine(int lineId, string text)
         {
             return null;
         }

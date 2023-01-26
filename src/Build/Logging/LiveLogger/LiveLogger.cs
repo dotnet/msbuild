@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 {
-    public class FancyLogger : ILogger
+    public class LiveLogger : ILogger
     {   
-        private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
+        private Dictionary<int, LiveLoggerProjectNode> projects = new Dictionary<int, LiveLoggerProjectNode>();
 
         private bool Succeeded;
 
@@ -21,7 +21,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public LoggerVerbosity Verbosity { get; set; }
 
-        public FancyLogger()
+        public LiveLogger()
         {
             Parameters = "";
         }
@@ -54,15 +54,15 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         void Render()
         {
-            // Initialize FancyLoggerBuffer
-            FancyLoggerBuffer.Initialize();
+            // Initialize
+            LiveLoggerBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            FancyLoggerBuffer.WriteNewLine(string.Empty);
+            LiveLoggerBuffer.WriteNewLine(string.Empty);
             // First render
-            FancyLoggerBuffer.Render();
+            LiveLoggerBuffer.Render();
             int i = 0;
             // Rerender periodically
-            while (!FancyLoggerBuffer.IsTerminated)
+            while (!LiveLoggerBuffer.IsTerminated)
             {
                 i++;
                 // Delay by 1/60 seconds
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                     // Rerender projects only when needed
                     foreach (var project in projects) project.Value.Log();
                     // Rerender buffer
-                    FancyLoggerBuffer.Render();
+                    LiveLoggerBuffer.Render();
                 });
                 // Handle keyboard input
                 if (Console.KeyAvailable)
@@ -81,12 +81,12 @@ namespace Microsoft.Build.Logging.FancyLogger
                     switch (key)
                     {
                         case ConsoleKey.UpArrow:
-                            if (FancyLoggerBuffer.TopLineIndex > 0) FancyLoggerBuffer.TopLineIndex--;
-                            FancyLoggerBuffer.ShouldRerender = true;
+                            if (LiveLoggerBuffer.TopLineIndex > 0) LiveLoggerBuffer.TopLineIndex--;
+                            LiveLoggerBuffer.ShouldRerender = true;
                             break;
                         case ConsoleKey.DownArrow:
-                            FancyLoggerBuffer.TopLineIndex++;
-                            FancyLoggerBuffer.ShouldRerender = true;
+                            LiveLoggerBuffer.TopLineIndex++;
+                            LiveLoggerBuffer.ShouldRerender = true;
                             break;
                         default:
                             break;
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             // If id already exists...
             if (projects.ContainsKey(id)) return;
             // Add project
-            FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
+            LiveLoggerProjectNode node = new LiveLoggerProjectNode(e);
             projects[id] = node;
             // Log
             node.ShouldRerender = true;
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node)) return;
             // Update line
             node.Finished = true;
             // Log
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node)) return;
             // Update
             node.AddTarget(e);
             // Log
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node)) return;
             // Update
             node.FinishedTargets++;
             // Log
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node)) return;
             // Update
             node.AddTask(e);
             existingTasks++;
@@ -177,7 +177,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             if (e is TaskCommandLineEventArgs) return;
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node)) return;
             // Update
             node.AddMessage(e);
             // Log
@@ -188,7 +188,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node)) return;
             // Update
             node.AddWarning(e);
             // Log
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node)) return;
+            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node)) return;
             // Update
             node.AddError(e);
             // Log
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public void Shutdown()
         {
-            FancyLoggerBuffer.Terminate();
+            LiveLoggerBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
             int errorCount = 0;
