@@ -166,7 +166,7 @@ namespace Microsoft.NET.Pack.Tests
 
             string expectedConfiguration = packReleaseValue == "false" ? "Debug" : "Release";
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", expectedConfiguration, "HelloWorld.1.0.0.nupkg");
-            Assert.True(File.Exists(expectedAssetPath));
+            new FileInfo(expectedAssetPath).Should().Exist();
         }
 
         [Fact]
