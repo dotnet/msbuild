@@ -48,6 +48,7 @@ namespace Microsoft.Build.CommandLine
             FileLogger9,
             DistributedFileLogger,
             FancyLogger,
+            LiveLogger,
 #if DEBUG
             WaitForDebugger,
 #endif
@@ -222,6 +223,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },            ParameterlessSwitch.FileLogger9,           null),
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null),
             new ParameterlessSwitchInfo(  new string[] { "fancylogger", "flg" },            ParameterlessSwitch.FancyLogger,           null),
+            new ParameterlessSwitchInfo(  new string[] { "livelogger", "lvl" },            ParameterlessSwitch.LiveLogger,           null),
 #if DEBUG
             new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null),
 #endif
