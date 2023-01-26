@@ -65,13 +65,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
 
     <!--
-     Note: SkipNonexistentTargets="true" on the following two items means that an outer build node's call to its existent GetTargetFrameworks
-     target will fail if its inner build nodes don't define GetTargetFrameworksWithPlatformForSingleTargetFrameworks. This is necessary
-     since the P2P protocol cannot express logic that allows nonexistent targets to be skipped if other targets marked as SkipNonexistentTargets="true"
-     are actually skipped on a project due to their nonexistence.
+     Note: SkipNonexistentTargets="true" on the following three items means that an outer build node's call to its existent GetTargetFrameworks target will fail if its inner build nodes don't define GetTargetFrameworksWithPlatformForSingleTargetFrameworks.
+     This is necessary since the P2P protocol cannot express the targets called from the outer build to the inner build.
      -->
     <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" />
     <ProjectReferenceTargets Include="Clean" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" />
+    <ProjectReferenceTargets Include="Rebuild" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" />
 
     <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
 
