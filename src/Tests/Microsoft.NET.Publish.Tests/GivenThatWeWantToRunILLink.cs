@@ -265,7 +265,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithProjectChanges(project => SetMetadata(project, projectName, "IsTrimmable", "True"));
 
             var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
 
