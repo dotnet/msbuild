@@ -29,7 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   is where PublishRelease is defaulted because it depends on _TargetFrameworkVersionWithoutV. Some targets do not run in some instances of dotnet pack.
   So, we must set PackRelease here. Even though this occurs before project import, the project import can override PackRelease later, before the pre-evaluation, so this is fine.-->
   <PropertyGroup Condition="'$(PackRelease)' == ''">
-    <!-- v Do not depend on this value being correct until after project evaluation.-->
+    <!-- Do not depend on this value being correct until after project evaluation.-->
     <PackRelease>true</PackRelease>
   </PropertyGroup>
 
