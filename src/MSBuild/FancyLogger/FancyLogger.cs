@@ -8,7 +8,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
-    public class FancyLogger : ILogger
+    internal class FancyLogger : ILogger
     {
         private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
 

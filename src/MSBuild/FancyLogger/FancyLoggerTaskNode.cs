@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Logging.FancyLogger
 {
 
-    public class FancyLoggerTaskNode
+    internal class FancyLoggerTaskNode
     {
         public int Id;
         public string TaskName;
