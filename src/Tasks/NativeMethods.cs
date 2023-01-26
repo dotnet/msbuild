@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -819,12 +819,10 @@ namespace Microsoft.Build.Tasks
         // MoveFileEx
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "MoveFileEx")]
-        internal static extern bool MoveFileExWindows
-        (
+        internal static extern bool MoveFileExWindows(
             [In] string existingFileName,
             [In] string newFileName,
-            [In] MoveFileFlags flags
-        );
+            [In] MoveFileFlags flags);
 
         /// <summary>
         /// Add implementation of this function when not running on windows. The implementation is
@@ -883,14 +881,12 @@ namespace Microsoft.Build.Tasks
         // UnRegisterTypeLib
         //------------------------------------------------------------------------------
         [DllImport("oleaut32", PreserveSig = false, EntryPoint = "UnRegisterTypeLib")]
-        internal static extern void UnregisterTypeLib
-        (
+        internal static extern void UnregisterTypeLib(
             [In] ref Guid guid,
             [In] short wMajorVerNum,
             [In] short wMinorVerNum,
             [In] int lcid,
-            [In] System.Runtime.InteropServices.ComTypes.SYSKIND syskind
-        );
+            [In] System.Runtime.InteropServices.ComTypes.SYSKIND syskind);
 
         //------------------------------------------------------------------------------
         // LoadTypeLib
@@ -958,8 +954,7 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CreateProcess
-        (
+        internal static extern bool CreateProcess(
             string lpApplicationName,
             string lpCommandLine,
             IntPtr lpProcessAttributes,
@@ -970,8 +965,7 @@ namespace Microsoft.Build.Tasks
             IntPtr lpEnvironment,
             string lpCurrentDirectory,
             [In] ref STARTUPINFO lpStartupInfo,
-            out PROCESS_INFORMATION lpProcessInformation
-        );
+            out PROCESS_INFORMATION lpProcessInformation);
 
         //------------------------------------------------------------------------------
         // ImageNtHeader

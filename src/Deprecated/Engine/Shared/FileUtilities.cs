@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -17,7 +17,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// each class get pulled into the resulting assembly.
     /// </summary>
     /// <owner>SumedhK</owner>
-    static internal class FileUtilities
+    internal static class FileUtilities
     {
         #region Item-spec modifiers
 
@@ -25,7 +25,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Encapsulates the definitions of the item-spec modifiers a.k.a. reserved item metadata.
         /// </summary>
         /// <owner>SumedhK</owner>
-        static internal class ItemSpecModifiers
+        internal static class ItemSpecModifiers
         {
             // NOTE: If you add an item here that starts with a new letter, you need to update the case 
             // statements in IsItemSpecModifier and IsDerivableItemSpecModifier.
@@ -109,7 +109,7 @@ namespace Microsoft.Build.BuildEngine.Shared
              * therefore is not an item spec modifier.
              * 
              */
-            switch (name.Length) 
+            switch (name.Length)
             {
                 case 7: // RootDir
                     switch (name[0])
@@ -122,12 +122,12 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'r':        
+                        case 'r':
                             break;
                     }
                     break;
                 case 8: // FullPath, Filename, Identity
-     
+
                     switch (name[0])
                     {
                         default:
@@ -150,7 +150,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'i':        
+                        case 'i':
                             break;
                     }
                     break;
@@ -165,7 +165,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'd':        
+                        case 'd':
                             break;
                         case 'E': // Extension
                             if (name == ItemSpecModifiers.Extension)
@@ -173,9 +173,9 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'e':        
+                        case 'e':
                             break;
-                    }             
+                    }
                     break;
                 case 11: // RelativeDir, CreatedTime
                     switch (name[0])
@@ -196,10 +196,10 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'r':        
+                        case 'r':
                             break;
                     }
-                    break; 
+                    break;
                 case 12: // RecursiveDir, ModifiedTime, AccessedTime
 
                     switch (name[0])
@@ -212,7 +212,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'a':        
+                        case 'a':
                             break;
                         case 'M': // ModifiedTime
                             if (name == ItemSpecModifiers.ModifiedTime)
@@ -220,7 +220,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'm':        
+                        case 'm':
                             break;
                         case 'R': // RecursiveDir
                             if (name == ItemSpecModifiers.RecursiveDir)
@@ -228,7 +228,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                                 return true;
                             }
                             break;
-                        case 'r':        
+                        case 'r':
                             break;
                     }
                     break;
@@ -236,7 +236,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     // Not the right length for a match.
                     return false;
             }
-                   
+
 
             // Could still be a case-insensitive match.
             bool result = ItemSpecModifiers.TableOfItemSpecModifiers.ContainsKey(name);
@@ -266,7 +266,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             return isItemSpecModifier;
-       }
+        }
 
         /// <summary>
         /// Performs path manipulations on the given item-spec as directed.
@@ -485,7 +485,10 @@ namespace Microsoft.Build.BuildEngine.Shared
                 catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
                 {
                     if (ExceptionHandling.NotExpectedException(e))
+                    {
                         throw;
+                    }
+
                     ErrorUtilities.VerifyThrowInvalidOperation(false, "Shared.InvalidFilespecForTransform", modifier, itemSpec, e.Message);
                 }
 
@@ -497,7 +500,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     if (cachedModifiers == null)
                     {
                         cachedModifiers = new Hashtable(StringComparer.OrdinalIgnoreCase);
-     
+
                         // mark the cache to indicate the item-spec for which it was created
                         // NOTE: we've intentionally picked a key here that will never conflict with any modifier name -- if we
                         // use the item-spec as the key, it's possible for it to conflict with the name of a modifier
@@ -733,7 +736,9 @@ namespace Microsoft.Build.BuildEngine.Shared
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedException(e))
+                {
                     throw;
+                }
 
                 // Invalid or inaccessible path: treat as if nonexistent file, just as File.Exists does
                 return null;

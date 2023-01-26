@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -170,7 +173,9 @@ namespace Microsoft.Build.Shared.Concurrent
                 try
                 {
                     if (acquireLock)
+                    {
                         lockTaken = Monitor.TryEnter(tables._locks[lockNo]);
+                    }
 
                     // If the table just got resized, we may not be holding the right lock, and must retry.
                     // This should be a rare occurrence.
@@ -238,7 +243,9 @@ namespace Microsoft.Build.Shared.Concurrent
                 finally
                 {
                     if (lockTaken)
+                    {
                         Monitor.Exit(tables._locks[lockNo]);
+                    }
                 }
 
                 //
@@ -281,8 +288,15 @@ namespace Microsoft.Build.Shared.Concurrent
         /// if the key was not in the dictionary.</returns>
         public TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory)
         {
-            if (key == null) ThrowKeyNullException();
-            if (valueFactory == null) throw new ArgumentNullException(nameof(valueFactory));
+            if (key == null)
+            {
+                ThrowKeyNullException();
+            }
+
+            if (valueFactory == null)
+            {
+                throw new ArgumentNullException(nameof(valueFactory));
+            }
 
             int hashcode = _comparer.GetHashCode(key);
 

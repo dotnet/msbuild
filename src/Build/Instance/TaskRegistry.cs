@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -218,8 +218,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <typeparam name="P">A type derived from IProperty</typeparam>
         /// <typeparam name="I">A type derived from IItem</typeparam>
-        internal static void RegisterTasksFromUsingTaskElement<P, I>
-            (
+        internal static void RegisterTasksFromUsingTaskElement<P, I>(
             ILoggingService loggingService,
             BuildEventContext buildEventContext,
             string directoryOfImportingFile,
@@ -227,15 +226,13 @@ namespace Microsoft.Build.Execution
             TaskRegistry taskRegistry,
             Expander<P, I> expander,
             ExpanderOptions expanderOptions,
-            IFileSystem fileSystem
-            )
+            IFileSystem fileSystem)
             where P : class, IProperty
             where I : class, IItem
         {
             ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, nameof(directoryOfImportingFile));
 
-            if (!ConditionEvaluator.EvaluateCondition
-                (
+            if (!ConditionEvaluator.EvaluateCondition(
                 projectUsingTaskXml.Condition,
                 ParserOptions.AllowPropertiesAndItemLists,
                 expander,
@@ -244,8 +241,7 @@ namespace Microsoft.Build.Execution
                 projectUsingTaskXml.ConditionLocation,
                 loggingService,
                 buildEventContext,
-                fileSystem
-                ))
+                fileSystem))
             {
                 return;
             }
@@ -255,16 +251,14 @@ namespace Microsoft.Build.Execution
 
             string taskName = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.TaskName, expanderOptions, projectUsingTaskXml.TaskNameLocation);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 taskName.Length > 0,
                 projectUsingTaskXml.TaskNameLocation,
                 "InvalidEvaluatedAttributeValue",
                 taskName,
                 projectUsingTaskXml.TaskName,
                 XMakeAttributes.name,
-                XMakeElements.usingTask
-                );
+                XMakeElements.usingTask);
 
             string taskFactory = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.TaskFactory, expanderOptions, projectUsingTaskXml.TaskFactoryLocation);
 
@@ -282,27 +276,23 @@ namespace Microsoft.Build.Execution
                 assemblyName = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.AssemblyName, expanderOptions, projectUsingTaskXml.AssemblyNameLocation);
             }
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 assemblyFile == null || assemblyFile.Length > 0,
                 projectUsingTaskXml.AssemblyFileLocation,
                 "InvalidEvaluatedAttributeValue",
                 assemblyFile,
                 projectUsingTaskXml.AssemblyFile,
                 XMakeAttributes.assemblyFile,
-                XMakeElements.usingTask
-                );
+                XMakeElements.usingTask);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 assemblyName == null || assemblyName.Length > 0,
                 projectUsingTaskXml.AssemblyNameLocation,
                 "InvalidEvaluatedAttributeValue",
                 assemblyName,
                 projectUsingTaskXml.AssemblyName,
                 XMakeAttributes.assemblyName,
-                XMakeElements.usingTask
-                );
+                XMakeElements.usingTask);
 
             // Ensure the assembly file/path is relative to the project in which this <UsingTask> node was defined -- we
             // don't want paths from imported projects being interpreted relative to the main project file.
@@ -325,8 +315,7 @@ namespace Microsoft.Build.Execution
                     if (
                             assemblyFile != null &&
                             (assemblyFile.EndsWith(s_tasksV4Filename, StringComparison.OrdinalIgnoreCase) || assemblyFile.EndsWith(s_tasksV12Filename, StringComparison.OrdinalIgnoreCase)) &&
-                            !FileUtilities.FileExistsNoThrow(assemblyFile, fileSystem)
-                        )
+                            !FileUtilities.FileExistsNoThrow(assemblyFile, fileSystem))
                     {
                         string replacedAssemblyFile = Path.Combine(Path.GetDirectoryName(assemblyFile), s_tasksCoreFilename);
 
@@ -345,8 +334,7 @@ namespace Microsoft.Build.Execution
                             (
                                 assemblyName.Equals(s_tasksV4SimpleName, StringComparison.OrdinalIgnoreCase) &&
                                 !FileUtilities.FileExistsNoThrow(s_potentialTasksV4Location, fileSystem) &&
-                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation, fileSystem)
-                            )
+                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation, fileSystem))
                         {
                             assemblyName = s_tasksCoreSimpleName;
                         }
@@ -354,8 +342,7 @@ namespace Microsoft.Build.Execution
                             (
                                 assemblyName.Equals(s_tasksV12SimpleName, StringComparison.OrdinalIgnoreCase) &&
                                 !FileUtilities.FileExistsNoThrow(s_potentialTasksV12Location, fileSystem) &&
-                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation, fileSystem)
-                            )
+                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation, fileSystem))
                         {
                             assemblyName = s_tasksCoreSimpleName;
                         }
@@ -403,18 +390,16 @@ namespace Microsoft.Build.Execution
         /// Given a task name, this method retrieves the task class. If the task has been requested before, it will be found in
         /// the class cache; otherwise, &lt;UsingTask&gt; declarations will be used to search the appropriate assemblies.
         /// </summary>
-        internal TaskFactoryWrapper GetRegisteredTask
-        (
+        internal TaskFactoryWrapper GetRegisteredTask(
             string taskName,
             string taskProjectFile,
             IDictionary<string, string> taskIdentityParameters,
             bool exactMatchRequired,
             TargetLoggingContext targetLoggingContext,
-            ElementLocation elementLocation
-        )
+            ElementLocation elementLocation)
         {
             TaskFactoryWrapper taskFactory = null;
-            
+
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
             RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out bool retrievedFromCache);
 
@@ -458,16 +443,14 @@ namespace Microsoft.Build.Execution
         /// <param name="elementLocation">The location of the task element in the project file.</param>
         /// <param name="retrievedFromCache">True if the record was retrieved from the cache.</param>
         /// <returns>The task registration record, or null if none was found.</returns>
-        internal RegisteredTaskRecord GetTaskRegistrationRecord
-            (
+        internal RegisteredTaskRecord GetTaskRegistrationRecord(
             string taskName,
             string taskProjectFile,
             IDictionary<string, string> taskIdentityParameters,
             bool exactMatchRequired,
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
-            out bool retrievedFromCache
-            )
+            out bool retrievedFromCache)
         {
             RegisteredTaskRecord taskRecord = null;
             retrievedFromCache = false;
@@ -656,14 +639,13 @@ namespace Microsoft.Build.Execution
 
         // Create another set containing architecture-specific task entries.
         // Then when we look for them, check if the name exists in that.
-        Dictionary<string, List<RegisteredTaskRecord>> overriddenTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
+        private Dictionary<string, List<RegisteredTaskRecord>> overriddenTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
 
         /// <summary>
         /// Registers an evaluated using task tag for future
         /// consultation
         /// </summary>
-        private void RegisterTask
-        (
+        private void RegisterTask(
             string taskName,
             AssemblyLoadInfo assemblyLoadInfo,
             string taskFactory,
@@ -672,8 +654,7 @@ namespace Microsoft.Build.Execution
             ILoggingService loggingService,
             BuildEventContext context,
             ProjectUsingTaskElement projectUsingTaskInXml,
-            bool overrideTask = false
-        )
+            bool overrideTask = false)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, nameof(assemblyLoadInfo));
@@ -740,15 +721,13 @@ namespace Microsoft.Build.Execution
         /// Given a task name and a list of records which may contain the task, this helper method will ask the records to see if the task name
         /// can be created by the factories which are wrapped by the records. (this is done by instantiating the task factory and asking it).
         /// </summary>
-        private RegisteredTaskRecord GetMatchingRegistration
-        (
+        private RegisteredTaskRecord GetMatchingRegistration(
             string taskName,
             List<RegisteredTaskRecord> taskRecords,
             string taskProjectFile,
             IDictionary<string, string> taskIdentityParameters,
             TargetLoggingContext targetLoggingContext,
-            ElementLocation elementLocation
-        )
+            ElementLocation elementLocation)
         {
             foreach (RegisteredTaskRecord record in taskRecords)
             {
@@ -1360,8 +1339,7 @@ namespace Microsoft.Build.Execution
                             (
                                 s_forceTaskHostLaunch &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "MSBuild") &&
-                                !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget")
-                            );
+                                !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget"));
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
@@ -1433,7 +1411,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
                                 factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
 #else
-                                factory = (ITaskFactory) Activator.CreateInstance(loadedType.Type);
+                                factory = (ITaskFactory)Activator.CreateInstance(loadedType.Type);
 #endif
                                 TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext);
 
@@ -1452,8 +1430,7 @@ namespace Microsoft.Build.Execution
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
                                         if (TaskFactoryParameters != null)
                                         {
-                                            targetLoggingContext.LogWarning
-                                                (
+                                            targetLoggingContext.LogWarning(
                                                 null,
                                                     new BuildEventFileInfo(elementLocation),
                                                     "TaskFactoryWillIgnoreTaskFactoryParameters",
@@ -1492,14 +1469,12 @@ namespace Microsoft.Build.Execution
                                 message += e.Message;
 
                                 // Could get an invalid cast when Creating Instance and UnWrap due to the framework assembly not being the same.
-                                targetLoggingContext.LogError
-                                (
+                                targetLoggingContext.LogError(
                                     new BuildEventFileInfo(elementLocation.File, elementLocation.Line, elementLocation.Column),
                                     "TaskFactoryInstantiationFailureErrorInvalidCast",
                                     TaskFactoryAttributeName,
                                     taskFactoryLoadInfo.AssemblyLocation,
-                                    message
-                                );
+                                    message);
 
                                 return false;
                             }
@@ -1622,15 +1597,13 @@ namespace Microsoft.Build.Execution
 
                     if (!Boolean.TryParse(expandedType, out evaluate))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject
-                        (
+                        ProjectErrorUtilities.ThrowInvalidProject(
                          taskElement.EvaluateLocation,
                          "InvalidEvaluatedAttributeValue",
                          expandedType,
                          taskElement.Evaluate,
                          XMakeAttributes.evaluate,
-                         XMakeElements.usingTaskBody
-                        );
+                         XMakeElements.usingTaskBody);
                     }
 
                     _taskBodyEvaluated = evaluate;
@@ -1664,16 +1637,14 @@ namespace Microsoft.Build.Execution
                         string expandedType = expander.ExpandIntoStringLeaveEscaped(parameter.ParameterType, expanderOptions, parameter.ParameterTypeLocation);
 
                         // Cannot have a null or empty name for the type after expansion.
-                        ProjectErrorUtilities.VerifyThrowInvalidProject
-                        (
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                             !String.IsNullOrEmpty(expandedType),
                             parameter.ParameterTypeLocation,
                             "InvalidEvaluatedAttributeValue",
                             expandedType,
                             parameter.ParameterType,
                             XMakeAttributes.parameterType,
-                            XMakeElements.usingTaskParameter
-                        );
+                            XMakeElements.usingTaskParameter);
 
                         Type paramType;
                         if (expandedType.StartsWith("Microsoft.Build.Framework.", StringComparison.OrdinalIgnoreCase) && !expandedType.Contains(","))
@@ -1691,46 +1662,39 @@ namespace Microsoft.Build.Execution
                                         Type.GetType(expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
                         }
 
-                        ProjectErrorUtilities.VerifyThrowInvalidProject
-                        (
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                             paramType != null,
                             parameter.ParameterTypeLocation,
                             "InvalidEvaluatedAttributeValue",
                             expandedType,
                             parameter.ParameterType,
                             XMakeAttributes.parameterType,
-                            XMakeElements.usingTaskParameter
-                        );
+                            XMakeElements.usingTaskParameter);
 
                         bool output;
                         string expandedOutput = expander.ExpandIntoStringLeaveEscaped(parameter.Output, expanderOptions, parameter.OutputLocation);
 
                         if (!Boolean.TryParse(expandedOutput, out output))
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject
-                            (
+                            ProjectErrorUtilities.ThrowInvalidProject(
                                 parameter.OutputLocation,
                                 "InvalidEvaluatedAttributeValue",
                                 expandedOutput,
                                 parameter.Output,
                                 XMakeAttributes.output,
-                                XMakeElements.usingTaskParameter
-                            );
+                                XMakeElements.usingTaskParameter);
                         }
 
                         if (
                             (!output && (!TaskParameterTypeVerifier.IsValidInputParameter(paramType))) ||
-                            (output && !TaskParameterTypeVerifier.IsValidOutputParameter(paramType))
-                        )
+                            (output && !TaskParameterTypeVerifier.IsValidOutputParameter(paramType)))
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject
-                            (
+                            ProjectErrorUtilities.ThrowInvalidProject(
                                 parameter.Location,
                                 "UnsupportedTaskParameterTypeError",
                                 paramType.FullName,
                                 parameter.ParameterType,
-                                parameter.Name
-                            );
+                                parameter.Name);
                         }
 
                         bool required;
@@ -1738,15 +1702,13 @@ namespace Microsoft.Build.Execution
 
                         if (!Boolean.TryParse(expandedRequired, out required))
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject
-                            (
+                            ProjectErrorUtilities.ThrowInvalidProject(
                                 parameter.RequiredLocation,
                                 "InvalidEvaluatedAttributeValue",
                                 expandedRequired,
                                 parameter.Required,
                                 XMakeAttributes.required,
-                                XMakeElements.usingTaskParameter
-                            );
+                                XMakeElements.usingTaskParameter);
                         }
 
                         UsingTaskParameters.Add(parameter.Name, new TaskPropertyInfo(parameter.Name, paramType, output, required));
@@ -1811,7 +1773,7 @@ namespace Microsoft.Build.Execution
 
                 if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
                 {
-                    _taskFactoryParameters = (Dictionary<string, string>) localParameters;
+                    _taskFactoryParameters = (Dictionary<string, string>)localParameters;
                 }
             }
 
@@ -1833,18 +1795,18 @@ namespace Microsoft.Build.Execution
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>) copy;
+                _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
             }
         }
 
         // todo make nested after C# 7
-        void TranslateTaskRegistrationKey(ITranslator translator, ref RegisteredTaskIdentity taskIdentity)
+        private void TranslateTaskRegistrationKey(ITranslator translator, ref RegisteredTaskIdentity taskIdentity)
         {
             translator.Translate(ref taskIdentity);
         }
 
         // todo make nested after C# 7
-        void TranslateTaskRegistrationValue(ITranslator translator, ref List<RegisteredTaskRecord> taskRecords)
+        private void TranslateTaskRegistrationValue(ITranslator translator, ref List<RegisteredTaskRecord> taskRecords)
         {
             translator.Translate(ref taskRecords, RegisteredTaskRecord.FactoryForDeserialization);
         }

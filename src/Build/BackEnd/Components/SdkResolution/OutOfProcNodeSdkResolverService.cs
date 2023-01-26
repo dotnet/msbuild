@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -126,7 +126,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             SendPacket(packet);
 
             // Wait for either the response or a shutdown event.  Either event means this thread should return
-            WaitHandle.WaitAny(new WaitHandle[] {_responseReceivedEvent, ShutdownEvent});
+            WaitHandle.WaitAny(new WaitHandle[] { _responseReceivedEvent, ShutdownEvent });
 
             // Keep track of the element location of the reference
             _lastResponse.ElementLocation = sdkReferenceLocation;

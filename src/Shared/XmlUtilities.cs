@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Xml;
@@ -12,7 +12,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// This class contains utility methods for XML manipulation.
     /// </summary>
-    static internal class XmlUtilities
+    internal static class XmlUtilities
     {
         /// <summary>
         /// This method renames an XML element.  Well, actually you can't directly
@@ -50,11 +50,11 @@ namespace Microsoft.Build.Shared
                 newElement.AppendChild(oldElement.FirstChild);
             }
 
-               
-            
-                // Add the new element in the same place the old element was.
-                oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
-            
+
+
+            // Add the new element in the same place the old element was.
+            oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
+
 
             return newElement;
         }
