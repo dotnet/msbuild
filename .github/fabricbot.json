@@ -165,7 +165,7 @@
           {
             "name": "addReply",
             "parameters": {
-              "comment": "@dotnet/linker-contrib a new issue has been filed in the ILLink area, please triage"
+              "comment": "@dotnet/illink-contrib a new issue has been filed in the ILLink area, please triage"
             }
           }
         ]
