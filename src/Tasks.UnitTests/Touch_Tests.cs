@@ -356,8 +356,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt),
-                engine.Log
-            );
+                engine.Log);
         }
 
         /// <summary>
@@ -382,8 +381,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate"),
-                engine.Log
-            );
+                engine.Log);
         }
 
         /// <summary>
@@ -409,8 +407,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),
-                engine.Log
-            );
+                engine.Log);
         }
     }
 }

@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
 
             return true;
         }
-        
+
         /// <summary>
         /// Stop and return (in an undefined state) as soon as possible.
         /// </summary>

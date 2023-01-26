@@ -365,21 +365,20 @@ namespace Microsoft.Build.Tasks
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
-            // first use the instance local cache
+            // If the process-wide cache contains an up-to-date FileState, always use it
+            if (isProcessFileStateUpToDate)
+            {
+                // For the next build, we may be using a different process. Update the file cache.
+                if (!isInstanceFileStateUpToDate)
+                {
+                    instanceLocalFileStateCache[path] = cachedProcessFileState;
+                    isDirty = true;
+                }
+                return cachedProcessFileState;
+            }
             if (isInstanceFileStateUpToDate)
             {
-                // update the process cache if it is missing.
-                if (!isProcessFileStateUpToDate)
-                {
-                    s_processWideFileStateCache[path] = cachedInstanceFileState;
-                }
-
-                return cachedInstanceFileState;
-            }
-            else if (isProcessFileStateUpToDate)
-            {
-                isDirty = true;
-                return instanceLocalFileStateCache[path] = cachedProcessFileState;
+                return s_processWideFileStateCache[path] = cachedInstanceFileState;
             }
 
             // If no up-to-date FileState exists at this point, create one and take ownership
@@ -472,9 +471,7 @@ namespace Microsoft.Build.Tasks
             if (String.IsNullOrEmpty(fileState.RuntimeVersion))
             {
                 fileState.RuntimeVersion = getAssemblyRuntimeVersion(path);
-
-                if (!String.IsNullOrEmpty(fileState.RuntimeVersion))
-                    isDirty = true;
+                isDirty = true;
             }
 
             return fileState.RuntimeVersion;
@@ -506,11 +503,7 @@ namespace Microsoft.Build.Tasks
                     out fileState.scatterFiles,
                     out fileState.frameworkName);
 
-                // Don't diry the cache if results are unchanged.
-                if (fileState.dependencies != null)
-                {
-                    isDirty = true;
-                }
+                isDirty = true;
             }
 
             dependencies = fileState.dependencies;

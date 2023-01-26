@@ -193,8 +193,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Single(t.DirectoriesCreated);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
-                    engine.Log
-                );
+                    engine.Log);
 
                 // Actually create the directory
                 // Note: Need a new task to reset the Log.HasLoggedErrors

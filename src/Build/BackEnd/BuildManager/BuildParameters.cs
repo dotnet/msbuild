@@ -808,7 +808,7 @@ namespace Microsoft.Build.Execution
         {
             get => _question;
             set => _question = value;
-        } 
+        }
 
         /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
