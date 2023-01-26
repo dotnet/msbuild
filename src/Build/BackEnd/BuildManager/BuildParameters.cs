@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -416,7 +416,7 @@ namespace Microsoft.Build.Execution
             get
             {
                 return new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_environmentProperties,
-                    instance => ((IProperty) instance).EvaluatedValueEscaped);
+                    instance => ((IProperty)instance).EvaluatedValueEscaped);
             }
         }
 
@@ -451,7 +451,7 @@ namespace Microsoft.Build.Execution
             get
             {
                 return new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_globalProperties,
-                    instance => ((IProperty) instance).EvaluatedValueEscaped);
+                    instance => ((IProperty)instance).EvaluatedValueEscaped);
             }
 
             set
@@ -871,7 +871,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _shutdownInProcNodeOnBuildFinish);
             translator.Translate(ref _logTaskInputs);
             translator.Translate(ref _logInitialPropertiesAndItems);
-            translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
+            translator.TranslateEnum(ref _projectLoadSettings, (int)_projectLoadSettings);
             translator.Translate(ref _interactive);
             translator.Translate(ref _isolateProjects);
             translator.Translate(ref _question);
@@ -884,7 +884,7 @@ namespace Microsoft.Build.Execution
             // LowPriority is passed as an argument to new nodes, so it doesn't need to be transmitted here.
         }
 
-#region INodePacketTranslatable Members
+        #region INodePacketTranslatable Members
 
         /// <summary>
         /// The class factory for deserialization.
@@ -894,7 +894,7 @@ namespace Microsoft.Build.Execution
             return new BuildParameters(translator);
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Gets the value of a boolean environment setting which is not expected to change.

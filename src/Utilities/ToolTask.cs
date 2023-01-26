@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -572,12 +572,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="commandLineCommands"></param>
         /// <param name="responseFileSwitch"></param>
         /// <returns>The information required to start the process.</returns>
-        protected virtual ProcessStartInfo GetProcessStartInfo
-        (
+        protected virtual ProcessStartInfo GetProcessStartInfo(
             string pathToTool,
             string commandLineCommands,
-            string responseFileSwitch
-        )
+            string responseFileSwitch)
         {
             // Build up the command line that will be spawned.
             string commandLine = commandLineCommands;
@@ -658,12 +656,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="responseFileCommands">Command line arguments that should go into a temporary response file</param>
         /// <param name="commandLineCommands">Command line arguments that should be passed to the tool executable directly</param>
         /// <returns>exit code from the tool - if errors were logged and the tool has an exit code of zero, then we sit it to -1</returns>
-        protected virtual int ExecuteTool
-        (
+        protected virtual int ExecuteTool(
             string pathToTool,
             string responseFileCommands,
-            string commandLineCommands
-        )
+            string commandLineCommands)
         {
             if (!UseCommandProcessor)
             {
@@ -1033,13 +1029,11 @@ namespace Microsoft.Build.Utilities
         /// <param name="dataAvailableSignal"></param>
         /// <param name="messageImportance"></param>
         /// <param name="queueType"></param>
-        private void LogMessagesFromStandardErrorOrOutput
-        (
+        private void LogMessagesFromStandardErrorOrOutput(
             Queue dataQueue,
             ManualResetEvent dataAvailableSignal,
             MessageImportance messageImportance,
-            StandardOutputOrErrorQueueType queueType
-        )
+            StandardOutputOrErrorQueueType queueType)
         {
             ErrorUtilities.VerifyThrow(dataQueue != null,
                 "The data queue must be available.");

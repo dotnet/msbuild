@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Reflection;
@@ -106,15 +106,13 @@ namespace Microsoft.Build.Tasks
         /// <returns>A string containing the full path of this tool, or null if the tool was not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            string pathToTool = SdkToolsPathUtility.GeneratePathToTool
-            (
+            string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
                 SdkToolsPathUtility.FileInfoExists,
                 Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
                 SdkToolsPath,
                 ToolName,
                 Log,
-                true
-            );
+                true);
 
             return pathToTool;
         }

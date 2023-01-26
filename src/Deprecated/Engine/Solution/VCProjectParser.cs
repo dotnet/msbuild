@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ using System.Xml;
 
 namespace Microsoft.Build.BuildEngine
 {
-	static internal class VCProjectParser
-	{
+    internal static class VCProjectParser
+    {
         /// <summary>
         /// For a given VC project, retrieves the projects it references 
         /// </summary>
         /// <param name="projectPath"></param>
         /// <returns></returns>
         /// <owner>LukaszG</owner>
-        static internal List<string> GetReferencedProjectGuids(XmlDocument project)
+        internal static List<string> GetReferencedProjectGuids(XmlDocument project)
         {
             List<string> referencedProjectGuids = new List<string>();
 

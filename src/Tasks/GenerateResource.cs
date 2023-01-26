@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.CodeDom;
@@ -574,11 +574,9 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!ExtractResWFiles)
                     {
-                        commandLineBuilder.AppendFileNamesIfNotNull
-                        (
+                        commandLineBuilder.AppendFileNamesIfNotNull(
                             new string[] { inputFiles[i].ItemSpec, outputFiles[i].ItemSpec },
-                            ","
-                        );
+                            ",");
                     }
                     else
                     {
@@ -593,12 +591,10 @@ namespace Microsoft.Build.Tasks
                 commandLineBuilder.AppendFileNamesIfNotNull(outputFiles.ToArray(), " ");
 
                 // append the strongly-typed resource details
-                commandLineBuilder.AppendSwitchIfNotNull
-                (
+                commandLineBuilder.AppendSwitchIfNotNull(
                     "/str:",
                     new string[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
-                    ","
-                );
+                    ",");
             }
 
             Log.LogCommandLine(MessageImportance.Low, commandLineBuilder.ToString());
@@ -782,18 +778,14 @@ namespace Microsoft.Build.Tasks
                                 // create the list that we'll use to disconnect the taskitems once we're done
                                 _remotedTaskItems = new List<ITaskItem>();
 
-                                appDomain = AppDomain.CreateDomain
-                                (
+                                appDomain = AppDomain.CreateDomain(
                                     "generateResourceAppDomain",
                                     null,
-                                    AppDomain.CurrentDomain.SetupInformation
-                                );
+                                    AppDomain.CurrentDomain.SetupInformation);
 
-                                object obj = appDomain.CreateInstanceFromAndUnwrap
-                                   (
+                                object obj = appDomain.CreateInstanceFromAndUnwrap(
                                        typeof(ProcessResourceFiles).Module.FullyQualifiedName,
-                                       typeof(ProcessResourceFiles).FullName
-                                   );
+                                       typeof(ProcessResourceFiles).FullName);
 
                                 Type processType = obj.GetType();
                                 ErrorUtilities.VerifyThrow(processType == typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
@@ -1224,11 +1216,9 @@ namespace Microsoft.Build.Tasks
             int i = initialResourceIndex;
             while (currentCommand.Length < s_maximumCommandLength && i < inputsToProcess.Count)
             {
-                currentCommand.AppendFileNamesIfNotNull
-                    (
+                currentCommand.AppendFileNamesIfNotNull(
                         new ITaskItem[] { inputsToProcess[i], outputsToProcess[i] },
-                        ","
-                    );
+                        ",");
                 i++;
             }
 
@@ -1812,15 +1802,13 @@ namespace Microsoft.Build.Tasks
                                             // we should create a separate app-domain, so that those assemblies
                                             // can be unlocked when the task is finished.
                                             // The type didn't start with "System." so return true.
-                                            Log.LogMessageFromResources
-                                            (
+                                            Log.LogMessageFromResources(
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfType",
                                                 name ?? String.Empty,
                                                 typeName,
                                                 source.ItemSpec,
-                                                ((IXmlLineInfo)reader).LineNumber
-                                            );
+                                                ((IXmlLineInfo)reader).LineNumber);
 
                                             return true;
                                         }
@@ -1858,15 +1846,13 @@ namespace Microsoft.Build.Tasks
                                     {
                                         if (NeedSeparateAppDomainBasedOnSerializedType(reader))
                                         {
-                                            Log.LogMessageFromResources
-                                            (
+                                            Log.LogMessageFromResources(
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfMimeType",
                                                 name ?? String.Empty,
                                                 mimeType,
                                                 source.ItemSpec,
-                                                ((IXmlLineInfo)reader).LineNumber
-                                            );
+                                                ((IXmlLineInfo)reader).LineNumber);
 
                                             return true;
                                         }
@@ -1890,28 +1876,24 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (XmlException e)
                     {
-                        Log.LogMessageFromResources
-                                    (
+                        Log.LogMessageFromResources(
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfExceptionLineNumber",
                                         source.ItemSpec,
                                         ((IXmlLineInfo)reader).LineNumber,
-                                        e.Message
-                                    );
+                                        e.Message);
 
                         return true;
                     }
                     catch (SerializationException e)
                     {
-                        Log.LogMessageFromResources
-                                    (
+                        Log.LogMessageFromResources(
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfErrorDeserializingLineNumber",
                                         source.ItemSpec,
                                         name ?? String.Empty,
                                         ((IXmlLineInfo)reader).LineNumber,
-                                        e.Message
-                                    );
+                                        e.Message);
 
                         return true;
                     }
@@ -1929,13 +1911,11 @@ namespace Microsoft.Build.Tasks
 
                         // If there was any problem parsing the .resx then log a message and
                         // fall back to using a separate AppDomain.
-                        Log.LogMessageFromResources
-                                    (
+                        Log.LogMessageFromResources(
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfException",
                                         source.ItemSpec,
-                                        e.Message
-                                    );
+                                        e.Message);
 
                         // In case we need more information from the customer (given this has been heavily reported
                         // and we don't understand it properly) let the usual debug switch dump the stack.
@@ -3085,9 +3065,7 @@ namespace Microsoft.Build.Tasks
                             targetFrameworkAttribute != null &&
                             (
                                 targetFrameworkAttribute.FrameworkName.StartsWith("Silverlight,", StringComparison.OrdinalIgnoreCase) ||
-                                targetFrameworkAttribute.FrameworkName.StartsWith("WindowsPhone,", StringComparison.OrdinalIgnoreCase)
-                            )
-                        )
+                                targetFrameworkAttribute.FrameworkName.StartsWith("WindowsPhone,", StringComparison.OrdinalIgnoreCase)))
                     {
                         // Skip Silverlight assemblies.
                         _logger.LogMessageFromResources("GenerateResource.SkippingExtractingFromNonSupportedFramework", name, targetFrameworkAttribute.FrameworkName);
@@ -3140,13 +3118,17 @@ namespace Microsoft.Build.Tasks
                 {
                     satCulture = assemblyName.CultureInfo;
                     if (!satCulture.Equals(CultureInfo.InvariantCulture))
+                    {
                         expectedExt = '.' + satCulture.Name + ".resources";
+                    }
                 }
 
                 foreach (String resName in resources)
                 {
                     if (!resName.EndsWith(".resources", StringComparison.OrdinalIgnoreCase)) // Skip non-.resources assembly blobs
+                    {
                         continue;
+                    }
 
                     if (mainAssembly)
                     {
@@ -3198,7 +3180,9 @@ namespace Microsoft.Build.Tasks
                             {
                                 // Remove the culture from the filename
                                 if (reader.outputFileName.EndsWith("." + reader.cultureName, StringComparison.OrdinalIgnoreCase))
+                                {
                                     reader.outputFileName = reader.outputFileName.Remove(reader.outputFileName.Length - (reader.cultureName.Length + 1));
+                                }
                             }
                             _readers.Add(reader);
 
@@ -3242,7 +3226,9 @@ namespace Microsoft.Build.Tasks
                     neutralResourcesLanguageAttribute = (NeutralResourcesLanguageAttribute)attrs[0];
                     bool fallbackToSatellite = neutralResourcesLanguageAttribute.Location == UltimateResourceFallbackLocation.Satellite;
                     if (!fallbackToSatellite && neutralResourcesLanguageAttribute.Location != UltimateResourceFallbackLocation.MainAssembly)
+                    {
                         _logger.LogWarningWithCodeFromResources(null, name, 0, 0, 0, 0, "GenerateResource.UnrecognizedUltimateResourceFallbackLocation", neutralResourcesLanguageAttribute.Location, name);
+                    }
                     // This MSBuild task needs to not report an error for main assemblies that don't have managed resources.
                 }
             }
@@ -3261,7 +3247,9 @@ namespace Microsoft.Build.Tasks
                 }
 
                 if (!ContainsProperlyNamedResourcesFiles(a, false))
+                {
                     _logger.LogWarningWithCodeFromResources("GenerateResource.SatelliteAssemblyContainsNoResourcesFile", assemblyName.CultureInfo.Name);
+                }
             }
             return neutralResourcesLanguageAttribute;
         }
@@ -3272,7 +3260,9 @@ namespace Microsoft.Build.Tasks
             foreach (String manifestResourceName in a.GetManifestResourceNames())
             {
                 if (manifestResourceName.EndsWith(postfix, StringComparison.OrdinalIgnoreCase))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -3430,8 +3420,7 @@ namespace Microsoft.Build.Tasks
                     _stronglyTypedResourcesNamespace,
                     provider,
                     generateInternalClass,
-                    out errors
-                    );
+                    out errors);
 
             CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
             using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
@@ -3583,15 +3572,21 @@ namespace Microsoft.Build.Tasks
                     while (ch != '=')
                     {
                         if (ch == '\r' || ch == '\n')
+                        {
                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.NoEqualsInLine", name), fileName, sr.LineNumber, sr.LinePosition);
+                        }
 
                         name.Append((char)ch);
                         ch = sr.Read();
                         if (ch == -1)
+                        {
                             break;
+                        }
                     }
                     if (name.Length == 0)
+                    {
                         throw new TextFileException(_logger.FormatResourceString("GenerateResource.NoNameInLine"), fileName, sr.LineNumber, sr.LinePosition);
+                    }
 
                     // For the INF file, we must allow a space on both sides of the equals
                     // sign.  Deal with it.
@@ -3602,7 +3597,9 @@ namespace Microsoft.Build.Tasks
                     ch = sr.Read(); // move past =
                     // If it exists, move past the first space after the equals sign.
                     if (ch == ' ')
+                    {
                         ch = sr.Read();
+                    }
 
                     // Read in value
                     value.Length = 0;
@@ -3641,7 +3638,10 @@ namespace Microsoft.Build.Tasks
                                     {
                                         int n = sr.Read(hex, index, numChars);
                                         if (n == 0)
+                                        {
                                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.InvalidEscape", name.ToString(), (char)ch), fileName, sr.LineNumber, sr.LinePosition);
+                                        }
+
                                         index += n;
                                         numChars -= n;
                                     }

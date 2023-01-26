@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -174,8 +174,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 t.TargetPlatformIdentifier = "Hello";
                 t.TargetPlatformVersion = null;
                 t.Execute();
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure we get a ArgumentException if null is passed into the target platform version.
@@ -189,8 +188,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 t.TargetPlatformIdentifier = null;
                 t.TargetPlatformVersion = "1.0";
                 t.Execute();
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure we get an error message if an empty platform identifier is passed in.

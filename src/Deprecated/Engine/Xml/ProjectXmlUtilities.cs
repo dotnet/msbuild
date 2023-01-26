@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -65,7 +65,7 @@ namespace Microsoft.Build.BuildEngine
             if (childElements.Count > 0)
             {
                 ThrowProjectInvalidChildElement(element.FirstChild);
-            }            
+            }
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal static void VerifyThrowProjectNoAttributes(XmlElement element)
         {
-            foreach(XmlAttribute attribute in element.Attributes)
+            foreach (XmlAttribute attribute in element.Attributes)
             {
                 ThrowProjectInvalidAttribute(attribute);
             }

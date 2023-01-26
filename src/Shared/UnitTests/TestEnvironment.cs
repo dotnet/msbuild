@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -85,11 +85,15 @@ namespace Microsoft.Build.UnitTests
 
                 // Reset test variants
                 foreach (var variant in _variants)
+                {
                     variant.Revert();
+                }
 
                 // Assert invariants
                 foreach (var item in _invariants)
+                {
                     item.AssertInvariant(Output);
+                }
 
                 SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
@@ -414,7 +418,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     // workaround for https://github.com/dotnet/msbuild/pull/3866
                     // if the initial environment had empty keys, then MSBuild will accidentally remove them via Environment.SetEnvironmentVariable
-                    if (operation != "removed" || !string.IsNullOrEmpty((string) subset[key]))
+                    if (operation != "removed" || !string.IsNullOrEmpty((string)subset[key]))
                     {
                         superset.Contains(key).ShouldBe(true, $"environment variable {operation}: {key}");
                         superset[key].ShouldBe(subset[key]);

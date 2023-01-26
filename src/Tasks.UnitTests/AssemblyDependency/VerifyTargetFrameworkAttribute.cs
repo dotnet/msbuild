@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
@@ -369,8 +372,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.TargetFrameworkMonikerDisplayName = "Foo";
             t.SearchPaths = new string[] { @"c:\Frameworks\" };
             Assert.True(
-                t.Execute
-                (
+                t.Execute(
                     fileExists,
                     directoryExists,
                     getDirectories,
@@ -387,9 +389,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #endif
                     checkIfAssemblyIsInGac,
                     isWinMDFile,
-                    readMachineTypeFromPEHeader
-                )
-            );
+                    readMachineTypeFromPEHeader));
 
 
             Assert.Equal(0, e.Warnings); // "No warning expected in this scenario."

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -65,15 +65,13 @@ namespace Microsoft.Build.Tasks
         /// Implementation of the execute method.
         /// </summary>
         /// <returns></returns>
-        internal bool ExecuteImpl
-        (
+        internal bool ExecuteImpl(
             FileExists fileExists,
             FileCreate fileCreate,
             GetAttributes fileGetAttributes,
             SetAttributes fileSetAttributes,
             SetLastAccessTime fileSetLastAccessTime,
-            SetLastWriteTime fileSetLastWriteTime
-        )
+            SetLastWriteTime fileSetLastWriteTime)
         {
             // See what time we are touching all files to
             DateTime touchDateTime;
@@ -105,8 +103,7 @@ namespace Microsoft.Build.Tasks
                 // touched items. 
                 if
                 (
-                    TouchFile
-                    (
+                    TouchFile(
                         path,
                         touchDateTime,
                         fileExists,
@@ -114,9 +111,7 @@ namespace Microsoft.Build.Tasks
                         fileGetAttributes,
                         fileSetAttributes,
                         fileSetLastAccessTime,
-                        fileSetLastWriteTime
-                    )
-                )
+                        fileSetLastWriteTime))
                 {
                     touchedItems.Add(file);
                 }
@@ -159,15 +154,13 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return ExecuteImpl
-            (
+            return ExecuteImpl(
                 File.Exists,
                 File.Create,
                 File.GetAttributes,
                 File.SetAttributes,
                 File.SetLastAccessTime,
-                File.SetLastWriteTime
-            );
+                File.SetLastWriteTime);
         }
 
         /// <summary>
@@ -176,11 +169,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="file"></param>
         /// <param name="fileCreate"></param>
         /// <returns>"true" if the file was created.</returns>
-        private bool CreateFile
-        (
+        private bool CreateFile(
             string file,
-            FileCreate fileCreate
-        )
+            FileCreate fileCreate)
         {
             try
             {
@@ -201,8 +192,7 @@ namespace Microsoft.Build.Tasks
         /// Helper method touches a file.
         /// </summary>
         /// <returns>"True" if the file was touched.</returns>
-        private bool TouchFile
-        (
+        private bool TouchFile(
             string file,
             DateTime dt,
             FileExists fileExists,
@@ -210,8 +200,7 @@ namespace Microsoft.Build.Tasks
             GetAttributes fileGetAttributes,
             SetAttributes fileSetAttributes,
             SetLastAccessTime fileSetLastAccessTime,
-            SetLastWriteTime fileSetLastWriteTime
-        )
+            SetLastWriteTime fileSetLastWriteTime)
         {
             if (!fileExists(file))
             {
