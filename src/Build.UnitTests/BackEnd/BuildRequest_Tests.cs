@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Versioning;
@@ -29,13 +29,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 CreateNewBuildRequest(0, null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructorGood()
         {
-            CreateNewBuildRequest(0, Array.Empty<string>() );
+            CreateNewBuildRequest(0, Array.Empty<string>());
         }
 
         [Fact]
@@ -100,8 +99,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 request.ResolveConfiguration(2);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -111,8 +109,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
                 request.ResolveConfiguration(-1);
-            }
-           );
+            });
         }
         [Fact]
         public void TestTranslation()

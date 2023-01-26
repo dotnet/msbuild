@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the Exec task
     /// </summary>
-    sealed public class Exec_Tests
+    public sealed class Exec_Tests
     {
         private readonly ITestOutputHelper _output;
 
@@ -316,7 +316,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -351,7 +354,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -385,7 +391,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -419,7 +428,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -552,7 +564,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (expectSuccess)
                 {
-                    ((MockEngine) exec.BuildEngine).AssertLogContains("[hello]");
+                    ((MockEngine)exec.BuildEngine).AssertLogContains("[hello]");
                 }
 
                 Assert.Equal(expectedEncoding, exec.StdOutEncoding);
@@ -561,7 +573,9 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 if (Directory.Exists(folder))
+                {
                     FileUtilities.DeleteWithoutTrailingBackslash(folder, true);
+                }
             }
 
             return;
@@ -596,9 +610,13 @@ namespace Microsoft.Build.UnitTests
         {
             Exec exec;
             if (NativeMethodsShared.IsWindows)
+            {
                 exec = PrepareExec("echo Some output & echo Some output & echo Some output & echo Some output ");
+            }
             else
+            {
                 exec = PrepareExec("echo Some output ; echo Some output ; echo Some output ; echo Some output ");
+            }
 
             exec.CustomErrorRegularExpression = "~!@#$%^_)(*&^%$#@@#XF &%^%T$REd((((([[[[";
             exec.CustomWarningRegularExpression = "*";
@@ -615,9 +633,14 @@ namespace Microsoft.Build.UnitTests
         {
             string cmdLine;
             if (NativeMethodsShared.IsWindows)
+            {
                 cmdLine = "echo Some output & echo ALERT:This is an error & echo Some more output";
+            }
             else
+            {
                 cmdLine = "echo Some output ; echo ALERT:This is an error ; echo Some more output";
+            }
+
             Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
 
@@ -641,9 +664,13 @@ namespace Microsoft.Build.UnitTests
         {
             string cmdLine;
             if (NativeMethodsShared.IsWindows)
+            {
                 cmdLine = "echo Some output & echo YOOHOO:This is a warning & echo Some more output";
+            }
             else
+            {
                 cmdLine = "echo Some output ; echo YOOHOO:This is a warning ; echo Some more output";
+            }
 
             Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();

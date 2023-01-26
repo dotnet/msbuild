@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -765,8 +765,7 @@ EndGlobal
 
                 SolutionFile sp = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
-            }
-           );
+            });
         }
         /// <summary>
         /// Blob should contain dependency info
@@ -1504,46 +1503,38 @@ EndGlobal
             ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)).First().Value;
 
             // Check that the appropriate target is being passed to the child projects
-            Assert.Null(buildTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Targets"));
+            Assert.Null(buildTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Targets"));
 
-            Assert.Equal("Clean", cleanTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Targets"));
+            Assert.Equal("Clean", cleanTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Targets"));
 
-            Assert.Equal("Rebuild", rebuildTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Targets"));
+            Assert.Equal("Rebuild", rebuildTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Targets"));
 
-            Assert.Equal("Publish", publishTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Targets"));
+            Assert.Equal("Publish", publishTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Targets"));
 
             // Check that the child projects in question are the members of the "ProjectReference" item group
-            Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Projects"));
+            Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Projects"));
+            Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Projects"));
+            Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Projects"));
+            Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Projects"));
 
             // We should have only the four standard targets plus the two validation targets (ValidateSolutionConfiguration and ValidateToolsVersions).
         }
@@ -2251,13 +2242,16 @@ EndGlobal
                 ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
+#pragma warning disable format
 #if !FEATURE_ASPNET_COMPILER
-                Assert.Throws<InvalidProjectFileException>(() => {
+                Assert.Throws<InvalidProjectFileException>(() =>
+                {
 #endif
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
 #if !FEATURE_ASPNET_COMPILER
                 });
 #endif
+#pragma warning restore format
 
 #if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");
@@ -2277,8 +2271,8 @@ EndGlobal
         [Fact]
         public void CustomTargetNamesAreInInMetaproj()
         {
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
-            (@"
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
+            @"
                 Microsoft Visual Studio Solution File, Format Version 14.00
                 # Visual Studio 2015
                 Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
@@ -2327,8 +2321,8 @@ EndGlobal
         [InlineData(true)]
         public void IllegalUserTargetNamesDoNotThrow(bool forceCaseDifference)
         {
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
-            (@"
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
+            @"
                 Microsoft Visual Studio Solution File, Format Version 14.00
                 # Visual Studio 2015
                 Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""

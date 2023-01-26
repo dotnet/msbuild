@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -1278,11 +1278,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <param name="primaryItemsByName"></param>
         /// <param name="secondaryItemsByName"></param>
         /// <param name="itemMetadata"></param>
-        private void CreateComplexPropertiesItemsMetadata
-            (
+        private void CreateComplexPropertiesItemsMetadata(
             out Lookup readOnlyLookup,
-            out StringMetadataTable itemMetadata
-            )
+            out StringMetadataTable itemMetadata)
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
             Dictionary<string, string> itemMetadataTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1692,8 +1690,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped(@"$(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@XXXXDBDirectory)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// In the general case, we should still error for properties that incorrectly miss the Registry: prefix, like
@@ -1710,8 +1707,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped(@"$(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectoryX)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -2297,8 +2293,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff($(Value)))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -2316,8 +2311,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Lgg)]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - invalid since properties don't have properties and don't support '.' in them
@@ -2334,8 +2328,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("$(SomeStuff.ToUpperInvariant().Foo)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - properties don't take arguments
@@ -2352,8 +2345,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff($(System.DateTime.Now)))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -2370,8 +2362,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("$(SomeStuff.ToLowerInvariant()_goop)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - functions with invalid arguments
@@ -2387,8 +2378,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Substring(HELLO!))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - functions with invalid arguments
@@ -2404,8 +2394,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Substring(-10))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function that calls a static method with quoted arguments
@@ -2420,8 +2409,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("$(([System.DateTime]::Now).ToString(\"MM.dd.yyyy\"))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - we don't handle metadata functions
@@ -2815,20 +2803,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Theory]
         [InlineData(
             "$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Create($([System.Runtime.InteropServices.OSPlatform]::$$platform$$.ToString())))))",
-            "True"
-        )]
+            "True")]
         [InlineData(
             @"$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::$$platform$$)))",
-            "True"
-        )]
+            "True")]
         [InlineData(
             "$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)",
-            "$$architecture$$"
-        )]
+            "$$architecture$$")]
         [InlineData(
             "$([MSBuild]::IsOSPlatform($$platform$$))",
-            "True"
-        )]
+            "True")]
         public void PropertyFunctionRuntimeInformation(string propertyFunction, string expectedExpansion)
         {
             Func<string, string, string, string> formatString = (aString, platform, architecture) => aString
@@ -3309,8 +3293,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 // We should have failed before now
                 Assert.True(false);
-            }
-           );
+            });
         }
 
 #if FEATURE_APPDOMAIN
@@ -3646,8 +3629,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "cat1s"
             };
             int[] hashes = stringsToHash.Select(toHash =>
-                (int)expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance)
-                ).ToArray();
+                (int)expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance))
+                .ToArray();
             for (int a = 0; a < hashes.Length; a++)
             {
                 for (int b = a; b < hashes.Length; b++)
@@ -3772,7 +3755,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {"$([MSBuild]::Escape(';'))", "%3b"},
                 new string[] {"$([MSBuild]::UnEscape('%3b'))", ";"},
                 new string[] {"$(e.Substring($(e.Length)))", ""},
-                new string[] {"$([System.Int32]::MaxValue)", System.Int32.MaxValue.ToString()},
+                new string[] {"$([System.Int32]::MaxValue)", System.Int32.MaxValue.ToString() },
                 new string[] {"x$()", "x"},
                 new string[] {"A$(Reg:A)A", "AA"},
                 new string[] {"A$(Reg:AA)", "A"},
@@ -3972,8 +3955,7 @@ $(
                 }
                 Assert.True(
                         !success || caughtException,
-                        "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'"
-                    );
+                        "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'");
             }
         }
 

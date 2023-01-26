@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -14,9 +14,9 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class RemoveDir_Tests
+    public sealed class RemoveDir_Tests
     {
-        ITestOutputHelper _output;
+        private ITestOutputHelper _output;
         public RemoveDir_Tests(ITestOutputHelper output)
         {
             _output = output;
@@ -82,21 +82,21 @@ namespace Microsoft.Build.UnitTests
 
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
-               List<TaskItem> list = new List<TaskItem>();
+                List<TaskItem> list = new List<TaskItem>();
 
                 for (int i = 0; i < 20; i++)
-               {
+                {
                     list.Add(new TaskItem(""));
-               }
+                }
 
-               RemoveDir t = new RemoveDir();
-               t.Directories = list.ToArray();
-               t.BuildEngine = new MockEngine(_output);
-               t.Execute().ShouldBeTrue();
+                RemoveDir t = new RemoveDir();
+                t.Directories = list.ToArray();
+                t.BuildEngine = new MockEngine(_output);
+                t.Execute().ShouldBeTrue();
 
                 t.RemovedDirectories.Length.ShouldBe(0);
                 ((MockEngine)t.BuildEngine).Warnings.ShouldBe(20);
-               ((MockEngine)t.BuildEngine).AssertLogContains("MSB3232");
+                ((MockEngine)t.BuildEngine).AssertLogContains("MSB3232");
             }
         }
     }

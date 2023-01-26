@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ComReference_Tests
+    public sealed class ComReference_Tests
     {
         private static Dictionary<string, string> s_existingFiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -20,7 +20,9 @@ namespace Microsoft.Build.UnitTests
             get
             {
                 if (s_existingFiles.Count != 0)
+                {
                     return s_existingFiles;
+                }
 
                 s_existingFiles.Add(@"C:\test\typelib1.dll", string.Empty);
                 s_existingFiles.Add(@"C:\test\typelib2\2.dll", string.Empty);

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -1027,8 +1027,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     File.Delete(importPath1);
                     File.Delete(importPath2);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// MSBuildDefaultTargets was not getting cleared out between reevaluations.
@@ -3066,8 +3065,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 // Should not reach this point.
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Basic verification -- whitespace in the TreatAsLocalProperty definition should be trimmed.
@@ -4442,7 +4440,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(primaryProject, projectContents);
                 File.WriteAllText(import, importContents);
 
-                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>( () =>
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
                     {
                         Project unused = new Project(primaryProject, null, null);
                     })
@@ -4885,7 +4883,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 if (!string.IsNullOrWhiteSpace(envVarValue))
+                {
                     env.SetEnvironmentVariable("MsBuildLogPropertyTracking", envVarValue);
+                }
 
                 env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE", "It's Defined!");
                 env.SetEnvironmentVariable("DEFINED_ENVIRONMENT_VARIABLE2", "It's also Defined!");

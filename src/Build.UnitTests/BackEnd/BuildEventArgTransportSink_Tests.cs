@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Framework;
@@ -52,8 +52,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(PacketProcessor);
                 transportSink.Consume(null, 0);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify consume properly packages up the message event into a packet and send it to the 
