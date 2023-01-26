@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Xml;
@@ -504,7 +504,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void SchedulerShouldHonorDisableInprocNode()
         {
             var s = new Scheduler();
-            s.InitializeComponent(new MockHost(new BuildParameters {DisableInProcNode = true}));
+            s.InitializeComponent(new MockHost(new BuildParameters { DisableInProcNode = true }));
             s.ForceAffinityOutOfProc.ShouldBeTrue();
         }
 
@@ -544,7 +544,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             CreateConfiguration(1, "foo.csproj");
 
-            BuildRequest request1 = CreateProxyBuildRequest(1, 1, new ProxyTargets(new Dictionary<string, string> {{"foo", "bar"}}), null);
+            BuildRequest request1 = CreateProxyBuildRequest(1, 1, new ProxyTargets(new Dictionary<string, string> { { "foo", "bar" } }), null);
 
             BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] { request1 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));

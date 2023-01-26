@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -26,7 +26,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 e is StackOverflowException
                 || e is OutOfMemoryException
                 || e is AccessViolationException
-                // ExecutionEngineException has been deprecated by the CLR
+            // ExecutionEngineException has been deprecated by the CLR
             )
             {
                 return true;

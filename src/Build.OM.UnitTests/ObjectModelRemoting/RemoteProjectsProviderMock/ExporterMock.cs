@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -154,12 +154,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private ProjectCollectionLinker(ConnectedProjectCollections group)
         {
             this.LinkedCollections = group;
-            this.CollectionId = (UInt32) Interlocked.Increment(ref _collecitonId);
+            this.CollectionId = (UInt32)Interlocked.Increment(ref _collecitonId);
             this.Collection = new ProjectCollection();
             this.LinkFactory = LinkedObjectsFactory.Get(this.Collection);
         }
 
-        public Project LoadProject(string path) =>  this.Collection.LoadProject(path);
+        public Project LoadProject(string path) => this.Collection.LoadProject(path);
         public Project LoadProjectIgnoreMissingImports(string path) => LoadProjectWithSettings(path, ProjectLoadSettings.IgnoreMissingImports);
         public Project LoadProjectWithSettings(string path, ProjectLoadSettings settings) => new Project(path, null, null, this.Collection, settings);
 
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             }
         }
 
-        private void ConnectTo (ProjectCollectionLinker other)
+        private void ConnectTo(ProjectCollectionLinker other)
         {
             if (other.CollectionId == this.CollectionId)
             {
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private static bool dbgValidateDuplicateViews = false;
 
 
-        internal  void ValidateNoDuplicates()
+        internal void ValidateNoDuplicates()
         {
             foreach (var r in imported)
             {
@@ -329,7 +329,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             {
                 var proxy = (ILinkMock)external;
 
-                remoter = (RMock) proxy.Remoter;
+                remoter = (RMock)proxy.Remoter;
                 return;
             }
 

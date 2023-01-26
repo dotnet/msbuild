@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -562,8 +562,7 @@ namespace Microsoft.Build.Evaluation
                                     RegistryKeyWrapper.KeyExists(Dev10VBExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
                                     RegistryKeyWrapper.KeyExists(Dev10VCExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
                                     RegistryKeyWrapper.KeyExists(Dev10VWDExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10LightSwitchInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32)
-                                )
+                                    RegistryKeyWrapper.KeyExists(Dev10LightSwitchInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32))
                         {
                             s_dev10IsInstalled = true;
                         }
@@ -710,30 +709,26 @@ namespace Microsoft.Build.Evaluation
 
                 if (defaultTasksFiles.Length == 0)
                 {
-                    loggingServices.LogWarning
-                        (
+                    loggingServices.LogWarning(
                         buildEventContext,
                         null,
                         new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                         taskFileWarning,
                         taskPattern,
                         searchPath,
-                        String.Empty
-                        );
+                        String.Empty);
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                loggingServices.LogWarning
-                    (
+                loggingServices.LogWarning(
                     buildEventContext,
                     null,
                     new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                     taskFileWarning,
                     taskPattern,
                     searchPath,
-                    e.Message
-                    );
+                    e.Message);
             }
 
             // Sort the file names to give a deterministic order
@@ -1073,16 +1068,13 @@ namespace Microsoft.Build.Evaluation
 
                         if (usingTask == null)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject
-                                (
+                            ProjectErrorUtilities.ThrowInvalidProject(
                                 elementXml.Location,
                                 "UnrecognizedElement",
-                                elementXml.XmlElement.Name
-                                );
+                                elementXml.XmlElement.Name);
                         }
 
-                        TaskRegistry.RegisterTasksFromUsingTaskElement<ProjectPropertyInstance, ProjectItemInstance>
-                            (
+                        TaskRegistry.RegisterTasksFromUsingTaskElement<ProjectPropertyInstance, ProjectItemInstance>(
                             loggingServices,
                             buildEventContext,
                             Path.GetDirectoryName(defaultTasksFile),
@@ -1090,8 +1082,7 @@ namespace Microsoft.Build.Evaluation
                             registry,
                             _expander,
                             ExpanderOptions.ExpandProperties,
-                            FileSystems.Default
-                            );
+                            FileSystems.Default);
                     }
                 }
                 catch (XmlException e)

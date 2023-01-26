@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -510,7 +510,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -575,8 +577,7 @@ namespace Microsoft.Build.UnitTests
                             sourceFile,
                             destinationFile,
                             "SkipUnchangedFiles",
-                            "true"
-                            );
+                            "true");
                     }
                     else
                     {
@@ -585,8 +586,7 @@ namespace Microsoft.Build.UnitTests
                             sourceFile,
                             destinationFile,
                             "SkipUnchangedFiles",
-                            "true"
-                            );
+                            "true");
                     }
 
                     // "Expected the destination file to contain the contents of source file."
@@ -967,7 +967,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
@@ -1329,7 +1331,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 if (!UseHardLinks)
                 {

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -44,11 +44,11 @@ namespace Microsoft.Build.Graph.UnitTests
         private readonly MockLogger _logger;
 
         [Theory]
-        [InlineData(new byte[] {})]
-        [InlineData(new byte[] {1})]
-        [InlineData(new byte[] {0})]
-        [InlineData(new byte[] {1, 1})]
-        [InlineData(new byte[] {1, 1, 90, 23})]
+        [InlineData(new byte[] { })]
+        [InlineData(new byte[] { 1 })]
+        [InlineData(new byte[] { 0 })]
+        [InlineData(new byte[] { 1, 1 })]
+        [InlineData(new byte[] { 1, 1, 90, 23 })]
         public void InvalidCacheFilesShouldLogError(byte[] cacheContents)
         {
             var project = CreateProjectFileWithBuildTargetAndItems(_env, 1).Path;
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 _logger,
                 new BuildParameters
                 {
-                    InputResultsCacheFiles = new[] {existingFile}
+                    InputResultsCacheFiles = new[] { existingFile }
                 });
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
@@ -102,9 +102,9 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 buildManager.BeginBuild(new BuildParameters
                 {
-                    InputResultsCacheFiles = new []{"a", "b"},
+                    InputResultsCacheFiles = new[] { "a", "b" },
                     OutputResultsCacheFile = "c",
-                    Loggers = new []{_logger}
+                    Loggers = new[] { _logger }
                 });
 
                 buildManager.EndBuild();
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 _logger,
                 new BuildParameters
                 {
-                    InputResultsCacheFiles = new[] {outputCache}
+                    InputResultsCacheFiles = new[] { outputCache }
                 });
 
             resultFromCachedBuild.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -462,7 +462,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 var logger = new MockLogger();
 
-                buildParameters.Loggers = new[] {logger};
+                buildParameters.Loggers = new[] { logger };
 
                 var result = BuildProjectFileUsingBuildManager(
                     node.ProjectInstance.FullPath,
@@ -516,8 +516,7 @@ namespace Microsoft.Build.Graph.UnitTests
             int projectNumber,
             int[] projectReferences = null,
             string defaultTargets = null,
-            string explicitTargets = null
-            )
+            string explicitTargets = null)
         {
             var sb = new StringBuilder();
 
@@ -545,8 +544,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 projectReferences,
                 null,
                 defaultTargets,
-                sb.ToString()
-                );
+                sb.ToString());
         }
 
         [Fact]
@@ -560,7 +558,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 _logger,
                 new BuildParameters
                 {
-                    InputResultsCacheFiles = new[] {"FileDoesNotExist1", existingFile, "FileDoesNotExist2"}
+                    InputResultsCacheFiles = new[] { "FileDoesNotExist1", existingFile, "FileDoesNotExist2" }
                 });
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);

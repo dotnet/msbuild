@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Exceptions;
@@ -212,8 +212,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Throws<InternalErrorException>(() =>
             {
                 ElementLocation.Create("file", -1, 2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests constructor specifying file, line, negative column
@@ -224,8 +223,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Throws<InternalErrorException>(() =>
             {
                 ElementLocation.Create("file", 1, -2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests constructor with invalid null file.
@@ -355,8 +353,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(_pathToCommonTargets);
                 Assert.True(doc.IsReadOnly);
                 doc.Save(FileUtilities.GetTemporaryFile());
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -370,7 +367,8 @@ namespace Microsoft.Build.UnitTests.Construction
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
             doc.Load(_pathToCommonTargets);
             Assert.True(doc.IsReadOnly);
-            Assert.Throws<InvalidOperationException>(() => {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
                 doc.Save(new MemoryStream());
             });
         }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -616,7 +616,7 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
-            _inprocNodeContext =  new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
+            _inprocNodeContext = new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
         }
 
         /// <summary>
@@ -632,7 +632,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for component construction.
         /// </summary>
-        static internal IBuildComponent CreateComponent(BuildComponentType componentType)
+        internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
             ErrorUtilities.VerifyThrow(componentType == BuildComponentType.Scheduler, "Cannot create components of type {0}", componentType);
             return new Scheduler();
@@ -666,8 +666,7 @@ namespace Microsoft.Build.BackEnd
             // See if we are done.  We are done if there are no unassigned requests and no requests assigned to nodes.
             if (_schedulingData.UnscheduledRequestsCount == 0 &&
                 _schedulingData.ReadyRequestsCount == 0 &&
-                _schedulingData.BlockedRequestsCount == 0
-                )
+                _schedulingData.BlockedRequestsCount == 0)
             {
                 if (_schedulingData.ExecutingRequestsCount == 0 && _schedulingData.YieldingRequestsCount == 0)
                 {
@@ -1629,7 +1628,7 @@ namespace Microsoft.Build.BackEnd
 
             // detect the case for https://github.com/dotnet/msbuild/issues/3047
             // if we have partial results AND blocked and blocking share the same configuration AND are blocked on each other
-            if (blocker.PartialBuildResult !=null &&
+            if (blocker.PartialBuildResult != null &&
                 blockingRequest.BuildRequest.ConfigurationId == blockedRequest.BuildRequest.ConfigurationId &&
                 blockingRequest.RequestsWeAreBlockedBy.Contains(blockedRequest))
             {
@@ -1775,8 +1774,7 @@ namespace Microsoft.Build.BackEnd
                                         requestAffinity,
                                         existingRequestAffinity,
                                         config.ProjectFullPath,
-                                        globalProperties
-                                        )));
+                                        globalProperties)));
                             response = GetResponseForResult(nodeForResults, request, result);
                             responses.Add(response);
                             continue;
@@ -1962,7 +1960,7 @@ namespace Microsoft.Build.BackEnd
             emitNonErrorLogs = _ => { };
 
             ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
-            var configCache = (IConfigCache) _componentHost.GetComponent(BuildComponentType.ConfigCache);
+            var configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
 
             // do not check root requests as nothing depends on them
             if (isolateProjects == ProjectIsolationMode.False || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
@@ -2486,8 +2484,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            loggingService.LogComment
-            (
+            loggingService.LogComment(
                 context,
                 MessageImportance.Normal,
                 "BuildHierarchyEntry",
@@ -2497,8 +2494,7 @@ namespace Microsoft.Build.BackEnd
                 String.Format(CultureInfo.InvariantCulture, "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds),
                 String.Format(CultureInfo.InvariantCulture, "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Blocked).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Ready).TotalSeconds),
                 _configCache[request.BuildRequest.ConfigurationId].ProjectFullPath,
-                String.Join(", ", request.BuildRequest.Targets)
-            );
+                String.Join(", ", request.BuildRequest.Targets));
 
             List<SchedulableRequest> childRequests = new List<SchedulableRequest>(_schedulingData.GetRequestsByHierarchy(request));
             childRequests.Sort(delegate (SchedulableRequest left, SchedulableRequest right)

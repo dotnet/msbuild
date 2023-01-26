@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -163,7 +163,7 @@ BuildEngine5.BuildProjectFilesInParallel(
 
         [Theory]
         [InlineData(BuildResultCode.Success, new string[] { })]
-        [InlineData(BuildResultCode.Success, new[] {"BuildSelf"})]
+        [InlineData(BuildResultCode.Success, new[] { "BuildSelf" })]
         public void CacheAndUndeclaredReferenceEnforcementShouldAcceptSelfReferences(BuildResultCode expectedBuildResult, string[] targets)
         {
             AssertBuild(targets,
@@ -178,7 +178,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         [Fact]
         public void CacheAndUndeclaredReferenceEnforcementShouldAcceptCallTarget()
         {
-            AssertBuild(new []{"CallTarget"},
+            AssertBuild(new[] { "CallTarget" },
                 (result, logger) =>
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -202,7 +202,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         private void CacheEnforcementImpl(bool addContinueOnError)
         {
             AssertBuild(
-                new[] {"BuildDeclaredReference"},
+                new[] { "BuildDeclaredReference" },
                 (result, logger) =>
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Failure);
@@ -398,7 +398,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         [InlineData("BuildDeclaredReferenceViaTask")]
         public void CacheEnforcementShouldAcceptPreviouslyBuiltReferences(string targetName)
         {
-            AssertBuild(new []{ targetName },
+            AssertBuild(new[] { targetName },
                 (result, logger) =>
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -410,9 +410,9 @@ BuildEngine5.BuildProjectFilesInParallel(
 
         [Theory]
         [InlineData(false, "BuildUndeclaredReference")]
-// [InlineData(false, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
+        // [InlineData(false, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         [InlineData(true, "BuildUndeclaredReference")]
-// [InlineData(true, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
+        // [InlineData(true, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         public void UndeclaredReferenceEnforcementShouldFailOnUndeclaredReference(bool addContinueOnError, string targetName)
         {
             AssertBuild(new[] { targetName },
@@ -429,7 +429,7 @@ BuildEngine5.BuildProjectFilesInParallel(
 
         [Theory]
         [InlineData("BuildUndeclaredReference")]
-// [InlineData("BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
+        // [InlineData("BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         public void UndeclaredReferenceEnforcementShouldFailOnPreviouslyBuiltButUndeclaredReferences(string targetName)
         {
             AssertBuild(new[] { targetName },
@@ -464,9 +464,9 @@ BuildEngine5.BuildProjectFilesInParallel(
 
                 Func<string, string> ToDuplicateSlashes = path => path.Replace("/", "//").Replace(@"\", @"\\");
 
-                var targetNames = new []{"BuildDeclaredReference", /*"BuildDeclaredReferenceViaTask"*/};
+                var targetNames = new[] { "BuildDeclaredReference", /*"BuildDeclaredReferenceViaTask"*/};
 
-                var functions = new[] {Preserve, FullToRelative, ToForwardSlash, ToBackSlash, ToDuplicateSlashes};
+                var functions = new[] { Preserve, FullToRelative, ToForwardSlash, ToBackSlash, ToDuplicateSlashes };
 
                 foreach (var projectReferenceModifier in functions)
                 {
@@ -490,7 +490,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         [MemberData(nameof(UndeclaredReferenceEnforcementShouldNormalizeFilePathsTestData))]
         public void UndeclaredReferenceEnforcementShouldNormalizeFilePaths(Func<string, string> projectReferenceModifier, Func<string, string> msbuildProjectModifier, string targetName)
         {
-            AssertBuild(new []{targetName},
+            AssertBuild(new[] { targetName },
                 (result, logger) =>
                 {
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -543,13 +543,13 @@ BuildEngine5.BuildProjectFilesInParallel(
             {
                 if (buildDeclaredReference)
                 {
-                    buildManagerSession.BuildProjectFile(declaredReferenceFile, new[] {"DeclaredReferenceTarget"})
+                    buildManagerSession.BuildProjectFile(declaredReferenceFile, new[] { "DeclaredReferenceTarget" })
                         .OverallResult.ShouldBe(BuildResultCode.Success);
                 }
 
                 if (buildUndeclaredReference)
                 {
-                    buildManagerSession.BuildProjectFile(undeclaredReferenceFile, new[] {"UndeclaredReferenceTarget"})
+                    buildManagerSession.BuildProjectFile(undeclaredReferenceFile, new[] { "UndeclaredReferenceTarget" })
                         .OverallResult.ShouldBe(BuildResultCode.Success);
                 }
 
@@ -607,7 +607,7 @@ BuildEngine5.BuildProjectFilesInParallel(
             {
                 // seed caches with results from the reference
                 buildManagerSession.BuildProjectFile(referenceFile).OverallResult.ShouldBe(BuildResultCode.Success);
-                buildManagerSession.BuildProjectFile(referenceFile, new []{"A"}).OverallResult.ShouldBe(BuildResultCode.Success);
+                buildManagerSession.BuildProjectFile(referenceFile, new[] { "A" }).OverallResult.ShouldBe(BuildResultCode.Success);
 
                 buildManagerSession.BuildProjectFile(projectFile).OverallResult.ShouldBe(BuildResultCode.Success);
 
