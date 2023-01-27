@@ -369,7 +369,7 @@ namespace Microsoft.Build.BackEnd
 
             if (this.TaskInstance is IIncrementalTask incrementalTask)
             {
-                incrementalTask.Question = _buildComponentHost.BuildParameters.Question;
+                incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
             }
 
             if (taskInitialized)

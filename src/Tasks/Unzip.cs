@@ -73,7 +73,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string Exclude { get; set; }
 
-        public bool Question { get; set; }
+        public bool FailIfNotIncremental { get; set; }
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
                     continue;
                 }
-                else if (Question)
+                else if (FailIfNotIncremental)
                 {
                     Log.LogErrorFromResources("Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
                     continue;

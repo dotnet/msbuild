@@ -142,7 +142,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (outputExists)
             {
-                // instead of writing, touch the output file
+                // if the file exists and the content is up to date, then touch the output file.
                 var now = DateTime.Now;
                 File.SetLastAccessTime(OutputAppConfigFile.ItemSpec, now);
                 File.SetLastWriteTime(OutputAppConfigFile.ItemSpec, now);

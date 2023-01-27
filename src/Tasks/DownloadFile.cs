@@ -65,8 +65,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public int Timeout { get; set; } = 100_000;
 
-
-        public bool Question { get; set; }
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="HttpMessageHandler"/> to use.  This is used by unit tests to mock a connection to a remote server.
@@ -186,7 +185,7 @@ namespace Microsoft.Build.Tasks
 
                         return;
                     }
-                    else if (Question)
+                    else if (FailIfNotIncremental)
                     {
                         Log.LogErrorFromResources("DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
                         return;

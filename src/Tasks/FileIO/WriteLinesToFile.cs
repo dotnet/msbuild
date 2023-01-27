@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks
         /// Question whether this task is incremental.
         /// </summary>
         /// <remarks>When question is true, then this task would not write to disk.  If CanBeIncremental is true, then error out.</remarks>
-        public bool Question { get; set; }
+        public bool FailIfNotIncremental { get; set; }
 
         public bool CanBeIncremental => WriteOnlyWhenDifferent;
 
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Tasks
                 // do not return if Lines is null, because we may
                 // want to delete the file in that case
                 StringBuilder buffer = new StringBuilder();
-                if (Lines != null && (!Question || WriteOnlyWhenDifferent))
+                if (Lines != null && (!FailIfNotIncremental || WriteOnlyWhenDifferent))
                 {
                     foreach (ITaskItem line in Lines)
                     {
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Tasks
                                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
                                             return true;
                                         }
-                                        else if (Question)
+                                        else if (FailIfNotIncremental)
                                         {
                                             Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                                             return false;
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
 
-                        if (Question)
+                        if (FailIfNotIncremental)
                         {
                             Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                             return false;
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        if (Question)
+                        if (FailIfNotIncremental)
                         {
                             Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, string.Empty);
                             return false;

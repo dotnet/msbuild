@@ -67,7 +67,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Question = true,
+                    FailIfNotIncremental = true,
                 };
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
                 _mockEngine.Log = string.Empty;
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Question = false,
+                    FailIfNotIncremental = false,
                 };
                 unzip2.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = true,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Question = true,
+                    FailIfNotIncremental = true,
                 };
                 unzip3.Execute().ShouldBeTrue(() => _mockEngine.Log);
             }

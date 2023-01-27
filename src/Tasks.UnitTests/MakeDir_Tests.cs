@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
-                t.Question = true;
+                t.FailIfNotIncremental = true;
                 t.Directories = dirList;
 
                 bool success = t.Execute();
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Question an existing directory should return true.
                 engine.Log = "";
-                t.Question = true;
+                t.FailIfNotIncremental = true;
                 success = t.Execute();
                 Assert.True(success);
 

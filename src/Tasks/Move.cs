@@ -73,7 +73,7 @@ namespace Microsoft.Build.Tasks
         /// <remarks>Move can be chained A->B->C with location C as the final location.
         /// Incrementally, it is hard to question A->B if both files are gone.
         /// In short, question will always return false and author should use target inputs/outputs.</remarks>
-        public bool Question { get; set; }
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Stop and return (in an undefined state) as soon as possible.
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    if (!Question && MoveFileWithLogging(sourceFile, destinationFile))
+                    if (!FailIfNotIncremental && MoveFileWithLogging(sourceFile, destinationFile))
                     {
                         SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
                         destinationFilesSuccessfullyMoved.Add(DestinationFiles[i]);

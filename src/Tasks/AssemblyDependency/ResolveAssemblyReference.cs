@@ -1039,8 +1039,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] UnresolvedAssemblyConflicts => _unresolvedConflicts.ToArray();
 
-        public bool Question { get; set; }
-
+        public bool FailIfNotIncremental { get; set; }
 
         #endregion
         #region Logging
@@ -2054,7 +2053,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
-                if (Question)
+                if (FailIfNotIncremental)
                 {
                     Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
                     return;

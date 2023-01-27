@@ -158,8 +158,8 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     UseHardlinksIfPossible = UseHardLinks,
                     UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    FailIfNotIncremental = true,
                 };
-                t.Question = true;
 
                 Assert.False(t.Execute(m.CopyFile, _parallelismThreadCount));
 
@@ -218,8 +218,8 @@ namespace Microsoft.Build.UnitTests
                     UseHardlinksIfPossible = UseHardLinks,
                     UseSymboliclinksIfPossible = UseSymbolicLinks,
                     SkipUnchangedFiles = true,
+                    FailIfNotIncremental = true,
                 };
-                t.Question = true;
                 Assert.True(t.Execute(m.CopyFile, _parallelismThreadCount));
 
                 // Expect for there to have been no copies.
@@ -269,8 +269,8 @@ namespace Microsoft.Build.UnitTests
                     UseHardlinksIfPossible = UseHardLinks,
                     UseSymboliclinksIfPossible = UseSymbolicLinks,
                     SkipUnchangedFiles = true,
+                    FailIfNotIncremental = true,
                 };
-                t.Question = true;
 
                 Assert.False(t.Execute(m.CopyFile, _parallelismThreadCount));
 

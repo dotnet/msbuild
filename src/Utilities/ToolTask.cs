@@ -358,7 +358,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         protected bool canBeIncremental { get; set; } = true;
 
-        public bool Question { get; set; }
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Returns a string with those switches and other information that can go into a response file.
@@ -1331,7 +1331,7 @@ namespace Microsoft.Build.Utilities
                     // doing any actual work).
                     return true;
                 }
-                else if (canBeIncremental && Question)
+                else if (canBeIncremental && FailIfNotIncremental)
                 {
                     LogPrivate.LogErrorWithCodeFromResources("ToolTask.NotUpToDate");
                     return false;

@@ -546,8 +546,7 @@ namespace Microsoft.Build.Tasks
             // do nothing
         }
 
-
-        public bool Question { get; set; }
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
@@ -718,7 +717,7 @@ namespace Microsoft.Build.Tasks
 
                     Log.LogMessageFromResources("GenerateResource.NothingOutOfDate");
                 }
-                else if (Question)
+                else if (FailIfNotIncremental)
                 {
                     Log.LogErrorFromResources("GenerateResource.OutOfDate");
                 }

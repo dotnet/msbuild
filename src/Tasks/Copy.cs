@@ -153,7 +153,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool OverwriteReadOnlyFiles { get; set; }
 
-        public bool Question { get; set; }
+        public bool FailIfNotIncremental { get; set; }
 
         #endregion
 
@@ -258,7 +258,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!FileSystems.Default.DirectoryExists(destinationFolder))
                 {
-                    if (Question)
+                    if (FailIfNotIncremental)
                     {
                         Log.LogError(CreatesDirectory, destinationFolder);
                         return false;
@@ -276,7 +276,7 @@ namespace Microsoft.Build.Tasks
                 _directoriesKnownToExist.TryAdd(destinationFolder, true);
             }
 
-            if (Question)
+            if (FailIfNotIncremental)
             {
                 string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
                 string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
@@ -769,7 +769,7 @@ namespace Microsoft.Build.Tasks
                 {
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, false);
 
-                    if (Question)
+                    if (FailIfNotIncremental)
                     {
                         Log.LogError(FileComment, sourceFileState.Name, destinationFileState.Name);
                         success = false;
