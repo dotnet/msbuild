@@ -46,7 +46,7 @@ namespace Microsoft.NET.Publish.Tests
         /// <param name="libraryPReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
         /// <param name="testPath">Use to set a unique folder name for the test, like other test infrastructure code.</param>
         /// <returns></returns>
-        internal Tuple<TestSolution, List<TestProject>> Setup(ITestOutputHelper log, List<string> exeProjTfms, List<string> libraryProjTfms, string PReleaseProperty, string exePReleaseValue, string libraryPReleaseValue, [CallerMemberName] string testPath = "")
+        internal (TestSolution testSolution, List<TestProject> testProjects) Setup(ITestOutputHelper log, List<string> exeProjTfms, List<string> libraryProjTfms, string PReleaseProperty, string exePReleaseValue, string libraryPReleaseValue, [CallerMemberName] string testPath = "")
         {
             // Project Setup
             List<TestProject> testProjects = new List<TestProject>();

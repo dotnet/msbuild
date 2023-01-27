@@ -79,7 +79,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         /// This should match the order in which projects were added to the solution.
         /// </param>
         /// <returns>A dictionary of property -> value mappings for every subproject in the solution.</returns>
-        public List<Dictionary<string, string>> ProjectProperties(List<Tuple<string, string>> targetFrameworksAndConfigurationsInOrderPerProject = null)
+        public List<Dictionary<string, string>> ProjectProperties(List<(string targetFramework, string configuration)> targetFrameworksAndConfigurationsInOrderPerProject = null)
         {
             var properties = new List<Dictionary<string, string>>();
             int i = 0;
