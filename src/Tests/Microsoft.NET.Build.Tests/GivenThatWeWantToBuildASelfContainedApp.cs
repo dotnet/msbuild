@@ -409,7 +409,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
-            Assert.True(bool.Parse(properties["SelfContained"]) == resultShouldBeSelfContained);
+            Assert.Equal(bool.Parse(properties["SelfContained"]), resultShouldBeSelfContained);
         }
 
         [Theory]

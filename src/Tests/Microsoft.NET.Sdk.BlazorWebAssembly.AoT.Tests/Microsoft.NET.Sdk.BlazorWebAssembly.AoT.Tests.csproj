@@ -14,7 +14,7 @@
     <BuildHelixPayload Condition="'$(RunAoTTests)' != 'true'">false</BuildHelixPayload>
   </PropertyGroup>
 
-  <!-- Based on .NET 8 breaking change: Add SC like old behavior if RID is defined. -->
+  <!-- Based on .NET 8 breaking change: Add SelfContained if RuntimeIdentifier is defined to match old behavior.. -->
   <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' and '$(SelfContained)' == ''">
     <SelfContained>true</SelfContained>
   </PropertyGroup>
