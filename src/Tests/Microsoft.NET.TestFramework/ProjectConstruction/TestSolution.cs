@@ -25,7 +25,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public TestSolution(ITestOutputHelper log, string newSolutionPath, List<TestAsset> solutionProjects, [CallerMemberName] string name = null)
         {
             Name = name;
-            SolutionPath = Path.Combine(newSolutionPath, $"{ name + ".sln"}");
+            SolutionPath = Path.Combine(newSolutionPath, $"{name + ".sln"}");
             Projects = new List<TestAsset>();
             ProjectPaths = new List<string>();
 
@@ -34,7 +34,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 .WithVirtualHive()
                 .Execute();
 
-            if(slnCreationResult.ExitCode != 0)
+            if (slnCreationResult.ExitCode != 0)
             {
                 throw new Exception($"This test failed during a call to dotnet new. If {newSolutionPath} is valid, it's likely this test is failing because of dotnet new. If there are failing .NET new tests, please fix those and then see if this test still fails.");
             }
@@ -84,7 +84,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             var properties = new List<Dictionary<string, string>>();
             int i = 0;
 
-            foreach(var testAsset in Projects)
+            foreach (var testAsset in Projects)
             {
                 TestProject testProject = testAsset.TestProject;
 
@@ -94,7 +94,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 if (targetFrameworksAndConfigurationsInOrderPerProject != null)
                 {
                     var tfmAndConfiguration = targetFrameworksAndConfigurationsInOrderPerProject.ElementAtOrDefault(i);
-                    if (tfmAndConfiguration != null)
+                    if (!tfmAndConfiguration.Equals(default))
                     {
                         tfm = tfmAndConfiguration.Item1;
                         config = tfmAndConfiguration.Item2;

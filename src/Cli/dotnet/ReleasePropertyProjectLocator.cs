@@ -206,8 +206,7 @@ namespace Microsoft.DotNet.Cli
                 // 3) This code only gets hit if we are in a solution publish setting, so we don't need to worry about it failing other publish scenarios
                 throw new GracefulException(Strings.SolutionProjectConfigurationsConflict, _propertyToCheck, String.Join("\n", (configuredProjects).Select(x => x.FullPath)));
             }
-
-            return configuredProjects.Any() ? configuredProjects.First() : null;
+            return configuredProjects.FirstOrDefault();
         }
 
         /// <summary>
@@ -302,7 +301,7 @@ namespace Microsoft.DotNet.Cli
             {
                 // Note: dotnet -f FRAMEWORK_1 --property:TargetFramework=FRAMEWORK_2 will use FRAMEWORK_1.
                 // So we can replace the value in the globals non-dubiously if it exists.
-                oldGlobalProperties[MSBuildPropertyNames.TARGET_FRAMEWORK] = _options.FrameworkOption;
+                globalProperties[MSBuildPropertyNames.TARGET_FRAMEWORK] = _options.FrameworkOption;
             }
         }
     }

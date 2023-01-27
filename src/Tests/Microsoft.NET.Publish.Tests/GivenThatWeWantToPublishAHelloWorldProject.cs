@@ -589,7 +589,7 @@ public static class Program
         {
             string tfm = "net7.0";
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", configOpt)
+               .CopyTestAsset("HelloWorld", identifier: configOpt)
                .WithSource()
                .WithTargetFramework(tfm)
                .WithProjectChanges(project =>

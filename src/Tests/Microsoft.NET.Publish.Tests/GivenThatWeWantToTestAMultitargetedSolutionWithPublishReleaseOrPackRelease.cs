@@ -80,12 +80,12 @@ namespace Microsoft.NET.Publish.Tests
             var sln = new TestSolution(log, mainProject.TestRoot, projects);
             testProjects.Add(testProject);
             testProjects.Add(libraryProject);
-            return new Tuple<TestSolution, List<TestProject>>(sln, testProjects);
+            return new(sln, testProjects);
         }
 
 
 
-        [InlineData("f", $"{ToolsetInfo.CurrentTargetFramework}")]
+        [InlineData("-f", $"{ToolsetInfo.CurrentTargetFramework}")]
         [InlineData($"-p:TargetFramework={ToolsetInfo.CurrentTargetFramework}")]
         [Theory]
         public void ItUsesReleaseWithATargetFrameworkOptionNet8ForNet6AndNet7MultitargetingProjectWithPReleaseUndefined(params string[] args)
@@ -103,10 +103,10 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+            var finalPropertyResults = sln.ProjectProperties(new()
                {
-                   new Tuple<string, string>(expectedTfm, expectedConfiguration),
-                   new Tuple<string, string>(expectedTfm, expectedConfiguration),
+                   new(expectedTfm, expectedConfiguration),
+                   new(expectedTfm, expectedConfiguration),
                });
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
@@ -126,10 +126,10 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+            var finalPropertyResults = sln.ProjectProperties(new()
                {
-                   new Tuple<string, string>("net8.0", expectedConfiguration),
-                   new Tuple<string, string>("net8.0", expectedConfiguration),
+                   new ("net8.0", expectedConfiguration),
+                   new ("net8.0", expectedConfiguration),
                });
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
@@ -151,10 +151,10 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+            var finalPropertyResults = sln.ProjectProperties(new()
                {
-                   new Tuple<string, string>(firstProjectTfm, expectedConfiguration),
-                   new Tuple<string, string>(secondProjectTfm, expectedConfiguration),
+                   new (firstProjectTfm, expectedConfiguration),
+                   new (secondProjectTfm, expectedConfiguration),
                });
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
@@ -177,10 +177,10 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+            var finalPropertyResults = sln.ProjectProperties(new()
                {
-                   new Tuple<string, string>(expectedTfm, expectedConfiguration),
-                   new Tuple<string, string>(expectedTfm, expectedConfiguration),
+                   new (expectedTfm, expectedConfiguration),
+                   new (expectedTfm, expectedConfiguration),
                });
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
@@ -202,10 +202,10 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+            var finalPropertyResults = sln.ProjectProperties(new()
                {
-                   new Tuple<string, string>(firstProjectTfm, expectedConfiguration),
-                   new Tuple<string, string>(secondProjectTfm, expectedConfiguration),
+                   new(firstProjectTfm, expectedConfiguration),
+                   new(secondProjectTfm, expectedConfiguration),
                });
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
@@ -249,10 +249,10 @@ namespace Microsoft.NET.Publish.Tests
                     .Should()
                     .Pass();
 
-                var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+                var finalPropertyResults = sln.ProjectProperties(new()
                {
-                   new Tuple<string, string>(firstProjectTfm, expectedConfiguration),
-                   new Tuple<string, string>(secondProjectTfm, expectedConfiguration),
+                   new(firstProjectTfm, expectedConfiguration),
+                   new(secondProjectTfm, expectedConfiguration),
                });
 
                 VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
@@ -364,10 +364,10 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+            var finalPropertyResults = sln.ProjectProperties(new()
                {
-                   new Tuple<string, string>(tfm, expectedConfiguration),
-                   new Tuple<string, string>(tfm, expectedConfiguration),
+                   new(tfm, expectedConfiguration),
+                   new(tfm, expectedConfiguration),
                });
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
