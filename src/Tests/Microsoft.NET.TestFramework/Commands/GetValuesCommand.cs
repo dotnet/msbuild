@@ -168,7 +168,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
         DirectoryInfo GetValuesDirectory(string targetFramework = "", string configuration = "Debug")
         {
             //  Use a consistent directory format to put the values text file in, so we don't have to worry about
-            //  whether the project uses the artifacts output format or not
+            //  whether the project uses the standard output path format or not
 
             targetFramework = targetFramework ?? string.Empty;
             configuration = configuration ?? string.Empty;

@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
   
-  <!-- We need to put the UseArtifactsOutput logic after the import of Directory.Build.props, but before the MSBuild Project Extensions .props import.
+  <!-- We need to put the UseStandardOutputPaths logic after the import of Directory.Build.props, but before the MSBuild Project Extensions .props import.
        However, both of these things happen in Microsoft.Common.props with no opportunity to insert logic in between them.
 
        So what we do here is duplicate the Directory.Build.props import logic from Microsoft.Common.props, and then set ImportDirectoryBuildProps to
@@ -57,15 +57,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
   </PropertyGroup>
 
-  <!-- Set up base artifacts folders if UseArtifactsOutput is set -->
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
-    <UseArtifactsIntermediateOutput Condition="'$(UseArtifactsIntermediateOutput)' == ''">true</UseArtifactsIntermediateOutput>
-    
-    <BaseArtifactsPath Condition="'$(BaseArtifactsPath)' == ''">artifacts\</BaseArtifactsPath>
-    <BaseArtifactsPath>$([MSBuild]::EnsureTrailingSlash($(BaseArtifactsPath)))</BaseArtifactsPath>
+  <!-- Set up base standard output folders if UseStandardOutputPaths is set -->
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true'">
+    <UseStandardIntermediateOutput Condition="'$(UseStandardIntermediateOutput)' == ''">true</UseStandardIntermediateOutput>
 
-    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseArtifactsPath)bin\</BaseOutputPath>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(BaseArtifactsPath)intermediates\</BaseIntermediateOutputPath>
+    <BaseStandardOutputPath Condition="'$(BaseStandardOutputPath)' == ''">bin\</BaseStandardOutputPath>
+    <BaseStandardOutputPath>$([MSBuild]::EnsureTrailingSlash($(BaseStandardOutputPath)))</BaseStandardOutputPath>
+
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseStandardOutputPath)build\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(BaseStandardOutputPath)obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectFullPath)' == '$(ProjectToOverrideProjectExtensionsPath)'">

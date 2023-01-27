@@ -25,23 +25,23 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
-  <!-- Set UseArtifactsOutput if not set and TargetFramework >= .NET 8 -->
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' == '' and
+  <!-- Set UseStandardOutputPaths if not set and TargetFramework >= .NET 8 -->
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == '' and
                             '$(TargetFrameworks)' == '' and
                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                             $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 8.0))">
-    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <UseStandardOutputPaths>true</UseStandardOutputPaths>
   </PropertyGroup>
 
-  <!-- Set BaseOutputPath for artifacts format if it wasn't set in Sdk.props -->
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
-    <BaseArtifactsPath Condition="'$(BaseArtifactsPath)' == ''">artifacts\</BaseArtifactsPath>
-    <BaseArtifactsPath>$([MSBuild]::EnsureTrailingSlash($(BaseArtifactsPath)))</BaseArtifactsPath>
+  <!-- Set BaseOutputPath for standard output format if it wasn't set in Sdk.props -->
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true'">
+    <BaseStandardOutputPath Condition="'$(BaseStandardOutputPath)' == ''">bin\</BaseStandardOutputPath>
+    <BaseStandardOutputPath>$([MSBuild]::EnsureTrailingSlash($(BaseStandardOutputPath)))</BaseStandardOutputPath>
 
-    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseArtifactsPath)bin\</BaseOutputPath>
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseStandardOutputPath)build\</BaseOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true'">
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' != 'true'">
     <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">bin\</BaseOutputPath>
     <BaseOutputPath Condition="!HasTrailingSlash('$(BaseOutputPath)')">$(BaseOutputPath)\</BaseOutputPath>
     <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' == 'AnyCPU'">$(BaseOutputPath)$(Configuration)\</OutputPath>
@@ -49,9 +49,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputPath Condition="!HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
   </PropertyGroup>
 
-  <!-- If "UseArtifactsOutput" wasn't set when the MSBuild project extensions .props files were imported, then use "obj" for the intermediate output path
-         instead of artifacts.  To have the intermediate output path in the artifacts folder, "UseArtifactsOutput" should be set in Directory.Build.props-->
-  <PropertyGroup Condition="'$(UseArtifactsIntermediateOutput)' != 'true'">
+  <!-- If "UseStandardOutputPaths" wasn't set when the MSBuild project extensions .props files were imported, then use "obj" for the intermediate output path
+         instead of $(BaseStandardOutputPath)\obj.  To have the intermediate output path in the standard output folder, "UseStandardOutputPaths" should be set in Directory.Build.props-->
+  <PropertyGroup Condition="'$(UseStandardIntermediateOutput)' != 'true'">
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">obj\</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
     <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' and '$(PlatformName)' == 'AnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
@@ -61,43 +61,37 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Set the package output path (for nuget pack target) now, before the TargetFramework is appended -->
   <PropertyGroup Condition="'$(PackageOutputPath)' == ''">
-    <PackageOutputPath Condition="'$(UseArtifactsOutput)' != 'true'">$(OutputPath)</PackageOutputPath>
-    <PackageOutputPath Condition="'$(UseArtifactsOutput)' == 'true'">$(BaseArtifactsPath)\package\$(Configuration.ToLowerInvariant())\</PackageOutputPath>
+    <PackageOutputPath Condition="'$(UseStandardOutputPaths)' != 'true'">$(OutputPath)</PackageOutputPath>
+    <PackageOutputPath Condition="'$(UseStandardOutputPaths)' == 'true'">$(BaseStandardOutputPath)\package\$(Configuration.ToLowerInvariant())\</PackageOutputPath>
   </PropertyGroup>
 
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
        of these properties before the TargetFramework is appended, so that if these values are specified
        in the project file, the specified value will be used for the exclude. -->
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true'">
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' != 'true'">
     <DefaultItemExcludes>$(DefaultItemExcludes);$(OutputPath)/**</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(BaseArtifactsPath)/**</DefaultItemExcludes>
-
-    <!-- Exclude bin and obj folders even when using artifacts output format, so that when a project is changed
-         to use artifacts format (for example by retargeting to .NET 8, it doesn't suddenly pick up files from
-         bin and obj. -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);bin/**</DefaultItemExcludes>
-    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**</DefaultItemExcludes>
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true'">
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(BaseStandardOutputPath)/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <!--
     Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
     targets.
    -->
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true' and
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' != 'true' and
                             '$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
     <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseArtifactsIntermediateOutput)' != 'true' and
+  <PropertyGroup Condition="'$(UseStandardIntermediateOutput)' != 'true' and
                             '$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true'">
     <_ArtifactPivots>$(Configuration.ToLowerInvariant())</_ArtifactPivots>
 
     <!-- Per the design, we should include the TargetFramework in the pivots if TargetFrameworks is defined, or if TargetFramework is a global property.
@@ -121,11 +115,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Publish path -->
     <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
-    <PublishDir Condition="'$(PublishDir)' == ''">$(BaseArtifactsPath)$(PublishDirName)\$(_ArtifactPivots)\</PublishDir>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(BaseStandardOutputPath)$(PublishDirName)\$(_ArtifactPivots)\</PublishDir>
     
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' and '$(UseArtifactsIntermediateOutput)' == 'true'">
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true' and '$(UseStandardIntermediateOutput)' == 'true'">
     <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' ">$(BaseIntermediateOutputPath)$(_ArtifactPivots)\</IntermediateOutputPath>
   </PropertyGroup>
 </Project>

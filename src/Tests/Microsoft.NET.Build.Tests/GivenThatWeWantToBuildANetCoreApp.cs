@@ -610,7 +610,7 @@ public static class Program
             if (crossTarget)
             {
                 //  Let the GetOutputDirectory logic know that this project doesn't use the artifacts output format
-                testProject.UseArtifactsOutput = false;
+                testProject.UseStandardOutputPaths = false;
             }
 
             var outputDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -621,7 +621,7 @@ public static class Program
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path(bool useArtifactsOutput)
+        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path(bool useStandardOutputPaths)
         {
             var testProject = new TestProject()
             {
@@ -633,22 +633,22 @@ public static class Program
 
             string[] extraArgs = new[] { $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework.ToUpper()}" };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: useArtifactsOutput.ToString());
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: useStandardOutputPaths.ToString());
 
             var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
-                .WithEnvironmentVariable("UseArtifactsOutput", useArtifactsOutput.ToString())
+                .WithEnvironmentVariable("UseStandardOutputPaths", useStandardOutputPaths.ToString())
                 .Execute(extraArgs)
                 .Should()
                 .Pass();
 
-            if (useArtifactsOutput)
+            if (useStandardOutputPaths)
             {
-                string outputFolder = Path.Combine(buildCommand.ProjectRootPath, "artifacts", "bin", $"debug_{ToolsetInfo.CurrentTargetFramework}");
+                string outputFolder = Path.Combine(buildCommand.ProjectRootPath, "bin", "build", $"debug_{ToolsetInfo.CurrentTargetFramework}");
                 new DirectoryInfo(outputFolder).Should().Exist();
 
-                string intermediateFolder = Path.Combine(buildCommand.ProjectRootPath, "artifacts", "intermediates", $"debug_{ToolsetInfo.CurrentTargetFramework}");
+                string intermediateFolder = Path.Combine(buildCommand.ProjectRootPath, "bin", "obj", $"debug_{ToolsetInfo.CurrentTargetFramework}");
                 new DirectoryInfo(intermediateFolder).Should().Exist();
             }
             else

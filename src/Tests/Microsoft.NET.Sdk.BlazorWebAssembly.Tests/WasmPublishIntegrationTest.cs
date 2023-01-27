@@ -119,7 +119,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                     reference.Name = "Reference";
                     reference.Add(new XElement(
                         "HintPath",
-                        Path.Combine("..", "razorclasslibrary", "artifacts", "bin", "debug", "RazorClassLibrary.dll")));
+                        Path.Combine("..", "razorclasslibrary", "bin", "build", "debug", "RazorClassLibrary.dll")));
                 }
             });
 

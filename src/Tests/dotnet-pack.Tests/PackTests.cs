@@ -267,7 +267,7 @@ namespace Microsoft.DotNet.Pack.Tests
                 .Should()
                 .Pass();
 
-            new DirectoryInfo(Path.Combine(rootPath, "artifacts"))
+            new DirectoryInfo(Path.Combine(rootPath, "bin"))
                 .Should().HaveFilesMatching("*.nupkg", SearchOption.AllDirectories);
         }
 

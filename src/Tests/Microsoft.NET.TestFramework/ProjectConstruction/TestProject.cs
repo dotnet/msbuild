@@ -49,7 +49,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public string TargetFrameworkProfile { get; set; }
 
-        public bool? UseArtifactsOutput { get; set; }
+        public bool? UseStandardOutputPaths { get; set; }
 
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 

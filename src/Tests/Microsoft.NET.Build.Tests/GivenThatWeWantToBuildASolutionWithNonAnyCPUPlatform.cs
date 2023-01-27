@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset, "x64SolutionBuild.sln");
             buildCommand
-                .Execute("/p:ProduceReferenceAssembly=false", "/p:UseArtifactsOutput=false")
+                .Execute("/p:ProduceReferenceAssembly=false", "/p:UseStandardOutputPaths=false")
                 .Should()
                 .Pass();
 

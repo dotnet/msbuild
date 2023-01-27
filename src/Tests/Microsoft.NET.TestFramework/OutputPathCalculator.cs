@@ -20,7 +20,7 @@ namespace Microsoft.NET.TestFramework
         public string ProjectPath { get; set; }
         public string TargetFramework { get; set; }
         public string RuntimeIdentifier { get; set; }
-        public bool? UseArtifactsOutput { get; set; }
+        public bool? UseStandardOutputPaths { get; set; }
         
 
         public bool IsSdkProject { get; set; } = true;
@@ -53,7 +53,7 @@ namespace Microsoft.NET.TestFramework
                 ProjectPath = projectPath,
                 TargetFramework = testProject.TargetFrameworks,
                 RuntimeIdentifier = testProject.RuntimeIdentifier,
-                UseArtifactsOutput = testProject.UseArtifactsOutput,
+                UseStandardOutputPaths = testProject.UseStandardOutputPaths,
                 IsSdkProject = testProject.IsSdkProject
             };
 
@@ -111,11 +111,11 @@ namespace Microsoft.NET.TestFramework
 
         }
 
-        private bool UsesArtifactsFolder()
+        private bool UsesStandardOutputPaths()
         {
-            if (UseArtifactsOutput.HasValue)
+            if (UseStandardOutputPaths.HasValue)
             {
-                return UseArtifactsOutput.Value;
+                return UseStandardOutputPaths.Value;
             }
 
             if (!IsSdkProject)
@@ -152,7 +152,7 @@ namespace Microsoft.NET.TestFramework
 
         public string GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
         {
-            if (UsesArtifactsFolder())
+            if (UsesStandardOutputPaths())
             {
                 string pivot = configuration.ToLowerInvariant();
                 if (IsMultiTargeted() && !string.IsNullOrEmpty(targetFramework))
@@ -167,7 +167,7 @@ namespace Microsoft.NET.TestFramework
                 {
                     pivot += "_" + runtimeIdentifier;
                 }
-                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "artifacts", "bin", pivot);
+                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", "build", pivot);
             }
             else
             {
@@ -186,7 +186,7 @@ namespace Microsoft.NET.TestFramework
 
         public string GetPublishDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
         {
-            if (UsesArtifactsFolder())
+            if (UsesStandardOutputPaths())
             {
                 string pivot = configuration.ToLowerInvariant();
                 if (IsMultiTargeted() && !string.IsNullOrEmpty(targetFramework))
@@ -201,7 +201,7 @@ namespace Microsoft.NET.TestFramework
                 {
                     pivot += "_" + runtimeIdentifier;
                 }
-                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "artifacts", "publish", pivot);
+                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", "publish", pivot);
             }
             else
             {
@@ -234,9 +234,9 @@ namespace Microsoft.NET.TestFramework
 
         public string GetPackageDirectory(string configuration = "Debug")
         {
-            if (UsesArtifactsFolder())
+            if (UsesStandardOutputPaths())
             {
-                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "artifacts", "package", configuration.ToLowerInvariant());
+                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", "package", configuration.ToLowerInvariant());
             }
             else
             {
