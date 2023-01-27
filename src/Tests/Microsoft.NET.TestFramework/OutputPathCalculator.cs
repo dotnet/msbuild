@@ -118,36 +118,41 @@ namespace Microsoft.NET.TestFramework
                 return UseStandardOutputPaths.Value;
             }
 
-            if (!IsSdkProject)
-            {
-                return false;
-            }
+            
 
-            string targetFramework = TryGetTargetFramework();
+            //  If we end up enabling standard output paths when targeting a certain version of .NET or higher, the logic for the rest of this method would look something like this:s
+            //if (!IsSdkProject)
+            //{
+            //    return false;
+            //}
 
-            if (targetFramework == null)
-            {
-                return false;
-            }
+            //string targetFramework = TryGetTargetFramework();
 
-            if (IsMultiTargeted())
-            {
-                return false;
-            }
+            //if (targetFramework == null)
+            //{
+            //    return false;
+            //}
 
-            var framework = NuGetFramework.Parse(targetFramework);
-            if (framework.Framework != ".NETCoreApp")
-            {
-                return false;
-            }
-            if (framework.Version.Major >= 8)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            //if (IsMultiTargeted())
+            //{
+            //    return false;
+            //}
+
+            //var framework = NuGetFramework.Parse(targetFramework);
+            //if (framework.Framework != ".NETCoreApp")
+            //{
+            //    return false;
+            //}
+            //if (framework.Version.Major >= 8)
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    return false;
+            //}
+
+            return false;
         }
 
         public string GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")

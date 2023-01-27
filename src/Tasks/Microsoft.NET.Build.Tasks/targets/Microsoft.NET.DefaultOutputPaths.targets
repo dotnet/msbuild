@@ -25,13 +25,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
-  <!-- Set UseStandardOutputPaths if not set and TargetFramework >= .NET 8 -->
+  <!-- NOTE: If we want to default UseStandardOutputPaths to true when targeting a given version of .NET or higher, this is where we would do it.
+
+    It would look something like this:
+
   <PropertyGroup Condition="'$(UseStandardOutputPaths)' == '' and
                             '$(TargetFrameworks)' == '' and
                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                             $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 8.0))">
     <UseStandardOutputPaths>true</UseStandardOutputPaths>
   </PropertyGroup>
+  -->
 
   <!-- Handle RootOutputPath and if it wasn't set in Sdk.props -->
   <PropertyGroup Condition="'$(RootOutputPath)' != ''">
