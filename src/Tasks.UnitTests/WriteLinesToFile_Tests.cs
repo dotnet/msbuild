@@ -154,6 +154,67 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [Fact]
+        public void WriteLinesWriteOnlyWhenDifferentWithEncodingTest()
+        {
+            var file = FileUtilities.GetTemporaryFile();
+            try
+            {
+                // Write an initial file.
+                var a = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = "ASCII",
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+
+                a.Execute().ShouldBeTrue();
+
+                // Verify contents
+                var r = new ReadLinesFromFile { File = new TaskItem(file) };
+                r.Execute().ShouldBeTrue();
+                r.Lines[0].ItemSpec.ShouldBe("File contents1");
+
+                var writeTime = DateTime.Now.AddHours(-1);
+
+                File.SetLastWriteTime(file, writeTime);
+
+                // Write the same contents to the file, timestamps should match.
+                var a2 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = "ASCII",
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+                a2.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
+
+                // Write the same contents to the file with different encoding, last write time should differ.
+                var a3 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = "UTF-8",
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+
+                a3.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBeGreaterThan(writeTime.AddSeconds(1));
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
         /// <summary>
         /// Should create directory structure when target <see cref="WriteLinesToFile.File"/> does not exist.
         /// </summary>
