@@ -74,8 +74,6 @@ namespace Microsoft.TemplateEngine.Cli
 
         public IReadOnlyDictionary<string, IBaselineInfo> BaselineInfo => _templateInfo.BaselineInfo;
 
-        public bool PreferDefaultName => _templateInfo.PreferDefaultName;
-
         [Obsolete]
         public bool HasScriptRunningPostActions { get => _templateInfo.HasScriptRunningPostActions; set => _templateInfo.HasScriptRunningPostActions = value; }
 
