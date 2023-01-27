@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -372,14 +372,12 @@ namespace Microsoft.Build.BackEnd
                 // See if any required properties were not set
                 foreach (KeyValuePair<string, string> requiredParameter in requiredParameters)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(
                         setParameters.ContainsKey(requiredParameter.Key),
                         _taskLocation,
                         "RequiredPropertyNotSetError",
                         _taskName,
-                        requiredParameter.Key
-                    );
+                        requiredParameter.Key);
                 }
             }
 
@@ -409,24 +407,20 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // flag an error if we find a parameter that has no .NET property equivalent
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     parameter != null,
                     parameterLocation,
                     "UnexpectedTaskOutputAttribute",
                     parameterName,
-                    _taskName
-                );
+                    _taskName);
 
                 // output parameters must have their corresponding .NET properties marked with the Output attribute
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     _taskFactoryWrapper.GetNamesOfPropertiesWithOutputAttribute.ContainsKey(parameterName),
                     parameterLocation,
                     "UnmarkedOutputTaskParameter",
                     parameter.Name,
-                    _taskName
-                );
+                    _taskName);
 
                 EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
@@ -442,27 +436,23 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ProjectErrorUtilities.ThrowInvalidProject
-                    (
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "UnsupportedTaskParameterTypeError",
                         parameter.PropertyType.FullName,
                         parameter.Name,
-                        _taskName
-                    );
+                        _taskName);
                 }
             }
             catch (InvalidOperationException e)
             {
                 // handle invalid TaskItems in task outputs
-                _targetLoggingContext.LogError
-                (
+                _targetLoggingContext.LogError(
                     new BuildEventFileInfo(parameterLocation),
                     "InvalidTaskItemsInTaskOutputs",
                     _taskName,
                     parameterName,
-                    e.Message
-                );
+                    e.Message);
 
                 gatheredGeneratedOutputsSuccessfully = false;
             }
@@ -473,33 +463,28 @@ namespace Microsoft.Build.BackEnd
                 // Log the stack, so the task vendor can fix their code
                 // Log the task line number, whatever the value of ContinueOnError;
                 // because this will be a hard error anyway.
-                _targetLoggingContext.LogFatalTaskError
-                (
+                _targetLoggingContext.LogFatalTaskError(
                     e.InnerException,
                     new BuildEventFileInfo(parameterLocation),
                     _taskName);
 
                 // We do not recover from a task exception while getting outputs,
                 // so do not merely set gatheredGeneratedOutputsSuccessfully = false; here
-                ProjectErrorUtilities.ThrowInvalidProject
-                (
+                ProjectErrorUtilities.ThrowInvalidProject(
                     parameterLocation,
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
                     parameterName,
-                    e.InnerException?.Message
-                );
+                    e.InnerException?.Message);
             }
             catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                ProjectErrorUtilities.ThrowInvalidProject
-                (
+                ProjectErrorUtilities.ThrowInvalidProject(
                     parameterLocation,
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
                     parameterName,
-                    e.Message
-                );
+                    e.Message);
             }
 
             return gatheredGeneratedOutputsSuccessfully;
@@ -753,15 +738,13 @@ namespace Microsoft.Build.BackEnd
                     ex is FormatException || // bad string representation of a type
                     ex is OverflowException) // overflow when converting string representation of a numerical type
                 {
-                    ProjectErrorUtilities.ThrowInvalidProject
-                    (
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "InvalidTaskParameterValueError",
                         currentItem.ItemSpec,
                         parameter.Name,
                         parameterType.FullName,
-                        _taskName
-                    );
+                        _taskName);
                 }
 
                 throw;
@@ -859,13 +842,11 @@ namespace Microsoft.Build.BackEnd
 
                             if (returnClass == null)
                             {
-                                _targetLoggingContext.LogError
-                                    (
+                                _targetLoggingContext.LogError(
                                         new BuildEventFileInfo(_taskLocation),
                                         "MissingTaskError",
                                         _taskName,
-                                        _projectInstance.TaskRegistry.Toolset.ToolsPath
-                                    );
+                                        _projectInstance.TaskRegistry.Toolset.ToolsPath);
 
                                 return null;
                             }
@@ -883,16 +864,14 @@ namespace Microsoft.Build.BackEnd
                         taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string taskRuntime);
                         taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string taskArchitecture);
 
-                        _targetLoggingContext.LogError
-                            (
+                        _targetLoggingContext.LogError(
                                 new BuildEventFileInfo(_taskLocation),
                                 "TaskExistsButHasMismatchedIdentityError",
                                 _taskName,
                                 usingTaskRuntime ?? XMakeAttributes.MSBuildRuntimeValues.any,
                                 usingTaskArchitecture ?? XMakeAttributes.MSBuildArchitectureValues.any,
                                 taskRuntime ?? XMakeAttributes.MSBuildRuntimeValues.any,
-                                taskArchitecture ?? XMakeAttributes.MSBuildArchitectureValues.any
-                            );
+                                taskArchitecture ?? XMakeAttributes.MSBuildArchitectureValues.any);
 
                         // if we've logged this error, even though we've found something, we want to act like we didn't.  
                         return null;
@@ -959,39 +938,33 @@ namespace Microsoft.Build.BackEnd
             }
             catch (InvalidCastException e)
             {
-                _taskLoggingContext.LogError
-                (
+                _taskLoggingContext.LogError(
                     new BuildEventFileInfo(_taskLocation),
                     "TaskInstantiationFailureErrorInvalidCast",
                     _taskName,
                     _taskFactoryWrapper.TaskFactory.FactoryName,
-                    e.Message
-                );
+                    e.Message);
             }
             catch (TargetInvocationException e)
             {
                 // Exception thrown by the called code itself
                 // Log the stack, so the task vendor can fix their code
-                _taskLoggingContext.LogError
-                (
+                _taskLoggingContext.LogError(
                     new BuildEventFileInfo(_taskLocation),
                     "TaskInstantiationFailureError",
                     _taskName,
                     _taskFactoryWrapper.TaskFactory.FactoryName,
-                    Environment.NewLine + e.InnerException
-                );
+                    Environment.NewLine + e.InnerException);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 // Reflection related exception
-                _taskLoggingContext.LogError
-                (
+                _taskLoggingContext.LogError(
                     new BuildEventFileInfo(_taskLocation),
                     "TaskInstantiationFailureError",
                     _taskName,
                     _taskFactoryWrapper.TaskFactory.FactoryName,
-                    e.Message
-                );
+                    e.Message);
             }
 
             return task;
@@ -1000,14 +973,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Set the specified parameter based on its type.
         /// </summary>
-        private bool SetTaskParameter
-        (
+        private bool SetTaskParameter(
             string parameterName,
             string parameterValue,
             ElementLocation parameterLocation,
             bool isRequired,
-            out bool parameterSet
-        )
+            out bool parameterSet)
         {
             bool success = false;
             parameterSet = false;
@@ -1057,85 +1028,71 @@ namespace Microsoft.Build.BackEnd
                     // try to set the parameter
                     if (TaskParameterTypeVerifier.IsValidScalarInputParameter(parameterType))
                     {
-                        success = InitializeTaskScalarParameter
-                            (
+                        success = InitializeTaskScalarParameter(
                             parameter,
                             parameterType,
                             parameterValue,
                             parameterLocation,
-                            out parameterSet
-                            );
+                            out parameterSet);
                     }
                     else if (TaskParameterTypeVerifier.IsValidVectorInputParameter(parameterType))
                     {
-                        success = InitializeTaskVectorParameter
-                            (
+                        success = InitializeTaskVectorParameter(
                             parameter,
                             parameterType,
                             parameterValue,
                             parameterLocation,
                             isRequired,
-                            out parameterSet
-                            );
+                            out parameterSet);
                     }
                     else
                     {
-                        _taskLoggingContext.LogError
-                            (
+                        _taskLoggingContext.LogError(
                             new BuildEventFileInfo(parameterLocation),
                             "UnsupportedTaskParameterTypeError",
                             parameterType.FullName,
                             parameter.Name,
-                            _taskName
-                            );
+                            _taskName);
                     }
 
                     if (!success)
                     {
                         // flag an error if the parameter could not be set
-                        _taskLoggingContext.LogError
-                            (
+                        _taskLoggingContext.LogError(
                             new BuildEventFileInfo(parameterLocation),
                             "InvalidTaskAttributeError",
                             parameterName,
                             parameterValue,
-                            _taskName
-                            );
+                            _taskName);
                     }
                 }
                 else
                 {
                     // flag an error if we find a parameter that has no .NET property equivalent
-                    _taskLoggingContext.LogError
-                        (
-                        new BuildEventFileInfo( parameterLocation ),
+                    _taskLoggingContext.LogError(
+                        new BuildEventFileInfo(parameterLocation),
                         "UnexpectedTaskAttribute",
                         parameterName,
                         _taskName,
                         _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssemblyName.FullName,
-                        _taskFactoryWrapper.TaskFactoryLoadedType.Path
-                        );
+                        _taskFactoryWrapper.TaskFactoryLoadedType.Path);
                 }
             }
             catch (AmbiguousMatchException)
             {
-                _taskLoggingContext.LogError
-                    (
+                _taskLoggingContext.LogError(
                     new BuildEventFileInfo(parameterLocation),
                     "AmbiguousTaskParameterError",
                     _taskName,
-                    parameterName
-                    );
+                    parameterName);
             }
             catch (ArgumentException)
             {
-                ProjectErrorUtilities.ThrowInvalidProject
-                    (
+                ProjectErrorUtilities.ThrowInvalidProject(
                     parameterLocation,
                     "SetAccessorNotAvailableOnTaskParameter",
                     parameterName,
-                    _taskName
-                    );
+                    _taskName);
             }
 
             return success;
@@ -1144,14 +1101,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Given an instantiated task, this helper method sets the specified scalar parameter based on its type.
         /// </summary>
-        private bool InitializeTaskScalarParameter
-        (
+        private bool InitializeTaskScalarParameter(
             TaskPropertyInfo parameter,
             Type parameterType,
             string parameterValue,
             ElementLocation parameterLocation,
-            out bool taskParameterSet
-        )
+            out bool taskParameterSet)
         {
             taskParameterSet = false;
 
@@ -1176,15 +1131,13 @@ namespace Microsoft.Build.BackEnd
                             // We only allow a single item to be passed into a parameter of ITaskItem.
 
                             // Some of the computation (expansion) here is expensive, so don't switch to VerifyThrowInvalidProject.
-                            ProjectErrorUtilities.ThrowInvalidProject
-                                (
+                            ProjectErrorUtilities.ThrowInvalidProject(
                                 parameterLocation,
                                 "CannotPassMultipleItemsIntoScalarParameter",
                                 _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation),
                                 parameter.Name,
                                 parameterType.FullName,
-                                _taskName
-                                );
+                                _taskName);
                         }
 
                         RecordItemForDisconnectIfNecessary(finalTaskItems[0]);
@@ -1217,15 +1170,13 @@ namespace Microsoft.Build.BackEnd
                     ex is FormatException || // bad string representation of a type
                     ex is OverflowException) // overflow when converting string representation of a numerical type
                 {
-                    ProjectErrorUtilities.ThrowInvalidProject
-                    (
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "InvalidTaskParameterValueError",
                         _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation),
                         parameter.Name,
                         parameterType.FullName,
-                        _taskName
-                    );
+                        _taskName);
                 }
 
                 throw;
@@ -1274,15 +1225,13 @@ namespace Microsoft.Build.BackEnd
         ///
         ///     "xxx@(CPPFiles)xxx"                         converts to     &lt;error&gt;
         /// </example>
-        private bool InitializeTaskVectorParameter
-        (
+        private bool InitializeTaskVectorParameter(
             TaskPropertyInfo parameter,
             Type parameterType,
             string parameterValue,
             ElementLocation parameterLocation,
             bool isRequired,
-            out bool taskParameterSet
-        )
+            out bool taskParameterSet)
         {
             ErrorUtilities.VerifyThrow(parameterValue != null, "Didn't expect null parameterValue in InitializeTaskVectorParameter");
 
@@ -1339,11 +1288,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Given an instantiated task, this helper method sets the specified parameter
         /// </summary>
-        private bool InternalSetTaskParameter
-        (
+        private bool InternalSetTaskParameter(
             TaskPropertyInfo parameter,
-            object parameterValue
-        )
+            object parameterValue)
         {
             bool success = false;
 
@@ -1374,8 +1321,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Exception thrown by the called code itself
                 // Log the stack, so the task vendor can fix their code
-                _taskLoggingContext.LogFatalTaskError
-                (
+                _taskLoggingContext.LogFatalTaskError(
                     e.InnerException,
                     new BuildEventFileInfo(_taskLocation),
                     _taskName);
@@ -1384,8 +1330,7 @@ namespace Microsoft.Build.BackEnd
             // InternalLoggerException is an arbitrary logger exception.
             catch (Exception e) when (e is not LoggerException && e is not InternalLoggerException && !ExceptionHandling.NotExpectedReflectionException(e))
             {
-                _taskLoggingContext.LogFatalTaskError
-                (
+                _taskLoggingContext.LogFatalTaskError(
                     e,
                     new BuildEventFileInfo(_taskLocation),
                     _taskName);

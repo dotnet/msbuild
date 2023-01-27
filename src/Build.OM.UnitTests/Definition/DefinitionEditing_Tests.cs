@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -232,8 +232,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
 
                 project.AddItem("i", String.Empty);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add an item with null metadata parameter.
@@ -528,8 +527,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItemElement item2 =
                 project.AddItem(
                     "i",
-                    NativeMethodsShared.IsWindows ? @"c:\subdir1\a\b\subdir2\c\i1.xyx" : "/subdir1/a/b/subdir2/c/i1.xyx")
-                    [0].Xml;
+                    NativeMethodsShared.IsWindows ? @"c:\subdir1\a\b\subdir2\c\i1.xyx" : "/subdir1/a/b/subdir2/c/i1.xyx")[
+                    0].Xml;
 
             string expected = ObjectModelHelpers.CleanupFileContents(
                                   NativeMethodsShared.IsWindows ?
@@ -1156,7 +1155,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
         public void RenameThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
-            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => {i.Rename("foo"); });
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.Rename("foo"); });
         }
 
         /// <summary>
@@ -1457,7 +1456,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
         public void RemoveItemsThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
-            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItems(new [] {i}); });
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItems(new[] { i }); });
         }
 
         /// <summary>
@@ -1589,8 +1588,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var property = project.SetProperty("p", "v1");
                 property.Xml.Parent.RemoveAllChildren();
                 property.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting an evaluated property after its XML's parent has been removed should
@@ -1605,8 +1603,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var property = project.SetProperty("p", "v1");
                 property.Xml.Parent.Parent.RemoveAllChildren();
                 property.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting an evaluated metadatum after its XML has been removed should
@@ -1621,8 +1618,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var metadatum = project.AddItem("i", "i1")[0].SetMetadataValue("p", "v1");
                 metadatum.Xml.Parent.RemoveAllChildren();
                 metadatum.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
         /// <summary>
         /// Changing an item's type after its XML has been removed should
@@ -1637,8 +1633,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var item = project.AddItem("i", "i1")[0];
                 item.Xml.Parent.RemoveAllChildren();
                 item.ItemType = "j";
-            }
-           );
+            });
         }
         /// <summary>
         /// Changing an item's type after its XML has been removed should
@@ -1653,8 +1648,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var item = project.AddItem("i", "i1")[0];
                 item.Xml.Parent.RemoveAllChildren();
                 item.RemoveMetadata("m");
-            }
-           );
+            });
         }
 
         [Theory]
@@ -1678,8 +1672,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             new[] // files that should be captured by the glob
             {
                 "a.foo"
-            }
-            )]
+            })]
         // explode on item coming from glob that expands to multiple items
         [InlineData(
             @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1694,8 +1687,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 "a.foo",
                 "b.foo"
-            }
-            )]
+            })]
         public void RemoveMetadataThrowsWhenItemElementSplittingIsDisabledAndItemComesFromGlob(string projectContents, int itemIndex, string[] files)
         {
             using (var env = TestEnvironment.Create())
@@ -1730,8 +1722,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var metadatum = project.AddItem("i", "i1")[0].SetMetadataValue("p", "v1");
                 metadatum.Xml.Parent.Parent.RemoveAllChildren();
                 metadatum.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting an evaluated metadatum after its XML's parent's parent has been removed should
@@ -1746,8 +1737,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var metadatum = project.AddItem("i", "i1")[0].SetMetadataValue("p", "v1");
                 metadatum.Xml.Parent.Parent.Parent.RemoveAllChildren();
                 metadatum.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
 
         [Theory]
@@ -2161,8 +2151,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
 
                 project.AddItemFast("i", String.Empty);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add an item with null metadata parameter.

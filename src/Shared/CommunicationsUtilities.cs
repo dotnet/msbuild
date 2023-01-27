@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Internal
         protected readonly int fileVersionPrivate;
         private readonly int sessionId;
 
-        internal protected Handshake(HandshakeOptions nodeType)
+        protected internal Handshake(HandshakeOptions nodeType)
         {
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
 
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    static internal class CommunicationsUtilities
+    internal static class CommunicationsUtilities
     {
         /// <summary>
         /// Indicates to the NodeEndpoint that all the various parts of the Handshake have been sent.
@@ -235,7 +235,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Gets or sets the node connection timeout.
         /// </summary>
-        static internal int NodeConnectionTimeout
+        internal static int NodeConnectionTimeout
         {
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
         }
@@ -244,13 +244,13 @@ namespace Microsoft.Build.Internal
         /// Get environment block
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static unsafe extern char* GetEnvironmentStrings();
+        internal static extern unsafe char* GetEnvironmentStrings();
 
         /// <summary>
         /// Free environment block
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static unsafe extern bool FreeEnvironmentStrings(char* pStrings);
+        internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
 
         /// <summary>
         /// Copied from the BCL implementation to eliminate some expensive security asserts.
@@ -363,7 +363,7 @@ namespace Microsoft.Build.Internal
                 var vars = Environment.GetEnvironmentVariables();
                 foreach (var key in vars.Keys)
                 {
-                    table[(string) key] = (string) vars[key];
+                    table[(string)key] = (string)vars[key];
                 }
             }
 
@@ -422,18 +422,25 @@ namespace Microsoft.Build.Internal
             stream.Write(bytes, 0, bytes.Length);
         }
 
-        internal static void ReadEndOfHandshakeSignal(this PipeStream stream, bool isProvider
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        internal static void ReadEndOfHandshakeSignal(
+            this PipeStream stream,
+            bool isProvider
 #if NETCOREAPP2_1_OR_GREATER || MONO
             , int timeout
 #endif
             )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             // Accept only the first byte of the EndOfHandshakeSignal
-            int valueRead = stream.ReadIntForHandshake(null
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            int valueRead = stream.ReadIntForHandshake(
+                byteToAccept: null
 #if NETCOREAPP2_1_OR_GREATER || MONO
             , timeout
 #endif
                 );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
             if (valueRead != EndOfHandshakeSignal)
             {
@@ -449,6 +456,7 @@ namespace Microsoft.Build.Internal
             }
         }
 
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
@@ -458,6 +466,7 @@ namespace Microsoft.Build.Internal
             , int timeout
 #endif
             )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             byte[] bytes = new byte[4];
 
@@ -608,7 +617,7 @@ namespace Microsoft.Build.Internal
             switch (clrVersion)
             {
                 case 0:
-                    // Not a taskhost, runtime must match
+                // Not a taskhost, runtime must match
                 case 4:
                     // Default for MSBuild running on .NET Framework 4,
                     // not represented in handshake

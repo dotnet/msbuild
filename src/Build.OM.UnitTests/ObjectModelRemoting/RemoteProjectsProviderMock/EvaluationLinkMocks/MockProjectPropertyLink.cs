@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public MockProjectPropertyElementLinkRemoter Xml => (MockProjectPropertyElementLinkRemoter)this.ExportElement(this.Source.Xml);
         public string Name => this.Source.Name;
         public string EvaluatedIncludeEscaped => ProjectPropertyLink.GetEvaluatedValueEscaped(this.Source);
-        public string UnevaluatedValue { get => this.Source.UnevaluatedValue; set=> this.Source.UnevaluatedValue = value; }
+        public string UnevaluatedValue { get => this.Source.UnevaluatedValue; set => this.Source.UnevaluatedValue = value; }
         public bool IsEnvironmentProperty => this.Source.IsEnvironmentProperty;
         public bool IsGlobalProperty => this.Source.IsGlobalProperty;
         public bool IsReservedProperty => this.Source.IsReservedProperty;

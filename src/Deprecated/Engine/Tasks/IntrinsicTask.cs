@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace Microsoft.Build.BuildEngine
             this.buildEventContext = eventContext;
             this.executionDirectory = executionDirectory;
             this.itemDefinitionLibrary = itemDefinitionLibrary;
-            
+
             ErrorUtilities.VerifyThrow(IsIntrinsicTaskName(taskNodeXmlElement.Name), "Only PropertyGroup and ItemGroup are known intrinsic tasks");
 
             switch (taskNodeXmlElement.Name)
@@ -70,7 +70,7 @@ namespace Microsoft.Build.BuildEngine
         {
             ErrorUtilities.VerifyThrow(lookup != null, "Need to specify lookup.");
 
-            if ((conditionAttribute != null) 
+            if ((conditionAttribute != null)
                 && !Utilities.EvaluateCondition(conditionAttribute.Value, conditionAttribute, new Expander(lookup.ReadOnlyLookup), null, ParserOptions.AllowPropertiesAndItemLists, loggingServices, buildEventContext))
             {
                 return;
@@ -93,7 +93,7 @@ namespace Microsoft.Build.BuildEngine
         /// Execute a PropertyGroup element, including each child property
         /// </summary>
         private void ExecutePropertyGroup(Lookup lookup)
-        {          
+        {
             foreach (BuildProperty property in backingPropertyGroup)
             {
                 ArrayList buckets = null;
@@ -325,16 +325,21 @@ namespace Microsoft.Build.BuildEngine
         private EngineLoggingServices loggingServices;
         // event contextual information where the event is fired from
         private BuildEventContext buildEventContext;
+
         // whether the backing type is a property group, or an item group
-        BackingType backingType;
+        private BackingType backingType;
+
         // backing property group, if any
-        BuildPropertyGroup backingPropertyGroup;
+        private BuildPropertyGroup backingPropertyGroup;
+
         // backing xml for a backing item group, if any
-        BuildItemGroupXml backingItemGroupXml;
+        private BuildItemGroupXml backingItemGroupXml;
+
         // children of the backing item group, if any
-        List<BuildItemGroupChildXml> backingBuildItemGroupChildren = null;
+        private List<BuildItemGroupChildXml> backingBuildItemGroupChildren = null;
+
         // directory in which the project is executing -- the current directory needed to expand wildcards
-        string executionDirectory;
+        private string executionDirectory;
         // the conditional expression that controls task execution
         private XmlAttribute conditionAttribute;
         // the library of default metadata that any new items should inherit

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public override IEnumerable<KeyValuePair<string, ElementLocation>> ParameterLocations => this.Proxy.ParameterLocations;
         public override string GetParameter(string name) { return this.Proxy.GetParameter(name); }
         // hmm did not know can use => on functions, can clean the milion other cases some tiem ...
-        public override void SetParameter(string name, string unevaluatedValue) =>  this.Proxy.SetParameter(name, unevaluatedValue);
+        public override void SetParameter(string name, string unevaluatedValue) => this.Proxy.SetParameter(name, unevaluatedValue);
         public override void RemoveParameter(string name) => Proxy.RemoveParameter(name);
         public override void RemoveAllParameters() => Proxy.RemoveAllParameters();
 

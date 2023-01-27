@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-//
 
 using System;
 using System.Collections.Generic;
@@ -31,7 +30,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
         public static int ANSIBreakpoint(string text, int position, int initialPosition)
         {
-            if (position >= text.Length) return text.Length;
+            if (position >= text.Length)
+            {
+                return text.Length;
+            }
             int nonAnsiIndex = 0;
             Match nextMatch = ANSIRegexRegex.Match(text, initialPosition);
             int logicalIndex = 0;
@@ -71,7 +73,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 string result = String.Empty;
                 string noFormatString = ANSIRemove(text);
-                if (noFormatString.Length > Console.BufferWidth) return text;
+                if (noFormatString.Length > Console.BufferWidth)
+                {
+                    return text;
+                }
+
                 int space = (Console.BufferWidth - noFormatString.Length) / 2;
                 result += new string(' ', space);
                 result += text;
@@ -83,7 +89,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 string result = String.Empty;
                 string noFormatString = ANSIRemove(text);
-                if (noFormatString.Length > Console.BufferWidth) return text;
+                if (noFormatString.Length > Console.BufferWidth)
+                {
+                    return text;
+                }
+
                 int space = Console.BufferWidth - noFormatString.Length;
                 result += new string(' ', space);
                 result += text;
@@ -94,7 +104,11 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 string result = String.Empty;
                 string noFormatString = ANSIRemove(text);
-                if (noFormatString.Length > Console.BufferWidth) return text;
+                if (noFormatString.Length > Console.BufferWidth)
+                {
+                    return text;
+                }
+
                 int space = Console.BufferWidth - noFormatString.Length;
                 result += text;
                 result += new string(' ', space);
@@ -106,7 +120,11 @@ namespace Microsoft.Build.Logging.FancyLogger
                 string result = String.Empty;
                 string leftNoFormatString = ANSIRemove(leftText);
                 string rightNoFormatString = ANSIRemove(rightText);
-                if (leftNoFormatString.Length + rightNoFormatString.Length >= width) return leftText + rightText;
+                if (leftNoFormatString.Length + rightNoFormatString.Length >= width)
+                {
+                    return leftText + rightText;
+                }
+
                 int space = width - (leftNoFormatString.Length + rightNoFormatString.Length);
                 result += leftText;
                 result += new string(' ', space - 1);
@@ -246,7 +264,8 @@ namespace Microsoft.Build.Logging.FancyLogger
             public static string UpAndScroll(int n)
             {
                 string result = "";
-                for (int i = 0; i < n; i++) {
+                for (int i = 0; i < n; i++)
+                {
                     result += "\x1bM";
                 }
                 return result;
@@ -282,7 +301,8 @@ namespace Microsoft.Build.Logging.FancyLogger
                 return String.Format("\x1b[s");
             }
 
-            public static string RestorePosition() {
+            public static string RestorePosition()
+            {
                 return String.Format("\x1b[u");
             }
 
@@ -306,7 +326,11 @@ namespace Microsoft.Build.Logging.FancyLogger
 
             public static string ForwardTab(int n)
             {
-                if (n == 0) return "";
+                if (n == 0)
+                {
+                    return "";
+                }
+
                 return String.Format("\x1b[{0}I", n);
             }
 
@@ -397,7 +421,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
             public static string Spinner(int n)
             {
-                char[] chars = { '\\', '|', '/', '-'};
+                char[] chars = { '\\', '|', '/', '-' };
                 return chars[n % (chars.Length - 1)].ToString();
             }
 
