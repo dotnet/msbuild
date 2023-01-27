@@ -1405,7 +1405,7 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
                                     "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false", "/p:EnableTrimAnalyzer=false")
                 .Should().Pass()
                 .And.HaveStdOutContaining("warning IL2026")
@@ -1798,6 +1798,7 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = isExe
             };
 
+            testProject.AdditionalProperties["SelfContained"] = "true";
             // Don't error when generators/analyzers can't be loaded.
             // This can occur when running tests against FullFramework MSBuild
             // if the build machine has an MSBuild install with an older version of Roslyn
