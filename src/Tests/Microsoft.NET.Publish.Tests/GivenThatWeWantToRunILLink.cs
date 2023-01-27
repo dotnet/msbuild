@@ -1423,7 +1423,7 @@ namespace Microsoft.NET.Publish.Tests
             var projectName = "HelloWorld";
             var referenceProjectName = "ClassLibForILLink";
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName, setSelfContained: false);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
@@ -1558,15 +1558,17 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName, isExe);
             testProject.AdditionalProperties["IsTrimmable"] = "true";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + isExe);
 
             var buildCommand = new BuildCommand(testAsset);
             // IsTrimmable enables analysis warnings during build
-            buildCommand.Execute()
+            buildCommand.Execute("/bl")
                 .Should().Pass()
                 .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026");
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid).FullName;
             var assemblyPath = Path.Combine(outputDirectory, $"{projectName}.dll");
             var runtimeConfigPath = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
 
@@ -1975,7 +1977,8 @@ public static class UnusedNonTrimmableAssembly
             [CallerMemberName] string callingMethod = "",
             string referenceProjectIdentifier = null,
             Action<TestProject> modifyReferencedProject = null,
-            bool addAssemblyReference = false)
+            bool addAssemblyReference = false,
+            bool setSelfContained = true)
         {
             var testProject = new TestProject()
             {
@@ -1983,7 +1986,12 @@ public static class UnusedNonTrimmableAssembly
                 TargetFrameworks = targetFramework,
                 IsExe = true
             };
-            testProject.AdditionalProperties["SelfContained"] = "true";
+
+            if (setSelfContained)
+            {
+                testProject.AdditionalProperties["SelfContained"] = "true";
+            }
+
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"
 using System;
 public class Program
