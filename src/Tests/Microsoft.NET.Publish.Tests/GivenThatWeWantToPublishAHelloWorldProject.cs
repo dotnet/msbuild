@@ -526,9 +526,9 @@ public static class Program
                .WithSource()
                .Path;
 
-            new DotnetCommand(Log)
+            new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(slnDir)
-                .Execute(@"dotnet", "publish")
+                .Execute()
                 .Should()
                 .Pass()
                 .And
@@ -587,10 +587,11 @@ public static class Program
         [InlineData("/property:Configuration=Debug")]
         public void PublishRelease_does_not_override_Configuration_property_across_formats(string configOpt)
         {
+            string tfm = "net7.0";
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", $"PublishReleaseHelloWorldCsProjConfigPropOverride{configOpt}")
+               .CopyTestAsset("HelloWorld", configOpt)
                .WithSource()
-               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
+               .WithTargetFramework(tfm)
                .WithProjectChanges(project =>
                {
                    var ns = project.Root.Name.Namespace;
@@ -603,9 +604,9 @@ public static class Program
                 .Should()
                 .Pass().And.NotHaveStdErr();
 
-            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", tfm, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
-            var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", tfm, "HelloWorld.dll");
             Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
         }
 

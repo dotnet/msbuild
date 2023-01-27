@@ -150,11 +150,11 @@ namespace Microsoft.NET.Pack.Tests
                 {
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                     propertyGroup.Add(packReleaseValue != "" ? 
-                         new XElement(ns + "PackRelease", packReleaseValue)
-                         :
-                         new XElement(ns + "Foo", packReleaseValue)
-                    );
+                    if (packReleaseValue != "")
+                    {
+                        propertyGroup
+                            .Add(new XElement(ns + "PackRelease", packReleaseValue));
+                    };
                 });
 
             var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);

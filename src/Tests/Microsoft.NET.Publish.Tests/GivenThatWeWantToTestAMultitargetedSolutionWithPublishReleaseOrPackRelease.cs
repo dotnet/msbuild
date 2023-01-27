@@ -62,44 +62,44 @@ namespace Microsoft.NET.Publish.Tests
             }
             var mainProject = _testAssetsManager.CreateTestProject(testProject, callingMethod: testPath, identifier: string.Join("", exeProjTfms) + PReleaseProperty);
 
-            var referencedProject = new TestProject("ReferencedProject")
+            var libraryProject = new TestProject("LibraryProject")
             {
                 TargetFrameworks = String.Join(";", libraryProjTfms),
                 IsExe = false
             };
-            referencedProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
+            libraryProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
             if (libraryPReleaseValue != "")
             {
-                referencedProject.AdditionalProperties[PReleaseProperty] = libraryPReleaseValue;
+                libraryProject.AdditionalProperties[PReleaseProperty] = libraryPReleaseValue;
             }
-            var secondProject = _testAssetsManager.CreateTestProject(referencedProject, callingMethod: testPath, identifier: string.Join("", libraryProjTfms) + PReleaseProperty);
+            var secondProject = _testAssetsManager.CreateTestProject(libraryProject, callingMethod: testPath, identifier: string.Join("", libraryProjTfms) + PReleaseProperty);
 
             List<TestAsset> projects = new List<TestAsset> { mainProject, secondProject };
 
             // Solution Setup
             var sln = new TestSolution(log, mainProject.TestRoot, projects);
             testProjects.Add(testProject);
-            testProjects.Add(referencedProject);
+            testProjects.Add(libraryProject);
             return new Tuple<TestSolution, List<TestProject>>(sln, testProjects);
         }
 
 
 
-        [InlineData(PublishRelease, "net8.0", true)]
-        [InlineData(PublishRelease, "-p:TargetFramework=net8.0", false)]
+        [InlineData("f", $"{ToolsetInfo.CurrentTargetFramework}")]
+        [InlineData($"-p:TargetFramework={ToolsetInfo.CurrentTargetFramework}")]
         [Theory]
-        public void ItUsesReleaseWithATargetFrameworkOptionNet8ForNet6AndNet7MultitargetingProjectWithPReleaseUndefined(string releaseProperty, string args, bool passDashF)
+        public void ItUsesReleaseWithATargetFrameworkOptionNet8ForNet6AndNet7MultitargetingProjectWithPReleaseUndefined(params string[] args)
         {
             var secondProjectTfm = ToolsetInfo.CurrentTargetFramework; // Net8 here is a 'net 8+' project
             var expectedConfiguration = Release;
             var expectedTfm = "net8.0";
 
-            var solutionAndProjects = Setup(Log, new List<string> { "net6.0", "net7.0", "net8.0" }, new List<string> { secondProjectTfm }, releaseProperty, "", "");
+            var solutionAndProjects = Setup(Log, new List<string> { "net6.0", "net7.0", "net8.0" }, new List<string> { secondProjectTfm }, PublishRelease, "", "");
             var sln = solutionAndProjects.Item1;
 
-            var dotnetCommand = new DotnetCommand(Log, releaseProperty == PublishRelease ? publish : pack);
+            var dotnetCommand = new DotnetCommand(Log, publish);
             dotnetCommand
-                .Execute(passDashF ? "-f" : "", args, sln.SolutionPath)
+                .Execute(args.Append(sln.SolutionPath))
                 .Should()
                 .Pass();
 
@@ -216,7 +216,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("false", PublishRelease)]
         [InlineData("", PublishRelease)]
         [InlineData("true", PackRelease)]
-        // [InlineData("false", PackRelease)] This case we would expect to fail as PackRelease is enabled regardless of TFM.
+        [InlineData("false", PackRelease)] // This case we would expect to fail as PackRelease is enabled regardless of TFM.
         [InlineData("", PackRelease)]
         [Theory]
         public void ItPassesWithNet8ProjectAndNet7ProjectSolutionWithPublishReleaseOrPackReleaseUndefined(string releasePropertyValue, string property)
@@ -233,19 +233,30 @@ namespace Microsoft.NET.Publish.Tests
             var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, property, "", releasePropertyValue);
             var sln = solutionAndProjects.Item1;
 
-            var dotnetCommand = new DotnetCommand(Log);
-            dotnetCommand
-                .Execute(property == PublishRelease ? "publish" : "pack", sln.SolutionPath)
-                .Should()
-                .Pass();
+            if (releasePropertyValue == "false" && property == PackRelease)
+            {
+                var dotnetCommand = new DotnetCommand(Log);
+                dotnetCommand
+                    .Execute("pack", sln.SolutionPath)
+                    .Should()
+                    .Fail();
+            }
+            else
+            {
+                var dotnetCommand = new DotnetCommand(Log);
+                dotnetCommand
+                    .Execute(property == PublishRelease ? "publish" : "pack", sln.SolutionPath)
+                    .Should()
+                    .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+                var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
                {
                    new Tuple<string, string>(firstProjectTfm, expectedConfiguration),
                    new Tuple<string, string>(secondProjectTfm, expectedConfiguration),
                });
 
-            VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
+                VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
+            }
         }
 
         [InlineData("true")]
@@ -285,7 +296,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(String.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease, ""));;
+                .HaveStdErrContaining(String.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease, "")); ;
         }
 
         [Fact]
@@ -342,6 +353,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_doesnt_error_if_environment_variable_opt_out_enabled_but_PublishRelease_conflicts()
         {
+            var expectedConfiguration = Debug;
             var tfm = ToolsetInfo.CurrentTargetFramework;
             var solutionAndProjects = Setup(Log, new List<string> { tfm }, new List<string> { tfm }, PublishRelease, "true", "false");
             var sln = solutionAndProjects.Item1;
@@ -351,6 +363,15 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(sln.SolutionPath) // This property won't be set in VS, make sure the error doesn't occur because of this by mimicking behavior.
                 .Should()
                 .Pass();
+
+            var finalPropertyResults = sln.ProjectProperties(new List<Tuple<string, string>>()
+               {
+                   new Tuple<string, string>(tfm, expectedConfiguration),
+                   new Tuple<string, string>(tfm, expectedConfiguration),
+               });
+
+            VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
+
         }
 
         [Fact]
@@ -378,18 +399,18 @@ namespace Microsoft.NET.Publish.Tests
 
         private void VerifyCorrectConfiguration(List<Dictionary<string, string>> finalProperties, string expectedConfiguration)
         {
-            string expectedBooleanValue = "true";
-            if(expectedConfiguration != "Release")
+            string expectedOptimizeValue = "true";
+            if (expectedConfiguration != "Release")
             {
-                expectedBooleanValue = "false";
+                expectedOptimizeValue = "false";
             }
 
 
-            Assert.Equal(expectedBooleanValue, finalProperties.First()[Optimize]);
-            Assert.Equal(expectedConfiguration, finalProperties.First()[Configuration]);
+            Assert.Equal(expectedOptimizeValue, finalProperties[0][Optimize]);
+            Assert.Equal(expectedConfiguration, finalProperties[0][Configuration]);
 
-            Assert.Equal(expectedBooleanValue, finalProperties.ElementAt(1)[Optimize]);
-            Assert.Equal(expectedConfiguration, finalProperties.ElementAt(1)[Configuration]);
+            Assert.Equal(expectedOptimizeValue, finalProperties[1][Optimize]);
+            Assert.Equal(expectedConfiguration, finalProperties[1][Configuration]);
         }
     }
 }
