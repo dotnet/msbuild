@@ -38,7 +38,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public string ProjectSdk { get; set; }
 
         //  Applies to SDK Projects
-        public string TargetFrameworks { get; set; }
+        public string TargetFrameworks { get; set; } = ToolsetInfo.CurrentTargetFramework;
 
         public string RuntimeFrameworkVersion { get; set; }
 

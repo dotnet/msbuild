@@ -33,12 +33,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UseStandardOutputPaths>true</UseStandardOutputPaths>
   </PropertyGroup>
 
+  <!-- Handle RootOutputPath and if it wasn't set in Sdk.props -->
+  <PropertyGroup Condition="'$(RootOutputPath)' != ''">
+    <UseStandardOutputPaths Condition="'$(UseStandardOutputPaths)' == ''">true</UseStandardOutputPaths>
+    <BaseStandardOutputPath Condition="'$(BaseStandardOutputPath)' == ''">$(RootOutputPath)</BaseStandardOutputPath>
+  </PropertyGroup>
+
   <!-- Set BaseOutputPath for standard output format if it wasn't set in Sdk.props -->
-  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true'">
+  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true' And '$(BaseOutputPath)' == ''">
     <BaseStandardOutputPath Condition="'$(BaseStandardOutputPath)' == ''">bin\</BaseStandardOutputPath>
     <BaseStandardOutputPath>$([MSBuild]::EnsureTrailingSlash($(BaseStandardOutputPath)))</BaseStandardOutputPath>
 
-    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseStandardOutputPath)build\</BaseOutputPath>
+    <BaseOutputPath>$(BaseStandardOutputPath)build\</BaseOutputPath>
+
+    <!-- If RootOutputPath is set, then projects share the BaseStandardOutputPath, and the project name should be appended to the output path -->
+    <BaseOutputPath Condition="'$(RootOutputPath)' != ''">$(BaseOutputPath)$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseStandardOutputPaths)' != 'true'">
@@ -115,7 +124,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Publish path -->
     <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
-    <PublishDir Condition="'$(PublishDir)' == ''">$(BaseStandardOutputPath)$(PublishDirName)\$(_ArtifactPivots)\</PublishDir>
+    
+    <PublishDir Condition="'$(PublishDir)' == '' And '$(RootOutputPath)' == ''">$(BaseStandardOutputPath)$(PublishDirName)\$(_ArtifactPivots)\</PublishDir>
+    <PublishDir Condition="'$(PublishDir)' == '' And '$(RootOutputPath)' != ''">$(BaseStandardOutputPath)$(PublishDirName)\$(MSBuildProjectName)\$(_ArtifactPivots)\</PublishDir>
     
   </PropertyGroup>
 

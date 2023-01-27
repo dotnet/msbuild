@@ -57,6 +57,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
   </PropertyGroup>
 
+  <!-- Setting RootOutputPath automatically opts in to standard output paths -->
+  <PropertyGroup Condition="'$(RootOutputPath)' != ''">
+    <UseStandardOutputPaths Condition="'$(UseStandardOutputPaths)' == ''">true</UseStandardOutputPaths>
+    <BaseStandardOutputPath>$(RootOutputPath)</BaseStandardOutputPath>
+  </PropertyGroup>
+
   <!-- Set up base standard output folders if UseStandardOutputPaths is set -->
   <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true'">
     <UseStandardIntermediateOutput Condition="'$(UseStandardIntermediateOutput)' == ''">true</UseStandardIntermediateOutput>
@@ -66,6 +72,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseStandardOutputPath)build\</BaseOutputPath>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(BaseStandardOutputPath)obj\</BaseIntermediateOutputPath>
+
+    <!-- If RootOutputPath is set, then projects share the BaseStandardOutputPath, and the project name should be appended to the output and
+         intermediate output paths -->
+    <BaseOutputPath Condition="'$(RootOutputPath)' != ''">$(BaseOutputPath)$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(RootOutputPath)' != ''">$(BaseIntermediateOutputPath)$(MSBuildProjectName)\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectFullPath)' == '$(ProjectToOverrideProjectExtensionsPath)'">
