@@ -65,15 +65,11 @@ namespace Microsoft.DotNet.PackageValidation
 
                 if (package.AssemblyReferences != null && !package.AssemblyReferences.TryGetValue(targetFramework, out assemblyReferences))
                 {
-                    log.LogWarning(
-                        new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm)
-                        {
-                            Target = displayString
-                        },
+                    log.LogWarning(new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm) { Target = displayString },
                         DiagnosticIds.SearchDirectoriesNotFoundForTfm,
-                        Resources.MissingSearchDirectory,
-                        targetFramework,
-                        displayString);
+                        string.Format(Resources.MissingSearchDirectory,
+                            targetFramework,
+                            displayString));
                 }
             }
 

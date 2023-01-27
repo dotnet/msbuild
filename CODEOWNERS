@@ -56,13 +56,13 @@
 
 # ILLink and ReadyToRun targets and tasks owned by runtime team
 # Area-ILLink Area-ReadyToRun
-/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ILLink.targets clrappmodel@microsoft.com
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ILLink.targets clrappmodel@microsoft.com @dotnet/illink-contrib
 /src/Tasks/Microsoft.NET.Build.Tasks/PrepareForReadyToRunCompilation.cs @AntonLapounov
 /src/Tasks/Microsoft.NET.Build.Tasks/RunReadyToRunCompiler.cs @AntonLapounov
-/src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToRunILLink.cs clrappmodel@microsoft.com
+/src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToRunILLink.cs clrappmodel@microsoft.com @dotnet/illink-contrib
 /src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToPublishReadyToRun.cs @AntonLapounov
 # Publish.targets related to ILLink and ReadyToRun is own by both runtime and SDK team
-/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Publish.targets clrappmodel@microsoft.com @AntonLapounov @dotnet/dotnet-cli
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Publish.targets clrappmodel@microsoft.com @dotnet/illink-contrib @AntonLapounov @dotnet/dotnet-cli
 /src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ClickOnce.targets @sujitnayak
 
 # Area-Watch

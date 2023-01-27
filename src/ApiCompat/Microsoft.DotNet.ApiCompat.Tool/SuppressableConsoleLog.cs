@@ -11,30 +11,41 @@ namespace Microsoft.DotNet.ApiCompat.Tool
     /// <summary>
     /// Class that can log Suppressions to the Console, by implementing ConsoleLog and ISuppressableLog.
     /// </summary>
-    internal class SuppressableConsoleLog : ConsoleLog, ISuppressableLog
+    internal sealed class SuppressableConsoleLog : ConsoleLog, ISuppressableLog
     {
         private readonly ISuppressionEngine _suppressionEngine;
-        public bool SuppressionWasLogged { get; private set; }
 
-        public SuppressableConsoleLog(ISuppressionEngine suppressionEngine, MessageImportance messageImportance) : base(messageImportance)
+        /// <inheritdoc />
+        public bool HasLoggedSuppressions { get; private set; }
+
+        public SuppressableConsoleLog(ISuppressionEngine suppressionEngine,
+            MessageImportance messageImportance)
+            : base(messageImportance)
         {
             _suppressionEngine = suppressionEngine;
         }
 
         /// <inheritdoc />
-        public bool LogError(Suppression suppression, string code, string format, params string[] args) => LogSuppressableMessage(Console.Error, suppression, code, format, args);
-
-        /// <inheritdoc />
-        public bool LogWarning(Suppression suppression, string code, string format, params string[] args) => LogSuppressableMessage(Console.Out, suppression, code, format, args);
-
-        private bool LogSuppressableMessage(TextWriter textWriter, Suppression suppression, string code, string format, params string[] args)
+        public bool LogError(Suppression suppression, string code, string message)
         {
             if (_suppressionEngine.IsErrorSuppressed(suppression))
-            {
                 return false;
-            }
-            SuppressionWasLogged = true;
-            textWriter.WriteLine($"{code}: {string.Format(format, args)}");
+            
+            HasLoggedSuppressions = true;
+            base.LogError(code, message);
+            
+            return true;
+        }
+
+        /// <inheritdoc />
+        public bool LogWarning(Suppression suppression, string code, string message)
+        {
+            if (_suppressionEngine.IsErrorSuppressed(suppression))
+                return false;
+            
+            HasLoggedSuppressions = true;
+            base.LogWarning(code, message);
+            
             return true;
         }
     }

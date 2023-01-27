@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.NET.Build.Tasks;
@@ -8,22 +8,41 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Logging
     /// <summary>
     /// Class to define common logging abstraction for MSBuild tasks across the APICompat and GenAPI codebases.
     /// </summary>
-    public class MSBuildLog : ILog
+    internal class MSBuildLog : ILog
     {
         internal readonly Logger _log;
 
-        internal MSBuildLog(Logger log)
-        {
+        /// <inheritdoc />
+        public bool HasLoggedErrors => _log.HasLoggedErrors;
+
+        public MSBuildLog(Logger log) =>
             _log = log;
-        }
 
         /// <inheritdoc />
-        public void LogError(string code, string format, params string[] args) => _log.Log(new Message((NET.Build.Tasks.MessageLevel)MessageLevel.Error, string.Format(format, args), code));
+        public virtual void LogError(string message) =>
+            LogCore(MessageLevel.Error, null, message);
 
         /// <inheritdoc />
-        public void LogWarning(string code, string format, params string[] args) => _log.Log(new Message((NET.Build.Tasks.MessageLevel)MessageLevel.Warning, string.Format(format, args), code));
+        public virtual void LogError(string code, string message) =>
+            LogCore(MessageLevel.Error, code, message);
 
         /// <inheritdoc />
-        public void LogMessage(MessageImportance importance, string format, params string[] args) => _log.LogMessage((Build.Framework.MessageImportance)importance, format, args);
+        public virtual void LogWarning(string message) =>
+            LogCore(MessageLevel.Warning, null, message);
+
+        /// <inheritdoc />
+        public virtual void LogWarning(string code, string message) =>
+            LogCore(MessageLevel.Warning, code, message);
+
+        /// <inheritdoc />
+        public virtual void LogMessage(string message) =>
+            LogCore(MessageLevel.NormalImportance, null, message);
+
+        /// <inheritdoc />
+        public virtual void LogMessage(MessageImportance importance, string message) =>
+            LogCore((MessageLevel)importance, null, message);
+
+        private void LogCore(MessageLevel level, string? code, string message) =>
+            _log.Log(new Message(level, message, code));
     }
 }

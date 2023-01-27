@@ -49,11 +49,10 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                     IReadOnlyList<ContentItem>? latestCompileAssets = options.Package.FindBestCompileAssetForFramework(baselineTargetFramework);
                     if (latestCompileAssets == null)
                     {
-                        _log.LogError(
-                            new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
+                        _log.LogError(new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
                             DiagnosticIds.TargetFrameworkDropped,
-                            Resources.MissingTargetFramework,
-                            baselineTargetFramework.ToString());
+                            string.Format(Resources.MissingTargetFramework,
+                                baselineTargetFramework));
                     }
                     else if (options.EnqueueApiCompatWorkItems)
                     {
@@ -74,11 +73,10 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                     IReadOnlyList<ContentItem>? latestRuntimeAssets = options.Package.FindBestRuntimeAssetForFramework(baselineTargetFramework);
                     if (latestRuntimeAssets == null)
                     {
-                        _log.LogError(
-                            new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
+                        _log.LogError(new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
                             DiagnosticIds.TargetFrameworkDropped,
-                            Resources.MissingTargetFramework,
-                            baselineTargetFramework.ToString());
+                            string.Format(Resources.MissingTargetFramework,
+                                baselineTargetFramework));
                     }
                     else if (options.EnqueueApiCompatWorkItems)
                     {
@@ -104,12 +102,11 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                         IReadOnlyList<ContentItem>? latestRuntimeSpecificAssets = options.Package.FindBestRuntimeAssetForFrameworkAndRuntime(baselineTargetFramework, baselineRuntimeSpecificAssetsRidGroup.Key);
                         if (latestRuntimeSpecificAssets == null)
                         {
-                            _log.LogError(
-                                new Suppression(DiagnosticIds.TargetFrameworkAndRidPairDropped) { Target = baselineTargetFramework.ToString() + "-" + baselineRuntimeSpecificAssetsRidGroup.Key },
+                            _log.LogError(new Suppression(DiagnosticIds.TargetFrameworkAndRidPairDropped) { Target = baselineTargetFramework.ToString() + "-" + baselineRuntimeSpecificAssetsRidGroup.Key },
                                 DiagnosticIds.TargetFrameworkAndRidPairDropped,
-                                Resources.MissingTargetFrameworkAndRid,
-                                baselineTargetFramework.ToString(),
-                                baselineRuntimeSpecificAssetsRidGroup.Key);
+                                string.Format(Resources.MissingTargetFrameworkAndRid,
+                                    baselineTargetFramework,
+                                    baselineRuntimeSpecificAssetsRidGroup.Key));
                         }
                         else if (options.EnqueueApiCompatWorkItems)
                         {

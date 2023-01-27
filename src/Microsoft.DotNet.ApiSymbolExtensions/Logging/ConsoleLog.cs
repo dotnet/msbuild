@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -12,25 +12,45 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Logging
     {
         private readonly MessageImportance _messageImportance;
 
-        public ConsoleLog(MessageImportance messageImportance)
-        {
+        /// <inheritdoc />
+        public bool HasLoggedErrors { get; private set; }
+
+        public ConsoleLog(MessageImportance messageImportance) =>
             _messageImportance = messageImportance;
+
+        /// <inheritdoc />
+        public virtual void LogError(string message)
+        {
+            HasLoggedErrors = true;
+            Console.Error.WriteLine(message);
         }
 
         /// <inheritdoc />
-        public void LogError(string code, string format, params string[] args) => Console.Error.WriteLine($"{code}: {string.Format(format, args)}");
+        public virtual void LogError(string code, string message)
+        {
+            HasLoggedErrors = true;
+            Console.Error.WriteLine($"{code}: {message}");
+        }
 
         /// <inheritdoc />
-        public void LogWarning(string code, string format, params string[] args) => Console.WriteLine($"{code}: {string.Format(format, args)}");
+        public virtual void LogWarning(string message) =>
+            Console.WriteLine(message);
 
         /// <inheritdoc />
-        public void LogMessage(MessageImportance importance, string format, params string[] args)
+        public virtual void LogWarning(string code, string message) =>
+            Console.WriteLine($"{code}: {message}");
+
+        /// <inheritdoc />
+        public virtual void LogMessage(string message) =>
+            LogMessage(MessageImportance.Normal, message);
+
+        /// <inheritdoc />
+        public virtual void LogMessage(MessageImportance importance, string message)
         {
             if (importance > _messageImportance)
-            {
                 return;
-            }
-            Console.WriteLine(format, args);
+
+            Console.WriteLine(message);
         }
     }
 }
