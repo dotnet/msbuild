@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     public class GivenDotnetPublishPublishesProjects : SdkTest
     {
 
-        private static string _defaultConfiguration = "Debug";
+        private static string _defaultConfiguration = "Release";
 
         public GivenDotnetPublishPublishesProjects(ITestOutputHelper log) : base(log)
         {
@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Pass();
 
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: targetFramework);
 
             if (resultShouldBeSelfContained)
             {
@@ -368,9 +368,10 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var rid = selfContained ? EnvironmentInfo.GetCompatibleRid() : "";
             var ridArgs = selfContained ? $"-r {rid}".Split() : Array.Empty<string>();
+            var ridAndConfigurationArgs = ridArgs.ToList().Concat(new List<string> { "-c", "Release" });
 
             new DotnetBuildCommand(Log, rootPath)
-                .Execute(ridArgs)
+                .Execute(ridAndConfigurationArgs)
                 .Should()
                 .Pass();
 
@@ -453,23 +454,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                .CopyTestAsset("HelloWorld", "PublishPropertiesHelloWorld")
                .WithSource();
 
-            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
-
-            new BuildCommand(helloWorldAsset)
-               .Execute()
-               .Should()
-               .Pass();
+            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
             // Another command, which should not be affected by PublishRelease
-            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
-
-            packCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
-            Assert.False(File.Exists(expectedAssetPath));
+            new BuildCommand(helloWorldAsset)
+               .Execute();
+            
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release");
+            Assert.False(Directory.Exists(expectedAssetPath));
         }
     }
 }

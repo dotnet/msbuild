@@ -523,10 +523,6 @@
   <data name="ToolSettingsUnsupportedRunner" xml:space="preserve">
     <value>Command '{0}' uses unsupported runner '{1}'."</value>
   </data>
-  <data name="SolutionExecutableConfigurationMismatchError" xml:space="preserve">
-    <value>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
-{1}.</value>
-  </data>
   <data name="ShellShimConflict" xml:space="preserve">
     <value>Command '{0}' conflicts with an existing command from another tool.</value>
   </data>
@@ -708,9 +704,6 @@ The default is 'true' if a runtime identifier is specified.</value>
   </data>
   <data name="ResponseFileNotFound" xml:space="preserve">
     <value>Response file '{0}' does not exist.</value>
-  </data>
-  <data name="CustomConfigurationDisablesPublishAndPackReleaseProperties" xml:space="preserve">
-    <value>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</value>
   </data>
   <data name="CorruptSolutionProjectFolderStructure" xml:space="preserve">
     <value>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</value>

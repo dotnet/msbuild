@@ -141,7 +141,7 @@ namespace Microsoft.NET.TestFramework
                 var ns = p.Root.Name.Namespace;
                 var propertyGroup = p.Root.Elements(ns + "PropertyGroup").First();
                 propertyGroup.Elements(ns + "TargetFramework").SingleOrDefault()?.Remove();
-                propertyGroup.Add(new XElement(ns + "TargetFramework", targetFrameworks));
+                propertyGroup.Add(new XElement(ns + "TargetFrameworks", targetFrameworks));
             },
             targetFrameworks,
             projectName);

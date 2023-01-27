@@ -665,11 +665,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1162: PDB 產生: 找不到 R2R 可執行檔 '{0}'。</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
-      <trans-unit id="PReleaseRequiresEnvVarOnSln">
-        <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
-        <target state="translated">NETSDK1190: 若要在解決方案專案中使用 '{0}'，您必須將環境變數 '{1}' 設為 true。這會增加完成作業的時間。</target>
-        <note>{StrBegin="NETSDK1190: "}</note>
-      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: 封裝為工具不支援包含本身。</target>
@@ -819,6 +814,13 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: 已為 GenerateRuntimeConfigurationFiles 指定了 'AdditionalProbingPaths'，但因為 'RuntimeConfigDevPath' 是空的，所以已跳過它。</target>
         <note>{StrBegin="NETSDK1048: "}</note>
+      </trans-unit>
+      <trans-unit id="SolutionProjectConfigurationsConflict">
+        <source>NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set the property for all projects. Conflicting projects:
+{1}</source>
+        <target state="new">NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set the property for all projects. Conflicting projects:
+{1}</target>
+        <note>{StrBegin="NETSDK1197: "}</note>
       </trans-unit>
       <trans-unit id="TargetFrameworkIsEol">
         <source>NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>

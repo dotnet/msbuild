@@ -117,12 +117,16 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
-    <!-- Enable warning for trying to use PublishRelease or PackRelease with a solution if env-var is not set.-->
-    <NETSdkWarning Condition="'$(PublishRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS)' == ''"
-                   ResourceName="PReleaseRequiresEnvVarOnSln" 
-                   FormatArguments="PublishRelease;DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS"
-    />
-
+    <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations.
+    SolutionExt is used to check if we are publishing a solution. Will be undefined if not.-->
+    <NETSdkError Condition="'$(_IsPublishing)' == 'true' and
+                            '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE)' != 'true' and
+                            '$(DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS)' == 'true' and
+                            '$(SolutionExt)' == '.sln' and
+                            '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
+                 ResourceName="SolutionProjectConfigurationsConflict"
+                 FormatArguments="PublishRelease;$(ProjectName)"/>
+    
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
