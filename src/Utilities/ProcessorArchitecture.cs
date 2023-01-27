@@ -56,7 +56,7 @@ namespace Microsoft.Build.Utilities
         public const string S390X = nameof(S390X);
 
         /// <summary>
-        /// Represents the LongAarch64 processor architecture.
+        /// Represents the LoongAarch64 processor architecture.
         /// </summary>
         public const string LOONGARCH64 = nameof(LOONGARCH64);
 
