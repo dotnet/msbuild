@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -104,15 +104,13 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
             Assert.Equal(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
 
-            ExecuteTaskAndVerifyLogContainsErrorFromResource
-                (
+            ExecuteTaskAndVerifyLogContainsErrorFromResource(
                 t,
                 "General.TwoVectorsMustHaveSameLength",
                 differentLengthInput.Length,
                 differentLengthOutput.Length,
                 "InputFiles",
-                "OutputFiles"
-                );
+                "OutputFiles");
 
             // If only OutputFiles is set, then the task should return -- as far as
             // it's concerned, no work needs to be done.
@@ -292,13 +290,11 @@ namespace Microsoft.Build.UnitTests
             int commandLineLength = CommandLine.GetCommandLine(t, false).Length;
             Assert.Equal(commandLineLength, maxCommandLineLength);
 
-            ExecuteTaskAndVerifyLogDoesNotContainResource
-            (
+            ExecuteTaskAndVerifyLogDoesNotContainResource(
                 t,
                 false,
                 "ResGen.CommandTooLong",
-                CommandLine.GetCommandLine(t, false).Length
-            );
+                CommandLine.GetCommandLine(t, false).Length);
 
             VerifyLogDoesNotContainResource((MockEngine)t.BuildEngine, GetPrivateLog(t), "ToolTask.CommandTooLong", typeof(ResGen).Name);
 
@@ -318,12 +314,10 @@ namespace Microsoft.Build.UnitTests
             commandLineLength = CommandLine.GetCommandLine(t, false).Length;
             Assert.Equal(commandLineLength, maxCommandLineLength + 1);
 
-            ExecuteTaskAndVerifyLogContainsErrorFromResource
-            (
+            ExecuteTaskAndVerifyLogContainsErrorFromResource(
                 t,
                 "ResGen.CommandTooLong",
-                CommandLine.GetCommandLine(t, false).Length
-            );
+                CommandLine.GetCommandLine(t, false).Length);
 
             VerifyLogDoesNotContainResource((MockEngine)t.BuildEngine, GetPrivateLog(t), "ToolTask.CommandTooLong", typeof(ResGen).Name);
         }
@@ -580,7 +574,7 @@ namespace Microsoft.Build.UnitTests
         /// LogPrivate is a private property.
         /// </summary>
         /// <returns></returns>
-        static private TaskLoggingHelper GetPrivateLog(ToolTask task)
+        private static TaskLoggingHelper GetPrivateLog(ToolTask task)
         {
             PropertyInfo logPrivateProperty = typeof(ToolTask).GetProperty("LogPrivate", BindingFlags.Instance | BindingFlags.NonPublic);
             return (TaskLoggingHelper)logPrivateProperty.GetValue(task, null);

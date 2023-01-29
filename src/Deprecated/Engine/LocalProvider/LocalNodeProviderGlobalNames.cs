@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Reflection;
 
@@ -8,7 +8,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// This class is shared between LocalNode and LocalNodeProvider and contains all the global name generation logic
     /// </summary>
-    static class LocalNodeProviderGlobalNames
+    internal static class LocalNodeProviderGlobalNames
     {
         #region Methods
 
@@ -18,7 +18,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeActiveEventName(int nodeNumber)
+        internal static string NodeActiveEventName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -32,7 +32,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeInUseEventName(int nodeNumber)
+        internal static string NodeInUseEventName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeErrorShutdownEventName(int nodeNumber)
+        internal static string NodeErrorShutdownEventName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -63,7 +63,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeReserveEventName(int nodeNumber)
+        internal static string NodeReserveEventName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -110,7 +110,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeInputMemoryName(int nodeNumber)
+        internal static string NodeInputMemoryName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -124,7 +124,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>
-        static internal string NodeOutputMemoryName(int nodeNumber)
+        internal static string NodeOutputMemoryName(int nodeNumber)
         {
             if (nodePostfix == null)
             {
@@ -138,7 +138,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Use reflection to figure out the version of Microsoft.Build.Engine.dll
         /// </summary>
-        static private void InitializeGlobalNamePostFixValues()
+        private static void InitializeGlobalNamePostFixValues()
         {
             AssemblyName name = new AssemblyName(Assembly.GetExecutingAssembly().FullName);
             string engineVersion = name.Version.ToString();
@@ -160,7 +160,7 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Data
-        static string nodePostfix = null;
+        private static string nodePostfix = null;
         #endregion
     }
 }

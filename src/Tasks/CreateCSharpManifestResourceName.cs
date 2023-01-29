@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -30,14 +30,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .cs file). May be null</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <returns>Returns the manifest name</returns>
-        protected override string CreateManifestName
-        (
+        protected override string CreateManifestName(
             string fileName,
             string linkFileName,
             string rootNamespace,
             string dependentUponFileName,
-            Stream binaryStream
-        )
+            Stream binaryStream)
         {
             string culture = null;
             bool treatAsCultureNeutral = false;
@@ -55,8 +53,7 @@ namespace Microsoft.Build.Tasks
                 override of a method declared in the base class, but its convenient 
                 to expose a static version anyway for unittesting purposes.
             */
-            return CreateManifestNameImpl
-            (
+            return CreateManifestNameImpl(
                 fileName,
                 linkFileName,
                 PrependCultureAsDirectory,
@@ -65,8 +62,7 @@ namespace Microsoft.Build.Tasks
                 culture,
                 binaryStream,
                 Log,
-                treatAsCultureNeutral
-            );
+                treatAsCultureNeutral);
         }
 
         /// <summary>
@@ -86,8 +82,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
         /// <param name="treatAsCultureNeutral">Whether to treat the current file as 'culture-neutral' and retain the culture in the name.</param>
         /// <returns>Returns the manifest name</returns>
-        internal static string CreateManifestNameImpl
-        (
+        internal static string CreateManifestNameImpl(
             string fileName,
             string linkFileName,
             bool prependCultureAsDirectory, // true by default
@@ -96,8 +91,7 @@ namespace Microsoft.Build.Tasks
             string culture, // may be null 
             Stream binaryStream, // File contents binary stream, may be null
             TaskLoggingHelper log,
-            bool treatAsCultureNeutral = false
-        )
+            bool treatAsCultureNeutral = false)
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
             string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
@@ -161,8 +155,7 @@ namespace Microsoft.Build.Tasks
                         ||
                         string.Equals(sourceExtension, restextFileExtension, StringComparison.OrdinalIgnoreCase)
                         ||
-                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase)
-                    )
+                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase))
                 {
                     if (!string.IsNullOrEmpty(directoryName))
                     {

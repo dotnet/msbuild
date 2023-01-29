@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Graph
     internal class GraphBuilder
     {
         internal const string SolutionItemReference = "_SolutionReference";
-        
+
         /// <summary>
         /// The thread calling BuildGraph() will act as an implicit worker
         /// </summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Graph
             _solutionDependencies = solutionDependencies;
 
             _entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(actualEntryPoints);
-            
+
             IEqualityComparer<ConfigurationMetadata> configComparer = EqualityComparer<ConfigurationMetadata>.Default;
 
             _graphWorkSet = new ParallelWorkSet<ConfigurationMetadata, ParsedProject>(
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Graph
             }
 
             var allParsedProjects = FindGraphNodes();
-            
+
             AddEdges(allParsedProjects);
 
             EntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
@@ -154,8 +154,7 @@ namespace Microsoft.Build.Graph
                                     itemType: ProjectInterpretation.TransitiveReferenceItemName,
                                     includeEscaped: referenceInfo.ReferenceConfiguration.ProjectFullPath,
                                     directMetadata: null,
-                                    definingFileEscaped: currentNode.ProjectInstance.FullPath
-                                ),
+                                    definingFileEscaped: currentNode.ProjectInstance.FullPath),
                                 edges);
                         }
                     }
@@ -205,7 +204,7 @@ namespace Microsoft.Build.Graph
                 }
                 else
                 {
-                    projectsByPath[projectPath] = new List<ProjectGraphNode> {project.Value.GraphNode};
+                    projectsByPath[projectPath] = new List<ProjectGraphNode> { project.Value.GraphNode };
                 }
             }
 
@@ -295,8 +294,7 @@ namespace Microsoft.Build.Graph
                             project.AbsolutePath,
                             solutionGlobalProperties
                                 .SetItem("Configuration", projectConfiguration.ConfigurationName)
-                                .SetItem("Platform", projectConfiguration.PlatformName)
-                            ));
+                                .SetItem("Platform", projectConfiguration.PlatformName)));
                 }
             }
 
@@ -450,7 +448,7 @@ namespace Microsoft.Build.Graph
                             {
                                 // the project being evaluated has a reference to itself
                                 var selfReferencingProjectString =
-                                    FormatCircularDependencyError(new List<string> {node.ProjectInstance.FullPath, node.ProjectInstance.FullPath});
+                                    FormatCircularDependencyError(new List<string> { node.ProjectInstance.FullPath, node.ProjectInstance.FullPath });
                                 throw new CircularDependencyException(
                                     string.Format(
                                         ResourceUtilities.GetResourceString("CircularDependencyInProjectGraph"),
@@ -459,7 +457,7 @@ namespace Microsoft.Build.Graph
 
                             // the project being evaluated has a circular dependency involving multiple projects
                             // add this project to the list of projects involved in cycle 
-                            var projectsInCycle = new List<string> {referenceNode.ProjectInstance.FullPath};
+                            var projectsInCycle = new List<string> { referenceNode.ProjectInstance.FullPath };
                             return (false, projectsInCycle);
                         }
                     }
@@ -527,10 +525,10 @@ namespace Microsoft.Build.Graph
             foreach (ConfigurationMetadata projectToEvaluate in _entryPointConfigurationMetadata)
             {
                 SubmitProjectForParsing(projectToEvaluate);
-                                /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
-                             meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
-                             and duplicates the information, leading to wasted work
-                             */
+                /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
+             meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
+             and duplicates the information, leading to wasted work
+             */
             }
 
             _graphWorkSet.WaitForAllWorkAndComplete();
@@ -546,7 +544,7 @@ namespace Microsoft.Build.Graph
         private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject)
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
-            
+
 
             foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, _projectInstanceFactory))
             {
@@ -555,10 +553,9 @@ namespace Microsoft.Build.Graph
                     throw new InvalidOperationException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "StaticGraphDoesNotSupportSlnReferences",
                         referenceInfo.ReferenceConfiguration.ProjectFullPath,
-                        referenceInfo.ReferenceConfiguration.ProjectFullPath
-                        ));
+                        referenceInfo.ReferenceConfiguration.ProjectFullPath));
                 }
-                
+
                 SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
 
                 referenceInfos.Add(referenceInfo);
@@ -670,8 +667,7 @@ namespace Microsoft.Build.Graph
             {
                 return ReferenceItems.ToImmutableDictionary(
                     kvp => (kvp.Key.Item1.ToConfigurationMetadata(), kvp.Key.Item2.ToConfigurationMetadata()),
-                    kvp => kvp.Value
-                    );
+                    kvp => kvp.Value);
             }
         }
 

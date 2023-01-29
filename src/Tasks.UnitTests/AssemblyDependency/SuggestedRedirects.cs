@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -107,20 +110,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")); // "Expected to find suggested redirect, but didn't"
             Assert.Equal(1, engine.Warnings); // "Should only be one warning for suggested redirects."
             Assert.Contains(
-                String.Format
-                    (
-                        AssemblyResources.GetString
-                        (
-                            "ResolveAssemblyReference.ConflictRedirectSuggestion"
-                        ),
+                String.Format(
+                        AssemblyResources.GetString(
+                            "ResolveAssemblyReference.ConflictRedirectSuggestion"),
                         "D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa",
                         "1.0.0.0",
                         s_myLibraries_V1_DDllPath,
                         "2.0.0.0",
-                        s_myLibraries_V2_DDllPath
-                    ),
-                engine.Log
-            );
+                        s_myLibraries_V2_DDllPath),
+                engine.Log);
         }
 
 
@@ -361,8 +359,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies = new ITaskItem[]
             {
-                new TaskItem("A", new Dictionary<string, string> { ["ExternallyResolved"] = "true" } ),
-                new TaskItem("B", new Dictionary<string, string> { ["ExternallyResolved"] = "true" } ),
+                new TaskItem("A", new Dictionary<string, string> { ["ExternallyResolved"] = "true" }),
+                new TaskItem("B", new Dictionary<string, string> { ["ExternallyResolved"] = "true" }),
             };
 
             t.SearchPaths = new string[]

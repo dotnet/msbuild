@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -42,8 +42,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructorNullProps()
@@ -51,8 +50,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", Array.Empty<string>(), null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructor1()
@@ -68,8 +66,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
                 BuildRequestConfiguration config1 = new BuildRequestConfiguration(1, data, "2.0");
                 config1.ShallowCloneWithNewId(0);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructor2PositiveConfigId()
@@ -91,8 +88,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -101,8 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", Array.Empty<string>(), null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestWasGeneratedByNode()
@@ -144,8 +139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
                 BuildRequestConfiguration config1 = new BuildRequestConfiguration(-1, data, "2.0");
                 config1.ConfigurationId = -2;
-            }
-           );
+            });
         }
         [Fact]
         public void TestSetConfigurationIdGood()
@@ -277,7 +271,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Dictionary<string, string> globalProperties = new (StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> globalProperties = new(StringComparer.OrdinalIgnoreCase);
             globalProperties["ThreeIn"] = "3";
 
             Project project = new Project(
@@ -472,7 +466,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 // Check if } do not cause it to crash due to usage of String.Format or such on code path
-                string problematicTmpPath = Path.Combine(originalTmp,  "}", "blabla", "temp");
+                string problematicTmpPath = Path.Combine(originalTmp, "}", "blabla", "temp");
                 Environment.SetEnvironmentVariable("TMP", problematicTmpPath);
                 Environment.SetEnvironmentVariable("TEMP", problematicTmpPath);
 

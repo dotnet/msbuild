@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -675,9 +675,7 @@ namespace Microsoft.Build.Utilities
                         buildEvent.BuildEventContext != null &&
                         (
                          buildEvent.BuildEventContext.SubmissionId != _submissionId && /* The build submission does not match the submissionId for this logger */
-                         buildEvent.BuildEventContext.SubmissionId != BuildEventContext.InvalidSubmissionId /*We do not have a build submissionid this can happen if the error comes from the nodeloggingcontext*/
-                        )
-                       )
+                         buildEvent.BuildEventContext.SubmissionId != BuildEventContext.InvalidSubmissionId))
                     {
                         return;
                     }
@@ -720,9 +718,7 @@ namespace Microsoft.Build.Utilities
                         buildEvent.BuildEventContext != null &&
                         (
                          buildEvent.BuildEventContext.SubmissionId != _submissionId && /* The build submission does not match the submissionId for this logger */
-                         buildEvent.BuildEventContext.SubmissionId != BuildEventContext.InvalidSubmissionId /*We do not have a build submissionid this can happen if the error comes from the nodeloggingcontext*/
-                        )
-                       )
+                         buildEvent.BuildEventContext.SubmissionId != BuildEventContext.InvalidSubmissionId))
                     {
                         return;
                     }
@@ -1217,10 +1213,7 @@ namespace Microsoft.Build.Utilities
                         (
                          buildEvent.BuildEventContext.SubmissionId != _submissionId && /* The build submission does not match the submissionId for this logger */
                          !( /* We do not have a build submissionid this can happen if the event comes from the nodeloggingcontext -- but we only want to raise it if it was an error or warning */
-                           buildEvent.BuildEventContext.SubmissionId == BuildEventContext.InvalidSubmissionId && eventIsErrorOrWarning
-                          )
-                        )
-                       )
+                           buildEvent.BuildEventContext.SubmissionId == BuildEventContext.InvalidSubmissionId && eventIsErrorOrWarning)))
                     {
                         return;
                     }

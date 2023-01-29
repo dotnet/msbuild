@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -106,7 +106,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
         public static Manifest ReadManifest(string path, bool preserveStream)
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
             string manifestType = null;
             if (path.EndsWith(".application", StringComparison.Ordinal))
             {

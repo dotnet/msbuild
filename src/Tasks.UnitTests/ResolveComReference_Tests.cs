@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_APPDOMAIN
 
@@ -22,7 +22,7 @@ using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ResolveComReference_Tests
+    public sealed class ResolveComReference_Tests
     {
         /// <summary>
         /// Creates a valid task item that's modified later
@@ -637,7 +637,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(rcr.CheckForConflictingReferences());
             Assert.Equal(3, rcr.allProjectRefs.Count);
 
-            
+
             // duplicate refs should not be treated as conflicts
             ComReferenceInfo referenceInfo = new ComReferenceInfo(tlbRefInfo);
             rcr.allProjectRefs.Add(referenceInfo);
@@ -807,20 +807,16 @@ namespace Microsoft.Build.UnitTests
             var embedInteropTypes = tlbRefInfo.taskItem.GetMetadata(ItemMetadataNames.embedInteropTypes);
             Assert.Equal("false", embedInteropTypes); // "The tlb wrapper for the activex control should have EmbedInteropTypes=false not " + embedInteropTypes);
             Assert.True(ComReference.AreTypeLibAttrEqual(tlbRefInfo.attr, axRefInfo.attr)); // "reference information should be the same"
-            Assert.Equal(TlbReference.GetWrapperFileName
-                        (
+            Assert.Equal(TlbReference.GetWrapperFileName(
                         axRefInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.tlbReferenceName),
                         includeVersionInInteropName,
                         axRefInfo.attr.wMajorVerNum,
-                        axRefInfo.attr.wMinorVerNum
-                        ),
-                    TlbReference.GetWrapperFileName
-                        (
+                        axRefInfo.attr.wMinorVerNum),
+                    TlbReference.GetWrapperFileName(
                         tlbRefInfo.typeLibName,
                         includeVersionInInteropName,
                         tlbRefInfo.attr.wMajorVerNum,
-                        tlbRefInfo.attr.wMinorVerNum
-                        )); // "Expected Ax reference's RCW name to match the new TLB"
+                        tlbRefInfo.attr.wMinorVerNum)); // "Expected Ax reference's RCW name to match the new TLB"
         }
     }
 }
