@@ -13,6 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
@@ -54,7 +55,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-        protected TestEnvironment _env;
+        protected readonly TestEnvironment _env;
+        private DummyMappedDrive _mappedDrive = null;
 
         public ProjectItem_Tests()
         {
@@ -64,6 +66,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void Dispose()
         {
             _env.Dispose();
+            _mappedDrive?.Dispose();
         }
 
         /// <summary>
@@ -795,7 +798,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [PlatformSpecific(TestPlatforms.Windows)]
         [Theory]
         [InlineData(@"z:\**\*.log")]
@@ -806,6 +808,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"z:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
+            // let's create the mapped drive only once it's needed by any test, then let's reuse;
+            _mappedDrive ??= new DummyMappedDrive();
+            unevaluatedInclude = UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.MappedDriveLetter);
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
@@ -880,7 +885,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project instance created from a file that contains a drive enumerating wildcard results in a logged warning on the Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [PlatformSpecific(TestPlatforms.Windows)]
         [Theory]
         [InlineData(
@@ -901,8 +905,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"z:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
+            // let's create the mapped drive only once it's needed by any test, then let's reuse;
+            _mappedDrive ??= new DummyMappedDrive();
+            placeHolder = UpdatePathToMappedDrive(placeHolder, _mappedDrive.MappedDriveLetter);
+            excludePlaceHolder = UpdatePathToMappedDrive(excludePlaceHolder, _mappedDrive.MappedDriveLetter);
             content = string.Format(content, placeHolder, excludePlaceHolder);
             CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
+        }
+
+        private static string UpdatePathToMappedDrive(string path, char driveLetter)
+        {
+            if (!string.IsNullOrEmpty(path) && path.StartsWith(driveLetter + ":", StringComparison.OrdinalIgnoreCase))
+            {
+                path = driveLetter + path.Substring(1);
+            }
+            return path;
         }
 
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
