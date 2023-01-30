@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -39,14 +39,12 @@ namespace Microsoft.Build.Framework
         /// <param name="targetName">target name</param>
         /// <param name="projectFile">project file</param>
         /// <param name="targetFile">file in which the target is defined</param>
-        public TargetStartedEventArgs
-        (
+        public TargetStartedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
             string projectFile,
-            string targetFile
-        )
+            string targetFile)
             : this(message, helpKeyword, targetName, projectFile, targetFile, String.Empty, TargetBuiltReason.None, DateTime.UtcNow)
         {
         }
@@ -61,16 +59,14 @@ namespace Microsoft.Build.Framework
         /// <param name="targetFile">file in which the target is defined</param>
         /// <param name="parentTarget">The part of the target.</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
-        public TargetStartedEventArgs
-        (
+        public TargetStartedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
             string projectFile,
             string targetFile,
             string parentTarget,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.targetName = targetName;
@@ -90,8 +86,7 @@ namespace Microsoft.Build.Framework
         /// <param name="parentTarget">The part of the target.</param>
         /// <param name="buildReason">The reason the parent built this target.</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
-        public TargetStartedEventArgs
-        (
+        public TargetStartedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
@@ -99,8 +94,7 @@ namespace Microsoft.Build.Framework
             string targetFile,
             string parentTarget,
             TargetBuiltReason buildReason,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.targetName = targetName;
@@ -148,7 +142,7 @@ namespace Microsoft.Build.Framework
             if (version > 20)
             {
                 parentTarget = reader.ReadByte() == 0 ? null : reader.ReadString();
-                buildReason = (TargetBuiltReason) reader.ReadInt32();
+                buildReason = (TargetBuiltReason)reader.ReadInt32();
             }
         }
         #endregion

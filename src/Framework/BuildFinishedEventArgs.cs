@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -39,12 +39,10 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="succeeded">True indicates a successful build</param>
-        public BuildFinishedEventArgs
-        (
+        public BuildFinishedEventArgs(
             string? message,
             string? helpKeyword,
-            bool succeeded
-        )
+            bool succeeded)
             : this(message, helpKeyword, succeeded, DateTime.UtcNow)
         {
         }
@@ -56,13 +54,11 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="succeeded">True indicates a successful build</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
-        public BuildFinishedEventArgs
-        (
+        public BuildFinishedEventArgs(
             string? message,
             string? helpKeyword,
             bool succeeded,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : this(message, helpKeyword, succeeded, eventTimestamp, null)
         {
             // do nothing
@@ -76,14 +72,12 @@ namespace Microsoft.Build.Framework
         /// <param name="succeeded">True indicates a successful build</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         /// <param name="messageArgs">message arguments</param>
-        public BuildFinishedEventArgs
-        (
+        public BuildFinishedEventArgs(
             string? message,
             string? helpKeyword,
             bool succeeded,
             DateTime eventTimestamp,
-            params object[]? messageArgs
-        )
+            params object[]? messageArgs)
             : base(message, helpKeyword, "MSBuild", eventTimestamp, messageArgs)
         {
             this.succeeded = succeeded;

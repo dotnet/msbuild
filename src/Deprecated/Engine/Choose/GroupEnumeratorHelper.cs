@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
 
@@ -74,11 +74,11 @@ namespace Microsoft.Build.BuildEngine
         /// </remarks>
         /// <owner>DavidLe</owner>
         /// <returns>IEnumerator</returns>
-        public IEnumerator GetEnumerator( )
+        public IEnumerator GetEnumerator()
         {
             foreach (IItemPropertyGrouping group in this.groupingCollection)
             {
-                if ((group is BuildItemGroup) && 
+                if ((group is BuildItemGroup) &&
                     ((this.type == ListType.ItemGroupsTopLevel) || (this.type == ListType.ItemGroupsTopLevelAndChoose) || (this.type == ListType.ItemGroupsAll)))
                 {
                     yield return group;

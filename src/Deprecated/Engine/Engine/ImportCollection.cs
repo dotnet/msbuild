@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -112,7 +112,7 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Members
-        
+
         /// <summary>
         /// Read-only accessor for the Project instance that this ImportCollection belongs to.
         /// </summary>
@@ -173,7 +173,7 @@ namespace Microsoft.Build.BuildEngine
 
             XmlElement projectElement = this.parentProject.ProjectElement;
             XmlElement newImportElement = projectElement.OwnerDocument.CreateElement(XMakeElements.import, XMakeAttributes.defaultXmlNamespace);
-            
+
             if (condition != null)
             {
                 newImportElement.SetAttribute(XMakeAttributes.condition, condition);
@@ -211,7 +211,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Remove the import from our hashtable.
             this.imports.Remove(importToRemove.EvaluatedProjectPath);
-            
+
             // Dissociate the import from the parent project.
             importToRemove.ParentProject = null;
 

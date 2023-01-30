@@ -29,11 +29,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="unformattedMessage"></param>
-        internal static void VerifyThrow
-        (
+        internal static void VerifyThrow(
             bool condition,
-            string unformattedMessage
-        )
+            string unformattedMessage)
         {
             if (!condition)
             {

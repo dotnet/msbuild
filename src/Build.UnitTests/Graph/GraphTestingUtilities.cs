@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,7 +17,7 @@ namespace Microsoft.Build.Graph.UnitTests
 {
     internal static class GraphTestingUtilities
     {
-        public static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}}.ToImmutableDictionary();
+        public static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> { { PropertyNames.IsGraphBuild, "true" } }.ToImmutableDictionary();
 
         public const string InnerBuildPropertyName = "InnerBuild";
         public const string InnerBuildPropertiesName = "InnerBuildProperties";
@@ -216,8 +216,7 @@ namespace Microsoft.Build.Graph.UnitTests
             int[] projectReferences = null,
             Dictionary<string, string[]> projectReferenceTargets = null,
             string defaultTargets = null,
-            string extraContent = null
-            )
+            string extraContent = null)
         {
             return Helpers.CreateProjectFile(
                 env,

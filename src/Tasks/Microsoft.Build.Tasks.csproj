@@ -507,6 +507,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveSDKReference.cs" />
+    <Compile Include="RequiresFramework35SP1Assembly.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactory.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
@@ -628,9 +629,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RequiresFramework35SP1Assembly.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="StrongNameException.cs">

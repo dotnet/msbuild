@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -53,8 +53,16 @@ namespace Microsoft.Build.Framework
         /// </returns>
         public bool Equals(SdkReference other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(MinimumVersion, other.MinimumVersion, StringComparison.OrdinalIgnoreCase);
@@ -71,12 +79,22 @@ namespace Microsoft.Build.Framework
         public static bool TryParse(string sdk, out SdkReference sdkReference)
         {
             sdkReference = null;
-            if (string.IsNullOrWhiteSpace(sdk)) return false;
+            if (string.IsNullOrWhiteSpace(sdk))
+            {
+                return false;
+            }
 
             var parts = sdk.Split(MSBuildConstants.ForwardSlash).Select(i => i.Trim()).ToArray();
 
-            if (parts.Length < 1 || parts.Length > 2) return false;
-            if (string.IsNullOrWhiteSpace(parts[0])) return false;
+            if (parts.Length < 1 || parts.Length > 2)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(parts[0]))
+            {
+                return false;
+            }
 
             if (parts.Length == 1 || string.IsNullOrWhiteSpace(parts[1]))
             {
@@ -97,9 +115,17 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return obj is SdkReference && Equals((SdkReference) obj);
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            return obj is SdkReference && Equals((SdkReference)obj);
         }
 
         /// <inheritdoc />

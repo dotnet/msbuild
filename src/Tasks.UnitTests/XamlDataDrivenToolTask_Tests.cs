@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -187,8 +187,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             {
                 object fakeTaskInstance = CreateFakeTask();
                 XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexInteger", 2);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -201,8 +200,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
                 XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexInteger", 256);
                 string expectedResult = "/always /Ci256 /Cr:CT";
                 CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
-            }
-           );
+            });
         }
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -295,7 +293,10 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
                 ObjectModelHelpers.DeleteDirectory(newTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 

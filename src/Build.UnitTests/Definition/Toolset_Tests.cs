@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -25,8 +25,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Toolset t = new Toolset(null, "x", new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -35,8 +34,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Toolset t = new Toolset("x", null, new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -45,8 +43,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentException>(() =>
             {
                 Toolset t = new Toolset(String.Empty, "x", new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -119,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Toolset t = new Toolset("4.0", "c:\\bar", buildProperties, environmentProperties, globalProperties,
                 subToolsets, "c:\\foo", "4.0", new Dictionary<string, ProjectImportPathMatch>
                 {
-                    ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> {@"c:\foo"})
+                    ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> { @"c:\foo" })
                 });
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());

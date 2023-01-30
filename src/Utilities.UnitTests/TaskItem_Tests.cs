@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem to = new TaskItem((ITaskItem)from);
             to.ItemSpec.ShouldBe("Monkey.txt");
             ((string)to).ShouldBe("Monkey.txt");
-            
+
             to.GetMetadata("Dog").ShouldBe("Bingo");
             to.GetMetadata("Cat").ShouldBe("Morris");
 
@@ -79,8 +79,7 @@ namespace Microsoft.Build.UnitTests
                 TaskItem taskItem = new TaskItem(item);
 
                 // no NullReferenceException
-            }
-           );
+            });
         }
 
         [Fact]
@@ -108,8 +107,7 @@ namespace Microsoft.Build.UnitTests
                 string result = (string)item;
 
                 // no NullReferenceException
-            }
-           );
+            });
         }
         [Fact]
         public void ConstructFromDictionary()
@@ -144,8 +142,7 @@ namespace Microsoft.Build.UnitTests
                     Console.WriteLine(e.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
 
         [Fact]
@@ -165,8 +162,7 @@ namespace Microsoft.Build.UnitTests
                     Console.WriteLine(e.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
         [Fact]
         public void CheckMetadataCount()
@@ -186,12 +182,9 @@ namespace Microsoft.Build.UnitTests
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
             from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath).ShouldBe(
-                Path.Combine
-                (
+                Path.Combine(
                     Directory.GetCurrentDirectory(),
-                    "Monkey.txt"
-                )
-            );
+                    "Monkey.txt"));
         }
 
         [Fact]
@@ -295,8 +288,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TaskItem item = new TaskItem("foo");
                 item.SetMetadata(null, "x");
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify metadata cannot be created with empty name
@@ -308,8 +300,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TaskItem item = new TaskItem("foo");
                 item.SetMetadata("", "x");
-            }
-           );
+            });
         }
         /// <summary>
         /// Create a TaskItem with a null metadata value -- this is allowed, but 
@@ -349,18 +340,14 @@ namespace Microsoft.Build.UnitTests
             AppDomain appDomain = null;
             try
             {
-                appDomain = AppDomain.CreateDomain
-                            (
+                appDomain = AppDomain.CreateDomain(
                                 "generateResourceAppDomain",
                                 null,
-                                AppDomain.CurrentDomain.SetupInformation
-                            );
+                                AppDomain.CurrentDomain.SetupInformation);
 
-                object obj = appDomain.CreateInstanceFromAndUnwrap
-                   (
+                object obj = appDomain.CreateInstanceFromAndUnwrap(
                        typeof(TaskItemCreator).Module.FullyQualifiedName,
-                       typeof(TaskItemCreator).FullName
-                   );
+                       typeof(TaskItemCreator).FullName);
 
                 TaskItemCreator creator = (TaskItemCreator)obj;
 
