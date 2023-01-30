@@ -1,13 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-//
 
 using System;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.LiveLogger
-{ 
-
+{
     public class LiveLoggerMessageNode
     {
         // Use this to change the max lenngth (relative to screen size) of messages
@@ -28,7 +26,10 @@ namespace Microsoft.Build.Logging.LiveLogger
         public LiveLoggerMessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
-            if (Message.Length > MAX_LENGTH) Message = Message.Substring(0, MAX_LENGTH - 1) + "…";
+            if (Message.Length > MAX_LENGTH)
+            {
+                Message = Message.Substring(0, MAX_LENGTH - 1) + "…";
+            }
             // Get type
             switch (args)
             {
@@ -73,7 +74,11 @@ namespace Microsoft.Build.Logging.LiveLogger
         // TODO: Rename to Log after FancyLogger's API becomes internal
         public void Log()
         {
-            if (Line == null) return;
+            if (Line == null)
+            {
+                return;
+            }
+
             Line.Text = $"    └── {ToANSIString()}";
         }
     }

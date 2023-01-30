@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-//
 
 using System;
 using System.Collections.Generic;
@@ -23,8 +22,14 @@ namespace Microsoft.Build.Logging.LiveLogger
             {
                 // Set text value and get wrapped lines
                 _text = value;
-                if (ShouldWrapLines) WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
-                else WrappedText = new List<string> { value };
+                if (ShouldWrapLines)
+                {
+                    WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
+                }
+                else
+                {
+                    WrappedText = new List<string> { value };
+                }
                 // Buffer should rerender
                 LiveLoggerBuffer.ShouldRerender = true;
             }
@@ -86,7 +91,11 @@ namespace Microsoft.Build.Logging.LiveLogger
         #region Rendering
         public static void Render()
         {
-            if (IsTerminated || !ShouldRerender) return;
+            if (IsTerminated || !ShouldRerender)
+            {
+                return;
+            }
+
             ShouldRerender = false;
             Console.Write(
                 // Write header
@@ -95,9 +104,11 @@ namespace Microsoft.Build.Logging.LiveLogger
                 // Write footer
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
                 // TODO: Remove and replace with actual footer
-                new string('-', Console.BufferWidth) +$"\nBuild progress: XX%\tTopLineIndex={TopLineIndex}"
-            );
-            if (Lines.Count == 0) return;
+                new string('-', Console.BufferWidth) + $"\nBuild progress: XX%\tTopLineIndex={TopLineIndex}");
+            if (Lines.Count == 0)
+            {
+                return;
+            }
 
             // Iterate over lines and display on terminal
             string contents = string.Empty;
@@ -106,17 +117,27 @@ namespace Microsoft.Build.Logging.LiveLogger
             foreach (LiveLoggerBufferLine line in Lines)
             {
                 // Continue if accum line count + next lines < scrolling area
-                if (accumulatedLineCount + line.WrappedText.Count < TopLineIndex) {
+                if (accumulatedLineCount + line.WrappedText.Count < TopLineIndex)
+                {
                     accumulatedLineCount += line.WrappedText.Count;
                     continue;
                 }
                 // Break if exceeds scrolling area
-                if (accumulatedLineCount - TopLineIndex > ScrollableAreaHeight) break;
-                foreach (string s in line.WrappedText) {
+                if (accumulatedLineCount - TopLineIndex > ScrollableAreaHeight)
+                {
+                    break;
+                }
+
+                foreach (string s in line.WrappedText)
+                {
                     // Get line index relative to scroll area
                     lineIndex = accumulatedLineCount - TopLineIndex;
                     // Print if line in scrolling area
-                    if (lineIndex >= 0 && lineIndex < ScrollableAreaHeight) contents += ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s;
+                    if (lineIndex >= 0 && lineIndex < ScrollableAreaHeight)
+                    {
+                        contents += ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s;
+                    }
+
                     accumulatedLineCount++;
                 }
             }
@@ -137,7 +158,11 @@ namespace Microsoft.Build.Logging.LiveLogger
         public static LiveLoggerBufferLine? GetLineById(int lineId)
         {
             int index = GetLineIndexById(lineId);
-            if (index == -1) return null;
+            if (index == -1)
+            {
+                return null;
+            }
+
             return Lines[index];
         }
         #endregion
@@ -159,7 +184,10 @@ namespace Microsoft.Build.Logging.LiveLogger
             {
                 // Get line index
                 int lineIndex = GetLineIndexById(lineId);
-                if (lineIndex == -1) return null;
+                if (lineIndex == -1)
+                {
+                    return null;
+                }
                 // Get line end index
                 Lines.Insert(lineIndex, line);
             }
@@ -196,7 +224,10 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get line index
             int lineIndex = GetLineIndexById(lineId);
-            if (lineIndex == -1) return;
+            if (lineIndex == -1)
+            {
+                return;
+            }
             // Delete
             Lines.RemoveAt(lineIndex);
             ShouldRerender = true;

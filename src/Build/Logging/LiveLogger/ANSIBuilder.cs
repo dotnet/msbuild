@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-//
 
 using System;
 using System.Collections.Generic;
@@ -11,8 +10,10 @@ namespace Microsoft.Build.Logging.LiveLogger
     internal static class ANSIBuilder
     {
         public static string ANSIRegex = @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~])";
+
         // TODO: This should replace ANSIRegex once FancyLogger's API is internal
         public static Regex ANSIRegexRegex = new Regex(ANSIRegex);
+
         public static string ANSIRemove(string text)
         {
             return ANSIRegexRegex.Replace(text, "");
@@ -23,10 +24,16 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             return ANSIBreakpoint(text, position, 0);
         }
+
         public static int ANSIBreakpoint(string text, int position, int initialPosition)
         {
-            if (position >= text.Length) return text.Length;
+            if (position >= text.Length)
+            {
+                return text.Length;
+            }
+
             int nonAnsiIndex = 0;
+
             // Match nextMatch = Regex.Match(text, ANSIRegex);
             Match nextMatch = ANSIRegexRegex.Match(text, initialPosition);
             int i = 0;
@@ -56,6 +63,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                 textSpan = textSpan.Slice(breakpoint);
                 breakpoint = ANSIBreakpoint(text, position, breakpoint);
             }
+
             result.Add(textSpan.ToString());
             return result;
         }
@@ -64,9 +72,13 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             public static string Center(string text)
             {
-                string result = String.Empty;
+                string result = string.Empty;
                 string noFormatString = ANSIRemove(text);
-                if (noFormatString.Length > Console.BufferWidth) return text;
+                if (noFormatString.Length > Console.BufferWidth)
+                {
+                    return text;
+                }
+
                 int space = (Console.BufferWidth - noFormatString.Length) / 2;
                 result += new string(' ', space);
                 result += text;
@@ -76,9 +88,13 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             public static string Right(string text)
             {
-                string result = String.Empty;
+                string result = string.Empty;
                 string noFormatString = ANSIRemove(text);
-                if (noFormatString.Length > Console.BufferWidth) return text;
+                if (noFormatString.Length > Console.BufferWidth)
+                {
+                    return text;
+                }
+
                 int space = Console.BufferWidth - noFormatString.Length;
                 result += new string(' ', space);
                 result += text;
@@ -87,9 +103,13 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             public static string Left(string text)
             {
-                string result = String.Empty;
+                string result = string.Empty;
                 string noFormatString = ANSIRemove(text);
-                if (noFormatString.Length > Console.BufferWidth) return text;
+                if (noFormatString.Length > Console.BufferWidth)
+                {
+                    return text;
+                }
+
                 int space = Console.BufferWidth - noFormatString.Length;
                 result += text;
                 result += new string(' ', space);
@@ -98,10 +118,14 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             public static string SpaceBetween(string leftText, string rightText, int width)
             {
-                string result = String.Empty;
+                string result = string.Empty;
                 string leftNoFormatString = ANSIRemove(leftText);
                 string rightNoFormatString = ANSIRemove(rightText);
-                if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth) return leftText + rightText;
+                if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth)
+                {
+                    return leftText + rightText;
+                }
+
                 int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length);
                 result += leftText;
                 result += new string(' ', space - 1);
@@ -242,9 +266,11 @@ namespace Microsoft.Build.Logging.LiveLogger
             public static string UpAndScroll(int n)
             {
                 string result = "";
-                for (int i = 0; i < n; i++) {
+                for (int i = 0; i < n; i++)
+                {
                     result += "\x1bM";
                 }
+
                 return result;
             }
 
@@ -278,7 +304,8 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return String.Format("\x1b[s");
             }
 
-            public static string RestorePosition() {
+            public static string RestorePosition()
+            {
                 return String.Format("\x1b[u");
             }
 
@@ -302,7 +329,11 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             public static string ForwardTab(int n)
             {
-                if (n == 0) return "";
+                if (n == 0)
+                {
+                    return "";
+                }
+
                 return String.Format("\x1b[{0}I", n);
             }
 
@@ -393,7 +424,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             public static string Spinner(int n)
             {
-                char[] chars = { '\\', '|', '/', '-'};
+                char[] chars = { '\\', '|', '/', '-' };
                 return chars[n % (chars.Length - 1)].ToString();
             }
 
