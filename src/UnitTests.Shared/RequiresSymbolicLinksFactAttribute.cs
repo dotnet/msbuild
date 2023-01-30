@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 
 using Microsoft.Build.Shared;
@@ -14,9 +15,12 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public sealed class RequiresSymbolicLinksFactAttribute : FactAttribute
     {
+        private static readonly bool s_runningInAzurePipeline =
+            bool.TryParse(Environment.GetEnvironmentVariable("TF_BUILD"), out bool value) && value;
+
         public RequiresSymbolicLinksFactAttribute()
         {
-            if (!NativeMethodsShared.IsWindows)
+            if (s_runningInAzurePipeline || !NativeMethodsShared.IsWindows)
             {
                 return;
             }
