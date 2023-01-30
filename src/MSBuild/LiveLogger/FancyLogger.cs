@@ -55,14 +55,14 @@ namespace Microsoft.Build.Logging.LiveLogger
         private void Render()
         {
             // Initialize FancyLoggerBuffer
-            FancyLoggerBuffer.Initialize();
+            TerminalBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            FancyLoggerBuffer.WriteNewLine(string.Empty);
+            TerminalBuffer.WriteNewLine(string.Empty);
             // First render
-            FancyLoggerBuffer.Render();
+            TerminalBuffer.Render();
             int i = 0;
             // Rerender periodically
-            while (!FancyLoggerBuffer.IsTerminated)
+            while (!TerminalBuffer.IsTerminated)
             {
                 i++;
                 // Delay by 1/60 seconds
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                         project.Value.Log();
                     }
                     // Rerender buffer
-                    FancyLoggerBuffer.Render();
+                    TerminalBuffer.Render();
                 });
                 // Handle keyboard input
                 if (Console.KeyAvailable)
@@ -84,15 +84,15 @@ namespace Microsoft.Build.Logging.LiveLogger
                     switch (key)
                     {
                         case ConsoleKey.UpArrow:
-                            if (FancyLoggerBuffer.TopLineIndex > 0)
+                            if (TerminalBuffer.TopLineIndex > 0)
                             {
-                                FancyLoggerBuffer.TopLineIndex--;
+                                TerminalBuffer.TopLineIndex--;
                             }
-                            FancyLoggerBuffer.ShouldRerender = true;
+                            TerminalBuffer.ShouldRerender = true;
                             break;
                         case ConsoleKey.DownArrow:
-                            FancyLoggerBuffer.TopLineIndex++;
-                            FancyLoggerBuffer.ShouldRerender = true;
+                            TerminalBuffer.TopLineIndex++;
+                            TerminalBuffer.ShouldRerender = true;
                             break;
                         default:
                             break;
@@ -247,7 +247,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public void Shutdown()
         {
-            FancyLoggerBuffer.Terminate();
+            TerminalBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
             int errorCount = 0;

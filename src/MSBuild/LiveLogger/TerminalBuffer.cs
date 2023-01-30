@@ -31,7 +31,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                     WrappedText = new List<string> { value };
                 }
                 // Buffer should rerender
-                FancyLoggerBuffer.ShouldRerender = true;
+                TerminalBuffer.ShouldRerender = true;
             }
         }
 
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         }
     }
 
-    internal class FancyLoggerBuffer
+    internal class TerminalBuffer
     {
         private static List<FancyLoggerBufferLine> Lines = new();
         public static int TopLineIndex = 0;

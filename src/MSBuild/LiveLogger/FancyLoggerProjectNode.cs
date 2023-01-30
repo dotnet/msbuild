@@ -78,7 +78,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             // Create or update line
             if (Line is null)
             {
-                Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
+                Line = TerminalBuffer.WriteNewLine(lineContents, false);
             }
             else
             {
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             {
                 if (CurrentTargetLine is not null)
                 {
-                    FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                    TerminalBuffer.DeleteLine(CurrentTargetLine.Id);
                 }
 
                 foreach (FancyLoggerMessageNode node in AdditionalDetails.ToList())
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
                     if (node.Line is not null)
                     {
-                        FancyLoggerBuffer.DeleteLine(node.Line.Id);
+                        TerminalBuffer.DeleteLine(node.Line.Id);
                     }
                 }
             }
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
             if (CurrentTargetLine is null)
             {
-                CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
+                CurrentTargetLine = TerminalBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
             }
             else
             {
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
                 if (node.Line is null)
                 {
-                    node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                    node.Line = TerminalBuffer.WriteNewLineAfter(Line!.Id, "Message");
                 }
 
                 node.Log();
