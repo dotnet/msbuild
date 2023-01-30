@@ -17,8 +17,7 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-
-using Microsoft.Build.Evaluation; 
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -28,7 +27,6 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-
 using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
@@ -2406,8 +2404,8 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.FancyLogger], 
-                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.LiveLogger], 
+                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.FancyLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.LiveLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -3188,8 +3186,8 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
-            bool fancyLoggerCommandLineOptIn, 
-            bool liveLoggerCommandLineOptIn, 
+            bool fancyLoggerCommandLineOptIn,
+            bool liveLoggerCommandLineOptIn,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3408,8 +3406,7 @@ namespace Microsoft.Build.CommandLine
             if (Console.IsOutputRedirected)
             {
                 messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low)
-                );
+                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
                 return false;
             }
             // If terminal is dumb
@@ -3418,8 +3415,7 @@ namespace Microsoft.Build.CommandLine
                 || Environment.GetEnvironmentVariable("TERM") == "dumb")
             {
                 messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low)
-                );
+                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low));
                 return false;
             }
             return true;
