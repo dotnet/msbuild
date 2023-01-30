@@ -3428,7 +3428,7 @@ namespace Microsoft.Build.CommandLine
             // Check for flags and env variables
             if (!noConsoleLogger)
             {
-                FancyLogger l = new FancyLogger();
+                LiveLogger l = new LiveLogger();
                 loggers.Add(l);
             }
         }

@@ -8,7 +8,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.LiveLogger
 {
-    internal class FancyLogger : ILogger
+    internal class LiveLogger : ILogger
     {
         private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
 
@@ -21,7 +21,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public LoggerVerbosity Verbosity { get; set; }
 
-        public FancyLogger()
+        public LiveLogger()
         {
             Parameters = "";
         }
