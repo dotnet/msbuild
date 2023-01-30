@@ -5,19 +5,19 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.LiveLogger
 {
-    public class LiveLoggerTargetNode
+    public class TargetNode
     {
         public int Id;
         public string TargetName;
-        public LiveLoggerTaskNode? CurrentTaskNode;
-        public LiveLoggerTargetNode(TargetStartedEventArgs args)
+        public TaskNode? CurrentTaskNode;
+        public TargetNode(TargetStartedEventArgs args)
         {
             Id = args.BuildEventContext!.TargetId;
             TargetName = args.TargetName;
         }
-        public LiveLoggerTaskNode AddTask(TaskStartedEventArgs args)
+        public TaskNode AddTask(TaskStartedEventArgs args)
         {
-            CurrentTaskNode = new LiveLoggerTaskNode(args);
+            CurrentTaskNode = new TaskNode(args);
             return CurrentTaskNode;
         }
     }

@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.LiveLogger
 {
-    public class LiveLoggerMessageNode
+    public class MessageNode
     {
         // Use this to change the max lenngth (relative to screen size) of messages
         private static int MAX_LENGTH = 3 * Console.BufferWidth;
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public string? FilePath;
         public int? LineNumber;
         public int? ColumnNumber;
-        public LiveLoggerMessageNode(LazyFormattedBuildEventArgs args)
+        public MessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
             if (Message.Length > MAX_LENGTH)

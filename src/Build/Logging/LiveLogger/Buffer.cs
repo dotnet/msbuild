@@ -31,7 +31,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                     WrappedText = new List<string> { value };
                 }
                 // Buffer should rerender
-                LiveLoggerBuffer.ShouldRerender = true;
+                Buffer.ShouldRerender = true;
             }
         }
 
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         }
     }
 
-    public class LiveLoggerBuffer
+    public class Buffer
     {
         private static List<LiveLoggerBufferLine> Lines = new();
         public static int TopLineIndex = 0;

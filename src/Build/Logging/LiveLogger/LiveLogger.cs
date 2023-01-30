@@ -10,7 +10,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 {
     public class LiveLogger : ILogger
     {
-        private Dictionary<int, LiveLoggerProjectNode> projects = new Dictionary<int, LiveLoggerProjectNode>();
+        private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
 
         private bool Succeeded;
 
@@ -55,14 +55,14 @@ namespace Microsoft.Build.Logging.LiveLogger
         private void Render()
         {
             // Initialize
-            LiveLoggerBuffer.Initialize();
+            Buffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            LiveLoggerBuffer.WriteNewLine(string.Empty);
+            Buffer.WriteNewLine(string.Empty);
             // First render
-            LiveLoggerBuffer.Render();
+            Buffer.Render();
             int i = 0;
             // Rerender periodically
-            while (!LiveLoggerBuffer.IsTerminated)
+            while (!Buffer.IsTerminated)
             {
                 i++;
                 // Delay by 1/60 seconds
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                         project.Value.Log();
                     }
                     // Rerender buffer
-                    LiveLoggerBuffer.Render();
+                    Buffer.Render();
                 });
                 // Handle keyboard input
                 if (Console.KeyAvailable)
@@ -84,16 +84,16 @@ namespace Microsoft.Build.Logging.LiveLogger
                     switch (key)
                     {
                         case ConsoleKey.UpArrow:
-                            if (LiveLoggerBuffer.TopLineIndex > 0)
+                            if (Buffer.TopLineIndex > 0)
                             {
-                                LiveLoggerBuffer.TopLineIndex--;
+                                Buffer.TopLineIndex--;
                             }
 
-                            LiveLoggerBuffer.ShouldRerender = true;
+                            Buffer.ShouldRerender = true;
                             break;
                         case ConsoleKey.DownArrow:
-                            LiveLoggerBuffer.TopLineIndex++;
-                            LiveLoggerBuffer.ShouldRerender = true;
+                            Buffer.TopLineIndex++;
+                            Buffer.ShouldRerender = true;
                             break;
                         default:
                             break;
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return;
             }
             // Add project
-            LiveLoggerProjectNode node = new LiveLoggerProjectNode(e);
+            ProjectNode node = new ProjectNode(e);
             projects[id] = node;
             // Log
             node.ShouldRerender = true;
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -148,7 +148,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -177,7 +177,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -216,7 +216,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -230,7 +230,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out LiveLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public void Shutdown()
         {
-            LiveLoggerBuffer.Terminate();
+            Buffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
             int errorCount = 0;

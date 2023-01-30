@@ -5,11 +5,11 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.LiveLogger
 {
-    public class LiveLoggerTaskNode
+    public class TaskNode
     {
         public int Id;
         public string TaskName;
-        public LiveLoggerTaskNode(TaskStartedEventArgs args)
+        public TaskNode(TaskStartedEventArgs args)
         {
             Id = args.BuildEventContext!.TaskId;
             TaskName = args.TaskName;

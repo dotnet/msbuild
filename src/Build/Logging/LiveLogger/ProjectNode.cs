@@ -9,7 +9,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.LiveLogger
 {
-    internal class LiveLoggerProjectNode
+    internal class ProjectNode
     {
         /// <summary>
         /// Given a list of paths, this method will get the shortest not ambiguous path for a project.
@@ -30,16 +30,16 @@ namespace Microsoft.Build.Logging.LiveLogger
         // Targets
         public int FinishedTargets;
         public LiveLoggerBufferLine? CurrentTargetLine;
-        public LiveLoggerTargetNode? CurrentTargetNode;
+        public TargetNode? CurrentTargetNode;
         // Messages, errors and warnings
-        public List<LiveLoggerMessageNode> AdditionalDetails = new();
+        public List<MessageNode> AdditionalDetails = new();
         // Count messages, warnings and errors
         public int MessageCount = 0;
         public int WarningCount = 0;
         public int ErrorCount = 0;
         // Bool if node should rerender
         internal bool ShouldRerender = true;
-        public LiveLoggerProjectNode(ProjectStartedEventArgs args)
+        public ProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
             ProjectPath = args.ProjectFile!;
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             // Create or update line
             if (Line is null)
             {
-                Line = LiveLoggerBuffer.WriteNewLine(lineContents, false);
+                Line = Buffer.WriteNewLine(lineContents, false);
             }
             else
             {
@@ -89,20 +89,20 @@ namespace Microsoft.Build.Logging.LiveLogger
             {
                 if (CurrentTargetLine is not null)
                 {
-                    LiveLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                    Buffer.DeleteLine(CurrentTargetLine.Id);
                 }
 
-                foreach (LiveLoggerMessageNode node in AdditionalDetails.ToList())
+                foreach (MessageNode node in AdditionalDetails.ToList())
                 {
                     // Only delete high priority messages
-                    if (node.Type != LiveLoggerMessageNode.MessageType.HighPriorityMessage)
+                    if (node.Type != MessageNode.MessageType.HighPriorityMessage)
                     {
                         continue;
                     }
 
                     if (node.Line is not null)
                     {
-                        LiveLoggerBuffer.DeleteLine(node.Line.Id);
+                        Buffer.DeleteLine(node.Line.Id);
                     }
                 }
             }
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
             if (CurrentTargetLine is null)
             {
-                CurrentTargetLine = LiveLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
+                CurrentTargetLine = Buffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
             }
             else
             {
@@ -124,28 +124,28 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             // Messages, warnings and errors
-            foreach (LiveLoggerMessageNode node in AdditionalDetails)
+            foreach (MessageNode node in AdditionalDetails)
             {
-                if (Finished && node.Type == LiveLoggerMessageNode.MessageType.HighPriorityMessage)
+                if (Finished && node.Type == MessageNode.MessageType.HighPriorityMessage)
                 {
                     continue;
                 }
 
                 if (node.Line is null)
                 {
-                    node.Line = LiveLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                    node.Line = Buffer.WriteNewLineAfter(Line!.Id, "Message");
                 }
 
                 node.Log();
             }
         }
 
-        public LiveLoggerTargetNode AddTarget(TargetStartedEventArgs args)
+        public TargetNode AddTarget(TargetStartedEventArgs args)
         {
-            CurrentTargetNode = new LiveLoggerTargetNode(args);
+            CurrentTargetNode = new TargetNode(args);
             return CurrentTargetNode;
         }
-        public LiveLoggerTaskNode? AddTask(TaskStartedEventArgs args)
+        public TaskNode? AddTask(TaskStartedEventArgs args)
         {
             // Get target id
             int targetId = args.BuildEventContext!.TargetId;
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return null;
             }
         }
-        public LiveLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
+        public MessageNode? AddMessage(BuildMessageEventArgs args)
         {
             if (args.Importance != MessageImportance.High)
             {
@@ -166,21 +166,21 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             MessageCount++;
-            LiveLoggerMessageNode node = new LiveLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }
-        public LiveLoggerMessageNode? AddWarning(BuildWarningEventArgs args)
+        public MessageNode? AddWarning(BuildWarningEventArgs args)
         {
             WarningCount++;
-            LiveLoggerMessageNode node = new LiveLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }
-        public LiveLoggerMessageNode? AddError(BuildErrorEventArgs args)
+        public MessageNode? AddError(BuildErrorEventArgs args)
         {
             ErrorCount++;
-            LiveLoggerMessageNode node = new LiveLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }
