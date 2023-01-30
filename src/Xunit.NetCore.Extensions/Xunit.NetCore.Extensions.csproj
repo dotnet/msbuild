@@ -9,7 +9,4 @@
   <ItemGroup>
     <PackageReference Include="xunit.core" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\CustomXunitAttributesUtilities.cs" />
-  </ItemGroup>
 </Project>

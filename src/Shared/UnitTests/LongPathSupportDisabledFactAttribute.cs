@@ -3,6 +3,7 @@
 
 using System.Runtime.InteropServices;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
