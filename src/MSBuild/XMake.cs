@@ -38,7 +38,7 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Logging.FancyLogger;
+using Microsoft.Build.Logging.LiveLogger;
 using System.Runtime.InteropServices;
 
 #nullable disable
