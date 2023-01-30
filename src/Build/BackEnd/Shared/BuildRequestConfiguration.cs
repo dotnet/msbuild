@@ -183,7 +183,7 @@ namespace Microsoft.Build.BackEnd
                 _project = data.ProjectInstance;
                 _projectInitialTargets = data.ProjectInstance.InitialTargets;
                 _projectDefaultTargets = data.ProjectInstance.DefaultTargets;
-                _projectTargets = data.ProjectInstance.Targets.Keys.ToHashSet();
+                _projectTargets = GetProjectTargets(data.ProjectInstance.Targets);
                 if (data.PropertiesToTransfer != null)
                 {
                     _transferredProperties = new List<ProjectPropertyInstance>();
@@ -220,7 +220,7 @@ namespace Microsoft.Build.BackEnd
             _project = instance;
             _projectInitialTargets = instance.InitialTargets;
             _projectDefaultTargets = instance.DefaultTargets;
-            _projectTargets = instance.Targets.Keys.ToHashSet();
+            _projectTargets = GetProjectTargets(instance.Targets);
             IsCacheable = false;
         }
 
@@ -415,7 +415,7 @@ namespace Microsoft.Build.BackEnd
 
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
-            ProjectTargets = _project.Targets.Keys.ToHashSet();
+            ProjectTargets = GetProjectTargets(_project.Targets);
 
             if (IsCached)
             {
@@ -987,6 +987,13 @@ namespace Microsoft.Build.BackEnd
                        _globalProperties.Equals(other._globalProperties);
             }
         }
+
+        /// <summary>
+        /// Gets the set of project targets for this <see cref="BuildRequestConfiguration"/>.
+        /// </summary>
+        /// <param name="projectTargets">The project targets to transform into a set.</param>
+        /// <returns>The set of project targets for this <see cref="BuildRequestConfiguration"/>.</returns>
+        private HashSet<string> GetProjectTargets(IDictionary<string, ProjectTargetInstance> projectTargets) => projectTargets.Keys.ToHashSet();
 
         /// <summary>
         /// Determines what the real tools version is.

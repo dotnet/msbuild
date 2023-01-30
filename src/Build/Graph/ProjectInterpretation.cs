@@ -67,6 +67,8 @@ namespace Microsoft.Build.Graph
         {
             public TargetSpecification(string target, bool skipIfNonexistent)
             {
+                // Verify that if this target is skippable then it equals neither 
+                // ".default" nor ".projectReferenceTargetsOrDefaultTargets".
                 ErrorUtilities.VerifyThrow(
                     !skipIfNonexistent || (!target.Equals(MSBuildConstants.DefaultTargetsMarker)
                     && !target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker)),
