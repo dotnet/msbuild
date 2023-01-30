@@ -451,8 +451,7 @@ internal static class NativeMethods
             {
                 ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
 
-#if !NET35
-                // .NET Core 1.0+
+#if NETCOREAPP || NETSTANDARD1_1_OR_GREATER
                 // Get the architecture from the runtime.
                 processorArchitecture = RuntimeInformation.OSArchitecture switch
                 {
@@ -474,60 +473,6 @@ internal static class NativeMethods
                     _ => ProcessorArchitectures.Unknown,
                 };
 
-#else
-                // Mono
-                // Use 'uname -m' to get the architecture.
-                try
-                {
-                    // On Unix run 'uname -m' to get the architecture. It's common for Linux and Mac
-                    using (
-                        var proc =
-                            Process.Start(
-                                new ProcessStartInfo("uname")
-                                {
-                                    Arguments = "-m",
-                                    UseShellExecute = false,
-                                    RedirectStandardOutput = true,
-                                    CreateNoWindow = true
-                                }))
-                    {
-                        string arch = null;
-                        if (proc != null)
-                        {
-                            arch = proc.StandardOutput.ReadLine();
-                            proc.WaitForExit();
-                        }
-
-                        if (!string.IsNullOrEmpty(arch))
-                        {
-                            if (arch.StartsWith("x86_64", StringComparison.OrdinalIgnoreCase))
-                            {
-                                processorArchitecture = ProcessorArchitectures.X64;
-                            }
-                            else if (arch.StartsWith("ia64", StringComparison.OrdinalIgnoreCase))
-                            {
-                                processorArchitecture = ProcessorArchitectures.IA64;
-                            }
-                            else if (arch.StartsWith("arm", StringComparison.OrdinalIgnoreCase))
-                            {
-                                processorArchitecture = ProcessorArchitectures.ARM;
-                            }
-                            else if (arch.StartsWith("aarch64", StringComparison.OrdinalIgnoreCase))
-                            {
-                                processorArchitecture = ProcessorArchitectures.ARM64;
-                            }
-                            else if (arch.StartsWith("i", StringComparison.OrdinalIgnoreCase)
-                                    && arch.EndsWith("86", StringComparison.OrdinalIgnoreCase))
-                            {
-                                processorArchitecture = ProcessorArchitectures.X86;
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    // Best effort: fall back to Unknown
-                }
 #endif
 
                 ProcessorArchitectureTypeNative = ProcessorArchitectureType = processorArchitecture;
