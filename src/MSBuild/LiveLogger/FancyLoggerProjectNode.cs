@@ -32,7 +32,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public FancyLoggerBufferLine? CurrentTargetLine;
         public FancyLoggerTargetNode? CurrentTargetNode;
         // Messages, errors and warnings
-        public List<FancyLoggerMessageNode> AdditionalDetails = new();
+        public List<MessageNode> AdditionalDetails = new();
         // Count messages, warnings and errors
         public int MessageCount = 0;
         public int WarningCount = 0;
@@ -93,10 +93,10 @@ namespace Microsoft.Build.Logging.LiveLogger
                     TerminalBuffer.DeleteLine(CurrentTargetLine.Id);
                 }
 
-                foreach (FancyLoggerMessageNode node in AdditionalDetails.ToList())
+                foreach (MessageNode node in AdditionalDetails.ToList())
                 {
                     // Only delete high priority messages
-                    if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage)
+                    if (node.Type != MessageNode.MessageType.HighPriorityMessage)
                     {
                         continue;
                     }
@@ -125,9 +125,9 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             // Messages, warnings and errors
-            foreach (FancyLoggerMessageNode node in AdditionalDetails)
+            foreach (MessageNode node in AdditionalDetails)
             {
-                if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage)
+                if (Finished && node.Type == MessageNode.MessageType.HighPriorityMessage)
                 {
                     continue;
                 }
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return null;
             }
         }
-        public FancyLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
+        public MessageNode? AddMessage(BuildMessageEventArgs args)
         {
             if (args.Importance != MessageImportance.High)
             {
@@ -167,21 +167,21 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             MessageCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }
-        public FancyLoggerMessageNode? AddWarning(BuildWarningEventArgs args)
+        public MessageNode? AddWarning(BuildWarningEventArgs args)
         {
             WarningCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }
-        public FancyLoggerMessageNode? AddError(BuildErrorEventArgs args)
+        public MessageNode? AddError(BuildErrorEventArgs args)
         {
             ErrorCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
             return node;
         }
