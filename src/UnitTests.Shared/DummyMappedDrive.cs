@@ -49,7 +49,6 @@ public class DummyMappedDrive : IDisposable
                 e = exc;
                 Debug.Fail("Exception in DummyMappedDrive finalizer: " + e.ToString());
             }
-
         }
 
         if (_mapped)

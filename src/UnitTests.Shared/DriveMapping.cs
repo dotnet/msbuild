@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable enable
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -10,7 +11,7 @@ namespace Microsoft.Build.UnitTests.Shared;
 internal static class DriveMapping
 {
     private const int ERROR_FILE_NOT_FOUND = 2;
-    private const int ERROR_INSUFFICIENT_BUFFER = 122;
+    // private const int ERROR_INSUFFICIENT_BUFFER = 122;
     private const int DDD_REMOVE_DEFINITION = 2;
     private const int DDD_NO_FLAG = 0;
     // extra space for '\??\'. Not counting for long paths support in tests.
@@ -49,16 +50,19 @@ internal static class DriveMapping
     public static string GetDriveMapping(char letter)
     {
         // since this is just for test purposes - let's not overcomplicate with long paths support
-        var sb = new StringBuilder(MAX_PATH);
-        if (QueryDosDevice(ToDeviceName(letter), sb, sb.Capacity) == 0)
+        char[] buffer = new char[MAX_PATH];
+        if (QueryDosDevice(ToDeviceName(letter), buffer, buffer.Length) == 0)
         {
             // Return empty string if the drive is not mapped
             int err = Marshal.GetLastWin32Error();
-            if (err == ERROR_FILE_NOT_FOUND) return string.Empty;
+            if (err == ERROR_FILE_NOT_FOUND)
+            {
+                return string.Empty;
+            }
             NativeMethodsShared.ThrowExceptionForErrorCode(err);
         }
         // Translate from the native path semantic - starting with '\??\'
-        return sb.ToString(4, sb.Length - 4);
+        return new string(buffer, 4, buffer.Length - 4);
     }
 
     private static string ToDeviceName(char letter)
@@ -67,7 +71,7 @@ internal static class DriveMapping
     }
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern bool DefineDosDevice(int flags, string deviceName, string? path);
+    private static extern bool DefineDosDevice([In] int flags, [In] string deviceName, [In] string? path);
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern int QueryDosDevice(string deviceName, StringBuilder buffer, int bufSize);
+    private static extern int QueryDosDevice([In] string deviceName, [Out] char[] buffer, [In] int bufSize);
 }
