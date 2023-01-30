@@ -3873,14 +3873,9 @@ namespace Microsoft.Build.UnitTests
         /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we
         /// get the expected set out.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("No registry unless under Windows.")]
         public void ResolveSDKFromRegistry()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "No registry unless under Windows"
-            }
-
             var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
             ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, File.Exists);

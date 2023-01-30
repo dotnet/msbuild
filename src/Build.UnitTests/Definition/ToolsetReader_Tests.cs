@@ -92,14 +92,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Test to make sure machine.config file has the section registered
         /// and we are picking it up from there.
         /// </summary>
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(additionalMessage: "The machine.config is only present on Windows.")]
         public void GetToolsetDataFromConfiguration_SectionNotRegisteredInConfigFile()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "The machine.config is only present on Windows"
-            }
-
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1301,14 +1296,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
         /// the default value is desired.
         /// </summary>
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(additionalMessage: "Registry access is only supported under Windows.")]
         public void PropertyInConfigurationFileReferencesRegistryLocation()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Registry access is only supported under Windows."
-            }
-
             // Registry Read
             RegistryKey key1 = Registry.CurrentUser.CreateSubKey(@"Software\Vendor\Tools");
             key1.SetValue("TaskLocation", @"somePathToTasks");
@@ -1659,38 +1649,23 @@ namespace Microsoft.Build.UnitTests.Definition
         /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
         /// the default value is desired.
         /// </summary>
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(additionalMessage: "Access local machine registry is for Windows only.")]
         public void ConfigFileInvalidRegistryExpression1()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Access local machine registry is for Windows only"
-            }
-
             // No location
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:)""/>");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(additionalMessage: "Access local machine registry is for Windows only.")]
         public void ConfigFileInvalidRegistryExpression2()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Access local machine registry is for Windows only"
-            }
-
             // Bogus key expression
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:__bogus__)""/>");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(additionalMessage: "Access local machine registry is for Windows only.")]
         public void ConfigFileInvalidRegistryExpression3()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Access local machine registry is for Windows only"
-            }
-
             // No registry location just @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:@)""/>");
         }
@@ -1716,14 +1691,9 @@ namespace Microsoft.Build.UnitTests.Definition
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:@HKEY_CURRENT_USER\Software\Vendor\Tools@TaskLocation)""/>");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(additionalMessage: "Access registry is for Windows only.")]
         public void ConfigFileInvalidRegistryExpression7()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Access registry is for Windows only"
-            }
-
             // Bogus hive
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:BOGUS_HIVE\Software\Vendor\Tools@TaskLocation)""/>");
         }
@@ -1768,14 +1738,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                           @"@(SomeItem)");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(additionalMessage: "Access local machine registry is for Windows only.")]
         public void RegistryInvalidRegistryExpression1()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Access local machine registry is for Windows only"
-            }
-
             // Bogus key expression
             RegistryInvalidRegistryExpressionHelper("$(Registry:__bogus__)");
         }

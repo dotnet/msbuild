@@ -648,15 +648,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Colon is special only on Windows.")]
         public void DoNotRetryCopyNotSupportedException()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                // Colon is special only on Windows
-                return;
-            }
-
             string sourceFile = FileUtilities.GetTemporaryFile();
             string destinationFile = "foobar:";
 

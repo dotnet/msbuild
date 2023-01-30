@@ -607,14 +607,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogContains("MSB4198");
         }
 
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Cannot have invalid characters in file name on Unix.")]
         public void ExpandItemVectorFunctionsBuiltIn_InvalidCharsError()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Cannot have invalid characters in file name on Unix"
-            }
-
             string content = @"
  <Project DefaultTargets=`t`>
 

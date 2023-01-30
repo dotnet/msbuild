@@ -20,7 +20,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-
+using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -2709,14 +2709,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Test standard reserved properties on UNC at root
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("UNC is only available under Windows.")]
         public void ReservedProjectPropertiesOnUNCRoot()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "UNC is only available under Windows"
-            }
-
             string uncFile = @"\\foo\bar\baz.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(uncFile);
             Project project = new Project(xml);
@@ -2732,14 +2727,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Test standard reserved properties on UNC
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("UNC is only available under Windows.")]
         public void ReservedProjectPropertiesOnUNC()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "UNC is only available under Windows"
-            }
-
             string uncFile = @"\\foo\bar\baz\biz.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(uncFile);
             Project project = new Project(xml);
