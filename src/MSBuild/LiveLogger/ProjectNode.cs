@@ -30,7 +30,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         // Targets
         public int FinishedTargets;
         public FancyLoggerBufferLine? CurrentTargetLine;
-        public FancyLoggerTargetNode? CurrentTargetNode;
+        public TargetNode? CurrentTargetNode;
         // Messages, errors and warnings
         public List<MessageNode> AdditionalDetails = new();
         // Count messages, warnings and errors
@@ -141,12 +141,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
         }
 
-        public FancyLoggerTargetNode AddTarget(TargetStartedEventArgs args)
+        public TargetNode AddTarget(TargetStartedEventArgs args)
         {
-            CurrentTargetNode = new FancyLoggerTargetNode(args);
+            CurrentTargetNode = new TargetNode(args);
             return CurrentTargetNode;
         }
-        public FancyLoggerTaskNode? AddTask(TaskStartedEventArgs args)
+        public TaskNode? AddTask(TaskStartedEventArgs args)
         {
             // Get target id
             int targetId = args.BuildEventContext!.TargetId;
