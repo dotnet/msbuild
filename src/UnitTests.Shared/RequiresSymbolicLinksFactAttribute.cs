@@ -32,7 +32,8 @@ namespace Microsoft.Build.UnitTests
                 string? errorMessage = null;
                 if (!NativeMethodsShared.MakeSymbolicLink(destinationFile, sourceFile, ref errorMessage))
                 {
-                    Skip = "This test requires symbolic link support to run.";
+                    Skip = "Requires permission to create symbolic links. Need to be run elevated or under development mode " +
+                        "(https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development).";
                 }
             }
             finally
