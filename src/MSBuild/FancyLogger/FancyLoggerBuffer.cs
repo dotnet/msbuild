@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
-    public class FancyLoggerBufferLine
+    internal class FancyLoggerBufferLine
     {
         private static int Counter = 0;
         private string _text = string.Empty;
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
     }
 
-    public class FancyLoggerBuffer
+    internal class FancyLoggerBuffer
     {
         private static List<FancyLoggerBufferLine> Lines = new();
         public static int TopLineIndex = 0;
