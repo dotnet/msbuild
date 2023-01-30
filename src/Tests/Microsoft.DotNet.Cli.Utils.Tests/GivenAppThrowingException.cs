@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
         }
 
-        [RequiresSpecificFrameworkFact("netcoreapp1.1")]
+        [RequiresSpecificFrameworkFact(ToolsetInfo.CurrentTargetFramework)]
         public void ItShowsStackTraceWhenRun()
         {
             var root = _testAssetsManager.CopyTestAsset("AppThrowingException", testAssetSubdirectory: TestAssetSubdirectories.NonRestoredTestProjects)
@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var appRoot = Path.Combine(root, "App");
 
-            string msg1 = "Unhandled Exception: AppThrowing.MyException: "
+            string msg1 = "Unhandled exception. AppThrowing.MyException: "
                 + "Exception of type 'AppThrowing.MyException' was thrown.";
             string msg2 = "at AppThrowing.MyException.Main(String[] args)";
             new DotnetCommand(Log)
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                          .And.HaveStdErrContaining(msg2);
         }
 
-        [RequiresSpecificFrameworkFact("netcoreapp1.1")]
+        [RequiresSpecificFrameworkFact(ToolsetInfo.CurrentTargetFramework)]
         public void ItShowsStackTraceWhenRunAsTool()
         {
             var root = _testAssetsManager.CopyTestAsset("AppThrowingException", testAssetSubdirectory: TestAssetSubdirectories.NonRestoredTestProjects)
