@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
@@ -17,8 +18,8 @@ namespace Microsoft.DotNet.GenAPI
     {
         /// <summary>
         /// Creates a declaration matching an existing symbol.
-        ///     The reson of having this similar to `SyntaxGenerator.Declaration` extention method is that
-        ///     SyntaxGenerator does not generates attributes neither for types, neiter for members.
+        ///     The reason of having this similar to `SyntaxGenerator.Declaration` extension method is that
+        ///     SyntaxGenerator does not generates attributes neither for types, neither for members.
         /// </summary>
         public static SyntaxNode DeclarationExt(this SyntaxGenerator syntaxGenerator, ISymbol symbol)
         {
@@ -92,7 +93,7 @@ namespace Microsoft.DotNet.GenAPI
             }
             catch (ArgumentException ex)
             {
-                // re-throw the ArgumentException with the specified symbol that caused it.
+                // re-throw the ArgumentException with the symbol that caused it.
                 throw new ArgumentException(ex.Message, symbol.ToDisplayString());
             }
         }

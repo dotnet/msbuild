@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Simplification;
 using Microsoft.DotNet.ApiSymbolExtensions;
+using Microsoft.DotNet.GenAPI.SyntaxRewriter;
 
 namespace Microsoft.DotNet.GenAPI
 {
@@ -23,7 +24,7 @@ namespace Microsoft.DotNet.GenAPI
     {
         private readonly TextWriter _textWriter;
         private readonly ISymbolFilter _symbolFilter;
-        private readonly CSharpSyntaxRewriter _syntaxRewriter;
+        private readonly string? _exceptionMessage;
 
         private readonly AdhocWorkspace _adhocWorkspace;
         private readonly SyntaxGenerator _syntaxGenerator;
@@ -33,12 +34,12 @@ namespace Microsoft.DotNet.GenAPI
         public CSharpFileBuilder(
             ISymbolFilter symbolFilter,
             TextWriter textWriter,
-            CSharpSyntaxRewriter syntaxRewriter,
+            string? exceptionMessage,
             IEnumerable<MetadataReference> metadataReferences)
         {
             _textWriter = textWriter;
             _symbolFilter = symbolFilter;
-            _syntaxRewriter = syntaxRewriter;
+            _exceptionMessage = exceptionMessage;
 
             _adhocWorkspace = new AdhocWorkspace();
             _syntaxGenerator = SyntaxGenerator.GetGenerator(_adhocWorkspace, LanguageNames.CSharp);
@@ -73,16 +74,19 @@ namespace Microsoft.DotNet.GenAPI
 
             SyntaxNode compilationUnit = _syntaxGenerator.CompilationUnit(namespaceSyntaxNodes)
                 .WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation)
+                .Rewrite(new TypeDeclarationCSharpSyntaxRewriter())
+                .Rewrite(new BodyBlockCSharpSyntaxRewriter(_exceptionMessage))
+                .Rewrite(new FieldDeclarationCSharpSyntaxRewriter())
                 .NormalizeWhitespace();
 
-            compilationUnit = _syntaxRewriter.Visit(compilationUnit);
-
             Document document = project.AddDocument(assembly.Name, compilationUnit);
+
             document = Simplifier.ReduceAsync(document).Result;
             document = Formatter.FormatAsync(document, DefineFormattingOptions()).Result;
 
-            compilationUnit = document.GetSyntaxRootAsync().Result!;
-            compilationUnit.WriteTo(_textWriter);
+            document.GetSyntaxRootAsync().Result!
+                .Rewrite(new SingleLineStatementCSharpSyntaxRewriter())
+                .WriteTo(_textWriter);
         }
 
         private SyntaxNode? Visit(INamespaceSymbol namespaceSymbol)
@@ -161,6 +165,9 @@ namespace Microsoft.DotNet.GenAPI
             /// TODO: consider to move configuration into file.
             return _adhocWorkspace.Options
                 .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInTypes, true)
+                .WithChangedOption(CSharpFormattingOptions.WrappingKeepStatementsOnSingleLine, true)
+                .WithChangedOption(CSharpFormattingOptions.WrappingPreserveSingleLine, true)
+                .WithChangedOption(CSharpFormattingOptions.IndentBlock, false)
                 .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInMethods, false)
                 .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInProperties, false)
                 .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAccessors, false)

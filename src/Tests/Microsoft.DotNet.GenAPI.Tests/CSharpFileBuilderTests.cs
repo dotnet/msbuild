@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
     public class CSharpFileBuilderTests
     {
         private readonly StringWriter _stringWriter = new();
-        private readonly CSharpSyntaxWriter _csharpSyntaxWriter = new(null);
         private readonly IAssemblySymbolWriter _csharpFileBuilder;
 
         class AllowAllFilter : ISymbolFilter
@@ -29,15 +28,17 @@ namespace Microsoft.DotNet.GenAPI.Tests
             var compositeFilter = new CompositeFilter()
                 .Add<ImplicitSymbolsFilter>()
                 .Add(new SymbolAccessibilityBasedFilter(true, true, true));
-            _csharpFileBuilder = new CSharpFileBuilder(compositeFilter, _stringWriter, _csharpSyntaxWriter, MetadataReferences);
+            _csharpFileBuilder = new CSharpFileBuilder(compositeFilter, _stringWriter, null, MetadataReferences);
         }
 
-        private static IEnumerable<MetadataReference> MetadataReferences { get => new List<MetadataReference> { MetadataReference.CreateFromFile(typeof(Object).Assembly!.Location!) }; }
-
-        private static SyntaxTree GetSyntaxTree(string syntax)
+        private static IEnumerable<MetadataReference> MetadataReferences
         {
-            return CSharpSyntaxTree.ParseText(syntax);
+            get => new List<MetadataReference> {
+                MetadataReference.CreateFromFile(typeof(Object).Assembly!.Location!) };
         }
+
+        private static SyntaxTree GetSyntaxTree(string syntax) =>
+            CSharpSyntaxTree.ParseText(syntax);
 
         private void RunTest(string original, string expected)
         {
@@ -52,7 +53,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
             SyntaxTree resultedSyntaxTree = GetSyntaxTree(resultedString);
             SyntaxTree expectedSyntaxTree = GetSyntaxTree(expected);
 
-            /// compare SyntaxTree and not string representation
+            // compare SyntaxTree and not string representation
             Assert.True(resultedSyntaxTree.IsEquivalentTo(expectedSyntaxTree),
                 $"Expected:\n{expected}\nResulted:\n{resultedString}");
         }
@@ -785,6 +786,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """);
         }
+
         [Fact]
         void TestExplicitInterfaceImplementationPropertyGeneration()
         {
@@ -822,6 +824,52 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         }
                     }
                     """);
+        }
+
+        [Fact]
+        void TestAccessibilityGenerationForPropertyAccessors()
+        {
+            RunTest(original: """
+                    namespace Foo
+                    {
+                        public class Bar
+                        {
+                            public int P { get; protected set; }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public partial class Bar
+                        {
+                            public int P { get { throw null; } protected set { } }
+                        }
+                    }
+                    """);
+        }
+
+        [Fact]
+        public void TestConstantFieldGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Bar
+                    {
+                        public const int CurrentEra = 0;
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Bar
+                    {
+                        public const int CurrentEra = 0;
+                    }
+                }
+                """);
         }
     }
 }

@@ -148,7 +148,7 @@
     <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.5.0-6.23078.4</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.5.0-6.23078.4</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
     <MicrosoftNetCompilersToolsetVersion>$(MicrosoftNetCompilersToolsetPackageVersion)</MicrosoftNetCompilersToolsetVersion>
-    <MicrosoftCodeAnalysisWorkspacesGenAPIPackageVersion>4.6.0-1.23067.16</MicrosoftCodeAnalysisWorkspacesGenAPIPackageVersion>
+    <MicrosoftCodeAnalysisWorkspacesGenAPIPackageVersion>4.6.0-1.23076.1</MicrosoftCodeAnalysisWorkspacesGenAPIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->

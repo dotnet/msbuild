@@ -12,7 +12,7 @@ using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 namespace Microsoft.DotNet.GenAPI
 {
     /// <summary>
-    /// Class to standertize initilization and running of GenAPI tool.
+    /// Class to standardize initialization and running of GenAPI tool.
     ///     Shared between CLI and MSBuild tasks frontends.
     /// </summary>
     public static class GenAPIApp
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.GenAPI
                 using CSharpFileBuilder fileBuilder = new(
                     compositeFilter,
                     textWriter,
-                    new CSharpSyntaxWriter(context.ExceptionMessage),
+                    context.ExceptionMessage,
                     loader.MetadataReferences);
 
                 fileBuilder.WriteAssembly(assemblySymbol);
