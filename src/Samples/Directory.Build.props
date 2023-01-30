@@ -5,7 +5,8 @@
     <OutDirName>Samples\$(MSBuildProjectName)</OutDirName>
 
     <!-- Don't regulate package versions for samples -->
-    <EnableCentralPackageVersions>false</EnableCentralPackageVersions>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
 
     <IsShipping>false</IsShipping>
     <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
