@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (FileUtilities.FileExistsNoThrow(File.ItemSpec))
                                 {
-                                    string existingContents = System.IO.File.ReadAllText(File.ItemSpec);
+                                    string existingContents = System.IO.File.ReadAllText(File.ItemSpec, encoding);
                                     if (existingContents.Length == buffer.Length)
                                     {
                                         if (existingContents.Equals(contentsAsString))
