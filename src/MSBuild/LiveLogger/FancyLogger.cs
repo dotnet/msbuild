@@ -10,7 +10,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 {
     internal class FancyLogger : ILogger
     {
-        private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
+        private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
 
         private bool Succeeded;
 
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return;
             }
             // Add project
-            FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
+            ProjectNode node = new ProjectNode(e);
             projects[id] = node;
             // Log
             node.ShouldRerender = true;
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -161,7 +161,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -176,7 +176,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -215,7 +215,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }

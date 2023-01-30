@@ -9,7 +9,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.LiveLogger
 {
-    internal class FancyLoggerProjectNode
+    internal class ProjectNode
     {
         /// <summary>
         /// Given a list of paths, this method will get the shortest not ambiguous path for a project.
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public int ErrorCount = 0;
         // Bool if node should rerender
         internal bool ShouldRerender = true;
-        public FancyLoggerProjectNode(ProjectStartedEventArgs args)
+        public ProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
             ProjectPath = args.ProjectFile!;
