@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -77,7 +77,7 @@ namespace Microsoft.Build.BuildEngine
                 return this.propertyGroupCount;
             }
         }
-        
+
         /// <summary>
         /// </summary>
         internal object SyncRoot
@@ -448,7 +448,9 @@ namespace Microsoft.Build.BuildEngine
                 ChangePropertyGroupCount(1);
             }
             else if (newGroup is Choose)
+            {
                 this.chooseCount++;
+            }
         }
 
         /// <summary>
@@ -478,7 +480,9 @@ namespace Microsoft.Build.BuildEngine
                 ChangePropertyGroupCount(1);
             }
             else if (newGroup is Choose)
+            {
                 this.chooseCount++;
+            }
         }
 
         /// <summary>
@@ -559,7 +563,7 @@ namespace Microsoft.Build.BuildEngine
             ArrayList propertiesToRemove = new ArrayList();
             foreach (BuildPropertyGroup propertyGroup in this.PropertyGroupsAll)
             {
-                if (String.Equals(condition.Trim(), propertyGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase) 
+                if (String.Equals(condition.Trim(), propertyGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase)
                     && (!propertyGroup.IsImported || includeImportedPropertyGroups))
                 {
                     propertiesToRemove.Add(propertyGroup);
@@ -619,7 +623,7 @@ namespace Microsoft.Build.BuildEngine
 
             foreach (BuildItemGroup itemGroup in this.ItemGroupsAll)
             {
-                if (String.Equals(condition.Trim(), itemGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase) 
+                if (String.Equals(condition.Trim(), itemGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase)
                     && !itemGroup.IsImported)
                 {
                     itemsToRemove.Add(itemGroup);

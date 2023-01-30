@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Serialization;
@@ -113,7 +113,7 @@ namespace Microsoft.Build.BuildEngine
         private InternalLoggerException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            this.e = (BuildEventArgs) info.GetValue("e", typeof(BuildEventArgs));
+            this.e = (BuildEventArgs)info.GetValue("e", typeof(BuildEventArgs));
             this.errorCode = info.GetString("errorCode");
             this.helpKeyword = info.GetString("helpKeyword");
             this.initializationException = info.GetBoolean("initializationException");
@@ -126,7 +126,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="info"></param>
         /// <param name="context"></param>
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        override public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 

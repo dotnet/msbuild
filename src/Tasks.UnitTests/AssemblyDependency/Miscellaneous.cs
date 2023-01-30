@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -2473,16 +2476,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // For {CandidateAssemblyFiles} we don't even want to see a comment logged for files with non-standard extensions.
             // This is because {CandidateAssemblyFiles} is very likely to contain non-assemblies and its best not to clutter
             // up the log.
-            engine.AssertLogDoesntContain
-            (
-                String.Format(".hiddenfile")
-            );
+            engine.AssertLogDoesntContain(
+                String.Format(".hiddenfile"));
 
             // ...but we do want to see a log entry for standard extensions, even if the base file name is empty.
-            engine.AssertLogContains
-            (
-                String.Format(@"NonUI\testDirectoryRoot\.dll")
-            );
+            engine.AssertLogContains(
+                String.Format(@"NonUI\testDirectoryRoot\.dll"));
         }
 
         /// <summary>
@@ -3198,10 +3197,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(succeeded);
             engine.AssertLogDoesntContain("MSB4018");
 
-            engine.AssertLogContains
-            (
-                String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll")
-            );
+            engine.AssertLogContains(
+                String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll"));
         }
 
         /// <summary>
@@ -3222,10 +3219,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool succeeded = Execute(t);
             Assert.True(succeeded);
-            engine.AssertLogContains
-            (
-                String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll")
-            );
+            engine.AssertLogContains(
+                String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll"));
         }
 
         /// <summary>
@@ -3437,7 +3432,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // There should have been no warning about the exception because it's only a dependency
             Assert.Equal(0, engine.Warnings);
-        
+
             // There should have been no ugly callstack dumped
             engine.AssertLogDoesntContain("Microsoft.Build.UnitTests");
         }
@@ -4932,11 +4927,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 new TaskItem("A")
             };
-            t.Assemblies[0].SetMetadata
-            (
+            t.Assemblies[0].SetMetadata(
                 "HintPath",
-                @"c:\MyNameMismatch\Foo.dll"
-            );
+                @"c:\MyNameMismatch\Foo.dll");
 
             t.SearchPaths = new string[]
             {
@@ -4968,11 +4961,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 new TaskItem("A")                    // Resolved by HintPath
             };
-            t.Assemblies[0].SetMetadata
-            (
+            t.Assemblies[0].SetMetadata(
                 "HintPath",
-                veryLongFile
-            );
+                veryLongFile);
 
             t.SearchPaths = new string[]
             {
@@ -5140,11 +5131,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-            (
+            string appConfigFile = WriteAppConfig(
                 "        <dependentAssembly\n" +        // Intentionally didn't close this XML tag.
-                "        </dependentAssembly>\n"
-            );
+                "        </dependentAssembly>\n");
 
             try
             {
@@ -5227,13 +5216,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies[1].SetMetadata("HintPath", @"C:\Regress339786\FolderA\A.dll");
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-            (
+            string appConfigFile = WriteAppConfig(
             "        <dependentAssembly>\n" +
             "            <assemblyIdentity name='C' PublicKeyToken='null' culture='neutral' />\n" +
             "            <bindingRedirect oldVersion='0.0.0.0-2.0.0.0' newVersion='2.0.0.0' />\n" +
-            "        </dependentAssembly>\n"
-            );
+            "        </dependentAssembly>\n");
             t.AppConfigFile = appConfigFile;
 
             try
@@ -5306,13 +5293,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='CrystalReports-Redist' >" +
                         "<File AssemblyName='CrystalReportsAssembly' Version='2.0.3600.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='2.0.40824.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 t.InstalledAssemblyTables = new TaskItem[] { new TaskItem(redistFile) };
 
@@ -5392,13 +5377,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='MyFancy-Redist' >" +
                         "<File AssemblyName='Microsoft.Build.Engine' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 t.InstalledAssemblyTables = new TaskItem[] { new TaskItem(redistFile) };
 
@@ -5423,16 +5406,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='MyFancy-Redist' >" +
                         // Simple name match where everything is the same except for version
                         "<File AssemblyName='A' Version='1.0.0.0' PublicKeyToken='a5d015c7d5a0b012' Culture='de-DE' FileVersion='2.0.40824.0' InGAC='true' />" +
                         "<File AssemblyName='A' Version='2.0.0.0' PublicKeyToken='a5d015c7d5a0b012' Culture='neutral' FileVersion='2.0.40824.0' InGAC='true' />" +
                         "<File AssemblyName='A' Version='3.0.0.0' PublicKeyToken='null' Culture='de-DE' FileVersion='2.0.40824.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyName v1 = new AssemblyName("A, Culture=de-DE, PublicKeyToken=a5d015c7d5a0b012, Version=1.0.0.0");
                 AssemblyName v2 = new AssemblyName("A, Culture=Neutral, PublicKeyToken=a5d015c7d5a0b012, Version=2.0.0.0");
@@ -5716,8 +5697,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                                                                            new AssemblyTableInfo("c:\\AnotherRandomDirectory.xml", "TargetFrameworkDirectory")
                                                                                           },
                                                                                           whiteListErrors,
-                                                                                          whiteListErrorFileNames
-                                                                   );
+                                                                                          whiteListErrorFileNames);
 
                 // Since there were no white list expect the black list to return null
                 Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
@@ -5741,11 +5721,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string garbageSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     garbageSubsetFile,
-                    "RandomGarbage, i am a bad file with random goo rather than anything important"
-                 );
+                    "RandomGarbage, i am a bad file with random goo rather than anything important");
 
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(garbageSubsetFile, "TargetFrameworkDirectory");
@@ -5979,11 +5957,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             File.WriteAllText(subsetListPath, _xmlOnlySubset);
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistListPath,
-                   "RANDOMBOOOOOGOOGOOG"
-                );
+                   "RANDOMBOOOOOGOOGOOG");
 
                 t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(redistListPath) };
                 t.IgnoreDefaultInstalledAssemblyTables = true;
@@ -6122,15 +6098,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     goodSubsetFile,
                   "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
                        "<File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='false' />" +
                        "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
                        "<File AssemblyName='System.Data' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
-                  "</FileList >"
-                 );
+                  "</FileList >");
 
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(goodSubsetFile, "TargetFrameworkDirectory");
@@ -6234,8 +6208,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 SubsetListFinder finder = new SubsetListFinder(Array.Empty<string>());
                 finder.GetSubsetListPathsFromDisk(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where the subsetsToSearchFor are passed in as null
@@ -6246,8 +6219,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 SubsetListFinder finder = new SubsetListFinder(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where the subsetsToSearchFor are an empty array
@@ -7060,8 +7032,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference rar = new ResolveAssemblyReference();
                 rar.ProfileName = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure we get an argument null exception when the ProfileFullFrameworkFolders is set to null
@@ -7073,8 +7044,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference rar = new ResolveAssemblyReference();
                 rar.FullFrameworkFolders = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure we get an argument null exception when the ProfileFullFrameworkAssemblyTables is set to null
@@ -7086,8 +7056,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference rar = new ResolveAssemblyReference();
                 rar.FullFrameworkAssemblyTables = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify that setting a subset and a profile at the same time will cause an error to be logged and rar to return false
@@ -7381,8 +7350,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference reference = new ResolveAssemblyReference();
                 reference.InstalledAssemblySubsetTables = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the case where the targetFrameworkSubsets are null
@@ -7394,8 +7362,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference reference = new ResolveAssemblyReference();
                 reference.TargetFrameworkSubsets = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the case where the FulltargetFrameworkSubsetNames are null
@@ -7407,8 +7374,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference reference = new ResolveAssemblyReference();
                 reference.FullTargetFrameworkSubsetNames = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where a non existent subset list path is used and no additional subsets are passed in.
@@ -7937,10 +7903,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            e.AssertLogContains
-            (
-                String.Format(AssemblyResources.GetString("ResolveAssemblyReference.ConflictUnsolvable"), @"MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", "MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null")
-            );
+            e.AssertLogContains(
+                String.Format(AssemblyResources.GetString("ResolveAssemblyReference.ConflictUnsolvable"), @"MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", "MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null"));
         }
 
         /// <summary>
@@ -7981,15 +7945,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
                         "<File IsRedistRoot='true' AssemblyName='MyRedistRootAssembly' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true'/>" +
                         "<File IsRedistRoot='false' AssemblyName='MyOtherAssembly' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true'/>" +
                         "<File AssemblyName='MyThirdAssembly' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true'/>" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 t.InstalledAssemblyTables = new TaskItem[] { new TaskItem(redistFile) };
 
@@ -8111,8 +8073,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
@@ -8121,8 +8082,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         "<File AssemblyName='System' Version='100.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                         "<File AssemblyName='System' Version='1.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                         "<File AssemblyName='System' Version='2.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8158,13 +8118,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8188,13 +8146,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Something' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8218,13 +8174,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8260,13 +8214,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8291,13 +8243,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8322,13 +8272,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='FR-fr' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8353,13 +8301,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -128,8 +128,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.EvaluatedInclude = String.Empty;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set include to invalid null value
@@ -141,8 +140,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.EvaluatedInclude = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Create an item with a metadatum that has a null value
@@ -204,8 +202,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.SetMetadata(null, "m1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Set metadata with invalid empty name
@@ -217,8 +214,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.SetMetadata(String.Empty, "m1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Cast to ITaskItem
@@ -647,8 +643,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 ";
 
                 GetOneItem(content);
-            }
-           );
+            });
         }
         /// <summary>
         /// Two items should each get their own values for built-in metadata

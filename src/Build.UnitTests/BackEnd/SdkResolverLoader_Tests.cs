@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using Shouldly;
 using System.IO;
@@ -48,8 +51,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var resolvers = loader.LoadAllResolvers(_loggingContext, new MockElementLocation("file"));
 
-            resolvers.Select(i => i.GetType().FullName).ShouldBe(new [] { typeof(DefaultSdkResolver).FullName });
-            
+            resolvers.Select(i => i.GetType().FullName).ShouldBe(new[] { typeof(DefaultSdkResolver).FullName });
+
             _logger.ErrorCount.ShouldBe(0);
             _logger.WarningCount.ShouldBe(0);
         }
@@ -342,7 +345,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     Environment.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", "false");
                     SdkResolverLoader loader = new MockSdkResolverLoader()
                     {
-                        LoadResolversAction = (resolverPath, loggingContext, location, resolvers) => {
+                        LoadResolversAction = (resolverPath, loggingContext, location, resolvers) =>
+                        {
                             resolvers.Add(new MockSdkResolverWithAssemblyPath(resolverPath));
                         }
                     };

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -28,16 +28,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         //  as an SDK resolver built for .NET Framework probably won't work on .NET Core, and vice versa.
         private readonly string AdditionalResolversFolder = Environment.GetEnvironmentVariable(
 #if NETFRAMEWORK
-            "MSBUILDADDITIONALSDKRESOLVERSFOLDER_NETFRAMEWORK"
+            "MSBUILDADDITIONALSDKRESOLVERSFOLDER_NETFRAMEWORK")
 #elif NET
-            "MSBUILDADDITIONALSDKRESOLVERSFOLDER_NET"
+            "MSBUILDADDITIONALSDKRESOLVERSFOLDER_NET")
 #endif
-            ) ?? Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
+            ?? Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
 
         internal virtual IList<SdkResolver> GetDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
         {
             var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
-                new List<SdkResolver> {new DefaultSdkResolver()}
+                new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
 
             return resolvers;
@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             ElementLocation location)
         {
             var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
-                new List<SdkResolver> {new DefaultSdkResolver()}
+                new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
 
             var potentialResolvers = FindPotentialSdkResolvers(
@@ -171,7 +171,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private bool TryAddAssemblyManifestFromXml(string pathToManifest, string manifestFolder, List<SdkResolverManifest> manifestsList, ElementLocation location)
         {
-            if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest)) return false;
+            if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest))
+            {
+                return false;
+            }
 
             SdkResolverManifest manifest = null;
             try
@@ -213,7 +216,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private bool TryAddAssemblyManifestFromDll(string assemblyPath, List<SdkResolverManifest> manifestsList)
         {
-            if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath)) return false;
+            if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath))
+            {
+                return false;
+            }
 
             manifestsList.Add(new SdkResolverManifest(DisplayName: assemblyPath, Path: assemblyPath, ResolvableSdkRegex: null));
             return true;
@@ -222,7 +228,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         protected virtual IEnumerable<Type> GetResolverTypes(Assembly assembly)
         {
             return assembly.ExportedTypes
-                .Select(type => new {type, info = type.GetTypeInfo()})
+                .Select(type => new { type, info = type.GetTypeInfo() })
                 .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
                 .Select(t => t.type);
         }

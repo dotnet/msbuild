@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -425,8 +425,7 @@ namespace Microsoft.Build.Tasks
                     if (
                         !String.IsNullOrEmpty(StronglyTypedClassName) ||
                         !String.IsNullOrEmpty(StronglyTypedNamespace) ||
-                        !String.IsNullOrEmpty(StronglyTypedFileName)
-                        )
+                        !String.IsNullOrEmpty(StronglyTypedFileName))
                     {
                         // We have no language to generate a STR, but nevertheless the user passed us a class, 
                         // namespace, and/or filename. Let them know that they probably wanted to pass a language too.
@@ -514,15 +513,13 @@ namespace Microsoft.Build.Tasks
                     // If it still hasn't been found, try to generate the appropriate path. 
                     if (pathToTool == null)
                     {
-                        pathToTool = SdkToolsPathUtility.GeneratePathToTool
-                                        (
+                        pathToTool = SdkToolsPathUtility.GeneratePathToTool(
                                             SdkToolsPathUtility.FileInfoExists,
                                             MSBuildProcessorArchitecture.CurrentProcessArchitecture,
                                             SdkToolsPath,
                                             ToolExe,
                                             Log,
-                                            true /* log errors and warnings */
-                                        );
+                                            true); /* log errors and warnings */
 
                         pathToTool = NativeMethodsShared.GetLongFilePath(pathToTool);
                     }
@@ -600,11 +597,9 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                resGenArguments.AppendFileNamesIfNotNull
-                                (
+                                resGenArguments.AppendFileNamesIfNotNull(
                                     new[] { inputFiles[i], outputFiles[i] },
-                                    ","
-                                );
+                                    ",");
                             }
                         }
                     }
@@ -616,12 +611,10 @@ namespace Microsoft.Build.Tasks
                     resGenArguments.AppendFileNamesIfNotNull(OutputFiles, " ");
 
                     // append the strongly-typed resource details
-                    resGenArguments.AppendSwitchIfNotNull
-                    (
+                    resGenArguments.AppendSwitchIfNotNull(
                         "/str:",
                         new[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
-                        ","
-                    );
+                        ",");
                 }
             }
 
