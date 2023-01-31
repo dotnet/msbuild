@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public SharedHomeDirectory(IMessageSink messageSink)
         {
             Log = new SharedTestOutputHelper(messageSink);
+            Log.WriteLine("Initializing SharedHomeDirectory for folder {0}", HomeDirectory);
             Initialize();
         }
 
@@ -63,6 +64,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             new DotnetNewCommand(Log)
                 .WithCustomHive(HomeDirectory)
+                .WithDebug()
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -71,6 +73,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             new DotnetNewCommand(Log, "install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates60Path)
                 .WithCustomHive(HomeDirectory)
+                .WithDebug()
                 .Execute()
                 .Should()
                 .ExitWith(0)
