@@ -113,15 +113,15 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            ValidateIntermediatePaths(testAsset, testProjects, setRootOutputInProject);
+            ValidateIntermediatePaths(testAsset, testProjects, setRootOutputInProject, "release");
 
             foreach (var testProject in testProjects)
             {
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "build", testProject.Name, "debug", testProject.Name + ".dll"))
+                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "build", testProject.Name, "release", testProject.Name + ".dll"))
                     .Should()
                     .Exist();
 
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "publish", testProject.Name, "debug", testProject.Name + ".dll"))
+                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "publish", testProject.Name, "release", testProject.Name + ".dll"))
                     .Should()
                     .Exist();
             }
@@ -140,21 +140,21 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            ValidateIntermediatePaths(testAsset, testProjects, setRootOutputInProject);
+            ValidateIntermediatePaths(testAsset, testProjects, setRootOutputInProject, "release");
 
             foreach (var testProject in testProjects)
             {
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "build", testProject.Name, "debug", testProject.Name + ".dll"))
+                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "build", testProject.Name, "release", testProject.Name + ".dll"))
                     .Should()
                     .Exist();
 
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "package", "debug", testProject.Name + ".1.0.0.nupkg"))
+                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "package", "release", testProject.Name + ".1.0.0.nupkg"))
                     .Should()
                     .Exist();
             }
         }
 
-        void ValidateIntermediatePaths(TestAsset testAsset, IEnumerable<TestProject> testProjects, bool setRootOutputInProject)
+        void ValidateIntermediatePaths(TestAsset testAsset, IEnumerable<TestProject> testProjects, bool setRootOutputInProject, string configuration = "debug")
         {
             foreach (var testProject in testProjects)
             {
@@ -178,7 +178,7 @@ namespace Microsoft.NET.Build.Tests
                         .Should()
                         .NotHaveSubDirectories();
 
-                    new DirectoryInfo(Path.Combine(testAsset.TestRoot, "artifacts", "obj", testProject.Name, "debug"))
+                    new DirectoryInfo(Path.Combine(testAsset.TestRoot, "artifacts", "obj", testProject.Name, configuration))
                         .Should()
                         .Exist();
                 };

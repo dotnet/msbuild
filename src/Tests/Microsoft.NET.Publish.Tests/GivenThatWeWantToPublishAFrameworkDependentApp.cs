@@ -41,8 +41,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}_{targetFramework}")
-                .WithTargetFramework(targetFramework)
-                .WithSource();
+                .WithSource()
+                .WithTargetFramework(targetFramework);
 
             var msbuildArgs = new List<string>()
             {

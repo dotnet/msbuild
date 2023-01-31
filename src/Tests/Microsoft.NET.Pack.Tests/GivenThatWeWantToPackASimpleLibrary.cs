@@ -34,7 +34,7 @@ namespace Microsoft.NET.Pack.Tests
             packageDirectory.Should().OnlyHaveFiles(new[]
             {
                 "HelloWorld.1.0.0.nupkg",
-            });
+            }, SearchOption.TopDirectoryOnly);
 
             var outputDirectory = packCommand.GetOutputDirectory();
             outputDirectory.Should().OnlyHaveFiles(new[] {

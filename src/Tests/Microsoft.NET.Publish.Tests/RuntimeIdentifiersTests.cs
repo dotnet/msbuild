@@ -112,10 +112,11 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            testProject.GetPropertyValues(testAsset.TestRoot)["RuntimeIdentifier"].Should().NotBeNullOrWhiteSpace();
+            var runtimeIdentifier = testProject.GetPropertyValues(testAsset.TestRoot)["RuntimeIdentifier"];
+            runtimeIdentifier.Should().NotBeNullOrWhiteSpace();
 
             var selfContainedExecutable = $"{testProject.Name}{Constants.ExeSuffix}";
-            string selfContainedExecutableFullPath = Path.Combine(buildCommand.GetOutputDirectory().FullName, selfContainedExecutable);
+            string selfContainedExecutableFullPath = Path.Combine(buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier).FullName, selfContainedExecutable);
 
             new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()

@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .Should().Pass()
                         .And.HaveStdOutContaining("Hello, World!");
 
-            var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin").Sub("build");
+            var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
             binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
 
             new CleanCommand(Log, projectDirectory)

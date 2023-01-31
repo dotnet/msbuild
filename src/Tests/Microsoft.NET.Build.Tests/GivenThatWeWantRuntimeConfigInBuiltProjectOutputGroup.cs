@@ -70,7 +70,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var configFile = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release").FullName, testProject.Name + ".runtimeconfig.json");
+            var configFile = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release", runtimeIdentifier: testProject.RuntimeIdentifier).FullName, testProject.Name + ".runtimeconfig.json");
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().NotContain("\"System.Runtime.TieredCompilation\"");
@@ -127,7 +127,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var configFile = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release").FullName, testProject.Name + ".runtimeconfig.json");
+            var configFile = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release", runtimeIdentifier: testProject.RuntimeIdentifier).FullName, testProject.Name + ".runtimeconfig.json");
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredCompilation\": true");

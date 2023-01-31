@@ -11,6 +11,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -42,7 +43,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDir = publishCommand.GetOutputDirectory().FullName;
+            var publishDir = publishCommand.GetOutputDirectory(runtimeIdentifier: "win-x86").FullName;
             var expectedNonSingleExeFiles = new string[] { ".dll", ".deps.json", ".runtimeconfig.json" }
                 .Select(ending => testProject.Name + ending);
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
@@ -79,7 +80,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDir = publishCommand.GetOutputDirectory().FullName;
+            var publishDir = publishCommand.GetOutputDirectory(runtimeIdentifier: "win-x86").FullName;
             var expectedSingleExeFileExtensions = new string[] { ".exe", ".pdb" };
 
             CheckPublishOutput(publishDir, expectedSingleExeFileExtensions.Select(ending => testProject.Name + ending), null);
@@ -120,7 +121,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDir = publishCommand.GetOutputDirectory().FullName;
+            var publishDir = publishCommand.GetOutputDirectory(runtimeIdentifier: "win-x86").FullName;
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             CheckPublishOutput(publishDir, expectedSingleExeFiles, null);
@@ -157,7 +158,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDir = publishCommand.GetOutputDirectory().FullName;
+            var publishDir = publishCommand.GetOutputDirectory(runtimeIdentifier: "win-x86").FullName;
             var expectedNonSingleExeFiles = new string[] { ".dll", ".deps.json", ".runtimeconfig.json" }
                 .Select(ending => testProject.Name + ending);
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
@@ -303,14 +304,14 @@ namespace Microsoft.NET.Publish.Tests
             {
                 foreach (var expectedFile in expectedFiles)
                 {
-                    File.Exists(Path.Combine(publishDir, expectedFile)).Should().BeTrue();
+                    new FileInfo(Path.Combine(publishDir, expectedFile)).Should().Exist();
                 }
             }
             if (unexpectedFiles != null)
             {
                 foreach (var unexpectedFile in unexpectedFiles)
                 {
-                    File.Exists(Path.Combine(publishDir, unexpectedFile)).Should().BeFalse();
+                    new FileInfo(Path.Combine(publishDir, unexpectedFile)).Should().NotExist();
                 }
             }
         }
