@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <GeneratedPackageId>random-name</GeneratedPackageId>
   </PropertyGroup>
 
