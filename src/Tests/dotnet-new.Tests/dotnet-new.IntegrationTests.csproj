@@ -41,6 +41,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
       public const string MicrosoftDotNetWebProjectTemplates60Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_6_0)"%3B
       public const string MicrosoftDotNetWebProjectTemplates70Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_7_0)"%3B
   }
+
+  internal class TemplatePackageVersion
+  {
+      public const string MicrosoftTemplateSearchTemplateDiscoveryPackageVersion = "$(MicrosoftTemplateEngineAbstractionsPackageVersion)"%3B
+  }
 }
       ]]>
     </GeneratedText>
