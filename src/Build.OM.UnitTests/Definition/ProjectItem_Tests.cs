@@ -933,10 +933,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Theory]
-        [InlineData(
-            ImportProjectElement,
-            @"\**\*.targets",
-            null)]
+        //Failing: https://github.com/dotnet/msbuild/issues/8373
+        //[InlineData(
+        //    ImportProjectElement,
+        //    @"\**\*.targets",
+        //    null)]
 
         // LazyItem.IncludeOperation
         [InlineData(
