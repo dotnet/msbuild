@@ -27,7 +27,7 @@
     -->
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>NetCoreAppRuntimePackageVersion</_Parameter1>
-      <_Parameter2>$(MicrosoftNETCoreAppRuntimePackageVersion)</_Parameter2>
+      <_Parameter2>7.0.1</_Parameter2>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>DefaultTestBaselinePackageVersion</_Parameter1>
@@ -37,8 +37,10 @@
 
   <ItemGroup>
     <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\AspNetSdkBaselineTest.cs" Link="AspNetSdkBaselineTest.cs" />
+    <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\StaticWebAssetsBaselineFactory.cs" Link="StaticWebAssetsBaselineFactory.cs" />
+    <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\StaticWebAssetsBaselineComparer.cs" Link="StaticWebAssetsBaselineComparer.cs" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />

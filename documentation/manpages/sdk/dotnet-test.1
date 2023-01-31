@@ -15,7 +15,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-test" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-test" "1" "2022-11-11" "" ".NET Documentation"
 .hy
 .SH dotnet test
 .PP
@@ -28,19 +28,32 @@ dotnet-test - .NET test driver used to execute unit tests.
 .nf
 \f[C]
 dotnet test [<PROJECT> | <SOLUTION> | <DIRECTORY> | <DLL> | <EXE>]
-    [-a|--test-adapter-path <ADAPTER_PATH>] [--arch <ARCHITECTURE>]
-    [--blame] [--blame-crash]
-    [--blame-crash-dump-type <DUMP_TYPE>] [--blame-crash-collect-always]
-    [--blame-hang] [--blame-hang-dump-type <DUMP_TYPE>]
+    [--test-adapter-path <ADAPTER_PATH>] 
+    [-a|--arch <ARCHITECTURE>]
+    [--blame]
+    [--blame-crash]
+    [--blame-crash-dump-type <DUMP_TYPE>]
+    [--blame-crash-collect-always]
+    [--blame-hang]
+    [--blame-hang-dump-type <DUMP_TYPE>]
     [--blame-hang-timeout <TIMESPAN>]
     [-c|--configuration <CONFIGURATION>]
     [--collect <DATA_COLLECTOR_NAME>]
-    [-d|--diag <LOG_FILE>] [-f|--framework <FRAMEWORK>]
-    [--filter <EXPRESSION>] [--interactive]
-    [-l|--logger <LOGGER>] [--no-build]
-    [--nologo] [--no-restore] [-o|--output <OUTPUT_DIRECTORY>] [--os <OS>]
-    [-r|--results-directory <RESULTS_DIR>] [--runtime <RUNTIME_IDENTIFIER>]
-    [-s|--settings <SETTINGS_FILE>] [-t|--list-tests]
+    [-d|--diag <LOG_FILE>]
+    [-f|--framework <FRAMEWORK>]
+    [-e|--environment <NAME=\[dq]VALUE\[dq]>]
+    [--filter <EXPRESSION>]
+    [--interactive]
+    [-l|--logger <LOGGER>]
+    [--no-build]
+    [--nologo]
+    [--no-restore]
+    [-o|--output <OUTPUT_DIRECTORY>]
+    [--os <OS>]
+    [--results-directory <RESULTS_DIR>]
+    [-r|--runtime <RUNTIME_IDENTIFIER>]
+    [-s|--settings <SETTINGS_FILE>]
+    [-t|--list-tests]
     [-v|--verbosity <LEVEL>]
     [<args>...]
     [[--] <RunSettings arguments>]
@@ -95,13 +108,23 @@ Path to a test project \f[I].exe\f[R] file.
 If not specified, the effect is the same as using the \f[V]DIRECTORY\f[R] argument to specify the current directory.
 .RE
 .SH OPTIONS
+.RS
+.PP
+[!WARNING] Breaking changes in options:
 .IP \[bu] 2
-\f[B]\f[VB]-a|--test-adapter-path <ADAPTER_PATH>\f[B]\f[R]
+Starting in .NET 7: switch \f[V]-a\f[R] to alias \f[V]--arch\f[R] instead of \f[V]--test-adapter-path\f[R]
+.IP \[bu] 2
+Starting in .NET 7: switch \f[V]-r\f[R] to alias \f[V]--runtime\f[R] instead of \f[V]--results-dir\f[R]
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]--test-adapter-path <ADAPTER_PATH>\f[B]\f[R]
 .RS 2
 .PP
 Path to a directory to be searched for additional test adapters.
 Only \f[I].dll\f[R] files with suffix \f[V].TestAdapter.dll\f[R] are inspected.
 If not specified, the directory of the test \f[I].dll\f[R] is searched.
+.PP
+Short form \f[V]-a\f[R] available in .NET SDK versions earlier than 7.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--arch <ARCHITECTURE>\f[B]\f[R]
@@ -120,6 +143,8 @@ Available since .NET 6 Preview 7.
 Runs the tests in blame mode.
 This option is helpful in isolating problematic tests that cause the test host to crash.
 When a crash is detected, it creates a sequence file in \f[V]TestResults/<Guid>/<Guid>_Sequence.xml\f[R] that captures the order of tests that were run before the crash.
+.PP
+This option does not create a memory dump and is not helpful when the test is hanging.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--blame-crash\f[B]\f[R] (Available since .NET 5.0 SDK)
@@ -145,6 +170,7 @@ To collect a crash dump from a native application running on .NET 5.0 or later, 
 .RS 2
 .PP
 The type of crash dump to be collected.
+Supported dump types are \f[V]full\f[R] (default), and \f[V]mini\f[R].
 Implies \f[V]--blame-crash\f[R].
 .RE
 .IP \[bu] 2
@@ -185,8 +211,9 @@ The timeout value is specified in one of the following formats:
 .PP
 When no unit is used (for example, 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used.
-For xUnit and NUnit the timeout is renewed after every test case.
-For MSTest, the timeout is used for all test cases.
+For xUnit, NUnit.
+and MSTest 2.2.4+, the timeout is renewed after every test case.
+For MSTest before version 2.2.4, the timeout is used for all test cases.
 This option is supported on Windows with \f[V]netcoreapp2.1\f[R] and later, on Linux with \f[V]netcoreapp3.1\f[R] and later, and on macOS with \f[V]net5.0\f[R] or later.
 Implies \f[V]--blame\f[R] and \f[V]--blame-hang\f[R].
 .RE
@@ -204,11 +231,10 @@ The default for most projects is \f[V]Debug\f[R], but you can override the build
 Enables data collector for the test run.
 For more information, see Monitor and analyze test run (https://aka.ms/vstest-collect).
 .PP
-To collect code coverage on any platform that is supported by .NET Core, install Coverlet (https://github.com/coverlet-coverage/coverlet/blob/master/README.md) and use the \f[V]--collect:\[dq]XPlat Code Coverage\[dq]\f[R] option.
-.PP
-On Windows, you can collect code coverage by using the \f[V]--collect \[dq]Code Coverage\[dq]\f[R] option.
-This option generates a \f[I].coverage\f[R] file, which can be opened in Visual Studio 2019 Enterprise.
+On Windows (x86, x64 and Arm64), Linux (x64) and macOS (x64), you can collect code coverage by using the \f[V]--collect \[dq]Code Coverage\[dq]\f[R] option.
 For more information, see Use code coverage and Customize code coverage analysis.
+.PP
+To collect code coverage on any platform that is supported by .NET Core, install Coverlet (https://github.com/coverlet-coverage/coverlet/blob/master/README.md) and use the \f[V]--collect \[dq]XPlat Code Coverage\[dq]\f[R] option.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]-d|--diag <LOG_FILE>\f[B]\f[R]
@@ -216,6 +242,15 @@ For more information, see Use code coverage and Customize code coverage analysis
 .PP
 Enables diagnostic mode for the test platform and writes diagnostic messages to the specified file and to files next to it.
 The process that is logging the messages determines which files are created, such as \f[V]*.host_<date>.txt\f[R] for test host log, and \f[V]*.datacollector_<date>.txt\f[R] for data collector log.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-e|--environment <NAME=\[dq]VALUE\[dq]>\f[B]\f[R]
+.RS 2
+.PP
+Sets the value of an environment variable.
+Creates the variable if it does not exist, overrides if it does exist.
+Use of this option will force the tests to be run in an isolated process.
+The option can be specified multiple times to provide multiple variables.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]-f|--framework <FRAMEWORK>\f[B]\f[R]
@@ -260,7 +295,7 @@ For more information, see Reporting test results (https://github.com/Microsoft/v
 .RS 2
 .PP
 Doesn\[cq]t build the test project before running it.
-It also implicitly sets the - \f[V]--no-restore\f[R] flag.
+It also implicitly sets the \f[V]--no-restore\f[R] flag.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--nologo\f[B]\f[R]
@@ -296,18 +331,22 @@ If you use this option, don\[cq]t use the \f[V]-r|--runtime\f[R] option.
 Available since .NET 6.
 .RE
 .IP \[bu] 2
-\f[B]\f[VB]-r|--results-directory <RESULTS_DIR>\f[B]\f[R]
+\f[B]\f[VB]--results-directory <RESULTS_DIR>\f[B]\f[R]
 .RS 2
 .PP
 The directory where the test results are going to be placed.
 If the specified directory doesn\[cq]t exist, it\[cq]s created.
 The default is \f[V]TestResults\f[R] in the directory that contains the project file.
+.PP
+Short form \f[V]-r\f[R] available in .NET SDK versions earlier than 7.
 .RE
 .IP \[bu] 2
-\f[B]\f[VB]--runtime <RUNTIME_IDENTIFIER>\f[B]\f[R]
+\f[B]\f[VB]-r|--runtime <RUNTIME_IDENTIFIER>\f[B]\f[R]
 .RS 2
 .PP
 The target runtime to test for.
+.PP
+Short form \f[V]-r\f[R] available starting in .NET SDK 7.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]-s|--settings <SETTINGS_FILE>\f[B]\f[R]

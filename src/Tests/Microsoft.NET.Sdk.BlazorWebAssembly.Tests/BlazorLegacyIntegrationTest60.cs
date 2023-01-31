@@ -90,7 +90,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             AssertManifest(manifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 publishOutputDirectory.FullName,
                 intermediateOutputPath);
         }
