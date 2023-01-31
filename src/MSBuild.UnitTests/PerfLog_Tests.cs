@@ -22,7 +22,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // Disable on Mono OSX, since Mono doesn't implement EventSource.
         public void TestPerfLogEnabledProducedLogFile()
         {
             using (TestEnvironment testEnv = TestEnvironment.Create(_output))

@@ -308,7 +308,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// there and there won't be a binding redirect to point it at 2.0.0.0.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void Regress442570_MissingBackVersionShouldWarn()
@@ -388,7 +387,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// binding redirects.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void Regress387218_UnificationRequiresStrongName()
@@ -432,7 +430,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// There should be no suggested redirect because assemblies with different cultures cannot unify.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void Regress390219_UnificationRequiresSameCulture()

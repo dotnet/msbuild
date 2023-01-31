@@ -219,7 +219,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// this was causing the GAC (api's) to crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyProcessorArchitectureDoesNotCrash()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
@@ -232,7 +231,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// this was causing the GAC (api's) to crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyProcessorArchitectureDoesNotCrashSpecificVersion()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
@@ -405,7 +403,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         // Indirect dependency
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SystemRuntimeDepends_Yes_Indirect()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();

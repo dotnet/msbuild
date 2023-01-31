@@ -20,7 +20,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void RelativePath()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file.temp", "foo");
@@ -53,7 +52,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void RelativePathWithEscaping()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file%3A.temp", "foo");

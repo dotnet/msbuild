@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -822,14 +823,9 @@ namespace Microsoft.Build.UnitTests
         * Convert a short local path to a long path.
         *
         */
-        [Fact]
+        [WindowsOnlyFact("Short names are for Windows only.")]
         public void GetLongFileNameForShortLocalPath()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Short names are for Windows only"
-            }
-
             string longPath = FileMatcher.GetLongPathName(
                 @"D:\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
@@ -859,14 +855,9 @@ namespace Microsoft.Build.UnitTests
         * Convert a short UNC path to a long path.
         *
         */
-        [Fact]
+        [WindowsOnlyFact("Short names are for Windows only.")]
         public void GetLongFileNameForShortUncPath()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Short names are for Windows only"
-            }
-
             string longPath = FileMatcher.GetLongPathName(
                 @"\\server\share\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
@@ -896,14 +887,9 @@ namespace Microsoft.Build.UnitTests
         * Convert a short relative path to a long path
         *
         */
-        [Fact]
+        [WindowsOnlyFact("Short names are for Windows only.")]
         public void GetLongFileNameForRelativePath()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Short names are for Windows only"
-            }
-
             string longPath = FileMatcher.GetLongPathName(
                 @"LONGDI~1\LONGSU~1\LONGFI~1.TXT",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
@@ -917,14 +903,9 @@ namespace Microsoft.Build.UnitTests
         * Convert a short relative path with a trailing backslash to a long path
         *
         */
-        [Fact]
+        [WindowsOnlyFact("Short names are for Windows only.")]
         public void GetLongFileNameForRelativePathPreservesTrailingSlash()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Short names are for Windows only"
-            }
-
             string longPath = FileMatcher.GetLongPathName(
                 @"LONGDI~1\LONGSU~1\",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
@@ -938,14 +919,9 @@ namespace Microsoft.Build.UnitTests
         * Convert a short relative path with doubled embedded backslashes to a long path
         *
         */
-        [Fact]
+        [WindowsOnlyFact("Short names are for Windows only.")]
         public void GetLongFileNameForRelativePathPreservesExtraSlashes()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Short names are for Windows only"
-            }
-
             string longPath = FileMatcher.GetLongPathName(
                 @"LONGDI~1\\LONGSU~1\\",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
@@ -959,14 +935,9 @@ namespace Microsoft.Build.UnitTests
         * Only part of the path might be short.
         *
         */
-        [Fact]
+        [WindowsOnlyFact("Short names are for Windows only.")]
         public void GetLongFileNameForMixedLongAndShort()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Short names are for Windows only"
-            }
-
             string longPath = FileMatcher.GetLongPathName(
                 @"c:\apple\banana\tomato\pomegr~1\orange\",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
@@ -981,14 +952,9 @@ namespace Microsoft.Build.UnitTests
         * as if they were already a long file name.
         *
         */
-        [Fact]
+        [WindowsOnlyFact("Short names are for Windows only.")]
         public void GetLongFileNameWherePartOfThePathDoesntExist()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Short names are for Windows only"
-            }
-
             string longPath = FileMatcher.GetLongPathName(
                 @"c:\apple\banana\tomato\pomegr~1\orange\chocol~1\vanila~1",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
@@ -1338,7 +1304,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Any)]
         [Theory]
         [InlineData(@"\", "**")]
         [InlineData(@"\\", "**")]
@@ -1350,8 +1315,7 @@ namespace Microsoft.Build.UnitTests
         public void DriveEnumeratingWildcardIsObservedOnAnyPlatform(string directoryPart, string wildcardPart) =>
             DriveEnumeratingWildcardIsObserved(directoryPart, wildcardPart);
 
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(@"\", "**")]
         [InlineData(@"c:\", "**")]
         [InlineData(@"c:\\", "**")]
@@ -1366,8 +1330,7 @@ namespace Microsoft.Build.UnitTests
         private void DriveEnumeratingWildcardIsObserved(string directoryPart, string wildcardPart) =>
             FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart).ShouldBeTrue();
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(@"\", "**")]
         [InlineData("/", "**/*.cs")]
         [InlineData("/", "**")]
@@ -1415,8 +1378,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(@"z:\**")]
         [InlineData(@"z:\\**")]
         [InlineData(@"z:\\\\\\\\**")]
@@ -1453,7 +1415,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Any)]
         [Theory]
         [InlineData(@"\", @"*\*.cs")]
         [InlineData(@"\\", @"*\*.cs")]
@@ -1464,8 +1425,7 @@ namespace Microsoft.Build.UnitTests
         public void DriveEnumeratingWildcardIsNotObservedOnAnyPlatform(string directoryPart, string wildcardPart) =>
             DriveEnumeratingWildcardIsNotObserved(directoryPart, wildcardPart);
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(@"c:\", "**")]
         [InlineData(@"c:\\", "**")]
         [InlineData(@"c:\\\\\\\\", "**")]
@@ -1899,8 +1859,7 @@ namespace Microsoft.Build.UnitTests
                 expectedIsLegalFileSpec);
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         // Escape pecial regex characters valid in Windows paths
         [InlineData(
             @"$()+.[^{\?$()+.[^{\$()+.[^{",
@@ -1938,8 +1897,7 @@ namespace Microsoft.Build.UnitTests
                 expectedIsLegalFileSpec);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         // Escape regex characters valid in Unix paths
         [InlineData(
             @"$()+.[^{|\?$()+.[^{|\$()+.[^{|",
