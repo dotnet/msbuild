@@ -814,7 +814,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Theory]
         [InlineData(@"/**/*.log")]
@@ -922,7 +921,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             return path;
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Theory]
         [InlineData(
