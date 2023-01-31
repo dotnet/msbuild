@@ -72,7 +72,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
         }
 
-        // TODO: Rename to Log after FancyLogger's API becomes internal
+        // TODO: Rename to Log after LiveLogger's API becomes internal
         public void Log()
         {
             if (Line == null)

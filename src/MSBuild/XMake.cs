@@ -3235,7 +3235,7 @@ namespace Microsoft.Build.CommandLine
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
 
             // TOOD: Review
-            // ProcessFancyLogger(noConsoleLogger, loggers);
+            // ProcessLiveLogger(noConsoleLogger, loggers);
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
 

@@ -55,7 +55,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
         }
 
-        // TODO: Rename to Render() after FancyLogger's API becomes internal
+        // TODO: Rename to Render() after LiveLogger's API becomes internal
         public void Log()
         {
             if (!ShouldRerender)

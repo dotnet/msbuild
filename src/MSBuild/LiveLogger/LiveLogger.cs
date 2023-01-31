@@ -54,7 +54,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private void Render()
         {
-            // Initialize FancyLoggerBuffer
+            // Initialize LiveLoggerBuffer
             TerminalBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
             TerminalBuffer.WriteNewLine(string.Empty);
