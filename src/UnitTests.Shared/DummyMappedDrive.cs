@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Versioning;
 
 namespace Microsoft.Build.UnitTests.Shared;
 
@@ -20,6 +21,12 @@ public class DummyMappedDrive : IDisposable
     public DummyMappedDrive()
     {
         _mappedPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+        if (!NativeMethodsShared.IsWindows)
+        {
+            return;
+        }
+
         Directory.CreateDirectory(_mappedPath);
         File.Create(Path.Combine(_mappedPath, "x")).Dispose();
 
@@ -51,7 +58,7 @@ public class DummyMappedDrive : IDisposable
             }
         }
 
-        if (_mapped)
+        if (_mapped && NativeMethodsShared.IsWindows)
         {
             try
             {

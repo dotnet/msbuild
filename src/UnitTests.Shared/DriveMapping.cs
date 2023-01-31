@@ -4,6 +4,7 @@
 #nullable enable
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace Microsoft.Build.UnitTests.Shared;
@@ -22,6 +23,7 @@ internal static class DriveMapping
     /// </summary>
     /// <param name="letter">Drive letter</param>
     /// <param name="path">Path to be mapped</param>
+    [SupportedOSPlatform("windows")]
     public static void MapDrive(char letter, string path)
     {
         if (!DefineDosDevice(DDD_NO_FLAG, ToDeviceName(letter), path))
@@ -34,6 +36,7 @@ internal static class DriveMapping
     /// Windows specific. Unmaps drive mapping.
     /// </summary>
     /// <param name="letter">Drive letter.</param>
+    [SupportedOSPlatform("windows")]
     public static void UnmapDrive(char letter)
     {
         if (!DefineDosDevice(DDD_REMOVE_DEFINITION, ToDeviceName(letter), null))
@@ -47,6 +50,7 @@ internal static class DriveMapping
     /// </summary>
     /// <param name="letter">Drive letter.</param>
     /// <returns>Path mapped under specified letter. Empty string if mapping not found.</returns>
+    [SupportedOSPlatform("windows")]
     public static string GetDriveMapping(char letter)
     {
         // since this is just for test purposes - let's not overcomplicate with long paths support
@@ -71,7 +75,10 @@ internal static class DriveMapping
     }
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    [SupportedOSPlatform("windows")]
     private static extern bool DefineDosDevice([In] int flags, [In] string deviceName, [In] string? path);
+
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    [SupportedOSPlatform("windows")]
     private static extern int QueryDosDevice([In] string deviceName, [Out] char[] buffer, [In] int bufSize);
 }
