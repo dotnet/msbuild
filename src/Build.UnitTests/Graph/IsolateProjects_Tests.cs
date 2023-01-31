@@ -131,7 +131,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         public IsolateProjectsTests(ITestOutputHelper testOutput)
         {
             _testOutput = testOutput;
-            _env = TestEnvironment.Create(_testOutput);
+            _env = TestEnvironment.Create(_testOutput, ignoreBuildErrorFiles: true);
 
             if (NativeMethodsShared.IsOSX)
             {
@@ -155,8 +155,6 @@ BuildEngine5.BuildProjectFilesInParallel(
         {
             _env.Dispose();
         }
-
-
 
         [Theory]
         [InlineData(BuildResultCode.Success, new string[] { })]
