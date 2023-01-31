@@ -26,10 +26,10 @@ namespace Microsoft.Build.Logging.LiveLogger
         public string TargetFramework;
         public bool Finished;
         // Line to display project info
-        public FancyLoggerBufferLine? Line;
+        public TerminalBufferLine? Line;
         // Targets
         public int FinishedTargets;
-        public FancyLoggerBufferLine? CurrentTargetLine;
+        public TerminalBufferLine? CurrentTargetLine;
         public TargetNode? CurrentTargetNode;
         // Messages, errors and warnings
         public List<MessageNode> AdditionalDetails = new();

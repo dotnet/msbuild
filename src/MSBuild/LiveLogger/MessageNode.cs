@@ -18,7 +18,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             Error
         }
         public string Message;
-        public FancyLoggerBufferLine? Line;
+        public TerminalBufferLine? Line;
         public MessageType Type;
         public string? Code;
         public string? FilePath;
