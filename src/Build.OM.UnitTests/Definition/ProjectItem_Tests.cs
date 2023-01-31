@@ -810,6 +810,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [UnixOnlyTheory]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [InlineData(@"/**/*.log")]
         [InlineData(@"$(empty)/**/*.log")]
         [InlineData(@"/$(empty)**/*.log")]
@@ -926,11 +927,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [UnixOnlyTheory]
-        // Failing: https://github.com/dotnet/msbuild/issues/8373
-        // [InlineData(
-        //    ImportProjectElement,
-        //    @"\**\*.targets",
-        //    null)]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
+        [InlineData(
+            ImportProjectElement,
+            @"\**\*.targets",
+            null)]
 
         // LazyItem.IncludeOperation
         [InlineData(

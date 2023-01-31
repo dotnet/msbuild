@@ -12,7 +12,7 @@ namespace Microsoft.Build.UnitTests.Shared;
 internal static class DriveMapping
 {
     private const int ERROR_FILE_NOT_FOUND = 2;
-    // private const int ERROR_INSUFFICIENT_BUFFER = 122;
+    private const int ERROR_INSUFFICIENT_BUFFER = 122;
     private const int DDD_REMOVE_DEFINITION = 2;
     private const int DDD_NO_FLAG = 0;
     // extra space for '\??\'. Not counting for long paths support in tests.
@@ -55,7 +55,8 @@ internal static class DriveMapping
     {
         // since this is just for test purposes - let's not overcomplicate with long paths support
         char[] buffer = new char[MAX_PATH];
-        if (QueryDosDevice(ToDeviceName(letter), buffer, buffer.Length) == 0)
+
+        while (QueryDosDevice(ToDeviceName(letter), buffer, buffer.Length) == 0)
         {
             // Return empty string if the drive is not mapped
             int err = Marshal.GetLastWin32Error();
@@ -63,15 +64,22 @@ internal static class DriveMapping
             {
                 return string.Empty;
             }
-            NativeMethodsShared.ThrowExceptionForErrorCode(err);
+
+            if (err != ERROR_INSUFFICIENT_BUFFER)
+            {
+                NativeMethodsShared.ThrowExceptionForErrorCode(err);
+            }
+
+            buffer = new char[buffer.Length * 4];
         }
+
         // Translate from the native path semantic - starting with '\??\'
         return new string(buffer, 4, buffer.Length - 4);
     }
 
     private static string ToDeviceName(char letter)
     {
-        return new string(char.ToUpper(letter), 1) + ":";
+        return $"{char.ToUpper(letter)}:";
     }
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
