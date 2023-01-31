@@ -473,7 +473,7 @@ namespace Microsoft.Build.UnitTests
                 // Temp folder might have been deleted by other TestEnvironment logic
             }
 
-            return files.ToArray();
+            return files.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
         }
 
         public override void AssertInvariant(ITestOutputHelper output)
@@ -629,12 +629,12 @@ namespace Microsoft.Build.UnitTests
         private readonly string _previousDebugEngineEnv;
         private readonly string _previousDebugPath;
 
-        public TransientDebugEngine(bool state)
+        public TransientDebugEngine(bool enabled)
         {
             _previousDebugEngineEnv = Environment.GetEnvironmentVariable("MSBuildDebugEngine");
             _previousDebugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 
-            if (state)
+            if (enabled)
             {
                 Environment.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", FileUtilities.TempFileDirectory);
