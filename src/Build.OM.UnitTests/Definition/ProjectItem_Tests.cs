@@ -933,8 +933,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Theory]
-        //Failing: https://github.com/dotnet/msbuild/issues/8373
-        //[InlineData(
+        // Failing: https://github.com/dotnet/msbuild/issues/8373
+        // [InlineData(
         //    ImportProjectElement,
         //    @"\**\*.targets",
         //    null)]
