@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -1680,7 +1680,9 @@ namespace Microsoft.Build.Execution
                 foreach (var item in GetItems(itemType))
                 {
                     if (string.Equals(item.EvaluatedInclude, evaluatedInclude, StringComparison.OrdinalIgnoreCase))
+                    {
                         yield return item;
+                    }
                 }
             }
             else
@@ -1688,7 +1690,9 @@ namespace Microsoft.Build.Execution
                 foreach (var item in GetItemsByEvaluatedInclude(evaluatedInclude))
                 {
                     if (string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase))
+                    {
                         yield return item;
+                    }
                 }
             }
         }
@@ -2233,8 +2237,7 @@ namespace Microsoft.Build.Execution
                 if (
                        String.Equals(toolsVersion, "2.0", StringComparison.OrdinalIgnoreCase) ||
                        String.Equals(toolsVersion, "3.0", StringComparison.OrdinalIgnoreCase) ||
-                       String.Equals(toolsVersion, "3.5", StringComparison.OrdinalIgnoreCase)
-                   )
+                       String.Equals(toolsVersion, "3.5", StringComparison.OrdinalIgnoreCase))
                 {
                     // Spawn the Orcas SolutionWrapperProject generator.  
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedExplicitToolsVersion", toolsVersion);
@@ -2450,8 +2453,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowInternalLength(targetName, nameof(targetName));
             ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), "Target {0} already exists.", targetName);
 
-            ProjectTargetInstance target = new ProjectTargetInstance
-                (
+            ProjectTargetInstance target = new ProjectTargetInstance(
                 targetName,
                 condition ?? String.Empty,
                 inputs ?? String.Empty,
@@ -2472,8 +2474,7 @@ namespace Microsoft.Build.Execution
                 String.IsNullOrEmpty(afterTargets) ? null : ElementLocation.EmptyLocation,
                 new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(new List<ProjectTargetInstanceChild>()),
                 new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(new List<ProjectOnErrorInstance>()),
-                parentProjectSupportsReturnsAttribute
-                );
+                parentProjectSupportsReturnsAttribute);
 
             _actualTargets[targetName] = target;
 
@@ -2511,9 +2512,8 @@ namespace Microsoft.Build.Execution
         /// <param name="sdkResolverService"></param>
         /// <param name="submissionId"></param>
         /// <returns>The ProjectRootElement for the root traversal and each of the metaprojects.</returns>
-        private static ProjectInstance[] GenerateSolutionWrapper
+        private static ProjectInstance[] GenerateSolutionWrapper(
 
-            (
                 string projectFile,
                 IDictionary<string, string> globalProperties,
                 string toolsVersion,
@@ -2521,8 +2521,7 @@ namespace Microsoft.Build.Execution
                 BuildEventContext projectBuildEventContext,
                 IReadOnlyCollection<string> targetNames,
                 ISdkResolverService sdkResolverService,
-                int submissionId
-            )
+                int submissionId)
         {
             SolutionFile sp = SolutionFile.Parse(projectFile);
 
@@ -2566,8 +2565,8 @@ namespace Microsoft.Build.Execution
         /// <param name="submissionId"></param>
         /// <returns>An appropriate ProjectRootElement</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM
-        (string projectFile,
+        private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM(
+        string projectFile,
             IDictionary<string, string> globalProperties,
             string toolsVersion,
             ProjectRootElementCacheBase projectRootElementCache,
@@ -2599,8 +2598,7 @@ namespace Microsoft.Build.Execution
                     if (environmentVariableName != null &&
                         (!XmlUtilities.IsValidElementName(environmentVariableName)
                         || XMakeElements.ReservedItemNames.Contains(environmentVariableName)
-                        || ReservedPropertyNames.IsReservedProperty(environmentVariableName))
-                       )
+                        || ReservedPropertyNames.IsReservedProperty(environmentVariableName)))
                     {
                         if (clearedVariables == null)
                         {
@@ -2724,14 +2722,12 @@ namespace Microsoft.Build.Execution
                 toolsVersionLocation = xml.ToolsVersionLocation;
             }
 
-            var toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-            (
+            var toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                 explicitToolsVersion,
                 xml.ToolsVersion,
                 buildParameters.GetToolset,
                 buildParameters.DefaultToolsVersion,
-                out var usingDifferentToolsVersionFromProjectFile
-            );
+                out var usingDifferentToolsVersionFromProjectFile);
 
             _usingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 

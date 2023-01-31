@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -25,9 +25,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             string prefix = !String.IsNullOrEmpty(r.Prefix) ? r.Prefix : nsmgr.LookupPrefix(r.NamespaceURI);
             if (!String.IsNullOrEmpty(prefix))
+            {
                 return prefix + ":" + r.LocalName;
+            }
             else
+            {
                 return r.LocalName;
+            }
         }
 
         // NOTE: XmlDocument.ImportNode munges "xmlns:asmv2" to "xmlns:d1p1" for some reason, use XmlUtil.CloneElementToDocument instead
@@ -60,7 +64,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int i = s.IndexOf(':');
             if (i < 0)
+            {
                 return s;
+            }
+
             return s.Substring(i + 1);
         }
 
@@ -144,7 +151,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     s = a.GetManifestResourceStream(String.Format(CultureInfo.InvariantCulture, "{0}.{1}", typeof(Util).Namespace, filename));
 
                     if (s != null)
+                    {
                         return s;
+                    }
 
                     // Next look in current directory...
                     try
@@ -155,7 +164,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                     }
                     if (s != null)
+                    {
                         return s;
+                    }
                 }
 
                 // Lastly, look at full specified uri path...
@@ -170,7 +181,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                 }
                 if (s != null)
+                {
                     return s;
+                }
 
                 // Didn't find the resource...
                 Debug.Fail(String.Format(CultureInfo.CurrentCulture, "ResourceResolver could not find file '{0}'", filename));

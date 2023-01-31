@@ -58,6 +58,10 @@
     </Compile>
     <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
+    
+    <Compile Include="..\Shared\UnitTests\LongPathSupportDisabledFactAttribute.cs">
+      <Link>Shared\LongPathSupportDisabledFactAttribute.cs</Link>
+    </Compile>
 
     <EmbeddedResource Include="SampleResx" />
     <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -117,12 +117,10 @@ namespace Microsoft.Build.BackEnd
             }
 
             // It's not null or invalid, so it should be a valid parameter type.
-            ErrorUtilities.VerifyThrow
-                (
+            ErrorUtilities.VerifyThrow(
                     TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
                     "How did we manage to get a task parameter of type {0} that isn't a valid parameter type?",
-                    wrappedParameterType
-                );
+                    wrappedParameterType);
 
             if (wrappedParameterType.IsArray)
             {
@@ -179,9 +177,9 @@ namespace Microsoft.Build.BackEnd
                     _parameterType = TaskParameterType.String;
                     _wrappedParameter = (string)Convert.ChangeType(wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
                 }
-                    // Also stringify known common value types, to avoid calling
-                    // TranslateDotNet when they'll just be stringified on the
-                    // output side
+                // Also stringify known common value types, to avoid calling
+                // TranslateDotNet when they'll just be stringified on the
+                // output side
                 else if (wrappedParameterType == typeof(bool))
                 {
                     _parameterType = TaskParameterType.Bool;
@@ -549,7 +547,7 @@ namespace Microsoft.Build.BackEnd
             ITaskItem,
             ITaskItem2
 #if !TASKHOST
-            ,IMetadataContainer
+            , IMetadataContainer
 #endif
         {
             /// <summary>

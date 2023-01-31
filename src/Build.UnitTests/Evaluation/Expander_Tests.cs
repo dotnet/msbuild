@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -32,6 +32,7 @@ using Xunit;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -259,7 +260,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsItemSpecModifier()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -320,7 +320,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChained1()
         {
             ProjectHelpers.CreateEmptyProjectInstance();
@@ -337,7 +336,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChained2()
         {
             ProjectHelpers.CreateEmptyProjectInstance();
@@ -365,7 +363,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChainedProject1()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -590,9 +587,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogContains("[foo;bar]");
         }
 
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/4363")]
+        [LongPathSupportDisabledFact(fullFrameworkOnly: true, additionalMessage: "https://github.com/dotnet/msbuild/issues/4363")]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -612,15 +607,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogContains("MSB4198");
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Cannot have invalid characters in file name on Unix.")]
         public void ExpandItemVectorFunctionsBuiltIn_InvalidCharsError()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Cannot have invalid characters in file name on Unix"
-            }
-
             string content = @"
  <Project DefaultTargets=`t`>
 
@@ -644,7 +633,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsItemSpecModifier2()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -876,8 +864,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [LongPathSupportDisabledFact]
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -897,9 +884,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->Metadata function
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -938,8 +923,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [LongPathSupportDisabledFact]
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -959,9 +943,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->WithMetadataValue function
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1000,8 +982,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [LongPathSupportDisabledFact]
         public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1021,9 +1002,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void InvalidPathAndMetadataItemInvalidWindowsPathChars3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1039,9 +1018,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void InvalidPathInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
@@ -1057,9 +1034,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4248");
         }
 
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "new enough dotnet.exe transparently opts into long paths")]
+        [LongPathSupportDisabledFact(fullFrameworkOnly: true, additionalMessage: "new enough dotnet.exe transparently opts into long paths")]
         public void PathTooLongInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
@@ -1278,11 +1253,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <param name="primaryItemsByName"></param>
         /// <param name="secondaryItemsByName"></param>
         /// <param name="itemMetadata"></param>
-        private void CreateComplexPropertiesItemsMetadata
-            (
+        private void CreateComplexPropertiesItemsMetadata(
             out Lookup readOnlyLookup,
-            out StringMetadataTable itemMetadata
-            )
+            out StringMetadataTable itemMetadata)
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
             Dictionary<string, string> itemMetadataTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1692,8 +1665,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped(@"$(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@XXXXDBDirectory)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// In the general case, we should still error for properties that incorrectly miss the Registry: prefix, like
@@ -1710,12 +1682,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped(@"$(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectoryX)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyString()
         {
@@ -1737,8 +1707,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyBinary()
         {
@@ -1763,8 +1732,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyDWord()
         {
@@ -1786,8 +1754,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyExpandString()
         {
@@ -1810,8 +1777,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyQWord()
         {
@@ -1833,8 +1799,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void RegistryPropertyMultiString()
         {
@@ -1883,7 +1848,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGetPathToReferenceAssembliesAsFunction()
         {
             if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48) == null)
@@ -2216,7 +2180,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDictionaryReturn()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2297,8 +2260,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff($(Value)))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -2316,8 +2278,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Lgg)]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - invalid since properties don't have properties and don't support '.' in them
@@ -2334,8 +2295,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("$(SomeStuff.ToUpperInvariant().Foo)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - properties don't take arguments
@@ -2352,8 +2312,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff($(System.DateTime.Now)))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -2370,8 +2329,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("$(SomeStuff.ToLowerInvariant()_goop)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - functions with invalid arguments
@@ -2387,8 +2345,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Substring(HELLO!))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - functions with invalid arguments
@@ -2404,8 +2361,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Substring(-10))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function that calls a static method with quoted arguments
@@ -2420,8 +2376,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
                 expander.ExpandIntoStringLeaveEscaped("$(([System.DateTime]::Now).ToString(\"MM.dd.yyyy\"))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expand property function - we don't handle metadata functions
@@ -2533,8 +2488,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that is only available when MSBUILDENABLEALLPROPERTYFUNCTIONS=1
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/coreclr/issues/15662")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "https://github.com/dotnet/coreclr/issues/15662")]
         public void PropertyStaticFunctionAllEnabled()
         {
             using (var env = TestEnvironment.Create())
@@ -2815,20 +2769,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Theory]
         [InlineData(
             "$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Create($([System.Runtime.InteropServices.OSPlatform]::$$platform$$.ToString())))))",
-            "True"
-        )]
+            "True")]
         [InlineData(
             @"$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::$$platform$$)))",
-            "True"
-        )]
+            "True")]
         [InlineData(
             "$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)",
-            "$$architecture$$"
-        )]
+            "$$architecture$$")]
         [InlineData(
             "$([MSBuild]::IsOSPlatform($$platform$$))",
-            "True"
-        )]
+            "True")]
         public void PropertyFunctionRuntimeInformation(string propertyFunction, string expectedExpansion)
         {
             Func<string, string, string, string> formatString = (aString, platform, architecture) => aString
@@ -3244,7 +3194,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that tests for existence of the task host
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDoesTaskHostExist()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3261,7 +3210,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that tests for existence of the task host
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDoesTaskHostExist_Whitespace()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3309,8 +3257,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 // We should have failed before now
                 Assert.True(false);
-            }
-           );
+            });
         }
 
 #if FEATURE_APPDOMAIN
@@ -3318,7 +3265,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that tests for existence of the task host
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDoesTaskHostExist_Evaluated()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3371,7 +3317,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionStaticMethodFileAttributes()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3483,8 +3428,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(String.Empty, result);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValue()
         {
@@ -3508,8 +3452,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValueDefault()
         {
@@ -3533,8 +3476,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView1()
         {
@@ -3558,8 +3500,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView2()
         {
@@ -3646,8 +3587,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "cat1s"
             };
             int[] hashes = stringsToHash.Select(toHash =>
-                (int)expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance)
-                ).ToArray();
+                (int)expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance))
+                .ToArray();
             for (int a = 0; a < hashes.Length; a++)
             {
                 for (int b = a; b < hashes.Length; b++)
@@ -3772,7 +3713,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {"$([MSBuild]::Escape(';'))", "%3b"},
                 new string[] {"$([MSBuild]::UnEscape('%3b'))", ";"},
                 new string[] {"$(e.Substring($(e.Length)))", ""},
-                new string[] {"$([System.Int32]::MaxValue)", System.Int32.MaxValue.ToString()},
+                new string[] {"$([System.Int32]::MaxValue)", System.Int32.MaxValue.ToString() },
                 new string[] {"x$()", "x"},
                 new string[] {"A$(Reg:A)A", "AA"},
                 new string[] {"A$(Reg:AA)", "A"},
@@ -3972,8 +3913,7 @@ $(
                 }
                 Assert.True(
                         !success || caughtException,
-                        "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'"
-                    );
+                        "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'");
             }
         }
 
@@ -4293,6 +4233,19 @@ $(
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(properties, FileSystems.Default);
             string result = expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             result.ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData("net6.0", "netstandard2.0", "")]
+        [InlineData("net6.0-windows", "netstandard2.0", "")]
+        [InlineData("net6.0-windows", "net6.0", "net6.0-windows")]
+        [InlineData("netstandard2.0;net6.0", "net6.0", "net6.0")]
+        [InlineData("netstandard2.0;net6.0-windows", "net6.0", "net6.0-windows")]
+        [InlineData("netstandard2.0;net6.0-windows", "net6.0;netstandard2.0;net472", "netstandard2.0%3bnet6.0-windows")]
+        [InlineData("netstandard2.0;net472", "net6.0;netstandard2.0;net472", "netstandard2.0%3bnet472")]
+        public void PropertyFunctionFilterTargetFrameworks(string incoming, string filter, string expected)
+        {
+            TestPropertyFunction($"$([MSBuild]::FilterTargetFrameworks('{incoming}', '{filter}'))", "_", "_", expected);
         }
 
         [Fact]

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -15,8 +18,7 @@ namespace Microsoft.Build.Engine.UnitTests
     {
         private const string ExpectedEventMessage = "03767942CDB147B98D0ECDBDE1436DA3";
         private const string ExpectedEventCode = "0BF68998";
-
-        ITestOutputHelper _output;
+        private ITestOutputHelper _output;
 
         public WarningsAsMessagesAndErrorsTests(ITestOutputHelper output)
         {
@@ -170,9 +172,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         {"Foo", ExpectedEventCode},
                     },
-                    warningsAsMessages: "$(Foo)"
-                )
-            );
+                    warningsAsMessages: "$(Foo)"));
 
             VerifyBuildMessageEvent(logger);
         }
@@ -213,8 +213,7 @@ namespace Microsoft.Build.Engine.UnitTests
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(
                 GetTestProject(
                     warningsAsMessages: ExpectedEventCode,
-                    warningsAsErrors: ExpectedEventCode
-                    ));
+                    warningsAsErrors: ExpectedEventCode));
 
             VerifyBuildMessageEvent(logger);
         }
@@ -275,7 +274,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Theory]
-        
+
         [InlineData("MSB1235", "MSB1234", "MSB1234", "MSB1234", false)] // Log MSB1234, treat as error via MSBuildWarningsAsErrors
         [InlineData("MSB1235", "", "MSB1234", "MSB1234", true)] // Log MSB1234, expect MSB1234 as error via MSBuildTreatWarningsAsErrors
         [InlineData("MSB1234", "MSB1234", "MSB1234", "MSB4181", true)]// Log MSB1234, MSBuildWarningsAsMessages takes priority

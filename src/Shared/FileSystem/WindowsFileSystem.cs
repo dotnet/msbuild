@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -34,9 +34,9 @@ namespace Microsoft.Build.Shared.FileSystem
     {
         private static readonly WindowsFileSystem Instance = new();
 
-        public new static WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
+        public static new WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
 
-        private WindowsFileSystem(){ }
+        private WindowsFileSystem() { }
 
         public override IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
         {

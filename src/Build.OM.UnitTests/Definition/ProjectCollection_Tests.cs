@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -132,7 +132,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (path != null) File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -769,8 +772,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Console.WriteLine(ex.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -838,8 +840,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 
@@ -874,8 +883,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 
@@ -910,8 +926,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 
@@ -1073,7 +1096,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #else
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
 #endif
-        [Trait("Category", "mono-osx-failing")]
         public void DefaultToolsVersion2()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20) != null)
