@@ -15,13 +15,6 @@ namespace Microsoft.Build.UnitTests
 {
     public class DebugUtils_Tests
     {
-        private readonly ITestOutputHelper _testOutput;
-
-        public DebugUtils_Tests(ITestOutputHelper testOutput)
-        {
-            _testOutput = testOutput;
-        }
-
         [Fact]
         public void DumpExceptionToFileShouldWriteInTempPathByDefault()
         {
