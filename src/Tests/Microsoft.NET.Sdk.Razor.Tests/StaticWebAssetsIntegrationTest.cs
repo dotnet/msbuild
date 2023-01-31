@@ -762,9 +762,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             publish.WithWorkingDirectory(ProjectDirectory.Path);
             publish.Execute("/p:AppendTargetFrameworkToOutputPath=false", "/bl").Should().Pass();
 
-            //  Hard code intermediate output path here to account for AppendTargetFrameworkToOutputPath=false
+            //  Hard code output paths here to account for AppendTargetFrameworkToOutputPath=false
             var intermediateOutputPath = Path.Combine(ProjectDirectory.Path, "AppWithPackageAndP2PReference", "obj", "Debug");
-            var publishPath = publish.GetOutputDirectory("", "Debug").ToString();
+            var publishPath = Path.Combine(ProjectDirectory.Path, "AppWithPackageAndP2PReference", "bin", "Debug", "publish");
 
             // GenerateStaticWebAssetsManifest should generate the manifest file.
             var path = Path.Combine(intermediateOutputPath, "staticwebassets.build.json");

@@ -46,8 +46,11 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var exe = Path.Combine( //find the platform directory
-                buildCommand.GetOutputDirectory().FullName,
+            var exe = Path.Combine(
+                //find the platform directory
+                new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
+                "Debug",
+                ToolsetInfo.CurrentTargetFramework,
                 "CSConsoleApp.exe");
 
             var runCommand = new RunExeCommand(Log, exe);

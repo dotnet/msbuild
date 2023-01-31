@@ -184,8 +184,16 @@ namespace Microsoft.NET.TestFramework
                 configuration = configuration ?? string.Empty;
                 runtimeIdentifier = runtimeIdentifier ?? string.Empty;
 
-                string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration, targetFramework, runtimeIdentifier);
-                return output;
+                if (IsSdkProject)
+                {
+                    string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration, targetFramework, runtimeIdentifier);
+                    return output;
+                }
+                else
+                {
+                    string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration);
+                    return output;
+                }
             }
         }
 
