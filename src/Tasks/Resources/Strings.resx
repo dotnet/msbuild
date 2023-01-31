@@ -2178,6 +2178,9 @@
   <data name="WriteLinesToFile.SkippingUnchangedFile">
     <value>Skipping write to file "{0}" because content would not change.</value>
   </data>
+  <data name="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
+    <value>'WriteOnlyWhenDifferent' attribute on "{0}" only takes effect when 'Overwrite="true"'.</value>
+  </data>
   <!--
         The GetReferenceAssemblyPaths message bucket is: MSB3642 - MSB3646.
         If this bucket overflows, pls. contact 'vsppbdev'.
