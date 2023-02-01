@@ -813,8 +813,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class Bar : IFoo
                         {
-                            int Foo.IFoo.FooField { get { throw null; } set { } }
-                            void Foo.IFoo.FooMethod() { }
+                            int IFoo.FooField { get { throw null; } set { } }
+                            void IFoo.FooMethod() { }
                         }
 
                         public partial interface IFoo
@@ -869,7 +869,102 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         public const int CurrentEra = 0;
                     }
                 }
-                """);
+                """
+            );
+        }
+
+        [Fact]
+        public void TestTypeParameterVarianceGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public delegate void Action<in T>(T obj);
+                    public partial interface IAsyncEnumerable<out T>
+                    {
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public delegate void Action<in T>(T obj);
+                    public partial interface IAsyncEnumerable<out T>
+                    {
+                    }
+                }
+                """
+            );
+        }
+
+        [Fact]
+        public void TestRefMembersGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public class Bar<T>
+                    {
+                    #pragma warning disable CS8597
+                        public ref T GetPinnableReference() { throw null; }
+                        public ref readonly T this[int index] { get { throw null; } }
+                        public ref int P { get { throw null; } }
+                    #pragma warning restore CS8597
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial class Bar<T>
+                    {
+                    #pragma warning disable CS8597
+                        public ref readonly T this[int index] { get { throw null; } }
+                        public ref int P { get { throw null; } }
+                        public ref T GetPinnableReference() { throw null; }
+                    #pragma warning restore CS8597
+                    }
+                }
+                """
+            );
+        }
+
+        [Fact]
+        public void TestDefaultConstraintOnOverrideGeneration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public abstract partial class A
+                    {
+                        public abstract TResult? Accept<TResult>(int a);
+                    }
+
+                    public sealed partial class B : A
+                    {
+                    #pragma warning disable CS8597
+                        public override TResult? Accept<TResult>(int a) where TResult : default { throw null; }
+                    #pragma warning restore CS8597
+                    } 
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public abstract partial class A
+                    {
+                        public abstract TResult? Accept<TResult>(int a);
+                    }
+
+                    public sealed partial class B : A
+                    {
+                    #pragma warning disable CS8597
+                        public override TResult? Accept<TResult>(int a) where TResult : default { throw null; }
+                    #pragma warning restore CS8597
+                    }
+                }
+                """
+            );
         }
     }
 }

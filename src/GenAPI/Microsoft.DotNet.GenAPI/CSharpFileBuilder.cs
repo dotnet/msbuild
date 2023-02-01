@@ -76,7 +76,6 @@ namespace Microsoft.DotNet.GenAPI
                 .WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation)
                 .Rewrite(new TypeDeclarationCSharpSyntaxRewriter())
                 .Rewrite(new BodyBlockCSharpSyntaxRewriter(_exceptionMessage))
-                .Rewrite(new FieldDeclarationCSharpSyntaxRewriter())
                 .NormalizeWhitespace();
 
             Document document = project.AddDocument(assembly.Name, compilationUnit);

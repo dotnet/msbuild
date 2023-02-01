@@ -36,8 +36,6 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             // visit subtree first to normalize type names.
             MethodDeclarationSyntax? rs = (MethodDeclarationSyntax?)base.VisitMethodDeclaration(node);
             if (rs is null) return rs;
-            // TODO: Adds support for destructor generation. Remove after the issue https://github.com/dotnet/arcade/issues/11938 is fixed.
-            if (rs.ReturnType.ToString() == string.Empty) return rs;
 
             if (rs.Modifiers.Where(token => token.IsKind(SyntaxKind.AbstractKeyword)).Any() || rs.Body is null)
             {

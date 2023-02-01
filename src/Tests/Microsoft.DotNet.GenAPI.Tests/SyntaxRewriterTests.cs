@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
 {
     public class SyntaxRewriterTests
     {
-        protected void Compare(CSharpSyntaxRewriter rewriter, string original, string expected)
+        protected static void Compare(CSharpSyntaxRewriter rewriter, string original, string expected)
         {
             StringWriter _stringWriter = new();
             SyntaxNode root = CSharpSyntaxTree.ParseText(original).GetRoot();
@@ -22,13 +22,13 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 .WriteTo(_stringWriter);
 
             StringBuilder stringBuilder = _stringWriter.GetStringBuilder();
-            var resulted = stringBuilder.ToString();
+            string resulted = stringBuilder.ToString();
 
             Assert.True(resulted.Equals(expected),
                 $"Expected:\n{expected}\nResulted:\n{resulted}");
         }
 
-        protected void CompareSyntaxTree(CSharpSyntaxRewriter rewriter, string original, string expected)
+        protected static void CompareSyntaxTree(CSharpSyntaxRewriter rewriter, string original, string expected)
         {
             StringWriter _stringWriter = new();
             SyntaxNode root = CSharpSyntaxTree.ParseText(original).GetRoot();
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 .WriteTo(_stringWriter);
 
             StringBuilder stringBuilder = _stringWriter.GetStringBuilder();
-            var resulted = stringBuilder.ToString();
+            string resulted = stringBuilder.ToString();
 
             SyntaxTree resultedSyntaxTree = CSharpSyntaxTree.ParseText(resulted);
             SyntaxTree expectedSyntaxTree = CSharpSyntaxTree.ParseText(expected);
@@ -350,33 +350,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     class B
                     {
                         public static bool operator ==(B lhs, B rhs) { throw new PlatformNotSupportedException("Not implemented"); }
-                    }
-                }
-                """);
-        }
-    }
-
-    public class FieldDeclarationSyntaxRewriterTests : SyntaxRewriterTests
-    {
-        [Fact]
-        public void TestConstantFieldGeneration()
-        {
-            CompareSyntaxTree(new FieldDeclarationCSharpSyntaxRewriter(),
-                original: """
-                namespace Foo
-                {
-                    class Bar
-                    {
-                        public static const int CurrentEra = 0;
-                    }
-                }
-                """,
-                expected: """
-                namespace Foo
-                {
-                    class Bar
-                    {
-                        public const int CurrentEra = 0;
                     }
                 }
                 """);
