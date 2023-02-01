@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -36,8 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             result.ShouldBe(true);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void CanResolveLongNonNormalizedHintPath()
         {
             var tempfolder = _env.DefaultTestDirectory.CreateDirectory("tempfolder_for_CanResolveLongHintPath");

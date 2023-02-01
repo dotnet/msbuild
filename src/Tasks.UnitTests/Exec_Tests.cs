@@ -15,6 +15,7 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -51,7 +52,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile()
@@ -74,7 +74,6 @@ namespace Microsoft.Build.UnitTests
         /// lying around.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
             using (var testEnvironment = TestEnvironment.Create())
@@ -168,8 +167,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void WindowsNewLineCharactersInCommandOnUnix()
         {
             var exec = PrepareExec("echo hello\r\n\r\n");
@@ -246,8 +244,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("[" + working + "]");
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]   // UNC is Windows-Only
+        [WindowsOnlyFact(additionalMessage: "UNC is Windows-Only.")]
         public void UNCWorkingDirectoryUsed()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -475,10 +472,9 @@ namespace Microsoft.Build.UnitTests
         /// Exec task will NOT use UTF8 when UTF8 Never is specified and non-ANSI characters are in the Command
         /// <remarks>Exec task will fail as the cmd processor will not be able to run the command.</remarks>
         /// </summary>
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("Never")]
         [InlineData("System")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void ExecTaskUtf8NeverWithNonAnsi(string useUtf8)
         {
             RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8, false);
@@ -903,8 +899,7 @@ namespace Microsoft.Build.UnitTests
         /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
         /// in the current system encoding.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void CanEncodeTest()
         {
             var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
@@ -968,7 +963,6 @@ echo line 3"" />
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EndToEndMultilineExec_EscapeSpecialCharacters()

@@ -25,7 +25,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TaskNodesDieAfterBuild()
         {
             using (TestEnvironment env = TestEnvironment.Create())

@@ -5,12 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 {
     internal static class ANSIBuilder
     {
         public static string ANSIRegex = @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~]|(?:\]8;;.*?\x1b\\))";
-        // TODO: This should replace ANSIRegex once FancyLogger's API is internal
+        // TODO: This should replace ANSIRegex once LiveLogger's API is internal
         public static Regex ANSIRegexRegex = new Regex(ANSIRegex);
         public static string ANSIRemove(string text)
         {
