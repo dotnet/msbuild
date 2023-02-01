@@ -61,7 +61,7 @@
 
   <Target Name="CopyExternalSourceFilesIntoProject" BeforeTargets="BeforeBuild">
     <ItemGroup>
-      <WcwidthFiles Include="$(PkgWcwidth_Sources)\contentFiles\cs\net5.0\External\**\*" />
+      <WcwidthFiles Include="$(PkgWcwidth_Sources)\contentFiles\cs\net6.0\External\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(WcwidthFiles)" DestinationFolder="$(BaseIntermediateOutputPath)/External/%(RecursiveDir)" />
     <ItemGroup>
