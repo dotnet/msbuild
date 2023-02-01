@@ -15,8 +15,8 @@
     <ProjectReference Include="..\..\Cli\dotnet-new3\dotnet-new3.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
-    <PackageReference Include="Verify.Xunit" Version="19.8.0" />
-    <PackageReference Include="Verify.DiffPlex" Version="2.1.0" />
+    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="Verify.DiffPlex" />
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.TestHelper" Version="$(MicrosoftTemplateEngineTestHelperPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="$(MicrosoftTemplateEngineAuthoringTemplateVerifierVersion)" />
