@@ -796,12 +796,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
         /// </summary>
         [WindowsOnlyTheory]
-        [InlineData(@"z:\**\*.log")]
-        [InlineData(@"z:$(empty)\**\*.log")]
-        [InlineData(@"z:\**")]
-        [InlineData(@"z:\\**")]
-        [InlineData(@"z:\\\\\\\\**")]
-        [InlineData(@"z:\**\*.cs")]
+        [InlineData(@"%DRIVE%:\**\*.log")]
+        [InlineData(@"%DRIVE%:$(empty)\**\*.log")]
+        [InlineData(@"%DRIVE%:\**")]
+        [InlineData(@"%DRIVE%:\\**")]
+        [InlineData(@"%DRIVE%:\\\\\\\\**")]
+        [InlineData(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
             var mappedDrive = GetDummyMappedDrive();
@@ -882,20 +882,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [WindowsOnlyTheory]
         [InlineData(
             ImportProjectElement,
-            @"z:\**\*.targets",
+            @"%DRIVE%:\**\*.targets",
             null)]
 
         // LazyItem.IncludeOperation
         [InlineData(
             ItemWithIncludeAndExclude,
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
         // LazyItem.IncludeOperation for Exclude
         [InlineData(
             ItemWithIncludeAndExclude,
             @"$(EmptyProperty)\*.cs",
-            @"z:\$(Microsoft_WindowsAzure_EngSys)**")]
+            @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
             var mappedDrive = GetDummyMappedDrive();
@@ -918,10 +918,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static string UpdatePathToMappedDrive(string path, char driveLetter)
         {
+            const string drivePlaceholder = "%DRIVE%";
             // if this seems to be rooted path - replace with the dummy mount
-            if (!string.IsNullOrEmpty(path) && path.Length > 1 && path[1] == ':')
+            if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
             {
-                path = driveLetter + path.Substring(1);
+                path = driveLetter + path.Substring(drivePlaceholder.Length);
             }
             return path;
         }
