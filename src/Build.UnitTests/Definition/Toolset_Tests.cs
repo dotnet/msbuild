@@ -12,6 +12,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -173,8 +174,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal("v13.0", t.DefaultSubToolsetVersion);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
         public void TestDefaultSubToolsetFor40()
         {
             Toolset t = ProjectCollection.GlobalProjectCollection.GetToolset("4.0");

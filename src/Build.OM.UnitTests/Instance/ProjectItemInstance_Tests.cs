@@ -17,6 +17,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using Xunit;
 using Shouldly;
 using System.Linq;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -908,8 +909,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Log warning for drive enumerating wildcards that exist in projects on Windows platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             TargetItemWithIncludeAndExclude,
             @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
@@ -950,8 +950,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Log warning for drive enumerating wildcards that exist in projects on Unix platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)**",
@@ -981,8 +980,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests target item evaluation resulting in no build failures.
         /// </summary>
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)*.cs",

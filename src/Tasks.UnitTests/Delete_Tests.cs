@@ -8,6 +8,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -41,8 +42,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Retry Delete. Specify windows since readonly not working on others
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void DeleteWithRetries()
         {
             string source = FileUtilities.GetTemporaryFile();

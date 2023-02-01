@@ -29,7 +29,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Test to see whether all of the correct boolean switches are appended.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestDefaultFlags()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -41,7 +40,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// This test case leaves the default flags the way they are
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestReversibleFlagsWithDefaults()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -55,7 +53,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// This test case explicitly sets the ComplexReversible to be false
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestReversibleFlagsWithoutDefaults()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -69,7 +66,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests to make sure enums are working well.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestBasicString()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -79,7 +75,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestDynamicEnum()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -92,7 +87,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests the basic string array type
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestBasicStringArray()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -107,7 +101,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests the basic string array type, with an array that contains multiple values.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestBasicStringArray_MultipleValues()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -124,7 +117,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests to see whether the integer appears correctly on the command line
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestInteger()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -138,7 +130,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests the (full) functionality of a reversible property
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexReversible()
         {
             // When flag is set to false
@@ -155,7 +146,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexString()
         {
             // check to see that the resulting value is good
@@ -169,7 +159,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests the functionality of a string type property
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexStringArray()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -180,7 +169,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexIntegerLessThanMin()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -191,7 +179,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexIntegerGreaterThanMax()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -203,7 +190,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             });
         }
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexIntegerWithinRange()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -248,7 +234,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CommandLineErrorsReportFullCommandlineAmpersandTemp()
         {
             string projectFile = @"
@@ -305,7 +290,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CommandLineErrorsReportFullCommandline()
         {
             string projectFile = @"
@@ -342,7 +326,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SquareBracketEscaping()
         {
             string projectFile = @"
