@@ -42,7 +42,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TargetAppConfigShouldContainsBindingRedirects()
         {
             // Arrange
@@ -68,7 +67,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TargetAppConfigShouldContainsBindingRedirectsFromAppConfig()
         {
             // Arrange
@@ -103,7 +101,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   should respect that.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GenerateBindingRedirectsFromTwoDependentAssemblySections()
         {
             // Arrange
@@ -163,7 +160,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void AppConfigWithProbingPathAndWithoutDependentAssemblyShouldNotProduceWarningsBug1161241()
         {
             // Arrange
@@ -191,7 +187,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void AppConfigWithEmptyAssemblyBindingShouldNotProduceWarnings()
         {
             // Arrange
@@ -217,7 +212,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - Due to app.config xsd schema this is a valid configuration.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DependentAssemblySectionWithoutBindingRedirectShouldNotProduceWarnings()
         {
             // Arrange

@@ -475,7 +475,6 @@ namespace Microsoft.Build.UnitTests
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CheckSetCopyLocalToFalseOnEmbedInteropTypesAssemblies()
         {
             string gacPath = @"C:\windows\gac";
@@ -564,7 +563,6 @@ namespace Microsoft.Build.UnitTests
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CheckSetCopyLocalToFalseOnGacAssemblies()
         {
             string gacPath = @"C:\windows\gac";

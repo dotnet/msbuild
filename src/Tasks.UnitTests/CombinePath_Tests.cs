@@ -8,6 +8,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -203,9 +204,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Specified paths contain invalid characters.  Task should continue processing remaining items.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // No invalid characters on Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidPath()
         {
             CombinePath t = new CombinePath();

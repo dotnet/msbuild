@@ -19,6 +19,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -131,7 +132,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void DoNotNormallyCopyOverReadOnlyFile()
@@ -194,7 +194,6 @@ namespace Microsoft.Build.UnitTests
         /// OverwriteReadOnlyFiles is false
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyOverReadOnlyFileEnvironmentOverride()
@@ -260,7 +259,6 @@ namespace Microsoft.Build.UnitTests
         /// If MSBUILDALWAYSRETRY is set, keep retrying the copy.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void AlwaysRetryCopyEnvironmentOverride()
@@ -332,7 +330,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyOverReadOnlyFileParameterIsSet()
@@ -651,16 +648,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Colon is special only on Windows.")]
         public void DoNotRetryCopyNotSupportedException()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                // Colon is special only on Windows
-                return;
-            }
-
             string sourceFile = FileUtilities.GetTemporaryFile();
             string destinationFile = "foobar:";
 
@@ -790,7 +780,6 @@ namespace Microsoft.Build.UnitTests
         /// Most important case is when destination is locked
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void DoRetryWhenDestinationLocked()
@@ -1019,9 +1008,7 @@ namespace Microsoft.Build.UnitTests
         /// CopiedFiles should only include files that were successfully copied
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Under Unix all filenames are valid and this test is not useful.")]
         public void OutputsOnlyIncludeSuccessfulCopies()
         {
             string temp = Path.GetTempPath();
@@ -1177,8 +1164,7 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false. Variation with different casing/relativeness.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
+        [WindowsOnlyFact(additionalMessage: "File names under Unix are case-sensitive and this test is not useful.")]
         public void CopyFileOnItself2()
         {
             string currdir = Directory.GetCurrentDirectory();
@@ -1229,7 +1215,6 @@ namespace Microsoft.Build.UnitTests
         /// or not skipUnchangedFiles is true or false. Variation with a second copy failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyFileOnItselfAndFailACopy()
@@ -1613,8 +1598,7 @@ namespace Microsoft.Build.UnitTests
         /// If the destination path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -1657,8 +1641,7 @@ namespace Microsoft.Build.UnitTests
         /// If the source path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
         {
             const string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -1936,7 +1919,6 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3027");
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
         internal virtual void ErrorIfLinkFailedCheck()
         {
             using (var env = TestEnvironment.Create())
@@ -2189,8 +2171,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // SMB share paths only work on Windows
+        [WindowsOnlyFact(additionalMessage: "SMB share paths only work on Windows.")]
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
@@ -2295,8 +2276,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // Only Windows has a (small) link limit, and this tests for an HRESULT
+        [WindowsOnlyFact(additionalMessage: "Only Windows has a (small) link limit, and this tests for an HRESULT.")]
         public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
@@ -2382,7 +2362,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();
@@ -2463,7 +2443,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();

@@ -1021,7 +1021,6 @@ namespace Microsoft.Build.UnitTests.Logging
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/437")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void LogBuildStartedCriticalOnly()
         {
             ProcessBuildEventHelper service =

@@ -6,15 +6,15 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
     public class FixPathOnUnixTests
     {
-        [Fact]
+        [UnixOnlyFact]
         public void TestPathFixupInMetadata()
         {
             string buildProjectContents = @"

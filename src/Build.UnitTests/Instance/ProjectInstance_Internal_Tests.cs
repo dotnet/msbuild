@@ -340,7 +340,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// environment
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
