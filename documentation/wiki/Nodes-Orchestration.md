@@ -11,11 +11,11 @@ Task declares (in [UsingTask](https://learn.microsoft.com/en-us/visualstudio/msb
 
    `TaskHost` is supported so far, but performance is not closely watched.
 
-2) **Parallel builds** - needed since tasks can access process wide state - namely current working dir, environment vars. Those can change between projects (especially [`Compile Include`](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-items) often contains relative path, without specifying `$MSBuildProjectDirectory` - so it relies on current directory being the location of the project file).
+2) **Parallel builds** - needed since tasks can access process wide state - namely current working dir, environment vars. Those can change between projects (especially [`Compile Include`](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-items) often contains relative path, without specifying `$MSBuildProjectDirectory` - so it relies on current directory being the location of the project file). For this reason node in parallel build can run only one task at a time.
 
 
 ## Communication
-For this reason we need interprocess communication.
+In a presence of multiple processes we need interprocess communication.
 
 ### Messages (de)serialization
 
@@ -55,11 +55,13 @@ Multitargeted project (`TargetFrameworks=x;Y`) - this will generate 'outer-build
 
 ----
 
+MSBuild scheduler maintains a list of projects that are eligible to run (not blocked) and list of free worker nodes (plus knows a mapping of projects already mapped to particular nodes) and maps the work. It does some heuristics prioritizing work that is likely to request more work (e.g. dir.proj files).
+
+## Scheduler assumptions
+
 Node in parallel build can run only one task at a time (task can explicitly temporarily vacate the node via `IBuildEngine.Yield`, or this can implicitly happen when MSBuild discovers dependencies on tasks that have not run yet)
 
 Once a `project instance` is assigned to a worker node - it is locked to that node (and cannot be run on another one). Above 2 facts can lead to scheduling issues (priorities inversions, blocking).
-
-MSBuild scheduler maintains a list of projects that are eligible to run (not blocked) and list of free worker nodes (plus knows a mapping of projects already mapped to particular nodes) and maps the work. It does some heuristics prioritizing work that is likely to request more work (e.g. dir.proj files).
 
 Scheduler can (opt-in) dump a graph of dependencies from last build into a text file and then use it in the next build.
 
