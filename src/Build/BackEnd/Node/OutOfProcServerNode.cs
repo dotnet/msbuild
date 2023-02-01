@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Experimental
                 return NodeEngineShutdownReason.Error;
             }
 
-            while(true)
+            while (true)
             {
                 NodeEngineShutdownReason shutdownReason = RunInternal(out shutdownException, handshake);
                 if (shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
@@ -331,7 +331,7 @@ namespace Microsoft.Build.Experimental
                 {
                     HandleServerNodeBuildCommand(command);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     _shutdownException = e;
                     _shutdownReason = NodeEngineShutdownReason.Error;
@@ -415,7 +415,7 @@ namespace Microsoft.Build.Experimental
                 Console.SetOut(oldOut);
                 Console.SetError(oldErr);
             }
-          
+
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -53,8 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read project with more than one ProjectExtensions
@@ -73,8 +72,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Set valid content
@@ -102,8 +100,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectExtensionsElement extensions = GetEmptyProjectExtensions();
 
                 extensions.Content = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Delete by ID

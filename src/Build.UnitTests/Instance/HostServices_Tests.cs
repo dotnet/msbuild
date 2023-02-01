@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -61,8 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 HostServices hostServices = new HostServices();
                 TestHostObject hostObject = new TestHostObject();
                 hostServices.RegisterHostObject(null, "target", "task", hostObject);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test ensuring a null target for host object registration throws.
@@ -75,8 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 HostServices hostServices = new HostServices();
                 TestHostObject hostObject = new TestHostObject();
                 hostServices.RegisterHostObject("project", null, "task", hostObject);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test ensuring a null task for host object registration throws.
@@ -89,8 +87,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 HostServices hostServices = new HostServices();
                 TestHostObject hostObject = new TestHostObject();
                 hostServices.RegisterHostObject("project", "target", null, hostObject);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test which verifies host object unregistration.
@@ -223,8 +220,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 hostServices.RegisterHostObject("project", "target", "task", hostObject);
                 Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
                 hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test which ensures that setting an Any affinity for a project with a host object throws.
@@ -239,8 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 hostServices.RegisterHostObject("project", "target", "task", hostObject);
                 Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
                 hostServices.SetNodeAffinity("project", NodeAffinity.Any);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -282,8 +277,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 TestHostObject hostObject = new TestHostObject();
                 hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
                 hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test which ensures the host object can be set for a project which has the Any affinity specifically set.

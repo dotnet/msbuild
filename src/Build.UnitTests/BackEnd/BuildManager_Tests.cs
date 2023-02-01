@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -1143,8 +1143,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidOperationException>(() =>
                 {
                     _buildManager.EndBuild();
-                }
-            );
+                });
         }
 
         [Fact]
@@ -1575,7 +1574,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildWithDelay20()
         {
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null) return;
+            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
+            {
+                return;
+            }
 
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='2.0'>
@@ -1611,7 +1613,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildInTaskHostWithDelay20()
         {
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null) return;
+            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
+            {
+                return;
+            }
 
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -3785,8 +3790,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
                     new[] { "MainTarget" },
-                    null
-                );
+                    null);
 
                 var submission = _buildManager.PendBuildRequest(buildRequestData);
 
@@ -3943,8 +3947,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
                     new[] { "MainTarget" },
-                    null
-                );
+                    null);
 
                 var submission = _buildManager.PendBuildRequest(buildRequestData);
 

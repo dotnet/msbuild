@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -321,8 +321,7 @@ namespace Microsoft.Build.Tasks
                     {
                         singleProject[0] = project;
 
-                        if (!ExecuteTargets
-                                (
+                        if (!ExecuteTargets(
                                 singleProject,
                                 propertiesTable,
                                 undefinePropertiesArray,
@@ -333,9 +332,7 @@ namespace Microsoft.Build.Tasks
                                 Log,
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
-                                ToolsVersion
-                                )
-                           )
+                                ToolsVersion))
                         {
                             success = false;
                         }
@@ -388,8 +385,7 @@ namespace Microsoft.Build.Tasks
             // Make the call to build the projects
             if (projectsToBuildInParallel.Count > 0)
             {
-                if (!ExecuteTargets
-                                (
+                if (!ExecuteTargets(
                                 projectsToBuildInParallel,
                                 propertiesTable,
                                 undefinePropertiesArray,
@@ -400,9 +396,7 @@ namespace Microsoft.Build.Tasks
                                 Log,
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
-                                ToolsVersion
-                                )
-                           )
+                                ToolsVersion))
                 {
                     success = false;
                 }
@@ -481,8 +475,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <returns>True if the operation was successful</returns>
-        internal static bool ExecuteTargets
-            (
+        internal static bool ExecuteTargets(
             List<ITaskItem> projects,
             Dictionary<string, string> propertiesTable,
             string[] undefineProperties,
@@ -493,8 +486,7 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log,
             List<ITaskItem> targetOutputs,
             bool unloadProjectsOnCompletion,
-            string toolsVersion
-            )
+            string toolsVersion)
         {
             bool success = true;
 
@@ -524,10 +516,9 @@ namespace Microsoft.Build.Tasks
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
-                        if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
-                              out Dictionary<string, string> preProjectPropertiesTable)
-                           )
+                        if (!PropertyParser.GetTableWithEscaping(
+                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
+                              out Dictionary<string, string> preProjectPropertiesTable))
                         {
                             return false;
                         }
@@ -565,10 +556,9 @@ namespace Microsoft.Build.Tasks
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
-                        if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(MSBuildConstants.SemicolonChar),
-                              out Dictionary<string, string> additionalProjectPropertiesTable)
-                           )
+                        if (!PropertyParser.GetTableWithEscaping(
+                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(MSBuildConstants.SemicolonChar),
+                              out Dictionary<string, string> additionalProjectPropertiesTable))
                         {
                             return false;
                         }

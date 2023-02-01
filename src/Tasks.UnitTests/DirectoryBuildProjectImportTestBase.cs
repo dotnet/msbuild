@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Evaluation;
 using System;
@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// A base class for testing the directory build project import functionality in Microsoft.Common.props and Microsoft.Common.targets.
     /// </summary>
-    abstract public class DirectoryBuildProjectImportTestBase : IDisposable
+    public abstract class DirectoryBuildProjectImportTestBase : IDisposable
     {
         private const string BasicDirectoryBuildProjectContents = @"
                 <Project>

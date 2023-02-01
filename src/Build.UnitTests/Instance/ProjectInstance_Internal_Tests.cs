@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -283,8 +283,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var projectInstance = new ProjectInstance(
                 new ProjectRootElement(
-                    XmlReader.Create(new StringReader("<Project></Project>")), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, false, false)
-                );
+                    XmlReader.Create(new StringReader("<Project></Project>")), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, false, false));
 
             projectInstance.UsingDifferentToolsVersionFromProjectFile.ShouldBeFalse();
         }
@@ -738,7 +737,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     pi.AddItem("foo", "bar");
                     pi.TranslateEntireState = true;
 
-                    ((ITranslatable) pi).Translate(TranslationHelpers.GetWriteTranslator());
+                    ((ITranslatable)pi).Translate(TranslationHelpers.GetWriteTranslator());
                     var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
                     return copy;

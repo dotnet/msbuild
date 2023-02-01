@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
@@ -158,8 +158,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 TestGetItemSpecModifierOnBadPath(Directory.GetCurrentDirectory());
-            }
-           );
+            });
         }
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
@@ -172,8 +171,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 TestGetItemSpecModifierOnBadPath(null);
-            }
-           );
+            });
         }
 
         private static void TestGetItemSpecModifierOnBadPath(string currentDirectory)
@@ -203,7 +201,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (file != null) File.Delete(file);
+                if (file != null)
+                {
+                    File.Delete(file);
+                }
             }
         }
 
@@ -265,9 +266,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("foo.txt",      new[] { ".txt" })]
-        [InlineData("foo.txt",      new[] { ".TXT" })]
-        [InlineData("foo.txt",      new[] { ".EXE", ".TXT" })]
+        [InlineData("foo.txt", new[] { ".txt" })]
+        [InlineData("foo.txt", new[] { ".TXT" })]
+        [InlineData("foo.txt", new[] { ".EXE", ".TXT" })]
         public void HasExtension_WhenFileNameHasExtension_ReturnsTrue(string fileName, string[] allowedExtensions)
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
@@ -279,13 +280,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("foo.txt",      new[] { ".DLL" })]
-        [InlineData("foo.txt",      new[] { ".EXE", ".DLL" })]
-        [InlineData("foo.exec",     new[] { ".exe", })]
-        [InlineData("foo.exe",      new[] { ".exec", })]
-        [InlineData("foo",          new[] { ".exe", })]
-        [InlineData("",             new[] { ".exe" })]
-        [InlineData(null,           new[] { ".exe" })]
+        [InlineData("foo.txt", new[] { ".DLL" })]
+        [InlineData("foo.txt", new[] { ".EXE", ".DLL" })]
+        [InlineData("foo.exec", new[] { ".exe", })]
+        [InlineData("foo.exe", new[] { ".exec", })]
+        [InlineData("foo", new[] { ".exe", })]
+        [InlineData("", new[] { ".exe" })]
+        [InlineData(null, new[] { ".exe" })]
         public void HasExtension_WhenFileNameDoesNotHaveExtension_ReturnsFalse(string fileName, string[] allowedExtensions)
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
@@ -441,8 +442,7 @@ namespace Microsoft.Build.UnitTests
                 string fullPath = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\a.cs";
 
                 Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -462,8 +462,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(null, null));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -472,8 +471,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(String.Empty));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -484,8 +482,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(@"\\"));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -496,8 +493,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(@"\\XXX\"));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -508,8 +504,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -528,7 +523,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [Fact(Skip="https://github.com/dotnet/msbuild/issues/4205")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4205")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadGlobalroot()
         {
@@ -543,8 +538,7 @@ namespace Microsoft.Build.UnitTests
                    // with this for security reasons.
                  * */
                 Assert.Null(FileUtilities.NormalizePath(@"\\?\globalroot\XXX"));
-            }
-           );
+            });
         }
 #endif
 
@@ -898,8 +892,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<IOException>(() =>
             {
                 FileUtilities.GetTemporaryFile("|");
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -914,8 +907,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<IOException>(() =>
             {
                 FileUtilities.GetTemporaryFile("|", null, ".tmp");
-            }
-           );
+            });
         }
 
         [Fact]

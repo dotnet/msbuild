@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -35,7 +35,9 @@ namespace Microsoft.Build.Shared
             {
                 // if we already have it, no need to do it again
                 if (s_currentOemEncoding != null)
+                {
                     return s_currentOemEncoding;
+                }
 
                 // fall back to default ANSI encoding if we have problems
 #if FEATURE_ENCODING_DEFAULT
@@ -82,13 +84,19 @@ namespace Microsoft.Build.Shared
         internal static bool SimilarToEncoding(this Encoding encoding1, Encoding encoding2)
         {
             if (encoding1 == null)
+            {
                 return encoding2 == null;
+            }
 
             if (encoding2 == null)
+            {
                 return false;
+            }
 
             if (Equals(encoding1, encoding2))
+            {
                 return true;
+            }
 
             return encoding1.EncodingName == encoding2.EncodingName;
         }
@@ -121,7 +129,10 @@ namespace Microsoft.Build.Shared
         /// <returns>True when the first 3 bytes of the Stream are equal to the preamble.</returns>
         internal static bool StartsWithPreamble(this Stream stream, byte[] preamble)
         {
-            if (preamble == null) return false;
+            if (preamble == null)
+            {
+                return false;
+            }
 
             int bytesRead;
             var buffer = new byte[preamble.Length];

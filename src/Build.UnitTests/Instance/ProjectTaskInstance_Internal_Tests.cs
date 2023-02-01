@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
                 {
                     new Dictionary<string, (string, MockElementLocation)>
                     {
-                        {"p1", ("v1", new MockElementLocation("p1"))}
+                        {"p1", ("v1", new MockElementLocation("p1")) }
                     },
                     new List<ProjectTaskInstanceChild>
                     {
@@ -49,8 +49,8 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
                 {
                     new Dictionary<string, (string, MockElementLocation)>
                     {
-                        {"p1", ("v1", new MockElementLocation("p1"))},
-                        {"p2", ("v2", new MockElementLocation("p2"))}
+                        {"p1", ("v1", new MockElementLocation("p1")) },
+                        {"p2", ("v2", new MockElementLocation("p2")) }
                     },
                     new List<ProjectTaskInstanceChild>
                     {
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
 
             var original = CreateTargetTask(null, parametersCopy, outputs);
 
-            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectTaskInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, copy, new TargetTaskComparer());

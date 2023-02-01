@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Collections;
 using System;
@@ -17,10 +17,10 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class EvaluatorData : IEvaluatorData<P, I, M, D>
+        private class EvaluatorData : IEvaluatorData<P, I, M, D>
         {
-            IEvaluatorData<P, I, M, D> _wrappedData;
-            Func<string, ICollection<I>> _itemGetter;
+            private IEvaluatorData<P, I, M, D> _wrappedData;
+            private Func<string, ICollection<I>> _itemGetter;
 
             public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, Func<string, ICollection<I>> itemGetter)
             {

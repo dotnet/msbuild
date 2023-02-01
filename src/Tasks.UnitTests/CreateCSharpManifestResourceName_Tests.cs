@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CreateCSharpManifestResourceName_Tests
+    public sealed class CreateCSharpManifestResourceName_Tests
     {
         private readonly ITestOutputHelper _testOutput;
 
@@ -31,8 +31,7 @@ namespace Microsoft.Build.UnitTests
         public void Basic()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -40,8 +39,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }"),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("MyStuff.Namespace.Class", result);
         }
@@ -54,7 +52,7 @@ namespace Microsoft.Build.UnitTests
         /// for different codepages.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact (Skip = "https://github.com/dotnet/msbuild/issues/295")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/295")]
 #else
         [Fact]
 #endif
@@ -71,8 +69,7 @@ namespace Microsoft.Build.UnitTests
             sourcesStream.Seek(0, SeekOrigin.Begin);
 
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"irrelevant",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -80,8 +77,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: sourcesStream,
-                    log: null
-                );
+                    log: null);
 
             MemoryStream m = new MemoryStream();
             m.Write(new byte[] { 0x64, 0xc3, 0x61, 0x2e, 0x43, 0x6c, 0x61, 0x73, 0x73 }, 0, 9); // dÃa.Class in ANSI
@@ -102,7 +98,7 @@ namespace Microsoft.Build.UnitTests
         ///
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact (Skip = "https://github.com/dotnet/msbuild/issues/295")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/295")]
 #else
         [Fact]
 #endif
@@ -119,8 +115,7 @@ namespace Microsoft.Build.UnitTests
             sourcesStream.Seek(0, SeekOrigin.Begin);
 
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"irrelevant",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -128,8 +123,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: sourcesStream,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("d\u00C4a.Class", result);
         }
@@ -141,8 +135,7 @@ namespace Microsoft.Build.UnitTests
         public void RelativeDependentUpon()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -150,8 +143,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream("namespace Namespace { class Class {} }"),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("Namespace.Class", result);
         }
@@ -163,8 +155,7 @@ namespace Microsoft.Build.UnitTests
         public void AbsoluteDependentUpon()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -172,8 +163,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }"),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("MyStuff.Namespace.Class", result);
         }
@@ -185,8 +175,7 @@ namespace Microsoft.Build.UnitTests
         public void DependentWithCulture()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.en-GB.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -194,8 +183,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }"),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("MyStuff.Namespace.Class.en-GB", result);
         }
@@ -208,8 +196,7 @@ namespace Microsoft.Build.UnitTests
         public void DependentWithCultureMetadata()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -217,8 +204,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: "en-GB",
                     binaryStream: StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }"),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("MyStuff.Namespace.Class.en-GB", result);
         }
@@ -230,8 +216,7 @@ namespace Microsoft.Build.UnitTests
         public void DependentWithEmbeddedCulture()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.fr-fr.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -239,8 +224,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }"),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("MyStuff.Namespace.Class.fr-fr", result);
         }
@@ -253,8 +237,7 @@ namespace Microsoft.Build.UnitTests
         public void RootnamespaceWithCulture()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"SubFolder\MyForm.en-GB.ResX",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -262,8 +245,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("RootNamespace.SubFolder.MyForm.en-GB", result);
         }
@@ -275,8 +257,7 @@ namespace Microsoft.Build.UnitTests
         public void RootnamespaceWithCulture_RetainCultureInFileName()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"Subfolder\File.cs.cshtml",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -285,8 +266,7 @@ namespace Microsoft.Build.UnitTests
                     culture: null,
                     binaryStream: null,
                     log: null,
-                    treatAsCultureNeutral: true // retain culture in name
-                );
+                    treatAsCultureNeutral: true); // retain culture in name
 
             result.ShouldBe("RootNamespace.Subfolder.File.cs.cshtml");
         }
@@ -298,8 +278,7 @@ namespace Microsoft.Build.UnitTests
         public void Regress222308()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"..\..\XmlEditor\Setup\XmlEditor.rgs",
                     linkFileName: @"XmlEditor.rgs",
                     prependCultureAsDirectory: true,
@@ -307,8 +286,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("RootNamespace.XmlEditor.rgs", result);
         }
@@ -320,8 +298,7 @@ namespace Microsoft.Build.UnitTests
         public void BitmapWithRootNamespace()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"SubFolder\SplashScreen.bmp",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -329,8 +306,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("RootNamespace.SubFolder.SplashScreen.bmp", result);
         }
@@ -342,8 +318,7 @@ namespace Microsoft.Build.UnitTests
         public void CulturedBitmapWithRootNamespace()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"SubFolder\SplashScreen.fr.bmp",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -351,8 +326,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal(FileUtilities.FixFilePath(@"fr\RootNamespace.SubFolder.SplashScreen.bmp"), result);
         }
@@ -364,8 +338,7 @@ namespace Microsoft.Build.UnitTests
         public void CulturedBitmapWithRootNamespaceNoDirectoryPrefix()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"SubFolder\SplashScreen.fr.bmp",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: false,
@@ -373,8 +346,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal(@"RootNamespace.SubFolder.SplashScreen.bmp", result);
         }
@@ -394,10 +366,8 @@ namespace Microsoft.Build.UnitTests
             i.SetMetadata("DependentUpon", "SR1.strings");        // Normally, this would be a C# file.
             t.ResourceFiles = new ITaskItem[] { i };
             t.RootNamespace = "CustomToolTest";
-            bool success = t.Execute
-            (
-                new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream)
-            );
+            bool success = t.Execute(
+                new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream));
 
             Assert.True(success); // "Expected the task to succeed."
 
@@ -718,8 +688,7 @@ namespace Microsoft.Build.UnitTests
         public void Regress419591()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: "MyForm.en-GB.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -727,8 +696,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: "MyForm.en-GB.cs",
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream("namespace ClassLibrary1 { class MyForm {} }"),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("ClassLibrary1.MyForm", result);
         }
@@ -747,8 +715,7 @@ namespace Microsoft.Build.UnitTests
         public void Regress419591_EmptySource()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: "MyForm.en-GB.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -756,8 +723,7 @@ namespace Microsoft.Build.UnitTests
                     dependentUponFileName: "MyForm.en-GB.cs",
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(""),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("RootNamespace.MyForm.en-GB", result);
         }
@@ -774,8 +740,7 @@ namespace Microsoft.Build.UnitTests
             CreateCSharpManifestResourceName c = new CreateCSharpManifestResourceName();
             c.BuildEngine = m;
 
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: "MyForm.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -796,15 +761,12 @@ namespace ClassLibrary3
     class MyForm 
     {
     }
-}"
-                    ),
-                    log: c.Log
-                );
+}"),
+                    log: c.Log);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("CreateManifestResourceName.DefinitionFoundWithinConditionalDirective"), "MyForm.cs", "MyForm.resx"),
-                m.Log
-            );
+                m.Log);
         }
 
         /// <summary>
@@ -933,8 +895,7 @@ namespace ClassLibrary3
         public void CulturedResourcesFileWithRootNamespaceWithinSubfolder()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"SubFolder\MyResource.fr.resources",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: false,
@@ -942,8 +903,7 @@ namespace ClassLibrary3
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal(@"RootNamespace.SubFolder.MyResource.fr.resources", result);
         }
@@ -955,8 +915,7 @@ namespace ClassLibrary3
         public void CulturedResourcesFileWithRootNamespace()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"MyResource.fr.resources",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: false,
@@ -964,8 +923,7 @@ namespace ClassLibrary3
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal(@"RootNamespace.MyResource.fr.resources", result);
         }
@@ -977,8 +935,7 @@ namespace ClassLibrary3
         public void ResourcesFileWithRootNamespace()
         {
             string result =
-            CreateCSharpManifestResourceName.CreateManifestNameImpl
-                (
+            CreateCSharpManifestResourceName.CreateManifestNameImpl(
                     fileName: @"MyResource.resources",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: false,
@@ -986,8 +943,7 @@ namespace ClassLibrary3
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal(@"RootNamespace.MyResource.resources", result);
         }

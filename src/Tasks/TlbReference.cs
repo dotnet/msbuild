@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -317,36 +317,28 @@ namespace Microsoft.Build.Tasks
                 switch (_targetProcessorArchitecture)
                 {
                     case UtilitiesProcessorArchitecture.X86:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.Required32Bit,
-                                ImageFileMachine.I386
-                            );
+                                ImageFileMachine.I386);
                         break;
                     case UtilitiesProcessorArchitecture.AMD64:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.PE32Plus,
-                                ImageFileMachine.AMD64
-                            );
+                                ImageFileMachine.AMD64);
                         break;
                     case UtilitiesProcessorArchitecture.IA64:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.PE32Plus,
-                                ImageFileMachine.IA64
-                            );
+                                ImageFileMachine.IA64);
                         break;
                     case UtilitiesProcessorArchitecture.ARM:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.Required32Bit,
-                                ImageFileMachine.ARM
-                            );
+                                ImageFileMachine.ARM);
                         break;
                     case UtilitiesProcessorArchitecture.MSIL:
                     default:
