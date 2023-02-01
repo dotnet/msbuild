@@ -283,6 +283,11 @@ namespace Microsoft.DotNet.Cli
             foreach (var keyEqVal in globalPropEnumerable)
             {
                 string[] keyValuePair = keyEqVal.Split("=", 2);
+                if (keyValuePair.Count() != 2)
+                {
+                    // The user provided a property such as -p:Foo without giving a value. Ignore the property.
+                    continue;
+                }
                 globalProperties[keyValuePair[0]] = keyValuePair[1];
             }
             return globalProperties;
