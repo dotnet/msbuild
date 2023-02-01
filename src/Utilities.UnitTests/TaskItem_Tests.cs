@@ -11,6 +11,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #pragma warning disable 0219
 
@@ -227,14 +228,9 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory).ShouldBe(NativeMethodsShared.IsWindows ? @"subdir\" : "subdir/");
         }
 
-        [Fact]
+        [WindowsOnlyFact("UNC is not implemented except under Windows.")]
         public void NonexistentRequestDirectoryUNC()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "UNC is not implemented except under Windows"
-            }
-
             TaskItem from = new TaskItem();
             from.ItemSpec = @"\\local\share\subdir\Monkey.txt";
             from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory).ShouldBe(@"subdir\");
@@ -333,8 +329,6 @@ namespace Microsoft.Build.UnitTests
         /// Test that task items can be successfully constructed based on a task item from another appdomain.  
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void RemoteTaskItem()
         {
             AppDomain appDomain = null;

@@ -352,7 +352,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// which has dependencies set to false.  A regular build or design time build has this set to true so we do the correct check.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void HigherVersionDirectDependenciesFalse()
         {
             MockEngine e = new MockEngine(_output);

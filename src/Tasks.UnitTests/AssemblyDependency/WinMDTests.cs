@@ -18,7 +18,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
-    [Trait("Category", "non-mono-tests")]
     public sealed class WinMDTests : ResolveAssemblyReferenceTestFixture
     {
         public WinMDTests(ITestOutputHelper output) : base(output)
