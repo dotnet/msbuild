@@ -122,7 +122,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        if (WriteOnlyWhenDifferent)
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && WriteOnlyWhenDifferent)
                         {
                             Log.LogWarningWithCodeFromResources("WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
                         }
