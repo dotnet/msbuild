@@ -1,4 +1,4 @@
-#Debugging with MacOS
+# Debugging with MacOS
 * Open terminal 
   * Hit command-space, type terminal, hit enter. Alternatively, hit magnifying glass (spotlight) in upper-right corner and search for terminal.)
 * Build and run tests
