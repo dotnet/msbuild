@@ -8,8 +8,10 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadCleanCommandParser
     {
-        private static readonly Command Command = ConstructCommand();
+
         public static readonly Option<bool> CleanAllOption = new Option<bool>("--all", LocalizableStrings.CleanAllOptionDescription);
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
         {
