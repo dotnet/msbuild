@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
@@ -584,6 +585,8 @@ public static class Program
         [InlineData("-property:Configuration=Debug")]
         [InlineData("--property:Configuration=Debug")]
         [InlineData("/p:Configuration=Debug")]
+        [InlineData("-p:_IsPublishing=true;Configuration=Debug")]
+        [InlineData("-p:_IsPublishing=true;Configuration=Debug;")]
         [InlineData("/property:Configuration=Debug")]
         public void PublishRelease_does_not_override_Configuration_property_across_formats(string configOpt)
         {
@@ -608,6 +611,35 @@ public static class Program
             Assert.True(File.Exists(expectedAssetPath));
             var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", tfm, "HelloWorld.dll");
             Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
+        }
+
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("=")]
+        public void PublishRelease_does_recognize_undefined_property(string propertySuffix)
+        {
+            string tfm = ToolsetInfo.CurrentTargetFramework;
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm
+            };
+
+            testProject.RecordProperties("SelfContained");
+            testProject.RecordProperties("PublishAot");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, MethodBase.GetCurrentMethod().Name))
+                .Execute(("-p:SelfContained" + propertySuffix))
+                .Should()
+                .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: tfm);
+
+            Assert.Equal("", properties["SelfContained"]);
+            Assert.Equal("", properties["PublishAot"]);
         }
 
         [Theory]
