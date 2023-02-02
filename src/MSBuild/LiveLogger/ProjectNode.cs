@@ -93,8 +93,15 @@ namespace Microsoft.Build.Logging.LiveLogger
                     TerminalBuffer.DeleteLine(CurrentTargetLine.Id);
                 }
 
+                bool foundErrorOrWarning = false;
+
                 foreach (MessageNode node in AdditionalDetails.ToList())
                 {
+                    if (node.Type != MessageNode.MessageType.HighPriorityMessage)
+                    {
+                        foundErrorOrWarning = true;
+                    }
+
                     // Only delete high priority messages
                     if (node.Type != MessageNode.MessageType.HighPriorityMessage)
                     {
@@ -105,6 +112,11 @@ namespace Microsoft.Build.Logging.LiveLogger
                     {
                         TerminalBuffer.DeleteLine(node.Line.Id);
                     }
+                }
+
+                if (!foundErrorOrWarning && this.Line is not null)
+                {
+                    TerminalBuffer.DeleteLine(this.Line.Id);
                 }
             }
 

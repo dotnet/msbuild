@@ -16,6 +16,9 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private float existingTasks = 1;
         private float completedTasks = 0;
+        private int completedProjects = 0;
+        private TerminalBufferLine? finishedProjectsLine;
+        private Dictionary<string, string> blockedProjects = new();
 
         public string Parameters { get; set; }
 
@@ -58,6 +61,10 @@ namespace Microsoft.Build.Logging.LiveLogger
             TerminalBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
             TerminalBuffer.WriteNewLine(string.Empty);
+
+            // Top line indicates the number of finished projects.
+            finishedProjectsLine = TerminalBuffer.WriteNewLine($"{completedProjects} projects finished building.");
+
             // First render
             TerminalBuffer.Render();
             int i = 0;
@@ -69,6 +76,10 @@ namespace Microsoft.Build.Logging.LiveLogger
                 // Use task delay to avoid blocking the task, so that keyboard input is listened continously
                 Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
+                    foreach (KeyValuePair<string, string> blockedProject in blockedProjects)
+                    {
+                    }
+
                     // Rerender projects only when needed
                     foreach (var project in projects)
                     {
@@ -130,6 +141,9 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
+            completedProjects++;
+            finishedProjectsLine!.Text = $"{completedProjects} projects finished building.";
+
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             if (!projects.TryGetValue(id, out ProjectNode? node))
@@ -183,6 +197,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             // Update
             node.AddTask(e);
             existingTasks++;
+
+            if (e.TaskName.Equals("MSBuild"))
+            {
+                blockedProjects[e.ProjectFile] = "Blocked by MSBuild task";
+            }
+
             // Log
             node.ShouldRerender = true;
         }
