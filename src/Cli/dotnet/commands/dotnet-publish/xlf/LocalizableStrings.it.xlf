@@ -55,8 +55,8 @@ Per impostazione predefinita, viene generato un pacchetto dipendente dal framewo
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">Configurazione per cui eseguire la pubblicazione. L'impostazione predefinita è 'Debug'. Usare la proprietà 'PublishRelease' per rendere 'Release' il valore predefinito per questo comando.</target>
+        <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
+        <target state="needs-review-translation">Configurazione per cui eseguire la pubblicazione. L'impostazione predefinita è 'Debug'. Usare la proprietà 'PublishRelease' per rendere 'Release' il valore predefinito per questo comando.</target>
         <note />
       </trans-unit>
     </body>

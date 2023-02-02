@@ -282,23 +282,10 @@ namespace Microsoft.DotNet.Cli
 
             foreach (var keyEqValString in globalPropEnumerable)
             {
-                foreach (var keyEqVal in keyEqValString.Split(";"))
+                var propertyPairs = MSBuildPropertyParser.ParseProperties(keyEqValString);
+                foreach (var propertyKeyValue in propertyPairs)
                 {
-                    string[] keyValuePair = keyEqVal.Split("=", 2);
-                    if (keyValuePair.Count() == 0)
-                    {
-                        // The user provided an empty value after ;. e.g. -p:Foo=Bar;
-                        continue;
-                    }
-                    else if (keyValuePair.Count() == 1)
-                    {
-                        // The user provided a property such as -p:Foo without giving a value. Undefine the property.
-                        // Note that MSBuild will fail if given -p:Foo; but we can ignore this situation because of this and let MsBuild fail, or, assuming it comes to parity with ';', behave the same as if ; was not present.
-                        // The same can be said for -p:Foo=bar;-p:Bar=Foo, which is also invalid syntax to MSBuild.
-                        globalProperties[keyValuePair[0]] = "";
-                        continue;
-                    }
-                    globalProperties[keyValuePair[0]] = keyValuePair[1];
+                    globalProperties[propertyKeyValue.key] = propertyKeyValue.value;
                 }
             }
             return globalProperties;

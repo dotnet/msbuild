@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default is 'Debug'. Use the `PackRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">Конфигурация для сборки пакета. По умолчанию используется Debug. Используйте свойство PackRelease, чтобы сделать Release стандартом для этой команды.</target>
+        <source>The configuration to use for building the package. The default is 'Release'.</source>
+        <target state="needs-review-translation">Конфигурация для сборки пакета. По умолчанию используется Debug. Используйте свойство PackRelease, чтобы сделать Release стандартом для этой команды.</target>
         <note />
       </trans-unit>
     </body>
