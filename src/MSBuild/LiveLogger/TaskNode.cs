@@ -3,14 +3,14 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 {
 
-    public class FancyLoggerTaskNode
+    internal class TaskNode
     {
         public int Id;
         public string TaskName;
-        public FancyLoggerTaskNode(TaskStartedEventArgs args)
+        public TaskNode(TaskStartedEventArgs args)
         {
             Id = args.BuildEventContext!.TaskId;
             TaskName = args.TaskName;

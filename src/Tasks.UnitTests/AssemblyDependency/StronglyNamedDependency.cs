@@ -44,7 +44,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// We automatically unify FX dependencies.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Exists()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

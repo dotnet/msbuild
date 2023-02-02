@@ -38,7 +38,7 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Logging.FancyLogger;
+using Microsoft.Build.Logging.LiveLogger;
 using System.Runtime.InteropServices;
 
 #nullable disable
@@ -2416,7 +2416,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.FancyLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.LiveLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -3197,7 +3197,7 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
-            bool fancyLoggerCommandLineOptIn,
+            bool liveLoggerCommandLineOptIn,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3227,9 +3227,11 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
-            if ((fancyLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true") && DoesEnvironmentSupportFancyLogger())
+            if (
+                (liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true" || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
+                && DoesEnvironmentSupportLiveLogger())
             {
-                ProcessFancyLogger(noConsoleLogger, loggers);
+                ProcessLiveLogger(noConsoleLogger, loggers);
             }
             else
             {
@@ -3243,7 +3245,7 @@ namespace Microsoft.Build.CommandLine
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
 
             // TOOD: Review
-            // ProcessFancyLogger(noConsoleLogger, loggers);
+            // ProcessLiveLogger(noConsoleLogger, loggers);
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
 
@@ -3408,13 +3410,13 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static bool DoesEnvironmentSupportFancyLogger()
+        private static bool DoesEnvironmentSupportLiveLogger()
         {
             // If output is redirected
             if (Console.IsOutputRedirected)
             {
                 messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
+                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
                 return false;
             }
             // If terminal is dumb
@@ -3423,20 +3425,20 @@ namespace Microsoft.Build.CommandLine
                 || Environment.GetEnvironmentVariable("TERM") == "dumb")
             {
                 messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is not supported.", MessageImportance.Low));
+                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low));
                 return false;
             }
             return true;
         }
 
-        private static void ProcessFancyLogger(
+        private static void ProcessLiveLogger(
             bool noConsoleLogger,
             List<ILogger> loggers)
         {
             // Check for flags and env variables
             if (!noConsoleLogger)
             {
-                FancyLogger l = new FancyLogger();
+                LiveLogger l = new LiveLogger();
                 loggers.Add(l);
             }
         }

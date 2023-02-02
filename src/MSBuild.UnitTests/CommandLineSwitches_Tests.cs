@@ -15,6 +15,7 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -1346,8 +1347,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
         /// </summary>
         [MemberData(nameof(GetInvalidFilenames))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
-        [Theory]
+        [WindowsFullFrameworkOnlyTheory(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void ProcessProfileEvaluationInvalidFilename(string filename)
         {
             bool enableProfiler = false;

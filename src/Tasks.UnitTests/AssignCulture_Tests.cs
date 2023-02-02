@@ -6,6 +6,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -241,8 +242,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
-        [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "These cultures are not returned via Culture api on net472.")]
+        [DotNetOnlyTheory(additionalMessage: "These cultures are not returned via Culture api on net472.")]
         [InlineData("sh-BA")]
         [InlineData("shi-MA")]
         public void AliasedCultures_SupportedOnNetCore(string culture)
@@ -260,8 +260,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Pseudoloc is special-cased in .NET relative to Framework.")]
+        [DotNetOnlyFact(additionalMessage: "Pseudoloc is special-cased in .NET relative to Framework.")]
         public void Pseudolocales_CaseInsensitive()
         {
             string culture = "qps-Ploc";

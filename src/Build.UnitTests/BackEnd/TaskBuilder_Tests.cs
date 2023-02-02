@@ -526,7 +526,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NullMetadataOnOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -551,7 +550,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NullMetadataOnLegacyOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -649,7 +647,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/6521")]
-        [Trait("Category", "non-mono-tests")]
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -705,7 +702,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// which didn't support the defining project metadata.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ValidateDefiningProjectMetadataOnTaskOutputs_LegacyItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -717,7 +713,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests that putting the RunInSTA attribute on a task causes it to run in the STA thread.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequired()
         {
             TestSTATask(true, false, false);
@@ -727,7 +722,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an STA task with an exception
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequiredWithException()
         {
             TestSTATask(true, false, true);
@@ -737,7 +731,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an STA task with failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequiredWithFailure()
         {
             TestSTATask(true, true, false);
@@ -747,7 +740,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequired()
         {
             TestSTATask(false, false, false);
@@ -757,7 +749,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task with an exception.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequiredWithException()
         {
             TestSTATask(false, false, true);
@@ -767,7 +758,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task with failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequiredWithFailure()
         {
             TestSTATask(false, true, false);

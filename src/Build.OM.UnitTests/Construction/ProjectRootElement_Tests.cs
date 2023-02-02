@@ -22,6 +22,7 @@ using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Shouldly;
 using Xunit;
 using Microsoft.Build.Framework;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -883,11 +884,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
         /// <summary>
-        /// Build a solution file that can't be accessed
+        /// Build a solution file that can't be accessed.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Security classes are not supported on Unix
-
+        [WindowsOnlyFact(additionalMessage: "Security classes are not supported on Unix.")]
         public void SolutionCanNotBeOpened()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -930,11 +929,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Build a project file that can't be accessed
+        /// Build a project file that can't be accessed.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        // FileSecurity class is not supported on Unix
+        [WindowsOnlyFact(additionalMessage: "FileSecurity class is not supported on Unix.")]
         public void ProjectCanNotBeOpened()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -1005,8 +1002,7 @@ Project(""{";
         /// <summary>
         /// Open lots of projects concurrently to try to trigger problems
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // This test is platform specific for Windows
+        [WindowsOnlyFact]
         public void ConcurrentProjectOpenAndCloseThroughProject()
         {
             int iterations = 500;

@@ -128,7 +128,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void HigherThanHighestInRedistListForMSBuildAssembly()
         {
             MockEngine e = new MockEngine(_output);
@@ -265,7 +264,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DependenciesHigherThanHighestInRedistListForMSBuildAssembly()
         {
             MockEngine e = new MockEngine(_output);

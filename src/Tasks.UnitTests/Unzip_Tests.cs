@@ -10,6 +10,7 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -136,8 +137,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // Can't figure out how to make CreateDirectory throw on non-Windows
-        [Fact]
+        [WindowsOnlyFact(additionalMessage: "Can't figure out how to make CreateDirectory throw on non-Windows.")]
         public void LogsErrorIfDirectoryCannotBeCreated()
         {
             Unzip unzip = new Unzip

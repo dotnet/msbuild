@@ -79,6 +79,7 @@
       <Link>TestData\GlobbingTestData.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ProcessExtensions.cs" />
+    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>

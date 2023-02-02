@@ -23,6 +23,7 @@ using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFra
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -68,8 +69,7 @@ namespace Microsoft.Build.UnitTests
             returnValue.Length.ShouldBe(0);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetApiContractReferencesFindsWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -93,8 +93,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetApiContractReferencesFindsVersionedWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -117,8 +116,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetWinBlueSDKLocation()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
@@ -127,8 +125,7 @@ namespace Microsoft.Build.UnitTests
             returnValue.ShouldBe(sdkRootPath);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetWinBlueContentFolderPath()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
@@ -137,8 +134,7 @@ namespace Microsoft.Build.UnitTests
             returnValue.ShouldBe(Path.Combine(sdkRootPath, @"DesignTime\CommonConfiguration\Neutral"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetSDKRootLocation()
         {
             string expectedValue = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
@@ -151,11 +147,10 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1250")]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/1250")]
 #else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/2569")]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/2569")]
 #endif
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetUnversionedSDKUnionMetadataLocation()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
@@ -165,8 +160,7 @@ namespace Microsoft.Build.UnitTests
             returnValue.ShouldBe(Path.Combine(sdkRootPath, "UnionMetadata"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetVersionedSDKUnionMetadataLocation()
         {
             // Create manifest file
@@ -533,8 +527,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Search for a whidbey when whidbey is the current version.
          */
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void FindFrameworksPathRunningUnderWhidbey()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
@@ -551,8 +544,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Search for a whidbey when orcas is the current version.
         */
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void FindFrameworksPathRunningUnderOrcas()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
@@ -569,8 +561,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Search for a whidbey when orcas is the current version.
         */
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void FindFrameworksPathRunningUnderEverett()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
@@ -626,7 +617,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void ExerciseMiscToolLocationHelperMethods()
@@ -687,7 +677,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGetPathToBuildToolsFile()
         {
             string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version20);
@@ -710,7 +699,6 @@ namespace Microsoft.Build.UnitTests
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/722")]
 #else
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
 #endif
         public void TestGetPathToBuildToolsFile_32Bit()
         {
@@ -907,11 +895,10 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_REGISTRY_SDKS
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
 #else
-        [Fact(Skip = "Registry SDKs not supported")]
+        [WindowsOnlyFact(Skip = "Registry SDKs not supported")]
 #endif
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetPathToDotNetFrameworkSdk()
         {
             // Test out of range .net version.
@@ -990,8 +977,7 @@ namespace Microsoft.Build.UnitTests
 
 #pragma warning disable 618 //The test below tests a deprecated API. We disable the warning for obsolete methods for this particular test
 #if FEATURE_WIN32_REGISTRY
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetPathToWindowsSdk()
         {
             // Test out of range .net version.
@@ -1134,7 +1120,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
         {
             string projectContents = @"
@@ -1176,7 +1161,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs10()
         {
             string projectContents = @"
@@ -1219,8 +1203,7 @@ namespace Microsoft.Build.UnitTests
             success.ShouldBeTrue(); // "Build Failed.  See Std Out for details."
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs11()
         {
             string projectContents = @"
@@ -1358,9 +1341,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if the moniker and the root make a too long path that an InvalidOperationException is raised
         /// which indicates there was a problem generating the reference assembly path.
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void GenerateReferencAssemblyPathTooLong()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1388,7 +1369,6 @@ namespace Microsoft.Build.UnitTests
         /// do not have anything to chain with.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ChainReferenceAssembliesRedistExistsNoRedistList()
         {
             string path = ToolLocationHelper.ChainReferenceAssemblyPath(@"PathDoesNotExistSoICannotChain");
@@ -1632,9 +1612,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void ChainReferenceAssembliesRedistPathTooLong()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1937,7 +1915,6 @@ namespace Microsoft.Build.UnitTests
         /// place, which means it just looks for a folder starting with v4.0 in the right spot for any higher version.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetPathToReferenceAssembliesDefaultLocation48()
         {
             if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48) != null)
@@ -1971,8 +1948,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we choose the correct path for program files based on the operating system
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void TestGenerateProgramFiles32()
         {
             Environment.SpecialFolder folder = Environment.Is64BitOperatingSystem ? Environment.SpecialFolder.ProgramFilesX86 : Environment.SpecialFolder.ProgramFiles;
@@ -1987,8 +1963,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get the correct reference assembly path out of the framework location helper
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "No ProgramFiles known location outside Windows"
+        [WindowsOnlyFact(additionalMessage: "No ProgramFiles known location outside Windows.")]
         public void TestGeneratedReferenceAssemblyPath()
         {
             string programFiles32 = FrameworkLocationHelper.GenerateProgramFiles32();
@@ -2209,7 +2184,6 @@ namespace Microsoft.Build.UnitTests
         /// We expect to always get the same path which is returned by GetPathToReferenceAssemblies.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetPathToStandardLibraries64Bit40()
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
@@ -2476,8 +2450,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can get a list of directories out of the public API.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetAssemblyFoldersExInfoTest()
         {
             SetupAssemblyFoldersExTestConditionRegistryKey();
@@ -3113,9 +3086,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we do not get any resolved paths when we pass in a root which is too long
         ///
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void ResolveFromDirectoryPathTooLong()
         {
             Should.Throw<PathTooLongException>(() =>
@@ -3135,9 +3106,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get no resolved paths when we pass in a root with invalid chars
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // No invalid characters on Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. No invalid characters on Unix.")]
         public void ResolveFromDirectoryInvalidChar()
         {
             var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
@@ -3175,8 +3144,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify SDKManifest defaults values for MaxPlatformVersion, MinOSVersion, MaxOSVersion when these are not
         /// present in the manifest and the SDK is a framework extension SDK
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void VerifyFrameworkSdkWithOldManifest()
         {
             string tmpRootDirectory = Path.GetTempPath();
@@ -3732,7 +3700,6 @@ namespace Microsoft.Build.UnitTests
         /// Setup some fake entries in the registry and verify we get the correct sdk from there.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyGetInstalledSDKLocations3()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations3");
@@ -3835,7 +3802,6 @@ namespace Microsoft.Build.UnitTests
         /// get the expected set out.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ResolveSDKFromDirectory()
         {
             var paths = new List<string> { _fakeStructureRoot, _fakeStructureRoot2 };
@@ -3907,14 +3873,9 @@ namespace Microsoft.Build.UnitTests
         /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we
         /// get the expected set out.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("No registry unless under Windows.")]
         public void ResolveSDKFromRegistry()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "No registry unless under Windows"
-            }
-
             var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
             ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, File.Exists);
@@ -3962,7 +3923,6 @@ namespace Microsoft.Build.UnitTests
         /// and make sure we get the expected results.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ResolveSDKFromRegistryAndDisk()
         {
             var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
@@ -4147,15 +4107,13 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the list of platforms is empty if we ask for an sdk that is not installed.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void VerifyGetFoldersInVSInstalls_Unix()
         {
             ToolLocationHelper.GetFoldersInVSInstalls(null, null, "relativePath").Count().ShouldBe(0);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void VerifyFindRootFolderWhereAllFilesExist()
         {
             // create directories and files in them
@@ -4195,7 +4153,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for pre-OneCore SDKs during evaluation time as a msbuild function.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyGetPreOneCoreSDKPropsLocation()
         {
             // This is the mockup layout for SDKs before One Core SDK.
@@ -4271,7 +4228,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for OneCore SDK during evaluation time as a msbuild function.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyGetOneCoreSDKPropsLocation()
         {
             // This is the mockup layout for One Core SDK.

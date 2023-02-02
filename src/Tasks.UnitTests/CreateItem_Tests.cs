@@ -13,6 +13,7 @@ using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -313,8 +314,7 @@ namespace Microsoft.Build.UnitTests
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Windows platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(@"z:\**")]
         [InlineData(@"z:\**\*.log")]
         [InlineData(@"z:\\\\**\*.log")]
@@ -327,8 +327,7 @@ namespace Microsoft.Build.UnitTests
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Unix platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(@"\**")]
         [InlineData(@"\**\*.log")]
         public void LogUnixWarningUponCreateItemExecution(string itemSpec)
@@ -393,8 +392,7 @@ namespace Microsoft.Build.UnitTests
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Windows platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             CreateItemWithInclude,
             @"z:\**")]
@@ -421,8 +419,7 @@ namespace Microsoft.Build.UnitTests
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Unix platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(
             CreateItemWithInclude,
             @"\**")]

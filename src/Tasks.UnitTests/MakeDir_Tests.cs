@@ -8,6 +8,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -59,8 +60,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that if we fail to create a folder, we don't pass
         /// through the input.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
+        [WindowsOnlyFact(additionalMessage: "Under Unix all filenames are valid and this test is not useful.")]
         public void SomeInputsFailToCreate()
         {
             string temp = Path.GetTempPath();

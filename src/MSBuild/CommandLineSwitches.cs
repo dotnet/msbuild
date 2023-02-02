@@ -47,7 +47,7 @@ namespace Microsoft.Build.CommandLine
             FileLogger8,
             FileLogger9,
             DistributedFileLogger,
-            FancyLogger,
+            LiveLogger,
 #if DEBUG
             WaitForDebugger,
 #endif
@@ -202,25 +202,25 @@ namespace Microsoft.Build.CommandLine
             //---------------------------------------------------------------------------------------------------------------------------------------------------
             //                                          Switch Names                        Switch Id                             Dup Error  Light up key
             //---------------------------------------------------------------------------------------------------------------------------------------------------
-            new ParameterlessSwitchInfo(  new string[] { "help", "h", "?" },                ParameterlessSwitch.Help,                  null),
-            new ParameterlessSwitchInfo(  new string[] { "version", "ver" },                ParameterlessSwitch.Version,               null),
-            new ParameterlessSwitchInfo(  new string[] { "nologo" },                        ParameterlessSwitch.NoLogo,                null),
-            new ParameterlessSwitchInfo(  new string[] { "noautoresponse", "noautorsp" },   ParameterlessSwitch.NoAutoResponse,        null),
-            new ParameterlessSwitchInfo(  new string[] { "noconsolelogger", "noconlog" },   ParameterlessSwitch.NoConsoleLogger,       null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger", "fl" },              ParameterlessSwitch.FileLogger,            null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger1", "fl1" },            ParameterlessSwitch.FileLogger1,           null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger2", "fl2" },            ParameterlessSwitch.FileLogger2,           null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger3", "fl3" },            ParameterlessSwitch.FileLogger3,           null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger4", "fl4" },            ParameterlessSwitch.FileLogger4,           null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger5", "fl5" },            ParameterlessSwitch.FileLogger5,           null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger6", "fl6" },            ParameterlessSwitch.FileLogger6,           null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger7", "fl7" },            ParameterlessSwitch.FileLogger7,           null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },            ParameterlessSwitch.FileLogger8,           null),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },            ParameterlessSwitch.FileLogger9,           null),
-            new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null),
-            new ParameterlessSwitchInfo(  new string[] { "fancylogger", "flg" },            ParameterlessSwitch.FancyLogger,           null),
+            new ParameterlessSwitchInfo(  new string[] { "help", "h", "?" },                         ParameterlessSwitch.Help,                  null),
+            new ParameterlessSwitchInfo(  new string[] { "version", "ver" },                         ParameterlessSwitch.Version,               null),
+            new ParameterlessSwitchInfo(  new string[] { "nologo" },                                 ParameterlessSwitch.NoLogo,                null),
+            new ParameterlessSwitchInfo(  new string[] { "noautoresponse", "noautorsp" },            ParameterlessSwitch.NoAutoResponse,        null),
+            new ParameterlessSwitchInfo(  new string[] { "noconsolelogger", "noconlog" },            ParameterlessSwitch.NoConsoleLogger,       null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger", "fl" },                       ParameterlessSwitch.FileLogger,            null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger1", "fl1" },                     ParameterlessSwitch.FileLogger1,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger2", "fl2" },                     ParameterlessSwitch.FileLogger2,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger3", "fl3" },                     ParameterlessSwitch.FileLogger3,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger4", "fl4" },                     ParameterlessSwitch.FileLogger4,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger5", "fl5" },                     ParameterlessSwitch.FileLogger5,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger6", "fl6" },                     ParameterlessSwitch.FileLogger6,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger7", "fl7" },                     ParameterlessSwitch.FileLogger7,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },                     ParameterlessSwitch.FileLogger8,           null),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },                     ParameterlessSwitch.FileLogger9,           null),
+            new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },           ParameterlessSwitch.DistributedFileLogger, null),
+            new ParameterlessSwitchInfo(  new string[] { "livelogger", "ll", "fancylogger", "flg" }, ParameterlessSwitch.LiveLogger,            null),
 #if DEBUG
-            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null),
+            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },                 ParameterlessSwitch.WaitForDebugger,       null),
 #endif
         };
 

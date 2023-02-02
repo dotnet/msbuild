@@ -8,6 +8,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Runtime.Hosting;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -40,14 +41,9 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keycontainer: switch
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("Key container is not supported, except under Windows.")]
         public void KeyContainer()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Key container is not supported, except under Windows"
-            }
-
             var t = new ResolveComReference.TlbImp();
             t.TypeLibName = "FakeTlb.tlb";
             string badParameterValue = "badKeyContainer";
@@ -267,14 +263,9 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests that strong name sign-related parameters are validated properly, causing the task
         /// to fail if they are incorrectly set up.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("Key container is not supported, except under Windows.")]
         public void TaskFailsWhenImproperlySigned()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Key container is not supported, except under Windows"
-            }
-
             var t = new ResolveComReference.TlbImp();
             t.TypeLibName = "Blah.tlb";
             string tempKeyContainer = null;
