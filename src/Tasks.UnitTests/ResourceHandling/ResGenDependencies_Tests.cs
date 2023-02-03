@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Reflection;
@@ -13,7 +13,7 @@ using System;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ResGenDependencies_Tests
+    public sealed class ResGenDependencies_Tests
     {
         [Theory]
         [MemberData(nameof(GenerateResource_Tests.Utilities.UsePreserializedResourceStates), MemberType = typeof(GenerateResource_Tests.Utilities))]
@@ -92,8 +92,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         private string CreateSampleResx()
         {
-            string resx = FileUtilities.GetTemporaryFile();
-            File.Delete(resx);
+            string resx = FileUtilities.GetTemporaryFileName();
             Stream fileToSend = Assembly.GetExecutingAssembly().GetManifestResourceStream("Microsoft.Build.Tasks.UnitTests.SampleResx");
             using (FileStream f = new FileStream(resx, FileMode.CreateNew))
             {

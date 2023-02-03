@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
 
                 string contents = @"a message here
                     error abcd12345: hey jude.
@@ -203,7 +203,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (file != null) File.Delete(file);
+                if (file != null)
+                {
+                    File.Delete(file);
+                }
             }
         }
 
@@ -224,8 +227,7 @@ namespace Microsoft.Build.UnitTests
                     Console.WriteLine(e.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the LogErrorFromException & LogWarningFromException methods

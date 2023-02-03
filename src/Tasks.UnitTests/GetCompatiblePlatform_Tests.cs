@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    sealed public class GetCompatiblePlatform_Tests
+    public sealed class GetCompatiblePlatform_Tests
     {
         private readonly ITestOutputHelper _output;
 
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
-                PlatformLookupTable = "AnyCPU=x64", 
+                PlatformLookupTable = "AnyCPU=x64",
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("AnyCPU");
         }
-        
+
         [Fact]
         public void ResolvesViaAnyCPUDefaultWithDefaultPlatformEnabled()
         {
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
-                PlatformLookupTable = "AnyCPU=x64", 
+                PlatformLookupTable = "AnyCPU=x64",
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
             task.Log.HasLoggedErrors.ShouldBeFalse();
         }
-        
+
         // When `Platform` is retrieved in "GetTargetFrameworks" and that platform matches what the task has decided the project should be built as
         // through negotiation. build that project _without_ a global property for Platform.
         [Fact]

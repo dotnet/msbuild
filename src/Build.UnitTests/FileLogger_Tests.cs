@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #pragma warning disable 436
 
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
 
@@ -67,7 +67,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -77,7 +80,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void InvalidFile()
         {
             Assert.Throws<LoggerException>(() =>
@@ -90,10 +92,12 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if (log != null) File.Delete(log);
+                    if (log != null)
+                    {
+                        File.Delete(log);
+                    }
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Specific verbosity overrides global verbosity
@@ -105,7 +109,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 FileLogger fl = new FileLogger();
                 EventSourceSink es = new EventSourceSink();
                 fl.Parameters = "verbosity=diagnostic;logfile=" + log;  // diagnostic specific setting
@@ -119,7 +123,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -169,8 +176,7 @@ namespace Microsoft.Build.UnitTests
                 fl.Parameters = "verbosity=CookiesAndCream";
                 EventSourceSink es = new EventSourceSink();
                 fl.Initialize(es);
-            }
-           );
+            });
         }
         /// <summary>
         /// Invalid encoding setting
@@ -184,7 +190,7 @@ namespace Microsoft.Build.UnitTests
 
                 try
                 {
-                    log = GetTempFilename();
+                    log = FileUtilities.GetTemporaryFileName();
                     FileLogger fl = new FileLogger();
                     EventSourceSink es = new EventSourceSink();
                     fl.Parameters = "encoding=foo;logfile=" + log;
@@ -192,10 +198,12 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if (log != null) File.Delete(log);
+                    if (log != null)
+                    {
+                        File.Delete(log);
+                    }
                 }
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -208,7 +216,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 SetUpFileLoggerAndLogMessage("encoding=utf-16;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 byte[] content = ReadRawBytes(log);
 
@@ -218,7 +226,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -232,7 +243,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 SetUpFileLoggerAndLogMessage("encoding=utf-8;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 byte[] content = ReadRawBytes(log);
 
@@ -243,7 +254,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -278,14 +292,17 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 WriteContentToFile(log);
                 SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -299,14 +316,17 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                log = GetTempFilename();
+                log = FileUtilities.GetTemporaryFileName();
                 WriteContentToFile(log);
                 SetUpFileLoggerAndLogMessage("append;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "existing content\nmessage here");
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -344,7 +364,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Note: Only the ParallelConsoleLogger supports this scenario (log file empty on no error/warn). We
                 // need to explicitly enable it here with the 'ENABLEMPLOGGING' flag.
-                FileLogger fileLogger = new FileLogger {Parameters = $"{loggerOption};logfile={logFile};ENABLEMPLOGGING" };
+                FileLogger fileLogger = new FileLogger { Parameters = $"{loggerOption};logfile={logFile};ENABLEMPLOGGING" };
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(@"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -404,17 +424,6 @@ namespace Microsoft.Build.UnitTests
                     Assert.DoesNotContain(message, log);
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets a filename for a nonexistent temporary file.
-        /// </summary>
-        /// <returns></returns>
-        private string GetTempFilename()
-        {
-            string path = FileUtilities.GetTemporaryFile();
-            File.Delete(path);
-            return path;
         }
 
         /// <summary>
@@ -530,8 +539,7 @@ namespace Microsoft.Build.UnitTests
                 fileLogger.Parameters = "logfile=";
                 fileLogger.Initialize(new EventSourceSink());
                 Assert.True(false);
-            }
-           );
+            });
         }
         #endregion
 

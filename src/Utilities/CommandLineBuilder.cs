@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -518,22 +518,18 @@ namespace Microsoft.Build.Utilities
             {
                 if (string.IsNullOrEmpty(switchName))
                 {
-                    ErrorUtilities.VerifyThrowArgument
-                        (
+                    ErrorUtilities.VerifyThrowArgument(
                             -1 == parameter.IndexOf('"'),
                             "General.QuotesNotAllowedInThisKindOfTaskParameterNoSwitchName",
-                            parameter
-                        );
+                            parameter);
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrowArgument
-                        (
+                    ErrorUtilities.VerifyThrowArgument(
                             -1 == parameter.IndexOf('"'),
                             "General.QuotesNotAllowedInThisKindOfTaskParameter",
                             switchName,
-                            parameter
-                        );
+                            parameter);
                 }
             }
         }

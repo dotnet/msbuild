@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,7 @@ using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -87,8 +88,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void OverrideTaskPathHasInvalidChars()
         {
             ProjectCollection e = new ProjectCollection();
@@ -393,8 +393,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </Project>")), null /* no global properties */, "goober", p);
                 success = project.Build(mockLogger);
                 // BANG!
-            }
-           );
+            });
         }
         /// <summary>
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT

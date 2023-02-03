@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -7,10 +7,11 @@ using Microsoft.Build.Tasks;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class FormatUrl_Tests
+    public sealed class FormatUrl_Tests
     {
         private readonly ITestOutputHelper _out;
 
@@ -66,8 +67,7 @@ namespace Microsoft.Build.UnitTests
         /// From the documentation, Path.GetFullPath(" ") should throw an ArgumentException, but it doesn't on macOS and Linux
         /// where whitespace characters are valid characters for filenames.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void WhitespaceTestOnUnix()
         {
             var t = new FormatUrl();
@@ -81,8 +81,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is white space.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void WhitespaceTestOnWindows()
         {
             var t = new FormatUrl();
@@ -139,8 +138,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is a *nix-style (macOS, Linux) local absolute file path.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void LocalUnixAbsolutePathTest()
         {
             var t = new FormatUrl();
@@ -154,8 +152,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is a Windows-style local absolute file path.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void LocalWindowsAbsolutePathTest()
         {
             var t = new FormatUrl();

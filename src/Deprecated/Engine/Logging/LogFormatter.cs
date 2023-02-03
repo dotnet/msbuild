@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
@@ -10,7 +10,7 @@ namespace Microsoft.Build.BuildEngine
     /// Utility helper functions for formatting logger output.
     /// </summary>
     /// <owner>JomoF</owner>
-    static internal class LogFormatter 
+    internal static class LogFormatter
     {
         /// <summary>
         /// Formats the timestamp in the log as  Hours:Minutes:Seconds.Milliseconds
@@ -42,7 +42,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>JomoF</owner>
         /// <param name="t"></param>
         /// <returns>String representation of time-span.</returns>
-        internal static string FormatTimeSpan(TimeSpan t) 
+        internal static string FormatTimeSpan(TimeSpan t)
         {
             string rawTime = t.ToString(); // Timespan is a value type and can't be null.
             int rawTimeLength = rawTime.Length;

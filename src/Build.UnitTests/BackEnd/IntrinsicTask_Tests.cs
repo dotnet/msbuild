@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -97,8 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -114,12 +113,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <PropertyGroup/>
                 </PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task);
-            }
-           );
+            });
         }
         [Fact]
         public void BlankProperty()
@@ -132,8 +129,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <p1></p1>
                 </PropertyGroup>
             </Target>
-            </Project>"
-            );
+            </Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
@@ -153,12 +149,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             <Target Name='t'>
                 <PropertyGroup>x</PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -174,12 +168,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <p Include='v0'/>
                 </PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void PropertyGroupWithConditionOnGroup()
@@ -661,8 +653,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 Lookup lookup = LookupHelpers.CreateEmptyLookup();
                 ExecuteTask(task, lookup);
-            }
-           );
+            });
         }
         /// <summary>
         /// Should not make items with an empty include.
@@ -748,8 +739,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -767,8 +757,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -786,8 +775,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void ItemGroupWithTransform()
@@ -1575,8 +1563,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void RemoveNoOp()
@@ -1739,7 +1726,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var items = lookup.GetItems("I2");
 
-            items.Select(i => i.EvaluatedInclude).ShouldBe(new []{"a2", "d2"});
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "d2" });
 
             items.ElementAt(0).GetMetadataValue("M1").ShouldBe("x");
             items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
@@ -1796,7 +1783,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
                             <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
                             <I1 Include='e1' M1='a/b/../c/./d' M2='1'/>
-                            <I1 Include='f1' M1='{ Environment.CurrentDirectory }\b\c' M2='6'/>
+                            <I1 Include='f1' M1='{Environment.CurrentDirectory}\b\c' M2='6'/>
 
                             <I2 Include='a2' M1='FOO.TXT' m2='c'/>
                             <I2 Include='b2' M1='foo/bar.txt' m2='x'/>
@@ -2964,8 +2951,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void ModifyItemInTargetWithConditionWithoutItemTypeOnMetadataInCondition()
@@ -3269,7 +3255,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void IncludeCheckOnMetadata_3()
         {
             MockLogger logger = new MockLogger();
@@ -3325,7 +3310,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                importedFile = FileUtilities.GetTemporaryFile();
+                importedFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(importedFile, ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
@@ -3363,7 +3348,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                importedFile = FileUtilities.GetTemporaryFile();
+                importedFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(importedFile, ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
