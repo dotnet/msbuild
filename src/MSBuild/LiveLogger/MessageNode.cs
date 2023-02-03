@@ -34,8 +34,9 @@ namespace Microsoft.Build.Logging.LiveLogger
             // Get type
             switch (args)
             {
-                case BuildMessageEventArgs:
+                case BuildMessageEventArgs message:
                     Type = MessageType.HighPriorityMessage;
+                    Code = message.Code;
                     break;
                 case BuildWarningEventArgs warning:
                     Type = MessageType.Warning;
@@ -68,7 +69,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                         ANSIBuilder.Formatting.ForegroundColor.Red)}";
                 case MessageType.HighPriorityMessage:
                 default:
-                    return $"ℹ️ {ANSIBuilder.Formatting.Italic(Message)}";
+                    return $"ℹ️ Message {Code}: {ANSIBuilder.Formatting.Italic(Message)}";
             }
         }
 
