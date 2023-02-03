@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
-        void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null);
+        void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null, bool cleanAllPacks = false);
 
         void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false);
 
@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems);
 
         /// <summary>
-        /// Replace the workload resolver used by this installer. Typically used to call <see cref="GetDownloads(IEnumerable{WorkloadId}, SdkFeatureBand, bool)"/>
+        /// Replace the workload fresolver used by this installer. Typically used to call <see cref="GetDownloads(IEnumerable{WorkloadId}, SdkFeatureBand, bool)"/>
         /// for a set of workload manifests that isn't currently installed
         /// </summary>
         /// <param name="workloadResolver">A new workload resolver to use</param>
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void Shutdown();
 
-        
+
     }
 
     // Interface to pass to workload manifest updater

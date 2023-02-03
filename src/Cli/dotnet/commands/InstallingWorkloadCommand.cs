@@ -162,7 +162,6 @@ namespace Microsoft.DotNet.Workloads.Workload
 
         protected IEnumerable<WorkloadId> GetInstalledWorkloads(bool fromPreviousSdk)
         {
-            //var currentFeatureBand = new SdkFeatureBand(_installedFeatureBand.ToString());
             if (fromPreviousSdk)
             {
                 var priorFeatureBands = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
