@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
 using System.Threading;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Shared;
 
 #if RUNTIME_TYPE_NETCORE || MONO
 using System.IO;

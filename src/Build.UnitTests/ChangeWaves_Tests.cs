@@ -1,15 +1,15 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Xunit;
-using Shouldly;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.UnitTests;
-using Xunit.Abstractions;
 using System;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests;
+using Microsoft.Build.Utilities;
+using Shouldly;
+using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 

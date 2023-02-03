@@ -4,12 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-
-using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
+using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 
 #nullable disable
 

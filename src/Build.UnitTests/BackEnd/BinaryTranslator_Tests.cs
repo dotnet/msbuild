@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
-using Microsoft.Build.BackEnd;
 using System.IO;
 using System.Reflection;
+using Microsoft.Build.BackEnd;
 using Shouldly;
 using Xunit;
 

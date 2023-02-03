@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Xml;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 

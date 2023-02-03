@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Evaluation;
-
-using Xunit;
 using Shouldly;
+using Xunit;
 
 #nullable disable
 

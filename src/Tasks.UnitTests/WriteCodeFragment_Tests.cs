@@ -3,13 +3,13 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
-using Xunit;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Shouldly;
+using Xunit;
 using Xunit.NetCore.Extensions;
 
 #nullable disable

@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Globalization;
 
 #nullable disable
 

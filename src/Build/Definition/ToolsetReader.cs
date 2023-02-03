@@ -2,21 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ErrorUtils = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using System.Runtime.CompilerServices;
 
 #nullable disable
 

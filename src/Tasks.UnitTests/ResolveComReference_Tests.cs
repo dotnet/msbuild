@@ -5,18 +5,16 @@
 
 using System;
 using System.Collections.Generic;
-
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
-using Xunit;
-using Microsoft.Build.Shared;
 using System.IO;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Shouldly;
+using Xunit;
+// TYPELIBATTR clashes with the one in InteropServices.
+using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 
 #nullable disable
 

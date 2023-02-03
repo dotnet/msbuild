@@ -16,11 +16,11 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 

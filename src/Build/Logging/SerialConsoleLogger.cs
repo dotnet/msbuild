@@ -2,16 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections;
-
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
+using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using System.Linq;
 
 #nullable disable
 

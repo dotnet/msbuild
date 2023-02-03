@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using System.IO;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.NetCore.Extensions;
 

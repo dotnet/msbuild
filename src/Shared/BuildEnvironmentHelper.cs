@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 

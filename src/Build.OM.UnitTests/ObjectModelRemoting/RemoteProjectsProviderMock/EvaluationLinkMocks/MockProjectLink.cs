@@ -12,9 +12,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.Evaluation.Context;
     using Microsoft.Build.Execution;
-    using Microsoft.Build.ObjectModelRemoting;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Logging;
+    using Microsoft.Build.ObjectModelRemoting;
 
     internal class MockProjectLinkRemoter : MockLinkRemoter<Project>
     {

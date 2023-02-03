@@ -1,9 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.UnitTests;
-using Microsoft.Build.Utilities;
-using Shouldly;
 using System;
 using System.IO;
 using System.Net;
@@ -13,8 +10,10 @@ using System.Net.Mime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.UnitTests;
+using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
-
 using Task = System.Threading.Tasks.Task;
 
 #nullable disable

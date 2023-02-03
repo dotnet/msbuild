@@ -6,20 +6,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
-
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using System.IO.Compression;
-using System.Reflection;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Logging;
 
 #nullable disable
 

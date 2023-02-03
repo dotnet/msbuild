@@ -1,16 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;

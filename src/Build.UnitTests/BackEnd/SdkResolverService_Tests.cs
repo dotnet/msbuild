@@ -1,24 +1,24 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using Microsoft.Build.UnitTests;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 using SdkResultImpl = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
 
 #nullable disable
 

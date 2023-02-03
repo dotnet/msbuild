@@ -4,19 +4,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Xml;
-using System.Runtime.InteropServices;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Win32.SafeHandles;
-using Xunit;
-using Xunit.Abstractions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Runtime.Versioning;
+using Microsoft.Win32.SafeHandles;
+using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 

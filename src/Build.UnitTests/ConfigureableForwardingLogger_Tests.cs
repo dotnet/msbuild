@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Microsoft.Build.BackEnd.Logging;
 using Shouldly;
 using Xunit;
 

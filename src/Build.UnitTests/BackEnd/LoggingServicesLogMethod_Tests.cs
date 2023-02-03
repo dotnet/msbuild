@@ -2,24 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using System.IO;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using Microsoft.Build.Execution;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
-
-using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
-using Xunit;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
+using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 

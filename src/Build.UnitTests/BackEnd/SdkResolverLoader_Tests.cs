@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Shouldly;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +13,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Exception = System.Exception;

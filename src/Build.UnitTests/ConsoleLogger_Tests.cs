@@ -6,22 +6,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-
-
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Build.Execution;
-using System.Runtime.Versioning;
 using Xunit.NetCore.Extensions;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 

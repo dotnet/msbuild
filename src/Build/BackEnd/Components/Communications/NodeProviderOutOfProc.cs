@@ -5,11 +5,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
+using System.Linq;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using System.Linq;
+using Microsoft.Build.Shared;
 
 #nullable disable
 

@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Xaml;
-using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;

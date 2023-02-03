@@ -3,19 +3,19 @@
 
 using System;
 using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Logging;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests.BackEnd;
-using System.Threading;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
 
