@@ -67,7 +67,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             // Project details
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(
                 // Show indicator
-                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner())) +
+                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Graphics.Spinner()) +
                 // Project
                 ANSIBuilder.Formatting.Dim("Project: ") +
                 // Project file path with color

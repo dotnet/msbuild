@@ -196,11 +196,6 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return String.Format("\x1b[21m{0}\x1b[24m", text);
             }
 
-            public static string Blinking(string text)
-            {
-                return String.Format("\x1b[5m{0}\x1b[25m", text);
-            }
-
             public static string Inverse(string text)
             {
                 return String.Format("\x1b[7m{0}\x1b[27m", text);
