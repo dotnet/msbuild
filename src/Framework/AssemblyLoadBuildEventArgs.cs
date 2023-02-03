@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-//
 
 #nullable disable
 
@@ -54,7 +53,7 @@ namespace Microsoft.Build.Framework
 
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
-            LoadingContext = (AssemblyLoadingContext) reader.Read7BitEncodedInt();
+            LoadingContext = (AssemblyLoadingContext)reader.Read7BitEncodedInt();
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             MVID = reader.ReadGuid();
