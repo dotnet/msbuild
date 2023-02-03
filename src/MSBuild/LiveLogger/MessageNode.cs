@@ -69,7 +69,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                         ANSIBuilder.Formatting.ForegroundColor.Red)}";
                 case MessageType.HighPriorityMessage:
                 default:
-                    return $"ℹ️ {(Code != null ? Code + ": " : string.Empty)} {ANSIBuilder.Formatting.Italic(Message)}";
+                    return $"ℹ️ {Code}{(Code is not null ? ": " : string.Empty)} {ANSIBuilder.Formatting.Italic(Message)}";
             }
         }
 
