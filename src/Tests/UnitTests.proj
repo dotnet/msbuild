@@ -129,10 +129,16 @@
         <Destination>r</Destination>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Include="SDKTestPackages.System.zip">
+      <HelixCorrelationPayload Include="SDKTestRunPackages.zip">
         <PayloadDirectory>$(TestDotnetRoot)</PayloadDirectory>
         <Destination>d/.nuget</Destination>
         <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestRunPackages.zip</Uri>
+      </HelixCorrelationPayload>
+
+      <HelixCorrelationPayload Include="SDKTestRunPackages2.zip">
+        <PayloadDirectory>$(TestDotnetRoot)</PayloadDirectory>
+        <Destination>d/.nuget</Destination>
+        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestRunPackages2.zip</Uri>
       </HelixCorrelationPayload>
     </ItemGroup>
   </Target>
