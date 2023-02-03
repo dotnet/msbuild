@@ -794,7 +794,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Create a custom message event to make sure it can get sent correctly
         /// </summary>
         [Serializable]
-        internal class MyCustomMessageEvent : BuildMessageEventArgs
+        internal sealed class MyCustomMessageEvent : BuildMessageEventArgs
         {
             /// <summary>
             /// Some custom data for the custom event.
@@ -831,7 +831,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Create a custom build event to test the logging of custom build events against the task host
         /// </summary>
         [Serializable]
-        internal class MyCustomBuildEventArgs : CustomBuildEventArgs
+        internal sealed class MyCustomBuildEventArgs : CustomBuildEventArgs
         {
             /// <summary>
             /// Constructor
@@ -852,7 +852,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Class which implements a simple custom build error
         /// </summary>
         [Serializable]
-        internal class MyCustomBuildErrorEventArgs : BuildErrorEventArgs
+        internal sealed class MyCustomBuildErrorEventArgs : BuildErrorEventArgs
         {
             /// <summary>
             /// Some custom data for the custom event.
@@ -889,7 +889,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Class which implements a simple custom build warning
         /// </summary>
         [Serializable]
-        internal class MyCustomBuildWarningEventArgs : BuildWarningEventArgs
+        internal sealed class MyCustomBuildWarningEventArgs : BuildWarningEventArgs
         {
             /// <summary>
             /// Custom data for the custom event
@@ -925,7 +925,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Create a custom message event to make sure it can get sent correctly
         /// </summary>
-        internal class MyCustomMessageEventNotSerializable : BuildMessageEventArgs
+        internal sealed class MyCustomMessageEventNotSerializable : BuildMessageEventArgs
         {
             /// <summary>
             /// Some custom data for the custom event.
@@ -961,7 +961,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Custom build event which is not marked serializable. This is used to make sure we warn if we try and log a not serializable type in multiproc.
         /// </summary>
-        internal class MyCustomBuildEventArgsNotSerializable : CustomBuildEventArgs
+        internal sealed class MyCustomBuildEventArgsNotSerializable : CustomBuildEventArgs
         {
             // If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
             //  what happens for an event that's not serializable, don't include a default constructor.
@@ -983,7 +983,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Class which implements a simple custom build error which is not serializable
         /// </summary>
-        internal class MyCustomBuildErrorEventArgsNotSerializable : BuildErrorEventArgs
+        internal sealed class MyCustomBuildErrorEventArgsNotSerializable : BuildErrorEventArgs
         {
             /// <summary>
             /// Custom data for the custom event
@@ -1019,7 +1019,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Class which implements a simple custom build warning which is not serializable
         /// </summary>
-        internal class MyCustomBuildWarningEventArgsNotSerializable : BuildWarningEventArgs
+        internal sealed class MyCustomBuildWarningEventArgsNotSerializable : BuildWarningEventArgs
         {
             /// <summary>
             /// Custom data for the custom event
@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Custom logger which will be used for testing
         /// </summary>
-        internal class MyCustomLogger : ILogger
+        internal sealed class MyCustomLogger : ILogger
         {
             /// <summary>
             /// Last error event the logger encountered
@@ -1285,7 +1285,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Mock this class so that we can determine if build results are being cloned or if the live copies are being returned to the callers of the msbuild callback.
         /// </summary>
-        internal class MockIRequestBuilderCallback : IRequestBuilderCallback, IRequestBuilder
+        internal sealed class MockIRequestBuilderCallback : IRequestBuilderCallback, IRequestBuilder
         {
             /// <summary>
             /// BuildResults to return from the BuildProjects method.

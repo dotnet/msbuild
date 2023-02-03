@@ -2259,7 +2259,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Create a custom class derived from ITaskItem to test input and output parameters work using this item.
         /// </summary>
-        internal class DerivedFromITaskItem : ITaskItem
+        internal sealed class DerivedFromITaskItem : ITaskItem
         {
             /// <summary>
             /// The ItemSpec of the item

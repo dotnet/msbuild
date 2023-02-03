@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// The mock task builder.
     /// </summary>
-    internal class MockTaskBuilder : ITaskBuilder, IBuildComponent
+    internal sealed class MockTaskBuilder : ITaskBuilder, IBuildComponent
     {
         /// <summary>
         /// The component host.

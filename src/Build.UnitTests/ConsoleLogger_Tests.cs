@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
             </Target>
          </Project>";
 
-        private class SimulatedConsole
+        private sealed class SimulatedConsole
         {
             private StringBuilder _simulatedConsole;
 
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
+        private sealed class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
 
         private readonly ITestOutputHelper _output;
 

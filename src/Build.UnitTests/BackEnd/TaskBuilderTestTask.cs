@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Task factory which wraps a test task, this is used for unit testing
         /// </summary>
-        internal class TaskBuilderTestTaskFactory : ITaskFactory
+        internal sealed class TaskBuilderTestTaskFactory : ITaskFactory
         {
             /// <summary>
             /// Type of the task wrapped by the task factory

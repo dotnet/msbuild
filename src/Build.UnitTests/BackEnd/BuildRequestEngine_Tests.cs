@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
     public class BuildRequestEngine_Tests : IDisposable
     {
-        internal class MockRequestBuilder : IRequestBuilder, IBuildComponent
+        internal sealed class MockRequestBuilder : IRequestBuilder, IBuildComponent
         {
             public bool ThrowExceptionOnRequest
             {

@@ -1501,7 +1501,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         ///  Create a non logging packet to test the packet handling code
         /// </summary>
-        internal class NonLoggingPacket : INodePacket
+        internal sealed class NonLoggingPacket : INodePacket
         {
             #region Members
 

@@ -1614,7 +1614,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Helper class to simulate directory work for ignore project extensions
         /// </summary>
-        internal class IgnoreProjectExtensionsHelper
+        internal sealed class IgnoreProjectExtensionsHelper
         {
             private readonly List<string> _directoryFileNameList;
 

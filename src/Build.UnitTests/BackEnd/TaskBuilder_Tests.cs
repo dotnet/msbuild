@@ -1175,7 +1175,7 @@ namespace ClassLibrary2
         /// <summary>
         /// The mock component host object.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
             #region IBuildComponentHost Members
 

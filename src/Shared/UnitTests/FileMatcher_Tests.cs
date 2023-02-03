@@ -1970,7 +1970,7 @@ namespace Microsoft.Build.UnitTests
         /// It accepts multiple sets of files and keeps track of how many files were "hit"
         /// In this case, "hit" means that the caller asked for that file directly.
         /// </summary>
-        internal class MockFileSystem
+        internal sealed class MockFileSystem
         {
             /// <summary>
             /// Array of files (set1)
@@ -2613,7 +2613,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        private class FileSystemAdapter : IFileSystem
+        private sealed class FileSystemAdapter : IFileSystem
         {
             private readonly MockFileSystem _mockFileSystem;
 

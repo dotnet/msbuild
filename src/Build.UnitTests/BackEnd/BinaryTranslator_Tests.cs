@@ -843,7 +843,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Comparer for BaseClass.
             /// </summary>
-            private class BaseClassComparer : IComparer<BaseClass>
+            private sealed class BaseClassComparer : IComparer<BaseClass>
             {
                 /// <summary>
                 /// Constructor.
@@ -873,7 +873,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Derived class for testing.
         /// </summary>
-        private class DerivedClass : BaseClass
+        private sealed class DerivedClass : BaseClass
         {
             /// <summary>
             /// A field.
@@ -928,7 +928,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Comparer for DerivedClass.
             /// </summary>
-            private class DerivedClassComparer : IComparer<DerivedClass>
+            private sealed class DerivedClassComparer : IComparer<DerivedClass>
             {
                 /// <summary>
                 /// Constructor

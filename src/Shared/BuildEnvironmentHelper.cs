@@ -14,7 +14,7 @@ using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
-    internal class BuildEnvironmentHelper
+    internal sealed class BuildEnvironmentHelper
     {
         // Since this class is added as 'link' to shared source in multiple projects,
         // MSBuildConstants.CurrentVisualStudioVersion is not available in all of them.
@@ -525,7 +525,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// Defines the current environment for build tools.
     /// </summary>
-    internal class BuildEnvironment
+    internal sealed class BuildEnvironment
     {
         public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInVisualStudio, string visualStudioPath)
         {

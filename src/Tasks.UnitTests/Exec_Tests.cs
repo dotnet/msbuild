@@ -1015,7 +1015,7 @@ echo line 3"" />
         }
     }
 
-    internal class ExecWrapper : Exec
+    internal sealed class ExecWrapper : Exec
     {
         public Encoding StdOutputEncoding
         {

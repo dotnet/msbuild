@@ -412,7 +412,7 @@ namespace TaskUsageLogger
         /// Store data about a particular task invocation
         /// </summary>
         [DebuggerDisplay("{TaskName} {TargetName} {TaskAssembly}")]
-        private class TaskData
+        private sealed class TaskData
         {
             public string TaskName;
             public string TargetName;
@@ -442,7 +442,7 @@ namespace TaskUsageLogger
         /// Store data about a particular task registration
         /// </summary>
         [DebuggerDisplay("{TaskName} {TaskAssembly} {FilePath}")]
-        private class UsingTaskData
+        private sealed class UsingTaskData
         {
             public string TaskName;
             public string TaskAssembly;

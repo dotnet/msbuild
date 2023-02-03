@@ -362,7 +362,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("MSB3922", () => _mockEngine.Log);
         }
 
-        private class MockHttpContent : HttpContent
+        private sealed class MockHttpContent : HttpContent
         {
             private readonly Func<Stream, Task> _func;
             private readonly int _length;
@@ -386,7 +386,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        private class MockHttpMessageHandler : HttpMessageHandler
+        private sealed class MockHttpMessageHandler : HttpMessageHandler
         {
             private readonly Func<HttpRequestMessage, CancellationToken, HttpResponseMessage> _func;
 

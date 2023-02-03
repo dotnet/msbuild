@@ -1781,7 +1781,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// we can test most of the logging methods without relying on the
         /// exact implementation of process logging events.
         /// </summary>
-        internal class ProcessBuildEventHelper : LoggingService
+        internal sealed class ProcessBuildEventHelper : LoggingService
         {
             #region Data
             /// <summary>
@@ -1795,7 +1795,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// Create a constructor which calls the base class constructor
             /// </summary>
             /// <param name="loggerMode">Is the logging service supposed to be Synchronous or Asynchronous</param>
-            protected ProcessBuildEventHelper(LoggerMode loggerMode, int nodeId, IBuildComponentHost componentHost)
+            private ProcessBuildEventHelper(LoggerMode loggerMode, int nodeId, IBuildComponentHost componentHost)
                 : base(loggerMode, nodeId)
             {
                 if (componentHost == null)
@@ -1873,7 +1873,7 @@ namespace Microsoft.Build.UnitTests.Logging
             #endregion
         }
 
-        private class EventArgsEqualityComparer<T> : IEqualityComparer<T> where T : BuildEventArgs
+        private sealed class EventArgsEqualityComparer<T> : IEqualityComparer<T> where T : BuildEventArgs
         {
             public bool Equals(T x, T y)
             {

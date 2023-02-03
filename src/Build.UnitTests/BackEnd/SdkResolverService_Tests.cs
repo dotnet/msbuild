@@ -605,7 +605,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             isRunningInVisualStudio.ShouldBeTrue();
         }
 
-        private class MockLoaderStrategy : SdkResolverLoader
+        private sealed class MockLoaderStrategy : SdkResolverLoader
         {
             private List<SdkResolver> _resolvers;
             private List<(string ResolvableSdkPattern, SdkResolver Resolver)> _resolversWithPatterns;
@@ -689,7 +689,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockResolverReturnsNull : SdkResolver
+        private sealed class MockResolverReturnsNull : SdkResolver
         {
             public override string Name => nameof(MockResolverReturnsNull);
 
@@ -698,7 +698,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory) => null;
         }
 
-        private class MockSdkResolver1 : SdkResolver
+        private sealed class MockSdkResolver1 : SdkResolver
         {
             public override string Name => nameof(MockSdkResolver1);
 
@@ -717,7 +717,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolver2 : SdkResolver
+        private sealed class MockSdkResolver2 : SdkResolver
         {
             public override string Name => nameof(MockSdkResolver2);
 
@@ -736,7 +736,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverWithResolvableSdkPattern1 : SdkResolver
+        private sealed class MockSdkResolverWithResolvableSdkPattern1 : SdkResolver
         {
             public override string Name => nameof(MockSdkResolverWithResolvableSdkPattern1);
 
@@ -755,7 +755,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverWithResolvableSdkPattern2 : SdkResolver
+        private sealed class MockSdkResolverWithResolvableSdkPattern2 : SdkResolver
         {
             public override string Name => nameof(MockSdkResolverWithResolvableSdkPattern2);
 
@@ -774,7 +774,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverWithState : SdkResolver
+        private sealed class MockSdkResolverWithState : SdkResolver
         {
             public const string Expected = "01713226A202458F97D9074168DF2618";
 
@@ -799,7 +799,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverThrows : SdkResolver
+        private sealed class MockSdkResolverThrows : SdkResolver
         {
             public override string Name => nameof(MockSdkResolverThrows);
             public override int Priority => 0;

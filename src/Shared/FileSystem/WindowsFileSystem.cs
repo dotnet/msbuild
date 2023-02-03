@@ -30,7 +30,7 @@ namespace Microsoft.Build.Shared.FileSystem
     /// TODO For potential extra perf gains, provide native implementations for all IFileSystem methods and stop inheriting from ManagedFileSystem
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal class WindowsFileSystem : ManagedFileSystem
+    internal sealed class WindowsFileSystem : ManagedFileSystem
     {
         private static readonly WindowsFileSystem Instance = new();
 

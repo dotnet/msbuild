@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// us to check to see if the forwarding logger is
         /// sending us the events we send in.
         /// </summary>
-        private class TestEventRedirector : IEventRedirector
+        private sealed class TestEventRedirector : IEventRedirector
         {
             #region Data
 

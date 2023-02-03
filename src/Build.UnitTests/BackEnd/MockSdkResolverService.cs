@@ -12,7 +12,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
-    internal class MockSdkResolverService : IBuildComponent, ISdkResolverService
+    internal sealed class MockSdkResolverService : IBuildComponent, ISdkResolverService
     {
         public Action<INodePacket> SendPacket { get; }
 

@@ -329,7 +329,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Generic class derived from BuildEventArgs which is used to test the case
         /// where the event is not a well known event, or a custom event
         /// </summary>
-        internal class GenericBuildEventArgs : BuildEventArgs
+        internal sealed class GenericBuildEventArgs : BuildEventArgs
         {
             /// <summary>
             /// Default constructor
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Generic class derived from BuildStatusEvent which is used to test the case
         /// where a status event is raised but it is not a well known status event (build started ...)
         /// </summary>
-        internal class GenericBuildStatusEventArgs : BuildStatusEventArgs
+        internal sealed class GenericBuildStatusEventArgs : BuildStatusEventArgs
         {
             /// <summary>
             /// Default constructor
@@ -359,7 +359,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Create a test class which will register to the event source and have event handlers
         /// which can act normally or throw exceptions.
         /// </summary>
-        internal class EventHandlerHelper
+        internal sealed class EventHandlerHelper
         {
             #region Data
             /// <summary>
@@ -692,7 +692,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// by not having to instantiate new objects everywhere and
         /// all the fields are set in one place which makes it more maintainable
         /// </summary>
-        internal class RaiseEventHelper
+        internal sealed class RaiseEventHelper
         {
             #region Data
             /// <summary>

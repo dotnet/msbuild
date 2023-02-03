@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 #else
-        internal class SGenExtension : SGen
+        internal sealed class SGenExtension : SGen
         {
             internal string CommandLine()
             {

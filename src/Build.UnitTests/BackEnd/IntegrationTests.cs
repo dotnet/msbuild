@@ -5,7 +5,7 @@
 
 namespace Microsoft.Build.Unittest.BackEnd
 {
-    internal class IntegrationTests
+    internal sealed class IntegrationTests
     {
     }
 }

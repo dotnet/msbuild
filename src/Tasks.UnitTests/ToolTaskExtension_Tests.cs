@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(expected, actual);
         }
 
-        private class MyToolTaskExtension : ToolTaskExtension
+        private sealed class MyToolTaskExtension : ToolTaskExtension
         {
             private readonly Action<CommandLineBuilderExtension> _addResponseFileCommands;
 

@@ -542,7 +542,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        internal class SdkPropertiesAreExpandedDataTemplate
+        internal sealed class SdkPropertiesAreExpandedDataTemplate
         {
             public SdkPropertiesAreExpandedDataTemplate(string template, bool expectedMinimumVersionIsNull)
             {
@@ -565,7 +565,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        internal class SdkPropertiesAreExpandedCase
+        internal sealed class SdkPropertiesAreExpandedCase
         {
             public SdkPropertiesAreExpandedCase(SdkReferencePropertyExpansionMode? mode,
                 SdkPropertiesAreExpandedDataTemplate template, bool setName, bool setVersion, bool expectedSuccess)

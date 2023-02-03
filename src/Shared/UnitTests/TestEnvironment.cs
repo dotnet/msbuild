@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        private class DefaultOutput : ITestOutputHelper
+        private sealed class DefaultOutput : ITestOutputHelper
         {
             public void WriteLine(string message)
             {

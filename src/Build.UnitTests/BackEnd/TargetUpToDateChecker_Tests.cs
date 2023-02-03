@@ -495,7 +495,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private readonly DateTime _yesterday = DateTime.Today.AddTicks(-TimeSpan.TicksPerDay);
         private readonly DateTime _twoDaysAgo = DateTime.Today.AddTicks(-2 * TimeSpan.TicksPerDay);
 
-        private class FileWriteInfo
+        private sealed class FileWriteInfo
         {
             public string Path;
             public DateTime LastWriteTime;

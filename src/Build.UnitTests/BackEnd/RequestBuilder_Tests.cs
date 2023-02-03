@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
     }
 
-    internal class TestTargetBuilder : ITargetBuilder, IBuildComponent
+    internal sealed class TestTargetBuilder : ITargetBuilder, IBuildComponent
     {
         private IBuildComponentHost _host;
         private IResultsCache _cache;
