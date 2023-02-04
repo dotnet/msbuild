@@ -7,6 +7,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
+using Xunit;
 
 namespace Microsoft.DotNet.Configurer.UnitTests
 {
