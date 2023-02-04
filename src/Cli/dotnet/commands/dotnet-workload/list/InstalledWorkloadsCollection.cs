@@ -22,6 +22,11 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             _workloads = new Dictionary<string, string>(workloadIds.Select(id => new KeyValuePair<string, string>(id.ToString(), installationSource)));
         }
 
+        public InstalledWorkloadsCollection()
+        {
+            _workloads = new();
+        }
+
         public IEnumerable<KeyValuePair<string, string>> AsEnumerable() =>
             _workloads.AsEnumerable();
 

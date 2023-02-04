@@ -12,6 +12,11 @@
         <target state="new">Attempt to remove orphaned workload components and clean workload manifest files.</target>
         <note />
       </trans-unit>
+      <trans-unit id="VSWorkloadNotRemoved">
+        <source>Workload '{0}' was not removed because it is installed and managed by Visual Studio. Please uninstall this workload through Visual Studio to fully remove it.</source>
+        <target state="new">Workload '{0}' was not removed because it is installed and managed by Visual Studio. Please uninstall this workload through Visual Studio to fully remove it.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

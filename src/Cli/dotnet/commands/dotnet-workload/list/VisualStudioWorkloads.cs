@@ -8,10 +8,11 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.VisualStudio.Setup.Configuration;
 
-namespace Microsoft.DotNet.Workloads.Workload.List
+namespace Microsoft.DotNet.Workloads.Workload
 {
     /// <summary>
     /// Provides functionality to query the status of .NET workloads in Visual Studio.    
@@ -140,8 +141,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 do
                 {
                     setupInstances.Next(1, instances, out fetched);
-                    
-                    if (fetched > 0) 
+
+                    if (fetched > 0)
                     {
                         ISetupInstance2 instance = (ISetupInstance2)instances[0];
 

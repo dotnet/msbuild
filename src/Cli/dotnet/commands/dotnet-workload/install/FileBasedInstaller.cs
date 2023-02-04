@@ -313,7 +313,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         .Where(recordPath => !installedSdkFeatureBands.Contains(new SdkFeatureBand(Path.GetFileName(recordPath))));
 
                     var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
-                    if (bandRecords.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
+                    if (
+                        (bandRecords.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
+                        ||
+                        cleanAllPacks
+                       )
                     {
                         unneededBandRecords = unneededBandRecords.Append(currentBandRecordPath);
                     }

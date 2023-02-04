@@ -123,4 +123,7 @@
   <data name="CommandDescription" xml:space="preserve">
     <value>Attempt to remove orphaned workload components and clean workload manifest files.</value>
   </data>
+  <data name="VSWorkloadNotRemoved" xml:space="preserve">
+    <value>Workload '{0}' was not removed because it is installed and managed by Visual Studio. Please uninstall this workload through Visual Studio to fully remove it.</value>
+  </data>
 </root>

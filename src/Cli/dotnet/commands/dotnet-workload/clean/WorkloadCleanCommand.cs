@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Clean
@@ -19,6 +20,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
 
         private readonly ReleaseVersion _sdkVersion;
         private readonly IInstaller _workloadInstaller;
+        private readonly IWorkloadResolver _workloadResolver;
 
         public WorkloadCleanCommand(
             ParseResult parseResult,
@@ -36,6 +38,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir, true);
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, workloadResolver, Verbosity, userProfileDir, VerifySignatures, PackageDownloader, dotnetPath);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
+            _workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
         }
 
         public override int Execute()
@@ -49,7 +53,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
         {
             if (_cleanAll)
             {
+                _workloadInstaller.GarbageCollectInstalledWorkloadPacks(cleanAllPacks: true);
 
+                if (OperatingSystem.IsWindows())
+                {
+                    InstalledWorkloadsCollection vsWorkloads = new();
+                    VisualStudioWorkloads.GetInstalledWorkloads(_workloadResolver, new SdkFeatureBand(_sdkVersion), vsWorkloads);
+
+                    foreach (var vsWorkload in vsWorkloads.AsEnumerable())
+                    {
+                        Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.VSWorkloadNotRemoved, vsWorkload.Key)));
+                    }
+                }
             }
             else
             {
