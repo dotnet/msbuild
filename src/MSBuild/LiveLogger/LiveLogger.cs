@@ -17,8 +17,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public int StartedProjects = 0;
         public int FinishedProjects = 0;
         public LoggerVerbosity Verbosity { get; set; }
-        private TerminalBufferLine? finishedProjectsLine;
-        private Dictionary<string, string> blockedProjects = new();
+        private Dictionary<string, int> blockedProjects = new();
 
         public LiveLogger()
         {
@@ -59,7 +58,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             TerminalBuffer.WriteNewLine(string.Empty);
 
             // Top line indicates the number of finished projects.
-            finishedProjectsLine = TerminalBuffer.WriteNewLine($"{FinishedProjects} projects finished building.");
+            TerminalBuffer.FinishedProjects = this.FinishedProjects;
 
             // First render
             TerminalBuffer.Render();
@@ -72,15 +71,14 @@ namespace Microsoft.Build.Logging.LiveLogger
                 // Use task delay to avoid blocking the task, so that keyboard input is listened continously
                 Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
-                    foreach (KeyValuePair<string, string> blockedProject in blockedProjects)
-                    {
-                    }
+                    TerminalBuffer.FinishedProjects = this.FinishedProjects;
 
                     // Rerender projects only when needed
                     foreach (var project in projects)
                     {
                         project.Value.Log();
                     }
+
                     // Rerender buffer
                     TerminalBuffer.Render();
                 });
@@ -158,7 +156,6 @@ namespace Microsoft.Build.Logging.LiveLogger
             // Update line
             node.Finished = true;
             FinishedProjects++;
-            finishedProjectsLine!.Text = $"{FinishedProjects} projects finished building.";
             UpdateFooter();
             node.ShouldRerender = true;
         }
@@ -208,12 +205,27 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             if (e.TaskName.Equals("MSBuild"))
             {
-                blockedProjects[e.ProjectFile] = "Blocked by MSBuild task";
+                TerminalBufferLine? line = TerminalBuffer.WriteNewLineAfterMidpoint($"{e.ProjectFile} is blocked by the MSBuild task.");
+                if (line is not null)
+                {
+                    blockedProjects[e.ProjectFile] = line.Id;
+                }
             }
         }
 
         private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
+            if (e.TaskName.Equals("MSBuild"))
+            {
+                if (blockedProjects.TryGetValue(e.ProjectFile, out int lineId))
+                {
+                    TerminalBuffer.DeleteLine(lineId);
+                    if (projects.TryGetValue(e.BuildEventContext!.ProjectInstanceId, out ProjectNode? node))
+                    {
+                        node.ShouldRerender = true;
+                    }
+                }
+            }
         }
 
         // Raised messages, warnings and errors
