@@ -152,7 +152,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Constructor, for unit testing only.  
+        /// Initializes a new instance of the <see cref="TaskExecutionHost"/> class
+        /// for unit testing only.
         /// </summary>
         internal TaskExecutionHost()
         {

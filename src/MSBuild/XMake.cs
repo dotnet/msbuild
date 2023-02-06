@@ -701,7 +701,7 @@ namespace Microsoft.Build.CommandLine
                 ProfilerLogger profilerLogger = null;
                 bool enableProfiler = false;
                 bool interactive = false;
-                bool isolateProjects = false;
+                ProjectIsolationMode isolateProjects = ProjectIsolationMode.False;
                 GraphBuildOptions graphBuildOptions = null;
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
@@ -1121,7 +1121,7 @@ namespace Microsoft.Build.CommandLine
             ProfilerLogger profilerLogger,
             bool enableProfiler,
             bool interactive,
-            bool isolateProjects,
+            ProjectIsolationMode isolateProjects,
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
@@ -1293,7 +1293,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.WarningsNotAsErrors = warningsNotAsErrors;
                     parameters.WarningsAsMessages = warningsAsMessages;
                     parameters.Interactive = interactive;
-                    parameters.IsolateProjects = isolateProjects;
+                    parameters.ProjectIsolationMode = isolateProjects;
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
@@ -2215,7 +2215,7 @@ namespace Microsoft.Build.CommandLine
             ref ProfilerLogger profilerLogger,
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
-            ref bool isolateProjects,
+            ref ProjectIsolationMode isolateProjects,
             ref GraphBuildOptions graphBuild,
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
@@ -2392,7 +2392,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.IsolateProjects))
                     {
-                        isolateProjects = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects], defaultValue: true, resourceName: "InvalidIsolateProjectsValue");
+                        isolateProjects = ProcessIsolateProjectsSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects]);
                     }
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
@@ -2534,6 +2534,39 @@ namespace Microsoft.Build.CommandLine
 
             int indexOfColon = val.IndexOf(":");
             return indexOfColon < 0 || indexOfColon == val.Length - 1;
+        }
+
+        internal static ProjectIsolationMode ProcessIsolateProjectsSwitch(string[] parameters)
+        {
+
+            // Before /isolate had parameters, it was treated as a boolean switch.
+            // Preserve that in case anyone is using /isolate:{false|true}
+            if (parameters.Length == 1 && bool.TryParse(parameters[0], out bool boolValue))
+            {
+                return boolValue ? ProjectIsolationMode.True : ProjectIsolationMode.False;
+            }
+
+            ProjectIsolationMode isolateProjects = ProjectIsolationMode.True;
+            foreach (string parameter in parameters)
+            {
+                if (string.IsNullOrWhiteSpace(parameter))
+                {
+                    continue;
+                }
+
+                string trimmedParameter = parameter.Trim();
+                if (trimmedParameter.Equals(nameof(ProjectIsolationMode.MessageUponIsolationViolation), StringComparison.OrdinalIgnoreCase)
+                    || trimmedParameter.Equals("Message", StringComparison.OrdinalIgnoreCase))
+                {
+                    isolateProjects = ProjectIsolationMode.MessageUponIsolationViolation;
+                }
+                else
+                {
+                    CommandLineSwitchException.Throw("InvalidIsolateProjectsValue", parameter);
+                }
+            }
+
+            return isolateProjects;
         }
 
         internal static GraphBuildOptions ProcessGraphBuildSwitch(string[] parameters)

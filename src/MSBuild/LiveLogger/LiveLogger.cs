@@ -13,12 +13,9 @@ namespace Microsoft.Build.Logging.LiveLogger
         private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
 
         private bool Succeeded;
-
-        private float existingTasks = 1;
-        private float completedTasks = 0;
-
         public string Parameters { get; set; }
-
+        public int StartedProjects = 0;
+        public int FinishedProjects = 0;
         public LoggerVerbosity Verbosity { get; set; }
 
         public LiveLogger()
@@ -101,6 +98,15 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
         }
 
+        private void UpdateFooter()
+        {
+            float percentage = (float)FinishedProjects / StartedProjects;
+            TerminalBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
+                $"Build progress (approx.) [{ANSIBuilder.Graphics.ProgressBar(percentage)}]",
+                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
+                Console.BufferWidth);
+        }
+
         // Build
         private void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
         {
@@ -114,6 +120,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         // Project
         private void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
+            StartedProjects++;
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             // If id already exists...
@@ -125,6 +132,8 @@ namespace Microsoft.Build.Logging.LiveLogger
             ProjectNode node = new ProjectNode(e);
             projects[id] = node;
             // Log
+            // Update footer
+            UpdateFooter();
             node.ShouldRerender = true;
         }
 
@@ -138,7 +147,8 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
             // Update line
             node.Finished = true;
-            // Log
+            FinishedProjects++;
+            UpdateFooter();
             node.ShouldRerender = true;
         }
 
@@ -182,14 +192,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
             // Update
             node.AddTask(e);
-            existingTasks++;
             // Log
             node.ShouldRerender = true;
         }
 
         private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
-            completedTasks++;
         }
 
         // Raised messages, warnings and errors
