@@ -92,8 +92,8 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(WorkloadUninstallCommandParser.GetCommand());
             command.AddCommand(WorkloadRepairCommandParser.GetCommand());
             command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
-            command.AddCommand(WorkloadElevateCommandParser.GetCommand());
             command.AddCommand(WorkloadCleanCommandParser.GetCommand());
+            command.AddCommand(WorkloadElevateCommandParser.GetCommand());
 
             command.SetHandler((parseResult) => ProcessArgs(parseResult));
 

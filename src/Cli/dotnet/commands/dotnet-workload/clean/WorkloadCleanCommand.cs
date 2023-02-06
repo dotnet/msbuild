@@ -12,6 +12,8 @@ using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
+#nullable enable
+
 namespace Microsoft.DotNet.Workloads.Workload.Clean
 {
     internal class WorkloadCleanCommand : WorkloadCommandBase
@@ -24,22 +26,29 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
 
         public WorkloadCleanCommand(
             ParseResult parseResult,
-            IReporter reporter = null,
-            IWorkloadResolver workloadResolver = null,
-            string dotnetDir = null,
-            string version = null,
-            string userProfileDir = null
+            IReporter? reporter = null,
+            IWorkloadResolver? workloadResolver = null,
+            string? dotnetDir = null,
+            string? version = null,
+            string? userProfileDir = null
             ) : base(parseResult, reporter: reporter)
         {
             _cleanAll = parseResult.GetValue(WorkloadCleanCommandParser.CleanAllOption);
 
-            var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            string? dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            if (dotnetPath == null)
+            {
+                throw new GracefulException(String.Format(LocalizableStrings.InvalidWorkloadProcessPath, Environment.ProcessPath ?? "null"));
+            }
+
             userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
+
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir, true);
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, workloadResolver, Verbosity, userProfileDir, VerifySignatures, PackageDownloader, dotnetPath);
+
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
-            _workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
+            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, _workloadResolver, Verbosity, userProfileDir, VerifySignatures, PackageDownloader, dotnetPath);
         }
 
         public override int Execute()
