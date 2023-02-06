@@ -410,7 +410,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// When it is false, it uses the filled in <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/> to simulate a fully cached build.
         /// 
         /// </summary>
-        /// <param name="env">The test environment.</param>
+        /// <param name="env">The test environment under which to run.</param>
         /// <param name="topoSortedNodes"></param>
         /// <param name="expectedNodeBuildOutput"></param>
         /// <param name="outputCaches"></param>
@@ -418,6 +418,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// <param name="assertBuildResults"></param>
         /// <param name="expectedOutputProducer"></param>
         /// <param name="targetListsPerNode">The list of targets to build per node.</param>
+        /// <param name="projectIsolationMode">The isolation mode under which to run.</param>
         /// <returns></returns>
         internal static Dictionary<string, (BuildResult Result, MockLogger Logger)> BuildUsingCaches(
             TestEnvironment env,
@@ -428,7 +429,8 @@ namespace Microsoft.Build.Graph.UnitTests
             bool assertBuildResults = true,
             // (current node, expected output dictionary) -> actual expected output for current node
             Func<ProjectGraphNode, ExpectedNodeBuildOutput, string[]> expectedOutputProducer = null,
-            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetListsPerNode = null)
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetListsPerNode = null,
+            ProjectIsolationMode projectIsolationMode = ProjectIsolationMode.False)
         {
             expectedOutputProducer ??= ((node, expectedOutputs) => expectedOutputs[node]);
 
@@ -451,7 +453,8 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 var buildParameters = new BuildParameters
                 {
-                    InputResultsCacheFiles = cacheFilesForReferences
+                    InputResultsCacheFiles = cacheFilesForReferences,
+                    ProjectIsolationMode = projectIsolationMode,
                 };
 
                 if (generateCacheFiles)
@@ -468,7 +471,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     node.ProjectInstance.FullPath,
                     null,
                     buildParameters,
-                    targetListsPerNode?[node].ToArray());
+                    targetListsPerNode?[node] != null ? targetListsPerNode?[node] : node.ProjectInstance.DefaultTargets);
 
                 results[ProjectNumber(node)] = (result, logger);
 

@@ -68,7 +68,6 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests that the assembly being imported is passed to the command line
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TypeLibNameWithSpaces()
         {
             var t = new ResolveComReference.TlbImp();

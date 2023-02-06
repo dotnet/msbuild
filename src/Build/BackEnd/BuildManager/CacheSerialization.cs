@@ -13,7 +13,11 @@ namespace Microsoft.Build.Execution
 {
     internal static class CacheSerialization
     {
-        public static string SerializeCaches(IConfigCache configCache, IResultsCache resultsCache, string outputCacheFile)
+        public static string SerializeCaches(
+            IConfigCache configCache,
+            IResultsCache resultsCache,
+            string outputCacheFile,
+            ProjectIsolationMode projectIsolationMode)
         {
             ErrorUtilities.VerifyThrowInternalNull(outputCacheFile, nameof(outputCacheFile));
 
@@ -81,6 +85,19 @@ namespace Microsoft.Build.Execution
                         var tempResultsCacheToSerialize = new ResultsCache();
                         tempResultsCacheToSerialize.AddResult(resultsCacheToSerialize.GetResultsForConfiguration(smallestCacheConfigId));
                         resultsCacheToSerialize = tempResultsCacheToSerialize;
+                    }
+
+                    if (projectIsolationMode == ProjectIsolationMode.MessageUponIsolationViolation)
+                    {
+                        int smallestConfigId = configCacheToSerialize.GetSmallestConfigId();
+
+                        // In MessageUponIsolationViolation mode, only keep the TargetResults for
+                        // top-level targets to mitigate the chances of an isolation-
+                        // violating target on a dependency project using incorrect state
+                        // due to its dependency on a cached target whose side effects would
+                        // not be taken into account. (E.g., the definition of a property.)
+                        resultsCacheToSerialize.GetResultsForConfiguration(smallestConfigId)
+                            .KeepSpecificTargetResults(configCacheToSerialize[smallestConfigId].RequestedTargets);
                     }
 
                     translator.Translate(ref configCacheToSerialize);

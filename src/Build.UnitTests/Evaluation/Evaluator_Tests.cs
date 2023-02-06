@@ -20,7 +20,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-
+using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -199,7 +199,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyConditionsInsideOutsideTargets()
         {
             string testtargets = @"
@@ -2297,7 +2296,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// or on a 32-bit machine and "c:\program files (x86)\msbuild" in a 32-bit process on a 64-bit machine.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPathDefault_Legacy()
         {
             string specialPropertyName = "MSBuildExtensionsPath";
@@ -2411,7 +2409,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// should win over whatever MSBuild thinks the default is.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPathWithGlobalOverride()
         {
             Project project = new Project(new ProjectCollection());
@@ -2430,7 +2427,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// We can't test that unless we are on a 64 bit box, but this test will work on either
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPath32Default()
         {
             // On a 64 bit machine we always want to use the program files x86.  If we are running as a 64 bit process then this variable will be set correctly
@@ -2464,7 +2460,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// of seeing whether our value wins.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPath32WithEnvironmentOverride()
         {
             string originalMSBuildExtensionsPath32Value = Environment.GetEnvironmentVariable("MSBuildExtensionsPath32");
@@ -2488,7 +2483,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// of seeing whether our value wins.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPath32WithGlobalOverride()
         {
             Project project = new Project(new ProjectCollection());
@@ -2505,7 +2499,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// We can't test that unless we are on a 64 bit box, but this test will work on either
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPath64Default()
         {
             string expected = string.Empty;
@@ -2679,7 +2672,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void ReservedProjectProperties()
         {
             string file = NativeMethodsShared.IsWindows ? @"c:\foo\bar.csproj" : "/foo/bar.csproj";
@@ -2717,14 +2709,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Test standard reserved properties on UNC at root
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("UNC is only available under Windows.")]
         public void ReservedProjectPropertiesOnUNCRoot()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "UNC is only available under Windows"
-            }
-
             string uncFile = @"\\foo\bar\baz.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(uncFile);
             Project project = new Project(xml);
@@ -2740,14 +2727,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Test standard reserved properties on UNC
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("UNC is only available under Windows.")]
         public void ReservedProjectPropertiesOnUNC()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "UNC is only available under Windows"
-            }
-
             string uncFile = @"\\foo\bar\baz\biz.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(uncFile);
             Project project = new Project(xml);
@@ -2765,7 +2747,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Verify when a node count is passed through on the project collection that the correct number is used to evaluate the msbuildNodeCount
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void VerifyMsBuildNodeCountReservedProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

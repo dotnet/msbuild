@@ -1360,7 +1360,11 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        public static BuildResult BuildProjectFileUsingBuildManager(string projectFile, MockLogger logger = null, BuildParameters parameters = null, string[] targetsToBuild = null)
+        public static BuildResult BuildProjectFileUsingBuildManager(
+            string projectFile,
+            MockLogger logger = null,
+            BuildParameters parameters = null,
+            IList<string> targetsToBuild = null)
         {
             using (var buildManager = new BuildManager())
             {
@@ -1377,7 +1381,7 @@ namespace Microsoft.Build.UnitTests
                     projectFile,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    targetsToBuild ?? Array.Empty<string>(),
+                    targetsToBuild?.ToArray() ?? Array.Empty<string>(),
                     null);
 
                 var result = buildManager.Build(

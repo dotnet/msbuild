@@ -9,6 +9,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -136,8 +137,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void TestTranslationRemoteHostObjects()
         {

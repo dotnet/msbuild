@@ -364,9 +364,7 @@ namespace Microsoft.Build.BackEnd
             _schedulingData.EventTime = DateTime.UtcNow;
             List<ScheduleResponse> responses = new List<ScheduleResponse>();
             TraceScheduler("Reporting result from node {0} for request {1}, parent {2}.", nodeId, result.GlobalRequestId, result.ParentGlobalRequestId);
-
-            // Record these results to the cache.
-            _resultsCache.AddResult(result);
+            RecordResultToCurrentCacheIfConfigNotInOverrideCache(result);
 
             if (result.NodeRequestId == BuildRequest.ResultsTransferNodeRequestId)
             {
@@ -1961,14 +1959,15 @@ namespace Microsoft.Build.BackEnd
         {
             emitNonErrorLogs = _ => { };
 
-            var isIsolatedBuild = _componentHost.BuildParameters.IsolateProjects;
+            ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
             var configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
 
             // do not check root requests as nothing depends on them
-            if (!isIsolatedBuild || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints
+            if (isolateProjects == ProjectIsolationMode.False || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints
                 || SkipNonexistentTargetsIfExistentTargetsHaveResults(request))
             {
-                if (isIsolatedBuild && request.SkipStaticGraphIsolationConstraints)
+                bool logComment = ((isolateProjects == ProjectIsolationMode.True || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation) && request.SkipStaticGraphIsolationConstraints);
+                if (logComment)
                 {
                     // retrieving the configs is not quite free, so avoid computing them eagerly
                     var configs = GetConfigurations();
@@ -2077,6 +2076,23 @@ namespace Microsoft.Build.BackEnd
                 // A cache miss on nonexistent targets on the reference is allowed, given the request
                 // to skip nonexistent targets.
                 return true;
+            }
+        }
+
+        /// <summary>
+        /// Records the result to the current cache if its config isn't in the override cache.
+        /// </summary>
+        /// <param name="result">The result to potentially record in the current cache.</param>
+        internal void RecordResultToCurrentCacheIfConfigNotInOverrideCache(BuildResult result)
+        {
+            // Record these results to the current cache only if their config isn't in the
+            // override cache, which can happen if we are building in the project isolation mode
+            // ProjectIsolationMode.MessageUponIsolationViolation, and the received result was built by an
+            // isolation-violating dependency project.
+            if (_configCache is not ConfigCacheWithOverride configCacheWithOverride
+                || !configCacheWithOverride.HasConfigurationInOverrideCache(result.ConfigurationId))
+            {
+                _resultsCache.AddResult(result);
             }
         }
 

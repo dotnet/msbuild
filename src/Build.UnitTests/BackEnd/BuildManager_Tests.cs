@@ -2303,7 +2303,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void CacheLifetime()
         {
             FileUtilities.ClearCacheDirectory();
@@ -3966,7 +3965,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Regression test for https://github.com/dotnet/msbuild/issues/3047
         /// </summary>
         [Fact]
-        [SkipOnMono("out-of-proc nodes not working on mono yet")]
         public void MultiProcReentrantProjectWithCallTargetDoesNotFail()
         {
             var a =

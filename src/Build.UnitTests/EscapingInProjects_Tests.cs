@@ -107,7 +107,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// a string parameter of a task, in this case the Message task.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SemicolonInPropertyPassedIntoStringParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -160,7 +159,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// an ITaskItem[] task parameter.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SemicolonInPropertyPassedIntoITaskItemParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
@@ -606,7 +604,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// as an escaped percent sign.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -733,7 +730,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// literally, not as a wildcard
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
             MockLogger logger = new();

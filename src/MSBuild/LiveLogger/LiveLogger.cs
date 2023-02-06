@@ -6,22 +6,19 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 {
-    internal class FancyLogger : ILogger
+    internal class LiveLogger : ILogger
     {
-        private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
+        private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
 
         private bool Succeeded;
-
-        private float existingTasks = 1;
-        private float completedTasks = 0;
-
         public string Parameters { get; set; }
-
+        public int StartedProjects = 0;
+        public int FinishedProjects = 0;
         public LoggerVerbosity Verbosity { get; set; }
 
-        public FancyLogger()
+        public LiveLogger()
         {
             Parameters = "";
         }
@@ -54,15 +51,15 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         private void Render()
         {
-            // Initialize FancyLoggerBuffer
-            FancyLoggerBuffer.Initialize();
+            // Initialize LiveLoggerBuffer
+            TerminalBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            FancyLoggerBuffer.WriteNewLine(string.Empty);
+            TerminalBuffer.WriteNewLine(string.Empty);
             // First render
-            FancyLoggerBuffer.Render();
+            TerminalBuffer.Render();
             int i = 0;
             // Rerender periodically
-            while (!FancyLoggerBuffer.IsTerminated)
+            while (!TerminalBuffer.IsTerminated)
             {
                 i++;
                 // Delay by 1/60 seconds
@@ -75,7 +72,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                         project.Value.Log();
                     }
                     // Rerender buffer
-                    FancyLoggerBuffer.Render();
+                    TerminalBuffer.Render();
                 });
                 // Handle keyboard input
                 if (Console.KeyAvailable)
@@ -84,21 +81,30 @@ namespace Microsoft.Build.Logging.FancyLogger
                     switch (key)
                     {
                         case ConsoleKey.UpArrow:
-                            if (FancyLoggerBuffer.TopLineIndex > 0)
+                            if (TerminalBuffer.TopLineIndex > 0)
                             {
-                                FancyLoggerBuffer.TopLineIndex--;
+                                TerminalBuffer.TopLineIndex--;
                             }
-                            FancyLoggerBuffer.ShouldRerender = true;
+                            TerminalBuffer.ShouldRerender = true;
                             break;
                         case ConsoleKey.DownArrow:
-                            FancyLoggerBuffer.TopLineIndex++;
-                            FancyLoggerBuffer.ShouldRerender = true;
+                            TerminalBuffer.TopLineIndex++;
+                            TerminalBuffer.ShouldRerender = true;
                             break;
                         default:
                             break;
                     }
                 }
             }
+        }
+
+        private void UpdateFooter()
+        {
+            float percentage = (float)FinishedProjects / StartedProjects;
+            TerminalBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
+                $"Build progress (approx.) [{ANSIBuilder.Graphics.ProgressBar(percentage)}]",
+                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
+                Console.BufferWidth);
         }
 
         // Build
@@ -114,6 +120,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         // Project
         private void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
+            StartedProjects++;
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             // If id already exists...
@@ -122,9 +129,11 @@ namespace Microsoft.Build.Logging.FancyLogger
                 return;
             }
             // Add project
-            FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
+            ProjectNode node = new ProjectNode(e);
             projects[id] = node;
             // Log
+            // Update footer
+            UpdateFooter();
             node.ShouldRerender = true;
         }
 
@@ -132,13 +141,14 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
             // Update line
             node.Finished = true;
-            // Log
+            FinishedProjects++;
+            UpdateFooter();
             node.ShouldRerender = true;
         }
 
@@ -147,7 +157,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -161,7 +171,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -176,20 +186,18 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
             // Update
             node.AddTask(e);
-            existingTasks++;
             // Log
             node.ShouldRerender = true;
         }
 
         private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
-            completedTasks++;
         }
 
         // Raised messages, warnings and errors
@@ -201,7 +209,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -215,7 +223,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -229,7 +237,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -247,7 +255,7 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public void Shutdown()
         {
-            FancyLoggerBuffer.Terminate();
+            TerminalBuffer.Terminate();
             // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
             Console.Clear();
             int errorCount = 0;
