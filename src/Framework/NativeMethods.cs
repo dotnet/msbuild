@@ -195,6 +195,21 @@ internal static class NativeMethods
         // ARM64
         ARM64,
 
+        // WebAssembly
+        WASM,
+
+        // S390x
+        S390X,
+
+        // LongAarch64
+        LOONGARCH64,
+
+        // 32-bit ARMv6
+        ARMV6,
+
+        // PowerPC 64-bit (little-endian) 
+        PPC64LE,
+
         // Who knows
         Unknown
     }
@@ -435,7 +450,8 @@ internal static class NativeMethods
             else
             {
                 ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
-#if !NET35
+
+#if NETCOREAPP || NETSTANDARD1_1_OR_GREATER
                 // Get the architecture from the runtime.
                 processorArchitecture = RuntimeInformation.OSArchitecture switch
                 {
@@ -443,64 +459,21 @@ internal static class NativeMethods
                     Architecture.Arm64 => ProcessorArchitectures.ARM64,
                     Architecture.X64 => ProcessorArchitectures.X64,
                     Architecture.X86 => ProcessorArchitectures.X86,
+#if NET5_0_OR_GREATER
+                    Architecture.Wasm => ProcessorArchitectures.WASM,
+#endif
+#if NET6_0_OR_GREATER
+                    Architecture.S390x => ProcessorArchitectures.S390X,
+#endif
+#if NET7_0_OR_GREATER
+                    Architecture.LoongArch64 => ProcessorArchitectures.LOONGARCH64,
+                    Architecture.Armv6 => ProcessorArchitectures.ARMV6,
+                    Architecture.Ppc64le => ProcessorArchitectures.PPC64LE,
+#endif
                     _ => ProcessorArchitectures.Unknown,
                 };
-#endif
-                // Fall back to 'uname -m' to get the architecture.
-                if (processorArchitecture == ProcessorArchitectures.Unknown)
-                {
-                    try
-                    {
-                        // On Unix run 'uname -m' to get the architecture. It's common for Linux and Mac
-                        using (
-                            var proc =
-                                Process.Start(
-                                    new ProcessStartInfo("uname")
-                                    {
-                                        Arguments = "-m",
-                                        UseShellExecute = false,
-                                        RedirectStandardOutput = true,
-                                        CreateNoWindow = true
-                                    }))
-                        {
-                            string arch = null;
-                            if (proc != null)
-                            {
-                                arch = proc.StandardOutput.ReadLine();
-                                proc.WaitForExit();
-                            }
 
-                            if (!string.IsNullOrEmpty(arch))
-                            {
-                                if (arch.StartsWith("x86_64", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.X64;
-                                }
-                                else if (arch.StartsWith("ia64", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.IA64;
-                                }
-                                else if (arch.StartsWith("arm", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.ARM;
-                                }
-                                else if (arch.StartsWith("aarch64", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.ARM64;
-                                }
-                                else if (arch.StartsWith("i", StringComparison.OrdinalIgnoreCase)
-                                        && arch.EndsWith("86", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.X86;
-                                }
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Best effort: fall back to Unknown
-                    }
-                }
+#endif
 
                 ProcessorArchitectureTypeNative = ProcessorArchitectureType = processorArchitecture;
             }
