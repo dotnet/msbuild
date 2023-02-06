@@ -525,9 +525,14 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
-                if (_buildParameters.UsesCachedResults())
+                if (_buildParameters.UsesCachedResults() && parameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
-                    _buildParameters.IsolateProjects = true;
+                    // If input or output caches are used and the project isolation mode is set to
+                    // ProjectIsolationMode.False, then set it to ProjectIsolationMode.True. The explicit
+                    // condition on ProjectIsolationMode is necessary to ensure that, if we're using input
+                    // or output caches and ProjectIsolationMode is set to ProjectIsolationMode.MessageUponIsolationViolation,
+                    // ProjectIsolationMode isn't changed to ProjectIsolationMode.True.
+                    _buildParameters.ProjectIsolationMode = ProjectIsolationMode.True;
                 }
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
@@ -1053,8 +1058,11 @@ namespace Microsoft.Build.Execution
 
             void SerializeCaches()
             {
-                var errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
-
+                string errorMessage = CacheSerialization.SerializeCaches(
+                    _configCache,
+                    _resultsCache,
+                    _buildParameters.OutputResultsCacheFile,
+                    _buildParameters.ProjectIsolationMode);
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     LogErrorAndShutdown(errorMessage);

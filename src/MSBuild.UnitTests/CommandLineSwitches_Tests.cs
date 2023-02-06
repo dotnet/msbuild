@@ -10,6 +10,7 @@ using System.Linq;
 using System.Resources;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
@@ -1019,7 +1020,7 @@ namespace Microsoft.Build.UnitTests
                                         profilerLogger: null,
                                         enableProfiler: false,
                                         interactive: false,
-                                        isolateProjects: false,
+                                        isolateProjects: ProjectIsolationMode.False,
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         inputResultsCaches: null,
