@@ -725,6 +725,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1093: as ferramentas do projeto (DotnetCliTool) dão suporte somente para o direcionamento ao .NET Core 2.2 e inferior.</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
+      <trans-unit id="PublishProfileNotPresent">
+        <source>NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</source>
+        <target state="new">NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</target>
+        <note>{StrBegin="NETSDK1198: "}</note>
+      </trans-unit>
       <trans-unit id="PublishReadyToRunRequiresVersion30">
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>
         <target state="translated">NETSDK1122: a compilação de ReadyToRun será ignorada porque ela é compatível apenas com o .NET Core 3.0 ou superior.</target>
