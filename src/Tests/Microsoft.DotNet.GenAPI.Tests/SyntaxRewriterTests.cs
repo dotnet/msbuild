@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     class B
                     {
-                        void Execute() {}
+                        void Execute() { }
                     }
                 }
                 """);
@@ -100,6 +100,30 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
+        public void TestConstructorPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                namespace A
+                {
+                    class B
+                    {
+                        public B() {}
+                    }
+                }
+                """,
+                expected: """
+                namespace A
+                {
+                    class B
+                    {
+                        public B() { }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
         public void TestMethodBodyWithSingleStatementInOneLine()
         {
             Compare(new SingleLineStatementCSharpSyntaxRewriter(),
@@ -122,11 +146,41 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """);
         }
+
+        [Fact]
+        public void TestPropertyPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                namespace A
+                {
+                    class B
+                    {
+                        int Property1;
+                        int Property2 {    get;     set;    }
+                        int Property3 {get;}
+                        int Property4 {    get {}}
+                    }
+                }
+                """,
+                expected: """
+                namespace A
+                {
+                    class B
+                    {
+                        int Property1;
+                        int Property2 { get; set; }
+                        int Property3 { get; }
+                        int Property4 { get { } }
+                    }
+                }
+                """);
+        }
     }
 
     public class TypeDeclarationSyntaxRewriterTests : SyntaxRewriterTests
     {
-       [Fact]
+        [Fact]
         public void TestRemoveSystemObjectAsBaseClass()
         {
             CompareSyntaxTree(new TypeDeclarationCSharpSyntaxRewriter(),

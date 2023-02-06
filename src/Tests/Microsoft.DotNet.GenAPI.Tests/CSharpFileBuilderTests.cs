@@ -967,5 +967,266 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 """
             );
         }
+
+        [Fact]
+        public void TestBaseTypeWithoutExplicitDefaultConstructor()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class B
+                        {
+                        }
+
+                        public class C : B
+                        {
+                            public C() {}
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class B
+                        {
+                        }
+
+                        public partial class C : B
+                        {
+                            public C() {}
+                        }
+                    }
+                    """);
+        }
+
+        [Fact]
+        public void TestBaseTypeWithExplicitDefaultConstructor()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class B
+                        {
+                            public B() {}
+                        }
+
+                        public class C : B
+                        {
+                            public C() {}
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class B
+                        {
+                            public B() {}
+                        }
+
+                        public partial class C : B
+                        {
+                            public C() {}
+                        }
+                    }
+                    """);
+        }
+
+        [Fact]
+        public void TestBaseTypeWithoutDefaultConstructor()
+        {
+            RunTest(original: """
+                    namespace Foo
+                    {
+                        public class A
+                        {
+                        }
+
+                        public class B
+                        {
+                            public B(int p1, string p2, A p3) { }
+                        }
+
+                        public class C : B
+                        {
+                            public C() : base(1, "", new A()) {}
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public partial class A
+                        {
+                        }
+
+                        public partial class B
+                        {
+                            public B(int p1, string p2, A p3) { }
+                        }
+
+                        public partial class C : B
+                        {
+                            public C() : base(default, default!, default!) {}
+                        }
+                    }
+                    """);
+        }
+
+        [Fact]
+        public void TestBaseTypeWithMultipleNonDefaultConstructors()
+        {
+            RunTest(original: """
+                    namespace Foo
+                    {
+                        public class A
+                        {
+                        }
+
+                        public class B
+                        {
+                            public B(int p1, string p2, A p3) { }
+                            public B(int p1, string p2) { }
+                            public B(int p1) { }
+                        }
+
+                        public class C : B
+                        {
+                            public C() : base(1, "", new A()) {}
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public partial class A
+                        {
+                        }
+
+                        public partial class B
+                        {
+                            public B(int p1, string p2, A p3) { }
+                            public B(int p1, string p2) { }
+                            public B(int p1) { }
+                        }
+
+                        public partial class C : B
+                        {
+                            public C() : base(default) {}
+                        }
+                    }
+                    """);
+        }
+
+        [Fact]
+        public void TestBaseTypeConstructorWithObsoleteAttribute()
+        {
+            RunTest(original: """
+                    namespace Foo
+                    {
+                        public class B
+                        {
+                            public B(int p1, string p2) { }
+                            [System.Obsolete("Constructor is deprecated.", true)]
+                            public B(int p1) { }
+                        }
+
+                        public class C : B
+                        {
+                            public C() : base(1, "") { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public partial class B
+                        {
+                            public B(int p1, string p2) { }
+                            [System.Obsolete("Constructor is deprecated.", true)]
+                            public B(int p1) { }
+                        }
+                    
+                        public partial class C : B
+                        {
+                            public C() : base(default, default!) { }
+                        }
+                    }
+                    """);
+        }
+
+        [Fact]
+        public void TestObsoleteBaseTypeConstructorWithoutErrorParameter()
+        {
+            RunTest(original: """
+                    namespace Foo
+                    {
+                        public class B
+                        {
+                            public B(int p1, string p2) { }
+                            [System.Obsolete("Constructor is deprecated.")]
+                            public B(int p1) { }
+                        }
+
+                        public class C : B
+                        {
+                            public C() : base(1, "") { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public partial class B
+                        {
+                            public B(int p1, string p2) { }
+                            [System.Obsolete("Constructor is deprecated.")]
+                            public B(int p1) { }
+                        }
+                    
+                        public partial class C : B
+                        {
+                            public C() : base(default) { }
+                        }
+                    }
+                    """);
+        }
+
+        [Fact]
+        public void TestObsoleteBaseTypeConstructorWithoutMessageParameter()
+        {
+            RunTest(original: """
+                    namespace Foo
+                    {
+                        public class B
+                        {
+                            public B(int p1, string p2) { }
+                            [System.Obsolete(null)]
+                            public B(int p1) { }
+                        }
+
+                        public class C : B
+                        {
+                            public C() : base(1, "") { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public partial class B
+                        {
+                            public B(int p1, string p2) { }
+                            [System.Obsolete(null)]
+                            public B(int p1) { }
+                        }
+                    
+                        public partial class C : B
+                        {
+                            public C() : base(default) { }
+                        }
+                    }
+                    """);
+        }
     }
 }
