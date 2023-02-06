@@ -39,7 +39,7 @@ public class LocalDocker
 
     public static async Task WriteImageToStream(Image x, string name, string tag, Stream imageStream)
     {
-        TarWriter writer = new(imageStream, TarEntryFormat.Gnu, leaveOpen: true);
+        using TarWriter writer = new(imageStream, TarEntryFormat.Pax, leaveOpen: true);
 
 
         // Feed each layer tarball into the stream
@@ -67,7 +67,7 @@ public class LocalDocker
 
         using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(x.config.ToJsonString())))
         {
-            GnuTarEntry configEntry = new(TarEntryType.RegularFile, configTarballPath)
+            PaxTarEntry configEntry = new(TarEntryType.RegularFile, configTarballPath)
             {
                 DataStream = configStream
             };
@@ -90,7 +90,7 @@ public class LocalDocker
 
         using (MemoryStream manifestStream = new MemoryStream(Encoding.UTF8.GetBytes(manifestNode.ToJsonString())))
         {
-            GnuTarEntry manifestEntry = new(TarEntryType.RegularFile, "manifest.json")
+            PaxTarEntry manifestEntry = new(TarEntryType.RegularFile, "manifest.json")
             {
                 DataStream = manifestStream
             };

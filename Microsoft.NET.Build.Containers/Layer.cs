@@ -2,6 +2,7 @@
 using System.Formats.Tar;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -39,18 +40,22 @@ public record struct Layer
         Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
         Span<byte> uncompressedHash = stackalloc byte[SHA256.HashSizeInBytes];
 
+        var directoryEntries = new HashSet<string>();
+
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
         {
             using (HashDigestGZipStream gz = new(fs, leaveOpen: true))
             {
-                using (TarWriter writer = new(gz, TarEntryFormat.Gnu, leaveOpen: true))
+                using (TarWriter writer = new(gz, TarEntryFormat.Pax, leaveOpen: true))
                 {
                     foreach (var item in fileList)
                     {
                         // Docker treats a COPY instruction that copies to a path like `/app` by
                         // including `app/` as a directory, with no leading slash. Emulate that here.
                         string containerPath = item.containerPath.TrimStart(PathSeparators);
+
+                        EnsureDirectoryEntries(writer, directoryEntries, containerPath.Split(PathSeparators));
 
                         writer.WriteEntry(item.path, containerPath);
                     }
@@ -94,6 +99,28 @@ public record struct Layer
     }
 
     private readonly static char[] PathSeparators = new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+    /// <summary>
+    /// Ensures that all directory entries for the given segments are created within the tar.
+    /// </summary>
+    /// <param name="tar">The tar into which to add the directory entries.</param>
+    /// <param name="directoryEntries">The lookup of all known directory entries. </param>
+    /// <param name="filePathSegments">The segments of the file within the tar for which to create the folders</param>
+    private static void EnsureDirectoryEntries(TarWriter tar, ISet<string> directoryEntries, IReadOnlyList<string> filePathSegments)
+    {
+        var pathBuilder = new StringBuilder();
+        for (var i = 0; i < filePathSegments.Count - 1; i++)
+        {
+            pathBuilder.Append($"{filePathSegments[i]}/");
+
+            var fullPath = pathBuilder.ToString(); 
+            if (!directoryEntries.Contains(fullPath))
+            {
+                tar.WriteEntry(new PaxTarEntry(TarEntryType.Directory, fullPath));
+                directoryEntries.Add(fullPath);
+            }
+        }
+    }
 
     /// <summary>
     /// A stream capable of computing the hash digest of raw uncompressed data while also compressing it.
