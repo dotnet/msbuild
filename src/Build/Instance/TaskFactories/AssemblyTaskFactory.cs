@@ -386,7 +386,7 @@ namespace Microsoft.Build.BackEnd
                     new TaskLoader.LogError(ErrorLoggingDelegate),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
-                    appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, appDomain),
+                    appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
 #endif
                     isOutOfProc
 #if FEATURE_APPDOMAIN

@@ -191,6 +191,11 @@
         <target state="translated">MSB4270: 在組件 "{0}" 中找不到任何專案快取外掛程式，但應該要有一個外掛程式。</target>
         <note />
       </trans-unit>
+      <trans-unit id="NodeReused">
+        <source>Reusing node {0} (PID: {1}).</source>
+        <target state="new">Reusing node {0} (PID: {1}).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly was not found. Expected Path: {0}</source>
         <target state="translated">找不到必要的 NuGet 元件。預期的路徑: {0}</target>
@@ -417,8 +422,8 @@
         <note />
       </trans-unit>
       <trans-unit id="TaskAssemblyLoaded">
-        <source>Assembly loaded during {0}: {1} (location: {2}, MVID: {3}, AppDomain: {4}|{5})</source>
-        <target state="new">Assembly loaded during {0}: {1} (location: {2}, MVID: {3}, AppDomain: {4}|{5})</target>
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

@@ -808,18 +808,18 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields(readImportance: false);
 
             AssemblyLoadingContext context = (AssemblyLoadingContext)ReadInt32();
+            string loadingInitiator = ReadDeduplicatedString();
             string assemblyName = ReadDeduplicatedString();
             string assemblyPath = ReadDeduplicatedString();
             Guid mvid = ReadGuid();
-            int appDomainId = ReadInt32();
             string appDomainName = ReadDeduplicatedString();
 
             var e = new AssemblyLoadBuildEventArgs(
                 context,
+                loadingInitiator,
                 assemblyName,
                 assemblyPath,
                 mvid,
-                appDomainId,
                 appDomainName);
             SetCommonFields(e, fields);
 

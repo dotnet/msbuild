@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
@@ -1842,11 +1843,16 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
+                IDisposable assemblyLoadTracker = null;
                 // Combine SDK path with the "project" relative path
                 try
                 {
-                    // TODO: can we distinguish builtin and custom sdkresolvers here?
-                    using var _ = AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.SdkResolution);
+                    // Is the sdk resolver a custom type?
+                    if (_sdkResolverService.GetType().Assembly != Assembly.GetExecutingAssembly())
+                    {
+                        assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.SdkResolution, _sdkResolverService.GetType());
+                    }
+
                     sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio,
                         failOnUnresolvedSdk: !_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) || _loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk));
                 }
@@ -1855,6 +1861,10 @@ namespace Microsoft.Build.Evaluation
                     // We throw using e.Message because e.Message already contains the stack trace
                     // https://github.com/dotnet/msbuild/pull/6763
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
+                }
+                finally
+                {
+                    assemblyLoadTracker?.Dispose();
                 }
 
                 if (!sdkResult.Success)

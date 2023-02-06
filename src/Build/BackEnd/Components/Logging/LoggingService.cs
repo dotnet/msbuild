@@ -1590,10 +1590,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">Any exception which is a ExceptionHandling.IsCriticalException will not be wrapped</exception>
         private void InitializeLogger(ILogger logger, IEventSource sourceForLogger)
         {
+            IDisposable assemblyLoadTracker = null;
             try
             {
-                // TODO: can we distinguish builtin and custom loggers here?
-                using var _ = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization);
+                // Is the logger a custom logger?
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) &&
+                    logger.GetType().Assembly != Assembly.GetExecutingAssembly() &&
+                    !(logger.GetType().FullName?.StartsWith("Microsoft.Build.Logging", StringComparison.OrdinalIgnoreCase) ?? false))
+                {
+                    assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, logger.GetType());
+                }
+
                 INodeLogger nodeLogger = logger as INodeLogger;
                 if (nodeLogger != null)
                 {
@@ -1607,6 +1614,10 @@ namespace Microsoft.Build.BackEnd.Logging
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
                 InternalLoggerException.Throw(e, null, "FatalErrorWhileInitializingLogger", true, logger.GetType().Name);
+            }
+            finally
+            {
+                assemblyLoadTracker?.Dispose();
             }
 
             // Update the minimum guaranteed message importance based on the newly added logger.

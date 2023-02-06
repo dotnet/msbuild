@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.IO;
@@ -9,35 +9,38 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
-    public class AssemblyLoadBuildEventArgs : BuildMessageEventArgs
+    public sealed class AssemblyLoadBuildEventArgs : BuildMessageEventArgs
     {
+        private const string DefaultAppDomainDescriptor = "[Default]";
+
         public AssemblyLoadBuildEventArgs()
         { }
 
         public AssemblyLoadBuildEventArgs(
             AssemblyLoadingContext loadingContext,
-            string assemblyName,
+            string? loadingInitiator,
+            string? assemblyName,
             string assemblyPath,
             Guid mvid,
-            int appDomainId,
-            string appDomainFriendlyName,
+            string? customAppDomainDescriptor,
             MessageImportance importance = MessageImportance.Low)
             : base(null, null, null, importance, DateTime.UtcNow, assemblyName, assemblyPath, mvid)
         {
             LoadingContext = loadingContext;
+            LoadingInitiator = loadingInitiator;
             AssemblyName = assemblyName;
             AssemblyPath = assemblyPath;
             MVID = mvid;
-            AppDomainId = appDomainId;
-            AppDomainFriendlyName = appDomainFriendlyName;
+            AppDomainDescriptor = customAppDomainDescriptor;
         }
 
         public AssemblyLoadingContext LoadingContext { get; private set; }
-        public string AssemblyName { get; private set; }
-        public string AssemblyPath { get; private set; }
+        public string? LoadingInitiator { get; private set; }
+        public string? AssemblyName { get; private set; }
+        public string? AssemblyPath { get; private set; }
         public Guid MVID { get; private set; }
-        public int AppDomainId { get; private set; }
-        public string AppDomainFriendlyName { get; private set; }
+        // Null string indicates that load occurred on Default AppDomain (for both Core and Framework).
+        public string? AppDomainDescriptor { get; private set; }
 
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -45,10 +48,10 @@ namespace Microsoft.Build.Framework
             writer.WriteTimestamp(RawTimestamp);
             writer.WriteOptionalBuildEventContext(BuildEventContext);
             writer.WriteGuid(MVID);
+            writer.WriteOptionalString(LoadingInitiator);
             writer.WriteOptionalString(AssemblyName);
             writer.WriteOptionalString(AssemblyPath);
-            writer.Write7BitEncodedInt(AppDomainId);
-            writer.WriteOptionalString(AppDomainFriendlyName);
+            writer.WriteOptionalString(AppDomainDescriptor);
         }
 
         internal override void CreateFromStream(BinaryReader reader, int version)
@@ -57,10 +60,10 @@ namespace Microsoft.Build.Framework
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             MVID = reader.ReadGuid();
+            LoadingInitiator = reader.ReadOptionalString();
             AssemblyName = reader.ReadOptionalString();
             AssemblyPath = reader.ReadOptionalString();
-            AppDomainId = reader.Read7BitEncodedInt();
-            AppDomainFriendlyName = reader.ReadOptionalString();
+            AppDomainDescriptor = reader.ReadOptionalString();
         }
 
         public override string Message
@@ -69,7 +72,8 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", LoadingContext.ToString(), AssemblyName, AssemblyPath, MVID.ToString(), AppDomainId.ToString(), AppDomainFriendlyName);
+                    string? loadingInitiator = LoadingInitiator == null ? null : $" ({LoadingInitiator})";
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", LoadingContext.ToString(), loadingInitiator, AssemblyName, AssemblyPath, MVID.ToString(), AppDomainDescriptor ?? DefaultAppDomainDescriptor);
                 }
 
                 return RawMessage;

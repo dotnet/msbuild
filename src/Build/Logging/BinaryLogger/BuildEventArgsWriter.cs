@@ -475,11 +475,11 @@ namespace Microsoft.Build.Logging
             Write(BinaryLogRecordKind.AssemblyLoad);
             WriteMessageFields(e, writeMessage: false, writeImportance: false);
             Write((int)e.LoadingContext);
+            WriteDeduplicatedString(e.LoadingInitiator);
             WriteDeduplicatedString(e.AssemblyName);
             WriteDeduplicatedString(e.AssemblyPath);
             Write(e.MVID);
-            Write(e.AppDomainId);
-            WriteDeduplicatedString(e.AppDomainFriendlyName);
+            WriteDeduplicatedString(e.AppDomainDescriptor);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)
