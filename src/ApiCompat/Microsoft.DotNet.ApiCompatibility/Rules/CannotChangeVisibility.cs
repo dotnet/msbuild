@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -15,9 +14,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class CannotChangeVisibility : IRule
     {
-        private readonly RuleSettings _settings;
+        private readonly IRuleSettings _settings;
 
-        public CannotChangeVisibility(RuleSettings settings, IRuleRegistrationContext context)
+        public CannotChangeVisibility(IRuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);

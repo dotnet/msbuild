@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Simplification;
-using Microsoft.DotNet.ApiSymbolExtensions;
+using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 using Microsoft.DotNet.GenAPI.SyntaxRewriter;
 
 namespace Microsoft.DotNet.GenAPI

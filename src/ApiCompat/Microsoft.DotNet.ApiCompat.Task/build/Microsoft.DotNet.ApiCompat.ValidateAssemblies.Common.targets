@@ -21,6 +21,7 @@
       SuppressionFiles="@(ApiCompatSuppressionFile)"
       SuppressionOutputFile="$(ApiCompatSuppressionOutputFile)"
       NoWarn="$(NoWarn)"
+      RespectInternals="$(ApiCompatRespectInternals)"
       EnableRuleAttributesMustMatch="$(ApiCompatEnableRuleAttributesMustMatch)"
       ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"
       EnableRuleCannotChangeParameterName="$(ApiCompatEnableRuleCannotChangeParameterName)"

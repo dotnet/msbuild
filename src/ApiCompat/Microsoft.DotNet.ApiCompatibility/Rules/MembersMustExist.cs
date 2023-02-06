@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Mapping;
 using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
@@ -15,9 +14,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class MembersMustExist : IRule
     {
-        private readonly RuleSettings _settings;
+        private readonly IRuleSettings _settings;
 
-        public MembersMustExist(RuleSettings settings, IRuleRegistrationContext context)
+        public MembersMustExist(IRuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
@@ -144,7 +143,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         private bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
-            _settings.SymbolComparer.Equals(method.ReturnType, candidate.ReturnType);
+            _settings.SymbolEqualityComparer.Equals(method.ReturnType, candidate.ReturnType);
 
         private bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
         {
@@ -153,7 +152,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             for (int i = 0; i < method.Parameters.Length; i++)
             {
-                if (!_settings.SymbolComparer.Equals(method.Parameters[i].Type, method.Parameters[i].Type))
+                if (!_settings.SymbolEqualityComparer.Equals(method.Parameters[i].Type, method.Parameters[i].Type))
                     return false;
             }
 

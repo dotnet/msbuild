@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Mapping;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             }
 
             // After visiting the assembly, the assembly mapper will contain any assembly load errors that happened
-            // when trying to resolve typeforwarded types. If there were any, we add them to the diagnostic bag next.
+            // when trying to resolve type forwarded types. If there were any, we add them to the diagnostic bag next.
             foreach (CompatDifference item in assembly.AssemblyLoadErrors)
             {
                 _compatDifferences.Add(item);

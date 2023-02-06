@@ -40,6 +40,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       PackageTargetPath="@(_PackageTargetPath)"
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
+      RespectInternals="$(ApiCompatRespectInternals)"
       EnableRuleAttributesMustMatch="$(ApiCompatEnableRuleAttributesMustMatch)"
       ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"
       EnableRuleCannotChangeParameterName="$(ApiCompatEnableRuleCannotChangeParameterName)"

@@ -4,18 +4,6 @@
 namespace Microsoft.DotNet.ApiCompatibility
 {
     /// <summary>
-    /// Factory to create an IDifferenceVisitor instance.
-    /// </summary>
-    public interface IDifferenceVisitorFactory
-    {
-        /// <summary>
-        /// Factory to create an IDifferenceVisitor.
-        /// </summary>
-        /// <returns></returns>
-        IDifferenceVisitor Create();
-    }
-
-    /// <summary>
     /// Factory to create a DifferenceVisitor instance.
     /// </summary>
     public sealed class DifferenceVisitorFactory : IDifferenceVisitorFactory

@@ -8,8 +8,9 @@ using System.Text;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiSymbolExtensions;
+using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
+using Microsoft.DotNet.GenAPI.Filtering;
 
 namespace Microsoft.DotNet.GenAPI.Tests
 {
@@ -25,9 +26,9 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
         public CSharpFileBuilderTests()
         {
-            var compositeFilter = new CompositeFilter()
-                .Add<ImplicitSymbolsFilter>()
-                .Add(new SymbolAccessibilityBasedFilter(true, true, true));
+            var compositeFilter = new CompositeSymbolFilter()
+                .Add<ImplicitSymbolFilter>()
+                .Add(new AccessibilitySymbolFilter(true, true, true));
             _csharpFileBuilder = new CSharpFileBuilder(compositeFilter, _stringWriter, null, MetadataReferences);
         }
 

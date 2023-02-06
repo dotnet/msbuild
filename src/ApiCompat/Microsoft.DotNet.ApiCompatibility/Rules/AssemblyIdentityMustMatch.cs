@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
@@ -14,10 +13,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     public class AssemblyIdentityMustMatch : IRule
     {
         private readonly ISuppressableLog _log;
-        private readonly RuleSettings _settings;
+        private readonly IRuleSettings _settings;
 
         public AssemblyIdentityMustMatch(ISuppressableLog log,
-            RuleSettings settings,
+            IRuleSettings settings,
             IRuleRegistrationContext context)
         {
             _log = log;

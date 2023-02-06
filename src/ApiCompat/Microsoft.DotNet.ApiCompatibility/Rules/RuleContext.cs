@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -43,11 +42,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         /// <inheritdoc> />
-        public void RunOnAssemblySymbolActions(IAssemblySymbol? left, IAssemblySymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, bool singleAssembly, IList<CompatDifference> differences)
+        public void RunOnAssemblySymbolActions(IAssemblySymbol? left, IAssemblySymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, bool isSingleAssembly, IList<CompatDifference> differences)
         {
             foreach (Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, bool, IList<CompatDifference>> action in _onAssemblySymbolActions)
             {
-                action(left, right, leftMetadata, rightMetadata, singleAssembly, differences);
+                action(left, right, leftMetadata, rightMetadata, isSingleAssembly, differences);
             }
         }
 

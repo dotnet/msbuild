@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 
 namespace Microsoft.DotNet.ApiCompatibility.Tests
