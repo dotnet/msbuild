@@ -130,8 +130,17 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_35_IsolateProjectsSwitch">
-        <source>  -isolateProjects[:True|False]
+        <source>  -isolateProjects[:True|MessageUponIsolationViolation|False]
                      Causes MSBuild to build each project in isolation.
+
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
                      This is a more restrictive mode of MSBuild as it requires
                      that the project graph be statically discoverable at
@@ -141,16 +150,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True|False]
-                     Hace que MSBuild compile cada proyecto en aislamiento.
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     Este es un modo de MSBuild más restrictivo ya que requiere
-                     que el grafo de proyecto se pueda detectar estáticamente en el
-                     momento de evaluación, pero puede mejorar la programación y reducir
-                     la sobrecarga de memoria al compilar un gran conjunto de proyectos.
-                     (Forma corta: -isolate)
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
-                     Este indicador es experimental y puede que no funcione como se espera.
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -648,15 +666,13 @@
       <trans-unit id="HelpMessage_InputCachesFiles">
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;archivoCaché&gt;...
-                     Lista de archivos de caché de entrada, separados por punto y coma, de la que MSBuild
-                     leerá los resultados de la compilación.
-                     Si se establece esta opción, se activan también las compilaciones aisladas (-isolate).
-                     (Forma corta: -irc)
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -667,16 +683,14 @@
         <source>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
+                     If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[archivo-de-caché]
-                     Archivo de caché de salida donde MSBuild escribe
-                     el contenido de las memorias caché de resultados
-                     de compilación cuando esta acaba.
-                     Si se establece esta opción, se activan también las
-                     compilaciones aisladas (-isolate).
-                     (Forma corta: -orc)
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
+                     (short form: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -1037,7 +1051,8 @@
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent
+      to Boolean.TrueString, nameof(ProjectIsolationMode.MessageUponIsolationViolation), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
