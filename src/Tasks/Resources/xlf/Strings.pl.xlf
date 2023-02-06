@@ -2353,6 +2353,11 @@
         <target state="translated">MSB3326: Nie można zaimportować następującego pliku klucza: {0}. Plik klucza może być chroniony hasłem. Aby rozwiązać ten problem, spróbuj ponownie zaimportować certyfikat lub zaimportuj certyfikat ręcznie do osobistego magazynu certyfikatów bieżącego użytkownika.</target>
         <note>{StrBegin="MSB3326: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveKeySource.PfxUnsupported">
+        <source>PFX signing not supported on .NET Core.</source>
+        <target state="new">PFX signing not supported on .NET Core.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveKeySource.ResolvedThumbprintEmpty">
         <source>MSB3327: Unable to find code signing certificate in the current user’s Windows certificate store. To correct this, either disable signing of the ClickOnce manifest or install the certificate into the certificate store.</source>
         <target state="translated">MSB3327: Nie można znaleźć certyfikatu podpisywania kodu w magazynie certyfikatów bieżącego użytkownika systemu Windows. Aby naprawić ten błąd, wyłącz podpisywanie manifestu ClickOnce lub zainstaluj certyfikat w magazynie certyfikatów.</target>
