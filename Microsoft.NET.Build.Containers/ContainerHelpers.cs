@@ -1,12 +1,14 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 namespace Microsoft.NET.Build.Containers;
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using System.Text.RegularExpressions;
 using static ReferenceParser;
 
-record Label(string name, string value);
+internal sealed record Label(string name, string value);
 
 // Explicitly lowercase to ease parsing - the incoming values are
 // lowercased by spec
@@ -78,7 +80,7 @@ public static class ContainerHelpers
     /// </summary>
     public static Uri TryExpandRegistryToUri(string alreadyValidatedDomain)
     {
-        var prefix = alreadyValidatedDomain.StartsWith("localhost") ? "http" : "https";
+        var prefix = alreadyValidatedDomain.StartsWith("localhost", StringComparison.Ordinal) ? "http" : "https";
         return new Uri($"{prefix}://{alreadyValidatedDomain}");
     }
 

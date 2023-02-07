@@ -1,7 +1,9 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Diagnostics;
 using System.Formats.Tar;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Microsoft.NET.Build.Containers;
@@ -25,15 +27,15 @@ public class LocalDocker
 
         // Create new stream tarball
 
-        await WriteImageToStream(x, name, tag, loadProcess.StandardInput.BaseStream);
+        await WriteImageToStream(x, name, tag, loadProcess.StandardInput.BaseStream).ConfigureAwait(false);
 
         loadProcess.StandardInput.Close();
 
-        await loadProcess.WaitForExitAsync();
+        await loadProcess.WaitForExitAsync().ConfigureAwait(false);
 
         if (loadProcess.ExitCode != 0)
         {
-            throw new DockerLoadException($"Failed to load image to local Docker daemon. stdout: {await loadProcess.StandardError.ReadToEndAsync()}");
+            throw new DockerLoadException($"Failed to load image to local Docker daemon. stdout: {await loadProcess.StandardError.ReadToEndAsync().ConfigureAwait(false)}");
         }
     }
 
@@ -49,12 +51,12 @@ public class LocalDocker
         {
             if (x.originatingRegistry is {} registry)
             {
-                string localPath = await registry.DownloadBlob(x.OriginatingName, d);
+                string localPath = await registry.DownloadBlob(x.OriginatingName, d).ConfigureAwait(false);
 
                 // Stuff that (uncompressed) tarball into the image tar stream
                 // TODO uncompress!!
                 string layerTarballPath = $"{d.Digest.Substring("sha256:".Length)}/layer.tar";
-                await writer.WriteEntryAsync(localPath, layerTarballPath);
+                await writer.WriteEntryAsync(localPath, layerTarballPath).ConfigureAwait(false);
                 layerTarballPaths.Add(layerTarballPath);
             }
             else
@@ -72,7 +74,7 @@ public class LocalDocker
                 DataStream = configStream
             };
 
-            await writer.WriteEntryAsync(configEntry);
+            await writer.WriteEntryAsync(configEntry).ConfigureAwait(false);
         }
 
         // Add manifest
@@ -95,7 +97,7 @@ public class LocalDocker
                 DataStream = manifestStream
             };
 
-            await writer.WriteEntryAsync(manifestEntry);
+            await writer.WriteEntryAsync(manifestEntry).ConfigureAwait(false);
         }
     }
 }

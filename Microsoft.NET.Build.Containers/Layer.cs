@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Diagnostics;
 using System.Formats.Tar;
 using System.IO.Compression;
 using System.Security.Cryptography;
@@ -106,7 +109,7 @@ public record struct Layer
     /// <param name="tar">The tar into which to add the directory entries.</param>
     /// <param name="directoryEntries">The lookup of all known directory entries. </param>
     /// <param name="filePathSegments">The segments of the file within the tar for which to create the folders</param>
-    private static void EnsureDirectoryEntries(TarWriter tar, ISet<string> directoryEntries, IReadOnlyList<string> filePathSegments)
+    private static void EnsureDirectoryEntries(TarWriter tar, HashSet<string> directoryEntries, IReadOnlyList<string> filePathSegments)
     {
         var pathBuilder = new StringBuilder();
         for (var i = 0; i < filePathSegments.Count - 1; i++)
@@ -128,7 +131,7 @@ public record struct Layer
     private sealed class HashDigestGZipStream : Stream
     {
         private readonly IncrementalHash sha256Hash;
-        private readonly Stream compressionStream;
+        private readonly GZipStream compressionStream;
 
         public HashDigestGZipStream(Stream writeStream, bool leaveOpen)
         {

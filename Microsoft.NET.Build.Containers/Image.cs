@@ -1,4 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -239,7 +241,7 @@ public class Image
         RecalculateDigest();
     }
 
-    public string GetDigest(JsonNode json)
+    public static string GetDigest(JsonNode json)
     {
         string hashString;
 
@@ -248,7 +250,7 @@ public class Image
         return $"sha256:{hashString}";
     }
 
-    public string GetDigest<T>(T item)
+    public static string GetDigest<T>(T item)
     {
         var node = JsonSerializer.SerializeToNode(item);
         if (node is not null) return GetDigest(node);

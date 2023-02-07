@@ -1,7 +1,9 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
@@ -94,7 +96,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         }
         validTags = v.ToArray();
         invalidTags = i.ToArray();
-        return invalidTags.Count() == 0;
+        return invalidTags.Length == 0;
     }
 
     public override bool Execute()

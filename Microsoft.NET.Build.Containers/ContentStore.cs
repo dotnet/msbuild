@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Diagnostics;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -26,7 +29,7 @@ public static class ContentStore
     {
         string digest = descriptor.Digest;
 
-        Debug.Assert(digest.StartsWith("sha256:"));
+        Debug.Assert(digest.StartsWith("sha256:", StringComparison.Ordinal));
 
         string contentHash = digest.Substring("sha256:".Length);
 

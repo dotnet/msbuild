@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 namespace Microsoft.NET.Build.Containers;
 
 using System;
@@ -15,7 +18,7 @@ public static class ContainerBuilder
         }
         Registry baseRegistry = new Registry(ContainerHelpers.TryExpandRegistryToUri(registryName));
 
-        var img = await baseRegistry.GetImageManifest(baseName, baseTag, containerRuntimeIdentifier, ridGraphPath);
+        var img = await baseRegistry.GetImageManifest(baseName, baseTag, containerRuntimeIdentifier, ridGraphPath).ConfigureAwait(false);
         if (img is null) {
             throw new ArgumentException($"Could not find image {baseName}:{baseTag} in registry {registryName} matching RuntimeIdentifier {containerRuntimeIdentifier}");
         }

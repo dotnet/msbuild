@@ -1,4 +1,7 @@
-﻿using System.Text.Json;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Text.Json;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
@@ -65,7 +68,7 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
     }
 
-    private void SetEnvironmentVariables(Image img, ITaskItem[] envVars)
+    private static void SetEnvironmentVariables(Image img, ITaskItem[] envVars)
     {
         foreach (ITaskItem envVar in envVars)
         {
