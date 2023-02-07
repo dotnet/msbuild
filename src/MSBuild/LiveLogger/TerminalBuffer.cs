@@ -81,10 +81,12 @@ namespace Microsoft.Build.Logging.LiveLogger
         public static void Terminate()
         {
             IsTerminated = true;
+            // Delete contents from alternate buffer before switching back to main buffer
+            Console.Write(
+                ANSIBuilder.Cursor.Home() +
+                ANSIBuilder.Eraser.DisplayCursorToEnd());
             // Reset configuration for buffer and cursor, and clear screen
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.Write(ANSIBuilder.Eraser.Display());
-            Console.Clear();
             Console.Write(ANSIBuilder.Cursor.Visible());
             Lines = new();
         }

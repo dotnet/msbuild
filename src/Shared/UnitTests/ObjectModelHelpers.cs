@@ -1364,7 +1364,7 @@ namespace Microsoft.Build.UnitTests
             string projectFile,
             MockLogger logger = null,
             BuildParameters parameters = null,
-            List<string> defaultTargets = null)
+            IList<string> targetsToBuild = null)
         {
             using (var buildManager = new BuildManager())
             {
@@ -1381,7 +1381,7 @@ namespace Microsoft.Build.UnitTests
                     projectFile,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    defaultTargets?.ToArray() ?? Array.Empty<string>(),
+                    targetsToBuild?.ToArray() ?? Array.Empty<string>(),
                     null);
 
                 var result = buildManager.Build(

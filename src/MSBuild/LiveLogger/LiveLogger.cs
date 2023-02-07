@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -256,18 +256,23 @@ namespace Microsoft.Build.Logging.LiveLogger
         public void Shutdown()
         {
             TerminalBuffer.Terminate();
-            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
-            Console.Clear();
             int errorCount = 0;
             int warningCount = 0;
             foreach (var project in projects)
             {
+                if (project.Value.AdditionalDetails.Count == 0)
+                {
+                    continue;
+                }
+
+                Console.WriteLine(project.Value.ToANSIString());
                 errorCount += project.Value.ErrorCount;
                 warningCount += project.Value.WarningCount;
                 foreach (var message in project.Value.AdditionalDetails)
                 {
-                    Console.WriteLine(message.ToANSIString());
+                    Console.WriteLine($"    └── {message.ToANSIString()}");
                 }
+                Console.WriteLine();
             }
 
             // Emmpty line

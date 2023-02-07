@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -416,6 +417,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// <param name="generateCacheFiles"></param>
         /// <param name="assertBuildResults"></param>
         /// <param name="expectedOutputProducer"></param>
+        /// <param name="targetListsPerNode">The list of targets to build per node.</param>
         /// <param name="projectIsolationMode">The isolation mode under which to run.</param>
         /// <returns></returns>
         internal static Dictionary<string, (BuildResult Result, MockLogger Logger)> BuildUsingCaches(
@@ -427,6 +429,7 @@ namespace Microsoft.Build.Graph.UnitTests
             bool assertBuildResults = true,
             // (current node, expected output dictionary) -> actual expected output for current node
             Func<ProjectGraphNode, ExpectedNodeBuildOutput, string[]> expectedOutputProducer = null,
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetListsPerNode = null,
             ProjectIsolationMode projectIsolationMode = ProjectIsolationMode.False)
         {
             expectedOutputProducer ??= ((node, expectedOutputs) => expectedOutputs[node]);
@@ -460,7 +463,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     buildParameters.OutputResultsCacheFile = outputCaches[node];
                 }
 
-                var logger = new MockLogger();
+                var logger = new MockLogger(env.Output);
 
                 buildParameters.Loggers = new[] { logger };
 
@@ -468,7 +471,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     node.ProjectInstance.FullPath,
                     null,
                     buildParameters,
-                    node.ProjectInstance.DefaultTargets);
+                    targetListsPerNode?[node] != null ? targetListsPerNode?[node] : node.ProjectInstance.DefaultTargets);
 
                 results[ProjectNumber(node)] = (result, logger);
 
