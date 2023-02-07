@@ -423,16 +423,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             public static string ProgressBar(float percentage, int width = 10, char completedChar = '█', char remainingChar = '░')
             {
-                string result = String.Empty;
-                for (int i = 0; i < (int)Math.Floor(width * percentage); i++)
-                {
-                    result += completedChar;
-                }
-                for (int i = (int)Math.Floor(width * percentage); i < width; i++)
-                {
-                    result += remainingChar;
-                }
-                return result;
+                return new string(completedChar, (int)Math.Floor(width * percentage)) + new string(remainingChar, width - (int)Math.Floor(width * percentage));
             }
 
             public static string Bell()

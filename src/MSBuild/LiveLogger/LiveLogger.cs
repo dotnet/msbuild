@@ -14,8 +14,8 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private bool Succeeded;
         public string Parameters { get; set; }
-        public int StartedProjects = 0;
-        public int FinishedProjects = 0;
+        private int startedProjects = 0;
+        private int finishedProjects = 0;
         public LoggerVerbosity Verbosity { get; set; }
         private Dictionary<string, int> blockedProjects = new();
 
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             TerminalBuffer.WriteNewLine(string.Empty);
 
             // Top line indicates the number of finished projects.
-            TerminalBuffer.FinishedProjects = this.FinishedProjects;
+            TerminalBuffer.FinishedProjects = this.finishedProjects;
 
             // First render
             TerminalBuffer.Render();
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                 // Use task delay to avoid blocking the task, so that keyboard input is listened continously
                 Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
-                    TerminalBuffer.FinishedProjects = this.FinishedProjects;
+                    TerminalBuffer.FinishedProjects = this.finishedProjects;
 
                     // Rerender projects only when needed
                     foreach (var project in projects)
@@ -108,7 +108,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private void UpdateFooter()
         {
-            float percentage = (float)FinishedProjects / StartedProjects;
+            float percentage = startedProjects == 0 ? 0.0f : (float)finishedProjects / startedProjects;
             TerminalBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
                 $"Build progress (approx.) [{ANSIBuilder.Graphics.ProgressBar(percentage)}]",
                 ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         // Project
         private void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            StartedProjects++;
+            startedProjects++;
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
             // If id already exists...
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
             // Update line
             node.Finished = true;
-            FinishedProjects++;
+            finishedProjects++;
             UpdateFooter();
             node.ShouldRerender = true;
         }
