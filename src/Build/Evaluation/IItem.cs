@@ -53,6 +53,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string GetMetadataValueEscaped(string name);
 
+        /// <summary>
+        /// Returns true if a particular piece of metadata is defined on this item (even if
+        /// its value is empty string) otherwise false.
+        /// This includes built-in metadata and metadata from item definitions.
+        /// </summary>
+        /// <remarks>
+        /// It has to include all of these because it's used for batching, which doesn't
+        /// care where the metadata originated.
+        /// </remarks>
         bool HasMetadata(string name);
     }
 }
