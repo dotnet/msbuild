@@ -31,6 +31,8 @@ namespace Microsoft.Build.UnitTests
     {
         private StringBuilder _log = new StringBuilder();
 
+        public List<LazyFormattedBuildEventArgs> BuildEventArgs { get; } = new List<LazyFormattedBuildEventArgs>();
+
         public MessageImportance MinimumMessageImportance { get; set; } = MessageImportance.Low;
 
         internal int Messages { set; get; }
@@ -43,6 +45,8 @@ namespace Microsoft.Build.UnitTests
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
+            BuildEventArgs.Add(eventArgs);
+
             Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             ++Errors;
@@ -50,6 +54,8 @@ namespace Microsoft.Build.UnitTests
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
         {
+            BuildEventArgs.Add(eventArgs);
+
             Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             ++Warnings;
@@ -66,6 +72,8 @@ namespace Microsoft.Build.UnitTests
             // Only if the message is above the minimum importance should we record the log message
             if (eventArgs.Importance <= MinimumMessageImportance)
             {
+                BuildEventArgs.Add(eventArgs);
+
                 Console.WriteLine(eventArgs.Message);
                 _log.AppendLine(eventArgs.Message);
                 ++Messages;
