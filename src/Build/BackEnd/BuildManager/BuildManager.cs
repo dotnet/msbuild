@@ -525,9 +525,14 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
-                if (_buildParameters.UsesCachedResults())
+                if (_buildParameters.UsesCachedResults() && parameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
-                    _buildParameters.IsolateProjects = true;
+                    // If input or output caches are used and the project isolation mode is set to
+                    // ProjectIsolationMode.False, then set it to ProjectIsolationMode.True. The explicit
+                    // condition on ProjectIsolationMode is necessary to ensure that, if we're using input
+                    // or output caches and ProjectIsolationMode is set to ProjectIsolationMode.MessageUponIsolationViolation,
+                    // ProjectIsolationMode isn't changed to ProjectIsolationMode.True.
+                    _buildParameters.ProjectIsolationMode = ProjectIsolationMode.True;
                 }
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
@@ -1053,8 +1058,11 @@ namespace Microsoft.Build.Execution
 
             void SerializeCaches()
             {
-                var errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
-
+                string errorMessage = CacheSerialization.SerializeCaches(
+                    _configCache,
+                    _resultsCache,
+                    _buildParameters.OutputResultsCacheFile,
+                    _buildParameters.ProjectIsolationMode);
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     LogErrorAndShutdown(errorMessage);
@@ -1389,7 +1397,7 @@ namespace Microsoft.Build.Execution
                 ((IBuildComponentHost)this).LoggingService,
                 request.BuildEventContext,
                 false /* loaded by solution parser*/,
-                config.TargetNames,
+                config.RequestedTargets,
                 SdkResolverService,
                 request.SubmissionId);
 
@@ -2328,23 +2336,17 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleResult(int node, BuildResult result)
         {
-            // Update cache with the default and initial targets, as needed.
+            // Update cache with the default, initial, and project targets, as needed.
             BuildRequestConfiguration configuration = _configCache[result.ConfigurationId];
             if (result.DefaultTargets != null)
             {
-                // If the result has Default and Initial targets, we populate the configuration cache with them if it
+                // If the result has Default, Initial, and project targets, we populate the configuration cache with them if it
                 // doesn't already have entries.  This can happen if we created a configuration based on a request from
                 // an external node, but hadn't yet received a result since we may not have loaded the Project locally
-                // and thus wouldn't know what the default and initial targets were.
-                if (configuration.ProjectDefaultTargets == null)
-                {
-                    configuration.ProjectDefaultTargets = result.DefaultTargets;
-                }
-
-                if (configuration.ProjectInitialTargets == null)
-                {
-                    configuration.ProjectInitialTargets = result.InitialTargets;
-                }
+                // and thus wouldn't know what the default, initial, and project targets were.
+                configuration.ProjectDefaultTargets ??= result.DefaultTargets;
+                configuration.ProjectInitialTargets ??= result.InitialTargets;
+                configuration.ProjectTargets ??= result.ProjectTargets;
             }
 
             IEnumerable<ScheduleResponse> response = _scheduler.ReportResult(node, result);

@@ -57,6 +57,7 @@ namespace Microsoft.Build.Logging.LiveLogger
     internal class TerminalBuffer
     {
         private static List<TerminalBufferLine> Lines = new();
+        public static string FooterText = string.Empty;
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
         internal static bool IsTerminated = false;
@@ -80,10 +81,12 @@ namespace Microsoft.Build.Logging.LiveLogger
         public static void Terminate()
         {
             IsTerminated = true;
+            // Delete contents from alternate buffer before switching back to main buffer
+            Console.Write(
+                ANSIBuilder.Cursor.Home() +
+                ANSIBuilder.Eraser.DisplayCursorToEnd());
             // Reset configuration for buffer and cursor, and clear screen
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.Write(ANSIBuilder.Eraser.Display());
-            Console.Clear();
             Console.Write(ANSIBuilder.Cursor.Visible());
             Lines = new();
         }
@@ -102,9 +105,8 @@ namespace Microsoft.Build.Logging.LiveLogger
                 ANSIBuilder.Cursor.Home() +
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")) +
                 // Write footer
-                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
-                // TODO: Remove and replace with actual footer
-                new string('-', Console.BufferWidth) + $"\nBuild progress: XX%\tTopLineIndex={TopLineIndex}");
+                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
+                new string('-', Console.BufferWidth) + '\n' + FooterText);
 
             if (Lines.Count == 0)
             {

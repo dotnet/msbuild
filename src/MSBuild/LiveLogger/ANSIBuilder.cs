@@ -9,7 +9,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 {
     internal static class ANSIBuilder
     {
-        public static string ANSIRegex = @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~])";
+        public static string ANSIRegex = @"\x1b(?:[@-Z\-_]|\[[0-?]*[ -\/]*[@-~]|(?:\]8;;.*?\x1b\\))";
         // TODO: This should replace ANSIRegex once LiveLogger's API is internal
         public static Regex ANSIRegexRegex = new Regex(ANSIRegex);
         public static string ANSIRemove(string text)
@@ -17,6 +17,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             return ANSIRegexRegex.Replace(text, "");
         }
 
+        /// <summary>
+        /// Find a place to break a string after a number of visible characters, not counting VT-100 codes.
+        /// </summary>
+        /// <param name="text">String to split.</param>
+        /// <param name="position">Number of visible characters to split after.</param>
+        /// <returns>Index in <paramref name="text"/> that represents <paramref name="position"/> visible characters.</returns>
         // TODO: This should be an optional parameter for ANSIBreakpoint(string text, int positioon, int initialPosition = 0)
         public static int ANSIBreakpoint(string text, int position)
         {
@@ -29,34 +35,33 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return text.Length;
             }
             int nonAnsiIndex = 0;
-            // Match nextMatch = Regex.Match(text, ANSIRegex);
             Match nextMatch = ANSIRegexRegex.Match(text, initialPosition);
-            int i = 0;
-            while (i < text.Length && nonAnsiIndex != position)
+            int logicalIndex = 0;
+            while (logicalIndex < text.Length && nonAnsiIndex != position)
             {
                 // Jump over ansi codes
-                if (i == nextMatch.Index && nextMatch.Length > 0)
+                if (logicalIndex == nextMatch.Index && nextMatch.Length > 0)
                 {
-                    i += nextMatch.Length;
+                    logicalIndex += nextMatch.Length;
                     nextMatch = nextMatch.NextMatch();
                 }
                 // Increment non ansi index
                 nonAnsiIndex++;
-                i++;
+                logicalIndex++;
             }
-            return i;
+            return logicalIndex;
         }
 
-        public static List<string> ANSIWrap(string text, int position)
+        public static List<string> ANSIWrap(string text, int maxLength)
         {
             ReadOnlySpan<char> textSpan = text.AsSpan();
             List<string> result = new();
-            int breakpoint = ANSIBreakpoint(text, position);
+            int breakpoint = ANSIBreakpoint(text, maxLength);
             while (textSpan.Length > breakpoint)
             {
                 result.Add(textSpan.Slice(0, breakpoint).ToString());
                 textSpan = textSpan.Slice(breakpoint);
-                breakpoint = ANSIBreakpoint(text, position, breakpoint);
+                breakpoint = ANSIBreakpoint(text, maxLength, breakpoint);
             }
             result.Add(textSpan.ToString());
             return result;
@@ -115,12 +120,12 @@ namespace Microsoft.Build.Logging.LiveLogger
                 string result = String.Empty;
                 string leftNoFormatString = ANSIRemove(leftText);
                 string rightNoFormatString = ANSIRemove(rightText);
-                if (leftNoFormatString.Length + rightNoFormatString.Length > Console.BufferWidth)
+                if (leftNoFormatString.Length + rightNoFormatString.Length >= width)
                 {
                     return leftText + rightText;
                 }
 
-                int space = Console.BufferWidth - (leftNoFormatString.Length + rightNoFormatString.Length);
+                int space = width - (leftNoFormatString.Length + rightNoFormatString.Length);
                 result += leftText;
                 result += new string(' ', space - 1);
                 result += rightText;
@@ -216,11 +221,10 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return String.Format("\x1b[53m{0}\x1b[55m", text);
             }
 
-            // TODO: Right now only replaces \ with /. Needs review to make sure it works on all or most terminal emulators.
-            public static string Hyperlink(string text, string url)
+            public static string Hyperlink(string text, string rawUrl)
             {
-                // return String.Format("\x1b[]8;;{0}\x1b\\{1}\x1b[]8;\x1b\\", text, url);
-                return url.Replace("\\", "/");
+                string url = rawUrl.Length > 0 ? new System.Uri(rawUrl).AbsoluteUri : rawUrl;
+                return $"\x1b]8;;{url}\x1b\\{text}\x1b]8;;\x1b\\";
             }
 
             public static string DECLineDrawing(string text)

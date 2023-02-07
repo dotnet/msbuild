@@ -362,12 +362,14 @@ namespace Microsoft.Build.BackEnd
                 BuildRequestData data = new BuildRequestData(projectFiles[i], properties[i].ToDictionary(), explicitToolsVersion, targets, null);
 
                 BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion);
-
+                ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
+                bool skipStaticGraphIsolationConstraints = (isolateProjects != ProjectIsolationMode.False && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath))
+                    || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation;
                 requests[i] = new FullyQualifiedBuildRequest(
                     config: config,
                     targets: targets,
                     resultsNeeded: waitForResults,
-                    skipStaticGraphIsolationConstraints: _componentHost.BuildParameters.IsolateProjects && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath),
+                    skipStaticGraphIsolationConstraints: skipStaticGraphIsolationConstraints,
                     flags: skipNonexistentTargets
                         ? BuildRequestDataFlags.SkipNonexistentTargets
                         : BuildRequestDataFlags.None);
