@@ -18,7 +18,9 @@ We infer the tag of the image to be the numeric component of your chosen `Target
 If you set a value here, you should set the fully-qualified name of the image to use as the base, including any tag you prefer:
 
 ```xml
-<ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:6.0</ContainerBaseImage>
+<PropertyGroup>
+    <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:6.0</ContainerBaseImage>
+<PropertyGroup>
 ```
 
 ## ContainerRuntimeIdentifier
@@ -30,7 +32,9 @@ When a Manifest List is your base image, we need to choose the most relevant ima
 By default, if your project has a RuntimeIdentifier set, that value will be used. A RuntimeIdentifer is usually set via the `-r` parameter to the `dotnet publish` command, or by setting the `RuntimeIdentifier` property in a PublishProfile used from Visual Studio.
 
 ```xml
-<ContainerRuntimeIdentifier>linux-x64</ContainerRuntimeIdentifier>
+<PropertyGroup>
+    <ContainerRuntimeIdentifier>linux-x64</ContainerRuntimeIdentifier>
+</PropertyGroup>
 ```
 
 > **Note**
@@ -38,7 +42,9 @@ By default, if your project has a RuntimeIdentifier set, that value will be used
 > any of the inference described above. For example, a `net7.0`-targeting application that wanted to run on alpine with the x64 architecture would use the `7.0-alpine-amd64` tag of the `mcr.microsoft.com/dotnet/runtime` image (or another base image as appropriate for your project type):
 >
 > ```xml
-> <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0-alpine-amd64</ContainerBaseImage>
+> <PropertyGroup>
+>     <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0-alpine-amd64</ContainerBaseImage>
+> </PropertyGroup>
 > ```
 
 ## ContainerRegistry
@@ -48,7 +54,9 @@ This property controls the destination registry - the place that the newly-creat
 Be default, we push to the local Docker daemon (annotated by `docker://`), but you can also specify a remote registry. Interacting with that registry may require authentication, see [Authenticating to container registries](./RegistryAuthentication.md) for more details.
 
 ```xml
-<ContainerRegistry>registry.mycorp.com:1234</ContainerRegistry>
+<PropertyGroup>
+    <ContainerRegistry>registry.mycorp.com:1234</ContainerRegistry>
+</PropertyGroup>
 ```
 
 ## ContainerImageName
@@ -58,7 +66,9 @@ This property controls the name of the image itself, e.g `dotnet/runtime` or `my
 By default, the value used will be the `AssemblyName` of the project.
 
 ```xml
-<ContainerImageName>my-super-awesome-app</ContainerImageName>
+<PropertyGroup>
+    <ContainerImageName>my-super-awesome-app</ContainerImageName>
+</PropertyGroup>
 ```
 
 > **Note**
@@ -71,11 +81,15 @@ This property controls the tag that is generated for the image. Tags are often u
 By default, the value used will be the `Version` of the project.
 
 ```xml
-<ContainerImageTag>1.2.3-alpha2</ContainerImageTag>
+<PropertyGroup>
+    <ContainerImageTag>1.2.3-alpha2</ContainerImageTag>
+</PropertyGroup>
 ```
 
 ```xml
-<ContainerImageTags>1.2.3-alpha2;latest</ContainerImageTags>
+<PropertyGroup>
+    <ContainerImageTags>1.2.3-alpha2;latest</ContainerImageTags>
+</PropertyGroup>
 ```
 
 > **Note**
@@ -88,7 +102,9 @@ This property controls the working directory of the container - the directory th
 By default, we use the `/app` directory as the working directory.
 
 ```xml
-<ContainerWorkingDirectory>/bin</ContainerWorkingDirectory>
+<PropertyGroup>
+    <ContainerWorkingDirectory>/bin</ContainerWorkingDirectory>
+</PropertyGroup>
 ```
 
 ## ContainerPort
@@ -193,7 +209,7 @@ ContainerEntrypointArg items have one property:
 
 ## Default container labels
 
-Labels are often used to provide consistent metadata on container images. This package provides some default labels to encourage better maintainability of the generated images, drawn from the set defined as part of the [OCI Image specification](https://github.com/opencontainers/image-spec/blob/main/annotations.md). Where possible, we use the values of common [NuGet Project Properties](https://learn.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target) as defaults for these annotations, though we also provide more customizable 
+Labels are often used to provide consistent metadata on container images. This package provides some default labels to encourage better maintainability of the generated images, drawn from the set defined as part of the [OCI Image specification](https://github.com/opencontainers/image-spec/blob/main/annotations.md). Where possible, we use the values of common [NuGet Project Properties](https://learn.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target) as defaults for these annotations, though we also provide more specific properties for each of these labels.
 
 | Annotation | Default Value | Dedicated Property Name | Fallback Property Name | Enabled Property Name | Notes |
 | - | - | - | - | - | - |
