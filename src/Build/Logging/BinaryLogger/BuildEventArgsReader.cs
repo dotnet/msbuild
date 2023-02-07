@@ -176,8 +176,8 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.EnvironmentVariableRead:
                     result = ReadEnvironmentVariableReadEventArgs();
                     break;
-                case BinaryLogRecordKind.ResponseFileUsed:
-                    result = ReadResponseFileUsedEventArgs();
+                case BinaryLogRecordKind.FileUsed:
+                    result = ReadFileUsedEventArgs();
                     break;
                 case BinaryLogRecordKind.PropertyReassignment:
                     result = ReadPropertyReassignmentEventArgs();
@@ -730,11 +730,11 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
-        private BuildEventArgs ReadResponseFileUsedEventArgs()
+        private BuildEventArgs ReadFileUsedEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
-            var responseFilePath = ReadDeduplicatedString();
-            var e = new ResponseFileUsedEventArgs(responseFilePath);
+            var filePath = ReadDeduplicatedString();
+            var e = new FileUsedEventArgs(filePath);
             SetCommonFields(e, fields);
 
             return e;

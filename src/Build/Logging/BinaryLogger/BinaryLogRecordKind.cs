@@ -33,6 +33,6 @@ namespace Microsoft.Build.Logging
         NameValueList,
         String,
         TaskParameter,
-        ResponseFileUsed,
+        FileUsed,
     }
 }

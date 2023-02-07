@@ -800,7 +800,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(buildEventContext != null, "buildEventContext was null");
             ErrorUtilities.VerifyThrow(filePath != null, "response file path was null");
-            ResponseFileUsedEventArgs responseFileUsedEvent = new ResponseFileUsedEventArgs(filePath);
+            FileUsedEventArgs responseFileUsedEvent = new FileUsedEventArgs(filePath);
             responseFileUsedEvent.BuildEventContext = buildEventContext;
             ProcessLoggingEvent(responseFileUsedEvent);
         }
