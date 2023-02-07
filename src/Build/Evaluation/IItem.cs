@@ -52,5 +52,7 @@ namespace Microsoft.Build.Evaluation
         /// Metadata value is the escaped value initially set.
         /// </summary>
         string GetMetadataValueEscaped(string name);
+
+        bool HasMetadata(string name);
     }
 }

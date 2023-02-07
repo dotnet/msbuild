@@ -1602,6 +1602,11 @@ namespace Microsoft.Build.Execution
             /// </remarks>
             public bool HasMetadata(string name)
             {
+                if (string.IsNullOrEmpty(name))
+                {
+                    ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                }
+
                 if ((_directMetadata?.Contains(name) == true) ||
                      FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
                     GetItemDefinitionMetadata(name) != null)

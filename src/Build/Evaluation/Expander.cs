@@ -2749,11 +2749,11 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (Pair<string, S> item in itemsOfType)
                     {
-                        string metadataValue = null;
+                        bool hasMetadata = false;
 
                         try
                         {
-                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                            hasMetadata = item.Value.HasMetadata(metadataName);
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2766,7 +2766,7 @@ namespace Microsoft.Build.Evaluation
 
                         // GetMetadataValueEscaped returns empty string for missing metadata,
                         // but IItem specifies it should return null
-                        if (!string.IsNullOrEmpty(metadataValue))
+                        if (hasMetadata)
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -2791,7 +2791,10 @@ namespace Microsoft.Build.Evaluation
 
                         try
                         {
-                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                            if (item.Value.HasMetadata(metadataName))
+                            {
+                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                            }
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2803,6 +2806,46 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         if (metadataValue != null && String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // return a result through the enumerator
+                            yield return new Pair<string, S>(item.Key, item.Value);
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Intrinsic function that returns those items don't have the given metadata value
+                /// Using a case insensitive comparison.
+                /// </summary>
+                /// 
+                internal static IEnumerable<Pair<string, S>> WithOutMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
+
+                    string metadataName = arguments[0];
+                    string metadataValueToFind = arguments[1];
+
+                    foreach (Pair<string, S> item in itemsOfType)
+                    {
+                        string metadataValue = null;
+
+                        try
+                        {
+                            if (item.Value.HasMetadata(metadataName))
+                            {
+                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                            }
+                        }
+                        catch (ArgumentException ex) // Blank metadata name
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
+                        }
+
+                        if (!String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -2830,7 +2873,10 @@ namespace Microsoft.Build.Evaluation
 
                             try
                             {
-                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                                if (item.Value.HasMetadata(metadataName))
+                                {
+                                    metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                                }
                             }
                             catch (ArgumentException ex) // Blank metadata name
                             {
