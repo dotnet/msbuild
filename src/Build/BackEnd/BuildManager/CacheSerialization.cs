@@ -97,7 +97,7 @@ namespace Microsoft.Build.Execution
                         // due to its dependency on a cached target whose side effects would
                         // not be taken into account. (E.g., the definition of a property.)
                         resultsCacheToSerialize.GetResultsForConfiguration(smallestConfigId)
-                            .KeepSpecificTargetResults(configCacheToSerialize[smallestConfigId].TargetNames);
+                            .KeepSpecificTargetResults(configCacheToSerialize[smallestConfigId].RequestedTargets);
                     }
 
                     translator.Translate(ref configCacheToSerialize);
