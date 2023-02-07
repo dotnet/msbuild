@@ -22,6 +22,8 @@ public static class KnownStrings
         public static string ContainerBaseRegistry = nameof(ContainerBaseRegistry);
         public static string ContainerBaseName = nameof(ContainerBaseName);
         public static string ContainerBaseTag = nameof(ContainerBaseTag);
+
+        public static string ContainerGenerateLabels = nameof(ContainerGenerateLabels);
     }
 
     public static class ErrorCodes

@@ -193,6 +193,22 @@ ContainerEntrypointArg items have one property:
 
 ## Default container labels
 
-Labels are often used to provide consistent metadata on container images. This package provides some default labels to encourage better maintainability of the generated images.
+Labels are often used to provide consistent metadata on container images. This package provides some default labels to encourage better maintainability of the generated images, drawn from the set defined as part of the [OCI Image specification](https://github.com/opencontainers/image-spec/blob/main/annotations.md). Where possible, we use the values of common [NuGet Project Properties](https://learn.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target) as defaults for these annotations, though we also provide more customizable 
 
-* `org.opencontainers.image.created` is set to the ISO 8601 format of the current UTC DateTime
+| Annotation | Default Value | Dedicated Property Name | Fallback Property Name | Enabled Property Name | Notes |
+| - | - | - | - | - | - |
+| `org.opencontainers.image.created` and `org.opencontainers.artifact.created` | the [RFC 3339](https://tools.ietf.org/html/rfc3339#section-5.6) format of the current UTC DateTime |  |  | `ContainerGenerateLabelsImageCreated` |  |
+|`org.opencontainers.artifact.description` and `org.opencontainers.image.description` | | `ContainerDescription` | `Description` | `ContainerGenerateLabelsImageDescription` | |
+| `org.opencontainers.image.authors` | | `ContainerAuthors`| `Authors` | `ContainerGenerateLabelsImageAuthors` | |
+| `org.opencontainers.image.url` | | `ContainerInformationUrl` | `PackageProjectUrl` | `ContainerGenerateLabelsImageUrl` | |
+| `org.opencontainers.image.documentation` | | `ContainerDocumentationUrl` | `PackageProjectUrl` | `ContainerGenerateLabelsImageDocumentation` | |
+| `org.opencontainers.image.version` | | `ContainerVersion` | `PackageVersion` | `ContainerGenerateLabelsImageVersion` | |
+| `org.opencontainers.image.vendor` | | `ContainerVendor` | | `ContainerGenerateLabelsImageVendor` | |
+| `org.opencontainers.image.licenses` | | `ContainerLicenseExpression` | `PackageLicenseExpression` | `ContainerGenerateLabelsImageLicenses` | |
+| `org.opencontainers.image.title` | | `ContainerTitle` | `Title` | `ContainerGenerateLabelsImageTitle` | |
+| `org.opencontainers.image.base.name` | | `ContainerBaseImage` | | `ContainerGenerateLabelsImageBaseName` | |
+| `org.opencontainers.image.source` | | `PrivateRepositoryUrl` | | `ContainerGenerateLabelsImageSource` | Only written if `PublishRepositoryUrl` is `true`. Also relies on Sourcelink infrastructure being part of the build. |
+| `org.opencontainers.image.revision` | | `SourceRevisionId` | | `ContainerGenerateLabelsImageRevision` | Only written if `PublishRepositoryUrl` is `true`. Also relies on Sourcelink infrastructure being part of the build. |
+
+> **Note**
+> You can disable all label generation by setting `ContainerGenerateLabels` to `false` in your project file.

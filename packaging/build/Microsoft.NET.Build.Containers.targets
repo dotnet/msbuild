@@ -74,11 +74,6 @@
             <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true'" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
         </ItemGroup>
 
-        <ItemGroup Label="Conventional Label assignment">
-            <!-- TODO: This impacts build reproducibility - it should probably be settable/conditioned on a property -->
-            <ContainerLabel Include="org.opencontainers.image.created" Value="$([System.DateTime]::UtcNow.ToString('o'))" />
-        </ItemGroup>
-
         <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"
                                   ContainerRegistry="$(ContainerRegistry)"
                                   ContainerImageName="$(ContainerImageName)"
@@ -94,6 +89,56 @@
             <Output TaskParameter="NewContainerTags" ItemName="ContainerImageTags" />
             <Output TaskParameter="NewContainerEnvironmentVariables" ItemName="ContainerEnvironmentVariables" />
         </ParseContainerProperties>
+
+        <PropertyGroup>
+            <ContainerGenerateLabels Condition="'$(ContainerGenerateLabels)' == ''">true</ContainerGenerateLabels>
+            <ContainerGenerateLabelsImageCreated Condition="'$(ContainerGenerateLabelsImageCreated)' == ''">true</ContainerGenerateLabelsImageCreated>
+            <ContainerGenerateLabelsImageDescription Condition="'$(ContainerGenerateLabelsImageDescription)' == ''">true</ContainerGenerateLabelsImageDescription>
+            <ContainerGenerateLabelsImageAuthors Condition="'$(ContainerGenerateLabelsImageAuthors)' == ''">true</ContainerGenerateLabelsImageAuthors>
+            <ContainerGenerateLabelsImageUrl Condition="'$(ContainerGenerateLabelsImageUrl)' == ''">true</ContainerGenerateLabelsImageUrl>
+            <ContainerGenerateLabelsImageDocumentation Condition="'$(ContainerGenerateLabelsImageDocumentation)' == ''">true</ContainerGenerateLabelsImageDocumentation>
+            <ContainerGenerateLabelsImageSource Condition="'$(ContainerGenerateLabelsImageSource)' == ''">true</ContainerGenerateLabelsImageSource>
+            <ContainerGenerateLabelsImageVersion Condition="'$(ContainerGenerateLabelsImageVersion)' == ''">true</ContainerGenerateLabelsImageVersion>
+            <ContainerGenerateLabelsImageRevision Condition="'$(ContainerGenerateLabelsImageRevision)' == ''">true</ContainerGenerateLabelsImageRevision>
+            <ContainerGenerateLabelsImageVendor Condition="'$(ContainerGenerateLabelsImageVendor)' == ''">true</ContainerGenerateLabelsImageVendor>
+            <ContainerGenerateLabelsImageLicenses Condition="'$(ContainerGenerateLabelsImageLicenses)' == ''">true</ContainerGenerateLabelsImageLicenses>
+            <ContainerGenerateLabelsImageTitle Condition="'$(ContainerGenerateLabelsImageTitle)' == ''">true</ContainerGenerateLabelsImageTitle>
+            <ContainerGenerateLabelsImageBaseDigest Condition="'$(ContainerGenerateLabelsImageBaseDigest)' == ''">true</ContainerGenerateLabelsImageBaseDigest>
+            <ContainerGenerateLabelsImageBaseName Condition="'$(ContainerGenerateLabelsImageBaseName)' == ''">true</ContainerGenerateLabelsImageBaseName>
+        </PropertyGroup>
+
+        <PropertyGroup Label="Defaults for Container Labels">
+            <ContainerDescription Condition="'$(ContainerDescription)' == '' and '$(Description)' != ''">$(Description)</ContainerDescription>
+            <ContainerAuthors Condition="'$(ContainerAuthors)' == '' and '$(Authors)' != ''">$(Authors)</ContainerAuthors>
+            <ContainerInformationUrl Condition="'$(ContainerInformationUrl)' == '' and '$(PackageProjectUrl)' != ''">$(PackageProjectUrl)</ContainerInformationUrl>
+            <ContainerDocumentationUrl Condition="'$(ContainerDocumentationUrl)' == '' and '$(PackageProjectUrl)' != ''">$(PackageProjectUrl)</ContainerDocumentationUrl>
+            <ContainerVersion Condition="'$(ContainerVersion)' == '' and '$(PackageVersion)' != ''">$(PackageVersion)</ContainerVersion>
+            <ContainerLicenseExpression Condition="'$(ContainerLicenseExpression)' == '' and '$(PackageLicenseExpression)' != ''">$(PackageLicenseExpression)</ContainerLicenseExpression>
+            <ContainerTitle Condition="'$(ContainerTitle)' == '' and '$(Title)' != ''">$(Title)</ContainerTitle>
+        </PropertyGroup>
+
+        <!-- Labels generated from descriptions from the spec at https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys -->
+        <ItemGroup Label="Conventional Label assignment" Condition="'$(ContainerGenerateLabels)' == 'true'">
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageCreated)' == 'true'" Include="org.opencontainers.image.created;org.opencontainers.artifact.created" Value="$([System.DateTime]::UtcNow.ToString('o'))" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageDescription)' == 'true' and '$(ContainerDescription)' != ''" Include="org.opencontainers.artifact.description;org.opencontainers.image.description" Value="$(ContainerDescription)" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageAuthors)' == 'true' and '$(ContainerAuthors)' != ''" Include="org.opencontainers.image.authors" Value="$(ContainerAuthors)" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageUrl)' == 'true' and '$(ContainerInformationUrl)' != ''" Include="org.opencontainers.image.url" Value="$(ContainerInformationUrl)" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageDocumentation)' == 'true' and '$(ContainerDocumentationUrl)' != ''" Include="org.opencontainers.image.documentation" Value="$(ContainerDocumentationUrl)" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageVersion)' == 'true' and '$(ContainerVersion)' != ''" Include="org.opencontainers.image.version" Value="$(ContainerVersion)" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageVendor)' == 'true' and '$(ContainerVendor)' != ''" Include="org.opencontainers.image.vendor" Value="$(ContainerVendor)" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageLicenses)' == 'true' and '$(ContainerLicenseExpression)' != ''" Include="org.opencontainers.image.licenses" Value="$(ContainerLicenseExpression)" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageTitle)' == 'true' and '$(ContainerTitle)' != ''" Include="org.opencontainers.image.title" Value="$(ContainerTitle)" />
+            <!-- Need to compute digests, not just names, before we can light this up. This suggests we need a task where all of the 'read' steps are done. -->
+            <!-- <ContainerLabel Condition="'$(ContainerGenerateLabelsImageBaseDigest)' == 'true' and '$(ContainerBaseImageDigest)' != ''" Include="org.opencontainers.image.base.digest" Value="$(ContainerBaseImageDigest)" /> -->
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageBaseName)' == 'true' and '$(ContainerBaseImage)' != ''" Include="org.opencontainers.image.base.name" Value="$(ContainerBaseImage)" />
+        </ItemGroup>
+
+        <!-- These sourcelink-derived properties are only allowed to flow to generated artifacts if `PublishRepositoryUrl` is set as a user signal for opt-in.
+             In addition, the 'nice' property names are currently set by NuGet Pack targets and so we have to use the private/generic names here.  -->
+        <ItemGroup Label="Source control label assignment" Condition="'$(ContainerGenerateLabels)' == 'true' and '$(PublishRepositoryUrl)' == 'true'">
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageSource)' == 'true' and '$(PrivateRepositoryUrl)' != ''" Include="org.opencontainers.image.source" Value="$(PrivateRepositoryUrl)" />
+            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageRevision)' == 'true' and '$(SourceRevisionId)' != ''" Include="org.opencontainers.image.revision" Value="$(SourceRevisionId)" />
+        </ItemGroup>
     </Target>
 
     <PropertyGroup>
