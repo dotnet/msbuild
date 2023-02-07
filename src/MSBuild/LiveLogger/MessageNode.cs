@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging.LiveLogger
@@ -15,7 +16,8 @@ namespace Microsoft.Build.Logging.LiveLogger
         {
             HighPriorityMessage,
             Warning,
-            Error
+            Error,
+            ProjectOutputMessage
         }
         public string Message;
         public TerminalBufferLine? Line;
@@ -24,6 +26,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public string? FilePath;
         public int? LineNumber;
         public int? ColumnNumber;
+        public string? ProjectOutputExecutablePath;
         public MessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
@@ -35,7 +38,18 @@ namespace Microsoft.Build.Logging.LiveLogger
             switch (args)
             {
                 case BuildMessageEventArgs:
-                    Type = MessageType.HighPriorityMessage;
+                    // Detect output messages
+                    var finalOutputMarker = " -> ";
+                    int i = args.Message!.IndexOf(finalOutputMarker, StringComparison.Ordinal);
+                    if (i > 0)
+                    {
+                        Type = MessageType.ProjectOutputMessage;
+                        ProjectOutputExecutablePath = args.Message!.Substring(i + finalOutputMarker.Length);
+                    }
+                    else
+                    {
+                        Type = MessageType.HighPriorityMessage;
+                    }
                     break;
                 case BuildWarningEventArgs warning:
                     Type = MessageType.Warning;
@@ -66,6 +80,8 @@ namespace Microsoft.Build.Logging.LiveLogger
                     return $"❌ {ANSIBuilder.Formatting.Color(
                         $"Error {Code}: {FilePath}({LineNumber},{ColumnNumber}) {Message}",
                         ANSIBuilder.Formatting.ForegroundColor.Red)}";
+                case MessageType.ProjectOutputMessage:
+                    return $"⚙️ {ANSIBuilder.Formatting.Hyperlink(ProjectOutputExecutablePath!, Path.GetDirectoryName(ProjectOutputExecutablePath)!)}";
                 case MessageType.HighPriorityMessage:
                 default:
                     return $"ℹ️ {ANSIBuilder.Formatting.Italic(Message)}";
