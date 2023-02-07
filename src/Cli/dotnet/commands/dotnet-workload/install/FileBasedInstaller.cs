@@ -308,34 +308,34 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 foreach (var packVersionDir in Directory.GetDirectories(packIdDir))
                 {
-                    var bandRecords = Directory.GetFileSystemEntries(packVersionDir);
+                    var bandRecordPaths = Directory.GetFileSystemEntries(packVersionDir);
 
-                    var unneededBandRecords = bandRecords
+                    var unneededBandRecordPaths = bandRecordPaths
                         .Where(recordPath => !installedSdkFeatureBands.Contains(new SdkFeatureBand(Path.GetFileName(recordPath))));
 
                     var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
                     if (
-                        (bandRecords.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
+                        (bandRecordPaths.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
                         ||
                         cleanAllPacks
                        )
                     {
-                        unneededBandRecords = unneededBandRecords.Append(currentBandRecordPath);
+                        unneededBandRecordPaths = unneededBandRecordPaths.Append(currentBandRecordPath);
                     }
 
-                    if (!unneededBandRecords.Any())
+                    if (!unneededBandRecordPaths.Any())
                     {
                         continue;
                     }
 
                     // Save the pack info in case we need to delete the pack
-                    var jsonPackInfo = File.ReadAllText(unneededBandRecords.First());
-                    foreach (var unneededRecord in unneededBandRecords)
+                    var jsonPackInfo = File.ReadAllText(unneededBandRecordPaths.First());
+                    foreach (var unneededRecord in unneededBandRecordPaths)
                     {
                         File.Delete(unneededRecord);
                     }
 
-                    if (!bandRecords.Except(unneededBandRecords).Any())
+                    if (!bandRecordPaths.Except(unneededBandRecordPaths).Any())
                     {
                         Directory.Delete(packVersionDir);
                         var deletablePack = GetPackInfo(packVersionDir);
@@ -345,9 +345,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             deletablePack = JsonSerializer.Deserialize(jsonPackInfo, typeof(PackInfo)) as PackInfo;
                         }
                         DeletePack(deletablePack);
-                        foreach (string bandWithPackToDelete in unneededBandRecords)
+                        foreach (string bandWithPackToDelete in unneededBandRecordPaths)
                         {
-                            DeletePackInstallationRecord(deletablePack, new SdkFeatureBand(bandWithPackToDelete));
+                            DeletePackInstallationRecord(deletablePack, new SdkFeatureBand(Path.GetFileName(bandWithPackToDelete)));
                         }
                     }
                 }
