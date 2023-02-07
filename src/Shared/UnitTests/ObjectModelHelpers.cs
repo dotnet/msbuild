@@ -676,7 +676,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>Returns created <see cref="Project"/>.</returns>
         internal static Project CreateInMemoryProject(string xml)
         {
-            return CreateInMemoryProject(xml, new[] { new ConsoleLogger() });
+            return CreateInMemoryProject(xml, new ConsoleLogger());
         }
 
         /// <summary>
@@ -766,11 +766,9 @@ namespace Microsoft.Build.UnitTests
             string projectContents,
             params ILogger[] loggers)
         {
-            using (ProjectCollection collection = new())
-            {
-                Project project = CreateInMemoryProject(collection, projectContents, loggers);
-                project.Build().ShouldBeTrue();
-            }
+            using ProjectCollection collection = new();
+            Project project = CreateInMemoryProject(collection, projectContents, loggers);
+            project.Build().ShouldBeTrue();
         }
 
         /// <summary>
@@ -796,11 +794,9 @@ namespace Microsoft.Build.UnitTests
             string projectContents,
             params ILogger[] loggers)
         {
-            using (ProjectCollection collection = new())
-            {
-                Project project = CreateInMemoryProject(collection, projectContents, loggers);
-                project.Build().ShouldBeFalse("Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details\"");
-            }
+            using ProjectCollection collection = new();
+            Project project = CreateInMemoryProject(collection, projectContents, loggers);
+            project.Build().ShouldBeFalse("Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details\"");
         }
 
         /// <summary>
