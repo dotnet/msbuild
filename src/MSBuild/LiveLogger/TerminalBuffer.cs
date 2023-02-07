@@ -110,8 +110,11 @@ namespace Microsoft.Build.Logging.LiveLogger
                 ANSIBuilder.Cursor.Home() +
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center($"MSBuild - Build in progress - {FinishedProjects} finished projects")) +
                 // Write footer
-                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
-                new string('-', Console.BufferWidth) + Environment.NewLine + FooterText);
+                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
+                    ANSIBuilder.Eraser.LineCursorToEnd() +
+                    new string('-', Console.BufferWidth) +
+                    Environment.NewLine +
+                    FooterText);
 
             if (Lines.Count == 0)
             {

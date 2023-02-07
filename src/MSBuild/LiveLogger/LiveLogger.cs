@@ -12,12 +12,13 @@ namespace Microsoft.Build.Logging.LiveLogger
     {
         private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
 
-        private bool Succeeded;
-        public string Parameters { get; set; }
+        private bool succeeded;
         private int startedProjects = 0;
         private int finishedProjects = 0;
-        public LoggerVerbosity Verbosity { get; set; }
         private Dictionary<string, int> blockedProjects = new();
+
+        public LoggerVerbosity Verbosity { get; set; }
+        public string Parameters { get; set; }
 
         public LiveLogger()
         {
@@ -122,27 +123,28 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
-            Succeeded = e.Succeeded;
+            succeeded = e.Succeeded;
         }
 
         // Project
         private void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
             startedProjects++;
+
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            // If id already exists...
-            if (projects.ContainsKey(id))
+
+            // If id does not exist...
+            if (!projects.ContainsKey(id))
             {
-                return;
+                // Add project
+                ProjectNode node = new(e)
+                {
+                    ShouldRerender = true,
+                };
+                projects[id] = node;
+                UpdateFooter();
             }
-            // Add project
-            ProjectNode node = new ProjectNode(e);
-            projects[id] = node;
-            // Log
-            // Update footer
-            UpdateFooter();
-            node.ShouldRerender = true;
         }
 
         private void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
@@ -153,11 +155,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             {
                 return;
             }
+
             // Update line
             node.Finished = true;
+            node.ShouldRerender = true;
             finishedProjects++;
             UpdateFooter();
-            node.ShouldRerender = true;
         }
 
         // Target
@@ -300,7 +303,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             // Emmpty line
             Console.WriteLine();
-            if (Succeeded)
+            if (succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
                 Console.WriteLine($"\t{warningCount} Warning(s)");
