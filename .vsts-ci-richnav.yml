@@ -12,6 +12,7 @@ variables:
     value: Roslyn-Project-System
   - name: PostBuildSign
     value: true
+  - template: /eng/common/templates/variables/pool-providers.yml
 
 stages:
 - stage: build

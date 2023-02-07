@@ -47,6 +47,7 @@ variables:
         /p:DotNetRuntimeSourceFeedKey=$(dotnetbuilds-internal-container-read-token-base64) 
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-CLI-SDLValidation-Params
+  - template: /eng/common/templates/variables/pool-providers.yml
 
 stages:
 - stage: build
