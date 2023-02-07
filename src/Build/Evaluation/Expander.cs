@@ -2764,8 +2764,6 @@ namespace Microsoft.Build.Evaluation
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
-                        // GetMetadataValueEscaped returns empty string for missing metadata,
-                        // but IItem specifies it should return null
                         if (hasMetadata)
                         {
                             // return a result through the enumerator
