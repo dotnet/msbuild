@@ -345,6 +345,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             deletablePack = JsonSerializer.Deserialize(jsonPackInfo, typeof(PackInfo)) as PackInfo;
                         }
                         DeletePack(deletablePack);
+                        foreach (string bandWithPackToDelete in unneededBandRecords)
+                        {
+                            DeletePackInstallationRecord(deletablePack, new SdkFeatureBand(bandWithPackToDelete));
+                        }
                     }
                 }
 
