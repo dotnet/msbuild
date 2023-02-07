@@ -1278,6 +1278,114 @@ $@"
         }
 
         [Fact]
+        public void GetTargetsListSupportsTargetsMarkedSkipNonexistentTargets()
+        {
+            ProjectGraph graph = Helpers.CreateProjectGraph(
+                _env,
+                dependencyEdges: new Dictionary<int, int[]>
+                {
+                    { 1, new[] { 2 } },
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>
+                {
+                    {
+                        1,
+                        @"
+                          <ItemGroup>
+                            <ProjectReferenceTargets Include='Build' Targets='NonskippableTarget1' />
+                            <ProjectReferenceTargets Include='Build' Targets='NonskippableTarget2' SkipNonexistentTargets='false' />
+                            <ProjectReferenceTargets Include='Build' Targets='SkippableExistingTarget;SkippableNonexistentTarget' SkipNonexistentTargets='true' />
+                            <ProjectReference Include='2.proj' />
+                          </ItemGroup>
+                          <Target Name='Build'>
+                            <MSBuild Projects='2.proj' Targets='NonskippableTarget1; NonskippableTarget2' />
+                            <MSBuild Projects='2.proj' Targets='SkippableExistingTarget;SkippableNonexistentTarget' SkipNonexistentTargets='true' />
+                          </Target>"
+                    },
+                    {
+                        2,
+                        @"<Target Name='NonskippableTarget1'>
+                          </Target>
+                          <Target Name='NonskippableTarget2'>
+                          </Target>
+                          <Target Name='SkippableExistingTarget'>
+                          </Target>"
+                    },
+                });
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(entryProjectTargets: new[] { "Build" });
+            targetLists[key: GetFirstNodeWithProjectNumber(graph: graph, projectNum: 1)].ShouldBe(expected: new[] { "Build" });
+            targetLists[key: GetFirstNodeWithProjectNumber(graph: graph, projectNum: 2)].ShouldBe(expected: new[] { "NonskippableTarget1", "NonskippableTarget2", "SkippableExistingTarget" });
+            Dictionary<string, (BuildResult Result, MockLogger Logger)> results = ResultCacheBasedBuilds_Tests.BuildUsingCaches(
+                _env,
+                topoSortedNodes: graph.ProjectNodesTopologicallySorted,
+                generateCacheFiles: true,
+                expectedNodeBuildOutput: new Dictionary<ProjectGraphNode, string[]>(),
+                outputCaches: new Dictionary<ProjectGraphNode, string>(),
+                assertBuildResults: false,
+                targetListsPerNode: targetLists);
+            foreach (KeyValuePair<string, (BuildResult Result, MockLogger Logger)> result in results)
+            {
+                result.Value.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+        }
+
+        [Fact]
+        public void SkipNonexistentTargetsDoesNotHideMissedTargetResults()
+        {
+            ProjectGraph graph = Helpers.CreateProjectGraph(
+                env: _env,
+                dependencyEdges: new Dictionary<int, int[]>
+                {
+                    { 1, new[] { 2 } },
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>
+                {
+                    {
+                        1,
+                        @"
+                          <ItemGroup>
+                            <!-- NonskippableTarget2 is not specified in the target protocol, which should cause the build to fail -->
+                            <ProjectReferenceTargets Include='Build' Targets='NonskippableTarget1;SkippableExistingTarget;SkippableNonexistentTarget' SkipNonexistentTargets='true' />
+                            <ProjectReference Include='2.proj' />
+                          </ItemGroup>
+                          <Target Name='Build'>
+                            <MSBuild Projects='2.proj' Targets='NonskippableTarget1;NonskippableTarget2;SkippableExistingTarget;SkippableNonexistentTarget' SkipNonexistentTargets='true' />
+                          </Target>"
+                    },
+                    {
+                        2,
+                        @"<Target Name='NonskippableTarget1'>
+                          </Target>
+                          <Target Name='NonskippableTarget2'>
+                          </Target>
+                          <Target Name='SkippableExistingTarget'>
+                          </Target>"
+                    },
+                });
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(entryProjectTargets: new[] { "Build" });
+            targetLists[key: GetFirstNodeWithProjectNumber(graph: graph, projectNum: 1)].ShouldBe(expected: new[] { "Build" });
+            targetLists[key: GetFirstNodeWithProjectNumber(graph: graph, projectNum: 2)].ShouldBe(expected: new[] { "NonskippableTarget1", "SkippableExistingTarget" });
+            Dictionary<string, (BuildResult Result, MockLogger Logger)> results = ResultCacheBasedBuilds_Tests.BuildUsingCaches(
+                env: _env,
+                topoSortedNodes: graph.ProjectNodesTopologicallySorted,
+                generateCacheFiles: true,
+                expectedNodeBuildOutput: new Dictionary<ProjectGraphNode, string[]>(),
+                outputCaches: new Dictionary<ProjectGraphNode, string>(),
+                assertBuildResults: false,
+                targetListsPerNode: targetLists);
+            results["2"].Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            BuildResult project1BuildResult = results["1"].Result;
+            project1BuildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            MockLogger project1MockLogger = results["1"].Logger;
+            project1MockLogger.ErrorCount.ShouldBe(1);
+            string project1ErrorMessage = project1MockLogger.Errors.First().Message;
+            project1ErrorMessage.ShouldContain("MSB4252");
+            project1ErrorMessage.ShouldContain("1.proj");
+            project1ErrorMessage.ShouldContain("2.proj");
+            project1ErrorMessage.ShouldContain(" with the (NonskippableTarget1;NonskippableTarget2;SkippableExistingTarget;SkippableNonexistentTarget) target(s) but the build result for the built project is not in the engine cache");
+        }
+
+        [Fact]
         public void ReferencedMultitargetingEntryPointNodeTargetListContainsDefaultTarget()
         {
             using (var env = TestEnvironment.Create())
