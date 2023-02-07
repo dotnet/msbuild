@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -17,6 +17,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using Xunit;
 using Shouldly;
 using System.Linq;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -128,8 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.EvaluatedInclude = String.Empty;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set include to invalid null value
@@ -141,8 +141,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.EvaluatedInclude = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Create an item with a metadatum that has a null value
@@ -204,8 +203,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.SetMetadata(null, "m1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Set metadata with invalid empty name
@@ -217,8 +215,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.SetMetadata(String.Empty, "m1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Cast to ITaskItem
@@ -647,8 +644,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 ";
 
                 GetOneItem(content);
-            }
-           );
+            });
         }
         /// <summary>
         /// Two items should each get their own values for built-in metadata
@@ -913,8 +909,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Log warning for drive enumerating wildcards that exist in projects on Windows platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             TargetItemWithIncludeAndExclude,
             @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
@@ -955,8 +950,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Log warning for drive enumerating wildcards that exist in projects on Unix platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)**",
@@ -986,8 +980,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests target item evaluation resulting in no build failures.
         /// </summary>
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)*.cs",

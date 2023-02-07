@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Xml;
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BuildEngine
 
         // If this is a persisted <ItemGroup>, this boolean tells us whether
         // it came from the main project file, or an imported project file.
-        bool importedFromAnotherProject = false;
+        private bool importedFromAnotherProject = false;
 
         // These are the loose Items beneath this BuildItemGroup.  This is
         // valid for both persisted and virtual ItemGroups.
@@ -388,11 +388,11 @@ namespace Microsoft.Build.BuildEngine
                 int insertionIndex = items.Count;
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if ( String.Equals(itemToAdd.Name, items[i].Name, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(itemToAdd.Name, items[i].Name, StringComparison.OrdinalIgnoreCase))
                     {
                         insertionIndex = i + 1;
 
-                        if ( 0 > String.Compare(itemToAdd.Include, items[i].Include, StringComparison.OrdinalIgnoreCase))
+                        if (0 > String.Compare(itemToAdd.Include, items[i].Include, StringComparison.OrdinalIgnoreCase))
                         {
                             insertionIndex = i;
                             break;
@@ -597,7 +597,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 MustNotBeImported();
 
-                foreach(BuildItem itemToRemove in items)
+                foreach (BuildItem itemToRemove in items)
                 {
                     XmlElement itemElement = itemToRemove.ItemElement;
                     MustHaveThisParentElement(itemToRemove);

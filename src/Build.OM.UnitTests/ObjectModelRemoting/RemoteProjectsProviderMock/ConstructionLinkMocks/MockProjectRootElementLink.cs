@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -15,7 +15,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
     internal class MockProjectRootElementLinkRemoter : MockProjectElementContainerLinkRemoter
     {
-        ProjectRootElement ProjectXml => (ProjectRootElement)Source;
+        private ProjectRootElement ProjectXml => (ProjectRootElement)Source;
 
         public override ProjectElement CreateLinkedObject(IImportHolder holder)
         {
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
         public MockProjectItemElementLinkRemoter CreateItemElement(string itemType, string include)
         {
-            return (MockProjectItemElementLinkRemoter) this.Export(this.ProjectXml.CreateItemElement(itemType, include));
+            return (MockProjectItemElementLinkRemoter)this.Export(this.ProjectXml.CreateItemElement(itemType, include));
         }
         public MockProjectItemDefinitionElementLinkRemoter CreateItemDefinitionElement(string itemType)
         {

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Win32.SafeHandles;
@@ -20,17 +20,17 @@ namespace Microsoft.Build.BuildEngine
                                                     0x0008 |
                                                     0x0010;
         internal const uint NORMAL_PRIORITY_CLASS = 0x0020;
-        internal const uint CREATE_NO_WINDOW      = 0x08000000;
+        internal const uint CREATE_NO_WINDOW = 0x08000000;
         internal const Int32 STARTF_USESTDHANDLES = 0x00000100;
         internal const uint PAGE_SIZE = 4096;
         internal const int SECURITY_DESCRIPTOR_REVISION = 1;
-        internal const int ERROR_SUCCESS          = 0;
+        internal const int ERROR_SUCCESS = 0;
 
-        internal const string  ADMINONLYSDDL      = "D:" +                    //Discretionary ACL
+        internal const string ADMINONLYSDDL = "D:" +                    //Discretionary ACL
                                                     "(A;OICI;GA;;;BA)" +       //Allow full control to administrators
                                                     "(A;OICI;GA;;;SY)";         //Allow full control to System
 
-        [DllImport("advapi32.dll", SetLastError=true)]
+        [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CheckTokenMembership
         (
@@ -40,16 +40,16 @@ namespace Microsoft.Build.BuildEngine
             out bool IsMember
         );
 
-        [DllImport("advapi32.dll", SetLastError=true)]
+        [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool AllocateAndInitializeSid
         (
-            IntPtr siaNtAuthority, 
-            byte nSubAuthorityCount, 
-            int dwSubAuthority0, int dwSubAuthority1, 
-            int dwSubAuthority2, int dwSubAuthority3, 
-            int dwSubAuthority4, int dwSubAuthority5, 
-            int dwSubAuthority6, int dwSubAuthority7, 
+            IntPtr siaNtAuthority,
+            byte nSubAuthorityCount,
+            int dwSubAuthority0, int dwSubAuthority1,
+            int dwSubAuthority2, int dwSubAuthority3,
+            int dwSubAuthority4, int dwSubAuthority5,
+            int dwSubAuthority6, int dwSubAuthority7,
             out IntPtr pSid
         );
 
@@ -66,7 +66,7 @@ namespace Microsoft.Build.BuildEngine
         internal static bool IsUserAdministrator()
         {
             int SECURITY_BUILTIN_DOMAIN_RID = 0x00000020;
-            int DOMAIN_ALIAS_RID_ADMINS  = 0x00000220;
+            int DOMAIN_ALIAS_RID_ADMINS = 0x00000220;
             IntPtr pNtAuthority = Marshal.AllocHGlobal(6);
             Marshal.WriteInt32(pNtAuthority, 0, 0);
             Marshal.WriteByte(pNtAuthority, 4, 0);
@@ -136,24 +136,24 @@ namespace Microsoft.Build.BuildEngine
             IntPtr lpBaseAddress
         );
 
-        [DllImport("kernel32.dll",  CharSet = CharSet.Unicode)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CreateProcess
         (
             string lpApplicationName,
-            string lpCommandLine, 
+            string lpCommandLine,
             ref SECURITY_ATTRIBUTES lpProcessAttributes,
             ref SECURITY_ATTRIBUTES lpThreadAttributes,
             [In, MarshalAs(UnmanagedType.Bool)]
             bool bInheritHandles,
-            uint dwCreationFlags, 
-            IntPtr lpEnvironment, 
+            uint dwCreationFlags,
+            IntPtr lpEnvironment,
             string lpCurrentDirectory,
             [In] ref STARTUPINFO lpStartupInfo,
             out PROCESS_INFORMATION lpProcessInformation
         );
 
-        [DllImport("advapi32",  CharSet = CharSet.Unicode, SetLastError = true)]
+        [DllImport("advapi32", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool ConvertStringSecurityDescriptorToSecurityDescriptor
         (
@@ -201,10 +201,10 @@ namespace Microsoft.Build.BuildEngine
         [StructLayout(LayoutKind.Sequential)]
         internal struct PROCESS_INFORMATION
         {
-            IntPtr hProcess;
-            IntPtr hThread;
-            int dwProcessId;
-            int dwThreadId;
+            private IntPtr hProcess;
+            private IntPtr hThread;
+            private int dwProcessId;
+            private int dwThreadId;
         }
 
         [StructLayout(LayoutKind.Sequential)]

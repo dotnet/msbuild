@@ -1,25 +1,24 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-//
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
-{ 
+namespace Microsoft.Build.Logging.LiveLogger
+{
 
-    public class FancyLoggerTargetNode
+    internal class TargetNode
     {
         public int Id;
         public string TargetName;
-        public FancyLoggerTaskNode? CurrentTaskNode;
-        public FancyLoggerTargetNode(TargetStartedEventArgs args)
+        public TaskNode? CurrentTaskNode;
+        public TargetNode(TargetStartedEventArgs args)
         {
             Id = args.BuildEventContext!.TargetId;
             TargetName = args.TargetName;
         }
-        public FancyLoggerTaskNode AddTask(TaskStartedEventArgs args)
+        public TaskNode AddTask(TaskStartedEventArgs args)
         {
-            CurrentTaskNode = new FancyLoggerTaskNode(args);
+            CurrentTaskNode = new TaskNode(args);
             return CurrentTaskNode;
         }
     }

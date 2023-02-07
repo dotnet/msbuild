@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,7 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -231,8 +232,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
 
                 item.SetMetadataValue("##invalid##", "x");
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempting to set built-in metadata should fail
@@ -245,8 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
 
                 item.SetMetadataValue("FullPath", "x");
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempting to set reserved metadata should fail
@@ -259,8 +258,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
 
                 item.SetMetadataValue("Choose", "x");
-            }
-           );
+            });
         }
         /// <summary>
         /// Metadata enumerator should only return custom metadata
@@ -706,8 +704,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, excludeString, normalizeSlashes: true);
         }
 
-        [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyTheory]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/**/*.cs",
             new[]
@@ -796,8 +793,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(@"z:\**\*.log")]
         [InlineData(@"z:$(empty)\**\*.log")]
         [InlineData(@"z:\**")]
@@ -810,8 +806,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(@"/**/*.log")]
         [InlineData(@"$(empty)/**/*.log")]
         [InlineData(@"/$(empty)**/*.log")]
@@ -837,7 +832,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Project project = new Project(projectCollection);
 
                     // Add item
-                    _= project.AddItem("i", unevaluatedInclude);
+                    _ = project.AddItem("i", unevaluatedInclude);
 
                     // Verify
                     collectionLogger.WarningCount.ShouldBe(1);
@@ -881,8 +876,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project instance created from a file that contains a drive enumerating wildcard results in a logged warning on the Windows platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             ImportProjectElement,
             @"z:\**\*.targets",
@@ -906,8 +900,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(
             ImportProjectElement,
             @"\**\*.targets",
@@ -927,7 +920,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void LogWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
             content = string.Format(content, placeHolder, excludePlaceHolder);
-                CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
+            CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
         }
 
         private static void CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(string content, bool throwException)
@@ -1014,8 +1007,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 @"project\a",
             },
-            false // whether the include survives the exclude (true) or not (false)
-            )]
+            false) // whether the include survives the exclude (true) or not (false)
+            ]
         // exclude matches include; file is below the project file
         [InlineData(ItemWithIncludeAndExclude,
             @"a",
@@ -1028,8 +1021,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 @"project\dir\a",
             },
-            false
-            )]
+            false)]
         // exclude matches include; file is above the project file
         [InlineData(ItemWithIncludeAndExclude,
             @"a",
@@ -1042,8 +1034,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 @"a",
             },
-            false
-            )]
+            false)]
         // exclude does not match include; file is next to project file; exclude points above the project file
         [InlineData(ItemWithIncludeAndExclude,
             "a",
@@ -1056,8 +1047,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 "a",
             },
-            true
-            )]
+            true)]
         // exclude does not match include; file is below the project file; exclude points next to the project file
         [InlineData(ItemWithIncludeAndExclude,
             "a",
@@ -1070,8 +1060,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 @"project\dir\a",
             },
-            true
-            )]
+            true)]
         // exclude does not match include; file is above the project file; exclude points next to the project file
         [InlineData(ItemWithIncludeAndExclude,
             "a",
@@ -1084,8 +1073,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 "a",
             },
-            true
-            )]
+            true)]
         public void IncludeAndExcludeWorkWithRelativeAndAbsolutePaths(
             string projectContents,
             string includeItem,
@@ -1133,26 +1121,24 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(
             "../a.cs;b.cs", // include string
             "**/*.cs", // exclude string
-            new[] {"a.cs", "ProjectDir/b.cs"}, // files to create relative to the test root dir
+            new[] { "a.cs", "ProjectDir/b.cs" }, // files to create relative to the test root dir
             "ProjectDir", // relative path from test root to project
-            new[] { "../a.cs" } // expected items
-            )]
+            new[] { "../a.cs" }) // expected items
+            ]
         // exclude globbing cone below project level;
         [InlineData(
             "a.cs;a/b.cs",
             "a/**/*.cs",
             new[] { "a.cs", "a/b.cs" },
             "",
-            new[] { "a.cs" }
-            )]
+            new[] { "a.cs" })]
         // exclude globbing above project level;
         [InlineData(
             "a.cs;../b.cs;../../c.cs",
             "../**/*.cs",
             new[] { "a/ProjectDir/a.cs", "a/b.cs", "c.cs" },
             "a/ProjectDir",
-            new[] { "../../c.cs" }
-            )]
+            new[] { "../../c.cs" })]
         public void ExcludeWithMissmatchingGlobCones(string includeString, string excludeString, string[] files, string relativePathFromRootToProject, string[] expectedInclude)
         {
             var projectContents = string.Format(ItemWithIncludeAndExclude, includeString, excludeString);
@@ -1171,8 +1157,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             "a.cs", // exclude string
             new[] { "ProjectDir/a.cs", "b.cs" }, // files to create relative to the test root dir
             "ProjectDir", // relative path from test root to project
-            new[] { "../b.cs" } // expected items
-            )]
+            new[] { "../b.cs" }) // expected items
+            ]
         public void ExcludingRelativeItemToCurrentDirectoryShouldWorkWithAboveTheConeIncludes(string includeString, string excludeString, string[] files, string relativePathFromRootToProject, string[] expectedInclude)
         {
             var projectContents = string.Format(ItemWithIncludeAndExclude, includeString, excludeString);
@@ -1642,8 +1628,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ";
 
                 GetOneItem(content);
-            }
-           );
+            });
         }
         /// <summary>
         /// Two items should each get their own values for built-in metadata
@@ -1924,8 +1909,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
 
                 item.RemoveMetadata("m"); // Should throw
-            }
-           );
+            });
         }
         /// <summary>
         /// Remove a nonexistent metadatum
@@ -1958,8 +1942,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 item.RemoveMetadata("FullPath");
-            }
-           );
+            });
         }
         /// <summary>
         /// Simple rename
@@ -2048,8 +2031,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.ReevaluateIfNecessary();
 
                 item.ItemType = "|";
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to rename imported item should fail
@@ -2080,8 +2062,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     File.Delete(file);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to set metadata on imported item should fail
@@ -2112,8 +2093,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     File.Delete(file);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to remove metadata on imported item should fail
@@ -2145,8 +2125,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     File.Delete(file);
                 }
-            }
-           );
+            });
         }
 
         [Fact]
@@ -2325,8 +2304,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 "<i Include='a;b' />" +
-                "<i Remove='b;c' />"
-                );
+                "<i Remove='b;c' />");
 
             Assert.Single(items);
             Assert.Equal("a", items[0].EvaluatedInclude);
@@ -2338,8 +2316,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 "<i Include='a;b' />" +
                 "<i Include='a;b' />" +
-                "<i Remove='b;c' />"
-                );
+                "<i Remove='b;c' />");
 
             Assert.Equal(2, items.Count);
             Assert.Equal(@"a;a", string.Join(";", items.Select(i => i.EvaluatedInclude)));
@@ -2350,8 +2327,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 @"<i Include='a.txt;b.cs;bin\foo.cs' />" +
-                @"<i Remove='bin\**' />"
-                );
+                @"<i Remove='bin\**' />");
 
             Assert.Equal(2, items.Count);
             Assert.Equal(@"a.txt;b.cs", string.Join(";", items.Select(i => i.EvaluatedInclude)));
@@ -2363,8 +2339,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 @"<i Include='a;b;c;d' />" +
                 @"<j Include='b;d' />" +
-                @"<i Remove='@(j)' />"
-                );
+                @"<i Remove='@(j)' />");
 
             Assert.Equal(2, items.Count);
             Assert.Equal(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude)));
@@ -2393,8 +2368,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var projectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
                 @"<i Include='a;b;c' />" +
                 @"<i Condition='0 == 1' Remove='b' />" +
-                @"<i Condition='1 == 1' Remove='c' />"
-                );
+                @"<i Condition='1 == 1' Remove='c' />");
 
             var project = ObjectModelHelpers.CreateInMemoryProject(projectContents);
 
@@ -2411,8 +2385,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"<i Include='a;b;c;d' />" +
                 @"<i Condition='0 == 1' Remove='b' />" +
                 @"<i Condition='1 == 1' Remove='c' />" +
-                @"<i Remove='d' />"
-                );
+                @"<i Remove='d' />");
 
             var project = ObjectModelHelpers.CreateInMemoryProject(projectContents);
 
@@ -2482,7 +2455,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
                 <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
                 <I1 Include='e1' M1='a/b/../c/./d' M2='1'/>
-                <I1 Include='f1' M1='{ Environment.CurrentDirectory }\b\c' M2='6'/>
+                <I1 Include='f1' M1='{Environment.CurrentDirectory}\b\c' M2='6'/>
 
                 <I2 Include='a2' M1='FOO.TXT' m2='c'/>
                 <I2 Include='b2' M1='foo/bar.txt' m2='x'/>
@@ -3683,8 +3656,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project,
                 inputFiles: Array.Empty<string>(),
                 expectedInclude: new[] { "1.cs", "2.js" },
-                expectedMetadataPerItem: null
-                );
+                expectedMetadataPerItem: null);
         }
 
         [Theory]

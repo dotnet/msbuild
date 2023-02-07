@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -60,9 +60,9 @@ namespace Microsoft.Build.BuildEngine
             nodeProviderToRegister.AssignNodeIdentifiers(nodeIds);
 
             // Go through all of the nodes as described by nodeDescriptions and add them to out list of nodes
-            for(int i=0; i < nodeDescriptions.Length;i++)
+            for (int i = 0; i < nodeDescriptions.Length; i++)
             {
-                ProvidersNodeInformation nodeToAddFromProvider = 
+                ProvidersNodeInformation nodeToAddFromProvider =
                     new ProvidersNodeInformation(i, nodeIds[i], nodeDescriptions[i], nodeProviderToRegister);
                 nodeList.Add(nodeToAddFromProvider);
             }
@@ -79,16 +79,16 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         internal INodeDescription[] GetNodeDescriptions()
         {
-          // The number of node descriptions is the number of nodes from all of the node providers, plus one for the default "0" node
-          INodeDescription[] nodeDescription = new INodeDescription[nodeList.Count+1];
-          nodeDescription[0] = null;
-          for (int nodeListIndex = 0; nodeListIndex < nodeList.Count; nodeListIndex++)
-          {
-              ProvidersNodeInformation nodeInfo = nodeList[nodeListIndex];
-              // +1 because the node description already has the 0 element set to null
-              nodeDescription[nodeListIndex + 1] = nodeInfo.Description;
-          }
-          return nodeDescription;
+            // The number of node descriptions is the number of nodes from all of the node providers, plus one for the default "0" node
+            INodeDescription[] nodeDescription = new INodeDescription[nodeList.Count + 1];
+            nodeDescription[0] = null;
+            for (int nodeListIndex = 0; nodeListIndex < nodeList.Count; nodeListIndex++)
+            {
+                ProvidersNodeInformation nodeInfo = nodeList[nodeListIndex];
+                // +1 because the node description already has the 0 element set to null
+                nodeDescription[nodeListIndex + 1] = nodeInfo.Description;
+            }
+            return nodeDescription;
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal void PostNodeStatus(int nodeId, NodeStatus nodeStatus)
         {
-            ErrorUtilities.VerifyThrow( nodeStatus.RequestId != NodeStatus.UnrequestedStatus,
+            ErrorUtilities.VerifyThrow(nodeStatus.RequestId != NodeStatus.UnrequestedStatus,
                                         "Node manager should not receive unrequested status");
 
             NodeStatus[] currentStatus = statusForNodes;
@@ -173,8 +173,8 @@ namespace Microsoft.Build.BuildEngine
 
         internal void PostCycleNotification
         (
-            int nodeId, 
-            TargetInProgessState child, 
+            int nodeId,
+            TargetInProgessState child,
             TargetInProgessState parent)
         {
             if (nodeId == 0)
@@ -232,7 +232,7 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrow(nodeIndex <= nodeList.Count, "Should not pass a node index higher then the number of nodes in nodeManager");
             if (nodeIndex != 0)
             {
-                nodeList[nodeIndex-1].NodeProvider.PostBuildResultToNode(nodeList[nodeIndex-1].NodeIndex, buildResult);
+                nodeList[nodeIndex - 1].NodeProvider.PostBuildResultToNode(nodeList[nodeIndex - 1].NodeIndex, buildResult);
             }
             else
             {
@@ -265,7 +265,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void UpdateSettings
         (
-            bool enableOutofProcLogging, 
+            bool enableOutofProcLogging,
             bool enableOnlyLogCriticalEvents,
             bool useBreadthFirstTraversal
         )
@@ -284,11 +284,11 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        
+
         /// <summary>
         /// Getter access to the local node
         /// </summary>
-        internal  TaskExecutionModule TaskExecutionModule
+        internal TaskExecutionModule TaskExecutionModule
         {
             get
             {
@@ -299,7 +299,7 @@ namespace Microsoft.Build.BuildEngine
                 taskExecutionModule = value;
             }
         }
-        
+
         /// <summary>
         /// Number of Nodes being managed by NodeManager
         /// </summary>
@@ -308,7 +308,7 @@ namespace Microsoft.Build.BuildEngine
             get
             {
                 // add 1 for the local node (taskExecutionModule)
-                return nodeList.Count+1;
+                return nodeList.Count + 1;
             }
         }
         #endregion
