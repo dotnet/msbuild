@@ -157,7 +157,7 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 
             AssemblyLoadBuildEventArgs buildArgs = new(_context, _initiator, assemblyName, assemblyPath, mvid, appDomainDescriptor)
             {
-                BuildEventContext = _loggingContext?.BuildEventContext
+                BuildEventContext = _loggingContext?.BuildEventContext ?? BuildEventContext.Invalid
             };
             _loggingContext?.LogBuildEvent(buildArgs);
             _loggingService?.LogBuildEvent(buildArgs);

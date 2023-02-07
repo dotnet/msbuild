@@ -1590,6 +1590,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">Any exception which is a ExceptionHandling.IsCriticalException will not be wrapped</exception>
         private void InitializeLogger(ILogger logger, IEventSource sourceForLogger)
         {
+            ILogger UnwrapLoggerType(ILogger log)
+            {
+                return (log is ProjectCollection.ReusableLogger reusableLogger)
+                    ? reusableLogger.OriginalLogger
+                    : log;
+            }
+
             IDisposable assemblyLoadTracker = null;
             try
             {
@@ -1598,7 +1605,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     logger.GetType().Assembly != Assembly.GetExecutingAssembly() &&
                     !(logger.GetType().FullName?.StartsWith("Microsoft.Build.Logging", StringComparison.OrdinalIgnoreCase) ?? false))
                 {
-                    assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, logger.GetType());
+                    assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, UnwrapLoggerType(logger).GetType());
                 }
 
                 INodeLogger nodeLogger = logger as INodeLogger;

@@ -3210,8 +3210,12 @@ namespace Microsoft.Build.CommandLine
                 originalVerbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
                 verbosity = originalVerbosity;
             }
+            var loggers = new List<ILogger>();
 
-            var loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity);
+            var outVerbosity = verbosity;
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
+
+            ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
 
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
@@ -3232,10 +3236,10 @@ namespace Microsoft.Build.CommandLine
 
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
-
             // TOOD: Review
             // ProcessLiveLogger(noConsoleLogger, loggers);
+
+            verbosity = outVerbosity;
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
 
@@ -3621,10 +3625,8 @@ namespace Microsoft.Build.CommandLine
         /// Figures out which additional loggers are going to listen to build events.
         /// </summary>
         /// <returns>List of loggers.</returns>
-        private static List<ILogger> ProcessLoggerSwitch(string[] parameters, LoggerVerbosity verbosity)
+        private static void ProcessLoggerSwitch(string[] parameters, List<ILogger> loggers, LoggerVerbosity verbosity)
         {
-            var loggers = new List<ILogger>();
-
             foreach (string parameter in parameters)
             {
                 string unquotedParameter = QuotingUtilities.Unquote(parameter);
@@ -3636,8 +3638,6 @@ namespace Microsoft.Build.CommandLine
                     loggers.Add(logger);
                 }
             }
-
-            return loggers;
         }
 
         /// <summary>
