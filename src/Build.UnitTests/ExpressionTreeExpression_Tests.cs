@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +27,7 @@ namespace Microsoft.Build.UnitTests
 
         private readonly Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
 
-        public static readonly IEnumerable<object[]> TrueTests = new []
+        public static readonly IEnumerable<object[]> TrueTests = new[]
         {
             "true or (SHOULDNOTEVALTHIS)", // short circuit
             "(true and false) or true",
@@ -160,9 +163,9 @@ namespace Microsoft.Build.UnitTests
             "'59264.59264' == '59264.59264'",
             "1" + new String('0', 500) + "==" + "1" + new String('0', 500), /* too big for double, eval as string */
             "'1" + new String('0', 500) + "'=='" + "1" + new String('0', 500) + "'" /* too big for double, eval as string */
-        }.Select(s => new[] {s});
+        }.Select(s => new[] { s });
 
-        public static readonly IEnumerable<object[]> FalseTests = new [] {
+        public static readonly IEnumerable<object[]> FalseTests = new[] {
             "false and SHOULDNOTEVALTHIS", // short circuit
             "$(a)!=no",
             "$(b)==1.1",
@@ -219,7 +222,7 @@ namespace Microsoft.Build.UnitTests
             "'1" + new String('0', 500) + "'=='01" + new String('0', 500) + "'" /* too big for double, eval as string */
         }.Select(s => new[] { s });
 
-        public static readonly IEnumerable<object[]> ErrorTests = new [] {
+        public static readonly IEnumerable<object[]> ErrorTests = new[] {
             "$",
             "$(",
             "$()",
@@ -413,7 +416,10 @@ namespace Microsoft.Build.UnitTests
         {
             foreach (string file in FilesWithExistenceChecks)
             {
-                if (File.Exists(file)) File.Delete(file);
+                if (File.Exists(file))
+                {
+                    File.Delete(file);
+                }
             }
         }
 
@@ -429,16 +435,14 @@ namespace Microsoft.Build.UnitTests
             Parser p = new Parser();
             GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
             ConditionEvaluator.IConditionEvaluationState state =
-                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                    (
+                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
                     _expander,
                     ExpanderOptions.ExpandAll,
                     null,
                     Directory.GetCurrentDirectory(),
                     ElementLocation.EmptyLocation,
-                    FileSystems.Default
-                    );
+                    FileSystems.Default);
 
             Assert.True(tree.Evaluate(state), "expected true from '" + expression + "'");
         }
@@ -455,16 +459,14 @@ namespace Microsoft.Build.UnitTests
             Parser p = new Parser();
             GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
             ConditionEvaluator.IConditionEvaluationState state =
-                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                    (
+                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
                     _expander,
                     ExpanderOptions.ExpandAll,
                     null,
                     Directory.GetCurrentDirectory(),
                     ElementLocation.EmptyLocation,
-                    FileSystems.Default
-                    );
+                    FileSystems.Default);
 
             Assert.False(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
         }
@@ -489,16 +491,14 @@ namespace Microsoft.Build.UnitTests
                 var tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
 
                 ConditionEvaluator.IConditionEvaluationState state =
-                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                        (
+                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                         expression,
                         _expander,
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
                         ElementLocation.EmptyLocation,
-                        FileSystems.Default
-                        );
+                        FileSystems.Default);
 
                 tree.Evaluate(state);
             }

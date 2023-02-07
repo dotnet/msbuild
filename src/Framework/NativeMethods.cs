@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework;
 
 internal static class NativeMethods
 {
-#region Constants
+    #region Constants
 
     internal const uint ERROR_INSUFFICIENT_BUFFER = 0x8007007A;
     internal const uint STARTUP_LOADER_SAFEMODE = 0x10;
@@ -72,9 +72,9 @@ internal static class NativeMethods
     internal const uint WAIT_OBJECT_0 = 0x00000000;
     internal const uint WAIT_TIMEOUT = 0x00000102;
 
-#endregion
+    #endregion
 
-#region Enums
+    #region Enums
 
     private enum PROCESSINFOCLASS : int
     {
@@ -194,6 +194,21 @@ internal static class NativeMethods
 
         // ARM64
         ARM64,
+
+        // WebAssembly
+        WASM,
+
+        // S390x
+        S390X,
+
+        // LongAarch64
+        LOONGARCH64,
+
+        // 32-bit ARMv6
+        ARMV6,
+
+        // PowerPC 64-bit (little-endian) 
+        PPC64LE,
 
         // Who knows
         Unknown
@@ -435,7 +450,8 @@ internal static class NativeMethods
             else
             {
                 ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
-#if !NET35
+
+#if NETCOREAPP || NETSTANDARD1_1_OR_GREATER
                 // Get the architecture from the runtime.
                 processorArchitecture = RuntimeInformation.OSArchitecture switch
                 {
@@ -443,64 +459,21 @@ internal static class NativeMethods
                     Architecture.Arm64 => ProcessorArchitectures.ARM64,
                     Architecture.X64 => ProcessorArchitectures.X64,
                     Architecture.X86 => ProcessorArchitectures.X86,
+#if NET5_0_OR_GREATER
+                    Architecture.Wasm => ProcessorArchitectures.WASM,
+#endif
+#if NET6_0_OR_GREATER
+                    Architecture.S390x => ProcessorArchitectures.S390X,
+#endif
+#if NET7_0_OR_GREATER
+                    Architecture.LoongArch64 => ProcessorArchitectures.LOONGARCH64,
+                    Architecture.Armv6 => ProcessorArchitectures.ARMV6,
+                    Architecture.Ppc64le => ProcessorArchitectures.PPC64LE,
+#endif
                     _ => ProcessorArchitectures.Unknown,
                 };
-#endif
-                // Fall back to 'uname -m' to get the architecture.
-                if (processorArchitecture == ProcessorArchitectures.Unknown)
-                {
-                    try
-                    {
-                        // On Unix run 'uname -m' to get the architecture. It's common for Linux and Mac
-                        using (
-                            var proc =
-                                Process.Start(
-                                    new ProcessStartInfo("uname")
-                                    {
-                                        Arguments = "-m",
-                                        UseShellExecute = false,
-                                        RedirectStandardOutput = true,
-                                        CreateNoWindow = true
-                                    }))
-                        {
-                            string arch = null;
-                            if (proc != null)
-                            {
-                                arch = proc.StandardOutput.ReadLine();
-                                proc.WaitForExit();
-                            }
 
-                            if (!string.IsNullOrEmpty(arch))
-                            {
-                                if (arch.StartsWith("x86_64", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.X64;
-                                }
-                                else if (arch.StartsWith("ia64", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.IA64;
-                                }
-                                else if (arch.StartsWith("arm", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.ARM;
-                                }
-                                else if (arch.StartsWith("aarch64", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.ARM64;
-                                }
-                                else if (arch.StartsWith("i", StringComparison.OrdinalIgnoreCase)
-                                        && arch.EndsWith("86", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.X86;
-                                }
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Best effort: fall back to Unknown
-                    }
-                }
+#endif
 
                 ProcessorArchitectureTypeNative = ProcessorArchitectureType = processorArchitecture;
             }
@@ -534,7 +507,7 @@ internal static class NativeMethods
     /// https://github.com/dotnet/runtime/blob/221ad5b728f93489655df290c1ea52956ad8f51c/src/libraries/System.Runtime.Extensions/src/System/Environment.Windows.cs#L171-L210
     /// </summary>
     [SupportedOSPlatform("windows")]
-    private unsafe static int GetLogicalCoreCountOnWindows()
+    private static unsafe int GetLogicalCoreCountOnWindows()
     {
         uint len = 0;
         const int ERROR_INSUFFICIENT_BUFFER = 122;
@@ -573,9 +546,9 @@ internal static class NativeMethods
         return -1;
     }
 
-#endregion
+    #endregion
 
-#region Member data
+    #region Member data
 
     internal static bool HasMaxPath => MaxPath == MAX_PATH;
 
@@ -658,7 +631,7 @@ internal static class NativeMethods
     internal static bool IsLinux
     {
 #if CLR2COMPATIBILITY
-            get { return false; }
+        get { return false; }
 #else
         get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); }
 #endif
@@ -670,7 +643,7 @@ internal static class NativeMethods
     internal static bool IsBSD
     {
 #if CLR2COMPATIBILITY
-            get { return false; }
+        get { return false; }
 #else
         get
         {
@@ -692,7 +665,10 @@ internal static class NativeMethods
     {
         get
         {
-            if (_isMono != null) return _isMono.Value;
+            if (_isMono != null)
+            {
+                return _isMono.Value;
+            }
 
             lock (IsMonoLock)
             {
@@ -719,7 +695,7 @@ internal static class NativeMethods
     internal static bool IsWindows
     {
 #if CLR2COMPATIBILITY
-            get { return true; }
+        get { return true; }
 #else
         get
         {
@@ -739,7 +715,7 @@ internal static class NativeMethods
     internal static bool IsOSX
     {
 #if CLR2COMPATIBILITY
-            get { return false; }
+        get { return false; }
 #else
         get
         {
@@ -882,9 +858,9 @@ internal static class NativeMethods
     /// </summary>
     internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
 
-#endregion
+    #endregion
 
-#region Wrapper methods
+    #region Wrapper methods
 
 
     [DllImport("kernel32.dll", SetLastError = true)]
@@ -1059,7 +1035,7 @@ internal static class NativeMethods
         else
         {
             symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
-            errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+            errorMessage = symbolicLinkCreated ? null : Marshal.GetLastWin32Error().ToString();
         }
 
         return symbolicLinkCreated;
@@ -1429,7 +1405,7 @@ internal static class NativeMethods
     /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
     /// </summary>
     /// <returns></returns>
-    internal unsafe static string GetCurrentDirectory()
+    internal static unsafe string GetCurrentDirectory()
     {
 #if FEATURE_LEGACY_GETCURRENTDIRECTORY
         if (IsWindows)
@@ -1444,7 +1420,7 @@ internal static class NativeMethods
     }
 
     [SupportedOSPlatform("windows")]
-    private unsafe static int GetCurrentDirectoryWin32(int nBufferLength, char* lpBuffer)
+    private static unsafe int GetCurrentDirectoryWin32(int nBufferLength, char* lpBuffer)
     {
         int pathLength = GetCurrentDirectory(nBufferLength, lpBuffer);
         VerifyThrowWin32Result(pathLength);
@@ -1452,7 +1428,7 @@ internal static class NativeMethods
     }
 
     [SupportedOSPlatform("windows")]
-    internal unsafe static string GetFullPath(string path)
+    internal static unsafe string GetFullPath(string path)
     {
         int bufferSize = GetFullPathWin32(path, 0, null, IntPtr.Zero);
         char* buffer = stackalloc char[bufferSize];
@@ -1462,7 +1438,7 @@ internal static class NativeMethods
     }
 
     [SupportedOSPlatform("windows")]
-    private unsafe static int GetFullPathWin32(string target, int bufferLength, char* buffer, IntPtr mustBeZero)
+    private static unsafe int GetFullPathWin32(string target, int bufferLength, char* buffer, IntPtr mustBeZero)
     {
         int pathLength = GetFullPathName(target, bufferLength, buffer, mustBeZero);
         VerifyThrowWin32Result(pathLength);
@@ -1476,7 +1452,7 @@ internal static class NativeMethods
     /// <param name="len">The length of the buffer.</param>
     /// <param name="s">The string.</param>
     /// <returns>True only if the contents of <paramref name="s"/> and the first <paramref name="len"/> characters in <paramref name="buffer"/> are identical.</returns>
-    private unsafe static bool AreStringsEqual(char* buffer, int len, string s)
+    private static unsafe bool AreStringsEqual(char* buffer, int len, string s)
     {
         if (len != s.Length)
         {
@@ -1560,7 +1536,7 @@ internal static class NativeMethods
     [DllImport("kernel32.dll")]
     [SupportedOSPlatform("windows")]
     internal static extern uint GetFileType(IntPtr hFile);
-    
+
     [DllImport("kernel32.dll")]
     internal static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
 
@@ -1570,7 +1546,7 @@ internal static class NativeMethods
     [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [SupportedOSPlatform("windows")]
-    internal unsafe static extern int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
+    internal static extern unsafe int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
 
     [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SetCurrentDirectory")]
@@ -1598,7 +1574,7 @@ internal static class NativeMethods
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [SupportedOSPlatform("windows")]
-    internal static unsafe extern int GetFullPathName(string target, int bufferLength, char* buffer, IntPtr mustBeZero);
+    internal static extern unsafe int GetFullPathName(string target, int bufferLength, char* buffer, IntPtr mustBeZero);
 
     [DllImport("KERNEL32.DLL")]
     [SupportedOSPlatform("windows")]
@@ -1654,8 +1630,7 @@ internal static class NativeMethods
         IntPtr lpSecurityAttributes,
         uint dwCreationDisposition,
         uint dwFlagsAndAttributes,
-        IntPtr hTemplateFile
-        );
+        IntPtr hTemplateFile);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [SupportedOSPlatform("windows")]
@@ -1663,8 +1638,7 @@ internal static class NativeMethods
         SafeFileHandle hFile,
         out FILETIME lpCreationTime,
         out FILETIME lpLastAccessTime,
-        out FILETIME lpLastWriteTime
-        );
+        out FILETIME lpLastWriteTime);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -1731,6 +1705,6 @@ internal static class NativeMethods
         return GetFileAttributesEx(path, 0, ref data);
     }
 
-#endregion
+    #endregion
 
 }

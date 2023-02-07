@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -244,8 +244,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 ProjectRootElement.Create(reader);
-            }
-           );
+            });
         }
         /// <summary>
         /// Reading from an XMLReader that has no content should throw the correct
@@ -258,8 +257,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 Project project = new Project(reader);
-            }
-           );
+            });
         }
         /// <summary>
         /// Reading from an XMLReader that has no content should throw the correct
@@ -278,8 +276,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 }
 
                 Project project = (new ProjectCollection()).LoadProject(reader);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -294,8 +291,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 reader.Dispose();
                 Project project = new Project(reader);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -328,8 +324,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 xml.AddImport("__nonexistent__");
 
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// Import gives invalid uri exception
@@ -343,8 +338,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 xml.AddImport(@"//MSBuildExtensionsPath32)\4.0\Microsoft.VisualStudioVersion.v11.Common.props");
 
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// Necessary but not sufficient for MSBuild evaluation to be thread safe.
@@ -393,8 +387,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(xml, null, null, new ProjectCollection(), ProjectLoadSettings.IgnoreMissingImports);
                 IList<ResolvedImport> imports = project.ImportsIncludingDuplicates;
                 imports.ShouldBeEmpty();
-            }
-           );
+            });
         }
         /// <summary>
         /// Import self ignored
@@ -919,8 +912,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.SetGlobalProperty("p", "v1");
                 project.ReevaluateIfNecessary();
                 project.SetProperty("p", "v2");
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting environment property should create a real property
@@ -949,8 +941,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 Project project = new Project();
                 project.SetProperty("msbuildprojectdirectory", "v1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Changing global properties with some preexisting.
@@ -984,7 +975,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #else
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
 #endif
-        [Trait("Category", "mono-osx-failing")]
         public void ChangeGlobalPropertiesInitiallyFromProjectCollection()
         {
             Dictionary<string, string> initial = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1252,7 +1242,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// environment
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -2131,8 +2120,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("x", "@(x->'%(x)')", null);
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// UsingTask expansion should throw InvalidProjectFileException
@@ -2146,8 +2134,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("@(x->'%(x)')", "y", null);
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// UsingTask expansion should throw InvalidProjectFileException
@@ -2161,8 +2148,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("x", null, "@(x->'%(x)')");
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// Saving project should make it "clean" for saving
@@ -2348,8 +2334,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 Project project = new Project();
                 project.RemoveItems(new List<ProjectItem>() { null });
-            }
-           );
+            });
         }
         /// <summary>
         /// Remove several items where removing the first one
@@ -2368,8 +2353,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project2 = new Project(root2);
 
                 project1.RemoveItems(project2.Items);
-            }
-           );
+            });
         }
         /// <summary>
         /// Remove an item that is no longer attached. For convenience,
@@ -2406,8 +2390,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 globalProperties.Add("msbuildprojectdirectory", "x");
 
                 Project project = new Project(globalProperties, null, new ProjectCollection());
-            }
-           );
+            });
         }
         /// <summary>
         /// Reserved property in project collection global properties should log an error then rethrow
@@ -2431,8 +2414,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     logger.AssertLogContains("MSB4177");
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Invalid property (reserved name) in project collection global properties should log an error then rethrow
@@ -2456,8 +2438,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     logger.AssertLogContains("MSB4177");
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Create tree like this
@@ -2527,8 +2508,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     logger.AssertLogContains("MSB4177");
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Create a structure of various imports and verify that project.GetLogicalProject()
@@ -2642,8 +2622,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ");
                 Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -2691,8 +2670,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ");
                 Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -3677,28 +3655,28 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-// [InlineData(
-//            @"
-// <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-// <A Remove=`e*;f*`/>
-// ",
-//        new[] {"ba"},
-//        new[] {"a", "ca", "da", "ea", "fa"}
-//        )]
-//        [InlineData(
-//            @"
-// <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-// ",
-//        new[] {"ba", "ea", "fa"},
-//        new[] {"a", "ca", "da"}
-//        )]
-//        [InlineData(
-//            @"
-// <A Include=`a;b*;c*;d*;e*;f*`/>
-// ",
-//        new[] {"ba", "ca", "da", "ea", "fa"},
-//        new[] {"a"}
-//        )]
+        // [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+        // <A Remove=`e*;f*`/>
+        // ",
+        //        new[] {"ba"},
+        //        new[] {"a", "ca", "da", "ea", "fa"}
+        //        )]
+        //        [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+        // ",
+        //        new[] {"ba", "ea", "fa"},
+        //        new[] {"a", "ca", "da"}
+        //        )]
+        //        [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*`/>
+        // ",
+        //        new[] {"ba", "ca", "da", "ea", "fa"},
+        //        new[] {"a"}
+        //        )]
         [InlineData(
             @"
 <E Include=`b`/>
@@ -3708,13 +3686,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 <A Remove=`@(R)`/>
 ",
         new[] { "aa", "bb", "cc" },
-        new[] { "b", "c" }
-        )]
+        new[] { "b", "c" })]
         [InlineData(
             @"<A Include=`ab*;b|c*;de*`/>",
             new[] { "ab", "de" },
-            new[] { "bc", "b|c", "b", "c" }
-            )]
+            new[] { "bc", "b|c", "b", "c" })]
         public void GetAllGlobsShouldProduceGlobThatMatches(string itemContents, string[] stringsThatShouldMatch, string[] stringsThatShouldNotMatch)
         {
             var projectTemplate =
@@ -3877,8 +3853,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportedEventFalseCondition()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -3922,8 +3896,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportedEventNoMatchingFiles()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -4183,8 +4155,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportEvent()
         {
             using (var env = TestEnvironment.Create(_output))

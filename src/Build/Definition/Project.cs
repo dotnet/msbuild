@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -2660,9 +2660,9 @@ namespace Microsoft.Build.Evaluation
             {
                 return (excludeGlob, removeGlob) switch
                 {
-                    (null,     null)     => includeGlob,
-                    (not null, null)     => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
-                    (null,     not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
+                    (null, null) => includeGlob,
+                    (not null, null) => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
+                    (null, not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
                     (not null, not null) => new MSBuildGlobWithGaps(includeGlob, new CompositeGlob(excludeGlob, removeGlob))
                 };
             }
@@ -4296,14 +4296,12 @@ namespace Microsoft.Build.Evaluation
                     toolsVersionLocation = Project.Xml.ToolsVersionLocation;
                 }
 
-                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-                (
+                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                     ExplicitToolsVersion,
                     Project.Xml.ToolsVersion,
                     Project.ProjectCollection.GetToolset,
                     Project.ProjectCollection.DefaultToolsVersion,
-                    out var usingDifferentToolsVersionFromProjectFile
-                );
+                    out var usingDifferentToolsVersionFromProjectFile);
 
                 UsingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 

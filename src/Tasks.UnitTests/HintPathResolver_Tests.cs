@@ -1,10 +1,14 @@
-﻿using Microsoft.Build.Shared;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using System;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -33,8 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             result.ShouldBe(true);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void CanResolveLongNonNormalizedHintPath()
         {
             var tempfolder = _env.DefaultTestDirectory.CreateDirectory("tempfolder_for_CanResolveLongHintPath");

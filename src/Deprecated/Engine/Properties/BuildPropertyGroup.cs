@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Xml;
@@ -251,7 +251,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // Handle XML comments under the <PropertyGroup> node (just ignore them).
                     case XmlNodeType.Comment:
-                        // fall through
+                    // fall through
                     case XmlNodeType.Whitespace:
                         // ignore whitespace
                         break;
@@ -443,7 +443,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     if (this.propertyGroupElement.ParentNode is XmlElement)
                     {
-                        return (XmlElement) this.propertyGroupElement.ParentNode;
+                        return (XmlElement)this.propertyGroupElement.ParentNode;
                     }
                 }
 
@@ -491,11 +491,20 @@ namespace Microsoft.Build.BuildEngine
             get
             {
                 if (!this.importedFromAnotherProject)
+                {
                     return string.Empty;
+                }
+
                 if (this.importedFromFilename != null)
+                {
                     return this.importedFromFilename;
+                }
+
                 if (this.PropertyGroupElement != null)
+                {
                     return XmlUtilities.GetXmlNodeFile(this.PropertyGroupElement, string.Empty);
+                }
+
                 ErrorUtilities.VerifyThrow(false, "BuildPropertyGroup is imported, doesn't have an ownerDocument, and importedFilename is null.");
                 return string.Empty;
             }
