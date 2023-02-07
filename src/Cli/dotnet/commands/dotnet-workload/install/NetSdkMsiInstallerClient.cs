@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                         }
                     }
-                    else if (cleanAllPacks)
+                    else if (cleanAllPacks && dependentFeatureBand.CompareTo(_sdkFeatureBand) < 1)
                     {
                         Log?.LogMessage($"Removing dependent '{dependent}' as part of the dotnet clean --all operation.");
                         UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);

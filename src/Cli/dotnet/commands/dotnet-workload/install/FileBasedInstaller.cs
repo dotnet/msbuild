@@ -317,7 +317,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     if (
                         (bandRecordPaths.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
                         ||
-                        cleanAllPacks
+                        (cleanAllPacks && _sdkFeatureBand.CompareTo(new SdkFeatureBand(Path.GetFileName(currentBandRecordPath))) < 1)
                        )
                     {
                         unneededBandRecordPaths = unneededBandRecordPaths.Append(currentBandRecordPath);

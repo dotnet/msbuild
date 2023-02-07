@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CleanAllOptionDescription">
-        <source>Run clean on all feature bands / versions of the SDK, as opposed to only the current running SDK.</source>
-        <target state="new">Run clean on all feature bands / versions of the SDK, as opposed to only the current running SDK.</target>
+        <source>Run clean on all feature bands / versions of the SDK that are equal to or lower than the current running SDK, as opposed to only the current one.</source>
+        <target state="new">Run clean on all feature bands / versions of the SDK that are equal to or lower than the current running SDK, as opposed to only the current one.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">

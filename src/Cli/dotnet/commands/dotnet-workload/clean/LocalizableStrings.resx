@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CleanAllOptionDescription" xml:space="preserve">
-    <value>Run clean on all feature bands / versions of the SDK, as opposed to only the current running SDK.</value>
+    <value>Run clean on all feature bands / versions of the SDK that are equal to or lower than the current running SDK, as opposed to only the current one.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
     <value>Attempt to remove orphaned workload components and clean workload manifest files.</value>
