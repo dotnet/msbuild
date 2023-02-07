@@ -2579,7 +2579,7 @@ namespace Microsoft.Build.Evaluation
                                     yield return new Pair<string, S>(metadataValue, item.Value);
                                 }
                             }
-                            else if (metadataValue != String.Empty && includeNullEntries)
+                            else if (metadataValue != null && includeNullEntries)
                             {
                                 yield return new Pair<string, S>(metadataValue, item.Value);
                             }
@@ -2764,9 +2764,8 @@ namespace Microsoft.Build.Evaluation
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
-                        // GetMetadataValueEscaped returns empty string for missing metadata,
-                        // but IItem specifies it should return null
-                        if (metadataValue!=null)
+                        // GetMetadataValueEscaped returns null for missing metadata
+                        if (metadataValue != null)
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -2811,7 +2810,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only those items don't have the given metadata value
+                /// Intrinsic function that returns those items don't have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
                 /// 

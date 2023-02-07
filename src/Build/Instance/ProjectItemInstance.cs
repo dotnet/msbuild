@@ -1258,7 +1258,8 @@ namespace Microsoft.Build.Execution
 
             /// <summary>
             /// Returns the specified metadata value, escaped.
-            /// If metadata is not defined, returns empty string.
+            /// If metadata is not defined, returns null.
+            /// If metadata is defined and value is empty, returns empty.
             /// </summary>
             public string GetMetadataEscaped(string metadataName)
             {
@@ -1810,7 +1811,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Helper to get the value of a built-in metadatum with
             /// the specified name, if any.
-            /// If value is not available, returns empty string.
+            /// If value is not available, returns null.
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
             {

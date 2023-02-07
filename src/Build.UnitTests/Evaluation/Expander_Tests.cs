@@ -1109,7 +1109,77 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
 </Project>");
 
-            logger.AssertLogContains("[One|Three|Four]");
+            logger.AssertLogContains("[One|Three|Four|Five]");
+        }
+
+        /// <summary>
+        /// Test metadata item functions with empty string metadata and not present metadata
+        /// </summary>
+        [Fact]
+        public void MetadataFuntionTestingWithEmtpyString()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess("""
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+   <ItemGroup>
+    <_Item Include="One">
+      <A>true</A>
+    </_Item>
+    <_Item Include="Two">
+      <A>false</A>
+    </_Item>
+    <_Item Include="Three">
+      <A></A>
+    </_Item>
+    <_Item Include="Four">
+      <B></B>
+    </_Item>
+  </ItemGroup>
+
+  <Target Name="Tests" DependsOnTargets="WithMetadataValueAFalse;WithMetadataValueAEmpty;WithOutMetadataValueAEmtpy;HasMetadataA;WithMetadataValueCEmpty;HasMetadataC;AnyHaveMetadataValueCEmpty;WithOutMetadataValueCEmpty" />
+
+  <Target Name="WithMetadataValueAFalse">
+    <Message Text="WithMetadataValueAFalse: [@(_Item->WithMetadataValue('A', 'false'), '|')]"/>
+  </Target>
+
+  <Target Name="WithMetadataValueAEmpty">
+    <Message Text="WithMetadataValueAEmpty: [@(_Item->WithMetadataValue('A', ''), '|')]"/>
+  </Target>
+
+  <Target Name="WithOutMetadataValueAEmtpy">
+    <Message Text="WithOutMetadataValueAEmpty: [@(_Item->WithOutMetadataValue('A', ''), '|')]"/>
+  </Target>
+
+  <Target Name="HasMetadataA">
+    <Message Text="HasMetadataA: [@(_Item->HasMetadata('A'), '|')]"/>
+  </Target>
+
+  <Target Name="WithMetadataValueCEmpty">
+    <Message Text="WithMetadataValueCEmpty: [@(_Item->WithMetadataValue('C', ''), '|')]"/>
+  </Target>
+
+  <Target Name="HasMetadataC">
+    <Message Text="HasMetadataC: [@(_Item->HasMetadata('C'), '|')]"/>
+  </Target>
+
+  <Target Name="AnyHaveMetadataValueCEmpty">
+    <Message Text="AnyHaveMetadataValueCEmpty: [@(_Item->AnyHaveMetadataValue('C', ''), '|')]"/>
+  </Target>
+
+  <Target Name="WithOutMetadataValueCEmpty">
+    <Message Text="WithOutMetadataValueCEmpty: [@(_Item->WithOutMetadataValue('C', ''), '|')]"/>
+  </Target>
+
+</Project>
+""");
+            logger.AssertLogContains("WithMetadataValueAFalse: [Two]");
+            logger.AssertLogContains("WithMetadataValueAEmpty: [Three]");
+            logger.AssertLogContains("WithOutMetadataValueAEmpty: [One|Two|Four]");
+            logger.AssertLogContains("HasMetadataA: [One|Two|Three]");
+            logger.AssertLogContains("WithMetadataValueCEmpty: []");
+            logger.AssertLogContains("HasMetadataC: []");
+            logger.AssertLogContains("AnyHaveMetadataValueCEmpty: [false]");
+            logger.AssertLogContains("WithOutMetadataValueCEmpty: [One|Two|Three|Four]");
         }
 
         [Fact]
