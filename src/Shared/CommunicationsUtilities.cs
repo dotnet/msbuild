@@ -672,7 +672,7 @@ namespace Microsoft.Build.Internal
         {
             if (s_trace)
             {
-                TraceCore(nodeId: -1, string.Format(format, arg0.ToString()));
+                TraceCore(nodeId: -1, string.Format(format, arg0));
             }
         }
 
