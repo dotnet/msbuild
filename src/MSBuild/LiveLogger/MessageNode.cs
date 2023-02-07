@@ -37,18 +37,19 @@ namespace Microsoft.Build.Logging.LiveLogger
             // Get type
             switch (args)
             {
-                case BuildMessageEventArgs:
+                case BuildMessageEventArgs message:
                     // Detect output messages
                     var finalOutputMarker = " -> ";
-                    int i = args.Message!.IndexOf(finalOutputMarker, StringComparison.Ordinal);
+                    int i = message.Message!.IndexOf(finalOutputMarker, StringComparison.Ordinal);
                     if (i > 0)
                     {
                         Type = MessageType.ProjectOutputMessage;
-                        ProjectOutputExecutablePath = args.Message!.Substring(i + finalOutputMarker.Length);
+                        ProjectOutputExecutablePath = message.Message!.Substring(i + finalOutputMarker.Length);
                     }
                     else
                     {
                         Type = MessageType.HighPriorityMessage;
+                        Code = message.Subcategory;
                     }
                     break;
                 case BuildWarningEventArgs warning:
@@ -84,7 +85,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                     return $"⚙️ {ANSIBuilder.Formatting.Hyperlink(ProjectOutputExecutablePath!, Path.GetDirectoryName(ProjectOutputExecutablePath)!)}";
                 case MessageType.HighPriorityMessage:
                 default:
-                    return $"ℹ️ {ANSIBuilder.Formatting.Italic(Message)}";
+                    return $"ℹ️ {Code}{(Code is not null ? ": " : string.Empty)} {ANSIBuilder.Formatting.Italic(Message)}";
             }
         }
 
