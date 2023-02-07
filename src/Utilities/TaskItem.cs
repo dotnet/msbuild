@@ -280,7 +280,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The metadata value.</returns>
         public string GetMetadata(string metadataName)
         {
-            string metadataValue = (this as ITaskItem2).GetMetadataValueEscaped(metadataName);
+            string metadataValue = (this as ITaskItem2).GetMetadataValueEscaped(metadataName) ?? string.Empty;
             return EscapingUtilities.UnescapeAll(metadataValue);
         }
 

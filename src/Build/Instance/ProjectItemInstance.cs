@@ -555,7 +555,7 @@ namespace Microsoft.Build.Execution
         {
             if (itemType == null || String.Equals(itemType, _itemType, StringComparison.OrdinalIgnoreCase))
             {
-                string value = _taskItem.GetMetadataEscaped(name);
+                string value = _taskItem.GetMetadataEscaped(name) ?? string.Empty;
 
                 if (value.Length > 0 || HasMetadata(name))
                 {
@@ -1253,7 +1253,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadata(string metadataName)
             {
-                return EscapingUtilities.UnescapeAll(GetMetadataEscaped(metadataName));
+                return EscapingUtilities.UnescapeAll(GetMetadataEscaped(metadataName) ?? string.Empty);
             }
 
             /// <summary>

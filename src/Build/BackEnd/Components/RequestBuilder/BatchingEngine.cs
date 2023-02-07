@@ -396,7 +396,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         // This returns String.Empty for both metadata that is undefined and metadata that has 
                         // an empty value; they are treated the same.
-                        itemMetadataValues[metadataQualifiedName] = ((IItem)item).GetMetadataValueEscaped(metadataName);
+                        itemMetadataValues[metadataQualifiedName] = ((IItem)item).GetMetadataValueEscaped(metadataName) ?? string.Empty;
                     }
                     catch (InvalidOperationException e)
                     {
