@@ -258,6 +258,33 @@ namespace Microsoft.Build.Utilities
                 || buildEngine10.EngineServices.LogsMessagesOfImportance(importance);
         }
 
+#if NET6_0_OR_GREATER
+
+        /// <summary>
+        /// Logs a message using the specified interpolated string.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="stringHandler">The message interpolated string.</param>
+        public void LogMessage(LogInterpolatedStringHandler stringHandler)
+        {
+            LogMessage(MessageImportance.Normal, stringHandler);
+        }
+
+        /// <summary>
+        /// Logs a message using the specified interpolated string.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="importance">The importance level of the message.</param>
+        /// <param name="stringHandler">The message interpolated string.</param>
+        public void LogMessage(MessageImportance importance, LogInterpolatedStringHandler stringHandler)
+        {
+            if (LogsMessagesOfImportance(importance))
+            {
+                LogMessage(importance, stringHandler.GetFormat(), stringHandler.Arguments);
+            }
+        }
+#endif
+
         /// <summary>
         /// Logs a message using the specified string.
         /// Thread safe.
@@ -592,6 +619,19 @@ namespace Microsoft.Build.Utilities
         #endregion
 
         #region Error logging methods
+
+#if NET6_0_OR_GREATER
+
+        /// <summary>
+        /// Logs an error message using the specified interpolated string.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="stringHandler">The message interpolated string.</param>
+        public void LogError(LogInterpolatedStringHandler stringHandler)
+        {
+            LogError(stringHandler.GetFormat(), stringHandler.Arguments);
+        }
+#endif
 
         /// <summary>
         /// Logs an error using the specified string.
@@ -943,6 +983,19 @@ namespace Microsoft.Build.Utilities
         #endregion
 
         #region Warning logging methods
+
+#if NET6_0_OR_GREATER
+
+        /// <summary>
+        /// Logs a warning message using the specified interpolated string.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="stringHandler">The message interpolated string.</param>
+        public void LogWarning(LogInterpolatedStringHandler stringHandler)
+        {
+            LogWarning(stringHandler.GetFormat(), stringHandler.Arguments);
+        }
+#endif
 
         /// <summary>
         /// Logs a warning using the specified string.
