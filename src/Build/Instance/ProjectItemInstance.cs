@@ -1295,7 +1295,7 @@ namespace Microsoft.Build.Execution
 
                 string value = GetBuiltInMetadataEscaped(metadataName);
 
-                return value ?? String.Empty;
+                return value;
             }
 
             /// <summary>
@@ -1819,7 +1819,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
             {
-                string value = String.Empty;
+                string value = null;
 
                 if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name))
                 {
