@@ -208,7 +208,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             if (e.TaskName.Equals("MSBuild"))
             {
-                TerminalBufferLine? line = TerminalBuffer.WriteNewLineAfterMidpoint($"{e.ProjectFile} is blocked by the MSBuild task.");
+                TerminalBufferLine? line = null; // TerminalBuffer.WriteNewLineAfterMidpoint($"{e.ProjectFile} is blocked by the MSBuild task.");
                 if (line is not null)
                 {
                     blockedProjects[e.ProjectFile] = line.Id;

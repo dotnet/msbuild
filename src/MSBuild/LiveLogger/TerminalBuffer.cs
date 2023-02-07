@@ -80,9 +80,10 @@ namespace Microsoft.Build.Logging.LiveLogger
             Console.OutputEncoding = Encoding.UTF8;
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
             Console.Write(ANSIBuilder.Cursor.Invisible());
-            TerminalBufferLine midLine = new(new string('-', Console.BufferWidth), true);
-            WriteNewLine(midLine);
-            midLineId = midLine.Id;
+            // TerminalBufferLine midLine = new(new string('-', Console.BufferWidth), true);
+            // WriteNewLine(midLine);
+            // midLineId = midLine.Id;
+            midLineId = -1;
         }
 
         public static void Terminate()
@@ -222,6 +223,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             int lineIndex = GetLineIndexById(midLineId);
             if (lineIndex == -1)
             {
+                WriteNewLine(line);
                 return null;
             }
 
