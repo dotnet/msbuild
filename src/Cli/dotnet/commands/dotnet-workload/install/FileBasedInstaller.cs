@@ -18,6 +18,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyModel;
 
 
 namespace Microsoft.DotNet.Workloads.Workload.Install

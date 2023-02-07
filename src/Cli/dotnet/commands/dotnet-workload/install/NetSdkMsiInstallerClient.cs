@@ -230,11 +230,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             Log?.LogMessage($"Removing dependent '{dependent}' because the pack record(s) do not match any expected packs.");
                             UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                         }
-                        else if (cleanAllPacks)
-                        {
-                            Log?.LogMessage($"Removing dependent '{dependent}' as part of the dotnet clean --all operation.");
-                            UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
-                        }
+                    }
+                    else if (cleanAllPacks)
+                    {
+                        Log?.LogMessage($"Removing dependent '{dependent}' as part of the dotnet clean --all operation.");
+                        UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                     }
                 }
                 catch (Exception e)
