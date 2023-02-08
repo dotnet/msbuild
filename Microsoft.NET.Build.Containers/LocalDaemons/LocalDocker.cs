@@ -111,9 +111,9 @@ public class LocalDocker : ILocalDaemon
         }
 
         // add config
-        string configTarballPath = $"{Image.GetSha(image.config)}.json";
+        string configTarballPath = $"{Image.GetSha(image.Config)}.json";
 
-        using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(image.config.ToJsonString())))
+        using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(image.Config.ToJsonString())))
         {
             PaxTarEntry configEntry = new(TarEntryType.RegularFile, configTarballPath)
             {

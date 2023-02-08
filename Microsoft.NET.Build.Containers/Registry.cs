@@ -28,7 +28,7 @@ public record struct Registry
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
-    public readonly Uri BaseUri;
+
     private readonly string RegistryName => BaseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
 
     public Registry(Uri baseUri)
@@ -36,6 +36,8 @@ public record struct Registry
         BaseUri = baseUri;
         _client = CreateClient();
     }
+
+    public readonly Uri BaseUri { get; }
 
     /// <summary>
     /// The max chunk size for patch blob uploads.
@@ -464,17 +466,17 @@ public record struct Registry
             }
         }
 
-        using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(x.config.ToJsonString())))
+        using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(x.Config.ToJsonString())))
         {
-            var configDigest = Image.GetDigest(x.config);
+            var configDigest = Image.GetDigest(x.Config);
             logProgressMessage($"Uploading config to registry at blob {configDigest}");
             await UploadBlob(destination.Repository, configDigest, stringStream).ConfigureAwait(false);
             logProgressMessage($"Uploaded config to registry");
         }
 
-        var manifestDigest = Image.GetDigest(x.manifest);
+        var manifestDigest = Image.GetDigest(x.Manifest);
         logProgressMessage($"Uploading manifest to registry {RegistryName} as blob {manifestDigest}");
-        string jsonString = JsonSerializer.SerializeToNode(x.manifest)?.ToJsonString() ?? "";
+        string jsonString = JsonSerializer.SerializeToNode(x.Manifest)?.ToJsonString() ?? "";
         HttpContent manifestUploadContent = new StringContent(jsonString);
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
         var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{destination.Repository}/manifests/{manifestDigest}"), manifestUploadContent).ConfigureAwait(false);

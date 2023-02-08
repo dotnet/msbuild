@@ -3,7 +3,6 @@
 
 using System.Text.Json;
 using Microsoft.Build.Framework;
-using System.Linq;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
@@ -158,8 +157,8 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
 
         // at this point we're done with modifications and are just pushing the data other places
-        GeneratedContainerManifest =  JsonSerializer.Serialize(image.manifest);
-        GeneratedContainerConfiguration = image.config.ToJsonString();
+        GeneratedContainerManifest =  JsonSerializer.Serialize(image.Manifest);
+        GeneratedContainerConfiguration = image.Config.ToJsonString();
 
         foreach (var destinationImageReference in destinationImageReferences)
         {
