@@ -672,7 +672,7 @@ namespace Microsoft.Build.Internal
         {
             if (s_trace)
             {
-                TraceCore(nodeId: -1, string.Format(format, arg0.ToString()));
+                TraceCore(nodeId: -1, string.Format(format, arg0));
             }
         }
 
@@ -683,7 +683,7 @@ namespace Microsoft.Build.Internal
         {
             if (s_trace)
             {
-                TraceCore(nodeId, string.Format(format, arg0.ToString()));
+                TraceCore(nodeId, string.Format(format, arg0));
             }
         }
 
@@ -694,7 +694,7 @@ namespace Microsoft.Build.Internal
         {
             if (s_trace)
             {
-                TraceCore(nodeId: -1, string.Format(format, arg0.ToString(), arg1.ToString()));
+                TraceCore(nodeId: -1, string.Format(format, arg0, arg1));
             }
         }
 
@@ -705,7 +705,7 @@ namespace Microsoft.Build.Internal
         {
             if (s_trace)
             {
-                TraceCore(nodeId, string.Format(format, arg0.ToString(), arg1.ToString()));
+                TraceCore(nodeId, string.Format(format, arg0, arg1));
             }
         }
 
@@ -716,7 +716,7 @@ namespace Microsoft.Build.Internal
         {
             if (s_trace)
             {
-                TraceCore(nodeId: -1, string.Format(format, arg0.ToString(), arg1.ToString(), arg2.ToString()));
+                TraceCore(nodeId: -1, string.Format(format, arg0, arg1, arg2));
             }
         }
 
@@ -727,7 +727,7 @@ namespace Microsoft.Build.Internal
         {
             if (s_trace)
             {
-                TraceCore(nodeId, string.Format(format, arg0.ToString(), arg1.ToString(), arg2.ToString()));
+                TraceCore(nodeId, string.Format(format, arg0, arg1, arg2));
             }
         }
 
