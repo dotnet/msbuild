@@ -310,5 +310,63 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("The operation was invalid");
             engine.AssertLogContains("An I/O error occurred");
         }
+
+#if NET6_0_OR_GREATER
+        [Fact]
+        public void LogMessageWithInterpolatedString()
+        {
+            MockEngine mockEngine = new MockEngine();
+            Task t = new MockTask();
+            t.BuildEngine = mockEngine;
+
+            t.Log.LogMessage($"echo {0} and {"1"}");
+
+            mockEngine.BuildEventArgs.Count.ShouldBe(1);
+            mockEngine.BuildEventArgs[0].ShouldBeOfType<BuildMessageEventArgs>();
+            mockEngine.BuildEventArgs[0].Message.ShouldBe("echo 0 and 1");
+        }
+
+        [Fact]
+        public void LogMessageWithInterpolatedString_RespectsImportanceLevel()
+        {
+            MockEngine mockEngine = new MockEngine();
+            Task t = new MockTask();
+            t.BuildEngine = mockEngine;
+
+            mockEngine.MinimumMessageImportance = MessageImportance.High;
+            t.Log.LogMessage(MessageImportance.Low, $"echo {0} and {"1"}");
+
+            mockEngine.BuildEventArgs.Count.ShouldBe(0);
+        }
+
+        [Fact]
+        public void LogWarningWithInterpolatedString()
+        {
+            MockEngine mockEngine = new MockEngine();
+            Task t = new MockTask();
+            t.BuildEngine = mockEngine;
+
+            t.Log.LogWarning($"echo {0} and {"1"}");
+
+            mockEngine.BuildEventArgs.Count.ShouldBe(1);
+            mockEngine.BuildEventArgs[0].ShouldBeOfType<BuildWarningEventArgs>();
+            mockEngine.BuildEventArgs[0].Message.ShouldBe("echo 0 and 1");
+        }
+
+        [Fact]
+        public void LogErrorWithInterpolatedString()
+        {
+            MockEngine mockEngine = new MockEngine();
+            Task t = new MockTask();
+            t.BuildEngine = mockEngine;
+
+            t.Log.LogError($"echo {0} and {"1"}");
+
+            mockEngine.BuildEventArgs.Count.ShouldBe(1);
+            mockEngine.BuildEventArgs[0].ShouldBeOfType<BuildErrorEventArgs>();
+            mockEngine.BuildEventArgs[0].Message.ShouldBe("echo 0 and 1");
+        }
+#endif
+
     }
 }
