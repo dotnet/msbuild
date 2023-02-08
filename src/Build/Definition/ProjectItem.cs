@@ -473,39 +473,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-
-            string value = null;
-
-            if (_directMetadata != null)
-            {
-                ProjectMetadata metadatum = _directMetadata[name];
-                if (metadatum != null)
-                {
-                    value = metadatum.EvaluatedValueEscaped;
-                }
-            }
-
-            if (value == null)
-            {
-                value = GetBuiltInMetadataEscaped(name);
-            }
-
-            if (value == null)
-            {
-                ProjectMetadata metadatum = GetItemDefinitionMetadata(name);
-
-                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
-                {
-                    Expander<ProjectProperty, ProjectItem> expander = new Expander<ProjectProperty, ProjectItem>(null, null, new BuiltInMetadataTable(this), FileSystems.Default);
-
-                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, metadatum.Location);
-                }
-                else if (metadatum != null)
-                {
-                    return metadatum.EvaluatedValueEscaped;
-                }
-            }
+            TryGetMetadataValueEscaped(name, out string value);
 
             return value ?? String.Empty;
         }
@@ -895,7 +863,49 @@ namespace Microsoft.Build.Evaluation
             return metadataFromDefinition;
         }
 
-        public bool TryGetMetadataValueEscaped(string name, out string value) => throw new NotImplementedException();
+        /// <summary>
+        /// Get the metadata value with the specified key. 
+        /// Return value indicates whether get the metadata or not. Returns false if metadata does not exist.
+        /// </summary>
+        public bool TryGetMetadataValueEscaped(string name, out string value)
+        {
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+
+            value = null;
+
+            if (_directMetadata != null)
+            {
+                ProjectMetadata metadatum = _directMetadata[name];
+                if (metadatum != null)
+                {
+                    value = metadatum.EvaluatedValueEscaped;
+                }
+            }
+
+            if (value == null)
+            {
+                value = GetBuiltInMetadataEscaped(name);
+            }
+
+            if (value == null)
+            {
+                ProjectMetadata metadatum = GetItemDefinitionMetadata(name);
+
+                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
+                {
+                    Expander<ProjectProperty, ProjectItem> expander = new Expander<ProjectProperty, ProjectItem>(null, null, new BuiltInMetadataTable(this), FileSystems.Default);
+
+                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, metadatum.Location);
+                }
+                else if (metadatum != null)
+                {
+                    value = metadatum.EvaluatedValueEscaped;
+                }
+            }
+
+            if (value == null) { return false; }
+            else { return true; }
+        }
 
         /// <summary>
         /// A class factory for ProjectItems.
