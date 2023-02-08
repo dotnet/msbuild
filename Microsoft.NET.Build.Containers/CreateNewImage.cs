@@ -69,10 +69,10 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
     }
 
-    private ILocalDaemon GetLocalDaemon(Action<string> logger) {
+    private LocalDocker GetLocalDaemon(Action<string> logger) {
         var daemon = LocalContainerDaemon switch {
             KnownDaemonTypes.Docker => new LocalDocker(logger),
-            _ => throw new ArgumentException($"Unknown local container daemon type '{LocalContainerDaemon}'. Valid local container daemon types are {String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)}", nameof(LocalContainerDaemon))
+            _ => throw new NotSupportedException($"Unknown local container daemon type '{LocalContainerDaemon}'. Valid local container daemon types are {String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)}")
         };
         return daemon;
     }
