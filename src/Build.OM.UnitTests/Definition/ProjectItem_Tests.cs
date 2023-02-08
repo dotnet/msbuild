@@ -13,6 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
@@ -55,7 +56,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-        protected TestEnvironment _env;
+        protected readonly TestEnvironment _env;
+        private DummyMappedDrive _mappedDrive = null;
 
         public ProjectItem_Tests()
         {
@@ -65,6 +67,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void Dispose()
         {
             _env.Dispose();
+            _mappedDrive?.Dispose();
         }
 
         /// <summary>
@@ -792,21 +795,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
-        [InlineData(@"z:\**\*.log")]
-        [InlineData(@"z:$(empty)\**\*.log")]
-        [InlineData(@"z:\**")]
-        [InlineData(@"z:\\**")]
-        [InlineData(@"z:\\\\\\\\**")]
-        [InlineData(@"z:\**\*.cs")]
+        [InlineData(@"%DRIVE%:\**\*.log")]
+        [InlineData(@"%DRIVE%:$(empty)\**\*.log")]
+        [InlineData(@"%DRIVE%:\**")]
+        [InlineData(@"%DRIVE%:\\**")]
+        [InlineData(@"%DRIVE%:\\\\\\\\**")]
+        [InlineData(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
+            var mappedDrive = GetDummyMappedDrive();
+            unevaluatedInclude = UpdatePathToMappedDrive(unevaluatedInclude, mappedDrive.MappedDriveLetter);
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [UnixOnlyTheory]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [InlineData(@"/**/*.log")]
         [InlineData(@"$(empty)/**/*.log")]
         [InlineData(@"/$(empty)**/*.log")]
@@ -875,32 +879,56 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project instance created from a file that contains a drive enumerating wildcard results in a logged warning on the Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
         [InlineData(
             ImportProjectElement,
-            @"z:\**\*.targets",
+            @"%DRIVE%:\**\*.targets",
             null)]
 
         // LazyItem.IncludeOperation
         [InlineData(
             ItemWithIncludeAndExclude,
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
         // LazyItem.IncludeOperation for Exclude
         [InlineData(
             ItemWithIncludeAndExclude,
             @"$(EmptyProperty)\*.cs",
-            @"z:\$(Microsoft_WindowsAzure_EngSys)**")]
+            @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
+            var mappedDrive = GetDummyMappedDrive();
+            placeHolder = UpdatePathToMappedDrive(placeHolder, mappedDrive.MappedDriveLetter);
+            excludePlaceHolder = UpdatePathToMappedDrive(excludePlaceHolder, mappedDrive.MappedDriveLetter);
             content = string.Format(content, placeHolder, excludePlaceHolder);
             CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        private DummyMappedDrive GetDummyMappedDrive()
+        {
+            if (NativeMethods.IsWindows)
+            {
+                // let's create the mapped drive only once it's needed by any test, then let's reuse;
+                _mappedDrive ??= new DummyMappedDrive();
+            }
+
+            return _mappedDrive;
+        }
+
+        private static string UpdatePathToMappedDrive(string path, char driveLetter)
+        {
+            const string drivePlaceholder = "%DRIVE%";
+            // if this seems to be rooted path - replace with the dummy mount
+            if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
+            {
+                path = driveLetter + path.Substring(drivePlaceholder.Length);
+            }
+            return path;
+        }
+
         [UnixOnlyTheory]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [InlineData(
             ImportProjectElement,
             @"\**\*.targets",
