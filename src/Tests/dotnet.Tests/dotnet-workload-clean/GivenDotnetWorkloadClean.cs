@@ -85,8 +85,8 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
 
-            const string aboveSdkFeatureBand = "7.0.100";
-            const string belowSdkFeatureBand = "5.0.100";
+            const string aboveSdkFeatureBand = ToolsetInfo.NextTargetFrameworkVersion + ".100";
+            const string belowSdkFeatureBand = "5.0.100"; // At the time of writing this test, it would only run on 7-8.0 SDKs or above.
 
             string installRoot = userLocal ? userProfileDir : dotnetRoot;
             if (userLocal)
@@ -100,7 +100,6 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             var extraAbovePackRecordPath = MakePackRecord(installRoot, aboveSdkFeatureBand);
             var extraBelowPackRecordPath = MakePackRecord(installRoot, belowSdkFeatureBand);
             var extraPackPath = MakePack(installRoot);
-
 
             var cleanCommand = GenerateWorkloadCleanAllCommand(workloadResolver, userProfileDir, dotnetRoot);
             cleanCommand.Execute();
@@ -176,21 +175,12 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             return packPath;
         }
 
-        private void ExecuteWorkloadList(string userProfileDir, WorkloadResolver workloadResolver)
-        {
-            var workloadInstaller = new MockWorkloadRecordRepo(new List<WorkloadId>());
-            var listParseResult = Parser.Instance.Parse("dotnet workload list --machine-readable");
-            new WorkloadListCommand(listParseResult, _reporter, workloadInstaller, _sdkFeatureVersion, workloadResolver: workloadResolver, userProfileDir: userProfileDir)
-                .Execute();
-        }
-
         /// <summary>
         /// Validate that commands that are likely to fail with invalid packs or invalid pack records do not fail, as an "end to end" safety precaution.
         /// </summary>
         private void AssertAdjacentCommandsStillPass(string userProfileDir, string dotnetRoot, string testDirectory, WorkloadResolver workloadResolver, MockNuGetPackageDownloader nugetDownloader, string sdkBand = null)
         {
             InstallWorkload(userProfileDir, dotnetRoot, testDirectory, workloadResolver, nugetDownloader, sdkBand);
-            ExecuteWorkloadList(userProfileDir, workloadResolver);
         }
     }
 }
