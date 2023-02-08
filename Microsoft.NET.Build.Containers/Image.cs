@@ -13,9 +13,6 @@ public class Image
     public ManifestV2 manifest;
     public JsonNode config;
 
-    public readonly string OriginatingName;
-    internal readonly Registry? originatingRegistry;
-
     internal List<Layer> newLayers = new();
 
     private HashSet<Label> labels;
@@ -24,12 +21,10 @@ public class Image
 
     internal Dictionary<string, string> environmentVariables;
 
-    public Image(ManifestV2 manifest, JsonNode config, string name, Registry? registry)
+    public Image(ManifestV2 manifest, JsonNode config)
     {
         this.manifest = manifest;
         this.config = config;
-        this.OriginatingName = name;
-        this.originatingRegistry = registry;
         // these next values are inherited from the parent image, so we need to seed our new image with them.
         this.labels = ReadLabelsFromConfig(config);
         this.exposedPorts = ReadPortsFromConfig(config);

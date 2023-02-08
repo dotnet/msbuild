@@ -54,13 +54,19 @@
 
             <!-- An empty ContainerRegistry implies pushing to the local daemon, putting this here for documentation purposes -->
             <!-- <ContainerRegistry></ContainerRegistry> -->
+            
+            <!-- Set which local container daemon to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
+            <LocalContainerDaemon Condition="'$(LocalContainerDaemon)' == ''">Docker</LocalContainerDaemon>
 
             <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
             <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
+            
             <!-- Only default a tag name if no tag names at all are provided -->
             <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
             <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true' and '$(ContainerImageTags)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
+            
             <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
+            
             <!-- The Container RID should default to the RID used for the entire build (to ensure things run on the platform they are built for), but the user knows best and so should be able to set it explicitly.
                  For builds that have a RID, we default to that RID. Otherwise, we default to the RID of the currently-executing SDK. -->
             <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' and '$(IsRidAgnostic)' != 'true'">$(RuntimeIdentifier)</ContainerRuntimeIdentifier>
@@ -162,6 +168,7 @@
                         BaseRegistry="$(ContainerBaseRegistry)"
                         BaseImageName="$(ContainerBaseName)"
                         BaseImageTag="$(ContainerBaseTag)"
+                        LocalContainerDaemon="$(LocalContainerDaemon)"
                         OutputRegistry="$(ContainerRegistry)"
                         ImageName="$(ContainerImageName)"
                         ImageTags="@(ContainerImageTags)"

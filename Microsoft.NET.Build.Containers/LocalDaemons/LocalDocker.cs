@@ -4,15 +4,23 @@
 using System.Diagnostics;
 using System.Formats.Tar;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Microsoft.NET.Build.Containers;
 
-public class LocalDocker
+public class LocalDocker : ILocalDaemon
 {
-    public static async Task Load(Image x, string name, string tag, string baseName)
+    private readonly Action<string> logger;
+
+    public LocalDocker(Action<string> logger)
     {
-        // call `docker load` and get it ready to recieve input
+        this.logger = logger;
+    }
+
+    public async Task Load(Image image, ImageReference sourceReference, ImageReference destinationReference)
+    {
+        // call `docker load` and get it ready to receive input
         ProcessStartInfo loadInfo = new("docker", $"load");
         loadInfo.RedirectStandardInput = true;
         loadInfo.RedirectStandardOutput = true;
@@ -27,7 +35,7 @@ public class LocalDocker
 
         // Create new stream tarball
 
-        await WriteImageToStream(x, name, tag, loadProcess.StandardInput.BaseStream).ConfigureAwait(false);
+        await WriteImageToStream(image, sourceReference, destinationReference, loadProcess.StandardInput.BaseStream).ConfigureAwait(false);
 
         loadProcess.StandardInput.Close();
 
@@ -39,7 +47,44 @@ public class LocalDocker
         }
     }
 
-    public static async Task WriteImageToStream(Image x, string name, string tag, Stream imageStream)
+    public async Task<bool> IsAvailable()
+    {
+        try
+        {
+            var config = await GetConfig().ConfigureAwait(false);
+            if (!config.RootElement.TryGetProperty("ServerErrors", out var errorProperty)) {
+                return true;
+            } else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0) {
+                return true;
+            } else {
+                // we have errors, turn them into a string and log them
+                var messages = String.Join(Environment.NewLine, errorProperty.EnumerateArray());
+                logger($"The daemon server reported errors: {messages}");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger($"Error while reading daemon config: {ex}");
+            return false;
+        }
+    }
+
+    private async Task<JsonDocument> GetConfig()
+    {
+        var psi = new ProcessStartInfo("docker", "info --format=\"{{json .}}\"")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        var proc = Process.Start(psi);
+        if (proc is null) throw new Exception("Failed to start docker client process");
+        await proc.WaitForExitAsync().ConfigureAwait(false);
+        if (proc.ExitCode != 0) throw new Exception($"Failed to get docker info({proc.ExitCode})\n{await proc.StandardOutput.ReadToEndAsync().ConfigureAwait(false)}\n{await proc.StandardError.ReadToEndAsync().ConfigureAwait(false)}");
+        return await JsonDocument.ParseAsync(proc.StandardOutput.BaseStream).ConfigureAwait(false);
+    }
+
+    private static async Task WriteImageToStream(Image image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream)
     {
         using TarWriter writer = new(imageStream, TarEntryFormat.Pax, leaveOpen: true);
 
@@ -47,11 +92,11 @@ public class LocalDocker
         // Feed each layer tarball into the stream
         JsonArray layerTarballPaths = new JsonArray();
 
-        foreach (var d in x.LayerDescriptors)
+        foreach (var d in image.LayerDescriptors)
         {
-            if (x.originatingRegistry is {} registry)
+            if (sourceReference.Registry is { } registry)
             {
-                string localPath = await registry.DownloadBlob(x.OriginatingName, d).ConfigureAwait(false);
+                string localPath = await registry.DownloadBlob(sourceReference.Repository, d).ConfigureAwait(false);;
 
                 // Stuff that (uncompressed) tarball into the image tar stream
                 // TODO uncompress!!
@@ -62,12 +107,13 @@ public class LocalDocker
             else
             {
                 throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
-            }        }
+            }
+        }
 
         // add config
-        string configTarballPath = $"{Image.GetSha(x.config)}.json";
+        string configTarballPath = $"{Image.GetSha(image.config)}.json";
 
-        using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(x.config.ToJsonString())))
+        using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(image.config.ToJsonString())))
         {
             PaxTarEntry configEntry = new(TarEntryType.RegularFile, configTarballPath)
             {
@@ -80,7 +126,7 @@ public class LocalDocker
         // Add manifest
         JsonArray tagsNode = new()
         {
-            name + ":" + tag
+            destinationReference.RepositoryAndTag
         };
 
         JsonNode manifestNode = new JsonArray(new JsonObject

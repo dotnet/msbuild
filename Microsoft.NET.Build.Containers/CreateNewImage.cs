@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using Microsoft.Build.Framework;
+using System.Linq;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
@@ -18,9 +19,9 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
     /// </summary>
     public string ToolPath { get; set; }
 
-    private bool IsDockerPush { get => String.IsNullOrEmpty(OutputRegistry); }
+    private bool IsDaemonPush { get => String.IsNullOrEmpty(OutputRegistry); }
 
-    private bool IsDockerPull { get => String.IsNullOrEmpty(BaseRegistry); }
+    private bool IsDaemonPull { get => String.IsNullOrEmpty(BaseRegistry); }
 
     private void SetPorts(Image image, ITaskItem[] exposedPorts)
     {
@@ -68,6 +69,35 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
     }
 
+    private ILocalDaemon GetLocalDaemon(Action<string> logger) {
+        var daemon = LocalContainerDaemon switch {
+            KnownDaemonTypes.Docker => new LocalDocker(logger),
+            _ => throw new ArgumentException($"Unknown local container daemon type '{LocalContainerDaemon}'. Valid local container daemon types are {String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)}", nameof(LocalContainerDaemon))
+        };
+        return daemon;
+    }
+
+    private Lazy<Registry?> SourceRegistry
+    {
+        get {
+            if(IsDaemonPull) {
+                return new Lazy<Registry?>(() => null);
+            } else {
+                return new Lazy<Registry?>(() => new Registry(ContainerHelpers.TryExpandRegistryToUri(BaseRegistry)));
+            }
+        }
+    }
+
+    private Lazy<Registry?> DestinationRegistry {
+        get {
+            if(IsDaemonPush) {
+                return new Lazy<Registry?>(() => null);
+            } else {
+                return new Lazy<Registry?>(() => new Registry(ContainerHelpers.TryExpandRegistryToUri(OutputRegistry)));
+            }
+        }
+    }
+
     private static void SetEnvironmentVariables(Image img, ITaskItem[] envVars)
     {
         foreach (ITaskItem envVar in envVars)
@@ -77,11 +107,10 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
     }
 
     private Image? GetBaseImage() {
-        if (IsDockerPull) {
-            throw new ArgumentException("Don't know how to pull images from local daemons at the moment");
+        if (SourceRegistry.Value is {} registry) {
+            return registry.GetImageManifest(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier, RuntimeIdentifierGraphPath).Result;
         } else {
-            var reg = new Registry(ContainerHelpers.TryExpandRegistryToUri(BaseRegistry));
-            return reg.GetImageManifest(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier, RuntimeIdentifierGraphPath).Result;
+            throw new ArgumentException("Don't know how to pull images from local daemons at the moment");
         }
     }
 
@@ -96,15 +125,17 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
             Log.LogError("{0} '{1}' does not exist", nameof(PublishDirectory), PublishDirectory);
             return !Log.HasLoggedErrors;
         }
+        ImageReference sourceImageReference = new(SourceRegistry.Value, BaseImageName, BaseImageTag);
+        var destinationImageReferences = ImageTags.Select(t => new ImageReference(DestinationRegistry.Value, ImageName, t));
 
         var image = GetBaseImage();
 
         if (image is null) {
-            Log.LogError($"Couldn't find matching base image for {0}:{1} that matches RuntimeIdentifier {2}", BaseImageName, BaseImageTag, ContainerRuntimeIdentifier);
+            Log.LogError($"Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}", sourceImageReference.RepositoryAndTag, ContainerRuntimeIdentifier);
             return !Log.HasLoggedErrors;
         }
 
-        SafeLog("Building image '{0}' with tags {1} on top of base image {2}/{3}:{4}", ImageName, String.Join(",", ImageTags), BaseRegistry, BaseImageName, BaseImageTag);
+        SafeLog("Building image '{0}' with tags {1} on top of base image {2}", ImageName, String.Join(",", ImageTags), sourceImageReference);
 
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory);
         image.AddLayer(newLayer);
@@ -130,15 +161,19 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
         GeneratedContainerManifest =  JsonSerializer.Serialize(image.manifest);
         GeneratedContainerConfiguration = image.config.ToJsonString();
 
-        Registry? outputReg = IsDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(OutputRegistry));
-        foreach (var tag in ImageTags)
+        foreach (var destinationImageReference in destinationImageReferences)
         {
-            if (IsDockerPush)
+            if (IsDaemonPush)
             {
+                var localDaemon = GetLocalDaemon(msg => Log.LogMessage(msg));
+                if (!localDaemon.IsAvailable().GetAwaiter().GetResult()) {
+                    Log.LogError("The local daemon is not available, but pushing to a local daemon was requested. Please start the daemon and try again.");
+                    return false;
+                }
                 try
                 {
-                    LocalDocker.Load(image, ImageName, tag, BaseImageName).Wait();
-                    SafeLog("Pushed container '{0}:{1}' to Docker daemon", ImageName, tag);
+                    localDaemon.Load(image, sourceImageReference, destinationImageReference).Wait();
+                    SafeLog("Pushed container '{0}' to local daemon", destinationImageReference.RepositoryAndTag);
                 }
                 catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
                 {
@@ -149,8 +184,8 @@ public partial class CreateNewImage : Microsoft.Build.Utilities.Task
             {
                 try
                 {
-                    outputReg?.Push(image, ImageName, tag, BaseImageName, message => SafeLog(message)).Wait();
-                    SafeLog("Pushed container '{0}:{1}' to registry '{2}'", ImageName, tag, OutputRegistry);
+                    destinationImageReference.Registry?.Push(image, sourceImageReference, destinationImageReference, message => SafeLog(message)).Wait();
+                    SafeLog("Pushed container '{0}' to registry '{2}'", destinationImageReference.RepositoryAndTag, OutputRegistry);
                 }
                 catch (ContainerHttpException e)
                 {

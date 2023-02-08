@@ -28,7 +28,7 @@
 
   <!-- net472 builds manually import files to compile -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-    <Compile Remove="*.*" />
+    <Compile Remove="**/*.*" />
     <Compile Include="ReferenceParser.cs" />
     <Compile Include="KnownStrings.cs" />
     <Compile Include="ParseContainerProperties.cs" />

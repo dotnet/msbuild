@@ -79,6 +79,7 @@ public partial class CreateNewImage : ToolTask
                " --baseimagename " + BaseImageName +
                " --baseimagetag " + BaseImageTag +
                (OutputRegistry is not null ? " --outputregistry " + OutputRegistry : "") +
+               "--localcontainerdaemon " + LocalContainerDaemon +
                " --imagename " + ImageName +
                " --workingdirectory " + WorkingDirectory +
                (Entrypoint.Length > 0 ? " --entrypoint " + String.Join(" ", Entrypoint.Select((i) => i.ItemSpec)) : "") +

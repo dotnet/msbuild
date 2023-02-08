@@ -28,8 +28,8 @@ public record struct Registry
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
-    private readonly Uri BaseUri;
-    private readonly string RegistryName => BaseUri.Host;
+    public readonly Uri BaseUri;
+    private readonly string RegistryName => BaseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
 
     public Registry(Uri baseUri)
     {
@@ -91,40 +91,40 @@ public record struct Registry
     /// </summary>
     private readonly bool SupportsParallelUploads => !IsAmazonECRRegistry;
 
-    public async Task<Image?> GetImageManifest(string repositoryName, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath)
+    public async Task<Image> GetImageManifest(string repositoryName, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath)
     {
         var client = GetClient();
         var initialManifestResponse = await GetManifest(repositoryName, reference).ConfigureAwait(false);
-        
+
         return initialManifestResponse.Content.Headers.ContentType?.MediaType switch {
-            DockerManifestV2 => await TryReadSingleImage(repositoryName, await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>().ConfigureAwait(false)).ConfigureAwait(false),
-            DockerManifestListV2 => await TryPickBestImageFromManifestList(repositoryName, reference, await initialManifestResponse.Content.ReadFromJsonAsync<ManifestListV2>().ConfigureAwait(false), runtimeIdentifier, runtimeIdentifierGraphPath).ConfigureAwait(false),
+            DockerManifestV2 => await ReadSingleImage(repositoryName, await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>().ConfigureAwait(false)).ConfigureAwait(false),
+            DockerManifestListV2 => await PickBestImageFromManifestList(repositoryName, reference, await initialManifestResponse.Content.ReadFromJsonAsync<ManifestListV2>().ConfigureAwait(false), runtimeIdentifier, runtimeIdentifierGraphPath).ConfigureAwait(false),
             var unknownMediaType => throw new NotImplementedException($"The manifest for {repositoryName}:{reference} from registry {BaseUri} was an unknown type: {unknownMediaType}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.")
         };
     }
 
-    private async Task<Image?> TryReadSingleImage(string repositoryName, ManifestV2 manifest) {
+    private async Task<Image> ReadSingleImage(string repositoryName, ManifestV2 manifest) {
         var config = manifest.config;
         string configSha = config.digest;
-        
+
         var blobResponse = await GetBlob(repositoryName, configSha).ConfigureAwait(false);
 
         JsonNode? configDoc = JsonNode.Parse(await blobResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
         Debug.Assert(configDoc is not null);
 
-        return new Image(manifest, configDoc, repositoryName, this);
+        return new Image(manifest, configDoc);
     }
 
-    async Task<Image?> TryPickBestImageFromManifestList(string repositoryName, string reference, ManifestListV2 manifestList, string runtimeIdentifier, string runtimeIdentifierGraphPath) {
+    async Task<Image> PickBestImageFromManifestList(string repositoryName, string reference, ManifestListV2 manifestList, string runtimeIdentifier, string runtimeIdentifierGraphPath) {
         var runtimeGraph = GetRuntimeGraphForDotNet(runtimeIdentifierGraphPath);
         var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
         var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, ridDict.Keys, runtimeIdentifier);
         if (bestManifestRid is null) {
-            throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers for the base image {repositoryName}:{reference} are {String.Join(",", graphForManifestList.Runtimes.Keys)}");
+            throw new BaseImageNotFoundException(runtimeIdentifier, repositoryName, reference, graphForManifestList.Runtimes.Keys);
         }
         var matchingManifest = ridDict[bestManifestRid];
         var manifestResponse = await GetManifest(repositoryName, matchingManifest.digest).ConfigureAwait(false);
-        return await TryReadSingleImage(repositoryName, await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>().ConfigureAwait(false)).ConfigureAwait(false);
+        return await ReadSingleImage(repositoryName, await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>().ConfigureAwait(false)).ConfigureAwait(false);
     }
 
     private async Task<HttpResponseMessage> GetManifest(string repositoryName, string reference)
@@ -157,13 +157,13 @@ public record struct Registry
                 }
             }
         }
-        
+
         var graph = new RuntimeGraph(runtimeDescriptionSet);
         return (ridDict, graph);
     }
 
     private static string? CreateRidForPlatform(PlatformInformation platform)
-    {   
+    {
         // we only support linux and windows containers explicitly, so anything else we should skip past.
         // there are theoretically other platforms/architectures that Docker supports (s390x?), but we are
         // deliberately ignoring them without clear user signal.
@@ -188,7 +188,7 @@ public record struct Registry
             "arm64" => "arm64",
             _ => null
         };
-        
+
         if (osPart is null || platformPart is null) return null;
         return $"{osPart}{versionPart ?? ""}-{platformPart}";
     }
@@ -203,12 +203,12 @@ public record struct Registry
     }
 
     /// <summary>
-    /// Ensure a blob associated with <paramref name="name"/> from the registry is available locally.
+    /// Ensure a blob associated with <paramref name="repository"/> from the registry is available locally.
     /// </summary>
-    /// <param name="name">Name of the associated image.</param>
+    /// <param name="repository">Name of the associated image repository.</param>
     /// <param name="descriptor"><see cref="Descriptor"/> that describes the blob.</param>
     /// <returns>Local path to the (decompressed) blob content.</returns>
-    public async Task<string> DownloadBlob(string name, Descriptor descriptor)
+    public async Task<string> DownloadBlob(string repository, Descriptor descriptor)
     {
         string localPath = ContentStore.PathForDescriptor(descriptor);
 
@@ -222,7 +222,7 @@ public record struct Registry
 
         HttpClient client = GetClient();
 
-        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{descriptor.Digest}"), HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{repository}/blobs/{descriptor.Digest}"), HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
         response.EnsureSuccessStatusCode();
 
@@ -239,17 +239,17 @@ public record struct Registry
         return localPath;
     }
 
-    public async Task Push(Layer layer, string name, Action<string> logProgressMessage)
+    public async Task Push(Layer layer, string repository, Action<string> logProgressMessage)
     {
         string digest = layer.Descriptor.Digest;
 
         using (FileStream contents = File.OpenRead(layer.BackingFile))
         {
-            await UploadBlob(name, digest, contents).ConfigureAwait(false);
+            await UploadBlob(repository, digest, contents).ConfigureAwait(false);
         }
     }
 
-    private readonly async Task<UriBuilder> UploadBlobChunked(string name, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+    private readonly async Task<UriBuilder> UploadBlobChunked(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
         Uri patchUri = uploadUri.Uri;
         var localUploadUri = new UriBuilder(uploadUri.Uri);
         localUploadUri.Query += $"&digest={Uri.EscapeDataString(digest)}";
@@ -306,7 +306,7 @@ public record struct Registry
         }
     }
 
-    private readonly async Task<UriBuilder> UploadBlobWhole(string name, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+    private readonly async Task<UriBuilder> UploadBlobWhole(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
         StreamContent content = new StreamContent(contents);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         content.Headers.ContentLength = contents.Length;
@@ -319,9 +319,9 @@ public record struct Registry
         return GetNextLocation(patchResponse);
     }
 
-    private readonly async Task<UriBuilder> StartUploadSession(string name, string digest, HttpClient client) {
-        Uri startUploadUri = new Uri(BaseUri, $"/v2/{name}/blobs/uploads/");
-        
+    private readonly async Task<UriBuilder> StartUploadSession(string repository, string digest, HttpClient client) {
+        Uri startUploadUri = new Uri(BaseUri, $"/v2/{repository}/blobs/uploads/");
+
         HttpResponseMessage pushResponse = await client.PostAsync(startUploadUri, content: null).ConfigureAwait(false);
 
         if (pushResponse.StatusCode != HttpStatusCode.Accepted)
@@ -333,9 +333,9 @@ public record struct Registry
         return GetNextLocation(pushResponse);
     }
 
-    private readonly async Task<UriBuilder> UploadBlobContents(string name, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
-        if (SupportsChunkedUpload) return await UploadBlobChunked(name, digest, contents, client, uploadUri).ConfigureAwait(false);
-        else return await UploadBlobWhole(name, digest, contents, client, uploadUri).ConfigureAwait(false);
+    private readonly async Task<UriBuilder> UploadBlobContents(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+        if (SupportsChunkedUpload) return await UploadBlobChunked(repository, digest, contents, client, uploadUri).ConfigureAwait(false);
+        else return await UploadBlobWhole(repository, digest, contents, client, uploadUri).ConfigureAwait(false);
     }
 
     private static async Task FinishUploadSession(string digest, HttpClient client, UriBuilder uploadUri) {
@@ -353,11 +353,11 @@ public record struct Registry
         }
     }
 
-    private readonly async Task UploadBlob(string name, string digest, Stream contents)
+    private readonly async Task UploadBlob(string repository, string digest, Stream contents)
     {
         HttpClient client = GetClient();
 
-        if (await BlobAlreadyUploaded(name, digest, client).ConfigureAwait(false))
+        if (await BlobAlreadyUploaded(repository, digest, client).ConfigureAwait(false))
         {
             // Already there!
             return;
@@ -365,17 +365,17 @@ public record struct Registry
 
         // Three steps to this process:
         // * start an upload session
-        var uploadUri = await StartUploadSession(name, digest, client).ConfigureAwait(false);
+        var uploadUri = await StartUploadSession(repository, digest, client).ConfigureAwait(false);
         // * upload the blob
-        var finalChunkUri = await UploadBlobContents(name, digest, contents, client, uploadUri).ConfigureAwait(false);
+        var finalChunkUri = await UploadBlobContents(repository, digest, contents, client, uploadUri).ConfigureAwait(false);
         // * finish the upload session
         await FinishUploadSession(digest, client, finalChunkUri).ConfigureAwait(false);
-        
+
     }
 
-    private readonly async Task<bool> BlobAlreadyUploaded(string name, string digest, HttpClient client)
+    private readonly async Task<bool> BlobAlreadyUploaded(string repository, string digest, HttpClient client)
     {
-        HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, new Uri(BaseUri, $"/v2/{name}/blobs/{digest}"))).ConfigureAwait(false);
+        HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, new Uri(BaseUri, $"/v2/{repository}/blobs/{digest}"))).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.OK)
         {
@@ -414,37 +414,37 @@ public record struct Registry
         return client;
     }
 
-    public async Task Push(Image x, string name, string? tag, string baseName, Action<string> logProgressMessage)
+    public async Task Push(Image x, ImageReference source, ImageReference destination, Action<string> logProgressMessage)
     {
-        tag ??= "latest";
 
         HttpClient client = GetClient();
-        var reg = this;
+        Registry destinationRegistry = (destination.Registry!).Value;
 
         Func<Descriptor, Task> uploadLayerFunc = async (descriptor) =>
         {
             string digest = descriptor.Digest;
-            logProgressMessage($"Uploading layer {digest} to {reg.RegistryName}");
-            if (await reg.BlobAlreadyUploaded(name, digest, client).ConfigureAwait(false))
+
+            logProgressMessage($"Uploading layer {digest} to {destinationRegistry.RegistryName}");
+            if (await destinationRegistry.BlobAlreadyUploaded(destination.Repository, digest, client).ConfigureAwait(false))
             {
                 logProgressMessage($"Layer {digest} already existed");
                 return;
             }
 
             // Blob wasn't there; can we tell the server to get it from the base image?
-            HttpResponseMessage pushResponse = await client.PostAsync(new Uri(reg.BaseUri, $"/v2/{name}/blobs/uploads/?mount={digest}&from={baseName}"), content: null).ConfigureAwait(false);
+            HttpResponseMessage pushResponse = await client.PostAsync(new Uri(destinationRegistry.BaseUri, $"/v2/{destination.Repository}/blobs/uploads/?mount={digest}&from={source.Repository}"), content: null).ConfigureAwait(false);
 
             if (pushResponse.StatusCode != HttpStatusCode.Created)
             {
                 // The blob wasn't already available in another namespace, so fall back to explicitly uploading it
 
-                if (x.originatingRegistry is { } registry)
+                if (source.Registry is { } sourceRegistry)
                 {
                     // Ensure the blob is available locally
-                    await registry.DownloadBlob(x.OriginatingName, descriptor).ConfigureAwait(false);
+                    await sourceRegistry.DownloadBlob(source.Repository, descriptor).ConfigureAwait(false);
                     // Then push it to the destination registry
-                    await reg.Push(Layer.FromDescriptor(descriptor), name, logProgressMessage).ConfigureAwait(false);
-                    logProgressMessage($"Finished uploading layer {digest} to {reg.RegistryName}");
+                    await destinationRegistry.Push(Layer.FromDescriptor(descriptor), destination.Repository, logProgressMessage).ConfigureAwait(false);
+                    logProgressMessage($"Finished uploading layer {digest} to {destinationRegistry.RegistryName}");
                 }
                 else {
                     throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
@@ -468,7 +468,7 @@ public record struct Registry
         {
             var configDigest = Image.GetDigest(x.config);
             logProgressMessage($"Uploading config to registry at blob {configDigest}");
-            await UploadBlob(name, configDigest, stringStream).ConfigureAwait(false);
+            await UploadBlob(destination.Repository, configDigest, stringStream).ConfigureAwait(false);
             logProgressMessage($"Uploaded config to registry");
         }
 
@@ -477,7 +477,7 @@ public record struct Registry
         string jsonString = JsonSerializer.SerializeToNode(x.manifest)?.ToJsonString() ?? "";
         HttpContent manifestUploadContent = new StringContent(jsonString);
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
-        var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{manifestDigest}"), manifestUploadContent).ConfigureAwait(false);
+        var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{destination.Repository}/manifests/{manifestDigest}"), manifestUploadContent).ConfigureAwait(false);
 
         if (!putResponse.IsSuccessStatusCode)
         {
@@ -485,14 +485,14 @@ public record struct Registry
         }
         logProgressMessage($"Uploaded manifest to {RegistryName}");
 
-        logProgressMessage($"Uploading tag {tag} to {RegistryName}");
-        var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{tag}"), manifestUploadContent).ConfigureAwait(false);
+        logProgressMessage($"Uploading tag {destination.Tag} to {RegistryName}");
+        var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{destination.Repository}/manifests/{destination.Tag}"), manifestUploadContent).ConfigureAwait(false);
 
         if (!putResponse2.IsSuccessStatusCode)
         {
             throw new ContainerHttpException("Registry push failed.", putResponse2.RequestMessage?.RequestUri?.ToString(), jsonString);
         }
 
-        logProgressMessage($"Uploaded tag {tag} to {RegistryName}");
+        logProgressMessage($"Uploaded tag {destination.Tag} to {RegistryName}");
     }
 }

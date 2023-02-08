@@ -73,6 +73,11 @@ var entrypointArgsOpt = new Option<string[]>(
     AllowMultipleArgumentsPerToken = true
 };
 
+var localContainerDaemonOpt = new Option<string>(
+    name: "--localcontainerdaemon",
+    description: "The local daemon type to push to"
+).FromAmong(KnownDaemonTypes.SupportedLocalDaemonTypes);
+
 var labelsOpt = new Option<string[]>(
     name: "--labels",
     description: "Labels that the image configuration will include in metadata.",
@@ -101,7 +106,7 @@ var portsOpt = new Option<Port[]>(
         var ports = result.Tokens.Select(x => x.Value).ToArray();
         var goodPorts = new List<Port>();
         var badPorts = new List<(string, ContainerHelpers.ParsePortError)>();
-        
+
         foreach (var port in ports) {
             var split = port.Split('/');
             if (split.Length != 2) {
@@ -173,7 +178,8 @@ RootCommand root = new RootCommand("Containerize an application without Docker."
     portsOpt,
     envVarsOpt,
     ridOpt,
-    ridGraphPathOpt
+    ridGraphPathOpt,
+    localContainerDaemonOpt
 };
 
 root.SetHandler(async (context) =>
@@ -193,7 +199,8 @@ root.SetHandler(async (context) =>
     string[] _envVars = context.ParseResult.GetValueForOption(envVarsOpt) ?? Array.Empty<string>();
     string _rid = context.ParseResult.GetValueForOption(ridOpt) ?? "";
     string _ridGraphPath = context.ParseResult.GetValueForOption(ridGraphPathOpt) ?? "";
-    await ContainerBuilder.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports, _envVars, _rid, _ridGraphPath).ConfigureAwait(false);
+    string _localContainerDaemon = context.ParseResult.GetValueForOption(localContainerDaemonOpt) ?? "";
+    await ContainerBuilder.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports, _envVars, _rid, _ridGraphPath, _localContainerDaemon).ConfigureAwait(false);
 });
 
 return await root.InvokeAsync(args).ConfigureAwait(false);
