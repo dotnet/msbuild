@@ -1,9 +1,3 @@
-﻿Imports System
+﻿Public Class Class1
 
-Module CompanyClassLibrary1
-
-    Public Class Class1
-
-    End Class
-
-End Module
+End Class

@@ -1,6 +1,4 @@
-﻿Imports System
-
-Module ClassLib
+﻿Module ClassLib
 
     Enum TestItem1
         None = 0
