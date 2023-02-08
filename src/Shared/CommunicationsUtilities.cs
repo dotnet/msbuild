@@ -608,7 +608,7 @@ namespace Microsoft.Build.Internal
             switch (clrVersion)
             {
                 case 0:
-                // Not a taskhost, runtime must match
+                    // Not a taskhost, runtime must match
                 case 4:
                     // Default for MSBuild running on .NET Framework 4,
                     // not represented in handshake
