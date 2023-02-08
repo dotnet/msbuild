@@ -670,10 +670,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void Trace<T>(string format, T arg0)
         {
-            if (s_trace)
-            {
-                TraceCore(nodeId: -1, string.Format(format, arg0));
-            }
+            Trace(nodeId: -1, format, arg0);
         }
 
         /// <summary>
@@ -692,10 +689,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void Trace<T0, T1>(string format, T0 arg0, T1 arg1)
         {
-            if (s_trace)
-            {
-                TraceCore(nodeId: -1, string.Format(format, arg0, arg1));
-            }
+            Trace(nodeId: -1, format, arg0, arg1);
         }
 
         /// <summary>
@@ -714,10 +708,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void Trace<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2)
         {
-            if (s_trace)
-            {
-                TraceCore(nodeId: -1, string.Format(format, arg0, arg1, arg2));
-            }
+            Trace(nodeId: -1, format, arg0, arg1, arg2);
         }
 
         /// <summary>
