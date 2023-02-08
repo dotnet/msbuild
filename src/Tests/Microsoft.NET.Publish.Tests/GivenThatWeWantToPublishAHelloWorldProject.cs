@@ -69,10 +69,16 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
+        [InlineData("netcoreapp1.1")]
         [InlineData("netcoreapp2.0")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var helloWorldAsset = _testAssetsManager
