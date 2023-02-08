@@ -200,7 +200,7 @@ public static class ReferenceParser
     /// is anchored and has capturing groups for name, tag, and digest
     /// components.
     /// </summary>
-    public static Regex ReferenceRegexp = new(referencePat);
+    public static readonly Regex ReferenceRegexp = new(referencePat);
 
     /// <summary>
     /// identifier is the format for string identifier used as a
