@@ -1134,15 +1134,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
       <B></B>
     </_Item>
   </ItemGroup>
-  <Target Name="Tests" DependsOnTargets="WithMetadataValueAFalse;WithMetadataValueAEmpty;WithOutMetadataValueAEmtpy;HasMetadataA;WithMetadataValueCEmpty;HasMetadataC;AnyHaveMetadataValueCEmpty;WithOutMetadataValueCEmpty" />
+  <Target Name="Tests" DependsOnTargets="WithMetadataValueAFalse;WithMetadataValueAEmpty;WithoutMetadataValueAEmtpy;HasMetadataA;WithMetadataValueCEmpty;HasMetadataC;AnyHaveMetadataValueCEmpty;WithoutMetadataValueCEmpty" />
   <Target Name="WithMetadataValueAFalse">
     <Message Text="WithMetadataValueAFalse: [@(_Item->WithMetadataValue('A', 'false'), '|')]"/>
   </Target>
   <Target Name="WithMetadataValueAEmpty">
     <Message Text="WithMetadataValueAEmpty: [@(_Item->WithMetadataValue('A', ''), '|')]"/>
   </Target>
-  <Target Name="WithOutMetadataValueAEmtpy">
-    <Message Text="WithOutMetadataValueAEmpty: [@(_Item->WithOutMetadataValue('A', ''), '|')]"/>
+  <Target Name="WithoutMetadataValueAEmtpy">
+    <Message Text="WithoutMetadataValueAEmpty: [@(_Item->WithoutMetadataValue('A', ''), '|')]"/>
   </Target>
   <Target Name="HasMetadataA">
     <Message Text="HasMetadataA: [@(_Item->HasMetadata('A'), '|')]"/>
@@ -1156,19 +1156,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
   <Target Name="AnyHaveMetadataValueCEmpty">
     <Message Text="AnyHaveMetadataValueCEmpty: [@(_Item->AnyHaveMetadataValue('C', ''), '|')]"/>
   </Target>
-  <Target Name="WithOutMetadataValueCEmpty">
-    <Message Text="WithOutMetadataValueCEmpty: [@(_Item->WithOutMetadataValue('C', ''), '|')]"/>
+  <Target Name="WithoutMetadataValueCEmpty">
+    <Message Text="WithoutMetadataValueCEmpty: [@(_Item->WithoutMetadataValue('C', ''), '|')]"/>
   </Target>
 </Project>
 """);
             logger.AssertLogContains("WithMetadataValueAFalse: [Two]");
             logger.AssertLogContains("WithMetadataValueAEmpty: [Three]");
-            logger.AssertLogContains("WithOutMetadataValueAEmpty: [One|Two|Four]");
+            logger.AssertLogContains("WithoutMetadataValueAEmpty: [One|Two|Four]");
             logger.AssertLogContains("HasMetadataA: [One|Two|Three]");
             logger.AssertLogContains("WithMetadataValueCEmpty: []");
             logger.AssertLogContains("HasMetadataC: []");
             logger.AssertLogContains("AnyHaveMetadataValueCEmpty: [false]");
-            logger.AssertLogContains("WithOutMetadataValueCEmpty: [One|Two|Three|Four]");
+            logger.AssertLogContains("WithoutMetadataValueCEmpty: [One|Two|Three|Four]");
         }
 
         [Fact]

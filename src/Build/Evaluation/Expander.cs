@@ -2749,11 +2749,11 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (Pair<string, S> item in itemsOfType)
                     {
-                        bool hasMetadata = false;
+                        bool metadataFound = false;
 
                         try
                         {
-                            hasMetadata = item.Value.HasMetadata(metadataName);
+                            metadataFound = item.Value.HasMetadata(metadataName);
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2764,7 +2764,7 @@ namespace Microsoft.Build.Evaluation
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
-                        if (hasMetadata)
+                        if (metadataFound)
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -2789,10 +2789,7 @@ namespace Microsoft.Build.Evaluation
 
                         try
                         {
-                            if (item.Value.HasMetadata(metadataName))
-                            {
-                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
-                            }
+                            item.Value.TryGetMetadataValueEscaped(metadataName, out metadataValue);
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2815,8 +2812,7 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns those items don't have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
-                /// 
-                internal static IEnumerable<Pair<string, S>> WithOutMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> WithoutMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2829,10 +2825,7 @@ namespace Microsoft.Build.Evaluation
 
                         try
                         {
-                            if (item.Value.HasMetadata(metadataName))
-                            {
-                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
-                            }
+                            item.Value.TryGetMetadataValueEscaped(metadataName, out metadataValue);
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2871,10 +2864,7 @@ namespace Microsoft.Build.Evaluation
 
                             try
                             {
-                                if (item.Value.HasMetadata(metadataName))
-                                {
-                                    metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
-                                }
+                                item.Value.TryGetMetadataValueEscaped(metadataName, out metadataValue);
                             }
                             catch (ArgumentException ex) // Blank metadata name
                             {

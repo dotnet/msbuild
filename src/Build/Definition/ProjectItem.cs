@@ -895,6 +895,8 @@ namespace Microsoft.Build.Evaluation
             return metadataFromDefinition;
         }
 
+        public bool TryGetMetadataValueEscaped(string name, out string value) => throw new NotImplementedException();
+
         /// <summary>
         /// A class factory for ProjectItems.
         /// </summary>
