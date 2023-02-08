@@ -1280,37 +1280,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadataEscaped(string metadataName)
             {
-                if (string.IsNullOrEmpty(metadataName))
-                {
-                    ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
-                }
-
-                ProjectMetadataInstance metadatum;
-                if (_directMetadata != null)
-                {
-                    metadatum = _directMetadata[metadataName];
-                    if (metadatum != null)
-                    {
-                        return metadatum.EvaluatedValueEscaped;
-                    }
-                }
-
-                metadatum = GetItemDefinitionMetadata(metadataName);
-
-                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
-                {
-                    Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
-
-                    // We don't have a location to use, but this is very unlikely to error
-                    return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
-                }
-                else if (metadatum != null)
-                {
-                    return metadatum.EvaluatedValueEscaped;
-                }
-
-                string value = GetBuiltInMetadataEscaped(metadataName);
-
+                TryGetMetadataEscaped(metadataName, out string value);
                 return value ?? String.Empty;
             }
 
