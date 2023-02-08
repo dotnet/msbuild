@@ -10,32 +10,33 @@ namespace Microsoft.NET.Build.Containers;
 
 public class Image
 {
-    public ManifestV2 manifest;
-    public JsonNode config;
+    private readonly HashSet<Label> _labels;
 
-    internal List<Layer> newLayers = new();
+    private readonly List<Layer> _newLayers = new();
 
-    private HashSet<Label> labels;
+    private readonly HashSet<Port> _exposedPorts;
 
-    internal HashSet<Port> exposedPorts;
-
-    internal Dictionary<string, string> environmentVariables;
+    private readonly Dictionary<string, string> _environmentVariables;
 
     public Image(ManifestV2 manifest, JsonNode config)
     {
-        this.manifest = manifest;
-        this.config = config;
+        Manifest = manifest;
+        Config = config;
         // these next values are inherited from the parent image, so we need to seed our new image with them.
-        this.labels = ReadLabelsFromConfig(config);
-        this.exposedPorts = ReadPortsFromConfig(config);
-        this.environmentVariables = ReadEnvVarsFromConfig(config);
+        _labels = ReadLabelsFromConfig(config);
+        _exposedPorts = ReadPortsFromConfig(config);
+        _environmentVariables = ReadEnvVarsFromConfig(config);
     }
+
+    public ManifestV2 Manifest { get; private set; }
+
+    public JsonNode Config { get; }
 
     public IEnumerable<Descriptor> LayerDescriptors
     {
         get
         {
-            var layersNode = manifest.layers;
+            var layersNode = Manifest.layers;
 
             if (layersNode is null)
             {
@@ -51,22 +52,25 @@ public class Image
 
     public void AddLayer(Layer l)
     {
-        newLayers.Add(l);
+        _newLayers.Add(l);
 
-        manifest.layers.Add(new(l.Descriptor.MediaType, l.Descriptor.Size, l.Descriptor.Digest, l.Descriptor.Urls));
-        config["rootfs"]!["diff_ids"]!.AsArray().Add(l.Descriptor.UncompressedDigest);
+        Manifest.layers.Add(new(l.Descriptor.MediaType, l.Descriptor.Size, l.Descriptor.Digest, l.Descriptor.Urls));
+        Config["rootfs"]!["diff_ids"]!.AsArray().Add(l.Descriptor.UncompressedDigest);
         RecalculateDigest();
     }
 
     private void RecalculateDigest()
     {
-        config["created"] = DateTime.UtcNow;
-        var newManifestConfig = manifest.config with
+        Config["created"] = DateTime.UtcNow;
+        ManifestConfig newManifestConfig = Manifest.config with
         {
-            digest = GetDigest(config),
-            size = Encoding.UTF8.GetBytes(config.ToJsonString()).Length
+            digest = GetDigest(Config),
+            size = Encoding.UTF8.GetBytes(Config.ToJsonString()).Length
         };
-        manifest.config = newManifestConfig;
+
+        ManifestV2 currentManifest = Manifest;
+        currentManifest.config = newManifestConfig;
+        Manifest = currentManifest;
     }
 
     private JsonObject CreatePortMap()
@@ -74,7 +78,7 @@ public class Image
         // ports are entries in a key/value map whose keys are "<number>/<type>" and whose values are an empty object.
         // yes, this is odd.
         var container = new JsonObject();
-        foreach (var port in exposedPorts)
+        foreach (var port in _exposedPorts)
         {
             container.Add($"{port.number}/{port.type}", new JsonObject());
         }
@@ -85,7 +89,7 @@ public class Image
     {
         // Env is a JSON array where each value is of the format: "VAR=value"
         var envVarJson = new JsonArray();
-        foreach (var envVar in environmentVariables)
+        foreach (var envVar in _environmentVariables)
         {
             envVarJson.Add<string>($"{envVar.Key}={envVar.Value}");
         }
@@ -166,7 +170,7 @@ public class Image
     private JsonObject CreateLabelMap()
     {
         var container = new JsonObject();
-        foreach (var label in labels)
+        foreach (var label in _labels)
         {
             container.Add(label.name, label.value);
         }
@@ -177,7 +181,7 @@ public class Image
 
     public void SetEntrypoint(string[] executableArgs, string[]? args = null)
     {
-        JsonObject? configObject = config["config"]!.AsObject();
+        JsonObject? configObject = Config["config"]!.AsObject();
 
         if (configObject is null)
         {
@@ -200,39 +204,39 @@ public class Image
 
     public string WorkingDirectory
     {
-        get => (string?)config["config"]!["WorkingDir"] ?? "";
+        get => (string?)Config["config"]!["WorkingDir"] ?? "";
         set
         {
-            config["config"]!["WorkingDir"] = value;
+            Config["config"]!["WorkingDir"] = value;
             RecalculateDigest();
         }
     }
 
     public void Label(string name, string value)
     {
-        labels.Add(new(name, value));
-        config["config"]!["Labels"] = CreateLabelMap();
+        _labels.Add(new(name, value));
+        Config["config"]!["Labels"] = CreateLabelMap();
         RecalculateDigest();
     }
 
     public void AddEnvironmentVariable(string envVarName, string value)
     {
-        if (!environmentVariables.ContainsKey(envVarName))
+        if (!_environmentVariables.ContainsKey(envVarName))
         {
-            environmentVariables.Add(envVarName, value);
+            _environmentVariables.Add(envVarName, value);
         }
         else
         {
-            environmentVariables[envVarName] = value;
+            _environmentVariables[envVarName] = value;
         }
-        config["config"]!["Env"] = CreateEnvironmentVarMapping();
+        Config["config"]!["Env"] = CreateEnvironmentVarMapping();
         RecalculateDigest();
     }
 
     public void ExposePort(int number, PortType type)
     {
-        exposedPorts.Add(new(number, type));
-        config["config"]!["ExposedPorts"] = CreatePortMap();
+        _exposedPorts.Add(new(number, type));
+        Config["config"]!["ExposedPorts"] = CreatePortMap();
         RecalculateDigest();
     }
 
