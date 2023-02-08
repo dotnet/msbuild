@@ -1,9 +1,9 @@
 <Project>
-    <PropertyGroup>
-        <_IsSDKContainerAllowedVersion>false</_IsSDKContainerAllowedVersion>
-        <!-- Anything newer than 7.0.100-preview.7 is supported -->
-        <_IsSDKContainerAllowedVersion
-            Condition="$([MSBuild]::VersionGreaterThan($(NetCoreSdkVersion), 7.0.100))
+  <PropertyGroup>
+    <_IsSDKContainerAllowedVersion>false</_IsSDKContainerAllowedVersion>
+    <!-- Anything newer than 7.0.100-preview.7 is supported -->
+    <_IsSDKContainerAllowedVersion
+        Condition="$([MSBuild]::VersionGreaterThan($(NetCoreSdkVersion), 7.0.100))
                        OR ( $([MSBuild]::VersionEquals($(NetCoreSdkVersion), 7.0.100))
                             AND (
                                  $(NETCoreSdkVersion.Contains('-preview.7'))
@@ -11,178 +11,183 @@
                                  OR $(NETCoreSdkVersion.Contains('-')) == false
                                 )
                           )">true</_IsSDKContainerAllowedVersion>
-    </PropertyGroup>
+  </PropertyGroup>
 
-    <Target Name="_ContainerVerifySDKVersion"
-        Condition="'$(WebPublishMethod)' == 'Container' or '$(PublishProfile)' == 'DefaultContainer'"
-        BeforeTargets="AfterPublish">
-        <!-- If the user has opted into container publishing via their own profile (WebPublishMethod = Container) or
+  <ItemGroup>
+    <ProjectCapability Include="NetSdkOCIImageBuild" />
+  </ItemGroup>
+
+  <Target Name="_ContainerVerifySDKVersion"
+      Condition="'$(WebPublishMethod)' == 'Container' or '$(PublishProfile)' == 'DefaultContainer'"
+      BeforeTargets="AfterPublish">
+    <!-- If the user has opted into container publishing via their own profile (WebPublishMethod = Container) or
             via the default Profile (PublishProfile = DefaultContainer), make sure they're on a supported SDK version.
             We do the explicit profile name check here because for preview6 for example the profile didn't exist, so we
             can't rely only on the WebPublishMethod. -->
-        <Error Condition="'$(_IsSDKContainerAllowedVersion)' != 'true'" Code="CONTAINER002" Text="The current .NET SDK ($(NETCoreSdkVersion)) doesn't support containerization. Please use version 7.0.100 or higher to enable containerization." />
-    </Target>
+    <Error Condition="'$(_IsSDKContainerAllowedVersion)' != 'true'" Code="CONTAINER002" Text="The current .NET SDK ($(NETCoreSdkVersion)) doesn't support containerization. Please use version 7.0.100 or higher to enable containerization." />
+  </Target>
 
-    <Target Name="ComputeContainerConfig">
-        <!-- Reference data about this project -->
-        <PropertyGroup>
-            <_IsAspNet Condition="@(ProjectCapability->Count()) > 0 and @(ProjectCapability->AnyHaveMetadataValue('Identity', 'AspNetCore'))">true</_IsAspNet>
-            <_IsSelfContained Condition="'$(SelfContained)' == 'true' or '$(PublishSelfContained)' == 'true'">true</_IsSelfContained>
-        </PropertyGroup>
-
-        <!-- Compute private defaults -->
-        <PropertyGroup Condition="$(ContainerBaseImage) == ''">
-            <_ContainerBaseRegistry>mcr.microsoft.com</_ContainerBaseRegistry>
-            <_ContainerBaseImageName Condition="'$(_IsSelfContained)' == 'true'">dotnet/runtime-deps</_ContainerBaseImageName>
-            <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == '' and '$(_IsAspNet)' == 'true'">dotnet/aspnet</_ContainerBaseImageName>
-            <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == ''">dotnet/runtime</_ContainerBaseImageName>
-            <_ContainerBaseImageTag>$(_TargetFrameworkVersionWithoutV)</_ContainerBaseImageTag>
-        </PropertyGroup>
-
-        <PropertyGroup Label="VS defaults">
-            <!-- RegistryUrl is used by existing VS targets for Docker builds - this lets us fill that void -->
-            <ContainerRegistry Condition="'$(RegistryUrl)' != ''">$(RegistryUrl)</ContainerRegistry>
-            <!-- PublishImageTag is used by existing VS targets for Docker builds - this lets us fill that void -->
-            <ContainerImageTag Condition="'$(PublishImageTag)' != ''">$(PublishImageTag)</ContainerImageTag>
-            <!-- This line is a compatibility shim for VS support - the VS container targets define a container tag using this property and format. This lets us be a drop-in replacement for them. -->
-            <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true'">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
-        </PropertyGroup>
-
-        <!-- Container Defaults -->
-        <PropertyGroup>
-            <ContainerBaseImage Condition="'$(ContainerBaseImage)' == ''">$(_ContainerBaseRegistry)/$(_ContainerBaseImageName):$(_ContainerBaseImageTag)</ContainerBaseImage>
-
-            <!-- An empty ContainerRegistry implies pushing to the local daemon, putting this here for documentation purposes -->
-            <!-- <ContainerRegistry></ContainerRegistry> -->
-            
-            <!-- Set which local container daemon to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
-            <LocalContainerDaemon Condition="'$(LocalContainerDaemon)' == ''">Docker</LocalContainerDaemon>
-
-            <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
-            <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
-            
-            <!-- Only default a tag name if no tag names at all are provided -->
-            <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
-            <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true' and '$(ContainerImageTags)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
-            
-            <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
-            
-            <!-- The Container RID should default to the RID used for the entire build (to ensure things run on the platform they are built for), but the user knows best and so should be able to set it explicitly.
-                 For builds that have a RID, we default to that RID. Otherwise, we default to the RID of the currently-executing SDK. -->
-            <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' and '$(IsRidAgnostic)' != 'true'">$(RuntimeIdentifier)</ContainerRuntimeIdentifier>
-            <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' ">$(NETCoreSdkPortableRuntimeIdentifier)</ContainerRuntimeIdentifier>
-        </PropertyGroup>
-
-        <ItemGroup Label="Entrypoint Assignment">
-            <!-- For non-apphosts, we need to invoke `dotnet` `workingdir/app` as separate args -->
-            <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(ContainerWorkingDirectory)/$(TargetFileName)" />
-            <!-- For apphosts, we need to invoke `workingdir/app` as a single arg -->
-            <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true'" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
-        </ItemGroup>
-
-        <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"
-                                  ContainerRegistry="$(ContainerRegistry)"
-                                  ContainerImageName="$(ContainerImageName)"
-                                  ContainerImageTag="$(ContainerImageTag)"
-                                  ContainerImageTags="$(ContainerImageTags)"
-                                  ContainerEnvironmentVariables="@(ContainerEnvironmentVariable)">
-
-            <Output TaskParameter="ParsedContainerRegistry" PropertyName="ContainerBaseRegistry" />
-            <Output TaskParameter="ParsedContainerImage" PropertyName="ContainerBaseName" />
-            <Output TaskParameter="ParsedContainerTag" PropertyName="ContainerBaseTag" />
-            <Output TaskParameter="NewContainerRegistry" PropertyName="ContainerRegistry" />
-            <Output TaskParameter="NewContainerImageName" PropertyName="ContainerImageName" />
-            <Output TaskParameter="NewContainerTags" ItemName="ContainerImageTags" />
-            <Output TaskParameter="NewContainerEnvironmentVariables" ItemName="ContainerEnvironmentVariables" />
-        </ParseContainerProperties>
-
-        <PropertyGroup>
-            <ContainerGenerateLabels Condition="'$(ContainerGenerateLabels)' == ''">true</ContainerGenerateLabels>
-            <ContainerGenerateLabelsImageCreated Condition="'$(ContainerGenerateLabelsImageCreated)' == ''">true</ContainerGenerateLabelsImageCreated>
-            <ContainerGenerateLabelsImageDescription Condition="'$(ContainerGenerateLabelsImageDescription)' == ''">true</ContainerGenerateLabelsImageDescription>
-            <ContainerGenerateLabelsImageAuthors Condition="'$(ContainerGenerateLabelsImageAuthors)' == ''">true</ContainerGenerateLabelsImageAuthors>
-            <ContainerGenerateLabelsImageUrl Condition="'$(ContainerGenerateLabelsImageUrl)' == ''">true</ContainerGenerateLabelsImageUrl>
-            <ContainerGenerateLabelsImageDocumentation Condition="'$(ContainerGenerateLabelsImageDocumentation)' == ''">true</ContainerGenerateLabelsImageDocumentation>
-            <ContainerGenerateLabelsImageSource Condition="'$(ContainerGenerateLabelsImageSource)' == ''">true</ContainerGenerateLabelsImageSource>
-            <ContainerGenerateLabelsImageVersion Condition="'$(ContainerGenerateLabelsImageVersion)' == ''">true</ContainerGenerateLabelsImageVersion>
-            <ContainerGenerateLabelsImageRevision Condition="'$(ContainerGenerateLabelsImageRevision)' == ''">true</ContainerGenerateLabelsImageRevision>
-            <ContainerGenerateLabelsImageVendor Condition="'$(ContainerGenerateLabelsImageVendor)' == ''">true</ContainerGenerateLabelsImageVendor>
-            <ContainerGenerateLabelsImageLicenses Condition="'$(ContainerGenerateLabelsImageLicenses)' == ''">true</ContainerGenerateLabelsImageLicenses>
-            <ContainerGenerateLabelsImageTitle Condition="'$(ContainerGenerateLabelsImageTitle)' == ''">true</ContainerGenerateLabelsImageTitle>
-            <ContainerGenerateLabelsImageBaseDigest Condition="'$(ContainerGenerateLabelsImageBaseDigest)' == ''">true</ContainerGenerateLabelsImageBaseDigest>
-            <ContainerGenerateLabelsImageBaseName Condition="'$(ContainerGenerateLabelsImageBaseName)' == ''">true</ContainerGenerateLabelsImageBaseName>
-        </PropertyGroup>
-
-        <PropertyGroup Label="Defaults for Container Labels">
-            <ContainerDescription Condition="'$(ContainerDescription)' == '' and '$(Description)' != ''">$(Description)</ContainerDescription>
-            <ContainerAuthors Condition="'$(ContainerAuthors)' == '' and '$(Authors)' != ''">$(Authors)</ContainerAuthors>
-            <ContainerInformationUrl Condition="'$(ContainerInformationUrl)' == '' and '$(PackageProjectUrl)' != ''">$(PackageProjectUrl)</ContainerInformationUrl>
-            <ContainerDocumentationUrl Condition="'$(ContainerDocumentationUrl)' == '' and '$(PackageProjectUrl)' != ''">$(PackageProjectUrl)</ContainerDocumentationUrl>
-            <ContainerVersion Condition="'$(ContainerVersion)' == '' and '$(PackageVersion)' != ''">$(PackageVersion)</ContainerVersion>
-            <ContainerLicenseExpression Condition="'$(ContainerLicenseExpression)' == '' and '$(PackageLicenseExpression)' != ''">$(PackageLicenseExpression)</ContainerLicenseExpression>
-            <ContainerTitle Condition="'$(ContainerTitle)' == '' and '$(Title)' != ''">$(Title)</ContainerTitle>
-        </PropertyGroup>
-
-        <!-- Labels generated from descriptions from the spec at https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys -->
-        <ItemGroup Label="Conventional Label assignment" Condition="'$(ContainerGenerateLabels)' == 'true'">
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageCreated)' == 'true'" Include="org.opencontainers.image.created;org.opencontainers.artifact.created" Value="$([System.DateTime]::UtcNow.ToString('o'))" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageDescription)' == 'true' and '$(ContainerDescription)' != ''" Include="org.opencontainers.artifact.description;org.opencontainers.image.description" Value="$(ContainerDescription)" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageAuthors)' == 'true' and '$(ContainerAuthors)' != ''" Include="org.opencontainers.image.authors" Value="$(ContainerAuthors)" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageUrl)' == 'true' and '$(ContainerInformationUrl)' != ''" Include="org.opencontainers.image.url" Value="$(ContainerInformationUrl)" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageDocumentation)' == 'true' and '$(ContainerDocumentationUrl)' != ''" Include="org.opencontainers.image.documentation" Value="$(ContainerDocumentationUrl)" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageVersion)' == 'true' and '$(ContainerVersion)' != ''" Include="org.opencontainers.image.version" Value="$(ContainerVersion)" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageVendor)' == 'true' and '$(ContainerVendor)' != ''" Include="org.opencontainers.image.vendor" Value="$(ContainerVendor)" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageLicenses)' == 'true' and '$(ContainerLicenseExpression)' != ''" Include="org.opencontainers.image.licenses" Value="$(ContainerLicenseExpression)" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageTitle)' == 'true' and '$(ContainerTitle)' != ''" Include="org.opencontainers.image.title" Value="$(ContainerTitle)" />
-            <!-- Need to compute digests, not just names, before we can light this up. This suggests we need a task where all of the 'read' steps are done. -->
-            <!-- <ContainerLabel Condition="'$(ContainerGenerateLabelsImageBaseDigest)' == 'true' and '$(ContainerBaseImageDigest)' != ''" Include="org.opencontainers.image.base.digest" Value="$(ContainerBaseImageDigest)" /> -->
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageBaseName)' == 'true' and '$(ContainerBaseImage)' != ''" Include="org.opencontainers.image.base.name" Value="$(ContainerBaseImage)" />
-        </ItemGroup>
-
-        <!-- These sourcelink-derived properties are only allowed to flow to generated artifacts if `PublishRepositoryUrl` is set as a user signal for opt-in.
-             In addition, the 'nice' property names are currently set by NuGet Pack targets and so we have to use the private/generic names here.  -->
-        <ItemGroup Label="Source control label assignment" Condition="'$(ContainerGenerateLabels)' == 'true' and '$(PublishRepositoryUrl)' == 'true'">
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageSource)' == 'true' and '$(PrivateRepositoryUrl)' != ''" Include="org.opencontainers.image.source" Value="$(PrivateRepositoryUrl)" />
-            <ContainerLabel Condition="'$(ContainerGenerateLabelsImageRevision)' == 'true' and '$(SourceRevisionId)' != ''" Include="org.opencontainers.image.revision" Value="$(SourceRevisionId)" />
-        </ItemGroup>
-    </Target>
-
+  <Target Name="ComputeContainerConfig">
+    <!-- Reference data about this project -->
     <PropertyGroup>
-        <PublishContainerDependsOn>
-            _ContainerVerifySDKVersion;
-            ComputeContainerConfig
-        </PublishContainerDependsOn>
+      <_IsAspNet Condition="@(ProjectCapability->Count()) > 0 and @(ProjectCapability->AnyHaveMetadataValue('Identity', 'AspNetCore'))">true</_IsAspNet>
+      <_IsSelfContained Condition="'$(SelfContained)' == 'true' or '$(PublishSelfContained)' == 'true'">true</_IsSelfContained>
     </PropertyGroup>
 
-    <Target Name="PublishContainer" DependsOnTargets="$(PublishContainerDependsOn)">
+    <!-- Compute private defaults -->
+    <PropertyGroup Condition="$(ContainerBaseImage) == ''">
+      <_ContainerBaseRegistry>mcr.microsoft.com</_ContainerBaseRegistry>
+      <_ContainerBaseImageName Condition="'$(_IsSelfContained)' == 'true'">dotnet/runtime-deps</_ContainerBaseImageName>
+      <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == '' and '$(_IsAspNet)' == 'true'">dotnet/aspnet</_ContainerBaseImageName>
+      <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == ''">dotnet/runtime</_ContainerBaseImageName>
+      <_ContainerBaseImageTag>$(_TargetFrameworkVersionWithoutV)</_ContainerBaseImageTag>
+    </PropertyGroup>
 
-        <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
-            <DotNetHostDirectory>$(NetCoreRoot)</DotNetHostDirectory>
-            <DotNetHostFileName>dotnet</DotNetHostFileName>
-            <DotNetHostFileName Condition="'$(OS)' == 'Windows_NT'">dotnet.exe</DotNetHostFileName>
-        </PropertyGroup>
+    <PropertyGroup Label="VS defaults">
+      <!-- RegistryUrl is used by existing VS targets for Docker builds - this lets us fill that void -->
+      <ContainerRegistry Condition="'$(RegistryUrl)' != ''">$(RegistryUrl)</ContainerRegistry>
+      <!-- PublishImageTag is used by existing VS targets for Docker builds - this lets us fill that void -->
+      <ContainerImageTag Condition="'$(PublishImageTag)' != ''">$(PublishImageTag)</ContainerImageTag>
+      <!-- This line is a compatibility shim for VS support - the VS container targets define a container tag using this property and format. This lets us be a drop-in replacement for them. -->
+      <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true'">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
+    </PropertyGroup>
 
-        <CreateNewImage ContainerizeDirectory="$(ContainerizeFolder)"
-                        ToolPath="$(DotNetHostDirectory)"
-                        ToolExe="$(DotNetHostFileName)"
-                        BaseRegistry="$(ContainerBaseRegistry)"
-                        BaseImageName="$(ContainerBaseName)"
-                        BaseImageTag="$(ContainerBaseTag)"
-                        LocalContainerDaemon="$(LocalContainerDaemon)"
-                        OutputRegistry="$(ContainerRegistry)"
-                        ImageName="$(ContainerImageName)"
-                        ImageTags="@(ContainerImageTags)"
-                        PublishDirectory="$(PublishDir)"
-                        WorkingDirectory="$(ContainerWorkingDirectory)"
-                        Entrypoint="@(ContainerEntrypoint)"
-                        EntrypointArgs="@(ContainerEntrypointArgs)"
-                        Labels="@(ContainerLabel)"
-                        ExposedPorts="@(ContainerPort)"
-                        ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)"
-                        ContainerRuntimeIdentifier="$(ContainerRuntimeIdentifier)"
-                        RuntimeIdentifierGraphPath="$(RuntimeIdentifierGraphPath)"> <!-- The RID graph path is provided as a property by the SDK. -->
-            <Output TaskParameter="GeneratedContainerManifest" PropertyName="GeneratedContainerManifest" />
-            <Output TaskParameter="GeneratedContainerConfiguration" PropertyName="GeneratedContainerConfiguration" />
-        </CreateNewImage>
-    </Target>
+    <!-- Container Defaults -->
+    <PropertyGroup>
+      <ContainerBaseImage Condition="'$(ContainerBaseImage)' == ''">$(_ContainerBaseRegistry)/$(_ContainerBaseImageName):$(_ContainerBaseImageTag)</ContainerBaseImage>
+
+      <!-- An empty ContainerRegistry implies pushing to the local daemon, putting this here for documentation purposes -->
+      <!-- <ContainerRegistry></ContainerRegistry> -->
+
+      <!-- Set which local container daemon to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
+      <LocalContainerDaemon Condition="'$(LocalContainerDaemon)' == ''">Docker</LocalContainerDaemon>
+
+      <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
+      <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
+
+      <!-- Only default a tag name if no tag names at all are provided -->
+      <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
+      <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true' and '$(ContainerImageTags)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
+
+      <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
+
+      <!-- The Container RID should default to the RID used for the entire build (to ensure things run on the platform they are built for), but the user knows best and so should be able to set it explicitly.
+                 For builds that have a RID, we default to that RID. Otherwise, we default to the RID of the currently-executing SDK. -->
+      <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' and '$(IsRidAgnostic)' != 'true'">$(RuntimeIdentifier)</ContainerRuntimeIdentifier>
+      <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' ">$(NETCoreSdkPortableRuntimeIdentifier)</ContainerRuntimeIdentifier>
+    </PropertyGroup>
+
+    <ItemGroup Label="Entrypoint Assignment">
+      <!-- For non-apphosts, we need to invoke `dotnet` `workingdir/app` as separate args -->
+      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(ContainerWorkingDirectory)/$(TargetFileName)" />
+      <!-- For apphosts, we need to invoke `workingdir/app` as a single arg -->
+      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true'" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
+    </ItemGroup>
+
+    <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"
+                              ContainerRegistry="$(ContainerRegistry)"
+                              ContainerImageName="$(ContainerImageName)"
+                              ContainerImageTag="$(ContainerImageTag)"
+                              ContainerImageTags="$(ContainerImageTags)"
+                              ContainerEnvironmentVariables="@(ContainerEnvironmentVariable)">
+
+      <Output TaskParameter="ParsedContainerRegistry" PropertyName="ContainerBaseRegistry" />
+      <Output TaskParameter="ParsedContainerImage" PropertyName="ContainerBaseName" />
+      <Output TaskParameter="ParsedContainerTag" PropertyName="ContainerBaseTag" />
+      <Output TaskParameter="NewContainerRegistry" PropertyName="ContainerRegistry" />
+      <Output TaskParameter="NewContainerImageName" PropertyName="ContainerImageName" />
+      <Output TaskParameter="NewContainerTags" ItemName="ContainerImageTags" />
+      <Output TaskParameter="NewContainerEnvironmentVariables" ItemName="ContainerEnvironmentVariables" />
+    </ParseContainerProperties>
+
+    <PropertyGroup>
+      <ContainerGenerateLabels Condition="'$(ContainerGenerateLabels)' == ''">true</ContainerGenerateLabels>
+      <ContainerGenerateLabelsImageCreated Condition="'$(ContainerGenerateLabelsImageCreated)' == ''">true</ContainerGenerateLabelsImageCreated>
+      <ContainerGenerateLabelsImageDescription Condition="'$(ContainerGenerateLabelsImageDescription)' == ''">true</ContainerGenerateLabelsImageDescription>
+      <ContainerGenerateLabelsImageAuthors Condition="'$(ContainerGenerateLabelsImageAuthors)' == ''">true</ContainerGenerateLabelsImageAuthors>
+      <ContainerGenerateLabelsImageUrl Condition="'$(ContainerGenerateLabelsImageUrl)' == ''">true</ContainerGenerateLabelsImageUrl>
+      <ContainerGenerateLabelsImageDocumentation Condition="'$(ContainerGenerateLabelsImageDocumentation)' == ''">true</ContainerGenerateLabelsImageDocumentation>
+      <ContainerGenerateLabelsImageSource Condition="'$(ContainerGenerateLabelsImageSource)' == ''">true</ContainerGenerateLabelsImageSource>
+      <ContainerGenerateLabelsImageVersion Condition="'$(ContainerGenerateLabelsImageVersion)' == ''">true</ContainerGenerateLabelsImageVersion>
+      <ContainerGenerateLabelsImageRevision Condition="'$(ContainerGenerateLabelsImageRevision)' == ''">true</ContainerGenerateLabelsImageRevision>
+      <ContainerGenerateLabelsImageVendor Condition="'$(ContainerGenerateLabelsImageVendor)' == ''">true</ContainerGenerateLabelsImageVendor>
+      <ContainerGenerateLabelsImageLicenses Condition="'$(ContainerGenerateLabelsImageLicenses)' == ''">true</ContainerGenerateLabelsImageLicenses>
+      <ContainerGenerateLabelsImageTitle Condition="'$(ContainerGenerateLabelsImageTitle)' == ''">true</ContainerGenerateLabelsImageTitle>
+      <ContainerGenerateLabelsImageBaseDigest Condition="'$(ContainerGenerateLabelsImageBaseDigest)' == ''">true</ContainerGenerateLabelsImageBaseDigest>
+      <ContainerGenerateLabelsImageBaseName Condition="'$(ContainerGenerateLabelsImageBaseName)' == ''">true</ContainerGenerateLabelsImageBaseName>
+    </PropertyGroup>
+
+    <PropertyGroup Label="Defaults for Container Labels">
+      <ContainerDescription Condition="'$(ContainerDescription)' == '' and '$(Description)' != ''">$(Description)</ContainerDescription>
+      <ContainerAuthors Condition="'$(ContainerAuthors)' == '' and '$(Authors)' != ''">$(Authors)</ContainerAuthors>
+      <ContainerInformationUrl Condition="'$(ContainerInformationUrl)' == '' and '$(PackageProjectUrl)' != ''">$(PackageProjectUrl)</ContainerInformationUrl>
+      <ContainerDocumentationUrl Condition="'$(ContainerDocumentationUrl)' == '' and '$(PackageProjectUrl)' != ''">$(PackageProjectUrl)</ContainerDocumentationUrl>
+      <ContainerVersion Condition="'$(ContainerVersion)' == '' and '$(PackageVersion)' != ''">$(PackageVersion)</ContainerVersion>
+      <ContainerLicenseExpression Condition="'$(ContainerLicenseExpression)' == '' and '$(PackageLicenseExpression)' != ''">$(PackageLicenseExpression)</ContainerLicenseExpression>
+      <ContainerTitle Condition="'$(ContainerTitle)' == '' and '$(Title)' != ''">$(Title)</ContainerTitle>
+    </PropertyGroup>
+
+    <!-- Labels generated from descriptions from the spec at https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys -->
+    <ItemGroup Label="Conventional Label assignment" Condition="'$(ContainerGenerateLabels)' == 'true'">
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageCreated)' == 'true'" Include="org.opencontainers.image.created;org.opencontainers.artifact.created" Value="$([System.DateTime]::UtcNow.ToString('o'))" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageDescription)' == 'true' and '$(ContainerDescription)' != ''" Include="org.opencontainers.artifact.description;org.opencontainers.image.description" Value="$(ContainerDescription)" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageAuthors)' == 'true' and '$(ContainerAuthors)' != ''" Include="org.opencontainers.image.authors" Value="$(ContainerAuthors)" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageUrl)' == 'true' and '$(ContainerInformationUrl)' != ''" Include="org.opencontainers.image.url" Value="$(ContainerInformationUrl)" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageDocumentation)' == 'true' and '$(ContainerDocumentationUrl)' != ''" Include="org.opencontainers.image.documentation" Value="$(ContainerDocumentationUrl)" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageVersion)' == 'true' and '$(ContainerVersion)' != ''" Include="org.opencontainers.image.version" Value="$(ContainerVersion)" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageVendor)' == 'true' and '$(ContainerVendor)' != ''" Include="org.opencontainers.image.vendor" Value="$(ContainerVendor)" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageLicenses)' == 'true' and '$(ContainerLicenseExpression)' != ''" Include="org.opencontainers.image.licenses" Value="$(ContainerLicenseExpression)" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageTitle)' == 'true' and '$(ContainerTitle)' != ''" Include="org.opencontainers.image.title" Value="$(ContainerTitle)" />
+      <!-- Need to compute digests, not just names, before we can light this up. This suggests we need a task where all of the 'read' steps are done. -->
+      <!-- <ContainerLabel Condition="'$(ContainerGenerateLabelsImageBaseDigest)' == 'true' and '$(ContainerBaseImageDigest)' != ''" Include="org.opencontainers.image.base.digest" Value="$(ContainerBaseImageDigest)" /> -->
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageBaseName)' == 'true' and '$(ContainerBaseImage)' != ''" Include="org.opencontainers.image.base.name" Value="$(ContainerBaseImage)" />
+    </ItemGroup>
+
+    <!-- These sourcelink-derived properties are only allowed to flow to generated artifacts if `PublishRepositoryUrl` is set as a user signal for opt-in.
+             In addition, the 'nice' property names are currently set by NuGet Pack targets and so we have to use the private/generic names here.  -->
+    <ItemGroup Label="Source control label assignment" Condition="'$(ContainerGenerateLabels)' == 'true' and '$(PublishRepositoryUrl)' == 'true'">
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageSource)' == 'true' and '$(PrivateRepositoryUrl)' != ''" Include="org.opencontainers.image.source" Value="$(PrivateRepositoryUrl)" />
+      <ContainerLabel Condition="'$(ContainerGenerateLabelsImageRevision)' == 'true' and '$(SourceRevisionId)' != ''" Include="org.opencontainers.image.revision" Value="$(SourceRevisionId)" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <PublishContainerDependsOn>
+      _ContainerVerifySDKVersion;
+      ComputeContainerConfig
+    </PublishContainerDependsOn>
+  </PropertyGroup>
+
+  <Target Name="PublishContainer" DependsOnTargets="$(PublishContainerDependsOn)">
+
+    <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
+      <DotNetHostDirectory>$(NetCoreRoot)</DotNetHostDirectory>
+      <DotNetHostFileName>dotnet</DotNetHostFileName>
+      <DotNetHostFileName Condition="'$(OS)' == 'Windows_NT'">dotnet.exe</DotNetHostFileName>
+    </PropertyGroup>
+
+    <CreateNewImage ContainerizeDirectory="$(ContainerizeFolder)"
+                    ToolPath="$(DotNetHostDirectory)"
+                    ToolExe="$(DotNetHostFileName)"
+                    BaseRegistry="$(ContainerBaseRegistry)"
+                    BaseImageName="$(ContainerBaseName)"
+                    BaseImageTag="$(ContainerBaseTag)"
+                    LocalContainerDaemon="$(LocalContainerDaemon)"
+                    OutputRegistry="$(ContainerRegistry)"
+                    ImageName="$(ContainerImageName)"
+                    ImageTags="@(ContainerImageTags)"
+                    PublishDirectory="$(PublishDir)"
+                    WorkingDirectory="$(ContainerWorkingDirectory)"
+                    Entrypoint="@(ContainerEntrypoint)"
+                    EntrypointArgs="@(ContainerEntrypointArgs)"
+                    Labels="@(ContainerLabel)"
+                    ExposedPorts="@(ContainerPort)"
+                    ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)"
+                    ContainerRuntimeIdentifier="$(ContainerRuntimeIdentifier)"
+                    RuntimeIdentifierGraphPath="$(RuntimeIdentifierGraphPath)"> <!-- The RID graph path is provided as a property by the SDK. -->
+      
+      <Output TaskParameter="GeneratedContainerManifest" PropertyName="GeneratedContainerManifest" />
+      <Output TaskParameter="GeneratedContainerConfiguration" PropertyName="GeneratedContainerConfiguration" />
+    </CreateNewImage>
+  </Target>
 </Project>

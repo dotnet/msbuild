@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 public static class ContainerBuilder
 {
-    private static ILocalDaemon GetLocalDaemon(string localDaemonType, Action<string> logger) {
+    private static LocalDocker GetLocalDaemon(string localDaemonType, Action<string> logger) {
         var daemon = localDaemonType switch {
             KnownDaemonTypes.Docker => new LocalDocker(logger),
             _ => throw new ArgumentException($"Unknown local container daemon type '{localDaemonType}'. Valid local container daemon types are {String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)}", nameof(localDaemonType))
