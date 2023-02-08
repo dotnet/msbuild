@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CleanAllOptionDescription" xml:space="preserve">
-    <value>Run clean on all feature bands / versions of the SDK that are equal to or lower than the current running SDK, as opposed to only the current one.</value>
+    <value>Clean every workload pack, including non-orphaned ones. In addition, clean SDK feature bands (versions) that are less than or equal to the current running SDK, as opposed to only the current version.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Attempt to remove orphaned workload components and clean workload manifest files.</value>
+    <value>Remove orphaned workload components that may be on the machine.</value>
   </data>
   <data name="VSWorkloadNotRemoved" xml:space="preserve">
     <value>Workload '{0}' was not removed because it is installed and managed by Visual Studio. Please uninstall this workload through Visual Studio to fully remove it.</value>

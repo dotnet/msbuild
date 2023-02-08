@@ -54,10 +54,12 @@ namespace Microsoft.DotNet.Workloads.Workload
         /// SDK installed by an instance matches the feature band of the currently executing SDK.
         /// </summary>
         /// <param name="workloadResolver">The workload resolver used to obtain available workloads.</param>
-        /// <param name="sdkFeatureBand">The feature band of the executing SDK.</param>
         /// <param name="installedWorkloads">The collection of installed workloads to update.</param>
-        internal static void GetInstalledWorkloads(IWorkloadResolver workloadResolver, SdkFeatureBand sdkFeatureBand,
-            InstalledWorkloadsCollection installedWorkloads, bool getForEveryFeatureBand = true)
+        /// <param name="sdkFeatureBand">The feature band of the executing SDK.
+        /// If null, then workloads from all feature bands in VS will be returned.
+        /// </param>
+        internal static void GetInstalledWorkloads(IWorkloadResolver workloadResolver,
+            InstalledWorkloadsCollection installedWorkloads, SdkFeatureBand? sdkFeatureBand = null)
         {
             IEnumerable<string> visualStudioWorkloadIds = GetAvailableVisualStudioWorkloads(workloadResolver);
             HashSet<string> installedWorkloadComponents = new();
@@ -95,7 +97,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                         SdkFeatureBand visualStudioSdkFeatureBand = new SdkFeatureBand(visualStudioSdkVersion);
 
                         // The feature band of the SDK in VS must match that of the SDK on which we're running.
-                        if (!getForEveryFeatureBand && !visualStudioSdkFeatureBand.Equals(sdkFeatureBand))
+                        if (sdkFeatureBand != null && !visualStudioSdkFeatureBand.Equals(sdkFeatureBand))
                         {
                             break;
                         }

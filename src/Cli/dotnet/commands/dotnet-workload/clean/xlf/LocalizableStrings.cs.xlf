@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CleanAllOptionDescription">
-        <source>Run clean on all feature bands / versions of the SDK that are equal to or lower than the current running SDK, as opposed to only the current one.</source>
-        <target state="new">Run clean on all feature bands / versions of the SDK that are equal to or lower than the current running SDK, as opposed to only the current one.</target>
+        <source>Clean every workload pack, including non-orphaned ones. In addition, clean SDK feature bands (versions) that are less than or equal to the current running SDK, as opposed to only the current version.</source>
+        <target state="new">Clean every workload pack, including non-orphaned ones. In addition, clean SDK feature bands (versions) that are less than or equal to the current running SDK, as opposed to only the current version.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Attempt to remove orphaned workload components and clean workload manifest files.</source>
-        <target state="new">Attempt to remove orphaned workload components and clean workload manifest files.</target>
+        <source>Remove orphaned workload components that may be on the machine.</source>
+        <target state="new">Remove orphaned workload components that may be on the machine.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">

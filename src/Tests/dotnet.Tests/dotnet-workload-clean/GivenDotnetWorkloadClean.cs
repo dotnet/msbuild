@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
         private readonly string _manifestPath;
 
         private MockWorkloadManifestUpdater _manifestUpdater = new();
-        private string _sdkFeatureVersion = "6.0.100";
-        private string _installingWorkload = "xamarin-android";
+        private readonly string _sdkFeatureVersion = "6.0.100";
+        private readonly string _installingWorkload = "xamarin-android";
         private readonly string dotnet = nameof(dotnet);
         private readonly string _profileDirectoryLeafName = "user-profile";
 
@@ -104,9 +104,9 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             var cleanCommand = GenerateWorkloadCleanAllCommand(workloadResolver, userProfileDir, dotnetRoot);
             cleanCommand.Execute();
 
-            AssertExtraneousPacksAreRemoved(extraPackPath, extraBelowPackRecordPath);
+            AssertExtraneousPacksAreRemoved(extraPackPath, extraBelowPackRecordPath, true);
             AssertExtraneousPacksAreNotRemoved(extraPackPath, extraAbovePackRecordPath);
-            AssertValidPackCountsMatchExpected(installRoot, expectedPackCount: 7, expectedPackRecordCount: 8);
+            AssertValidPackCountsMatchExpected(installRoot, expectedPackCount: 1, expectedPackRecordCount: 1);
         }
 
         private void InstallWorkload(string userProfileDir, string dotnetRoot, string testDirectory, WorkloadResolver workloadResolver, MockNuGetPackageDownloader nugetDownloader, string sdkBand = null)
@@ -148,11 +148,21 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             return packRecordPath;
         }
 
-        private void AssertExtraneousPacksAreRemoved(string extraPackPath, string extraPackRecordPath)
+        private string MakePack(string installRoot)
+        {
+            var packPath = Path.Combine(installRoot, "packs", "Test.Pack.A", "1.0.0");
+            Directory.CreateDirectory(packPath);
+            return packPath;
+        }
+
+        private void AssertExtraneousPacksAreRemoved(string extraPackPath, string extraPackRecordPath, bool entirePackRootPathShouldRemain = false)
         {
             File.Exists(extraPackRecordPath).Should().BeFalse();
-            Directory.Exists(Path.GetDirectoryName(Path.GetDirectoryName(extraPackRecordPath))).Should().BeFalse();
-            Directory.Exists(extraPackPath).Should().BeFalse();
+            if (!entirePackRootPathShouldRemain)
+            {
+                Directory.Exists(Path.GetDirectoryName(Path.GetDirectoryName(extraPackRecordPath))).Should().BeFalse();
+                Directory.Exists(extraPackPath).Should().BeFalse();
+            }
         }
 
         private void AssertExtraneousPacksAreNotRemoved(string extraPackPath, string extraPackRecordPath)
@@ -162,17 +172,10 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             Directory.Exists(extraPackPath).Should().BeTrue();
         }
 
-        private void AssertValidPackCountsMatchExpected(string installRoot, int expectedPackCount = 7, int expectedPackRecordCount = 8) // 7 and 8 are just the expected pack counts if no packs are deleted
+        private void AssertValidPackCountsMatchExpected(string installRoot, int expectedPackCount, int expectedPackRecordCount)
         {
             Directory.GetDirectories(Path.Combine(installRoot, "packs")).Length.Should().Be(expectedPackCount);
             Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1")).Length.Should().Be(expectedPackRecordCount);
-        }
-
-        private string MakePack(string installRoot)
-        {
-            var packPath = Path.Combine(installRoot, "packs", "Test.Pack.A", "1.0.0");
-            Directory.CreateDirectory(packPath);
-            return packPath;
         }
 
         /// <summary>

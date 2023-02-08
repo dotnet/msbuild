@@ -54,7 +54,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
         public override int Execute()
         {
             ExecuteGarbageCollection();
-            RestoreManifestStates();
             return 0;
         }
 
@@ -63,28 +62,23 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
             if (_cleanAll)
             {
                 _workloadInstaller.GarbageCollectInstalledWorkloadPacks(cleanAllPacks: true);
-
-                if (OperatingSystem.IsWindows())
-                {
-                    InstalledWorkloadsCollection vsWorkloads = new();
-                    VisualStudioWorkloads.GetInstalledWorkloads(_workloadResolver, new SdkFeatureBand(_sdkVersion), vsWorkloads);
-
-                    foreach (var vsWorkload in vsWorkloads.AsEnumerable())
-                    {
-                        Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.VSWorkloadNotRemoved, vsWorkload.Key)));
-                    }
-                }
             }
             else
             {
                 _workloadInstaller.GarbageCollectInstalledWorkloadPacks();
             }
+
+#if !DOT_NET_BUILD_FROM_SOURCE
+            if (OperatingSystem.IsWindows())
+            {
+                InstalledWorkloadsCollection vsWorkloads = new();
+                VisualStudioWorkloads.GetInstalledWorkloads(_workloadResolver, vsWorkloads, _cleanAll ? null : new SdkFeatureBand(_sdkVersion));
+                foreach (var vsWorkload in vsWorkloads.AsEnumerable())
+                {
+                    Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.VSWorkloadNotRemoved, vsWorkload.Key)));
+                }
+            }
+#endif
         }
-
-        private void RestoreManifestStates()
-        {
-
-        }
-
     }
 }

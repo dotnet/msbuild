@@ -37,11 +37,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenManagedInstallItCanGetFeatureBandsWhenFilesArePresent()
         {
-            SdkFeatureBand[] versions = new []
-            { 
+            SdkFeatureBand[] versions = new[]
+            {
                 new SdkFeatureBand("6.0.100"),
                 new SdkFeatureBand("6.0.300"),
-                new SdkFeatureBand("7.0.100") 
+                new SdkFeatureBand("7.0.100")
             };
             (string dotnetRoot, FileBasedInstaller installer, INuGetPackageDownloader _) = GetTestInstaller();
 
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void GivenManagedInstallItCanGetInstalledWorkloads()
         {
             var version = "6.0.100";
-            var workloads = new WorkloadId[] { new WorkloadId("test-workload-1"), new WorkloadId("test-workload-2"), new WorkloadId("test-workload3")};
+            var workloads = new WorkloadId[] { new WorkloadId("test-workload-1"), new WorkloadId("test-workload-2"), new WorkloadId("test-workload3") };
             var (dotnetRoot, installer, _) = GetTestInstaller();
 
             // Write fake workloads
@@ -356,13 +356,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                     .Should()
                     .BeTrue();
             }
-
-            foreach (var pack in packsToBeGarbageCollected)
-            {
-                Directory.Exists(pack.Path)
-                    .Should()
-                    .BeFalse();
-            }
         }
 
         [Fact]
@@ -382,8 +375,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             mockNugetInstaller.DownloadCallParams[0].Should().BeEquivalentTo((new PackageId($"{manifestId}.manifest-{featureBand}"),
                 new NuGetVersion(manifestVersion.ToString()), null as DirectoryPath?, null as PackageSourceLocation));
         }
-		
-	    [Fact]
+
+        [Fact]
         public void GivenManagedInstallItCanGetDownloads()
         {
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
@@ -437,7 +430,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             CliTransaction.RunNew(context => installer.InstallWorkloads(new[] { new WorkloadId("android-sdk-workload") }, new SdkFeatureBand(version), context, new DirectoryPath(cachePath)));
             var mockNugetInstaller = nugetInstaller as MockNuGetPackageDownloader;
-            
+
             // We shouldn't download anything, use the cache
             mockNugetInstaller.DownloadCallParams.Count.Should().Be(0);
 
@@ -458,7 +451,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var packVersion = "8.4.7";
             var version = "6.0.100";
             var cachePath = Path.Combine(dotnetRoot, "MockCache");
-            
+
             var exceptionThrown = Assert.Throws<Exception>(() =>
                 CliTransaction.RunNew(context => installer.InstallWorkloads(new[] { new WorkloadId("android-sdk-workload") }, new SdkFeatureBand(version), context, new DirectoryPath(cachePath))));
             exceptionThrown.Message.Should().Contain(packId);
@@ -471,9 +464,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName, identifier: identifier).Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            INuGetPackageDownloader nugetInstaller = failingInstaller ? new FailingNuGetPackageDownloader(testDirectory) :  new MockNuGetPackageDownloader(dotnetRoot, manifestDownload);
+            INuGetPackageDownloader nugetInstaller = failingInstaller ? new FailingNuGetPackageDownloader(testDirectory) : new MockNuGetPackageDownloader(dotnetRoot, manifestDownload);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
-            var sdkFeatureBand = new SdkFeatureBand("6.0.100");
+            var sdkFeatureBand = new SdkFeatureBand("6.0.300");
             return (dotnetRoot, new FileBasedInstaller(_reporter, sdkFeatureBand, workloadResolver, userProfileDir: testDirectory, nugetInstaller, dotnetRoot, packageSourceLocation: packageSourceLocation), nugetInstaller);
         }
     }

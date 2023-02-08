@@ -181,6 +181,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
+        /// <summary>
+        /// Find all the dependents that look like they belong to SDKs. We only care
+        /// about dependents that match the SDK host we're running under. For example, an x86 SDK should not be
+        /// modifying the x64 MSI dependents. After this, decrement any dependents (registry keys) that should be removed.
+        /// </summary>
+        /// <param name="packRecordToUpdate"></param>
+        /// <param name="depProvider"></param>
+        /// <param name="installedFeatureBands"></param>
+        /// <param name="expectedWorkloadPacks"></param>
+        /// <param name="cleanAllPacks">If true, decrement reference counts for all CLI MSI workloads. Elsewise, only deference dependents for orphaned packs.</param>
         private void UpdateDependentReferenceCounts(
             WorkloadPackRecord packRecordToUpdate,
             DependencyProvider depProvider,
@@ -189,10 +199,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             bool cleanAllPacks
             )
         {
-
-            // Find all the dependents that look like they belong to SDKs. We only care
-            // about dependents that match the SDK host we're running under. For example, an x86 SDK should not be
-            // modifying the x64 MSI dependents.
             IEnumerable<string> sdkDependents = depProvider.Dependents
                 .Where(d => d.StartsWith($"{DependentPrefix}"))
                 .Where(d => d.EndsWith($",{HostArchitecture}"));
