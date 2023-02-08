@@ -997,6 +997,19 @@ namespace Microsoft.Build.Utilities
         }
 #endif
 
+#if NET6_0_OR_GREATER
+
+        /// <summary>
+        /// Logs a warning message using the specified interpolated string.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="stringHandler">The message interpolated string.</param>
+        public void LogWarning(LogInterpolatedStringHandler stringHandler)
+        {
+            LogWarning(stringHandler.GetFormat(), stringHandler.Arguments);
+        }
+#endif
+
         /// <summary>
         /// Logs a warning using the specified string.
         /// Thread safe.
