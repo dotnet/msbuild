@@ -15,7 +15,7 @@ namespace Microsoft.Build.Framework
         private int position = 0;
         private int argPosition = 0;
 
-        public object[] Arguments { get; } = Array.Empty<object>();
+        public object?[] Arguments { get; } = Array.Empty<object?>();
 
         public LogInterpolatedStringHandler(int literalLength, int formattedCount)
         {
