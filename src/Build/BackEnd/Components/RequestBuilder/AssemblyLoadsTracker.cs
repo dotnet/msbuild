@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 #endif
+using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 
@@ -38,51 +39,26 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 
         public static IDisposable StartTracking(
             LoggingContext loggingContext,
-            AssemblyLoadingContext context)
-            => StartTracking(loggingContext, null, context, null, null);
+            AssemblyLoadingContext context,
+            Type? initiator,
+            AppDomain? appDomain = null)
+            => StartTracking(loggingContext, null, context, initiator, null, appDomain);
 
         public static IDisposable StartTracking(
             LoggingContext loggingContext,
             AssemblyLoadingContext context,
-            AppDomain appDomain)
-            => StartTracking(loggingContext, null, context, null, appDomain);
-
-        public static IDisposable StartTracking(
-            LoggingContext loggingContext,
-            AssemblyLoadingContext context,
-            Type initiator)
-            => StartTracking(loggingContext, null, context, initiator, null);
-
-        public static IDisposable StartTracking(
-            LoggingContext loggingContext,
-            AssemblyLoadingContext context,
-            Type initiator,
-            AppDomain appDomain)
-            => StartTracking(loggingContext, null, context, initiator, appDomain);
-
-        public static IDisposable StartTracking(
-            LoggingService loggingService,
-            AssemblyLoadingContext context)
-            => StartTracking(null, loggingService, context, null, null);
-
-        public static IDisposable StartTracking(
-            LoggingService loggingService,
-            AssemblyLoadingContext context,
-            Type initiator)
-            => StartTracking(null, loggingService, context, initiator, null);
-
-        public static IDisposable StartTracking(
-            LoggingService loggingService,
-            AssemblyLoadingContext context,
-            AppDomain appDomain)
-            => StartTracking(null, loggingService, context, null, appDomain);
+            string? initiator = null,
+            AppDomain? appDomain = null)
+            => StartTracking(loggingContext, null, context, null, initiator, appDomain);
 
         public static IDisposable StartTracking(
             LoggingService loggingService,
             AssemblyLoadingContext context,
             Type initiator,
-            AppDomain appDomain)
-            => StartTracking(null, loggingService, context, initiator, appDomain);
+            AppDomain? appDomain = null)
+            => StartTracking(null, loggingService, context, initiator, null, appDomain);
+
+
 
 #if FEATURE_APPDOMAIN
         public static void StopTracking(AppDomain appDomain)
@@ -107,19 +83,47 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             StopTracking();
         }
 
+        private static bool IsBuiltinType(string? typeName)
+        {
+            if (string.IsNullOrEmpty(typeName))
+            {
+                return false;
+            }
+
+            return typeName!.StartsWith("Microsoft.Build", StringComparison.OrdinalIgnoreCase) ||
+                   typeName.StartsWith("Microsoft.NET.Build", StringComparison.OrdinalIgnoreCase) ||
+                   typeName.StartsWith("Microsoft.CodeAnalysis.BuildTasks", StringComparison.OrdinalIgnoreCase);
+        }
+
         private static IDisposable StartTracking(
             LoggingContext? loggingContext,
             LoggingService? loggingService,
             AssemblyLoadingContext context,
-            Type? initiator,
+            Type? initiatorType,
+            string? initiatorName,
             AppDomain? appDomain)
         {
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+            if (
+                // Feature is not enabled
+                !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) ||
+                (
+                    // We do not want to load all assembly loads (including those triggered by builtin types)
+                    !Traits.Instance.LogAllAssemblyLoads &&
+                    (
+                        // Load will be initiated by internal type - so we are not interested in those
+                        initiatorType?.Assembly == Assembly.GetExecutingAssembly()
+                        ||
+                        IsBuiltinType(initiatorType?.FullName)
+                        ||
+                        IsBuiltinType(initiatorName)
+                    )
+                )
+            )
             {
                 return EmptyDisposable.Instance;
             }
 
-            var tracker = new AssemblyLoadsTracker(loggingContext, loggingService, context, initiator, appDomain ?? AppDomain.CurrentDomain);
+            var tracker = new AssemblyLoadsTracker(loggingContext, loggingService, context, initiatorType, appDomain ?? AppDomain.CurrentDomain);
 #if FEATURE_APPDOMAIN
             if (appDomain != null && !appDomain.IsDefaultAppDomain())
             {

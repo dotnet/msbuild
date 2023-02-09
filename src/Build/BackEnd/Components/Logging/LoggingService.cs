@@ -1598,16 +1598,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     : log;
             }
 
-            IDisposable assemblyLoadTracker = null;
             try
             {
-                // Is the logger a custom logger?
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) &&
-                    logger.GetType().Assembly != Assembly.GetExecutingAssembly() &&
-                    !(logger.GetType().FullName?.StartsWith("Microsoft.Build.Logging", StringComparison.OrdinalIgnoreCase) ?? false))
-                {
-                    assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, UnwrapLoggerType(logger).GetType());
-                }
+                using var assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, UnwrapLoggerType(logger).GetType());
 
                 INodeLogger nodeLogger = logger as INodeLogger;
                 if (nodeLogger != null)
@@ -1622,10 +1615,6 @@ namespace Microsoft.Build.BackEnd.Logging
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
                 InternalLoggerException.Throw(e, null, "FatalErrorWhileInitializingLogger", true, logger.GetType().Name);
-            }
-            finally
-            {
-                assemblyLoadTracker?.Dispose();
             }
 
             // Update the minimum guaranteed message importance based on the newly added logger.

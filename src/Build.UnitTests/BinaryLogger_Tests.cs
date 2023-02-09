@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests
                 RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
                 success.ShouldBeTrue();
                 string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
-                text.ShouldContain("Assembly loaded during TaskRun: System.Diagnostics.Debug");
+                text.ShouldContain("Assembly loaded during TaskRun (InlineCode.HelloWorld): System.Diagnostics.Debug");
             }
         }
 

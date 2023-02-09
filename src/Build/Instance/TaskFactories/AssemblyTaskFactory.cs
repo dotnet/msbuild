@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Components.RequestBuilder;
 #endif
 
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -271,6 +271,9 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
+
+                using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, loadInfo.AssemblyName);
+
                 _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
