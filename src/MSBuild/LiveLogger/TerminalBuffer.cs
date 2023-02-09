@@ -101,10 +101,14 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             ShouldRerender = false;
+            ANSIBuilder.Formatting.ForegroundColor desiredColor =
+                topBarColor == TopBarColor.Error ? ANSIBuilder.Formatting.ForegroundColor.Red :
+                topBarColor == TopBarColor.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
+                ANSIBuilder.Formatting.ForegroundColor.White;
             Console.Write(
                 // Write header
                 ANSIBuilder.Cursor.Home() +
-                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")) +
+                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")), ANSIBuilder.Formatting.BackgroundColor.Black, desiredColor) +
                 // Write footer
                 ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
                 new string('-', Console.BufferWidth) + '\n' + FooterText);
