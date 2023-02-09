@@ -11,7 +11,7 @@ namespace Microsoft.Build.Framework
     [InterpolatedStringHandler]
     public ref struct LogInterpolatedStringHandler
     {
-        private char[] buffer;
+        private readonly char[] buffer;
         private int position = 0;
         private int argPosition = 0;
 
@@ -24,8 +24,12 @@ namespace Microsoft.Build.Framework
                 throw new ArgumentOutOfRangeException("Number of formatted arguments must be less than 100.");
             }
 
-            // Length is computed with reserved space for "{x}" and "{xx}" placeholders 
-            buffer = new char[literalLength + (4 * formattedCount)];
+            // Buffer size is computed with reserved space for "{x}" and "{xx}" placeholders
+            int bufferSize = formattedCount < 10 ?
+                literalLength + (3 * formattedCount) :
+                literalLength + 3 * (formattedCount % 10) + 4 * (formattedCount - (formattedCount % 10));
+
+            buffer = new char[bufferSize];
 
             if (formattedCount > 0)
             {

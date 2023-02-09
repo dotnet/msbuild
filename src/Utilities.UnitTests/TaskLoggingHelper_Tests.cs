@@ -319,11 +319,11 @@ namespace Microsoft.Build.UnitTests
             Task t = new MockTask();
             t.BuildEngine = mockEngine;
 
-            t.Log.LogMessage($"echo {0} and {"1"}");
+            t.Log.LogMessage($"echo {0} and {"1"} {2} {3} {4} {5} {6} {7} {8} {9} {10}");
 
             mockEngine.BuildEventArgs.Count.ShouldBe(1);
             mockEngine.BuildEventArgs[0].ShouldBeOfType<BuildMessageEventArgs>();
-            mockEngine.BuildEventArgs[0].Message.ShouldBe("echo 0 and 1");
+            mockEngine.BuildEventArgs[0].Message.ShouldBe("echo 0 and 1 2 3 4 5 6 7 8 9 10");
         }
 
         [Fact]
