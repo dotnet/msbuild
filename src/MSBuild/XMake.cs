@@ -3258,6 +3258,12 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
+                // If supported, advertise livelogger
+                if (DoesEnvironmentSupportLiveLogger())
+                {
+                    messagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage("Try out the new LiveLogger using the switch -livelogger or -ll", MessageImportance.High));
+                }
                 ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
 
