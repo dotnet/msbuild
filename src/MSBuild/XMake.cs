@@ -3249,17 +3249,20 @@ namespace Microsoft.Build.CommandLine
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
+            // See if live logger is supported
+            bool liveLoggerSupported = DoesEnvironmentSupportLiveLogger();
+
             // Choose default console logger
             if (
                 (liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true" || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
-                && DoesEnvironmentSupportLiveLogger())
+                && liveLoggerSupported)
             {
                 ProcessLiveLogger(noConsoleLogger, loggers);
             }
             else
             {
                 // If supported, advertise livelogger
-                if (DoesEnvironmentSupportLiveLogger())
+                if (liveLoggerSupported)
                 {
                     messagesToLogInBuildLoggers.Add(
                         new BuildManager.DeferredBuildMessage("Try out the new LiveLogger using the switch -livelogger or -ll", MessageImportance.High));
