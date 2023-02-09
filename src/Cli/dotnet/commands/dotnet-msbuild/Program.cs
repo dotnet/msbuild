@@ -29,8 +29,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
             msbuildArgs.AddRange(parseResult.GetValue(MSBuildCommandParser.Arguments));
 
-            //result.ShowHelpOrErrorIfAppropriate();
-
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(MSBuildCommandParser.GetCommand()));
 
             MSBuildCommand command = new MSBuildCommand(
@@ -38,11 +36,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 msbuildPath);
             return command;
         }
-
-        //public int Execute()
-        //{
-        //    return new MSBuildForwardingApp(_msbuildArgs, _msbuildPath).Execute();
-        //}
 
         public static int Run(ParseResult parseResult)
         {
