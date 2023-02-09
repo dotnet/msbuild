@@ -1079,6 +1079,119 @@ public static class Program
         }
 
         [Theory]
+        [InlineData("invalidProfile", true)]
+        [InlineData("invalidProfile.pubxml", true)]
+        [InlineData("..\\Properties\\PublishProfiles\\invalidProfile.pubxml", true)]
+        [InlineData("invalidProfile.txt", true)]
+        [InlineData("testProfile", false)]
+        [InlineData("testProfile.pubxml", false)]
+        [InlineData("..\\Properties\\PublishProfiles\\testProfile.pubxml", false)]
+        [InlineData("", false)]
+        public void It_warns_with_an_invalid_publish_profile_NetSdk(string publishProfile, bool shouldWarn)
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+
+            var testProject = new TestProject()
+            {
+                Name = "ConsoleWithPublishProfile",
+                TargetFrameworks = tfm,
+                ProjectSdk = "Microsoft.NET.Sdk",
+                IsExe = true,
+            };
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: $"PublishProfile{publishProfile.Length}");
+
+            var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
+            var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
+            Directory.CreateDirectory(publishProfilesDirectory);
+
+            File.WriteAllText(Path.Combine(publishProfilesDirectory, "testProfile.pubxml"), $@"
+<Project>
+  <PropertyGroup>
+    <msbuildProperty>value</msbuildProperty>
+  </PropertyGroup>
+</Project>
+");
+
+            var command = new PublishCommand(testProjectInstance);
+            if (shouldWarn)
+            {
+                command
+                    .Execute($"/p:PublishProfile={publishProfile}")
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("NETSDK1198");
+            }
+            else
+            {
+                command
+                    .Execute($"/p:PublishProfile={publishProfile}")
+                    .Should()
+                    .Pass()
+                    .And
+                    .NotHaveStdOutContaining("NETSDK1198");
+            }
+        }
+
+        [Theory]
+        [InlineData("invalidProfile", true)]
+        [InlineData("invalidProfile.pubxml", true)]
+        [InlineData("..\\Properties\\PublishProfiles\\invalidProfile.pubxml", true)]
+        [InlineData("invalidProfile.txt", true)]
+        [InlineData("testProfile", false)]
+        [InlineData("testProfile.pubxml", false)]
+        [InlineData("..\\Properties\\PublishProfiles\\testProfile.pubxml", false)]
+        [InlineData("Default", false)]
+        [InlineData("", false)]
+        public void It_warns_with_an_invalid_publish_profile_WebSdk(string publishProfile, bool shouldWarn)
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+
+            var testProject = new TestProject()
+            {
+                Name = "WebWithPublishProfile",
+                TargetFrameworks = tfm,
+                ProjectSdk = "Microsoft.NET.Sdk.Web",
+                IsExe = true,
+            };
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: $"PublishProfile{publishProfile.Length}");
+
+            var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
+            var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
+            Directory.CreateDirectory(publishProfilesDirectory);
+
+            File.WriteAllText(Path.Combine(publishProfilesDirectory, "testProfile.pubxml"), $@"
+<Project>
+  <PropertyGroup>
+    <msbuildProperty>value</msbuildProperty>
+  </PropertyGroup>
+</Project>
+");
+
+            var command = new PublishCommand(testProjectInstance);
+            if (shouldWarn)
+            {
+                command
+                    .Execute($"/p:PublishProfile={publishProfile}")
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("NETSDK1198");
+            }
+            else
+            {
+                command
+                    .Execute($"/p:PublishProfile={publishProfile}")
+                    .Should()
+                    .Pass()
+                    .And
+                    .NotHaveStdOutContaining("NETSDK1198");
+            }
+        }
+
+        [Theory]
         [InlineData("--p:PublishReadyToRun=true")]
         [InlineData("-p:PublishSingleFile=true")]
         [InlineData("-p:PublishSelfContained=true")]

@@ -114,6 +114,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(PublishAotSupported)' != 'true'"
                 ResourceName="AotNotSupported" />
 
+    <NETSdkWarning Condition="'$(PublishProfileImported)' != 'true' and '$(PublishProfile)' != ''"
+                ResourceName="PublishProfileNotPresent" 
+                FormatArguments="$(PublishProfile)"/>    
+                               
     <!-- Enable warning for trying to use PublishRelease or PackRelease with a solution if env-var is not set.-->
     <NETSdkWarning Condition="'$(PublishRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS)' == ''"
                    ResourceName="PReleaseRequiresEnvVarOnSln" 

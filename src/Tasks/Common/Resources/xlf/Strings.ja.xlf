@@ -9,12 +9,12 @@
       </trans-unit>
       <trans-unit id="AotNoValidRuntimePackageError">
         <source>NETSDK1183: Unable to optimize assemblies for ahead-of-time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="new">NETSDK1183: Unable to optimize assemblies for ahead-of-time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</target>
+        <target state="translated">NETSDK1183: Ahead Of Time コンパイル用にアセンブリを最適化できません: 有効なランタイム パッケージが見つかりませんでした。PublishAot プロパティを false に設定するか、公開時に、サポートされているランタイム識別子を使用してください。.NET 7 以降を対象とする場合は、必ず PublishAot プロパティを true に設定してパッケージを復元してください。</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AotNotSupported">
         <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="new">NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</target>
+        <target state="translated">NETSDK1195: SDK は Ahead Of Time コンパイルをサポートしていません。PublishAot プロパティを false に設定してください。</target>
         <note>{StrBegin="NETSDK1195: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -724,6 +724,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
         <target state="translated">NETSDK1093: プロジェクト ツール (DotnetCliTool) は、ターゲットが .NET Core 2.2 以下の場合のみサポートされます。</target>
         <note>{StrBegin="NETSDK1093: "}</note>
+      </trans-unit>
+      <trans-unit id="PublishProfileNotPresent">
+        <source>NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</source>
+        <target state="new">NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</target>
+        <note>{StrBegin="NETSDK1198: "}</note>
       </trans-unit>
       <trans-unit id="PublishReadyToRunRequiresVersion30">
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>

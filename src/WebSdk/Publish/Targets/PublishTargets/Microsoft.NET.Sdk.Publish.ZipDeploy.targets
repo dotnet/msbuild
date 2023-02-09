@@ -26,6 +26,9 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
  -->
 
   <Target Name="CreateZipFile">
+    <MakeDir Directories="$(PublishIntermediateTempPath)" 
+      Condition="!Exists('$(PublishIntermediateTempPath)')" />
+
     <CreateZipFile
       FolderToZip="$(PublishIntermediateOutputPath)"
       ProjectName="$(MSBuildProjectName)"
