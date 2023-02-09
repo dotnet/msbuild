@@ -100,12 +100,14 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             var extraAbovePackRecordPath = MakePackRecord(installRoot, aboveSdkFeatureBand);
             var extraBelowPackRecordPath = MakePackRecord(installRoot, belowSdkFeatureBand);
             var extraPackPath = MakePack(installRoot);
+            var workloadInstallationRecordDirectory = Path.Combine(installRoot, "metadata", "workloads", _sdkFeatureVersion, "InstalledWorkloads");
 
             var cleanCommand = GenerateWorkloadCleanAllCommand(workloadResolver, userProfileDir, dotnetRoot);
             cleanCommand.Execute();
 
             AssertExtraneousPacksAreRemoved(extraPackPath, extraBelowPackRecordPath, true);
             AssertExtraneousPacksAreNotRemoved(extraPackPath, extraAbovePackRecordPath);
+            AssertWorkloadInstallationRecordIsRemoved(workloadInstallationRecordDirectory);
             AssertValidPackCountsMatchExpected(installRoot, expectedPackCount: 1, expectedPackRecordCount: 1);
         }
 
@@ -170,6 +172,11 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             File.Exists(extraPackRecordPath).Should().BeTrue();
             Directory.Exists(Path.GetDirectoryName(Path.GetDirectoryName(extraPackRecordPath))).Should().BeTrue();
             Directory.Exists(extraPackPath).Should().BeTrue();
+        }
+
+        private void AssertWorkloadInstallationRecordIsRemoved(string workloadInstallationRecordDirectory)
+        {
+            Assert.Equal(Directory.GetFiles(workloadInstallationRecordDirectory), System.Array.Empty<string>());
         }
 
         private void AssertValidPackCountsMatchExpected(string installRoot, int expectedPackCount, int expectedPackRecordCount)

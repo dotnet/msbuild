@@ -365,6 +365,29 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     Directory.Delete(packIdDir);
                 }
             }
+
+            if (cleanAllPacks)
+            {
+                EradicateAllWorkloadInstallationRecordsForFeatureBandAndBelow(_sdkFeatureBand);
+            }
+        }
+
+        private void EradicateAllWorkloadInstallationRecordsForFeatureBandAndBelow(SdkFeatureBand featureBand)
+        {
+            FileBasedInstallationRecordRepository workloadRecordRepository = new(_workloadMetadataDir);
+            var allFeatureBands = workloadRecordRepository.GetFeatureBandsWithInstallationRecords();
+
+            foreach (SdkFeatureBand potentialBandToClean in allFeatureBands)
+            {
+                if (potentialBandToClean.CompareTo(featureBand) < 1)
+                {
+                    var workloadInstallationRecordIds = workloadRecordRepository.GetInstalledWorkloads(potentialBandToClean);
+                    foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
+                    {
+                        workloadRecordRepository.DeleteWorkloadInstallationRecord(workloadInstallationRecordId, potentialBandToClean);
+                    }
+                }
+            }
         }
 
         public void Shutdown()
