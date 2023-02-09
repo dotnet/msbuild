@@ -251,8 +251,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                     Directory.CreateDirectory(pack.Path);
                 }
             }
-            // Write fake install record for 6.0.100
-            var workloadsRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersions.First(), "InstalledWorkloads");
+            // Write fake install record for 6.0.300
+            var workloadsRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersions[1], "InstalledWorkloads");
             Directory.CreateDirectory(workloadsRecordPath);
             File.Create(Path.Combine(workloadsRecordPath, "xamarin-empty-mock"));
 
@@ -337,7 +337,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 }
             }
             // Write fake workload install record for 6.0.100
-            var installedWorkloadsPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersions.First(), "InstalledWorkloads", "xamarin-android-build");
+            var installedWorkloadsPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersions[1], "InstalledWorkloads", "xamarin-android-build");
             File.WriteAllText(installedWorkloadsPath, string.Empty);
 
             installer.GarbageCollectInstalledWorkloadPacks();
@@ -351,10 +351,17 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                     .Should()
                     .BeTrue();
 
-                var expectedRecordPath = Path.Combine(installedPacksPath, pack.Id, pack.Version, sdkVersions.First());
+                var expectedRecordPath = Path.Combine(installedPacksPath, pack.Id, pack.Version, sdkVersions[1]);
                 File.Exists(expectedRecordPath)
                     .Should()
                     .BeTrue();
+            }
+
+            foreach (var pack in packsToBeGarbageCollected)
+            {
+                Directory.Exists(pack.Path)
+                    .Should()
+                    .BeFalse();
             }
         }
 

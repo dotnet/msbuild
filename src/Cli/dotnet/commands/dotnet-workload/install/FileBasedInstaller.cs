@@ -310,6 +310,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     var bandRecordPaths = Directory.GetFileSystemEntries(packVersionDir);
 
+                    // Mark packs for GC from versions / feature bands of the SDK that are not present on the machine
                     var unneededBandRecordPaths = bandRecordPaths
                         .Where(recordPath =>
                             {
@@ -318,6 +319,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             }
                     );
 
+                    // Mark packs for GC that don't have a corresponding workload installation record (or all packs).
                     var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
                     if (
                         new SdkFeatureBand(Path.GetFileName(currentBandRecordPath)).CompareTo(_sdkFeatureBand) < 1 &&
