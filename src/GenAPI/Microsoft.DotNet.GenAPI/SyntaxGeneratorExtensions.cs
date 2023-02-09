@@ -66,6 +66,15 @@ namespace Microsoft.DotNet.GenAPI
                 }
             }
 
+            if (symbol is IEventSymbol eventSymbol && !eventSymbol.IsAbstract)
+            {
+                // adds generation of add & remove accessors for the non abstract events.
+                return syntaxGenerator.CustomEventDeclaration(eventSymbol.Name,
+                    syntaxGenerator.TypeExpression(eventSymbol.Type),
+                    eventSymbol.DeclaredAccessibility,
+                    DeclarationModifiers.From(eventSymbol));
+            }
+
             try
             {
                 return syntaxGenerator.Declaration(symbol);

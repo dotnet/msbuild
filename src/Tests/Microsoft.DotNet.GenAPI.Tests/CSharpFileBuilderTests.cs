@@ -436,7 +436,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
                     public class Events
                     {
-                        public event System.EventHandler<string> OnNewMessage { add { } remove {} }
+                        public event System.EventHandler<string> OnNewMessage { add { } remove { } }
                     }
                 }
                 """,
@@ -450,8 +450,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
                     public partial class Events
                     {
-                        /// add & remove accessors have a default implementation.
-                        public event System.EventHandler<string> OnNewMessage;
+                        public event System.EventHandler<string> OnNewMessage { add { } remove { } }
                     }
                 }
                 """);
@@ -1254,6 +1253,30 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class Bar
                         {
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestMethodsWithReferenceParameterGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class foo
+                        {
+                            public void Execute(out int i) { i = 1; }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class foo
+                        {
+                            public void Execute(out int i) { throw null; }
                         }
                     }
                     """,
