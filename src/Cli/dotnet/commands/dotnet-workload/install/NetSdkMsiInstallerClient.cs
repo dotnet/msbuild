@@ -248,7 +248,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             // No need to plan. We know that there are no other dependents, the MSI is installed and we
                             // want to remove it.
                             VerifyPackage(msi);
-                            ExecutePackage(msi, InstallAction.Uninstall);
+                            ExecutePackage(msi, InstallAction.Uninstall, id);
                         }
                     }
                 }
@@ -354,7 +354,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> _);
             }
 
-            ExecutePackage(msi, plannedAction);
+            ExecutePackage(msi, plannedAction, msiPackageId);
 
             // Update the reference count against the MSI.
             UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
@@ -373,7 +373,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     VerifyPackage(msi);
                     DetectState state = DetectPackage(msi, out Version installedVersion);
                     InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Repair, installedVersion, out _);
-                    ExecutePackage(msi, plannedAction);
+                    ExecutePackage(msi, plannedAction, aquirableMsi.NuGetPackageId);
 
                     // Update the reference count against the MSI.
                     UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
@@ -409,7 +409,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         {
                             shouldRollBackPack = true;
                         }
-                        ExecutePackage(msi, plannedAction);
+                        ExecutePackage(msi, plannedAction, msiToInstall.NuGetPackageId);
 
                         // Update the reference count against the MSI.
                         UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
@@ -463,7 +463,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 // The previous steps would have logged the final action. If the verdict is not to uninstall we can exit.
                 if (plannedAction == InstallAction.Uninstall)
                 {
-                    ExecutePackage(msi, plannedAction);
+                    ExecutePackage(msi, plannedAction, msiToRollback.NuGetPackageId);
                 }
 
                 Log?.LogMessage("Rollback completed.");
@@ -858,27 +858,30 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// </summary>
         /// <param name="msi">The MSI package to execute.</param>
         /// <param name="action">The action to perform.</param>
-        private void ExecutePackage(MsiPayload msi, InstallAction action)
+        /// <param name="displayName">A friendly name to display to the user when reporting progress. If no value is provided, the MSI
+        /// filename will be used.</param>
+        private void ExecutePackage(MsiPayload msi, InstallAction action, string displayName = null)
         {
             uint error = Error.SUCCESS;
             string logFile = GetMsiLogName(msi, action);
+            string name = string.IsNullOrWhiteSpace(displayName) ? msi.Payload : displayName;
 
             switch (action)
             {
                 case InstallAction.MinorUpdate:
                 case InstallAction.Install:
                 case InstallAction.MajorUpgrade:
-                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressInstall, msi.Payload), () => InstallMsi(msi.MsiPath, logFile));
+                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressInstall, name), () => InstallMsi(msi.MsiPath, logFile));
                     ExitOnError(error, $"Failed to install {msi.Payload}.");
                     break;
 
                 case InstallAction.Repair:
-                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressRepair, msi.Payload), () => RepairMsi(msi.ProductCode, logFile));
+                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressRepair, name), () => RepairMsi(msi.ProductCode, logFile));
                     ExitOnError(error, $"Failed to repair {msi.Payload}.");
                     break;
 
                 case InstallAction.Uninstall:
-                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressUninstall, msi.Payload), () => UninstallMsi(msi.ProductCode, logFile));
+                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressUninstall, name), () => UninstallMsi(msi.ProductCode, logFile));
                     ExitOnError(error, $"Failed to remove {msi.Payload}.");
                     break;
 

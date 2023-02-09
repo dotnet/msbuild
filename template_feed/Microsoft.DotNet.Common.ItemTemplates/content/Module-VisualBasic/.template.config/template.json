@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Microsoft",
+  "classifications": [
+    "Common"
+  ],
+  "name": "Module",
+  "generatorVersions": "[1.0.0.0-*)",
+  "description": "Creates a new Visual Basic module",
+  "tags": {
+    "language": "VB",
+    "type": "item"
+  },
+  "groupIdentity": "DotNet.Common.Module",
+  "precedence": "0",
+  "identity": "DotNet.Common.Module.VisualBasic",
+  "shortName": "module",
+  "sourceName": "Module1",
+  "preferDefaultName": true,
+  "defaultName": "Module1",
+  "primaryOutputs": [
+    {
+      "path": "Module1.vb"
+    }
+  ],
+  "constraints": {
+    "visualbasic-only": {
+      "type": "project-capability",
+      "args": "VB"
+    }
+  }
+}
