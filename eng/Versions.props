@@ -126,14 +126,14 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/templating -->
-    <MicrosoftTemplateEngineAbstractionsPackageVersion>7.0.200</MicrosoftTemplateEngineAbstractionsPackageVersion>
+    <MicrosoftTemplateEngineAbstractionsPackageVersion>7.0.201</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineEdgePackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineEdgePackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
     <MicrosoftTemplateEngineUtilsPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineUtilsPackageVersion>
     <MicrosoftTemplateSearchCommonPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateSearchCommonPackageVersion>
     <!-- test dependencies -->
-    <MicrosoftTemplateEngineMocksPackageVersion>7.0.200-rtm.23075.6</MicrosoftTemplateEngineMocksPackageVersion>
-    <MicrosoftTemplateEngineTestHelperPackageVersion>7.0.200-rtm.23069.8</MicrosoftTemplateEngineTestHelperPackageVersion>
+    <MicrosoftTemplateEngineMocksPackageVersion>7.0.201-servicing.23108.3</MicrosoftTemplateEngineMocksPackageVersion>
+    <MicrosoftTemplateEngineTestHelperPackageVersion>7.0.201-rtm.23107.10</MicrosoftTemplateEngineTestHelperPackageVersion>
     <MicrosoftTemplateEngineAuthoringTemplateVerifierVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineAuthoringTemplateVerifierVersion>
   </PropertyGroup>
   <PropertyGroup>
