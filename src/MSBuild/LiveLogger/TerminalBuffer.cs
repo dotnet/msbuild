@@ -62,6 +62,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public static string Footer = string.Empty;
         internal static bool IsTerminated = false;
         internal static bool ShouldRerender = true;
+        internal static TopBarColor topBarColor = TopBarColor.None;
         internal static int ScrollableAreaHeight
         {
             get
@@ -237,5 +238,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             ShouldRerender = true;
         }
         #endregion
+    }
+
+    internal enum TopBarColor
+    {
+        None,
+        Warning,
+        Error,
     }
 }

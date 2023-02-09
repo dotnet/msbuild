@@ -197,6 +197,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             WarningCount++;
             MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
+            TerminalBuffer.topBarColor = TerminalBuffer.topBarColor == TopBarColor.Error ? TopBarColor.Error : TopBarColor.Warning;
             return node;
         }
         public MessageNode? AddError(BuildErrorEventArgs args)
@@ -204,6 +205,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             ErrorCount++;
             MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
+            TerminalBuffer.topBarColor = TopBarColor.Error;
             return node;
         }
     }
