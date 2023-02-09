@@ -10,6 +10,7 @@ These orphaned packs that the SDK did not correctly remove can reside on the fil
 The point of this command is to help users:
 - Clean up residue on their system, saving disk space.
 - Help potentially restore their machine to a working state with workloads.
+- Mass uninstall every workload in one swoop.
 
 We considered `workload clean` as an option to "clean" or restore manifests to known SDK states; however, because of the existence of `workload repair`, we decided that is poor UX and can be done in that command.
 
