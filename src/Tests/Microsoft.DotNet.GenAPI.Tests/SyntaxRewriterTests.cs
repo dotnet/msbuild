@@ -176,6 +176,60 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """);
         }
+
+        [Fact]
+        public void TestOperatorPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                namespace A
+                {
+                    class B
+                    {
+                        public static bool operator ==(ChildSyntaxList list1, ChildSyntaxList list2) {
+                        throw null;
+                        }
+                    }
+                }
+                """,
+                expected: """
+                namespace A
+                {
+                    class B
+                    {
+                        public static bool operator ==(ChildSyntaxList list1, ChildSyntaxList list2) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        public void TestConversionOperatorPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                    namespace Foo
+                    {
+                        public readonly struct Digit
+                        {
+                            public static implicit operator byte(Digit d) {
+                            throw null;
+                            }
+                            public static explicit operator Digit(byte b) => throw null;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public readonly struct Digit
+                        {
+                            public static implicit operator byte(Digit d) { throw null; }
+                            public static explicit operator Digit(byte b) => throw null;
+                        }
+                    }
+                    """);
+        }
     }
 
     public class TypeDeclarationSyntaxRewriterTests : SyntaxRewriterTests

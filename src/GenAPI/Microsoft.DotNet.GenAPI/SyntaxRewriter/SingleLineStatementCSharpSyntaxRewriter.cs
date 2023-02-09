@@ -21,6 +21,41 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
         /// <inheritdoc />
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
+            return VisitBaseMethodDeclarationSyntax(node);
+        }
+
+        /// <inheritdoc />
+        public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
+        {
+            return VisitBaseMethodDeclarationSyntax(node);
+        }
+
+        /// <inheritdoc />
+        public override SyntaxNode? VisitOperatorDeclaration(OperatorDeclarationSyntax node)
+        {
+            return VisitBaseMethodDeclarationSyntax(node);
+        }
+
+        /// <inheritdoc />
+        public override SyntaxNode? VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
+        {
+            return VisitBaseMethodDeclarationSyntax(node);
+        }
+
+        /// <inheritdoc />
+        public override SyntaxNode? VisitIndexerDeclaration(IndexerDeclarationSyntax node)
+        {
+            return VisitBasePropertyDeclarationSyntax(node);
+        }
+
+        /// <inheritdoc />
+        public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+        {
+            return VisitBasePropertyDeclarationSyntax(node);
+        }
+
+        private static SyntaxNode? VisitBaseMethodDeclarationSyntax(BaseMethodDeclarationSyntax node)
+        {
             BlockSyntax? body = node.Body;
             if (body != null)
             {
@@ -39,19 +74,7 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             return node.WithBody(body);
         }
 
-        public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
-        {
-            BlockSyntax? body = node.Body;
-            if (body != null)
-            {
-                body = body
-                    .WithOpenBraceToken(body.OpenBraceToken.WithTrailingTrivia(SyntaxFactory.Space))
-                    .WithCloseBraceToken(body.CloseBraceToken.WithLeadingTrivia());
-            }
-            return node.WithBody(body);
-        }
-
-        public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+        private static SyntaxNode? VisitBasePropertyDeclarationSyntax(BasePropertyDeclarationSyntax node)
         {
             AccessorListSyntax? accessorList = node.AccessorList;
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.GenAPI
@@ -37,6 +38,14 @@ namespace Microsoft.DotNet.GenAPI
             }
 
             return (bool)errorArgument.Value;
+        }
+
+        public static bool IsDefaultMemberAttribute(this AttributeData attribute)
+        {
+            INamedTypeSymbol? attributeClass = attribute.AttributeClass;
+            if (attributeClass == null) return false;
+
+            return attributeClass.ToDisplayString() == typeof(DefaultMemberAttribute).FullName;
         }
     }
 }

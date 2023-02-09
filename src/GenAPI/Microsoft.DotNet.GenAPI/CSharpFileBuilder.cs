@@ -105,7 +105,12 @@ namespace Microsoft.DotNet.GenAPI
                 foreach (AttributeData attribute in typeMember.GetAttributes()
                     .Where(a => a.AttributeClass != null && _symbolFilter.Include(a.AttributeClass)))
                 {
-                    typeDeclaration = _syntaxGenerator.AddAttributes(typeDeclaration, _syntaxGenerator.Attribute(attribute));
+                    // The C# compiler emits the DefaultMemberAttribute on any type containing an indexer.
+                    // In C# it is an error to manually attribute a type with the DefaultMemberAttribute if the type also declares an indexer.
+                    if (!attribute.IsDefaultMemberAttribute() || !typeMember.HasIndexer())
+                    {
+                        typeDeclaration = _syntaxGenerator.AddAttributes(typeDeclaration, _syntaxGenerator.Attribute(attribute));
+                    }
                 }
 
                 typeDeclaration = Visit(typeDeclaration, typeMember);
@@ -122,6 +127,20 @@ namespace Microsoft.DotNet.GenAPI
 
             foreach (ISymbol member in members.Order())
             {
+                // If the method is ExplicitInterfaceImplementation and is derived from an interface that was filtered out, we must filter out it either.
+                if (member is IMethodSymbol method &&
+                    method.MethodKind == MethodKind.ExplicitInterfaceImplementation &&
+                    method.ExplicitInterfaceImplementations.Any(m => !_symbolFilter.Include(m.ContainingSymbol)))
+                {
+                    continue;
+                }
+                // If the property is derived from an interface that was filter out, we must filtered out it either.
+                if (member is IPropertySymbol property && !property.ExplicitInterfaceImplementations.IsEmpty &&
+                    property.ExplicitInterfaceImplementations.Any(m => !_symbolFilter.Include(m.ContainingSymbol)))
+                {
+                    continue;
+                }
+
                 SyntaxNode memberDeclaration = _syntaxGenerator.DeclarationExt(member, _symbolFilter);
 
                 foreach (AttributeData attribute in member.GetAttributes()

@@ -16,20 +16,9 @@ namespace Microsoft.DotNet.GenAPI.Tests
 {
     public class CSharpFileBuilderTests
     {
-        private readonly StringWriter _stringWriter = new();
-        private readonly IAssemblySymbolWriter _csharpFileBuilder;
-
         class AllowAllFilter : ISymbolFilter
         {
             public bool Include(ISymbol symbol) => true;
-        }
-
-        public CSharpFileBuilderTests()
-        {
-            var compositeFilter = new CompositeSymbolFilter()
-                .Add<ImplicitSymbolFilter>()
-                .Add(new AccessibilitySymbolFilter(true, true, true));
-            _csharpFileBuilder = new CSharpFileBuilder(compositeFilter, _stringWriter, null, MetadataReferences);
         }
 
         private static IEnumerable<MetadataReference> MetadataReferences
@@ -41,12 +30,24 @@ namespace Microsoft.DotNet.GenAPI.Tests
         private static SyntaxTree GetSyntaxTree(string syntax) =>
             CSharpSyntaxTree.ParseText(syntax);
 
-        private void RunTest(string original, string expected)
+        private void RunTest(string original,
+            string expected,
+            bool includeInternalSymbols = true,
+            bool includeEffectivelyPrivateSymbols = true,
+            bool includeExplicitInterfaceImplementationSymbols = true)
         {
-            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true);
-            _csharpFileBuilder.WriteAssembly(assemblySymbol);
+            StringWriter stringWriter = new();
 
-            StringBuilder stringBuilder = _stringWriter.GetStringBuilder();
+            var compositeFilter = new CompositeSymbolFilter()
+                .Add<ImplicitSymbolFilter>()
+                .Add(new AccessibilitySymbolFilter(includeInternalSymbols,
+                    includeEffectivelyPrivateSymbols, includeExplicitInterfaceImplementationSymbols));
+            IAssemblySymbolWriter csharpFileBuilder = new CSharpFileBuilder(compositeFilter, stringWriter, null, MetadataReferences);
+
+            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true);
+            csharpFileBuilder.WriteAssembly(assemblySymbol);
+
+            StringBuilder stringBuilder = stringWriter.GetStringBuilder();
             var resultedString = stringBuilder.ToString();
 
             stringBuilder.Remove(0, stringBuilder.Length);
@@ -1227,6 +1228,36 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         }
                     }
                     """);
+        }
+
+        [Fact]
+        public void TestFilterOutInternalExplicitInterfaceImplementation()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        internal interface Foo
+                        {
+                            void XYZ();
+                            int ABC { get; set; }
+                        }
+
+                        public class Bar : Foo
+                        {
+                            int Foo.ABC { get => 1; set { } }
+                            void Foo.XYZ() { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
         }
     }
 }
