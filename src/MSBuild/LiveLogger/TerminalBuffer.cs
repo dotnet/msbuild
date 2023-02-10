@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -105,10 +105,17 @@ namespace Microsoft.Build.Logging.LiveLogger
                 topBarColor == TopBarColor.Error ? ANSIBuilder.Formatting.ForegroundColor.Red :
                 topBarColor == TopBarColor.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
                 ANSIBuilder.Formatting.ForegroundColor.White;
+
+            string text = "MSBuild - Build in progress";
+            text =
+                topBarColor == TopBarColor.Error ? $"❌ {text} ❌" :
+                topBarColor == TopBarColor.Warning ? $"⚠ {text} ⚠" :
+                text;
+
             Console.Write(
                 // Write header
                 ANSIBuilder.Cursor.Home() +
-                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")), ANSIBuilder.Formatting.BackgroundColor.Black, desiredColor) +
+                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center(text)), ANSIBuilder.Formatting.BackgroundColor.Black, desiredColor) +
                 // Write footer
                 ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
                 new string('-', Console.BufferWidth) + '\n' + FooterText);
