@@ -56,13 +56,15 @@ namespace Microsoft.Build.Logging.LiveLogger
 
     internal class TerminalBuffer
     {
+        private const char errorSymbol = '❌';
+        private const char warningSymbol = '⚠';
         private static List<TerminalBufferLine> Lines = new();
         public static string FooterText = string.Empty;
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
         internal static bool IsTerminated = false;
         internal static bool ShouldRerender = true;
-        internal static TopBarColor topBarColor = TopBarColor.None;
+        internal static OverallBuildState topBarColor = OverallBuildState.None;
         internal static int ScrollableAreaHeight
         {
             get
@@ -102,14 +104,14 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             ShouldRerender = false;
             ANSIBuilder.Formatting.ForegroundColor desiredColor =
-                topBarColor == TopBarColor.Error ? ANSIBuilder.Formatting.ForegroundColor.Red :
-                topBarColor == TopBarColor.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
+                topBarColor == OverallBuildState.Error ? ANSIBuilder.Formatting.ForegroundColor.Red :
+                topBarColor == OverallBuildState.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
                 ANSIBuilder.Formatting.ForegroundColor.White;
 
             string text = "MSBuild - Build in progress";
             text =
-                topBarColor == TopBarColor.Error ? $"❌ {text} ❌" :
-                topBarColor == TopBarColor.Warning ? $"⚠ {text} ⚠" :
+                topBarColor == OverallBuildState.Error ? $"{errorSymbol} {text} {errorSymbol}" :
+                topBarColor == OverallBuildState.Warning ? $"{warningSymbol} {text} {warningSymbol}" :
                 text;
 
             Console.Write(
@@ -165,7 +167,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             Console.Write(contents);
         }
         #endregion
-        #region Line identification
+            #region Line identification
         public static int GetLineIndexById(int lineId)
         {
             return Lines.FindIndex(x => x.Id == lineId);
@@ -251,7 +253,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         #endregion
     }
 
-    internal enum TopBarColor
+    internal enum OverallBuildState
     {
         None,
         Warning,
