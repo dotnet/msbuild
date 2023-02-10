@@ -15,19 +15,22 @@ namespace Microsoft.Build.Framework
         private int position = 0;
         private int argPosition = 0;
 
-        public object?[] Arguments { get; } = Array.Empty<object?>();
+        public readonly object?[] Arguments { get; } = Array.Empty<object?>();
 
         public LogInterpolatedStringHandler(int literalLength, int formattedCount)
         {
-            if (formattedCount > 99)
-            {
-                throw new ArgumentOutOfRangeException("Number of formatted arguments must be less than 100.");
-            }
+            int bufferSize;
 
-            // Buffer size is computed with reserved space for "{x}" and "{xx}" placeholders
-            int bufferSize = formattedCount < 10 ?
-                literalLength + (3 * formattedCount) :
-                literalLength + 3 * (formattedCount % 10) + 4 * (formattedCount - (formattedCount % 10));
+            // Buffer size is computed with reserved space for "{x..x}" placeholders
+            if (formattedCount < 10)
+            {
+                bufferSize = literalLength + (3 * formattedCount);
+            }
+            else
+            {
+                int maxNumberOfDigits = (int)(Math.Log10(formattedCount) + 1);
+                bufferSize = literalLength + (formattedCount * (maxNumberOfDigits + 2));
+            }
 
             buffer = new char[bufferSize];
 
@@ -45,10 +48,19 @@ namespace Microsoft.Build.Framework
 
         public void AppendFormatted<T>(T t)
         {
-            string indexString = argPosition.ToString();
             buffer[position++] = '{';
-            indexString.AsSpan().CopyTo(buffer.AsSpan().Slice(position));
-            position += indexString.Length;
+
+            if (argPosition < 10)
+            {
+                buffer[position++] = (char)('0' + argPosition);
+            }
+            else
+            {
+                string indexString = argPosition.ToString();
+                indexString.AsSpan().CopyTo(buffer.AsSpan().Slice(position));
+                position += indexString.Length;
+            }
+
             buffer[position++] = '}';
 
             Arguments[argPosition++] = t;
