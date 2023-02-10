@@ -298,7 +298,7 @@
     <value>Workload updates are available. Run `dotnet workload list` for more information.</value>
   </data>
   <data name="PendingReboot" xml:space="preserve">
-    <value>The machine has a pending reboot. Installation will continue, but you may need to restart.</value>
+    <value>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</value>
   </data>
   <data name="MsiProgressInstall" xml:space="preserve">
     <value>Installing {0} </value>

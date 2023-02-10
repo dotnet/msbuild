@@ -112,7 +112,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 ReportPendingReboot();
-                Log?.LogMessage("Starting garbage collection.");
+                Log?.LogMessage($"Starting garbage collection.");
+                Log?.LogMessage($"Garbage Collection Mode: CleanAllPacks={cleanAllPacks}.");
+
                 IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands();
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
 
@@ -169,10 +171,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     else
                     {
                         packsToRemove.Add(packRecord);
+                        Log?.LogMessage($"Removing {packRecord.MsiId} ({packRecord.MsiNuGetVersion}) as no dependents remain.");
                     }
                 }
 
                 RemoveWorkloadPacks(packsToRemove, offlineCache);
+
+                if (cleanAllPacks)
+                {
+                    EradicateAllWorkloadInstallationRecords(_sdkFeatureBand);
+                }
             }
             catch (Exception e)
             {
@@ -225,8 +233,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         Log?.LogMessage($"Removing dependent '{dependent}' from provider key '{depProvider.ProviderKeyName}' because its SDK feature band does not match any installed feature bands.");
                         UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                     }
-
-                    if (dependentFeatureBand.Equals(_sdkFeatureBand))
+                    else if (cleanAllPacks && dependentFeatureBand.CompareTo(_sdkFeatureBand) < 1)
+                    {
+                        Log?.LogMessage($"Removing dependent '{dependent}' as part of the dotnet clean --all operation.");
+                        UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
+                    }
+                    else if (dependentFeatureBand.Equals(_sdkFeatureBand))
                     {
                         // If the current SDK feature band is listed as a dependent, we can validate
                         // the workload packs against the expected pack IDs and versions to potentially remove it.
@@ -236,11 +248,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             Log?.LogMessage($"Removing dependent '{dependent}' because the pack record(s) do not match any expected packs.");
                             UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                         }
+                        else
+                        {
+                            Log?.LogMessage($"Dependent '{dependent}' was not removed as the packs are still needed. Mode: {cleanAllPacks} | Dependent band: {dependentFeatureBand} | SDK band: {_sdkFeatureBand}.");
+                        }
                     }
-                    else if (cleanAllPacks && dependentFeatureBand.CompareTo(_sdkFeatureBand) < 1)
+                    else
                     {
-                        Log?.LogMessage($"Removing dependent '{dependent}' as part of the dotnet clean --all operation.");
-                        UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
+                        Log?.LogMessage($"Dependent '{dependent}' was not removed. Mode: {cleanAllPacks} | Dependent band: {dependentFeatureBand} | SDK band: {_sdkFeatureBand}.");
                     }
                 }
                 catch (Exception e)
@@ -283,6 +298,23 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         // want to remove it.
                         VerifyPackage(msi);
                         ExecutePackage(msi, InstallAction.Uninstall);
+                    }
+                }
+            }
+        }
+
+        public void EradicateAllWorkloadInstallationRecords(SdkFeatureBand featureBand)
+        {
+            var allFeatureBands = RecordRepository.GetFeatureBandsWithInstallationRecords();
+
+            foreach (SdkFeatureBand potentialBandToClean in allFeatureBands)
+            {
+                if (potentialBandToClean.CompareTo(featureBand) < 1)
+                {
+                    var workloadInstallationRecordIds = RecordRepository.GetInstalledWorkloads(potentialBandToClean);
+                    foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
+                    {
+                        RecordRepository.DeleteWorkloadInstallationRecord(workloadInstallationRecordId, potentialBandToClean);
                     }
                 }
             }

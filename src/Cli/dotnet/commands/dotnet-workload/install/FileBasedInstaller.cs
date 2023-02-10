@@ -370,11 +370,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             if (cleanAllPacks)
             {
-                EradicateAllWorkloadInstallationRecordsForFeatureBandAndBelow(_sdkFeatureBand);
+                EradicateAllWorkloadInstallationRecords(_sdkFeatureBand);
             }
         }
 
-        private void EradicateAllWorkloadInstallationRecordsForFeatureBandAndBelow(SdkFeatureBand featureBand)
+        public void EradicateAllWorkloadInstallationRecords(SdkFeatureBand featureBand)
         {
             FileBasedInstallationRecordRepository workloadRecordRepository = new(_workloadMetadataDir);
             var allFeatureBands = workloadRecordRepository.GetFeatureBandsWithInstallationRecords();

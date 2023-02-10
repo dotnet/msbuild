@@ -22,6 +22,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null, bool cleanAllPacks = false);
 
+        /// <summary>
+        /// Remove all non-VS workload installation records for the specified feature band, and all records for feature bands lower than featureBand.
+        /// </summary>
+        /// <param name="featureBand">The maximum feature band to remove all workload installation records from.</param>
+        void EradicateAllWorkloadInstallationRecords(SdkFeatureBand featureBand);
+
         void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false);
 
         IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository();

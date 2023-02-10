@@ -101,6 +101,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             GarbageCollectionCalled = true;
         }
 
+        public void EradicateAllWorkloadInstallationRecords(SdkFeatureBand featureBand)
+        {
+            throw new NotImplementedException();
+        }
+
         public IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository()
         {
             return InstallationRecordRepository;
