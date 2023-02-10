@@ -336,7 +336,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                     Directory.CreateDirectory(pack.Path);
                 }
             }
-            // Write fake workload install record for 6.0.100
+            // Write fake workload install record for 6.0.300
             var installedWorkloadsPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersions[1], "InstalledWorkloads", "xamarin-android-build");
             File.WriteAllText(installedWorkloadsPath, string.Empty);
 
