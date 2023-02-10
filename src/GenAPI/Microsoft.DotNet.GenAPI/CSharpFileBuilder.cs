@@ -125,6 +125,12 @@ namespace Microsoft.DotNet.GenAPI
         {
             IEnumerable<ISymbol> members = namedType.GetMembers().Where(_symbolFilter.Include);
 
+            // If it's a value type
+            if (namedType.TypeKind == TypeKind.Struct)
+            {
+                namedTypeNode = _syntaxGenerator.AddMembers(namedTypeNode, namedType.SynthesizeDummyFields(_symbolFilter));
+            }
+
             foreach (ISymbol member in members.Order())
             {
                 // If the method is ExplicitInterfaceImplementation and is derived from an interface that was filtered out, we must filter out it either.

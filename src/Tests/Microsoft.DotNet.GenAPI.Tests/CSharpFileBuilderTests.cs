@@ -756,6 +756,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public readonly partial struct Digit
                     {
+                        private int _dummyPrimitive;
+                        
                         public Digit(byte digit) { }
                         public static explicit operator Digit(byte b) { throw null; }
 
@@ -966,6 +968,81 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """
             );
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsForValueTypes()
+        {
+            RunTest(original: """
+                using System;
+
+                namespace Foo
+                {
+                    public struct Bar
+                    {
+                        #pragma warning disable 0169
+                        private IntPtr intPtr;
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial struct Bar
+                    {
+                        private int _dummyPrimitive;
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsForReferenceTypes()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public struct Bar
+                    {
+                        #pragma warning disable 0169
+                        private object field;
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial struct Bar
+                    {
+                        private object _dummy;
+                        private int _dummyPrimitive;
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsForGenericTypes()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public struct Bar<T>
+                    {
+                        #pragma warning disable 0169
+                        private T _field;
+                    }
+                }
+                """,
+            expected: """
+                namespace Foo
+                {
+                    public partial struct Bar<T>
+                    {
+                        private T _field;
+                    }
+                }
+                """);
         }
 
         [Fact]
