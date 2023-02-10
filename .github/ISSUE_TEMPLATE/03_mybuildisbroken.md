@@ -11,8 +11,8 @@ labels: needs-triage
 <!--
 * Here are some useful links to help you figure out what's wrong.
 * Our documentation: https://github.com/dotnet/msbuild/blob/main/documentation/README.md
-* General Help: https://github.com/microsoft/msbuild/blob/main/documentation/wiki/Something's-wrong-in-my-build.md
-* Tips & Tricks: https://github.com/microsoft/msbuild/blob/main/documentation/wiki/MSBuild-Tips-%26-Tricks.md
+* General Help: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Something's-wrong-in-my-build.md
+* Tips & Tricks: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/MSBuild-Tips-%26-Tricks.md
 -->
 
 ### Issue Description
