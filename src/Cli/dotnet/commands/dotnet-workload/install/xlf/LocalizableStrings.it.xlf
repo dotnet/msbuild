@@ -198,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Il computer ha un riavvio in sospeso. L'installazione continuerà, ma potrebbe essere necessario riavviare.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Il computer ha un riavvio in sospeso. L'installazione continuerà, ma potrebbe essere necessario riavviare.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

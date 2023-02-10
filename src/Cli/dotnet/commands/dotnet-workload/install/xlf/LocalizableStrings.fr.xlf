@@ -198,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Le redémarrage de l’ordinateur est en attente. L’installation va se poursuivre, mais vous devrez peut-être redémarrer.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Le redémarrage de l’ordinateur est en attente. L’installation va se poursuivre, mais vous devrez peut-être redémarrer.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
