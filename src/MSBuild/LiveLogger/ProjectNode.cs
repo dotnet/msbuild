@@ -93,7 +93,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             // Create or update line
             if (Line is null)
             {
-                Line = TerminalBuffer.WriteNewLine(lineContents, false);
+                Line = TerminalBuffer.WriteNewLineBeforeMidpoint(lineContents, false);
             }
             else
             {
@@ -108,8 +108,15 @@ namespace Microsoft.Build.Logging.LiveLogger
                     TerminalBuffer.DeleteLine(CurrentTargetLine.Id);
                 }
 
-                foreach (MessageNode node in AdditionalDetails.ToList())
+                bool foundErrorOrWarning = false;
+
+                foreach (MessageNode node in AdditionalDetails)
                 {
+                    if (node.Type != MessageNode.MessageType.HighPriorityMessage)
+                    {
+                        foundErrorOrWarning = true;
+                    }
+
                     // Only delete high priority messages
                     if (node.Type != MessageNode.MessageType.HighPriorityMessage)
                     {
@@ -120,6 +127,20 @@ namespace Microsoft.Build.Logging.LiveLogger
                     {
                         TerminalBuffer.DeleteLine(node.Line.Id);
                     }
+                }
+
+                if (!foundErrorOrWarning && this.Line is not null)
+                {
+                    foreach (MessageNode node in AdditionalDetails)
+                    {
+                        int? id = node.Line?.Id;
+                        if (id is not null)
+                        {
+                            TerminalBuffer.DeleteLine(id.Value);
+                        }
+                    }
+
+                    TerminalBuffer.DeleteLine(this.Line.Id);
                 }
             }
 
