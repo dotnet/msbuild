@@ -83,7 +83,7 @@ function SetupCredProvider {
   }
 }
 
-#Workaround for https://github.com/microsoft/msbuild/issues/4430
+#Workaround for https://github.com/dotnet/msbuild/issues/4430
 function InstallDotNetSdkAndRestoreArcade {
   $dotnetTempDir = Join-Path $RepoRoot "dotnet"
   $dotnetSdkVersion="2.1.507" # After experimentation we know this version works when restoring the SDK (compared to 3.0.*)
