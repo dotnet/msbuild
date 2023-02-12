@@ -1046,6 +1046,34 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
+        void TestSynthesizePrivateFieldsForNestedGenericTypes()
+        {
+            RunTest(original: """
+                using System.Collections.Generic;
+
+                namespace Foo
+                {
+                    public struct Bar<T> where T : notnull
+                    {
+                        #pragma warning disable 0169
+                        private Dictionary<int, List<T>> _field;
+                    }
+                }
+                """,
+            expected: """
+                namespace Foo
+                {
+                    public partial struct Bar<T>
+                    {
+                        private System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<T>> _field;
+                        private object _dummy;
+                        private int _dummyPrimitive;
+                    }
+                }
+                """);
+        }
+
+        [Fact]
         public void TestBaseTypeWithoutExplicitDefaultConstructor()
         {
             RunTest(original: """

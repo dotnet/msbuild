@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.GenAPI
                 // Collect generic excluded fields
                 IEnumerable<IFieldSymbol> genericTypedFields = excludedFields.Where(f => {
                     if (f.Type is INamedTypeSymbol ty) {
-                        return ty.IsGenericType;
+                        return !ty.IsBoundGenericType();
                     }
                     return f.Type is ITypeParameterSymbol;
                 });
@@ -129,6 +129,28 @@ namespace Microsoft.DotNet.GenAPI
                     yield return CreateDummyField("int", "_dummyPrimitive", new());
                 }
             }
+        }
+
+        // Check that the named type is fully bound in all its type arguments.
+        public static bool IsBoundGenericType(this INamedTypeSymbol namedType)
+        {
+            foreach (var arg in namedType.TypeArguments)
+            {
+                if (arg is ITypeParameterSymbol)
+                {
+                    return false;
+                }
+
+                if (arg is INamedTypeSymbol nt)
+                {
+                    if (!nt.IsBoundGenericType())
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }
