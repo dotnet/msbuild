@@ -1593,9 +1593,12 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ILogger UnwrapLoggerType(ILogger log)
             {
-                return (log is ProjectCollection.ReusableLogger reusableLogger)
-                    ? reusableLogger.OriginalLogger
-                    : log;
+                while (log is ProjectCollection.ReusableLogger reusableLogger)
+                {
+                    log = reusableLogger.OriginalLogger;
+                }
+
+                return log;
             }
 
             try

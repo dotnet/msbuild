@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System.IO;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
@@ -272,7 +272,8 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
 
-                using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, loadInfo.AssemblyName);
+                string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
+                using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
 
                 _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);

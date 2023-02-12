@@ -90,9 +90,9 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
                 return false;
             }
 
-            return typeName!.StartsWith("Microsoft.Build", StringComparison.OrdinalIgnoreCase) ||
-                   typeName.StartsWith("Microsoft.NET.Build", StringComparison.OrdinalIgnoreCase) ||
-                   typeName.StartsWith("Microsoft.CodeAnalysis.BuildTasks", StringComparison.OrdinalIgnoreCase);
+            return typeName!.StartsWith("Microsoft.Build", StringComparison.Ordinal) ||
+                   typeName.StartsWith("Microsoft.NET.Build", StringComparison.Ordinal) ||
+                   typeName.StartsWith("Microsoft.NET.Sdk", StringComparison.Ordinal);
         }
 
         private static IDisposable StartTracking(
@@ -139,8 +139,6 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 
         private void StartTracking()
         {
-            // Make multisubscriptions idempotent
-            _appDomain.AssemblyLoad -= CurrentDomainOnAssemblyLoad;
             _appDomain.AssemblyLoad += CurrentDomainOnAssemblyLoad;
         }
 
