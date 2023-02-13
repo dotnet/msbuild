@@ -64,7 +64,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public static string Footer = string.Empty;
         internal static bool IsTerminated = false;
         internal static bool ShouldRerender = true;
-        internal static OverallBuildState topBarColor = OverallBuildState.None;
+        internal static OverallBuildState overallBuildState = OverallBuildState.None;
         internal static int ScrollableAreaHeight
         {
             get
@@ -104,14 +104,14 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             ShouldRerender = false;
             ANSIBuilder.Formatting.ForegroundColor desiredColor =
-                topBarColor == OverallBuildState.Error ? ANSIBuilder.Formatting.ForegroundColor.Red :
-                topBarColor == OverallBuildState.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
+                overallBuildState == OverallBuildState.Error ? ANSIBuilder.Formatting.ForegroundColor.Red :
+                overallBuildState == OverallBuildState.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
                 ANSIBuilder.Formatting.ForegroundColor.White;
 
             string text = "MSBuild - Build in progress";
             text =
-                topBarColor == OverallBuildState.Error ? $"{errorSymbol} {text} {errorSymbol}" :
-                topBarColor == OverallBuildState.Warning ? $"{warningSymbol} {text} {warningSymbol}" :
+                overallBuildState == OverallBuildState.Error ? $"{errorSymbol} {text} {errorSymbol}" :
+                overallBuildState == OverallBuildState.Warning ? $"{warningSymbol} {text} {warningSymbol}" :
                 text;
 
             Console.Write(
