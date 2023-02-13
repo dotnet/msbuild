@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
         }
 
-        [Fact]
+        [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
             string testFileName = "foobar.txt";
