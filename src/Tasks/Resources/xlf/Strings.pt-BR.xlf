@@ -312,8 +312,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorDownloading">
-        <source>MSB3923: Failed to download file "{0}".  {1}</source>
-        <target state="translated">MSB3923: falha ao baixar o arquivo "{0}". {1}</target>
+        <source>MSB3923: Failed to download file "{0}". Error message as follows:</source>
+        <target state="new">MSB3923: Failed to download file "{0}". Error message as follows:</target>
         <note>{StrBegin="MSB3923: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorInvalidUrl">
