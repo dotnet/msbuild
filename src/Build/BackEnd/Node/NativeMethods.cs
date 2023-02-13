@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.InteropServices;
@@ -49,8 +49,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CreateProcess
-        (
+        internal static extern bool CreateProcess(
             string lpApplicationName,
             string lpCommandLine,
             ref SECURITY_ATTRIBUTES lpProcessAttributes,
@@ -61,8 +60,7 @@ namespace Microsoft.Build.BackEnd
             IntPtr lpEnvironment,
             string lpCurrentDirectory,
             [In] ref STARTUP_INFO lpStartupInfo,
-            out PROCESS_INFORMATION lpProcessInformation
-        );
+            out PROCESS_INFORMATION lpProcessInformation);
 
         /// <summary>
         /// Structure that contains the startupinfo

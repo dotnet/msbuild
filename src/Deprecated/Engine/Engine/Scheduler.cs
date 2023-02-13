@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections.Generic;
@@ -275,7 +279,7 @@ namespace Microsoft.Build.BuildEngine
                 }
 
                 // Dump some interesting information to the console if profile build is turned on by an environment variable
-                if (parentEngine.ProfileBuild && scheduleRecord != null && buildResult.TaskTime != 0 )
+                if (parentEngine.ProfileBuild && scheduleRecord != null && buildResult.TaskTime != 0)
                 {
                     Console.WriteLine("N " + scheduleRecord.EvaluationNode + " Name " + scheduleRecord.ProjectName + ":" +
                                       scheduleRecord.ParentKey.HandleId + ":" + scheduleRecord.ParentKey.RequestId +
@@ -303,7 +307,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         // Continue using breadth-first traversal as long as the non-blocked work load for this node is below 
                         // the nodeWorkloadProjectCount or its postBlockCount is non-zero
-                        if ((totalRequestsPerNode[i] - blockedRequestsPerNode[i]) < nodeWorkLoadProjectCount || postBlockCount[i] != 0 )
+                        if ((totalRequestsPerNode[i] - blockedRequestsPerNode[i]) < nodeWorkLoadProjectCount || postBlockCount[i] != 0)
                         {
                             useBreadthFirstTraversal = true;
                             break;
@@ -314,7 +318,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         if (Engine.debugMode)
                         {
-                             Console.WriteLine("Switching to depth first traversal because all node have workitems");
+                            Console.WriteLine("Switching to depth first traversal because all node have workitems");
                         }
                         parentEngine.NodeManager.TaskExecutionModule.UseBreadthFirstTraversal = false;
 
@@ -381,7 +385,7 @@ namespace Microsoft.Build.BuildEngine
                 Console.WriteLine("Switch to breadth first traversal is requested by " + nodeId);
             }
 
-            postBlockCount[nodeId] = nodeWorkLoadProjectCount/2;
+            postBlockCount[nodeId] = nodeWorkLoadProjectCount / 2;
         }
 
         /// <summary>
@@ -397,7 +401,7 @@ namespace Microsoft.Build.BuildEngine
             foreach (ScheduleRecordKey key in handleIdToScheduleRecord.Keys)
             {
                 ScheduleRecord record = handleIdToScheduleRecord[key];
-                Console.WriteLine(key.HandleId  + ":" + key.RequestId + " " + record.ProjectName + " on node " + record.EvaluationNode);
+                Console.WriteLine(key.HandleId + ":" + key.RequestId + " " + record.ProjectName + " on node " + record.EvaluationNode);
             }
         }
         #endregion

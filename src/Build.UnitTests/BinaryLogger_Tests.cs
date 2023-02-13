@@ -1,10 +1,14 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -99,7 +103,12 @@ namespace Microsoft.Build.UnitTests
             parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
             // build and log into binary logger, mock logger, serial and parallel console loggers
-            ObjectModelHelpers.BuildProjectExpectSuccess(projectText, binaryLogger, mockLogFromBuild, serialFromBuild, parallelFromBuild);
+            // no logging on evaluation
+            using (ProjectCollection collection = new())
+            {
+                Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
+                project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, serialFromBuild, parallelFromBuild }).ShouldBeTrue();
+            }
 
             var mockLogFromPlayback = new MockLogger();
 
@@ -207,7 +216,7 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
         }
 
-        [Fact]
+        [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
             string testFileName = "foobar.txt";

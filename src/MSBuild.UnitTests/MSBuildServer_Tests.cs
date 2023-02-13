@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -11,6 +11,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 #if NETFRAMEWORK
@@ -220,6 +221,10 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
+            // This test seems to be flaky, lets enable better logging to investigate it next time
+            // TODO: delete after investigated its flakiness
+            _env.WithTransientDebugEngineForNewProcesses(true);
+
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
 
             // Start a server node and find its PID.
@@ -284,6 +289,10 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void PropertyMSBuildStartupDirectoryOnServer()
         {
+            // This test seems to be flaky, lets enable better logging to investigate it next time
+            // TODO: delete after investigated its flakiness
+            _env.WithTransientDebugEngineForNewProcesses(true);
+
             string reportMSBuildStartupDirectoryProperty = @$"
 <Project>
     <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />

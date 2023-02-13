@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 
@@ -584,7 +588,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event BuildErrorEventHandler ErrorRaised;
-        
+
         /// <summary>
         /// This event is raised to log a warning.
         /// </summary>
@@ -602,43 +606,43 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event BuildFinishedEventHandler BuildFinished;
-        
+
         /// <summary>
         /// this event is raised to log the start of a project build
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event ProjectStartedEventHandler ProjectStarted;
-        
+
         /// <summary>
         /// this event is raised to log the end of a project build
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event ProjectFinishedEventHandler ProjectFinished;
-        
+
         /// <summary>
         /// this event is raised to log the start of a target build
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event TargetStartedEventHandler TargetStarted;
-        
+
         /// <summary>
         /// this event is raised to log the end of a target build
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event TargetFinishedEventHandler TargetFinished;
-        
+
         /// <summary>
         /// this event is raised to log the start of task execution
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event TaskStartedEventHandler TaskStarted;
-        
+
         /// <summary>
         /// this event is raised to log the end of task execution
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
-        public event TaskFinishedEventHandler TaskFinished; 
-        
+        public event TaskFinishedEventHandler TaskFinished;
+
         /// <summary>
         /// this event is raised to log a custom event
         /// </summary>

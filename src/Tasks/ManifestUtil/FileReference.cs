@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public TypeLib[] TypeLibs => _typeLibs;
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _writeableType = value;
         }
 
-#endregion
+        #endregion
     }
 
     [ComVisible(false)]
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string TlbId => _tlbid;
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -230,7 +230,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _tlbid = value;
         }
 
-#endregion
+        #endregion
     }
 
     [ComVisible(false)]
@@ -295,7 +295,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Version => _version;
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -342,7 +342,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _version = value;
         }
 
-#endregion
+        #endregion
     }
 
     [ComVisible(false)]
@@ -382,7 +382,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -402,7 +402,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _versioned = value;
         }
 
-#endregion
+        #endregion
     }
 
     [ComVisible(false)]
@@ -429,7 +429,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string TlbId => _tlbid;
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -476,6 +476,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _tlbid = value;
         }
 
-#endregion
+        #endregion
     }
 }

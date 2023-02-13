@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections.Generic;
@@ -51,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
         /// This function logs out all the messages currently posted to the queue. The active queue is swapped
         /// with the secondary queue to enable posting of messages while this function is running
         /// </summary>
-        override internal bool ProcessPostedLoggingEvents()
+        internal override bool ProcessPostedLoggingEvents()
         {
             bool processedEvents = false;
             lastFlushTime = DateTime.Now.Ticks;
@@ -103,7 +107,7 @@ namespace Microsoft.Build.BuildEngine
         /// be posted to another logger
         /// </summary>
         /// <param name="buildEventArgs"></param>
-        override internal void ProcessBuildEvent(BuildEventArgs buildEventArgs)
+        internal override void ProcessBuildEvent(BuildEventArgs buildEventArgs)
         {
             engineEventSource.RaiseStronglyTypedEvent(buildEventArgs);
 
@@ -135,7 +139,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Shutdown the logging service as appropriate
         /// </summary>
-        override internal void Shutdown()
+        internal override void Shutdown()
         {
             foreach (EventSource eventSource in eventSources.Values)
             {

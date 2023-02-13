@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -71,7 +75,7 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-               /// <summary>
+        /// <summary>
         /// Gets the value of the target's "Inputs" attribute.
         /// </summary>
         /// <owner>SumedhK</owner>
@@ -249,7 +253,7 @@ namespace Microsoft.Build.BuildEngine
                     loggingService.LogComment(buildEventContext, MessageImportance.Normal,
                         "SkipTargetBecauseOutputsUpToDate",
                         TargetToAnalyze.Name);
-                    
+
                     // Log the target inputs & outputs
                     if (!loggingService.OnlyLogCriticalEvents)
                     {
@@ -288,7 +292,7 @@ namespace Microsoft.Build.BuildEngine
                 if (result == DependencyAnalysisResult.FullBuild && this.dependencyAnalysisDetail.Count > 0)
                 {
                     // For the full build decision the are three possible outcomes
-                    loggingService.LogComment(buildEventContext,"BuildTargetCompletely", this.targetToAnalyze.Name);
+                    loggingService.LogComment(buildEventContext, "BuildTargetCompletely", this.targetToAnalyze.Name);
 
                     foreach (DependencyAnalysisLogDetail logDetail in this.dependencyAnalysisDetail)
                     {
@@ -476,7 +480,7 @@ namespace Microsoft.Build.BuildEngine
             // otherwise, don't build the target
             else
             {
-                loggingService.LogComment(buildEventContext, MessageImportance.Normal, 
+                loggingService.LogComment(buildEventContext, MessageImportance.Normal,
                     "SkipTargetBecauseNoOutputs", TargetToAnalyze.Name);
                 // detailed reason is low importance to keep log clean
                 loggingService.LogComment(buildEventContext, MessageImportance.Low,
@@ -702,7 +706,7 @@ namespace Microsoft.Build.BuildEngine
                 // if the target did declare inputs, but the specification evaluated to nothing
                 if (TargetInputSpecification.Length > 0)
                 {
-                    loggingService.LogComment(buildEventContext, MessageImportance.Normal, 
+                    loggingService.LogComment(buildEventContext, MessageImportance.Normal,
                         "SkipTargetBecauseNoInputs", TargetToAnalyze.Name);
                     // detailed reason is low importance to keep log clean
                     loggingService.LogComment(buildEventContext, MessageImportance.Low,
@@ -725,8 +729,8 @@ namespace Microsoft.Build.BuildEngine
             else
             {
                 DependencyAnalysisLogDetail dependencyAnalysisDetailEntry;
-                bool someOutOfDate =  IsAnyOutOfDate(out dependencyAnalysisDetailEntry, projectDirectory, targetInputItemSpecs, targetOutputItemSpecs);
-   
+                bool someOutOfDate = IsAnyOutOfDate(out dependencyAnalysisDetailEntry, projectDirectory, targetInputItemSpecs, targetOutputItemSpecs);
+
                 if (someOutOfDate)
                 {
                     dependencyAnalysisDetail.Add(dependencyAnalysisDetailEntry);
@@ -911,7 +915,7 @@ namespace Microsoft.Build.BuildEngine
         {
             ErrorUtilities.VerifyThrow((inputs.Count > 0) && (outputs.Count > 0), "Need to specify inputs and outputs.");
 
-             // Algorithm: walk through all the outputs to find the oldest output
+            // Algorithm: walk through all the outputs to find the oldest output
             //            walk through the inputs as far as we need to until we find one that's newer (if any)
 
             // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely): 
@@ -1210,22 +1214,27 @@ namespace Microsoft.Build.BuildEngine
         private XmlAttribute targetInputsAttribute;
         // The XmlAttribute for the "Outputs"
         private XmlAttribute targetOutputsAttribute;
+
         // Details of the dependency analysis for logging
-        ArrayList dependencyAnalysisDetail = new ArrayList();
+        private ArrayList dependencyAnalysisDetail = new ArrayList();
+
         // The unique target inputs
-        Hashtable uniqueTargetInputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private Hashtable uniqueTargetInputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+
         // The unique target outputs;
-        Hashtable uniqueTargetOutputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private Hashtable uniqueTargetOutputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+
         // Engine logging service which to log message to
-        EngineLoggingServices loggingService;
+        private EngineLoggingServices loggingService;
+
         // Event context information where event is raised from
-        BuildEventContext buildEventContext;
+        private BuildEventContext buildEventContext;
     }
 
     /// <summary>
     /// Why TLDA decided this entry was out of date
     /// </summary>
-    enum OutofdateReason
+    internal enum OutofdateReason
     {
         MissingInput, // The input file was missing
         MissingOutput, // The output file was missing
@@ -1235,7 +1244,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// A logging detail entry. Describes what TLDA decided about inputs / outputs
     /// </summary>
-    class DependencyAnalysisLogDetail
+    internal class DependencyAnalysisLogDetail
     {
         private OutofdateReason reason;
         private string inputItemName;

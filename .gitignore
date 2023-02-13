@@ -215,3 +215,6 @@ stage1/
 
 # ETL traces
 *.etl.zip
+
+# .DS_Store for macOS
+**/.DS_Store
