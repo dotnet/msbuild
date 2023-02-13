@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Microsoft.Build.Logging.LiveLogger
 {
@@ -65,6 +67,8 @@ namespace Microsoft.Build.Logging.LiveLogger
         internal static bool IsTerminated = false;
         internal static bool ShouldRerender = true;
         internal static OverallBuildState topBarColor = OverallBuildState.None;
+        internal static int FinishedProjects = 0;
+        private static int midLineId;
         internal static int ScrollableAreaHeight
         {
             get
@@ -79,6 +83,10 @@ namespace Microsoft.Build.Logging.LiveLogger
             Console.OutputEncoding = Encoding.UTF8;
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
             Console.Write(ANSIBuilder.Cursor.Invisible());
+            // TerminalBufferLine midLine = new(new string('-', Console.BufferWidth), true);
+            // WriteNewLine(midLine);
+            // midLineId = midLine.Id;
+            midLineId = -1;
         }
 
         public static void Terminate()
@@ -108,7 +116,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                 topBarColor == OverallBuildState.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
                 ANSIBuilder.Formatting.ForegroundColor.White;
 
-            string text = "MSBuild - Build in progress";
+            string text = $"MSBuild - Build in progress - {FinishedProjects} finished projects";
             text =
                 topBarColor == OverallBuildState.Error ? $"{errorSymbol} {text} {errorSymbol}" :
                 topBarColor == OverallBuildState.Warning ? $"{warningSymbol} {text} {warningSymbol}" :
@@ -119,8 +127,11 @@ namespace Microsoft.Build.Logging.LiveLogger
                 ANSIBuilder.Cursor.Home() +
                 ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center(text)), ANSIBuilder.Formatting.BackgroundColor.Black, desiredColor) +
                 // Write footer
-                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
-                new string('-', Console.BufferWidth) + '\n' + FooterText);
+                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
+                    ANSIBuilder.Eraser.LineCursorToEnd() +
+                    new string('-', Console.BufferWidth) +
+                    Environment.NewLine +
+                    FooterText);
 
             if (Lines.Count == 0)
             {
@@ -207,12 +218,33 @@ namespace Microsoft.Build.Logging.LiveLogger
                     return null;
                 }
                 // Get line end index
-                Lines.Insert(lineIndex, line);
+                Lines.Insert(lineIndex + 1, line);
             }
             else
             {
                 Lines.Add(line);
             }
+            return line;
+        }
+
+        public static TerminalBufferLine? WriteNewLineAfterMidpoint(string text, bool shouldWrapLines = false)
+        {
+            TerminalBufferLine line = new(text, shouldWrapLines);
+            return WriteNewLineAfter(midLineId, line);
+        }
+
+        public static TerminalBufferLine? WriteNewLineBeforeMidpoint(string text, bool shouldWrapLines)
+        {
+            TerminalBufferLine line = new(text, shouldWrapLines);
+            int lineIndex = GetLineIndexById(midLineId);
+            if (lineIndex == -1)
+            {
+                WriteNewLine(line);
+                return null;
+            }
+
+            Lines.Insert(lineIndex, line);
+
             return line;
         }
 

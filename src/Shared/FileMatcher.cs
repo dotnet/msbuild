@@ -2311,7 +2311,7 @@ namespace Microsoft.Build.Shared
         /// Returns true if the given character is a valid drive letter.
         /// </summary>
         /// <remarks>
-        /// Copied from https://github.com/dotnet/corefx/blob/master/src/Common/src/System/IO/PathInternal.Windows.cs#L77-L83
+        /// Copied from https://github.com/dotnet/corefx/blob/b8b81a66738bb10ef0790023598396861d92b2c4/src/Common/src/System/IO/PathInternal.Windows.cs#L53-L59
         /// </remarks>
         private static bool IsValidDriveChar(char value)
         {
