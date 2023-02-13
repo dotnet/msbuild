@@ -3254,7 +3254,7 @@ namespace Microsoft.Build.CommandLine
                 (liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true" || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
                 && DoesEnvironmentSupportLiveLogger())
             {
-                ProcessLiveLogger(noConsoleLogger, loggers);
+                ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
             }
             else
             {
@@ -3456,13 +3456,27 @@ namespace Microsoft.Build.CommandLine
 
         private static void ProcessLiveLogger(
             bool noConsoleLogger,
+            List<DistributedLoggerRecord> distributedLoggerRecords,
+            int cpuCount,
             List<ILogger> loggers)
         {
-            // Check for flags and env variables
             if (!noConsoleLogger)
             {
-                LiveLogger l = new LiveLogger();
-                loggers.Add(l);
+                // A central logger will be created for both single proc and multiproc.
+                LiveLogger logger = new LiveLogger();
+
+                // Check to see if there is a possibility we will be logging from an out-of-proc node.
+                // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
+                if (cpuCount == 1 && !Traits.Instance.InProcNodeDisabled)
+                {
+                    loggers.Add(logger);
+                }
+                else
+                {
+                    // For performance, register this logger using the forwarding logger mechanism.
+                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", LiveLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    distributedLoggerRecords.Add(forwardingLoggerRecord);
+                }
             }
         }
 

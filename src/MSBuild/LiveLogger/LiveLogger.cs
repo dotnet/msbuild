@@ -20,6 +20,28 @@ namespace Microsoft.Build.Logging.LiveLogger
         public LoggerVerbosity Verbosity { get; set; }
         public string Parameters { get; set; }
 
+        /// <summary>
+        /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
+        /// </summary>
+        /// <remarks>
+        /// If LiveLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+        /// </remarks>
+        public static readonly string[] ConfigurableForwardingLoggerParameters =
+        {
+            "BUILDSTARTEDEVENT",
+            "PROJECTSTARTEDEVENT",
+            "TARGETSTARTEDEVENT",
+            "TASKSTARTEDEVENT",
+            "BUILDFINISHEDEVENT",
+            "PROJECTFINISHEDEVENT",
+            "TARGETFINISHEDEVENT",
+            "HIGHMESSAGEEVENT",
+            "NORMALMESSAGEEVENT",
+            "LOWMESSAGEEVENT",
+            "WARNINGEVENT",
+            "ERROREVENT"
+        };
+
         public LiveLogger()
         {
             Parameters = "";
@@ -27,7 +49,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public void Initialize(IEventSource eventSource)
         {
-            // Register for different events
+            // Register for different events. Make sure that ConfigurableForwardingLoggerParameters are in sync with them.
             // Started
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
             eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
