@@ -256,6 +256,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
 
+        /// <summary>
+        /// Build telemetry to be send when this build ends.
+        /// <remarks>Could be null</remarks>
+        /// </summary>
+        private BuildTelemetry _buildTelemetry;
+
         private ProjectCacheService _projectCacheService;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
@@ -504,11 +510,22 @@ namespace Microsoft.Build.Execution
 
                 // Initiate build telemetry data
                 DateTime now = DateTime.UtcNow;
-                KnownTelemetry.BuildTelemetry ??= new()
+
+                // Acquire it from static variable so we can apply data collected up to this moment
+                _buildTelemetry = KnownTelemetry.BuildTelemetry;
+                if (_buildTelemetry != null)
                 {
-                    StartAt = now,
-                };
-                KnownTelemetry.BuildTelemetry.InnerStartAt = now;
+                    KnownTelemetry.BuildTelemetry = null;
+                }
+                else
+                {
+                    _buildTelemetry = new()
+                    {
+                        StartAt = now,
+                    };
+                }
+
+                _buildTelemetry.InnerStartAt = now;
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
@@ -824,10 +841,10 @@ namespace Microsoft.Build.Execution
 
                 var newSubmission = new BuildSubmission(this, GetNextSubmissionId(), requestData, _buildParameters.LegacyThreadingSemantics);
 
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (_buildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectFullPath;
-                    KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                    _buildTelemetry.Project ??= requestData.ProjectFullPath;
+                    _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
 
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -852,12 +869,12 @@ namespace Microsoft.Build.Execution
 
                 var newSubmission = new GraphBuildSubmission(this, GetNextSubmissionId(), requestData);
 
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (_buildTelemetry != null)
                 {
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
-                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
-                    KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                    _buildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
+                    _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
 
                 _graphBuildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -1003,13 +1020,13 @@ namespace Microsoft.Build.Execution
 
                         loggingService.LogBuildFinished(_overallBuildSuccess);
 
-                        if (KnownTelemetry.BuildTelemetry != null)
+                        if (_buildTelemetry != null)
                         {
-                            KnownTelemetry.BuildTelemetry.FinishedAt = DateTime.UtcNow;
-                            KnownTelemetry.BuildTelemetry.Success = _overallBuildSuccess;
-                            KnownTelemetry.BuildTelemetry.Version = ProjectCollection.Version;
-                            KnownTelemetry.BuildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
-                            KnownTelemetry.BuildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
+                            _buildTelemetry.FinishedAt = DateTime.UtcNow;
+                            _buildTelemetry.Success = _overallBuildSuccess;
+                            _buildTelemetry.Version = ProjectCollection.Version;
+                            _buildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
+                            _buildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
 
                             string host = null;
                             if (BuildEnvironmentState.s_runningInVisualStudio)
@@ -1024,12 +1041,12 @@ namespace Microsoft.Build.Execution
                             {
                                 host = "VSCode";
                             }
-                            KnownTelemetry.BuildTelemetry.Host = host;
+                            _buildTelemetry.Host = host;
 
-                            KnownTelemetry.BuildTelemetry.UpdateEventProperties();
-                            loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.BuildTelemetry.EventName, KnownTelemetry.BuildTelemetry.Properties);
+                            _buildTelemetry.UpdateEventProperties();
+                            loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.Properties);
                             // Clean telemetry to make it ready for next build submission.
-                            KnownTelemetry.BuildTelemetry = null;
+                            _buildTelemetry = null;
                         }
                     }
 
