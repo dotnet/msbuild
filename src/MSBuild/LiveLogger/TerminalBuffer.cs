@@ -178,7 +178,8 @@ namespace Microsoft.Build.Logging.LiveLogger
             Console.Write(contents);
         }
         #endregion
-            #region Line identification
+
+        #region Line identification
         public static int GetLineIndexById(int lineId)
         {
             return Lines.FindIndex(x => x.Id == lineId);
