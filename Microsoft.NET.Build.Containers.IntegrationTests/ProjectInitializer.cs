@@ -8,8 +8,17 @@ using Xunit;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
-public static class ProjectInitializer {
-    private static string? CombinedTargetsLocation;
+public sealed class ProjectInitializer
+{
+    private readonly static string _combinedTargetsLocation;
+
+    static ProjectInitializer()
+    {
+        var relativePath = Path.Combine("..", "packaging", "build", "Microsoft.NET.Build.Containers.targets");
+        var targetsFile = CurrentFile.Relative(relativePath);
+        var propsFile = Path.ChangeExtension(targetsFile, ".props");
+        _combinedTargetsLocation = CombineFiles(propsFile, targetsFile);
+    }
 
     private static string CombineFiles(string propsFile, string targetsFile)
     {
@@ -24,14 +33,6 @@ public static class ProjectInitializer {
         Directory.CreateDirectory(directoryName);
         File.WriteAllLines(tempTargetLocation, combinedContent);
         return tempTargetLocation;
-    }
-
-    public static void LocateMSBuild()
-    {
-        var relativePath = Path.Combine("..", "packaging", "build", "Microsoft.NET.Build.Containers.targets");
-        var targetsFile = CurrentFile.Relative(relativePath);
-        var propsFile = Path.ChangeExtension(targetsFile, ".props");
-        CombinedTargetsLocation = CombineFiles(propsFile, targetsFile);
     }
 
     public static (Project, CapturingLogger) InitProject(Dictionary<string, string> bonusProps, [CallerMemberName]string projectName = "")
@@ -62,6 +63,6 @@ public static class ProjectInitializer {
         {
             props[kvp.Key] = kvp.Value;
         }
-        return (collection.LoadProject(CombinedTargetsLocation, props, null), logs);
+        return (collection.LoadProject(_combinedTargetsLocation, props, null), logs);
     }
 }

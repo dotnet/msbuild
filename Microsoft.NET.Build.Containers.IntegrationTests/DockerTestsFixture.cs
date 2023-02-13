@@ -16,8 +16,6 @@ public sealed class DockerTestsFixture : IDisposable
         try
         {
             DockerRegistryManager.StartAndPopulateDockerRegistry(_diagnosticOutput);
-            ProjectInitializer.LocateMSBuild();
-            Directory.CreateDirectory(TestSettings.TestArtifactsDirectory);
         }
         catch
         {
@@ -36,19 +34,5 @@ public sealed class DockerTestsFixture : IDisposable
         {
             _diagnosticOutput.WriteLine("Failed to shutdown docker registry, shut down it manually");
         }
-
-        try
-        {
-            //clean up tests artifacts
-            if (Directory.Exists(TestSettings.TestArtifactsDirectory))
-            {
-                Directory.Delete(TestSettings.TestArtifactsDirectory, true);
-            }
-        }
-        catch
-        {
-            _diagnosticOutput.WriteLine($"Failed to remove temp directory {TestSettings.TestArtifactsDirectory}, clean up the files manually.");
-        }
-
     }
 }
