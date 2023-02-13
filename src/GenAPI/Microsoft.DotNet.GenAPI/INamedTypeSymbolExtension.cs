@@ -71,16 +71,22 @@ namespace Microsoft.DotNet.GenAPI
         }
 
         // Build dummy field from a type, field name, and attribute list.
-        private static SyntaxNode CreateDummyField(string typ, string fieldName, SyntaxList<AttributeListSyntax> attrs) =>
-            SyntaxFactory.FieldDeclaration(
+        private static SyntaxNode CreateDummyField(string typ, string fieldName, SyntaxList<AttributeListSyntax> attrs, bool isReadonly)
+        {
+            List<SyntaxToken> modifiers = new List<SyntaxToken> { SyntaxFactory.Token(SyntaxKind.PrivateKeyword) };
+            if (isReadonly)
+                modifiers.Add(SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
+            SyntaxNode declaration = SyntaxFactory.FieldDeclaration(
                 SyntaxFactory.VariableDeclaration(
                     SyntaxFactory.ParseTypeName(typ))
                 .WithVariables(
-                    SyntaxFactory.SingletonSeparatedList<Microsoft.CodeAnalysis.CSharp.Syntax.VariableDeclaratorSyntax>(
+                    SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
                         SyntaxFactory.VariableDeclarator(
-                            SyntaxFactory.Identifier(fieldName))))
-            ).WithModifiers(SyntaxFactory.TokenList(new[] { SyntaxFactory.Token(SyntaxKind.PrivateKeyword) })
-            ).WithAttributeLists(attrs);
+                            SyntaxFactory.Identifier(fieldName)))))
+                .WithModifiers(SyntaxFactory.TokenList(modifiers))
+                .WithAttributeLists(attrs);
+            return declaration;
+        }
 
         // SynthesizeDummyFields yields private fields for the namedType, because they can be part of the API contract.
         // - A struct containing a field that is a reference type cannot be used as a reference.
@@ -110,23 +116,24 @@ namespace Microsoft.DotNet.GenAPI
                     yield return CreateDummyField(
                         genericField.Type.ToDisplayString(),
                         genericField.Name,
-                        FromAttributeData(genericField.GetAttributes()));
+                        FromAttributeData(genericField.GetAttributes()),
+                        namedType.IsReadOnly);
                 }
 
                 // If any field's type is transitively a reference type.
                 if (excludedFields.Any(f => IsOrContainsReferenceType(f.Type)))
                 {
                     // add reference type dummy field
-                    yield return CreateDummyField("object", "_dummy", new());
+                    yield return CreateDummyField("object", "_dummy", new(), namedType.IsReadOnly);
 
                     // add int field
-                    yield return CreateDummyField("int", "_dummyPrimitive", new());
+                    yield return CreateDummyField("int", "_dummyPrimitive", new(), namedType.IsReadOnly);
                 }
                 // Otherwise, if the field transitively contains a field whose type is non-empty.
                 else if (excludedFields.Any(f => IsOrContainsNonEmptyStruct(f.Type)))
                 {
                     // add int field
-                    yield return CreateDummyField("int", "_dummyPrimitive", new());
+                    yield return CreateDummyField("int", "_dummyPrimitive", new(), namedType.IsReadOnly);
                 }
             }
         }
