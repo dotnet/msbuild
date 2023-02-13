@@ -72,8 +72,14 @@ namespace Microsoft.Build.Utilities
     {
 #region Static Member Data
 
-        // The default path to temp, used to create explicitly short and long paths
-        private static readonly string s_tempPath = FileUtilities.TempFileDirectory;
+        /// <summary>
+        /// The default path to temp, used to create explicitly short and long paths.
+        /// </summary>
+        /// <remarks>
+        /// This must be the base system-wide temp path because we use it to filter out I/O of tools outside of our control.
+        /// Tools running under the tracker may put temp files in the temp base or in a sub-directory of their choosing.
+        /// </remarks>
+        private static readonly string s_tempPath = Path.GetTempPath();
 
         // The short path to temp
         private static readonly string s_tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());
