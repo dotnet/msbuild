@@ -43,10 +43,11 @@ public class DockerRegistryManager
 
     public static void ShutdownDockerRegistry(ITestOutputHelper testOutput)
     {
-        Assert.NotNull(s_registryContainerId);
-
-        new BasicCommand(testOutput, "docker", "stop", s_registryContainerId)
-            .Execute()
-            .Should().Pass();
+        if (s_registryContainerId != null)
+        {
+            new BasicCommand(testOutput, "docker", "stop", s_registryContainerId)
+                .Execute()
+                .Should().Pass();
+        }
     }
 }

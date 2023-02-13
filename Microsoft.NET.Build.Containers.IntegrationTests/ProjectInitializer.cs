@@ -18,7 +18,7 @@ public static class ProjectInitializer {
         var combinedContent = new List<string>();
         combinedContent.AddRange(propsContent[..^1]);
         combinedContent.AddRange(targetsContent[1..]);
-        var tempTargetLocation = Path.Combine(Path.GetTempPath(), "Containers", "Microsoft.NET.Build.Containers.targets");
+        var tempTargetLocation = Path.Combine(TestSettings.TestArtifactsDirectory, "Containers", "Microsoft.NET.Build.Containers.targets");
         string? directoryName = Path.GetDirectoryName(tempTargetLocation);
         Assert.NotNull(directoryName);
         Directory.CreateDirectory(directoryName);
@@ -32,11 +32,6 @@ public static class ProjectInitializer {
         var targetsFile = CurrentFile.Relative(relativePath);
         var propsFile = Path.ChangeExtension(targetsFile, ".props");
         CombinedTargetsLocation = CombineFiles(propsFile, targetsFile);
-    }
-
-    public static void Cleanup()
-    {
-        if (CombinedTargetsLocation != null) File.Delete(CombinedTargetsLocation);
     }
 
     public static (Project, CapturingLogger) InitProject(Dictionary<string, string> bonusProps, [CallerMemberName]string projectName = "")

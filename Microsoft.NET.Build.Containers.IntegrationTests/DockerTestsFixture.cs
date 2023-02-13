@@ -8,28 +8,47 @@ namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
 public sealed class DockerTestsFixture : IDisposable
 {
-    private ITestOutputHelper _diagnosticOutput;
+    private readonly SharedTestOutputHelper _diagnosticOutput;
 
     public DockerTestsFixture(IMessageSink messageSink)
     {
         _diagnosticOutput = new SharedTestOutputHelper(messageSink);
-        DockerRegistryManager.StartAndPopulateDockerRegistry(_diagnosticOutput);
-        ProjectInitializer.LocateMSBuild();
-        Directory.CreateDirectory(TestSettings.TestArtifactsDirectory);
+        try
+        {
+            DockerRegistryManager.StartAndPopulateDockerRegistry(_diagnosticOutput);
+            ProjectInitializer.LocateMSBuild();
+            Directory.CreateDirectory(TestSettings.TestArtifactsDirectory);
+        }
+        catch
+        {
+            Dispose();
+            throw;
+        }
     }
 
     public void Dispose()
     {
-        DockerRegistryManager.ShutdownDockerRegistry(_diagnosticOutput);
-        ProjectInitializer.Cleanup();
-        //clean up tests artifacts
         try
         {
+            DockerRegistryManager.ShutdownDockerRegistry(_diagnosticOutput);
+        }
+        catch
+        {
+            _diagnosticOutput.WriteLine("Failed to shutdown docker registry, shut down it manually");
+        }
+
+        try
+        {
+            //clean up tests artifacts
             if (Directory.Exists(TestSettings.TestArtifactsDirectory))
             {
                 Directory.Delete(TestSettings.TestArtifactsDirectory, true);
             }
         }
-        catch { }
+        catch
+        {
+            _diagnosticOutput.WriteLine($"Failed to remove temp directory {TestSettings.TestArtifactsDirectory}, clean up the files manually.");
+        }
+
     }
 }
