@@ -475,9 +475,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            string value = GetMetadataValueEscaped(name, false);
-
-            return value ?? String.Empty;
+            return GetMetadataValueEscaped(name, false);
         }
 
         /// <summary>

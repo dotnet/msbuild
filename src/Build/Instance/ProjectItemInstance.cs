@@ -1280,8 +1280,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadataEscaped(string metadataName)
             {
-                string value = GetMetadataEscaped(metadataName, false);
-                return value ?? String.Empty;
+                return GetMetadataEscaped(metadataName, false);
             }
 
             /// <summary>
