@@ -70,6 +70,6 @@
     <!-- Hacky workaround for the fact that we don't publish the package yet. -->
     <Target Name="CopyNupkgToCustomFolder" AfterTargets="Pack">
         <Copy SourceFiles="$(OutDir)../Microsoft.NET.Build.Containers.$(Version).nupkg"
-            DestinationFiles="../Test.Microsoft.NET.Build.Containers.Filesystem/package/Microsoft.NET.Build.Containers.$(Version).nupkg" />
+            DestinationFiles="../Microsoft.NET.Build.Containers.IntegrationTests/package/Microsoft.NET.Build.Containers.$(Version).nupkg" />
     </Target>
 </Project>
