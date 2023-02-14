@@ -1,14 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Microsoft.NET.Build.Containers.Tasks;
-
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+
+namespace Microsoft.NET.Build.Containers.Tasks;
 
 /// <summary>
 /// This task will shell out to the net7.0-targeted application for VS scenarios.
@@ -43,12 +43,7 @@ public partial class CreateNewImage : ToolTask
     /// <param name="commandLineCommands"></param>
     /// <param name="responseFileSwitch"></param>
     /// <returns></returns>
-    protected override ProcessStartInfo GetProcessStartInfo
-    (
-        string pathToTool,
-        string commandLineCommands,
-        string responseFileSwitch
-    )
+    protected override ProcessStartInfo GetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
     {
         VSHostObject hostObj = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<ITaskItem>);
         if (hostObj.ExtractCredentials(out string user, out string pass, (string s) => Log.LogWarning(s)))

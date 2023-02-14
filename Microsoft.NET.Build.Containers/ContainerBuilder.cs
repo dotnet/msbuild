@@ -1,22 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Microsoft.NET.Build.Containers;
-
-using System;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
+
+namespace Microsoft.NET.Build.Containers;
 
 public static class ContainerBuilder
 {
-    private static LocalDocker GetLocalDaemon(string localDaemonType, Action<string> logger) {
-        var daemon = localDaemonType switch {
-            KnownDaemonTypes.Docker => new LocalDocker(logger),
-            _ => throw new ArgumentException($"Unknown local container daemon type '{localDaemonType}'. Valid local container daemon types are {String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)}", nameof(localDaemonType))
-        };
-        return daemon;
-    }
     public static async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string[] entrypointArgs, string imageName, string[] imageTags, string? outputRegistry, string[] labels, Port[] exposedPorts, string[] envVars, string containerRuntimeIdentifier, string ridGraphPath, string localContainerDaemon)
     {
         var isDaemonPull = String.IsNullOrEmpty(registryName);
@@ -103,5 +93,15 @@ public static class ContainerBuilder
                 }
             }
         }
+    }
+
+    private static LocalDocker GetLocalDaemon(string localDaemonType, Action<string> logger)
+    {
+        var daemon = localDaemonType switch
+        {
+            KnownDaemonTypes.Docker => new LocalDocker(logger),
+            _ => throw new ArgumentException($"Unknown local container daemon type '{localDaemonType}'. Valid local container daemon types are {String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)}", nameof(localDaemonType))
+        };
+        return daemon;
     }
 }

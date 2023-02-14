@@ -87,8 +87,8 @@ public class ContainerHelpersTests
 
         if (shouldParse) {
             Assert.NotNull(port);
-            Assert.Equal(port.number, expectedPortNumber);
-            Assert.Equal(port.type, expectedType);
+            Assert.Equal(port.Value.Number, expectedPortNumber);
+            Assert.Equal(port.Value.Type, expectedType);
         } else {
             Assert.Null(port);
             Assert.NotNull(errors);

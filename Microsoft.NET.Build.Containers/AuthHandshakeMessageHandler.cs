@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Containers;
 /// <summary>
 /// A delegating handler that performs the Docker auth handshake as described <see href="https://docs.docker.com/registry/spec/auth/token/">in their docs</see> if a request isn't authenticated
 /// </summary>
-public partial class AuthHandshakeMessageHandler : DelegatingHandler
+internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
 {
     private const int MaxRequestRetries = 5; // Arbitrary but seems to work ok for chunked uploads to ghcr.io
 

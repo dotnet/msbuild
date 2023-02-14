@@ -2,7 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Build.Containers;
-public class ContainerHttpException : Exception
+
+internal sealed class ContainerHttpException : Exception
 {
     private const string ErrorPrefix = "Containerize: error CONTAINER004:";
     string? jsonResponse;

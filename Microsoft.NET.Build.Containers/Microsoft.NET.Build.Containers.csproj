@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net472</TargetFrameworks>
@@ -22,6 +22,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Nuget.Packaging" /> 
     <PackageReference Include="Valleysoft.DockerCredsProvider" />
   </ItemGroup>
@@ -31,19 +35,25 @@
     <Compile Remove="**/*.*" />
     <Compile Include="ReferenceParser.cs" />
     <Compile Include="KnownStrings.cs" />
-    <Compile Include="ParseContainerProperties.cs" />
-    <Compile Include="CreateNewImage.Interface.cs" />
-    <Compile Include="CreateNewImageToolTask.cs" />
+    <Compile Include="Tasks/ParseContainerProperties.cs" />
+    <Compile Include="Tasks/CreateNewImage.Interface.cs" />
+    <Compile Include="Tasks/CreateNewImageToolTask.cs" />
     <Compile Include="ContainerHelpers.cs" />
     <Compile Include="net472Definitions.cs" />
     <Compile Include="VSHostObject.cs" />
+    <Compile Include="Port.cs" />
   </ItemGroup>
 
   <!-- core remove files specific to net472 workarounds -->
   <ItemGroup Condition="'$(TargetFramework)' != 'net472'">
-    <Compile Remove="CreateNewImageToolTask.cs" />
+    <Compile Remove="Tasks/CreateNewImageToolTask.cs" />
     <Compile Remove="net472Definitions.cs" />
     <Compile Remove="VSHostObject.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Unshipped.txt" />
   </ItemGroup>
 
   <!-- This target adds all of our PackageReference and ProjectReference's runtime assets to our package output. -->

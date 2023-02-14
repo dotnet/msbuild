@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Microsoft.NET.Build.Containers;
 
-public record struct Layer
+internal record struct Layer
 {
     public Descriptor Descriptor { get; private set; }
 

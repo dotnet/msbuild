@@ -9,7 +9,7 @@ using System.Text.Json.Nodes;
 
 namespace Microsoft.NET.Build.Containers;
 
-public class LocalDocker : ILocalDaemon
+internal sealed class LocalDocker : ILocalDaemon
 {
     private readonly Action<string> logger;
 

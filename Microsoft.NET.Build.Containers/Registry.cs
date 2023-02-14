@@ -13,23 +13,14 @@ using System.Text.Json.Serialization;
 
 namespace Microsoft.NET.Build.Containers;
 
-public record struct ManifestConfig(string mediaType, long size, string digest);
-public record struct ManifestLayer(string mediaType, long size, string digest, string[]? urls);
-public record struct ManifestV2(int schemaVersion, string mediaType, ManifestConfig config, List<ManifestLayer> layers);
-
-public record struct PlatformInformation(string architecture, string os, string? variant, string[] features, [property:JsonPropertyName("os.version")][field: JsonPropertyName("os.version")] string? version);
-public record struct PlatformSpecificManifest(string mediaType, long size, string digest, PlatformInformation platform);
-public record struct ManifestListV2(int schemaVersion, string mediaType, PlatformSpecificManifest[] manifests);
-
-
-public record struct Registry
+internal sealed class Registry
 {
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
 
-    private readonly string RegistryName => BaseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+    private string RegistryName => BaseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
 
     public Registry(Uri baseUri)
     {
@@ -37,7 +28,7 @@ public record struct Registry
         _client = CreateClient();
     }
 
-    public readonly Uri BaseUri { get; }
+    public Uri BaseUri { get; }
 
     /// <summary>
     /// The max chunk size for patch blob uploads.
@@ -45,12 +36,12 @@ public record struct Registry
     /// <remarks>
     /// This varies by registry target, for example Amazon Elastic Container Registry requires 5MB chunks for all but the last chunk.
     /// </remarks>
-    public readonly int MaxChunkSizeBytes => IsAmazonECRRegistry ? 5248080 : 1024 * 64;
+    public int MaxChunkSizeBytes => IsAmazonECRRegistry ? 5248080 : 1024 * 64;
 
     /// <summary>
     /// Check to see if the registry is for Amazon Elastic Container Registry (ECR).
     /// </summary>
-    public readonly bool IsAmazonECRRegistry
+    public bool IsAmazonECRRegistry
     {
         get
         {
@@ -78,20 +69,20 @@ public record struct Registry
     /// <remarks>
     /// Google Artifact Registry locations (one for each availability zone) are of the form "ZONE-docker.pkg.dev".
     /// </remarks>
-    public readonly bool IsGoogleArtifactRegistry {
+    public bool IsGoogleArtifactRegistry {
         get => RegistryName.EndsWith("-docker.pkg.dev", StringComparison.Ordinal);
     }
 
     /// <summary>
     /// Google Artifact Registry doesn't support chunked upload, but we want the capability check to be agnostic to the target.
     /// </summary>
-    private readonly bool SupportsChunkedUpload => !IsGoogleArtifactRegistry;
+    private bool SupportsChunkedUpload => !IsGoogleArtifactRegistry;
 
     /// <summary>
     /// Pushing to ECR uses a much larger chunk size. To avoid getting too many socket disconnects trying to do too many
     /// parallel uploads be more conservative and upload one layer at a time.
     /// </summary>
-    private readonly bool SupportsParallelUploads => !IsAmazonECRRegistry;
+    private bool SupportsParallelUploads => !IsAmazonECRRegistry;
 
     public async Task<Image> GetImageManifest(string repositoryName, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath)
     {
@@ -251,7 +242,7 @@ public record struct Registry
         }
     }
 
-    private readonly async Task<UriBuilder> UploadBlobChunked(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+    private async Task<UriBuilder> UploadBlobChunked(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
         Uri patchUri = uploadUri.Uri;
         var localUploadUri = new UriBuilder(uploadUri.Uri);
         localUploadUri.Query += $"&digest={Uri.EscapeDataString(digest)}";
@@ -295,7 +286,7 @@ public record struct Registry
         return new UriBuilder(patchUri);
     }
 
-    private readonly UriBuilder GetNextLocation(HttpResponseMessage response) {
+    private UriBuilder GetNextLocation(HttpResponseMessage response) {
         if (response.Headers.Location is {IsAbsoluteUri: true })
         {
             return new UriBuilder(response.Headers.Location);
@@ -308,7 +299,7 @@ public record struct Registry
         }
     }
 
-    private readonly async Task<UriBuilder> UploadBlobWhole(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+    private async Task<UriBuilder> UploadBlobWhole(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
         StreamContent content = new StreamContent(contents);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         content.Headers.ContentLength = contents.Length;
@@ -321,7 +312,7 @@ public record struct Registry
         return GetNextLocation(patchResponse);
     }
 
-    private readonly async Task<UriBuilder> StartUploadSession(string repository, string digest, HttpClient client) {
+    private async Task<UriBuilder> StartUploadSession(string repository, string digest, HttpClient client) {
         Uri startUploadUri = new Uri(BaseUri, $"/v2/{repository}/blobs/uploads/");
 
         HttpResponseMessage pushResponse = await client.PostAsync(startUploadUri, content: null).ConfigureAwait(false);
@@ -335,7 +326,7 @@ public record struct Registry
         return GetNextLocation(pushResponse);
     }
 
-    private readonly async Task<UriBuilder> UploadBlobContents(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
+    private async Task<UriBuilder> UploadBlobContents(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri) {
         if (SupportsChunkedUpload) return await UploadBlobChunked(repository, digest, contents, client, uploadUri).ConfigureAwait(false);
         else return await UploadBlobWhole(repository, digest, contents, client, uploadUri).ConfigureAwait(false);
     }
@@ -355,7 +346,7 @@ public record struct Registry
         }
     }
 
-    private readonly async Task UploadBlob(string repository, string digest, Stream contents)
+    private async Task UploadBlob(string repository, string digest, Stream contents)
     {
         HttpClient client = GetClient();
 
@@ -375,7 +366,7 @@ public record struct Registry
 
     }
 
-    private readonly async Task<bool> BlobAlreadyUploaded(string repository, string digest, HttpClient client)
+    private async Task<bool> BlobAlreadyUploaded(string repository, string digest, HttpClient client)
     {
         HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, new Uri(BaseUri, $"/v2/{repository}/blobs/{digest}"))).ConfigureAwait(false);
 
@@ -389,7 +380,7 @@ public record struct Registry
 
     private readonly HttpClient _client;
 
-    private readonly HttpClient GetClient()
+    private HttpClient GetClient()
     {
         return _client;
     }
@@ -420,7 +411,7 @@ public record struct Registry
     {
 
         HttpClient client = GetClient();
-        Registry destinationRegistry = (destination.Registry!).Value;
+        Registry destinationRegistry = destination.Registry!;
 
         Func<Descriptor, Task> uploadLayerFunc = async (descriptor) =>
         {

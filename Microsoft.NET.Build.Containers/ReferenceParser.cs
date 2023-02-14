@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Containers;
 /// Names of each member are deliberately non-.NET-standard, as they were kept aligned with their golang versions for easier comparison.
 /// Visibility of each member is determined by golang rules - lowercase is private, uppercase is public. The exception is when a private member is used inside the golang module.
 /// </summary>
-public static class ReferenceParser
+internal static class ReferenceParser
 {
 
     /// <summary>

@@ -8,7 +8,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
-public class ParseContainerProperties : Microsoft.Build.Utilities.Task
+public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
 {
     /// <summary>
     /// The full base image name. mcr.microsoft.com/dotnet/runtime:6.0, for example.
@@ -77,26 +77,6 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         NewContainerImageName = "";
         NewContainerTags = Array.Empty<string>();
         NewContainerEnvironmentVariables = Array.Empty<ITaskItem>();
-    }
-
-    private static bool TryValidateTags(string[] inputTags, out string[] validTags, out string[] invalidTags)
-    {
-        var v = new List<string>();
-        var i = new List<string>();
-        foreach (var tag in inputTags)
-        {
-            if (ContainerHelpers.IsValidImageTag(tag))
-            {
-                v.Add(tag);
-            }
-            else
-            {
-                i.Add(tag);
-            }
-        }
-        validTags = v.ToArray();
-        invalidTags = i.ToArray();
-        return invalidTags.Length == 0;
     }
 
     public override bool Execute()
@@ -196,7 +176,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         return !Log.HasLoggedErrors;
     }
 
-    public void ValidateEnvironmentVariables()
+    private void ValidateEnvironmentVariables()
     {
         var filteredEnvVars = ContainerEnvironmentVariables.Where((x) => ContainerHelpers.IsValidEnvironmentVariable(x.ItemSpec)).ToArray<ITaskItem>();
         var badEnvVars = ContainerEnvironmentVariables.Where((x) => !ContainerHelpers.IsValidEnvironmentVariable(x.ItemSpec));
@@ -215,5 +195,25 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         {
             NewContainerEnvironmentVariables[i] = filteredEnvVars[i];
         }
+    }
+
+    private static bool TryValidateTags(string[] inputTags, out string[] validTags, out string[] invalidTags)
+    {
+        var v = new List<string>();
+        var i = new List<string>();
+        foreach (var tag in inputTags)
+        {
+            if (ContainerHelpers.IsValidImageTag(tag))
+            {
+                v.Add(tag);
+            }
+            else
+            {
+                i.Add(tag);
+            }
+        }
+        validTags = v.ToArray();
+        invalidTags = i.ToArray();
+        return invalidTags.Length == 0;
     }
 }

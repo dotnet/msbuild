@@ -8,7 +8,7 @@ using System.Text.Json.Nodes;
 
 namespace Microsoft.NET.Build.Containers;
 
-public class Image
+internal class Image
 {
     private readonly HashSet<Label> _labels;
 
@@ -80,7 +80,7 @@ public class Image
         var container = new JsonObject();
         foreach (var port in _exposedPorts)
         {
-            container.Add($"{port.number}/{port.type}", new JsonObject());
+            container.Add($"{port.Number}/{port.Type}", new JsonObject());
         }
         return container;
     }
@@ -155,7 +155,7 @@ public class Image
                     && property.Value is JsonObject propertyValue
                     && ContainerHelpers.TryParsePort(propertyName, out var parsedPort, out var _))
                 {
-                    ports.Add(parsedPort);
+                    ports.Add(parsedPort.Value);
                 }
             }
             return ports;

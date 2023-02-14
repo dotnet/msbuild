@@ -11,7 +11,7 @@ namespace Microsoft.NET.Build.Containers;
 /// error message. The handler catches the generic error and provides a more informed error
 /// message to let the user know they need to create the repository.
 /// </summary>
-public class AmazonECRMessageHandler : DelegatingHandler
+internal sealed class AmazonECRMessageHandler : DelegatingHandler
 {
     public AmazonECRMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 

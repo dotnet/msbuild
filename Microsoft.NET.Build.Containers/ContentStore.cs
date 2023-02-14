@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace Microsoft.NET.Build.Containers;
 
-public static class ContentStore
+internal static class ContentStore
 {
     public static string ArtifactRoot { get; set; } = Path.Combine(Path.GetTempPath(), "Containers");
     public static string ContentRoot

@@ -114,7 +114,7 @@ var portsOpt = new Option<Port[]>(
                 continue;
             }
             if (ContainerHelpers.TryParsePort(split[0], split[1], out var portInfo, out var portError)) {
-                goodPorts.Add(portInfo);
+                goodPorts.Add(portInfo.Value);
             } else {
                 var pe = (ContainerHelpers.ParsePortError)portError!;
                 badPorts.Add((port, pe));
