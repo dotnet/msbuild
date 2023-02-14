@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
-
 using Microsoft.Build.Tasks;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
 using Xunit;
+using Marshal = System.Runtime.InteropServices.Marshal;
 
 #nullable disable
 

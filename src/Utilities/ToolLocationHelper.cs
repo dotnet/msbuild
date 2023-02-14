@@ -6,19 +6,17 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
-
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Win32;
-
-using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
-using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
-using System.Runtime.Versioning;
-using Microsoft.Build.Framework;
+using Microsoft.Win32;
+using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
+using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 
 #nullable disable
 

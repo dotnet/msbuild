@@ -1017,7 +1017,7 @@ internal static class NativeMethods
         return null;
     }
 
-    internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
+    internal static bool MakeSymbolicLink(string newFileName, string existingFileName, ref string errorMessage)
     {
         bool symbolicLinkCreated;
         if (IsWindows)
@@ -1029,12 +1029,12 @@ internal static class NativeMethods
                 flags |= SymbolicLink.AllowUnprivilegedCreate;
             }
 
-            symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, flags);
+            symbolicLinkCreated = CreateSymbolicLink(newFileName, existingFileName, flags);
             errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
         }
         else
         {
-            symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
+            symbolicLinkCreated = symlink(existingFileName, newFileName) == 0;
             errorMessage = symbolicLinkCreated ? null : Marshal.GetLastWin32Error().ToString();
         }
 

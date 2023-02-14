@@ -3,12 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-
 using Microsoft.Build.Collections;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable
 

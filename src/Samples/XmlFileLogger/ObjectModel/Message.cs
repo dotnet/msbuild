@@ -11,7 +11,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     /// <summary>
     /// Class representation of a logged generic string output message.
     /// </summary>
-    internal class Message : ILogNode
+    internal sealed class Message : ILogNode
     {
         private readonly string _message;
         private readonly DateTime _timestamp;

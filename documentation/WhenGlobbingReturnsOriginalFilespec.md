@@ -1,3 +1,5 @@
+# When globbing returns original filespec
+
 Original itemspec is returned when:
 - illegal filespec contains
 	- both wildcards and escaped wildcards (`%2a`, `%3f`)

@@ -341,7 +341,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Helper class that contains execution results for <see cref="GenerateBindingRedirects"/>.
         /// </summary>
-        private class BindingRedirectsExecutionResult
+        private sealed class BindingRedirectsExecutionResult
         {
             public MockEngine Engine { get; set; }
 
@@ -357,7 +357,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Mock implementation of the <see cref="ITaskItem"/>.
         /// </summary>
-        private class TaskItemMock : ITaskItem
+        private sealed class TaskItemMock : ITaskItem
         {
             public TaskItemMock(string assemblyName, string maxVersion)
             {

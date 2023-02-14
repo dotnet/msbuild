@@ -15,7 +15,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Helper class to simulate application configuration read
     /// </summary>
-    internal class ToolsetConfigurationReaderTestHelper
+    internal sealed class ToolsetConfigurationReaderTestHelper
     {
         private static ExeConfigurationFileMap s_configFile;
         private static string s_testFolderFullPath = null;

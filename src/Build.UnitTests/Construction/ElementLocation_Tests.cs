@@ -2,16 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
+using System.Reflection;
+using System.Xml;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
 using Microsoft.Build.UnitTests.BackEnd;
-using System.Xml;
-using System.IO;
-using System.Reflection;
 using Xunit;
-using Microsoft.Build.BackEnd;
 
 #nullable disable
 

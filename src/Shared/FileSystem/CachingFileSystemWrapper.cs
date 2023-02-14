@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Microsoft.Build.Shared.FileSystem
 {
-    internal class CachingFileSystemWrapper : IFileSystem
+    internal sealed class CachingFileSystemWrapper : IFileSystem
     {
         private readonly IFileSystem _fileSystem;
         private readonly ConcurrentDictionary<string, bool> _existenceCache = new ConcurrentDictionary<string, bool>();

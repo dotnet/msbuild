@@ -3,16 +3,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
-using System.IO;
-using System.Threading;
-using Shouldly;
 
 #nullable disable
 

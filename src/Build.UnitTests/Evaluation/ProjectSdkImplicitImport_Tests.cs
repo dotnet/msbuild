@@ -16,10 +16,10 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
 using SdkResolverContext = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResult = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
-using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
 
 #nullable disable
 
@@ -542,7 +542,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        internal class SdkPropertiesAreExpandedDataTemplate
+        internal sealed class SdkPropertiesAreExpandedDataTemplate
         {
             public SdkPropertiesAreExpandedDataTemplate(string template, bool expectedMinimumVersionIsNull)
             {
@@ -565,7 +565,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        internal class SdkPropertiesAreExpandedCase
+        internal sealed class SdkPropertiesAreExpandedCase
         {
             public SdkPropertiesAreExpandedCase(SdkReferencePropertyExpansionMode? mode,
                 SdkPropertiesAreExpandedDataTemplate template, bool setName, bool setVersion, bool expectedSuccess)

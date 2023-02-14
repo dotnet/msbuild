@@ -12,11 +12,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.Evaluation.Context;
     using Microsoft.Build.Execution;
-    using Microsoft.Build.ObjectModelRemoting;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Logging;
+    using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectLinkRemoter : MockLinkRemoter<Project>
+    internal sealed class MockProjectLinkRemoter : MockLinkRemoter<Project>
     {
         public override Project CreateLinkedObject(IImportHolder holder)
         {
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public void Unload() { }
     }
 
-    internal class MockProjectLink : ProjectLink, ILinkMock
+    internal sealed class MockProjectLink : ProjectLink, ILinkMock
     {
         public MockProjectLink(MockProjectLinkRemoter proxy, IImportHolder holder)
         {

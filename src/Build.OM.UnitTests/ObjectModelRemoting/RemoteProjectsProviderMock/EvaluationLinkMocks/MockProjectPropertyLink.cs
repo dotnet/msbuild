@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectPropertyLinkRemoter : MockLinkRemoter<ProjectProperty>
+    internal sealed class MockProjectPropertyLinkRemoter : MockLinkRemoter<ProjectProperty>
     {
         public override ProjectProperty CreateLinkedObject(IImportHolder holder)
         {
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public bool IsImported => this.Source.IsImported;
     }
 
-    internal class MockProjectPropertyLink : ProjectPropertyLink, ILinkMock
+    internal sealed class MockProjectPropertyLink : ProjectPropertyLink, ILinkMock
     {
         public MockProjectPropertyLink(MockProjectPropertyLinkRemoter proxy, IImportHolder holder)
         {

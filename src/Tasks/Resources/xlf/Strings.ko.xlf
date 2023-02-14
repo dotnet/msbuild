@@ -2712,6 +2712,11 @@
         <target state="translated">MSB3762: 참조가 작업에 전달되지 않았습니다. 적어도 mscorlib 및 Windows.Foundation에 대한 참조가 필요합니다.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
+        <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
+        <target state="new">'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
         <target state="translated">MSB3724: XAML 작업을 만들 수 없습니다. 속성 이름 '{0}'이(가) 중복되었습니다.</target>

@@ -8,10 +8,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Build.Evaluation;
-    using Xunit;
     using Microsoft.Build.Framework;
+    using Xunit;
 
-    internal class ProjectPair : LinkPair<Project>
+    internal sealed class ProjectPair : LinkPair<Project>
     {
         public ProjectPair(Project view, Project real)
             : base(view, real)

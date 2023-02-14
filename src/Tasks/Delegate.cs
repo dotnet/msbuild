@@ -3,10 +3,9 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.Versioning;
-
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
 

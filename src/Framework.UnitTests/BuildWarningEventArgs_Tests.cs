@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
         /// Create a derived class so that we can test the default constructor in order to increase code coverage and 
         /// verify this code path does not cause any exceptions.
         /// </summary>
-        private class BuildWarningEventArgs2 : BuildWarningEventArgs
+        private sealed class BuildWarningEventArgs2 : BuildWarningEventArgs
         {
             /// <summary>
             /// Default constructor

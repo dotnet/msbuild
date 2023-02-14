@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 

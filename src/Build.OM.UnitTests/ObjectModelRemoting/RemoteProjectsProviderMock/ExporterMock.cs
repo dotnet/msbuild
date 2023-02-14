@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// <summary>
     /// Provide ability to export and import OM objects to another collections.
     /// </summary>
-    internal class ProjectCollectionLinker : ExternalProjectsProvider
+    internal sealed class ProjectCollectionLinker : ExternalProjectsProvider
     {
         internal static int _collecitonId = 0;
 
@@ -371,7 +371,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             object Linked { get; }
         }
 
-        private class ActiveImport<T, RMock> : ImportedLinksMap.LinkedObject<RMock>, IImportHolder, IActiveImportDBG
+        private sealed class ActiveImport<T, RMock> : ImportedLinksMap.LinkedObject<RMock>, IImportHolder, IActiveImportDBG
             where T : class
             where RMock : MockLinkRemoter<T>
         {
@@ -388,8 +388,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             public ProjectCollectionLinker Linker { get; private set; }
 
-            public T Linked { get; protected set; }
-            public RMock Remoter { get; protected set; }
+            public T Linked { get; private set; }
+            public RMock Remoter { get; private set; }
         }
 
 
@@ -398,7 +398,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return new ConnectedProjectCollections();
         }
 
-        internal class ConnectedProjectCollections
+        internal sealed class ConnectedProjectCollections
         {
             private List<ProjectCollectionLinker> group = new List<ProjectCollectionLinker>();
             public ProjectCollectionLinker AddNew()
@@ -441,7 +441,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        private class ExternalConnection
+        private sealed class ExternalConnection
         {
             public ExternalConnection(ProjectCollectionLinker linker)
             {
