@@ -11,4 +11,16 @@ You can create a binary log by passing the `-bl` parameter to MSBuild. You can e
 [More details about binary logs](Binary-Log.md)
 
 ## Capturing Binary Logs Through Visual Studio
+### (Preferred way) Capturing logs for all MSBuild invocations
+Via setting `MSBUILDDEBUGENGINE` environment variable to `'1'`:
+```
+> SET MSBUILDDEBUGENGINE=1
+> devenv.exe MySolution.sln
+```
+
+MSBuild binary logs are then captured to `MSBuild_Logs` subfolder of a current folder.
+
+[More technical info](Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#logs)
+
+### Capturing specific logs for chosen build invocations
 See [this guide](https://github.com/dotnet/project-system-tools) in the Project System Tools repo for capturing binlogs through Visual Studio.
