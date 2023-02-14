@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         /// Create a derived class so that we can test the default constructor in order to increase code coverage and 
         /// verify this code path does not cause any exceptions.
         /// </summary>
-        private class TaskStartedEventArgs2 : TaskStartedEventArgs
+        private sealed class TaskStartedEventArgs2 : TaskStartedEventArgs
         {
             /// <summary>
             /// Default constructor

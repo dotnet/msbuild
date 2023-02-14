@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Shared;
 
 #nullable disable
 

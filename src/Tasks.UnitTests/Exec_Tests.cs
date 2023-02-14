@@ -2,19 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
 using Xunit.NetCore.Extensions;
 
 #nullable disable
@@ -1015,7 +1015,7 @@ echo line 3"" />
         }
     }
 
-    internal class ExecWrapper : Exec
+    internal sealed class ExecWrapper : Exec
     {
         public Encoding StdOutputEncoding
         {

@@ -157,6 +157,9 @@ csharp_space_between_square_brackets = false
 dotnet_code_quality.ca1802.api_surface = private, internal
 dotnet_code_quality.ca2208.api_surface = public
 
+# CA1852: Seal internal types
+dotnet_diagnostic.ca1852.severity = warning
+
 # RS0037: Enable tracking of nullability of reference types in the declared API
 # Our API is not annotated but new classes get nullable enabled so disable this.
 # We'd be happy if everything was annotated and this could be removed.

@@ -2712,6 +2712,11 @@
         <target state="translated">MSB3762: Göreve hiçbir başvuru geçirilmedi. En azından mscorlib ve Windows.Foundation başvuruları gereklidir.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
+        <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
+        <target state="new">'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
         <target state="translated">MSB3724: XAML görevi oluşturulamıyor. Yinelenen özellik adı: '{0}'.</target>

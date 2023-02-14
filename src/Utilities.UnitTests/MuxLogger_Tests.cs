@@ -325,7 +325,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// A logger which signals an event when it gets a project started message.
         /// </summary>
-        private class EventingLogger : ILogger
+        private sealed class EventingLogger : ILogger
         {
             /// <summary>
             /// The event source

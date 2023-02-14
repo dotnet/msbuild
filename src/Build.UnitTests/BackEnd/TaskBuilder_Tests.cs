@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.BackEnd;
@@ -15,14 +16,12 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Threading;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 #nullable disable
 
@@ -542,7 +541,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -566,7 +565,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -639,14 +638,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                     </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
 
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/6521")]
+        [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -680,6 +679,47 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Project>";
 
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            logger.AssertLogContains("[foo: ]");
+        }
+
+        /// <summary>
+        /// If an item being output from a task has null metadata, we shouldn't crash.
+        /// </summary>
+        [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
+        [Trait("Category", "non-mono-tests")]
+        public void NullMetadataOnLegacyOutputItems_InlineTask_Diagnostic()
+        {
+            string projectContents = @"
+                    <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`NullMetadataTask_v4` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildFrameworkToolsPath)\Microsoft.Build.Tasks.v4.0.dll`>
+                            <ParameterGroup>
+                               <OutputItems ParameterType=`Microsoft.Build.Framework.ITaskItem[]` Output=`true` />
+                            </ParameterGroup>
+                            <Task>
+                                <Code>
+                                <![CDATA[
+                                    OutputItems = new ITaskItem[1];
+
+                                    IDictionary<string, string> metadata = new Dictionary<string, string>();
+                                    metadata.Add(`a`, null);
+
+                                    OutputItems[0] = new TaskItem(`foo`, (IDictionary)metadata);
+
+                                    return true;
+                                ]]>
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                      <Target Name=`Build`>
+                        <NullMetadataTask_v4>
+                          <Output TaskParameter=`OutputItems` ItemName=`Outputs` />
+                        </NullMetadataTask_v4>
+
+                        <Message Text=`[%(Outputs.Identity): %(Outputs.a)]` Importance=`High` />
+                      </Target>
+                    </Project>";
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, loggerVerbosity: LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
 #endif
@@ -1134,7 +1174,7 @@ namespace ClassLibrary2
         /// <summary>
         /// The mock component host object.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
             #region IBuildComponentHost Members
 

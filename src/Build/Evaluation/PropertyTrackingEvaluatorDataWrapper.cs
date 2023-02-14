@@ -1,14 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;

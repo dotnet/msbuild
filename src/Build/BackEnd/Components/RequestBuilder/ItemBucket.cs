@@ -3,11 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable

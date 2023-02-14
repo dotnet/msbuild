@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectItemDefinitionElementLinkRemoter : MockProjectElementContainerLinkRemoter
+    internal sealed class MockProjectItemDefinitionElementLinkRemoter : MockProjectElementContainerLinkRemoter
     {
         public override ProjectElement ImportImpl(ProjectCollectionLinker remote)
         {
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
     }
 
-    internal class MockProjectItemDefinitionElementLink : ProjectItemDefinitionElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
+    internal sealed class MockProjectItemDefinitionElementLink : ProjectItemDefinitionElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
     {
         public MockProjectItemDefinitionElementLink(MockProjectItemDefinitionElementLinkRemoter proxy, IImportHolder holder)
         {

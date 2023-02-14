@@ -25,6 +25,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public string ProjectPath;
         public string TargetFramework;
         public bool Finished;
+        public string? ProjectOutputExecutable;
         // Line to display project info
         public TerminalBufferLine? Line;
         // Targets
@@ -55,6 +56,29 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
         }
 
+        public string ToANSIString()
+        {
+            ANSIBuilder.Formatting.ForegroundColor color = ANSIBuilder.Formatting.ForegroundColor.Default;
+            string icon = ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner()) + " ";
+
+            if (Finished && WarningCount + ErrorCount == 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Green;
+                icon = "✓";
+            }
+            else if (ErrorCount > 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Red;
+                icon = "X";
+            }
+            else if (WarningCount > 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Yellow;
+                icon = "✓";
+            }
+            return icon + " " + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), color) + " " + ANSIBuilder.Formatting.Inverse(TargetFramework);
+        }
+
         // TODO: Rename to Render() after LiveLogger's API becomes internal
         public void Log()
         {
@@ -65,20 +89,11 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             ShouldRerender = false;
             // Project details
-            string lineContents = ANSIBuilder.Alignment.SpaceBetween(
-                // Show indicator
-                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner())) +
-                // Project
-                ANSIBuilder.Formatting.Dim("Project: ") +
-                // Project file path with color
-                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default)} [{TargetFramework ?? "*"}]",
-                $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
-                Console.WindowWidth);
-
+            string lineContents = ANSIBuilder.Alignment.SpaceBetween(ToANSIString(), $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)", Console.BufferWidth - 1);
             // Create or update line
             if (Line is null)
             {
-                Line = TerminalBuffer.WriteNewLine(lineContents, false);
+                Line = TerminalBuffer.WriteNewLineBeforeMidpoint(lineContents, false);
             }
             else
             {
@@ -93,8 +108,15 @@ namespace Microsoft.Build.Logging.LiveLogger
                     TerminalBuffer.DeleteLine(CurrentTargetLine.Id);
                 }
 
-                foreach (MessageNode node in AdditionalDetails.ToList())
+                bool foundErrorOrWarning = false;
+
+                foreach (MessageNode node in AdditionalDetails)
                 {
+                    if (node.Type != MessageNode.MessageType.HighPriorityMessage)
+                    {
+                        foundErrorOrWarning = true;
+                    }
+
                     // Only delete high priority messages
                     if (node.Type != MessageNode.MessageType.HighPriorityMessage)
                     {
@@ -105,6 +127,20 @@ namespace Microsoft.Build.Logging.LiveLogger
                     {
                         TerminalBuffer.DeleteLine(node.Line.Id);
                     }
+                }
+
+                if (!foundErrorOrWarning && this.Line is not null)
+                {
+                    foreach (MessageNode node in AdditionalDetails)
+                    {
+                        int? id = node.Line?.Id;
+                        if (id is not null)
+                        {
+                            TerminalBuffer.DeleteLine(id.Value);
+                        }
+                    }
+
+                    TerminalBuffer.DeleteLine(this.Line.Id);
                 }
             }
 
@@ -168,6 +204,12 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             MessageCount++;
             MessageNode node = new MessageNode(args);
+            // Add output executable path
+            if (node.ProjectOutputExecutablePath is not null)
+            {
+                ProjectOutputExecutable = node.ProjectOutputExecutablePath;
+            }
+
             AdditionalDetails.Add(node);
             return node;
         }
@@ -176,6 +218,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             WarningCount++;
             MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
+            TerminalBuffer.overallBuildState = TerminalBuffer.overallBuildState == OverallBuildState.Error ? OverallBuildState.Error : OverallBuildState.Warning;
             return node;
         }
         public MessageNode? AddError(BuildErrorEventArgs args)
@@ -183,6 +226,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             ErrorCount++;
             MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
+            TerminalBuffer.overallBuildState = OverallBuildState.Error;
             return node;
         }
     }

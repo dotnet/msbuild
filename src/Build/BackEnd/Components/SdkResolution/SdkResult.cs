@@ -1,10 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Framework;
 using SdkReference = Microsoft.Build.Framework.SdkReference;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 

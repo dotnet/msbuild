@@ -210,7 +210,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        public class TempWorkingDirectory : IDisposable
+        public sealed class TempWorkingDirectory : IDisposable
         {
             public string Path { get; }
 

@@ -4,10 +4,10 @@
 #if FEATURE_STRONG_NAMES
 
 using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 #nullable disable
 

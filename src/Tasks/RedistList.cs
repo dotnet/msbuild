@@ -12,9 +12,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 

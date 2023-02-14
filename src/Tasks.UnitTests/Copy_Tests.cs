@@ -1147,7 +1147,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class CopyMonitor
+        internal sealed class CopyMonitor
         {
             internal int copyCount;
 
@@ -2109,7 +2109,7 @@ namespace Microsoft.Build.UnitTests
         /// Simulates the File.Copy method without touching the disk.
         /// First copy fails as requested, subsequent copies succeed.
         /// </summary>
-        private class CopyFunctor
+        private sealed class CopyFunctor
         {
             /// <summary>
             /// Protects the counts and lists below.
@@ -2539,7 +2539,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
+        [RequiresSymbolicLinksFact]
         public void CopyToDestinationFolderWithSymbolicLinkCheck()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();

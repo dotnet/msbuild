@@ -1,9 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,7 +14,10 @@ using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Win32;
 
 #nullable disable
 

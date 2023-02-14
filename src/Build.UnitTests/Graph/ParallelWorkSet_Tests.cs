@@ -14,7 +14,7 @@ namespace Microsoft.Build.Graph.UnitTests
 {
     public class ParallelWorkSet_Tests
     {
-        private class ParallelWorkSetTestCase
+        private sealed class ParallelWorkSetTestCase
         {
             internal int DegreeOfParallelism { get; set; }
             internal List<WorkItem> WorkItemsToAdd { get; set; } = new List<WorkItem>();

@@ -167,11 +167,7 @@ namespace Microsoft.Build.UnitTests
          * The level of detail to show in the event log.
          *
          */
-        public LoggerVerbosity Verbosity
-        {
-            get => LoggerVerbosity.Normal;
-            set {/* do nothing */}
-        }
+        public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Normal;
 
         /*
          * Property:    Parameters
@@ -226,11 +222,12 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false, bool printEventsToStdout = true)
+        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false, bool printEventsToStdout = true, LoggerVerbosity verbosity = LoggerVerbosity.Normal)
         {
             _testOutputHelper = testOutputHelper;
             _profileEvaluation = profileEvaluation;
             _printEventsToStdout = printEventsToStdout;
+            Verbosity = verbosity;
         }
 
         public List<Action<object, BuildEventArgs>> AdditionalHandlers { get; set; } = new List<Action<object, BuildEventArgs>>();

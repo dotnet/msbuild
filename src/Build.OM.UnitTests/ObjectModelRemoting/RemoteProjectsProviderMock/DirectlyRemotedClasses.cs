@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
     }
 
-    internal class RemotedResolvedImport
+    internal sealed class RemotedResolvedImport
     {
         public RemotedResolvedImport(ResolvedImport resolvedImport, ProjectCollectionLinker exporter)
         {

@@ -5,9 +5,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Security;
 using System.Runtime.InteropServices;
-
+using System.Security;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 

@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
+using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
 #nullable disable
 

@@ -257,7 +257,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
         }
     }
 
-    internal class TargetSpecificationComparer : IEqualityComparer<TargetSpecification>
+    internal sealed class TargetSpecificationComparer : IEqualityComparer<TargetSpecification>
     {
         public bool Equals(TargetSpecification x, TargetSpecification y)
         {

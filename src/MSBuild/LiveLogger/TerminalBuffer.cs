@@ -1,10 +1,12 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Microsoft.Build.Logging.LiveLogger
 {
@@ -56,12 +58,17 @@ namespace Microsoft.Build.Logging.LiveLogger
 
     internal class TerminalBuffer
     {
+        private const char errorSymbol = '❌';
+        private const char warningSymbol = '⚠';
         private static List<TerminalBufferLine> Lines = new();
         public static string FooterText = string.Empty;
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
         internal static bool IsTerminated = false;
         internal static bool ShouldRerender = true;
+        internal static OverallBuildState overallBuildState = OverallBuildState.None;
+        internal static int FinishedProjects = 0;
+        private static int midLineId;
         internal static int ScrollableAreaHeight
         {
             get
@@ -76,15 +83,21 @@ namespace Microsoft.Build.Logging.LiveLogger
             Console.OutputEncoding = Encoding.UTF8;
             Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
             Console.Write(ANSIBuilder.Cursor.Invisible());
+            // TerminalBufferLine midLine = new(new string('-', Console.BufferWidth), true);
+            // WriteNewLine(midLine);
+            // midLineId = midLine.Id;
+            midLineId = -1;
         }
 
         public static void Terminate()
         {
             IsTerminated = true;
+            // Delete contents from alternate buffer before switching back to main buffer
+            Console.Write(
+                ANSIBuilder.Cursor.Home() +
+                ANSIBuilder.Eraser.DisplayCursorToEnd());
             // Reset configuration for buffer and cursor, and clear screen
             Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.Write(ANSIBuilder.Eraser.Display());
-            Console.Clear();
             Console.Write(ANSIBuilder.Cursor.Visible());
             Lines = new();
         }
@@ -98,13 +111,27 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             ShouldRerender = false;
+            ANSIBuilder.Formatting.ForegroundColor desiredColor =
+                overallBuildState == OverallBuildState.Error ? ANSIBuilder.Formatting.ForegroundColor.Red :
+                overallBuildState == OverallBuildState.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
+                ANSIBuilder.Formatting.ForegroundColor.White;
+
+            string text = $"MSBuild - Build in progress - {FinishedProjects} finished projects";
+            text =
+                overallBuildState == OverallBuildState.Error ? $"{errorSymbol} {text} {errorSymbol}" :
+                overallBuildState == OverallBuildState.Warning ? $"{warningSymbol} {text} {warningSymbol}" :
+                text;
+
             Console.Write(
                 // Write header
                 ANSIBuilder.Cursor.Home() +
-                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")) +
+                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center(text)), ANSIBuilder.Formatting.BackgroundColor.Black, desiredColor) +
                 // Write footer
-                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
-                new string('-', Console.BufferWidth) + '\n' + FooterText);
+                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
+                    ANSIBuilder.Eraser.LineCursorToEnd() +
+                    new string('-', Console.BufferWidth) +
+                    Environment.NewLine +
+                    FooterText);
 
             if (Lines.Count == 0)
             {
@@ -151,6 +178,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             Console.Write(contents);
         }
         #endregion
+
         #region Line identification
         public static int GetLineIndexById(int lineId)
         {
@@ -191,12 +219,33 @@ namespace Microsoft.Build.Logging.LiveLogger
                     return null;
                 }
                 // Get line end index
-                Lines.Insert(lineIndex, line);
+                Lines.Insert(lineIndex + 1, line);
             }
             else
             {
                 Lines.Add(line);
             }
+            return line;
+        }
+
+        public static TerminalBufferLine? WriteNewLineAfterMidpoint(string text, bool shouldWrapLines = false)
+        {
+            TerminalBufferLine line = new(text, shouldWrapLines);
+            return WriteNewLineAfter(midLineId, line);
+        }
+
+        public static TerminalBufferLine? WriteNewLineBeforeMidpoint(string text, bool shouldWrapLines)
+        {
+            TerminalBufferLine line = new(text, shouldWrapLines);
+            int lineIndex = GetLineIndexById(midLineId);
+            if (lineIndex == -1)
+            {
+                WriteNewLine(line);
+                return null;
+            }
+
+            Lines.Insert(lineIndex, line);
+
             return line;
         }
 
@@ -235,5 +284,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             ShouldRerender = true;
         }
         #endregion
+    }
+
+    internal enum OverallBuildState
+    {
+        None,
+        Warning,
+        Error,
     }
 }

@@ -4,11 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 using System.IO;
 

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -12,11 +12,13 @@ namespace Microsoft.Build.Logging.LiveLogger
     {
         private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
 
-        private bool Succeeded;
-        public string Parameters { get; set; }
-        public int StartedProjects = 0;
-        public int FinishedProjects = 0;
+        private bool succeeded;
+        private int startedProjects = 0;
+        private int finishedProjects = 0;
+        private Dictionary<string, int> blockedProjects = new();
+
         public LoggerVerbosity Verbosity { get; set; }
+        public string Parameters { get; set; }
 
         public LiveLogger()
         {
@@ -55,6 +57,10 @@ namespace Microsoft.Build.Logging.LiveLogger
             TerminalBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
             TerminalBuffer.WriteNewLine(string.Empty);
+
+            // Top line indicates the number of finished projects.
+            TerminalBuffer.FinishedProjects = this.finishedProjects;
+
             // First render
             TerminalBuffer.Render();
             int i = 0;
@@ -66,11 +72,14 @@ namespace Microsoft.Build.Logging.LiveLogger
                 // Use task delay to avoid blocking the task, so that keyboard input is listened continously
                 Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
+                    TerminalBuffer.FinishedProjects = this.finishedProjects;
+
                     // Rerender projects only when needed
                     foreach (var project in projects)
                     {
                         project.Value.Log();
                     }
+
                     // Rerender buffer
                     TerminalBuffer.Render();
                 });
@@ -100,7 +109,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private void UpdateFooter()
         {
-            float percentage = (float)FinishedProjects / StartedProjects;
+            float percentage = startedProjects == 0 ? 0.0f : (float)finishedProjects / startedProjects;
             TerminalBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
                 $"Build progress (approx.) [{ANSIBuilder.Graphics.ProgressBar(percentage)}]",
                 ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
@@ -114,27 +123,28 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
-            Succeeded = e.Succeeded;
+            succeeded = e.Succeeded;
         }
 
         // Project
         private void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            StartedProjects++;
+            startedProjects++;
+
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            // If id already exists...
-            if (projects.ContainsKey(id))
+
+            // If id does not exist...
+            if (!projects.ContainsKey(id))
             {
-                return;
+                // Add project
+                ProjectNode node = new(e)
+                {
+                    ShouldRerender = true,
+                };
+                projects[id] = node;
+                UpdateFooter();
             }
-            // Add project
-            ProjectNode node = new ProjectNode(e);
-            projects[id] = node;
-            // Log
-            // Update footer
-            UpdateFooter();
-            node.ShouldRerender = true;
         }
 
         private void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
@@ -145,11 +155,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             {
                 return;
             }
+
             // Update line
             node.Finished = true;
-            FinishedProjects++;
-            UpdateFooter();
             node.ShouldRerender = true;
+            finishedProjects++;
+            UpdateFooter();
         }
 
         // Target
@@ -194,10 +205,30 @@ namespace Microsoft.Build.Logging.LiveLogger
             node.AddTask(e);
             // Log
             node.ShouldRerender = true;
+
+            if (e.TaskName.Equals("MSBuild"))
+            {
+                TerminalBufferLine? line = null; // TerminalBuffer.WriteNewLineAfterMidpoint($"{e.ProjectFile} is blocked by the MSBuild task.");
+                if (line is not null)
+                {
+                    blockedProjects[e.ProjectFile] = line.Id;
+                }
+            }
         }
 
         private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
         {
+            if (e.TaskName.Equals("MSBuild"))
+            {
+                if (blockedProjects.TryGetValue(e.ProjectFile, out int lineId))
+                {
+                    TerminalBuffer.DeleteLine(lineId);
+                    if (projects.TryGetValue(e.BuildEventContext!.ProjectInstanceId, out ProjectNode? node))
+                    {
+                        node.ShouldRerender = true;
+                    }
+                }
+            }
         }
 
         // Raised messages, warnings and errors
@@ -256,23 +287,28 @@ namespace Microsoft.Build.Logging.LiveLogger
         public void Shutdown()
         {
             TerminalBuffer.Terminate();
-            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
-            Console.Clear();
             int errorCount = 0;
             int warningCount = 0;
             foreach (var project in projects)
             {
+                if (project.Value.AdditionalDetails.Count == 0)
+                {
+                    continue;
+                }
+
+                Console.WriteLine(project.Value.ToANSIString());
                 errorCount += project.Value.ErrorCount;
                 warningCount += project.Value.WarningCount;
                 foreach (var message in project.Value.AdditionalDetails)
                 {
-                    Console.WriteLine(message.ToANSIString());
+                    Console.WriteLine($"    └── {message.ToANSIString()}");
                 }
+                Console.WriteLine();
             }
 
             // Emmpty line
             Console.WriteLine();
-            if (Succeeded)
+            if (succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
                 Console.WriteLine($"\t{warningCount} Warning(s)");

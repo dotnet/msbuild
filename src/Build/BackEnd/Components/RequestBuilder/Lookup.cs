@@ -4,12 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Shared;
 using System.Threading;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
-
+using Microsoft.Build.Shared;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 #nullable disable

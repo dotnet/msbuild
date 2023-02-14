@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A stream class that counts the number of times it was reset.
         /// </summary>
-        private class RestartCountingStream : Stream
+        private sealed class RestartCountingStream : Stream
         {
             private int _resetCount;
             private Stream _stream;

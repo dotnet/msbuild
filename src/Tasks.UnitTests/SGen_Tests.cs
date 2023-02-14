@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Shared;
 using System.IO;
 using System.Linq;
-using Xunit;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Shouldly;
+using Xunit;
 
 #nullable disable
 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 #else
-        internal class SGenExtension : SGen
+        internal sealed class SGenExtension : SGen
         {
             internal string CommandLine()
             {
