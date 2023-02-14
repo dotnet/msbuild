@@ -27,6 +27,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Parse invalid property under target](https://github.com/dotnet/msbuild/pull/8190)
 - [Eliminate project string cache](https://github.com/dotnet/msbuild/pull/7965)
 - [Log an error when no provided search path for an import exists](https://github.com/dotnet/msbuild/pull/8095)
+- [Log assembly loads](https://github.com/dotnet/msbuild/pull/8316)
 
 ### 17.4
 - [Respect deps.json when loading assemblies](https://github.com/dotnet/msbuild/pull/7520)
