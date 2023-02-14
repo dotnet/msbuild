@@ -6,7 +6,7 @@ However, you should be aware what type of information is captured in the binary 
 
 ⚠ NOTE: some build environments make secrets available using environment variables. Before sharing a binary log, make sure it does not expose API tokens or other important secrets.
 
-You can create a binary log by passing the `-bl` parameter to MSBuild. You can explore the contents of the generated .binlog file using [MSBuild Structured Log Viewer](http://msbuildlog.com/) or in your browser using [Live Structured Log Viewer](https://live.msbuildlog.com). Note: We don't capture any data from binary logs viewed on your browser.
+You can create a binary log by passing the `-bl` parameter to MSBuild (`MSBuild.exe` or `dotnet build`). You can explore the contents of the generated .binlog file using [MSBuild Structured Log Viewer](http://msbuildlog.com/) or in your browser using [Live Structured Log Viewer](https://live.msbuildlog.com). Note: We don't capture any data from binary logs viewed on your browser.
 
 [More details about binary logs](Binary-Log.md)
 
@@ -19,6 +19,8 @@ Via setting `MSBUILDDEBUGENGINE` environment variable to `'1'`:
 ```
 
 MSBuild binary logs are then captured to `MSBuild_Logs` subfolder of a current folder.
+
+⚠ NOTE: logs are being recorded for each MSBuild invocation (including design time builds) and kept in the folder without removing older ones - so the number of log files can grow quickly. It is recommended to set the opt-in environment variable only for the short duration of reproducing the issue to be investigated (though it is understandable that some nondeterministic issues might need multiple reproduction attempts)
 
 [More technical info](Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#logs)
 
