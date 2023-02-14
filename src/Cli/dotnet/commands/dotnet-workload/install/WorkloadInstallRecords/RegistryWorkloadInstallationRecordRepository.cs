@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.DotNet.Installer.Windows;
+using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.Win32;
 
@@ -85,6 +86,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 
             // ToList() is needed to ensure deferred execution does not reference closed registry keys.
             return wrk?.GetSubKeyNames().Select(id => new WorkloadId(id)).ToList() ?? Enumerable.Empty<WorkloadId>();
+        }
+
+        /// <summary>
+        /// Return all discoverable workloads with installations in the registry, but do not return VS workloads.
+        /// </summary>
+        /// <param name="sdkFeatureBand">The feature band of the SDK workloads to discover.</param>
+        /// <param name="workloadResolver">The resolver used to discover VS workloads.</param>
+        public IEnumerable<WorkloadId> GetCLIOnlyInstalledWorkloads(SdkFeatureBand sdkFeatureBand, IWorkloadResolver workloadResolver)
+        {
+            var allWorkloads = GetInstalledWorkloads(sdkFeatureBand);
+            InstalledWorkloadsCollection vsWorkloads = new();
+            VisualStudioWorkloads.GetInstalledWorkloads(workloadResolver, vsWorkloads, sdkFeatureBand);
+            return allWorkloads.Except(vsWorkloads);
         }
 
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
