@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Microsoft.DotNet.GenAPI.Filtering;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.GenAPI.Tests
 {
@@ -42,7 +43,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 .Add<ImplicitSymbolFilter>()
                 .Add(new AccessibilitySymbolFilter(includeInternalSymbols,
                     includeEffectivelyPrivateSymbols, includeExplicitInterfaceImplementationSymbols));
-            IAssemblySymbolWriter csharpFileBuilder = new CSharpFileBuilder(compositeFilter, stringWriter, null, MetadataReferences);
+            IAssemblySymbolWriter csharpFileBuilder = new CSharpFileBuilder(new ConsoleLog(MessageImportance.Low),
+                compositeFilter, stringWriter, null, false, MetadataReferences);
 
             IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true);
             csharpFileBuilder.WriteAssembly(assemblySymbol);

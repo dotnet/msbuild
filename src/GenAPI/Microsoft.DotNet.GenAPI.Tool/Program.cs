@@ -52,6 +52,9 @@ namespace Microsoft.DotNet.GenAPI.Tool
             Option<bool> includeVisibleOutsideOfAssemblyOption = new("--include-visible-outside",
                 "Include internal API's. Default is false.");
 
+            Option<bool> includeAssemblyAttributesOption = new("--include-assembly-attributes",
+                "Includes assembly attributes which are values that provide information about an assembly. Default is false.");
+
             RootCommand rootCommand = new("Microsoft.DotNet.GenAPI")
             {
                 TreatUnmatchedTokensAsErrors = true
@@ -63,6 +66,7 @@ namespace Microsoft.DotNet.GenAPI.Tool
             rootCommand.AddGlobalOption(headerFileOption);
             rootCommand.AddGlobalOption(exceptionMessageOption);
             rootCommand.AddGlobalOption(includeVisibleOutsideOfAssemblyOption);
+            rootCommand.AddGlobalOption(includeAssemblyAttributesOption);
 
             rootCommand.SetHandler((InvocationContext context) =>
             {
@@ -73,7 +77,8 @@ namespace Microsoft.DotNet.GenAPI.Tool
                     context.ParseResult.GetValue(headerFileOption),
                     context.ParseResult.GetValue(exceptionMessageOption),
                     context.ParseResult.GetValue(excludeAttributesFilesOption),
-                    context.ParseResult.GetValue(includeVisibleOutsideOfAssemblyOption)
+                    context.ParseResult.GetValue(includeVisibleOutsideOfAssemblyOption),
+                    context.ParseResult.GetValue(includeAssemblyAttributesOption)
                 ));
             });
 

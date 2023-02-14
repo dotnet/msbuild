@@ -27,7 +27,8 @@ namespace Microsoft.DotNet.GenAPI
                 string? headerFile,
                 string? exceptionMessage,
                 string[]? excludeAttributesFiles,
-                bool includeVisibleOutsideOfAssembly)
+                bool includeVisibleOutsideOfAssembly,
+                bool includeAssemblyAttributes)
             {
                 Assemblies = assemblies;
                 AssemblyReferences = assemblyReferences;
@@ -36,6 +37,7 @@ namespace Microsoft.DotNet.GenAPI
                 ExceptionMessage = exceptionMessage;
                 ExcludeAttributesFiles = excludeAttributesFiles;
                 IncludeVisibleOutsideOfAssembly = includeVisibleOutsideOfAssembly;
+                IncludeAssemblyAttributes = includeAssemblyAttributes;
             }
 
             /// <summary>
@@ -73,6 +75,11 @@ namespace Microsoft.DotNet.GenAPI
             /// Include internal API's. Default is false.
             /// </summary>
             public bool IncludeVisibleOutsideOfAssembly { get; }
+
+            /// <summary>
+            /// Includes assembly attributes which are values that provide information about an assembly.
+            /// </summary>
+            public bool IncludeAssemblyAttributes { get; }
         }
 
         /// <summary>
@@ -110,9 +117,11 @@ namespace Microsoft.DotNet.GenAPI
                 textWriter.Write(ReadHeaderFile(context.HeaderFile));
 
                 using CSharpFileBuilder fileBuilder = new(
+                    logger,
                     compositeSymbolFilter,
                     textWriter,
                     context.ExceptionMessage,
+                    context.IncludeAssemblyAttributes,
                     loader.MetadataReferences);
 
                 fileBuilder.WriteAssembly(assemblySymbol);
