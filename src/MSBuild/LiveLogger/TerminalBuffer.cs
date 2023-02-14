@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -58,12 +58,15 @@ namespace Microsoft.Build.Logging.LiveLogger
 
     internal class TerminalBuffer
     {
+        private const char errorSymbol = '❌';
+        private const char warningSymbol = '⚠';
         private static List<TerminalBufferLine> Lines = new();
         public static string FooterText = string.Empty;
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
         internal static bool IsTerminated = false;
         internal static bool ShouldRerender = true;
+        internal static OverallBuildState overallBuildState = OverallBuildState.None;
         internal static int FinishedProjects = 0;
         private static int midLineId;
         internal static int ScrollableAreaHeight
@@ -108,10 +111,21 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             ShouldRerender = false;
+            ANSIBuilder.Formatting.ForegroundColor desiredColor =
+                overallBuildState == OverallBuildState.Error ? ANSIBuilder.Formatting.ForegroundColor.Red :
+                overallBuildState == OverallBuildState.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
+                ANSIBuilder.Formatting.ForegroundColor.White;
+
+            string text = $"MSBuild - Build in progress - {FinishedProjects} finished projects";
+            text =
+                overallBuildState == OverallBuildState.Error ? $"{errorSymbol} {text} {errorSymbol}" :
+                overallBuildState == OverallBuildState.Warning ? $"{warningSymbol} {text} {warningSymbol}" :
+                text;
+
             Console.Write(
                 // Write header
                 ANSIBuilder.Cursor.Home() +
-                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center($"MSBuild - Build in progress - {FinishedProjects} finished projects")) +
+                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center(text)), ANSIBuilder.Formatting.BackgroundColor.Black, desiredColor) +
                 // Write footer
                 ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) +
                     ANSIBuilder.Eraser.LineCursorToEnd() +
@@ -164,6 +178,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             Console.Write(contents);
         }
         #endregion
+
         #region Line identification
         public static int GetLineIndexById(int lineId)
         {
@@ -269,5 +284,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             ShouldRerender = true;
         }
         #endregion
+    }
+
+    internal enum OverallBuildState
+    {
+        None,
+        Warning,
+        Error,
     }
 }

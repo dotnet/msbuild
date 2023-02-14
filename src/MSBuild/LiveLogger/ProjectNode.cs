@@ -218,6 +218,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             WarningCount++;
             MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
+            TerminalBuffer.overallBuildState = TerminalBuffer.overallBuildState == OverallBuildState.Error ? OverallBuildState.Error : OverallBuildState.Warning;
             return node;
         }
         public MessageNode? AddError(BuildErrorEventArgs args)
@@ -225,6 +226,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             ErrorCount++;
             MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
+            TerminalBuffer.overallBuildState = OverallBuildState.Error;
             return node;
         }
     }
