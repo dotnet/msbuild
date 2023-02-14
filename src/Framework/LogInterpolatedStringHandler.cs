@@ -8,6 +8,10 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework
 {
+    /// <summary>
+    /// Represents interpolation string handler which allows to get string format and parameters
+    /// such like <see cref="FormattableString"/>.
+    /// </summary>
     [InterpolatedStringHandler]
     public ref struct LogInterpolatedStringHandler
     {
@@ -64,7 +68,7 @@ namespace Microsoft.Build.Framework
             return result;
         }
 
-        private int GetNumberOfDigits(int value)
+        private static int GetNumberOfDigits(int value)
         {
             // It's OK to return 0 if the value is 0, because we don't need to reserve
             // extra space in that case
