@@ -512,10 +512,10 @@ namespace Microsoft.Build.Execution
                 DateTime now = DateTime.UtcNow;
 
                 // Acquire it from static variable so we can apply data collected up to this moment
-                _buildTelemetry = KnownTelemetry.BuildTelemetry;
+                _buildTelemetry = KnownTelemetry.PartialBuildTelemetry;
                 if (_buildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry = null;
+                    KnownTelemetry.PartialBuildTelemetry = null;
                 }
                 else
                 {

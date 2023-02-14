@@ -371,7 +371,7 @@ namespace Microsoft.Build.Experimental
             // Initiate build telemetry
             if (command.PartialBuildTelemetry != null)
             {
-                BuildTelemetry buildTelemetry = KnownTelemetry.BuildTelemetry ??= new BuildTelemetry();
+                BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
 
                 buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
                 buildTelemetry.InitialServerState = command.PartialBuildTelemetry.InitialServerState;
