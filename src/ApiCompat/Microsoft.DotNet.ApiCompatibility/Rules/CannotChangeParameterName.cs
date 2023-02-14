@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -13,7 +12,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class CannotChangeParameterName : IRule
     {
-        public CannotChangeParameterName(RuleSettings settings, IRuleRegistrationContext context) =>
+        public CannotChangeParameterName(IRuleSettings settings, IRuleRegistrationContext context) =>
             context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
 
         private void RunOnMemberSymbol(

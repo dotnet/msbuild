@@ -3,7 +3,7 @@
 
 #nullable enable
 
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility;
 using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests

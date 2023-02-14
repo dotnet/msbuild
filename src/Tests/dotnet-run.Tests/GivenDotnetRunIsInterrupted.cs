@@ -13,6 +13,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 using Xunit.Sdk;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.Run.Tests
 {

@@ -6,7 +6,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
@@ -64,9 +63,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                     continue;
 
                 // Create and configure the work item specific api comparer
-                IApiComparer apiComparer = _apiComparerFactory.Create(new ApiComparerSettings(
-                    strictMode: workItem.Options.EnableStrictMode,
-                    withReferences: runWithReferences));
+                IApiComparer apiComparer = _apiComparerFactory.Create();
+                apiComparer.Settings.StrictMode = workItem.Options.EnableStrictMode;
+                apiComparer.Settings.WithReferences = runWithReferences;
+                        
 
                 // Invoke the api comparer for the work item and operate on the difference result
                 IEnumerable<CompatDifference> differences = apiComparer.GetDifferences(leftContainerList, rightContainersList);

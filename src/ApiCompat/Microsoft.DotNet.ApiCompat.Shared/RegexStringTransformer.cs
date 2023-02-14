@@ -12,8 +12,6 @@ namespace Microsoft.DotNet.ApiCompat
     internal class RegexStringTransformer
     {
         private readonly (Regex Regex, string ReplacementString)[] _patterns;
-        // Define a timeout for regex matches to guard against malicious user inputs.
-        private static readonly TimeSpan s_regexTimeout = TimeSpan.FromSeconds(2);
 
         /// <summary>
         /// Initializes the regex string transformer with a given capture group and replacement patterns.
@@ -34,7 +32,7 @@ namespace Microsoft.DotNet.ApiCompat
             _patterns = new (Regex Regex, string ReplacementString)[rawPatterns.Length];
             for (int i = 0; i < rawPatterns.Length; i++)
             {
-                _patterns[i] = (new Regex(rawPatterns[i].CaptureGroupPattern, RegexOptions.Compiled, s_regexTimeout), rawPatterns[i].ReplacementString);
+                _patterns[i] = (new Regex(rawPatterns[i].CaptureGroupPattern, RegexOptions.Compiled), rawPatterns[i].ReplacementString);
             }
         }
 

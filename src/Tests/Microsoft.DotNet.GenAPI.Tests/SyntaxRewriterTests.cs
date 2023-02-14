@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
 {
     public class SyntaxRewriterTests
     {
-        protected void Compare(CSharpSyntaxRewriter rewriter, string original, string expected)
+        protected static void Compare(CSharpSyntaxRewriter rewriter, string original, string expected)
         {
             StringWriter _stringWriter = new();
             SyntaxNode root = CSharpSyntaxTree.ParseText(original).GetRoot();
@@ -22,13 +22,13 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 .WriteTo(_stringWriter);
 
             StringBuilder stringBuilder = _stringWriter.GetStringBuilder();
-            var resulted = stringBuilder.ToString();
+            string resulted = stringBuilder.ToString();
 
             Assert.True(resulted.Equals(expected),
                 $"Expected:\n{expected}\nResulted:\n{resulted}");
         }
 
-        protected void CompareSyntaxTree(CSharpSyntaxRewriter rewriter, string original, string expected)
+        protected static void CompareSyntaxTree(CSharpSyntaxRewriter rewriter, string original, string expected)
         {
             StringWriter _stringWriter = new();
             SyntaxNode root = CSharpSyntaxTree.ParseText(original).GetRoot();
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 .WriteTo(_stringWriter);
 
             StringBuilder stringBuilder = _stringWriter.GetStringBuilder();
-            var resulted = stringBuilder.ToString();
+            string resulted = stringBuilder.ToString();
 
             SyntaxTree resultedSyntaxTree = CSharpSyntaxTree.ParseText(resulted);
             SyntaxTree expectedSyntaxTree = CSharpSyntaxTree.ParseText(expected);
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     class B
                     {
-                        void Execute() {}
+                        void Execute() { }
                     }
                 }
                 """);
@@ -100,6 +100,30 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
+        public void TestConstructorPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                namespace A
+                {
+                    class B
+                    {
+                        public B() {}
+                    }
+                }
+                """,
+                expected: """
+                namespace A
+                {
+                    class B
+                    {
+                        public B() { }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
         public void TestMethodBodyWithSingleStatementInOneLine()
         {
             Compare(new SingleLineStatementCSharpSyntaxRewriter(),
@@ -122,11 +146,95 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """);
         }
+
+        [Fact]
+        public void TestPropertyPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                namespace A
+                {
+                    class B
+                    {
+                        int Property1;
+                        int Property2 {    get;     set;    }
+                        int Property3 {get;}
+                        int Property4 {    get {}}
+                    }
+                }
+                """,
+                expected: """
+                namespace A
+                {
+                    class B
+                    {
+                        int Property1;
+                        int Property2 { get; set; }
+                        int Property3 { get; }
+                        int Property4 { get { } }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        public void TestOperatorPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                namespace A
+                {
+                    class B
+                    {
+                        public static bool operator ==(ChildSyntaxList list1, ChildSyntaxList list2) {
+                        throw null;
+                        }
+                    }
+                }
+                """,
+                expected: """
+                namespace A
+                {
+                    class B
+                    {
+                        public static bool operator ==(ChildSyntaxList list1, ChildSyntaxList list2) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        public void TestConversionOperatorPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                    namespace Foo
+                    {
+                        public readonly struct Digit
+                        {
+                            public static implicit operator byte(Digit d) {
+                            throw null;
+                            }
+                            public static explicit operator Digit(byte b) => throw null;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public readonly struct Digit
+                        {
+                            public static implicit operator byte(Digit d) { throw null; }
+                            public static explicit operator Digit(byte b) => throw null;
+                        }
+                    }
+                    """);
+        }
     }
 
     public class TypeDeclarationSyntaxRewriterTests : SyntaxRewriterTests
     {
-       [Fact]
+        [Fact]
         public void TestRemoveSystemObjectAsBaseClass()
         {
             CompareSyntaxTree(new TypeDeclarationCSharpSyntaxRewriter(),
@@ -350,33 +458,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     class B
                     {
                         public static bool operator ==(B lhs, B rhs) { throw new PlatformNotSupportedException("Not implemented"); }
-                    }
-                }
-                """);
-        }
-    }
-
-    public class FieldDeclarationSyntaxRewriterTests : SyntaxRewriterTests
-    {
-        [Fact]
-        public void TestConstantFieldGeneration()
-        {
-            CompareSyntaxTree(new FieldDeclarationCSharpSyntaxRewriter(),
-                original: """
-                namespace Foo
-                {
-                    class Bar
-                    {
-                        public static const int CurrentEra = 0;
-                    }
-                }
-                """,
-                expected: """
-                namespace Foo
-                {
-                    class Bar
-                    {
-                        public const int CurrentEra = 0;
                     }
                 }
                 """);

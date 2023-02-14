@@ -892,4 +892,8 @@ You may need to build the project on another operating system or architecture, o
 {1}</value>
   <comment>{StrBegin="NETSDK1197: "}</comment>
   </data>
+  <data name="PublishProfileNotPresent" xml:space="preserve">
+    <value>NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</value>
+    <comment>{StrBegin="NETSDK1198: "}</comment>
+  </data>
 </root>

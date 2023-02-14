@@ -5,7 +5,7 @@ using System.IO;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace Microsoft.DotNet.ApiSymbolExtensions
+namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
 {
     /// <summary>
     /// Implements the logic of filtering out attribute symbols. Reads the file with the list of attributes in DocId format.
@@ -14,9 +14,9 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
     {
         private readonly HashSet<string> _attributesToExclude;
 
-        public AttributeSymbolFilter(string[] attributeDocIdsFiles)
+        public AttributeSymbolFilter(string[] excludeAttributesFiles)
         {
-            _attributesToExclude = new HashSet<string>(ReadDocIdsAttributes(attributeDocIdsFiles));
+            _attributesToExclude = new HashSet<string>(ReadDocIdsAttributes(excludeAttributesFiles));
         }
 
         /// <summary>
@@ -24,9 +24,9 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         /// </summary>
         /// <param name="symbol"><see cref="ISymbol"/> to evaluate.</param>
         /// <returns>True to include the <paramref name="symbol"/> or false to filter it out.</returns>
-        public bool Include(ISymbol member)
+        public bool Include(ISymbol symbol)
         {
-            if (member is INamedTypeSymbol namedType)
+            if (symbol is INamedTypeSymbol namedType)
             {
                 string? docId = namedType.GetDocumentationCommentId();
                 if (docId != null && _attributesToExclude.Contains(docId))
@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
                     return false;
                 }
             }
+
             return true;
         }
 

@@ -13,22 +13,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly ISuppressableLog _log;
         private readonly bool _enableRuleAttributesMustMatch;
-        private readonly IReadOnlyCollection<string>? _excludeAttributesFiles;
         private readonly bool _enableRuleCannotChangeParameterName;
 
         public RuleFactory(ISuppressableLog log,
             bool enableRuleAttributesMustMatch = false,
-            IReadOnlyCollection<string>? excludeAttributesFiles = null,
             bool enableRuleCannotChangeParameterName = false)
         {
             _log = log;
             _enableRuleAttributesMustMatch = enableRuleAttributesMustMatch;
-            _excludeAttributesFiles = excludeAttributesFiles;
             _enableRuleCannotChangeParameterName = enableRuleCannotChangeParameterName;
         }
 
         /// <inheritdoc />
-        public IRule[] CreateRules(RuleSettings settings, IRuleRegistrationContext context)
+        public IRule[] CreateRules(IRuleSettings settings, IRuleRegistrationContext context)
         {
             List<IRule> rules = new()
             {
@@ -45,7 +42,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             if (_enableRuleAttributesMustMatch)
             {
-                rules.Add(new AttributesMustMatch(settings, context, _excludeAttributesFiles));
+                rules.Add(new AttributesMustMatch(settings, context));
             }
 
             if (_enableRuleCannotChangeParameterName)
