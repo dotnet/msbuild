@@ -19,18 +19,9 @@ namespace Microsoft.Build.Framework
 
         public LogInterpolatedStringHandler(int literalLength, int formattedCount)
         {
-            int bufferSize;
-
             // Buffer size is computed with reserved space for "{x..x}" placeholders
-            if (formattedCount < 10)
-            {
-                bufferSize = literalLength + (3 * formattedCount);
-            }
-            else
-            {
-                int maxNumberOfDigits = (int)(Math.Log10(formattedCount) + 1);
-                bufferSize = literalLength + (formattedCount * (maxNumberOfDigits + 2));
-            }
+            int maxNumberOfDigits = GetNumberOfDigits(formattedCount);
+            int bufferSize = literalLength + (formattedCount * (maxNumberOfDigits + 2));
 
             buffer = new char[bufferSize];
 
@@ -69,6 +60,21 @@ namespace Microsoft.Build.Framework
         internal string GetFormat()
         {
             string result = new string(buffer, 0, position);
+
+            return result;
+        }
+
+        private int GetNumberOfDigits(int value)
+        {
+            // It's OK to return 0 if the value is 0, because we don't need to reserve
+            // extra space in that case
+            int result = 0;
+
+            while (value > 0)
+            {
+                result++;
+                value /= 10;
+            }
 
             return result;
         }
