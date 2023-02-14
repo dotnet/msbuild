@@ -92,11 +92,6 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
-      <trans-unit id="DefaultSDKResolverError">
-        <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
-        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: tentativo di creare più sostituzioni della stessa attività: {0}</target>
@@ -125,13 +120,6 @@
       <trans-unit id="ErrorWritingCacheFile">
         <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4258: durante la scrittura del file della cache dei risultati di output nel percorso "{0}" è stato rilevato un errore: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToResolveSDK">
-        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
-  {1}</source>
-        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
-  {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -340,11 +328,6 @@
         <target state="translated">Valore iniziale della proprietà: $({0})="{1}". Origine: {2}</target>
         <note />
       </trans-unit>
-      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
-        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
-        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
-        <note>{StrBegin="MSB4067: "}</note>
-      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: la disabilitazione del nodo InProc porta a una riduzione del livello delle prestazioni quando si usano plug-in della cache del progetto che emettono richieste di compilazione proxy.</target>
@@ -358,11 +341,6 @@
       <trans-unit id="SDKResolverFailed">
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">Il sistema di risoluzione SDK "{0}" non è riuscito durante il tentativo di risolvere l'SDK "{1}". Eccezione: "{2}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SDKResolverReturnedNull">
-        <source>SDK resolver "{0}" returned null.</source>
-        <target state="new">SDK resolver "{0}" returned null.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
