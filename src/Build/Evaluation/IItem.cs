@@ -65,9 +65,9 @@ namespace Microsoft.Build.Evaluation
         bool HasMetadata(string name);
 
         /// <summary>
-        /// Get the metadata value with the specified key. 
-        /// Return value indicates whether get the metadata or not. Returns false if metadata does not exist.
+        /// Returns the metadata with the specified key.
+        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
         /// </summary>
-        bool TryGetMetadataValueEscaped(string name, out string value);
+        string GetMetadataValueEscaped(string name, bool returnNullIfNotFound);
     }
 }

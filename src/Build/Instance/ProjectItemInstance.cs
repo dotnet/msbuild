@@ -710,12 +710,12 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Get the metadata value with the specified key. 
-        /// Return value indicates whether get the metadata or not. Returns false if metadata does not exist.
+        /// Returns the metadata with the specified key.
+        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
         /// </summary>
-        public bool TryGetMetadataValueEscaped(string name, out string value)
+        public string GetMetadataValueEscaped(string name, bool returnNullIfNotFound)
         {
-            return _taskItem.TryGetMetadataEscaped(name, out value);
+            return _taskItem.GetMetadataEscaped(name, returnNullIfNotFound);
         }
 
         /// <summary>
@@ -1226,12 +1226,12 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Get the metadata value with the specified key. 
-            /// Return value indicates whether get the metadata or not. Returns false if metadata does not exist.
+            /// Returns the metadata with the specified key.
+            /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
             /// </summary>
-            bool IItem.TryGetMetadataValueEscaped(string name, out string value)
+            string IItem.GetMetadataValueEscaped(string name, bool returnNullIfNotFound)
             {
-                return TryGetMetadataEscaped(name, out value);
+                return GetMetadataEscaped(name, returnNullIfNotFound);
             }
 
             /// <summary>
@@ -1280,15 +1280,15 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadataEscaped(string metadataName)
             {
-                TryGetMetadataEscaped(metadataName, out string value);
+                string value = GetMetadataEscaped(metadataName, false);
                 return value ?? String.Empty;
             }
 
             /// <summary>
-            /// Get the specified metadata value, escaped.
-            /// If metadata is not defined, value is null, returns false.
+            /// Returns the metadata with the specified key.
+            /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
             /// </summary>
-            public bool TryGetMetadataEscaped(string metadataName, out string value)
+            public string GetMetadataEscaped(string metadataName, bool returnNullIfNotFound)
             {
                 if (string.IsNullOrEmpty(metadataName))
                 {
@@ -1296,13 +1296,13 @@ namespace Microsoft.Build.Execution
                 }
 
                 ProjectMetadataInstance metadatum;
+                string value = null;
                 if (_directMetadata != null)
                 {
                     metadatum = _directMetadata[metadataName];
                     if (metadatum != null)
                     {
-                        value = metadatum.EvaluatedValueEscaped;
-                        return true;
+                        return metadatum.EvaluatedValueEscaped;
                     }
                 }
 
@@ -1313,24 +1313,20 @@ namespace Microsoft.Build.Execution
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
-                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
-                    return true;
+                    return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
                 }
                 else if (metadatum != null)
                 {
-                    value = metadatum.EvaluatedValueEscaped;
-                    return true;
+                    return metadatum.EvaluatedValueEscaped;
                 }
 
 
                 if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName))
                 {
                     value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, metadataName, ref _fullPath);
-                    return true;
                 }
 
-                value = null;
-                return false;
+                return returnNullIfNotFound ? value : value ?? string.Empty;
             }
 
             /// <summary>

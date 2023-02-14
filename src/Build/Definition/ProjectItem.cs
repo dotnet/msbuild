@@ -443,6 +443,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool HasMetadata(string name)
         {
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+
             if (Link != null)
             {
                 return Link.HasMetadata(name);
@@ -473,7 +475,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            TryGetMetadataValueEscaped(name, out string value);
+            string value = GetMetadataValueEscaped(name, false);
 
             return value ?? String.Empty;
         }
@@ -864,14 +866,14 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Get the metadata value with the specified key. 
-        /// Return value indicates whether get the metadata or not. Returns false if metadata does not exist.
+        /// Returns the metadata with the specified key.
+        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
         /// </summary>
-        public bool TryGetMetadataValueEscaped(string name, out string value)
+        public string GetMetadataValueEscaped(string name, bool returnNullIfNotFound)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
-            value = null;
+            string value = null;
 
             if (_directMetadata != null)
             {
@@ -903,8 +905,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            if (value == null) { return false; }
-            else { return true; }
+            return returnNullIfNotFound ? value : value ?? string.Empty;
         }
 
         /// <summary>
