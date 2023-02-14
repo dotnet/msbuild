@@ -2810,7 +2810,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This class will provide delegates and properties to allow differen combinations of ToolLocationHelper GetDotNetFrameworkPaths and GetReferenceAssemblyPaths to be simulated.
         /// </summary>
-        internal class LegacyFrameworkTestHelper
+        internal sealed class LegacyFrameworkTestHelper
         {
             /// <summary>
             /// Paths which simulate the fact that the frameworks are installed including their reference assemblies

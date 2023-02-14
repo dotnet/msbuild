@@ -988,7 +988,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class CopyMonitor
+        internal sealed class CopyMonitor
         {
             internal int copyCount;
 
@@ -1950,7 +1950,7 @@ namespace Microsoft.Build.UnitTests
         /// Simulates the File.Copy method without touching the disk.
         /// First copy fails as requested, subsequent copies succeed.
         /// </summary>
-        private class CopyFunctor
+        private sealed class CopyFunctor
         {
             /// <summary>
             /// Protects the counts and lists below.

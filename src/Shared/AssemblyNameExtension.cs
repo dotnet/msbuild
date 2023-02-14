@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Text;
-using System.Reflection;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
-using System.Runtime.Serialization;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
 using Microsoft.Build.BackEnd;
 
 #nullable disable

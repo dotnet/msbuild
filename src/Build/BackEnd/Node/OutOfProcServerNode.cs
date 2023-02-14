@@ -7,11 +7,11 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental
 {

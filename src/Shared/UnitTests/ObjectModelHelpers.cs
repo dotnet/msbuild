@@ -12,8 +12,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
@@ -24,10 +22,11 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Build.Utilities;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -207,7 +206,7 @@ namespace Microsoft.Build.UnitTests
             string GetMetadataValue(string key);
         }
 
-        internal class ProjectItemTestItemAdapter : ITestItem
+        internal sealed class ProjectItemTestItemAdapter : ITestItem
         {
             private readonly ProjectItem _projectInstance;
 
@@ -226,7 +225,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class ProjectItemInstanceTestItemAdapter : ITestItem
+        internal sealed class ProjectItemInstanceTestItemAdapter : ITestItem
         {
             private readonly ProjectItemInstance _projectInstance;
 
@@ -1998,7 +1997,7 @@ namespace Microsoft.Build.UnitTests
                 ? path
                 : path.ToSlash();
 
-        internal class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
+        internal sealed class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
         {
             public bool Equals(ElementLocation x, ElementLocation y)
             {
@@ -2026,7 +2025,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class BuildManagerSession : IDisposable
+        internal sealed class BuildManagerSession : IDisposable
         {
             private readonly TestEnvironment _env;
             private readonly BuildManager _buildManager;
@@ -2173,7 +2172,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class LoggingFileSystem : MSBuildFileSystemBase
+        internal sealed class LoggingFileSystem : MSBuildFileSystemBase
         {
             private int _fileSystemCalls;
 

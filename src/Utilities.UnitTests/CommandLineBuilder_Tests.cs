@@ -459,7 +459,7 @@ namespace Microsoft.Build.UnitTests
             actual.ShouldBe(expected);
         }
 
-        internal class TestCommandLineBuilder : CommandLineBuilder
+        internal sealed class TestCommandLineBuilder : CommandLineBuilder
         {
             internal void TestVerifyThrow(string switchName, string parameter)
             {

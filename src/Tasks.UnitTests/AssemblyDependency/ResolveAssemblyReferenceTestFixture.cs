@@ -6,19 +6,18 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
-using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
 using Xunit.Abstractions;
-
+using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using NativeMethods = Microsoft.Build.Tasks.NativeMethods;
-using System.Runtime.Versioning;
+using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable
 

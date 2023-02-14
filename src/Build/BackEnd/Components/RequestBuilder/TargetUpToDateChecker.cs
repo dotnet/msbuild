@@ -20,7 +20,7 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 namespace Microsoft.Build.BackEnd
 {
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-
+    using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
     // ItemVectorPartitionCollection is designed to contains a set of project items which have possibly undergone transforms.
     // The outer dictionary it usually keyed by item type, so if items originally came from 
     // an expression like @(Foo), the outer dictionary would have a key of "Foo" in it.
@@ -29,7 +29,6 @@ namespace Microsoft.Build.BackEnd
     // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be 
     // contained a list of the items which were created/transformed using that pattern.    
     using ItemVectorPartitionCollection = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>>;
-    using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
 
     /// <summary>
     /// Enumeration of the results of target dependency analysis.

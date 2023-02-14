@@ -2708,7 +2708,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
 
 #if FEATURE_WIN32_REGISTRY
-    internal class MockRegistryKey : RegistryKeyWrapper
+    internal sealed class MockRegistryKey : RegistryKeyWrapper
     {
         public enum WhereToThrow
         {
@@ -2727,7 +2727,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Construct the mock key with a specified key
         /// </summary>
         /// <param name="path"></param>
-        protected MockRegistryKey(RegistryKey wrappedKey, RegistryKey registryHive)
+        private MockRegistryKey(RegistryKey wrappedKey, RegistryKey registryHive)
             : base(wrappedKey, registryHive)
         { }
 

@@ -15,9 +15,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-
-using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
+using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 
 #nullable disable
 
@@ -343,7 +342,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        private class DefaultOutput : ITestOutputHelper
+        private sealed class DefaultOutput : ITestOutputHelper
         {
             public void WriteLine(string message)
             {

@@ -5,17 +5,16 @@
 
 using System;
 using System.Collections.Generic;
-
-using Microsoft.Build.Shared;
-using error = Microsoft.Build.Shared.ErrorUtilities;
-using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
-using RegistryException = Microsoft.Build.Exceptions.RegistryException;
-using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
-using Constants = Microsoft.Build.Internal.Constants;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
+using Constants = Microsoft.Build.Internal.Constants;
+using error = Microsoft.Build.Shared.ErrorUtilities;
+using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+using RegistryException = Microsoft.Build.Exceptions.RegistryException;
+using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
 
 #nullable disable
 

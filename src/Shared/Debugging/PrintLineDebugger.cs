@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared.Debugging
     ///     tools like VS or CLI.
     ///     See example usages in PrintLineDebugger_Tests
     /// </summary>
-    internal class PrintLineDebugger : IDisposable
+    internal sealed class PrintLineDebugger : IDisposable
     {
         private static readonly Lazy<PropertyInfo> CommonWriterProperty = new Lazy<PropertyInfo>(
             () =>

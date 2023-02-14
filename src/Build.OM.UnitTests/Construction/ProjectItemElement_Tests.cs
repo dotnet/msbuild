@@ -5,12 +5,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Xml;
-
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.Evaluation;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 

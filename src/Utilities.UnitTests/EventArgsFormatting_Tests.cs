@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Minimal logger implementation
     /// </summary>
-    internal class MyLogger : Logger
+    internal sealed class MyLogger : Logger
     {
         public override void Initialize(IEventSource eventSource)
         {

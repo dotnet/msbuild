@@ -10,7 +10,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectItemLinkRemoter : MockLinkRemoter<ProjectItem>
+    internal sealed class MockProjectItemLinkRemoter : MockLinkRemoter<ProjectItem>
     {
         public override ProjectItem CreateLinkedObject(IImportHolder holder)
         {
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public void ChangeItemType(string newItemType) => this.Source.ItemType = newItemType;
     }
 
-    internal class MockProjectItemLink : ProjectItemLink, ILinkMock
+    internal sealed class MockProjectItemLink : ProjectItemLink, ILinkMock
     {
         public MockProjectItemLink(MockProjectItemLinkRemoter proxy, IImportHolder holder)
         {

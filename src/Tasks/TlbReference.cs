@@ -2,22 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Linq;
-
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
-using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+// TYPELIBATTR clashes with the one in InteropServices.
+using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
+using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 
 #nullable disable
 
