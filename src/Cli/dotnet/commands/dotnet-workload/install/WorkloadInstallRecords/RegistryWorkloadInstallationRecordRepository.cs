@@ -96,9 +96,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         public IEnumerable<WorkloadId> GetCLIOnlyInstalledWorkloads(SdkFeatureBand sdkFeatureBand, IWorkloadResolver workloadResolver)
         {
             var allWorkloads = GetInstalledWorkloads(sdkFeatureBand);
-            InstalledWorkloadsCollection vsWorkloads = new();
-            VisualStudioWorkloads.GetInstalledWorkloads(workloadResolver, vsWorkloads, sdkFeatureBand);
-            return allWorkloads.Except(vsWorkloads);
+            InstalledWorkloadsCollection allVSWorkloads = new();
+            VisualStudioWorkloads.GetInstalledWorkloads(workloadResolver, allVSWorkloads, sdkFeatureBand);
+            return allWorkloads.Except(allVSWorkloads.AsEnumerable().Select(kvp => new WorkloadId(kvp.Key)).ToList());
         }
 
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
