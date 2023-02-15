@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Logging.LiveLogger
@@ -427,7 +428,19 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             public static string ProgressBar(float percentage, int width = 10, char completedChar = '█', char remainingChar = '░')
             {
-                return new string(completedChar, (int)Math.Floor(width * percentage)) + new string(remainingChar, width - (int)Math.Floor(width * percentage));
+                int completed = (int)Math.Floor(width * percentage);
+
+                // Floating point rounding errors can put this slightly off, but we need to ensure that it's non-negative.
+                if (completed < 0)
+                {
+                    completed = 0;
+                }
+                else if (completed > width)
+                {
+                    completed = width;
+                }
+
+                return new string(completedChar, completed) + new string(remainingChar, width - completed);
             }
 
             public static string Bell()

@@ -65,6 +65,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public static int TopLineIndex = 0;
         public static string Footer = string.Empty;
         internal static bool IsTerminated = false;
+        internal static bool IsRestoring = false;
         internal static bool ShouldRerender = true;
         internal static OverallBuildState overallBuildState = OverallBuildState.None;
         internal static int FinishedProjects = 0;
@@ -116,7 +117,10 @@ namespace Microsoft.Build.Logging.LiveLogger
                 overallBuildState == OverallBuildState.Warning ? ANSIBuilder.Formatting.ForegroundColor.Yellow :
                 ANSIBuilder.Formatting.ForegroundColor.White;
 
-            string text = $"MSBuild - Build in progress - {FinishedProjects} finished projects";
+            string text = IsRestoring ?
+                $"MSBuild - Restore in progress - {FinishedProjects} finished projects" :
+                $"MSBuild - Build in progress - {FinishedProjects} finished projects";
+
             text =
                 overallBuildState == OverallBuildState.Error ? $"{errorSymbol} {text} {errorSymbol}" :
                 overallBuildState == OverallBuildState.Warning ? $"{warningSymbol} {text} {warningSymbol}" :

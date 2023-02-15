@@ -168,12 +168,15 @@ namespace Microsoft.Build.Logging.LiveLogger
                     continue;
                 }
 
-                if (node.Line is null)
+                if (!TerminalBuffer.IsRestoring)
                 {
-                    node.Line = TerminalBuffer.WriteNewLineAfter(Line!.Id, "Message");
-                }
+                    if (node.Line is null)
+                    {
+                        node.Line = TerminalBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                    }
 
-                node.Log();
+                    node.Log();
+                }
             }
         }
 
