@@ -133,25 +133,25 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>8a96ee761d457fc8f0fcb3b1727151e34d9a2682</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="8.0.0-preview.2.23112.1">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="8.0.0-preview.2.23114.2">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>b776458a94f09e2c07b3142c134cc00fed43d08e</Sha>
+      <Sha>aab6b9d01954277ae22eab9fab7bae55add54060</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.8.0" Version="8.0.0-preview.2.23112.1">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.8.0" Version="8.0.0-preview.2.23114.2">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>b776458a94f09e2c07b3142c134cc00fed43d08e</Sha>
+      <Sha>aab6b9d01954277ae22eab9fab7bae55add54060</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="8.0.0-preview.2.23112.1">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="8.0.0-preview.2.23114.2">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>b776458a94f09e2c07b3142c134cc00fed43d08e</Sha>
+      <Sha>aab6b9d01954277ae22eab9fab7bae55add54060</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.8.0" Version="8.0.0-preview.2.23112.1">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.8.0" Version="8.0.0-preview.2.23114.2">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>b776458a94f09e2c07b3142c134cc00fed43d08e</Sha>
+      <Sha>aab6b9d01954277ae22eab9fab7bae55add54060</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="8.0.0-preview.2.23111.2" CoherentParentDependency="Microsoft.WindowsDesktop.App.Ref">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="8.0.0-preview.2.23113.1" CoherentParentDependency="Microsoft.WindowsDesktop.App.Ref">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>c14237626efed2c7138feca38de2c6625856df70</Sha>
+      <Sha>d7a149c551d492259d6f84dbf3dd165a8743ab26</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="8.0.0-preview.2.23114.7">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
