@@ -1,9 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <RootNamespace>ClassLib</RootNamespace>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>10</LangVersion>
-  </PropertyGroup>
-
-</Project>

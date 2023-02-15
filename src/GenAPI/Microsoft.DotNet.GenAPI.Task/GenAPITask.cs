@@ -49,6 +49,11 @@ namespace Microsoft.DotNet.GenAPI.Task
         /// </summary>
         public bool IncludeVisibleOutsideOfAssembly { get; set; }
 
+        /// <summary>
+        /// Includes assembly attributes which are values that provide information about an assembly.
+        /// </summary>
+        public bool IncludeAssemblyAttributes { get; }
+
         protected override void ExecuteCore()
         {
             GenAPIApp.Run(new MSBuildLog(Log), new GenAPIApp.Context(
@@ -58,7 +63,8 @@ namespace Microsoft.DotNet.GenAPI.Task
                 HeaderFile,
                 ExceptionMessage,
                 ExcludeAttributesFiles,
-                IncludeVisibleOutsideOfAssembly
+                IncludeVisibleOutsideOfAssembly,
+                IncludeAssemblyAttributes
             ));
         }
     }

@@ -176,6 +176,60 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """);
         }
+
+        [Fact]
+        public void TestOperatorPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                namespace A
+                {
+                    class B
+                    {
+                        public static bool operator ==(ChildSyntaxList list1, ChildSyntaxList list2) {
+                        throw null;
+                        }
+                    }
+                }
+                """,
+                expected: """
+                namespace A
+                {
+                    class B
+                    {
+                        public static bool operator ==(ChildSyntaxList list1, ChildSyntaxList list2) { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        public void TestConversionOperatorPostProcessing()
+        {
+            Compare(new SingleLineStatementCSharpSyntaxRewriter(),
+                original: """
+                    namespace Foo
+                    {
+                        public readonly struct Digit
+                        {
+                            public static implicit operator byte(Digit d) {
+                            throw null;
+                            }
+                            public static explicit operator Digit(byte b) => throw null;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace Foo
+                    {
+                        public readonly struct Digit
+                        {
+                            public static implicit operator byte(Digit d) { throw null; }
+                            public static explicit operator Digit(byte b) => throw null;
+                        }
+                    }
+                    """);
+        }
     }
 
     public class TypeDeclarationSyntaxRewriterTests : SyntaxRewriterTests
@@ -406,6 +460,23 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         public static bool operator ==(B lhs, B rhs) { throw new PlatformNotSupportedException("Not implemented"); }
                     }
                 }
+                """);
+        }
+    }
+
+    public class TypeForwardAttributeCSharpSyntaxRewriterTests : SyntaxRewriterTests
+    {
+        [Fact]
+        public void TypeForwardAttributeDeclaration()
+        {
+            CompareSyntaxTree(new TypeForwardAttributeCSharpSyntaxRewriter(),
+                original: """
+                [assembly:System.Runtime.CompilerServices.TypeForwardedToAttribute(typeof(global::System.Collections.Generic.IAsyncEnumerable<T>))]
+                [assembly:System.Runtime.CompilerServices.TypeForwardedToAttribute(typeof(global::System.Collections.Generic.IAsyncEnumerable<A, B, C>))]
+                """,
+                expected: """
+                [assembly:System.Runtime.CompilerServices.TypeForwardedToAttribute(typeof(global::System.Collections.Generic.IAsyncEnumerable<>))]
+                [assembly:System.Runtime.CompilerServices.TypeForwardedToAttribute(typeof(global::System.Collections.Generic.IAsyncEnumerable<,,>))]
                 """);
         }
     }

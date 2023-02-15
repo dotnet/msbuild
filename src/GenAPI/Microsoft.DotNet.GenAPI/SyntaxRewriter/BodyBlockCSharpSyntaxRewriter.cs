@@ -48,7 +48,9 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             }
 
             string returnType = rs.ReturnType.ToString();
-            if (returnType != "void" && returnType != "System.Void")
+            if ((returnType != "void" && returnType != "System.Void") ||
+                // if there is at least one reference parameter - generate non empty body.
+                node.ParameterList.Parameters.Any(p => p.Modifiers.Any(m => m.IsKind(SyntaxKind.OutKeyword))))
             {
                 rs = rs.WithBody(GetThrowNullBody());
             }

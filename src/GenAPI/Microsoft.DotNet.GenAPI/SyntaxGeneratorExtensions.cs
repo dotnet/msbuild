@@ -30,7 +30,10 @@ namespace Microsoft.DotNet.GenAPI
                     case TypeKind.Struct:
                     case TypeKind.Interface:
                         TypeDeclarationSyntax typeDeclaration = (TypeDeclarationSyntax)syntaxGenerator.Declaration(symbol);
-                        return typeDeclaration.WithMembers(new SyntaxList<MemberDeclarationSyntax>());
+                        return typeDeclaration
+                            .WithBaseList(syntaxGenerator.GetBaseTypeList(type, symbolFilter))
+                            .WithMembers(new SyntaxList<MemberDeclarationSyntax>());
+
                     case TypeKind.Enum:
                         EnumDeclarationSyntax enumDeclaration = (EnumDeclarationSyntax)syntaxGenerator.Declaration(symbol);
                         return enumDeclaration.WithMembers(new SeparatedSyntaxList<EnumMemberDeclarationSyntax>());
@@ -63,6 +66,15 @@ namespace Microsoft.DotNet.GenAPI
                 }
             }
 
+            if (symbol is IEventSymbol eventSymbol && !eventSymbol.IsAbstract)
+            {
+                // adds generation of add & remove accessors for the non abstract events.
+                return syntaxGenerator.CustomEventDeclaration(eventSymbol.Name,
+                    syntaxGenerator.TypeExpression(eventSymbol.Type),
+                    eventSymbol.DeclaredAccessibility,
+                    DeclarationModifiers.From(eventSymbol));
+            }
+
             try
             {
                 return syntaxGenerator.Declaration(symbol);
@@ -91,6 +103,25 @@ namespace Microsoft.DotNet.GenAPI
             }
 
             return constructorInitializer;
+        }
+
+        // Gets the list of base class and interfaces for a given symbol <see cref="INamedTypeSymbol"/>.
+        private static BaseListSyntax? GetBaseTypeList(this SyntaxGenerator syntaxGenerator,
+            INamedTypeSymbol type,
+            ISymbolFilter symbolFilter)
+        {
+            List<BaseTypeSyntax> baseTypes = new();
+
+            if (type.TypeKind == TypeKind.Class && type.BaseType != null && symbolFilter.Include(type.BaseType))
+            {
+                baseTypes.Add(SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(type.BaseType)));
+            }
+
+            // includes only interfaces that were not filtered out by the given <see cref="ISymbolFilter"/>.
+            baseTypes.AddRange(type.Interfaces.Where(symbolFilter.Include).Select(i => SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(i))));
+            return baseTypes.Count > 0 ?
+                SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(baseTypes)) :
+                null;
         }
     }
 }

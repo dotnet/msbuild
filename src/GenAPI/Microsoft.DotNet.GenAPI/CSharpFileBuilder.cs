@@ -8,11 +8,13 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Simplification;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 using Microsoft.DotNet.GenAPI.SyntaxRewriter;
 
 namespace Microsoft.DotNet.GenAPI
@@ -22,9 +24,11 @@ namespace Microsoft.DotNet.GenAPI
     /// </summary>
     public class CSharpFileBuilder : IAssemblySymbolWriter, IDisposable
     {
+        ILog _logger;
         private readonly TextWriter _textWriter;
         private readonly ISymbolFilter _symbolFilter;
         private readonly string? _exceptionMessage;
+        private readonly bool _includeAssemblyAttributes;
 
         private readonly AdhocWorkspace _adhocWorkspace;
         private readonly SyntaxGenerator _syntaxGenerator;
@@ -32,14 +36,18 @@ namespace Microsoft.DotNet.GenAPI
         private readonly IEnumerable<MetadataReference> _metadataReferences;
 
         public CSharpFileBuilder(
+            ILog logger,
             ISymbolFilter symbolFilter,
             TextWriter textWriter,
             string? exceptionMessage,
+            bool includeAssemblyAttributes,
             IEnumerable<MetadataReference> metadataReferences)
         {
+            _logger = logger;
             _textWriter = textWriter;
             _symbolFilter = symbolFilter;
             _exceptionMessage = exceptionMessage;
+            _includeAssemblyAttributes = includeAssemblyAttributes;
 
             _adhocWorkspace = new AdhocWorkspace();
             _syntaxGenerator = SyntaxGenerator.GetGenerator(_adhocWorkspace, LanguageNames.CSharp);
@@ -78,6 +86,13 @@ namespace Microsoft.DotNet.GenAPI
                 .Rewrite(new BodyBlockCSharpSyntaxRewriter(_exceptionMessage))
                 .NormalizeWhitespace();
 
+            if (_includeAssemblyAttributes)
+            {
+                compilationUnit = GenerateAssemblyAttributes(assembly, compilationUnit);
+            }
+
+            compilationUnit = GenerateForwardedTypeAssemblyAttributes(assembly, compilationUnit);
+
             Document document = project.AddDocument(assembly.Name, compilationUnit);
 
             document = Simplifier.ReduceAsync(document).Result;
@@ -85,6 +100,7 @@ namespace Microsoft.DotNet.GenAPI
 
             document.GetSyntaxRootAsync().Result!
                 .Rewrite(new SingleLineStatementCSharpSyntaxRewriter())
+                .Rewrite(new TypeForwardAttributeCSharpSyntaxRewriter())
                 .WriteTo(_textWriter);
         }
 
@@ -105,7 +121,12 @@ namespace Microsoft.DotNet.GenAPI
                 foreach (AttributeData attribute in typeMember.GetAttributes()
                     .Where(a => a.AttributeClass != null && _symbolFilter.Include(a.AttributeClass)))
                 {
-                    typeDeclaration = _syntaxGenerator.AddAttributes(typeDeclaration, _syntaxGenerator.Attribute(attribute));
+                    // The C# compiler emits the DefaultMemberAttribute on any type containing an indexer.
+                    // In C# it is an error to manually attribute a type with the DefaultMemberAttribute if the type also declares an indexer.
+                    if (!attribute.IsDefaultMemberAttribute() || !typeMember.HasIndexer())
+                    {
+                        typeDeclaration = _syntaxGenerator.AddAttributes(typeDeclaration, _syntaxGenerator.Attribute(attribute));
+                    }
                 }
 
                 typeDeclaration = Visit(typeDeclaration, typeMember);
@@ -120,8 +141,28 @@ namespace Microsoft.DotNet.GenAPI
         {
             IEnumerable<ISymbol> members = namedType.GetMembers().Where(_symbolFilter.Include);
 
+            // If it's a value type
+            if (namedType.TypeKind == TypeKind.Struct)
+            {
+                namedTypeNode = _syntaxGenerator.AddMembers(namedTypeNode, namedType.SynthesizeDummyFields(_symbolFilter));
+            }
+
             foreach (ISymbol member in members.Order())
             {
+                // If the method is ExplicitInterfaceImplementation and is derived from an interface that was filtered out, we must filter out it either.
+                if (member is IMethodSymbol method &&
+                    method.MethodKind == MethodKind.ExplicitInterfaceImplementation &&
+                    method.ExplicitInterfaceImplementations.Any(m => !_symbolFilter.Include(m.ContainingSymbol)))
+                {
+                    continue;
+                }
+                // If the property is derived from an interface that was filter out, we must filtered out it either.
+                if (member is IPropertySymbol property && !property.ExplicitInterfaceImplementations.IsEmpty &&
+                    property.ExplicitInterfaceImplementations.Any(m => !_symbolFilter.Include(m.ContainingSymbol)))
+                {
+                    continue;
+                }
+
                 SyntaxNode memberDeclaration = _syntaxGenerator.DeclarationExt(member, _symbolFilter);
 
                 foreach (AttributeData attribute in member.GetAttributes()
@@ -141,7 +182,41 @@ namespace Microsoft.DotNet.GenAPI
             return namedTypeNode;
         }
 
-        private IEnumerable<INamespaceSymbol> EnumerateNamespaces(IAssemblySymbol assemblySymbol)
+        private SyntaxNode GenerateAssemblyAttributes(IAssemblySymbol assembly, SyntaxNode compilationUnit)
+        {
+            foreach (var attribute in assembly.GetAttributes()
+                .Where(a => a.AttributeClass != null && _symbolFilter.Include(a.AttributeClass)))
+            {
+                compilationUnit = _syntaxGenerator.AddAttributes(compilationUnit, _syntaxGenerator.Attribute(attribute)
+                    .WithTrailingTrivia(SyntaxFactory.LineFeed));
+            }
+            return compilationUnit;
+        }
+
+        private SyntaxNode GenerateForwardedTypeAssemblyAttributes(IAssemblySymbol assembly, SyntaxNode compilationUnit)
+        {
+            foreach (INamedTypeSymbol symbol in assembly.GetForwardedTypes())
+            {
+                if (symbol.TypeKind != TypeKind.Error)
+                {
+                    TypeSyntax typeSyntaxNode = (TypeSyntax)_syntaxGenerator.TypeExpression(symbol);
+                    compilationUnit = _syntaxGenerator.AddAttributes(compilationUnit,
+                        _syntaxGenerator.Attribute("System.Runtime.CompilerServices.TypeForwardedToAttribute",
+                            SyntaxFactory.TypeOfExpression(typeSyntaxNode)).WithTrailingTrivia(SyntaxFactory.LineFeed));
+                }
+                else
+                {
+                    _logger.LogWarning(string.Format(
+                        "Could not resolve type '{0}' in containing assembly '{1}' via type forward. Make sure that the assembly is provided as a reference and contains the type.",
+                        symbol.ToDisplayString(),
+                        $"{symbol.ContainingAssembly.Name}.dll"));
+                }
+            }
+
+            return compilationUnit;
+        }
+
+        private static IEnumerable<INamespaceSymbol> EnumerateNamespaces(IAssemblySymbol assemblySymbol)
         {
             Stack<INamespaceSymbol> stack = new();
             stack.Push(assemblySymbol.GlobalNamespace);

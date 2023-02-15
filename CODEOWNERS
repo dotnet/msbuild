@@ -78,3 +78,8 @@
 /src/Tests/Microsoft.DotNet.ApiCompatibility*/ @dotnet/area-infrastructure-libraries
 /src/Tests/Microsoft.DotNet.ApiCompat*/ @dotnet/area-infrastructure-libraries
 /src/Tests/Microsoft.DotNet.PackageValidation*/ @dotnet/area-infrastructure-libraries
+
+# Area-GenAPI
+/src/GenAPI/ @andriipatsula @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.GenAPI/ @andriipatsula @dotnet/area-infrastructure-libraries
+/src/Microsoft.DotNet.ApiSymbolExtensions/ @andriipatsula @dotnet/area-infrastructure-libraries

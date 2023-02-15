@@ -12,6 +12,7 @@ variables:
     value: Roslyn-Project-System
   - name: PostBuildSign
     value: true
+  - template: /eng/common/templates/variables/pool-providers.yml
 
 stages:
 - stage: build
@@ -24,7 +25,7 @@ stages:
         richCodeNavigationLanguage: 'csharp'
         richCodeNavigationEnvironment: 'production'
         pool:
-            name: NetCore-Public
+            name: $(DncEngPublicBuildPool)
             demands: ImageOverride -equals windows.vs2019.amd64.open   
         timeoutInMinutes: 180
         strategy:
