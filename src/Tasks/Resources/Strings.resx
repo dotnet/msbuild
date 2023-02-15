@@ -2776,7 +2776,7 @@
     <comment>{StrBegin="MSB3922: "}</comment>
   </data>
   <data name="DownloadFile.ErrorDownloading" xml:space="preserve">
-    <value>MSB3923: Failed to download file "{0}". {1}</value>
+    <value>MSB3923: Failed to download file "{0}".  {1}</value>
     <comment>{StrBegin="MSB3923: "}</comment>
   </data>
   <data name="DownloadFile.Retrying" xml:space="preserve">
