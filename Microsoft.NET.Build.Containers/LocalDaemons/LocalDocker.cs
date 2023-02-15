@@ -18,7 +18,7 @@ internal sealed class LocalDocker : ILocalDaemon
         this.logger = logger;
     }
 
-    public async Task Load(Image image, ImageReference sourceReference, ImageReference destinationReference)
+    public async Task Load(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference)
     {
         // call `docker load` and get it ready to receive input
         ProcessStartInfo loadInfo = new("docker", $"load");
@@ -84,7 +84,7 @@ internal sealed class LocalDocker : ILocalDaemon
         return await JsonDocument.ParseAsync(proc.StandardOutput.BaseStream).ConfigureAwait(false);
     }
 
-    private static async Task WriteImageToStream(Image image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream)
+    private static async Task WriteImageToStream(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream)
     {
         using TarWriter writer = new(imageStream, TarEntryFormat.Pax, leaveOpen: true);
 
@@ -111,9 +111,9 @@ internal sealed class LocalDocker : ILocalDaemon
         }
 
         // add config
-        string configTarballPath = $"{Image.GetSha(image.Config)}.json";
+        string configTarballPath = $"{image.ImageSha}.json";
 
-        using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(image.Config.ToJsonString())))
+        using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(image.Config)))
         {
             PaxTarEntry configEntry = new(TarEntryType.RegularFile, configTarballPath)
             {

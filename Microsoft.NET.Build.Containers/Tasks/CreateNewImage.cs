@@ -32,9 +32,9 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         ImageReference sourceImageReference = new(SourceRegistry.Value, BaseImageName, BaseImageTag);
         var destinationImageReferences = ImageTags.Select(t => new ImageReference(DestinationRegistry.Value, ImageName, t));
 
-        var image = GetBaseImage();
+        ImageBuilder imageBuilder = GetBaseImage();
 
-        if (image is null)
+        if (imageBuilder is null)
         {
             Log.LogError($"Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}", sourceImageReference.RepositoryAndTag, ContainerRuntimeIdentifier);
             return !Log.HasLoggedErrors;
@@ -43,18 +43,18 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         SafeLog("Building image '{0}' with tags {1} on top of base image {2}", ImageName, String.Join(",", ImageTags), sourceImageReference);
 
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory);
-        image.AddLayer(newLayer);
-        image.WorkingDirectory = WorkingDirectory;
-        image.SetEntrypoint(Entrypoint.Select(i => i.ItemSpec).ToArray(), EntrypointArgs.Select(i => i.ItemSpec).ToArray());
+        imageBuilder.AddLayer(newLayer);
+        imageBuilder.SetWorkingDirectory(WorkingDirectory);
+        imageBuilder.SetEntryPoint(Entrypoint.Select(i => i.ItemSpec).ToArray(), EntrypointArgs.Select(i => i.ItemSpec).ToArray());
 
         foreach (var label in Labels)
         {
-            image.Label(label.ItemSpec, label.GetMetadata("Value"));
+            imageBuilder.AddLabel(label.ItemSpec, label.GetMetadata("Value"));
         }
 
-        SetEnvironmentVariables(image, ContainerEnvironmentVariables);
+        SetEnvironmentVariables(imageBuilder, ContainerEnvironmentVariables);
 
-        SetPorts(image, ExposedPorts);
+        SetPorts(imageBuilder, ExposedPorts);
 
         // at the end of this step, if any failed then bail out.
         if (Log.HasLoggedErrors)
@@ -62,9 +62,11 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
             return false;
         }
 
+        BuiltImage builtImage = imageBuilder.Build();
+
         // at this point we're done with modifications and are just pushing the data other places
-        GeneratedContainerManifest = JsonSerializer.Serialize(image.Manifest);
-        GeneratedContainerConfiguration = image.Config.ToJsonString();
+        GeneratedContainerManifest = JsonSerializer.Serialize(builtImage.Manifest);
+        GeneratedContainerConfiguration = builtImage.Config;
 
         foreach (var destinationImageReference in destinationImageReferences)
         {
@@ -78,7 +80,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
                 }
                 try
                 {
-                    localDaemon.Load(image, sourceImageReference, destinationImageReference).Wait();
+                    localDaemon.Load(builtImage, sourceImageReference, destinationImageReference).Wait();
                     SafeLog("Pushed container '{0}' to local daemon", destinationImageReference.RepositoryAndTag);
                 }
                 catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
@@ -90,7 +92,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
             {
                 try
                 {
-                    destinationImageReference.Registry?.Push(image, sourceImageReference, destinationImageReference, message => SafeLog(message)).Wait();
+                    destinationImageReference.Registry?.Push(builtImage, sourceImageReference, destinationImageReference, message => SafeLog(message)).Wait();
                     SafeLog("Pushed container '{0}' to registry '{2}'", destinationImageReference.RepositoryAndTag, OutputRegistry);
                 }
                 catch (ContainerHttpException e)
@@ -113,7 +115,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         return !Log.HasLoggedErrors;
     }
 
-    private void SetPorts(Image image, ITaskItem[] exposedPorts)
+    private void SetPorts(ImageBuilder image, ITaskItem[] exposedPorts)
     {
         foreach (var port in exposedPorts)
         {
@@ -188,7 +190,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
     }
 
-    private static void SetEnvironmentVariables(Image img, ITaskItem[] envVars)
+    private static void SetEnvironmentVariables(ImageBuilder img, ITaskItem[] envVars)
     {
         foreach (ITaskItem envVar in envVars)
         {
@@ -196,10 +198,14 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
     }
 
-    private Image? GetBaseImage() {
-        if (SourceRegistry.Value is {} registry) {
+    private ImageBuilder GetBaseImage()
+    {
+        if (SourceRegistry.Value is {} registry)
+        {
             return registry.GetImageManifest(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier, RuntimeIdentifierGraphPath).Result;
-        } else {
+        }
+        else
+        {
             throw new ArgumentException("Don't know how to pull images from local daemons at the moment");
         }
     }

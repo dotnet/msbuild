@@ -58,16 +58,16 @@ Microsoft.NET.Build.Containers.ManifestListV2.mediaType.set -> void
 Microsoft.NET.Build.Containers.ManifestListV2.schemaVersion.get -> int
 Microsoft.NET.Build.Containers.ManifestListV2.schemaVersion.set -> void
 Microsoft.NET.Build.Containers.ManifestV2
-Microsoft.NET.Build.Containers.ManifestV2.config.get -> Microsoft.NET.Build.Containers.ManifestConfig
-Microsoft.NET.Build.Containers.ManifestV2.config.set -> void
-Microsoft.NET.Build.Containers.ManifestV2.layers.get -> System.Collections.Generic.List<Microsoft.NET.Build.Containers.ManifestLayer>!
-Microsoft.NET.Build.Containers.ManifestV2.layers.set -> void
+Microsoft.NET.Build.Containers.ManifestV2.Config.get -> Microsoft.NET.Build.Containers.ManifestConfig
+Microsoft.NET.Build.Containers.ManifestV2.Config.init -> void
+Microsoft.NET.Build.Containers.ManifestV2.GetDigest() -> string!
+Microsoft.NET.Build.Containers.ManifestV2.Layers.get -> System.Collections.Generic.List<Microsoft.NET.Build.Containers.ManifestLayer>!
+Microsoft.NET.Build.Containers.ManifestV2.Layers.init -> void
 Microsoft.NET.Build.Containers.ManifestV2.ManifestV2() -> void
-Microsoft.NET.Build.Containers.ManifestV2.ManifestV2(int schemaVersion, string! mediaType, Microsoft.NET.Build.Containers.ManifestConfig config, System.Collections.Generic.List<Microsoft.NET.Build.Containers.ManifestLayer>! layers) -> void
-Microsoft.NET.Build.Containers.ManifestV2.mediaType.get -> string!
-Microsoft.NET.Build.Containers.ManifestV2.mediaType.set -> void
-Microsoft.NET.Build.Containers.ManifestV2.schemaVersion.get -> int
-Microsoft.NET.Build.Containers.ManifestV2.schemaVersion.set -> void
+Microsoft.NET.Build.Containers.ManifestV2.MediaType.get -> string!
+Microsoft.NET.Build.Containers.ManifestV2.MediaType.init -> void
+Microsoft.NET.Build.Containers.ManifestV2.SchemaVersion.get -> int
+Microsoft.NET.Build.Containers.ManifestV2.SchemaVersion.init -> void
 Microsoft.NET.Build.Containers.PlatformInformation
 Microsoft.NET.Build.Containers.PlatformInformation.architecture.get -> string!
 Microsoft.NET.Build.Containers.PlatformInformation.architecture.set -> void

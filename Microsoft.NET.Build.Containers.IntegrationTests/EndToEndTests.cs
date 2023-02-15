@@ -39,25 +39,27 @@ public class EndToEndTests
 
         Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry));
 
-        Image? x = await registry.GetImageManifest(
+        ImageBuilder imageBuilder = await registry.GetImageManifest(
             DockerRegistryManager.BaseImage,
             DockerRegistryManager.Net6ImageTag,
             "linux-x64",
             ToolsetUtils.GetRuntimeGraphFilePath()).ConfigureAwait(false);
 
-        Assert.NotNull(x);
+        Assert.NotNull(imageBuilder);
 
         Layer l = Layer.FromDirectory(publishDirectory, "/app");
 
-        x.AddLayer(l);
+        imageBuilder.AddLayer(l);
 
-        x.SetEntrypoint(new[] { "/app/MinimalTestApp" });
+        imageBuilder.SetEntryPoint(new[] { "/app/MinimalTestApp" });
+
+        BuiltImage builtImage = imageBuilder.Build();
 
         // Push the image back to the local registry
         var sourceReference = new ImageReference(registry, DockerRegistryManager.BaseImage, DockerRegistryManager.Net6ImageTag);
         var destinationReference = new ImageReference(registry, NewImageName(), "latest");
 
-        await registry.Push(x, sourceReference, destinationReference, Console.WriteLine).ConfigureAwait(false);
+        await registry.Push(builtImage, sourceReference, destinationReference, Console.WriteLine).ConfigureAwait(false);
 
         // pull it back locally
         new BasicCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
@@ -79,24 +81,26 @@ public class EndToEndTests
 
         Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry));
 
-        Image? x = await registry.GetImageManifest(
+        ImageBuilder imageBuilder = await registry.GetImageManifest(
             DockerRegistryManager.BaseImage,
             DockerRegistryManager.Net6ImageTag,
             "linux-x64",
             ToolsetUtils.GetRuntimeGraphFilePath()).ConfigureAwait(false);
-        Assert.NotNull(x);
+        Assert.NotNull(imageBuilder);
 
         Layer l = Layer.FromDirectory(publishDirectory, "/app");
 
-        x.AddLayer(l);
+        imageBuilder.AddLayer(l);
 
-        x.SetEntrypoint(new[] { "/app/MinimalTestApp" });
+        imageBuilder.SetEntryPoint(new[] { "/app/MinimalTestApp" });
+
+        BuiltImage builtImage = imageBuilder.Build();
 
         // Load the image into the local Docker daemon
         var sourceReference = new ImageReference(registry, DockerRegistryManager.BaseImage, DockerRegistryManager.Net6ImageTag);
         var destinationReference = new ImageReference(registry, NewImageName(), "latest");
 
-        await new LocalDocker(Console.WriteLine).Load(x, sourceReference, destinationReference).ConfigureAwait(false);
+        await new LocalDocker(Console.WriteLine).Load(builtImage, sourceReference, destinationReference).ConfigureAwait(false);
 
         // Run the image
         new BasicCommand(_testOutput, "docker", "run", "--rm", "--tty", $"{NewImageName()}:latest")
@@ -289,21 +293,23 @@ public class EndToEndTests
         // Build the image
         Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.BaseImageSource));
 
-        Image? x = await registry.GetImageManifest(DockerRegistryManager.BaseImage, DockerRegistryManager.Net7ImageTag, rid, ToolsetUtils.GetRuntimeGraphFilePath()).ConfigureAwait(false);
-        Assert.NotNull(x);
+        ImageBuilder? imageBuilder = await registry.GetImageManifest(DockerRegistryManager.BaseImage, DockerRegistryManager.Net7ImageTag, rid, ToolsetUtils.GetRuntimeGraphFilePath()).ConfigureAwait(false);
+        Assert.NotNull(imageBuilder);
 
         Layer l = Layer.FromDirectory(publishDirectory, "/app");
 
-        x.AddLayer(l);
-        x.WorkingDirectory = workingDir;
+        imageBuilder.AddLayer(l);
+        imageBuilder.SetWorkingDirectory(workingDir);
 
-        var entryPoint = DecideEntrypoint(rid, isRIDSpecific, "MinimalTestApp", workingDir);
-        x.SetEntrypoint(entryPoint);
+        string[] entryPoint = DecideEntrypoint(rid, isRIDSpecific, "MinimalTestApp", workingDir);
+        imageBuilder.SetEntryPoint(entryPoint);
+
+        BuiltImage builtImage = imageBuilder.Build();
 
         // Load the image into the local Docker daemon
         var sourceReference = new ImageReference(registry, DockerRegistryManager.BaseImage, DockerRegistryManager.Net7ImageTag);
         var destinationReference = new ImageReference(registry, NewImageName(), rid);
-        await new LocalDocker(Console.WriteLine).Load(x, sourceReference, destinationReference).ConfigureAwait(false);
+        await new LocalDocker(Console.WriteLine).Load(builtImage, sourceReference, destinationReference).ConfigureAwait(false);
 
         // Run the image
         new BasicCommand(

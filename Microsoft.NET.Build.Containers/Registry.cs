@@ -84,9 +84,8 @@ internal sealed class Registry
     /// </summary>
     private bool SupportsParallelUploads => !IsAmazonECRRegistry;
 
-    public async Task<Image> GetImageManifest(string repositoryName, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath)
+    public async Task<ImageBuilder> GetImageManifest(string repositoryName, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath)
     {
-        var client = GetClient();
         var initialManifestResponse = await GetManifest(repositoryName, reference).ConfigureAwait(false);
 
         return initialManifestResponse.Content.Headers.ContentType?.MediaType switch {
@@ -96,8 +95,9 @@ internal sealed class Registry
         };
     }
 
-    private async Task<Image> ReadSingleImage(string repositoryName, ManifestV2 manifest) {
-        var config = manifest.config;
+    private async Task<ImageBuilder> ReadSingleImage(string repositoryName, ManifestV2 manifest)
+    {
+        var config = manifest.Config;
         string configSha = config.digest;
 
         var blobResponse = await GetBlob(repositoryName, configSha).ConfigureAwait(false);
@@ -105,10 +105,10 @@ internal sealed class Registry
         JsonNode? configDoc = JsonNode.Parse(await blobResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
         Debug.Assert(configDoc is not null);
 
-        return new Image(manifest, configDoc);
+        return new ImageBuilder(manifest, new ImageConfig(configDoc));
     }
 
-    async Task<Image> PickBestImageFromManifestList(string repositoryName, string reference, ManifestListV2 manifestList, string runtimeIdentifier, string runtimeIdentifierGraphPath) {
+    async Task<ImageBuilder> PickBestImageFromManifestList(string repositoryName, string reference, ManifestListV2 manifestList, string runtimeIdentifier, string runtimeIdentifierGraphPath) {
         var runtimeGraph = GetRuntimeGraphForDotNet(runtimeIdentifierGraphPath);
         var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
         var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, ridDict.Keys, runtimeIdentifier);
@@ -407,7 +407,7 @@ internal sealed class Registry
         return client;
     }
 
-    public async Task Push(Image x, ImageReference source, ImageReference destination, Action<string> logProgressMessage)
+    public async Task Push(BuiltImage builtImage, ImageReference source, ImageReference destination, Action<string> logProgressMessage)
     {
 
         HttpClient client = GetClient();
@@ -447,27 +447,27 @@ internal sealed class Registry
 
         if (SupportsParallelUploads)
         {
-            await Task.WhenAll(x.LayerDescriptors.Select(descriptor => uploadLayerFunc(descriptor))).ConfigureAwait(false);
+            await Task.WhenAll(builtImage.LayerDescriptors.Select(descriptor => uploadLayerFunc(descriptor))).ConfigureAwait(false);
         }
         else
         {
-            foreach(var descriptor in x.LayerDescriptors)
+            foreach(var descriptor in builtImage.LayerDescriptors)
             {
                 await uploadLayerFunc(descriptor).ConfigureAwait(false);
             }
         }
 
-        using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(x.Config.ToJsonString())))
+        using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(builtImage.Config)))
         {
-            var configDigest = Image.GetDigest(x.Config);
+            var configDigest = builtImage.ImageDigest;
             logProgressMessage($"Uploading config to registry at blob {configDigest}");
             await UploadBlob(destination.Repository, configDigest, stringStream).ConfigureAwait(false);
             logProgressMessage($"Uploaded config to registry");
         }
 
-        var manifestDigest = Image.GetDigest(x.Manifest);
+        var manifestDigest = builtImage.Manifest.GetDigest();
         logProgressMessage($"Uploading manifest to registry {RegistryName} as blob {manifestDigest}");
-        string jsonString = JsonSerializer.SerializeToNode(x.Manifest)?.ToJsonString() ?? "";
+        string jsonString = JsonSerializer.SerializeToNode(builtImage.Manifest)?.ToJsonString() ?? "";
         HttpContent manifestUploadContent = new StringContent(jsonString);
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
         var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{destination.Repository}/manifests/{manifestDigest}"), manifestUploadContent).ConfigureAwait(false);
