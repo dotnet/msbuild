@@ -310,7 +310,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     var bandRecordPaths = Directory.GetFileSystemEntries(packVersionDir);
 
-                    // Mark packs for GC from versions / feature bands of the SDK that are not present on the machine
+                    // Mark packs for GC from versions / feature bands of the SDK that are not present on the machine and lower or equal to the current sdk.
                     var unneededBandRecordPaths = bandRecordPaths
                         .Where(recordPath =>
                             {
