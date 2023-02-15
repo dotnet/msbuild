@@ -95,10 +95,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         /// <param name="workloadResolver">The resolver used to discover VS workloads.</param>
         public IEnumerable<WorkloadId> GetCLIOnlyInstalledWorkloads(SdkFeatureBand sdkFeatureBand, IWorkloadResolver workloadResolver)
         {
+#if !DOT_NET_BUILD_FROM_SOURCE
             var allWorkloads = GetInstalledWorkloads(sdkFeatureBand);
             InstalledWorkloadsCollection allVSWorkloads = new();
             VisualStudioWorkloads.GetInstalledWorkloads(workloadResolver, allVSWorkloads, sdkFeatureBand);
             return allWorkloads.Except(allVSWorkloads.AsEnumerable().Select(kvp => new WorkloadId(kvp.Key)).ToList());
+#else
+            return new List<WorkloadId>(); 
+#endif
         }
 
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
