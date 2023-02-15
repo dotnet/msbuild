@@ -3,15 +3,17 @@ trigger:
   branches:
     include:
     - main
-    - release/*
-    - internal/release/3.*
-    - internal/release/5.*
-    - internal/release/6.*
-    - internal/release/7.*
+    - release/7.0.3xx
+    - internal/release/*
     - exp/*
-  paths:
-    exclude:
-    - "*.md"
+
+pr:
+  branches:
+    include:
+    - main
+    - release/*
+    - internal/release/*
+
 
 variables:
   - name: teamName
