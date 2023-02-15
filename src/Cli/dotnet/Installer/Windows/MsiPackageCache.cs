@@ -199,10 +199,10 @@ namespace Microsoft.DotNet.Installer.Windows
                 FileAccessRetrier.RetryOnMoveAccessFailure(() => File.Move(sourceFile, destinationFile));
                 Log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
 
-                //FileInfo fi = new(destinationFile);
-                //FileSecurity fs = new();
-                //fs.SetSecurityDescriptorSddlForm(FileSecurityDescriptor);
-                //fi.SetAccessControl(fs);
+                FileInfo fi = new(destinationFile);
+                FileSecurity fs = new();
+                fs.SetSecurityDescriptorSddlForm(FileSecurityDescriptor);
+                fi.SetAccessControl(fs);
             }
         }
 
