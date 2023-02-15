@@ -443,7 +443,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool HasMetadata(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
 
             if (Link != null)
             {
@@ -475,7 +475,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            return GetMetadataValueEscaped(name, false);
+            return GetMetadataValueEscaped(name, returnNullIfNotFound: false);
         }
 
         /// <summary>

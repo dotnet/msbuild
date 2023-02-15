@@ -516,6 +516,50 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
+        /// HasMetadata
+        /// </summary>
+        [Fact]
+        public void HasMetadata()
+        {
+            string content = """
+                    <Project>
+                        <ItemDefinitionGroup>
+                            <i>
+                                <m0>v0</m0>
+                            </i>
+                        </ItemDefinitionGroup>
+                        <ItemGroup>
+                            <i Include='i1'>
+                                <m1>v1</m1>
+                            </i>
+                        </ItemGroup>
+                    </Project>
+                """;
+
+            ProjectItemInstance item = GetOneItem(content);
+            item.HasMetadata("m0").ShouldBeTrue();
+            item.HasMetadata("m1").ShouldBeTrue();
+            item.HasMetadata("Identity").ShouldBeTrue();
+
+            item.HasMetadata("").ShouldBeFalse();
+            item.HasMetadata("m2").ShouldBeFalse();
+            Assert.Throws<ArgumentNullException>(() => { item.HasMetadata(null); });
+        }
+
+        /// <summary>
+        /// GetMetadataValueEscaped with non present and invalid value
+        /// </summary>
+        [Fact]
+        public void GetMetadataValueEscaped()
+        {
+            ProjectItemInstance item = GetItemInstance();
+            item.GetMetadataValueEscaped("m2", returnNullIfNotFound: true).ShouldBeNull();
+            item.GetMetadataValueEscaped("m2", returnNullIfNotFound: false).ShouldBeEmpty();
+            Assert.Throws<ArgumentNullException>(() => { item.GetMetadataValueEscaped(null, returnNullIfNotFound: true); });
+            Assert.Throws<ArgumentException>(() => { item.GetMetadataValueEscaped("", returnNullIfNotFound: true); });
+        }
+
+        /// <summary>
         /// Metadata on items can refer to metadata above
         /// </summary>
         [Fact]

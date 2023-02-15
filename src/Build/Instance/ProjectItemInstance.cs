@@ -1280,7 +1280,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadataEscaped(string metadataName)
             {
-                return GetMetadataEscaped(metadataName, false);
+                return GetMetadataEscaped(metadataName, returnNullIfNotFound: false);
             }
 
             /// <summary>
@@ -1634,10 +1634,8 @@ namespace Microsoft.Build.Execution
             /// </remarks>
             public bool HasMetadata(string name)
             {
-                if (string.IsNullOrEmpty(name))
-                {
-                    ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-                }
+
+                ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
 
                 if ((_directMetadata?.Contains(name) == true) ||
                      FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
