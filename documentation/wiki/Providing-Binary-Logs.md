@@ -18,11 +18,13 @@ Via setting `MSBUILDDEBUGENGINE` environment variable to `'1'`:
 > devenv.exe MySolution.sln
 ```
 
-MSBuild binary logs are then captured to `MSBuild_Logs` subfolder of a current folder.
+MSBuild binary logs are then captured to a location specified via `MSBUILDDEBUGPATH` environment variable (or defaults to `MSBuild_Logs` subfolder of a current folder or `%temp%`, based on access rights).
 
 ⚠ NOTE: logs are being recorded for each MSBuild invocation (including design time builds) and kept in the folder without removing older ones - so the number of log files can grow quickly. It is recommended to set the opt-in environment variable only for the short duration of reproducing the issue to be investigated (though it is understandable that some nondeterministic issues might need multiple reproduction attempts)
 
-[More technical info](Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#logs)
+Further reading:
+* [More technical info](Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#logs)
+* [Design time builds logs](https://github.com/dotnet/project-system/blob/main/docs/repo/debugging/design-time-builds.md#gathering-full-fidelity-binlogs)
 
 ### Capturing specific logs for chosen build invocations
 See [this guide](https://github.com/dotnet/project-system-tools) in the Project System Tools repo for capturing binlogs through Visual Studio.
