@@ -2592,12 +2592,12 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (project.GlobalProperties.Count != globalProperties.Count)
+                if (project.GlobalPropertiesCount != globalProperties.Count)
                 {
                     return false;
                 }
 
-                foreach (KeyValuePair<string, string> leftProperty in project.GlobalProperties)
+                foreach (KeyValuePair<string, string> leftProperty in project.GlobalPropertiesEnumerable)
                 {
                     if (!globalProperties.TryGetValue(leftProperty.Key, out var rightValue))
                     {

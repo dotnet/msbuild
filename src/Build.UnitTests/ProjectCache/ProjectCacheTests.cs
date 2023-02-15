@@ -1035,7 +1035,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 ");
             var mockCache = new InstanceMockCache();
 
-            var buildParameters =  new BuildParameters
+            var buildParameters = new BuildParameters
             {
                 ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(mockCache),
             };
@@ -1047,7 +1047,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 logger = buildSession.Logger;
                 graphResult = buildSession.BuildGraph(graph);
             }
-            
+
             graphResult.ShouldHaveSucceeded();
         }
 

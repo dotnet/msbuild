@@ -38,6 +38,8 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Logging.FancyLogger;
+using System.Runtime.InteropServices;
 
 #nullable disable
 
@@ -126,7 +128,7 @@ namespace Microsoft.Build.CommandLine
         private static readonly CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
 
         private static readonly char[] s_commaSemicolon = { ',', ';' };
-
+ 
         /// <summary>
         /// Static constructor
         /// </summary>
@@ -678,6 +680,7 @@ namespace Microsoft.Build.CommandLine
                 Dictionary<string, string> restoreProperties = null;
                 ILogger[] loggers = Array.Empty<ILogger>();
                 LoggerVerbosity verbosity = LoggerVerbosity.Normal;
+                LoggerVerbosity originalVerbosity = LoggerVerbosity.Normal;
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
 #if FEATURE_XML_SCHEMA_VALIDATION
                 bool needToValidateProject = false;
@@ -715,6 +718,7 @@ namespace Microsoft.Build.CommandLine
                                             ref globalProperties,
                                             ref loggers,
                                             ref verbosity,
+                                            ref originalVerbosity,
                                             ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
                                             ref needToValidateProject,
@@ -1081,6 +1085,11 @@ namespace Microsoft.Build.CommandLine
         private const string msbuildLogFileName = "msbuild.log";
 
         /// <summary>
+        /// List of messages to be sent to the logger when it is attached
+        /// </summary>
+        private static List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
+
+        /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
         /// <returns>true, if build succeeds</returns>
@@ -1317,11 +1326,12 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
+                    // List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
                     BuildResultCode? result = null;
 
-                    IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
                         var commandLineString =
@@ -1330,7 +1340,18 @@ namespace Microsoft.Build.CommandLine
 #else
                             string.Join(" ", commandLine);
 #endif
-                        messagesToLogInBuildLoggers = GetMessagesToLogInBuildLoggers(commandLineString);
+                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLineString));
+
+                        // Log a message for every response file and include it in log
+                        foreach (var responseFilePath in s_includedResponseFiles)
+                        {
+                            messagesToLogInBuildLoggers.Add(
+                                new BuildManager.DeferredBuildMessage(
+                                    String.Format("Included response file: {0}", responseFilePath),
+                                    MessageImportance.Normal,
+                                    responseFilePath
+                                ));
+                        }
                     }
 
                     buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
@@ -1485,7 +1506,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
+        private static List<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
             List<BuildManager.DeferredBuildMessage> messages = new()
             {
@@ -2186,6 +2207,7 @@ namespace Microsoft.Build.CommandLine
             ref Dictionary<string, string> globalProperties,
             ref ILogger[] loggers,
             ref LoggerVerbosity verbosity,
+            ref LoggerVerbosity originalVerbosity,
             ref List<DistributedLoggerRecord> distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
             ref bool needToValidateProject,
@@ -2301,6 +2323,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref globalProperties,
                                                            ref loggers,
                                                            ref verbosity,
+                                                           ref originalVerbosity,
                                                            ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
                                                            ref needToValidateProject,
@@ -2401,6 +2424,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.FancyLogger], 
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -2408,6 +2432,7 @@ namespace Microsoft.Build.CommandLine
                         groupedFileLoggerParameters,
                         out distributedLoggerRecords,
                         out verbosity,
+                        out originalVerbosity,
                         cpuCount,
                         out profilerLogger,
                         out enableProfiler
@@ -2438,7 +2463,7 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
                     }
 
-                    if (verbosity == LoggerVerbosity.Diagnostic)
+                    if (originalVerbosity == LoggerVerbosity.Diagnostic)
                     {
                         string equivalentCommandLine = commandLineSwitches.GetEquivalentCommandLineExceptProjectFile();
                         Console.WriteLine($"{Path.Combine(s_exePath, s_exeName)} {equivalentCommandLine} {projectFile}");
@@ -3184,6 +3209,7 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
+            bool fancyLoggerCommandLineOptIn, 
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3191,18 +3217,21 @@ namespace Microsoft.Build.CommandLine
             string[][] groupedFileLoggerParameters,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
+            out LoggerVerbosity originalVerbosity,
             int cpuCount,
             out ProfilerLogger profilerLogger,
             out bool enableProfiler
         )
         {
             // if verbosity level is not specified, use the default
-            verbosity = LoggerVerbosity.Normal;
+            originalVerbosity = LoggerVerbosity.Normal;
+            verbosity = originalVerbosity;
 
             if (verbositySwitchParameters.Length > 0)
             {
                 // Read the last verbosity switch found
-                verbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
+                originalVerbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
+                verbosity = originalVerbosity;
             }
 
             var loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity);
@@ -3210,13 +3239,24 @@ namespace Microsoft.Build.CommandLine
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
-            ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
+            // Choose default console logger
+            if ((fancyLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true") && DoesEnvironmentSupportFancyLogger())
+            {
+                ProcessFancyLogger(noConsoleLogger, loggers);
+            }
+            else
+            {
+                ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
+            }
 
             ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
 
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
+
+            // TOOD: Review
+            // ProcessFancyLogger(noConsoleLogger, loggers);
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
 
@@ -3377,6 +3417,43 @@ namespace Microsoft.Build.CommandLine
                     DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, consoleParameters, verbosity);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
+            }
+        }
+
+        private static bool DoesEnvironmentSupportFancyLogger()
+        {
+            // If output is redirected
+            if (Console.IsOutputRedirected)
+            {
+                messagesToLogInBuildLoggers.Add(
+                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is being redirected to a file.", MessageImportance.Low)
+                );
+                return false;
+            }
+            // If terminal is dumb
+            if (
+                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.GetEnvironmentVariable("WT_SESSION") == "")
+                || Environment.GetEnvironmentVariable("TERM") == "dumb"
+            )
+            {
+                messagesToLogInBuildLoggers.Add(
+                    new BuildManager.DeferredBuildMessage("FancyLogger was not used because the output is not supported.", MessageImportance.Low)
+                );
+                return false;
+            }
+            return true;
+        }
+
+        private static void ProcessFancyLogger(
+            bool noConsoleLogger,
+            List<ILogger> loggers
+        )
+        {
+            // Check for flags and env variables
+            if (!noConsoleLogger)
+            {
+                FancyLogger l = new FancyLogger();
+                loggers.Add(l);
             }
         }
 

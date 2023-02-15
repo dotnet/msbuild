@@ -352,8 +352,8 @@ namespace Microsoft.Build.Execution
 
             this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, project.Items, projectItemToInstanceMap);
 
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
-            foreach (var property in project.GlobalProperties)
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalPropertiesCount);
+            foreach (var property in project.GlobalPropertiesEnumerable)
             {
                 _globalProperties.Set(ProjectPropertyInstance.Create(property.Key, property.Value));
             }

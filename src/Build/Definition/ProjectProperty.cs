@@ -596,7 +596,7 @@ namespace Microsoft.Build.Evaluation
             {
                 [DebuggerStepThrough]
                 get
-                { return _project.GlobalProperties.ContainsKey(Name); }
+                { return _project.GlobalPropertiesContains(Name); }
             }
 
             /// <summary>

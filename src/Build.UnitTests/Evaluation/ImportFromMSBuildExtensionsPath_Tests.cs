@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     <Target Name='FromExtn'>
                         <Message Text='Running FromExtn'/>
                     </Target>
-                    <Import Project='$(MSBuildExtensionsPath)\non-existant\*.proj'/>
+                    <Import Project='$(MSBuildExtensionsPath)\non-existent\*.proj'/>
                 </Project>
                 ";
 

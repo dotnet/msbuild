@@ -77,6 +77,13 @@ namespace Microsoft.Build.Shared
                     // Platform/PlatformTarget when this is the case.
                     log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", projectPath);
                 }
+                // If the referenced project has a defined `Platform` that's compatible, it will build that way by default.
+                // If we're about to tell the reference to build using its default platform, don't pass it as a global property.
+                if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(buildProjectReferenceAs, StringComparison.OrdinalIgnoreCase))
+                {
+                    log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
+                    buildProjectReferenceAs = string.Empty;
+                }
             return buildProjectReferenceAs;
         }
         internal static Dictionary<string, string>? ExtractLookupTable(string stringTable, TaskLoggingHelper? log = null)

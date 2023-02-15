@@ -251,6 +251,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private DateTime _instantiationTimeUtc;
 
+        /// <summary>
+        /// Messages to be logged
+        /// </summary>
         private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
 
         private ProjectCacheService _projectCacheService;
@@ -394,10 +397,20 @@ namespace Microsoft.Build.Execution
 
             public string Text { get; }
 
+            public string FilePath { get; }
+
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
+                FilePath = null;
+            }
+
+            public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
+            {
+                Importance = importance;
+                Text = text;
+                FilePath = filePath;
             }
         }
 
@@ -527,6 +540,7 @@ namespace Microsoft.Build.Execution
 
                 var loggingService = InitializeLoggingService();
 
+                // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
                 InitializeCaches();
@@ -912,10 +926,7 @@ namespace Microsoft.Build.Execution
                 // but the top level exception handler there should catch everything and have forwarded it to the
                 // OnThreadException method in this class already.
                 _workQueue.Complete();
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-                {
-                    _workQueue.Completion.Wait();
-                }
+                _workQueue.Completion.Wait();
 
                 Task projectCacheDispose = _projectCacheService.DisposeAsync().AsTask();
 
@@ -965,10 +976,10 @@ namespace Microsoft.Build.Execution
 
                 if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
                 {
-                    e = ae.InnerExceptions.First();
+                    ExceptionDispatchInfo.Capture(ae.InnerExceptions[0]).Throw();
                 }
 
-                throw e;
+                throw;
             }
             finally
             {
@@ -1854,8 +1865,7 @@ namespace Microsoft.Build.Execution
 
             if (submission.BuildRequestData.GraphBuildOptions.Build)
             {
-                // Kick off project cache initialization frontloading
-                Task.Run(() => _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token));
+                _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token);
 
                 var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
@@ -2746,14 +2756,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnLoggingThreadException(Exception e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnThreadException(e));
-            }
-            else
-            {
-                OnThreadException(e);
-            }
+            _workQueue.Post(() => OnThreadException(e));
         }
 
         /// <summary>
@@ -2761,16 +2764,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnProjectFinishedBody(e));
-            }
-            else
-            {
-                OnProjectFinishedBody(e);
-            }
-
-            void OnProjectFinishedBody(ProjectFinishedEventArgs e)
+            _workQueue.Post(() =>
             {
                 lock (_syncLock)
                 {
@@ -2787,7 +2781,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -2795,16 +2789,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnProjectStartedBody(e));
-            }
-            else
-            {
-                OnProjectStartedBody(e);
-            }
-
-            void OnProjectStartedBody(ProjectStartedEventArgs e)
+            _workQueue.Post(() =>
             {
                 lock (_syncLock)
                 {
@@ -2813,7 +2798,7 @@ namespace Microsoft.Build.Execution
                         _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -2895,6 +2880,12 @@ namespace Microsoft.Build.Execution
             foreach (var message in deferredBuildMessages)
             {
                 loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+
+                // If message includes a file path, include that file
+                if (message.FilePath is not null)
+                {
+                    loggingService.LogIncludeFile(BuildEventContext.Invalid, message.FilePath);
+                }
             }
         }
 

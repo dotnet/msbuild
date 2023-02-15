@@ -6,6 +6,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
+using System.Xml;
 
 using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -181,7 +182,7 @@ namespace Microsoft.Build.Construction
                         break;
 
                     case XMakeElements.itemDefinitionGroup:
-                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement));
+                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement, _project));
                         break;
 
                     case XMakeElements.choose:
@@ -634,6 +635,14 @@ namespace Microsoft.Build.Construction
                         if (onError != null)
                         {
                             ProjectErrorUtilities.ThrowInvalidProject(onError.Location, "NodeMustBeLastUnderElement", XMakeElements.onError, XMakeElements.target, childElement.Name);
+                        }                       
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+                        {
+                            if (childElement.ChildNodes.Count == 1 && childElement.FirstChild.NodeType == XmlNodeType.Text)
+                            {
+                                // If the element has inner text and no other child elements except text, then this should be a property and throw invalid child element of <Target>
+                                ProjectErrorUtilities.ThrowInvalidProject(childElement.Location, "PropertyOutsidePropertyGroupInTarget", childElement.Name, childElement.ParentNode.Name);
+                            }
                         }
 
                         child = ParseProjectTaskElement(childElement, target);
@@ -709,11 +718,11 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Parse a ProjectItemDefinitionGroupElement
         /// </summary>
-        private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element)
+        private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
             ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
-            ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, _project, _project);
+            ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, parent, _project);
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
@@ -863,6 +872,10 @@ namespace Microsoft.Build.Construction
 
                     case XMakeElements.choose:
                         child = ParseProjectChooseElement(childElement, parent, nestingDepth);
+                        break;
+
+                    case XMakeElements.itemDefinitionGroup:
+                        child = ParseProjectItemDefinitionGroupElement(childElement, parent);
                         break;
 
                     default:
