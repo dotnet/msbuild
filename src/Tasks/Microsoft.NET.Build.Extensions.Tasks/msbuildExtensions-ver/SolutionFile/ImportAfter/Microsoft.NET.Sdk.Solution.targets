@@ -33,7 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="Build;Publish;Clean;Store;VSTest"
           Condition="'$(_CommandLineDefinedOutputPath)' == 'true'">
 
-    <NETSdkError ResourceName="CannotHaveSolutionLevelOutputPath" />
+    <NetSdkWarning ResourceName="CannotHaveSolutionLevelOutputPath" />
 
   </Target>
 
