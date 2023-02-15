@@ -1072,13 +1072,10 @@ namespace Microsoft.Build.BackEnd
                 if (other._keepOnlySpecified)
                 {
                     // Any metadata not specified in other must be removed from this one.
-                    var metadataToRemove = new List<string>(_modifications.Keys);
+                    var metadataToRemove = new List<string>(_modifications.Keys.Where(m => other[m].Remove));
                     foreach (var metadata in metadataToRemove)
                     {
-                        if (other[metadata].Remove)
-                        {
-                            _modifications.Remove(metadata);
-                        }
+                        _modifications.Remove(metadata);
                     }
                 }
 

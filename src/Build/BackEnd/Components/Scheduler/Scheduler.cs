@@ -975,7 +975,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            if (bestConfig == null || bestConfig.TotalPlanTime < configToConsider.TotalPlanTime)
+                            if (bestConfig is null || bestConfig.TotalPlanTime < configToConsider.TotalPlanTime)
                             {
                                 bestConfig = configToConsider;
                                 bestRequest = request;
@@ -984,7 +984,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                if (bestConfig is not null)
+                if (bestRequest is not null)
                 {
                     AssignUnscheduledRequestToNode(bestRequest, idleNodeId, responses);
                 }

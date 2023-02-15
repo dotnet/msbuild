@@ -9,7 +9,6 @@ using Microsoft.Build.Execution;
 using System.Diagnostics;
 
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
-using System.Linq;
 
 #nullable disable
 

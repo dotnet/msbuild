@@ -203,7 +203,7 @@ namespace Microsoft.Build.BackEnd
                          * 
                          */
                         ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
-                        ErrorUtilities.VerifyThrow(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs).Count > 0, "The target must have inputs.");
+                        ErrorUtilities.VerifyThrow(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, earlyExitIfNonEmpty: true).Count > 0, "The target must have inputs.");
 
                         result = PerformDependencyAnalysisIfDiscreteInputs(itemVectorsInTargetInputs,
                                     itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs, itemVectorsReferencedOnlyInTargetInputs,
