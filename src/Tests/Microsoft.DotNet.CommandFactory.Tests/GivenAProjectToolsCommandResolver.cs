@@ -389,6 +389,7 @@ namespace Microsoft.DotNet.Tests
         private void PopulateFallbackFolder(string testProjectDirectory, string fallbackFolder)
         {
             var nugetConfigPath = Path.Combine(testProjectDirectory, "NuGet.Config");
+
             new DotnetRestoreCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute("--packages", fallbackFolder)

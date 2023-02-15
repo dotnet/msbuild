@@ -47,12 +47,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="BuildTestPackages.targets" />
     <None Include="SetupTestRoot.targets" />
   </ItemGroup>
 
   <Import Project="SetupTestRoot.targets" />
-  <Import Project="BuildTestPackages.targets" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
