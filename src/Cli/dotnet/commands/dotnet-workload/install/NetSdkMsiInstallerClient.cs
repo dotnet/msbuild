@@ -235,7 +235,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     }
                     else if (cleanAllPacks && dependentFeatureBand.CompareTo(_sdkFeatureBand) < 1)
                     {
-                        Log?.LogMessage($"Removing dependent '{dependent}' as part of the dotnet clean --all operation.");
+                        Log?.LogMessage($"Adding dependent '{dependent}' for removal as part of the dotnet clean --all operation.");
                         UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                     }
                     else if (dependentFeatureBand.Equals(_sdkFeatureBand))
@@ -311,7 +311,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 if (potentialBandToClean.CompareTo(featureBand) < 1)
                 {
-                    var workloadInstallationRecordIds = RecordRepository.GetInstalledWorkloads(potentialBandToClean);
+                    var workloadInstallationRecordIds = RecordRepository.GetInstalledWorkloadsForFeatureBandAndBelow(potentialBandToClean);
                     foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
                     {
                         RecordRepository.DeleteWorkloadInstallationRecord(workloadInstallationRecordId, potentialBandToClean);
