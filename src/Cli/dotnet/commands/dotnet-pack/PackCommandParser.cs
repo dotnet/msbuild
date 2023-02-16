@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDirDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdOutputDir
-        }.ForwardAsOutputPath("PackageOutputPath");
+        }.ForwardAsSingle(o => $"-property:PackageOutputPath={CommandDirectoryContext.GetFullPath(o)}");
 
         public static readonly Option<bool> NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.CmdNoBuildOptionDescription)
             .ForwardAs("-property:NoBuild=true");
