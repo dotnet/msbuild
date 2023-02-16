@@ -17,6 +17,9 @@ namespace Microsoft.Build.Logging.LiveLogger
         private int finishedProjects = 0;
         private Dictionary<string, int> blockedProjects = new();
 
+        private DateTime startTime;
+        private DateTime endTime;
+
         public LoggerVerbosity Verbosity { get; set; }
         public string Parameters { get; set; }
 
@@ -119,10 +122,12 @@ namespace Microsoft.Build.Logging.LiveLogger
         // Build
         private void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
         {
+            startTime = DateTime.Now;
         }
 
         private void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
+            endTime = DateTime.Now;
             succeeded = e.Succeeded;
         }
 
@@ -286,6 +291,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public void Shutdown()
         {
+            TimeSpan buildDuration = endTime - startTime;
             TerminalBuffer.Terminate();
             int errorCount = 0;
             int warningCount = 0;
@@ -311,15 +317,15 @@ namespace Microsoft.Build.Logging.LiveLogger
             if (succeeded)
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine($"\t{warningCount} Warning(s)");
-                Console.WriteLine($"\t{errorCount} Error(s)");
             }
             else
             {
                 Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-                Console.WriteLine($"\t{warningCount} Warnings(s)");
-                Console.WriteLine($"\t{errorCount} Errors(s)");
             }
+            Console.WriteLine($"\t{warningCount} Warnings(s)");
+            Console.WriteLine($"\t{errorCount} Errors(s)");
+            Console.WriteLine();
+            Console.WriteLine($"Time elapsed {buildDuration.ToString()}");
         }
     }
 }
