@@ -54,21 +54,37 @@ internal sealed class LocalDocker : ILocalDaemon
         }
     }
 
-    public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
+    public Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        return IsAvailableIntAsync(sync: false, cancellationToken);
+    }
+
+    ///<inheritdoc/>
+    public bool IsAvailable()
+    {
+        //it is safe to call Task.Result here, as when sync is true, the method is fully synchronous
+        return IsAvailableIntAsync(sync: true, cancellationToken: default).Result;
+    }
+
+    private async Task<bool> IsAvailableIntAsync(bool sync, CancellationToken cancellationToken)
+    {
         try
         {
-            JsonDocument config = await GetConfigAsync(cancellationToken).ConfigureAwait(false);
-            cancellationToken.ThrowIfCancellationRequested();
+            //it is safe to call Task.Result here, as when sync is true, the method is fully synchronous
+            JsonDocument config = sync ? GetConfigAsync(sync: true, cancellationToken).Result : await GetConfigAsync(sync: false, cancellationToken).ConfigureAwait(false);
 
-            if (!config.RootElement.TryGetProperty("ServerErrors", out var errorProperty)) {
+            if (!config.RootElement.TryGetProperty("ServerErrors", out JsonElement errorProperty))
+            {
                 return true;
-            } else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0) {
+            }
+            else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0)
+            {
                 return true;
-            } else {
+            }
+            else
+            {
                 // we have errors, turn them into a string and log them
-                var messages = String.Join(Environment.NewLine, errorProperty.EnumerateArray());
+                string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
                 logger($"The daemon server reported errors: {messages}");
                 return false;
             }
@@ -80,7 +96,13 @@ internal sealed class LocalDocker : ILocalDaemon
         }
     }
 
-    private static async Task<JsonDocument> GetConfigAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// Gets docker configuration.
+    /// </summary>
+    /// <param name="sync">when <see langword="true"/>, the method is executed synchronously.</param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="DockerLoadException">when failed to retrieve docker configuration.</exception>
+    private static async Task<JsonDocument> GetConfigAsync(bool sync, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var psi = new ProcessStartInfo("docker", "info --format=\"{{json .}}\"")
@@ -88,22 +110,46 @@ internal sealed class LocalDocker : ILocalDaemon
             RedirectStandardOutput = true,
             RedirectStandardError = true
         };
-        Process proc = Process.Start(psi) ?? throw new Exception(Resource.GetString(nameof(Strings.DockerProcessCreationFailed)));
+        Process proc = Process.Start(psi) ?? throw new DockerLoadException(Resource.GetString(nameof(Strings.DockerProcessCreationFailed)));
 
-        await proc.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        if (!sync)
+        {
+            await proc.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            proc.WaitForExit();
+        }
 
         cancellationToken.ThrowIfCancellationRequested();
 
 
         if (proc.ExitCode != 0)
         {
-            throw new Exception(Resource.FormatString(
-            nameof(Strings.DockerInfoFailed),
-            proc.ExitCode,
-            await proc.StandardOutput.ReadToEndAsync().ConfigureAwait(false)));
+            if (!sync)
+            {
+                throw new DockerLoadException(Resource.FormatString(
+                    nameof(Strings.DockerInfoFailed),
+                    proc.ExitCode,
+                    await proc.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false)));
+            }
+            else
+            {
+            	throw new DockerLoadException(Resource.FormatString(
+                    nameof(Strings.DockerInfoFailed),
+                    proc.ExitCode,
+                    proc.StandardOutput.ReadToEnd()));
+            }
         }
 
-        return await JsonDocument.ParseAsync(proc.StandardOutput.BaseStream, cancellationToken: cancellationToken).ConfigureAwait(false);
+        if (!sync)
+        {
+            return await JsonDocument.ParseAsync(proc.StandardOutput.BaseStream, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            return JsonDocument.Parse(proc.StandardOutput.BaseStream);
+        }
     }
 
     private static async Task WriteImageToStreamAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
@@ -171,4 +217,5 @@ internal sealed class LocalDocker : ILocalDaemon
             await writer.WriteEntryAsync(manifestEntry, cancellationToken).ConfigureAwait(false);
         }
     }
+
 }

@@ -18,4 +18,10 @@ internal interface ILocalDaemon {
     /// Checks to see if the local container runtime is available. This is used to give nice errors to the user.
     /// </summary>
     public Task<bool> IsAvailableAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Checks to see if the local container runtime is available. This is used to give nice errors to the user.
+    /// See <see cref="IsAvailableAsync(CancellationToken)"/> for async version.
+    /// </summary>
+    public bool IsAvailable();
 }
