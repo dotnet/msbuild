@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -8,9 +8,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-#if !NETFRAMEWORK
-using System.Runtime.Loader;
-#endif
 using System.Threading;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
@@ -196,7 +193,8 @@ namespace Microsoft.Build.Shared
 
             // Deduplicate between MSBuild assemblies and task dependencies. 
             Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
-            foreach (string localPath in localAssemblies) {
+            foreach (string localPath in localAssemblies)
+            {
                 assembliesDictionary.Add(Path.GetFileName(localPath), localPath);
             }
 
@@ -214,12 +212,10 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        internal LoadedType Load
-        (
+        internal LoadedType Load(
             string typeName,
             AssemblyLoadInfo assembly,
-            bool useTaskHost = false
-        )
+            bool useTaskHost = false)
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost);
         }
@@ -230,11 +226,9 @@ namespace Microsoft.Build.Shared
         /// found will be returned.
         /// </summary>
         /// <returns>The loaded type, or null if the type was not found.</returns>
-        internal LoadedType ReflectionOnlyLoad
-        (
+        internal LoadedType ReflectionOnlyLoad(
             string typeName,
-            AssemblyLoadInfo assembly
-        )
+            AssemblyLoadInfo assembly)
         {
             return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false);
         }

@@ -1,11 +1,13 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+#if NET5_0_OR_GREATER
 using System.Linq;
 using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -27,9 +29,9 @@ namespace Microsoft.Build.Tasks
         // These pseudo-locales are available in versions of Windows from Vista and later.
         // However, from Windows 10, version 1803, they are not returned when enumerating the
         // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
-        static readonly string[] pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
+        private static readonly string[] pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
 
-        static HashSet<string> InitializeValidCultureNames()
+        private static HashSet<string> InitializeValidCultureNames()
         {
 #if !FEATURE_CULTUREINFO_GETCULTURES
             if (!AssemblyUtilities.CultureInfoHasGetCultures())

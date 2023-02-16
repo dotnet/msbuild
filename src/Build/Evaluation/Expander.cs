@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
@@ -19,14 +20,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
-
-using Microsoft.NET.StringTools;
-using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -1028,8 +1027,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (
                         (isBuiltInMetadata && ((_options & ExpanderOptions.ExpandBuiltInMetadata) != 0)) ||
-                       (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0))
-                        )
+                       (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0)))
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
@@ -1934,8 +1932,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 bool includeNullEntries,
                 out bool isTransformExpression,
-                out List<Pair<string, S>> itemsFromCapture
-                )
+                out List<Pair<string, S>> itemsFromCapture)
                 where S : class, IItem
             {
                 ErrorUtilities.VerifyThrow(evaluatedItems != null, "Cannot expand items without providing items");
@@ -2112,8 +2109,7 @@ namespace Microsoft.Build.Evaluation
                 IItemProvider<S> evaluatedItems,
                 IElementLocation elementLocation,
                 SpanBasedStringBuilder builder,
-                ExpanderOptions options
-                )
+                ExpanderOptions options)
                 where S : class, IItem
             {
                 List<Pair<string, S>> itemsFromCapture;
@@ -3038,15 +3034,13 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly.</remarks>
             internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex
-                    (
+                () => new Regex(
                     @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
                     ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
                     ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
                     ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
                     ItemVectorWithTransformRHS + @"))",
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled
-                    ));
+                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
@@ -3125,8 +3119,7 @@ namespace Microsoft.Build.Evaluation
                     BindingFlags,
                     Remainder,
                     UsedUninitializedProperties,
-                    FileSystem
-                    );
+                    FileSystem);
             }
         }
 
@@ -3236,7 +3229,7 @@ namespace Microsoft.Build.Evaluation
                 IFileSystem fileSystem)
             {
                 // Used to aggregate all the components needed for a Function
-                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> {FileSystem = fileSystem};
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem };
 
                 // By default the expression root is the whole function expression
                 ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -3453,7 +3446,7 @@ namespace Microsoft.Build.Evaluation
                             //
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new []
+                            args = new[]
                             {
                                 args[0],
                                 startingDirectory,
@@ -3852,7 +3845,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (ElementsOfType(args, typeof(string)))
                             {
-                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string) o));
+                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string)o));
                                 return true;
                             }
                         }
@@ -4158,7 +4151,7 @@ namespace Microsoft.Build.Evaluation
                                 default:
                                     if (ElementsOfType(args, typeof(string)))
                                     {
-                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string) o));
+                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string)o));
                                         return true;
                                     }
                                     break;
@@ -4320,8 +4313,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (args[0] is string value0 &&
                     args[1] is string value1 &&
-                    args[2] is string value2
-                    )
+                    args[2] is string value2)
                 {
                     arg0 = value0;
                     arg1 = value1;
@@ -4348,8 +4340,7 @@ namespace Microsoft.Build.Evaluation
                 if (args[0] is string value0 &&
                     args[1] is string value1 &&
                     args[2] is string value2 &&
-                    args[3] is string value3
-                    )
+                    args[3] is string value3)
                 {
                     arg0 = value0;
                     arg1 = value1;

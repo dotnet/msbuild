@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_FILE_TRACKER
 
@@ -65,15 +65,22 @@ namespace Microsoft.Build.Utilities
         ManagedARM64 = 7
     }
 
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
     /// <summary>
     /// This class contains utility functions to encapsulate launching and logging for the Tracker
     /// </summary>
     public static class FileTracker
     {
-#region Static Member Data
+        #region Static Member Data
 
-        // The default path to temp, used to create explicitly short and long paths
-        private static readonly string s_tempPath = FileUtilities.TempFileDirectory;
+        /// <summary>
+        /// The default path to temp, used to create explicitly short and long paths.
+        /// </summary>
+        /// <remarks>
+        /// This must be the base system-wide temp path because we use it to filter out I/O of tools outside of our control.
+        /// Tools running under the tracker may put temp files in the temp base or in a sub-directory of their choosing.
+        /// </remarks>
+        private static readonly string s_tempPath = Path.GetTempPath();
 
         // The short path to temp
         private static readonly string s_tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());
@@ -113,11 +120,11 @@ namespace Microsoft.Build.Utilities
         // Static cache of the path separator character in an array for use in String.Split.
         private static readonly string pathSeparator = Path.PathSeparator.ToString();
 
-#endregion
+        #endregion
 
-#region Static Member Initializers
+        #region Static Member Initializers
 
-        static List<string> InitializeCommonApplicationDataPaths()
+        private static List<string> InitializeCommonApplicationDataPaths()
         {
             List<string> commonApplicationDataPaths = new();
 
@@ -142,9 +149,9 @@ namespace Microsoft.Build.Utilities
             return commonApplicationDataPaths;
         }
 
-#endregion
+        #endregion
 
-#region Native method wrappers
+        #region Native method wrappers
 
         /// <summary>
         /// Stops tracking file accesses.  
@@ -209,9 +216,9 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLogs", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public static void WriteContextTLogs(string intermediateDirectory, string taskName) => InprocTrackingNativeMethods.WriteContextTLogs(intermediateDirectory, taskName);
 
-#endregion // Native method wrappers
+        #endregion // Native method wrappers
 
-#region Methods
+        #region Methods
 
         /// <summary>
         /// Test to see if the specified file is excluded from tracked dependencies
@@ -343,7 +350,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The response file path.</returns>
         public static string CreateRootingMarkerResponseFile(string rootMarker)
         {
-            string trackerResponseFile = FileUtilities.GetTemporaryFile(".rsp");
+            string trackerResponseFile = FileUtilities.GetTemporaryFileName(".rsp");
             File.WriteAllText(trackerResponseFile, "/r \"" + rootMarker + "\"", Encoding.Unicode);
 
             return trackerResponseFile;
@@ -528,8 +535,7 @@ namespace Microsoft.Build.Utilities
                                        s_TrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase) ||
                                        s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase),
                                        "This method should only be passed s_TrackerFilename or s_FileTrackerFilename, but was passed {0} instead!",
-                                       filename
-                                       );
+                                       filename);
 
             // Look for FileTracker.dll/Tracker.exe in the MSBuild tools directory. They may exist elsewhere on disk,
             // but other copies aren't guaranteed to be compatible with the latest.
@@ -640,7 +646,7 @@ namespace Microsoft.Build.Utilities
         public static string TrackerArguments(string command, string arguments, string dllName, string intermediateDirectory, string rootFiles, string cancelEventName)
             => TrackerResponseFileArguments(dllName, intermediateDirectory, rootFiles, cancelEventName) + TrackerCommandArguments(command, arguments);
 
-#region StartProcess methods
+        #region StartProcess methods
 
         /// <summary>
         /// Start the process; tracking the command.  
@@ -707,7 +713,7 @@ namespace Microsoft.Build.Utilities
         public static Process StartProcess(string command, string arguments, ExecutableType toolType)
             => StartProcess(command, arguments, toolType, null, null, null, null);
 
-#endregion // StartProcess methods
+        #endregion // StartProcess methods
 
         /// <summary>
         /// Logs a message of the given importance using the specified resource string. To the specified Log.
@@ -757,9 +763,9 @@ namespace Microsoft.Build.Utilities
             Log?.LogWarningWithCodeFromResources(messageResourceName, messageArgs);
         }
 
-#endregion
+        #endregion
     }
-
+#pragma warning restore format
     /// <summary>
     /// Dependency filter delegate. Used during TLog saves in order for tasks to selectively remove dependencies from the written
     /// graph.
@@ -770,3 +776,4 @@ namespace Microsoft.Build.Utilities
 }
 
 #endif
+

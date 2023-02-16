@@ -1,15 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
-using Microsoft.Build.Construction;
-
-using Xunit;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+using Xunit;
 
 
 #nullable disable
@@ -462,7 +461,7 @@ multi-line comment here
             // Using streams can cause issues with CRLF characters being replaced by LF going in to
             // ProjectRootElement. Saving to disk mimics the real-world behavior so we can specifically
             // test issues with CRLF characters being normalized. Related issue: #1340
-            var file = FileUtilities.GetTemporaryFile();
+            var file = FileUtilities.GetTemporaryFileName();
             var expected = ObjectModelHelpers.CleanupFileContents(updatedProject);
             string actual;
 

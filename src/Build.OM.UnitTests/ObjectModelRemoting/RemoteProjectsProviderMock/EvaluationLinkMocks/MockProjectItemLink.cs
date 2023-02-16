@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -10,7 +10,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectItemLinkRemoter : MockLinkRemoter<ProjectItem>
+    internal sealed class MockProjectItemLinkRemoter : MockLinkRemoter<ProjectItem>
     {
         public override ProjectItem CreateLinkedObject(IImportHolder holder)
         {
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public void ChangeItemType(string newItemType) => this.Source.ItemType = newItemType;
     }
 
-    internal class MockProjectItemLink : ProjectItemLink, ILinkMock
+    internal sealed class MockProjectItemLink : ProjectItemLink, ILinkMock
     {
         public MockProjectItemLink(MockProjectItemLinkRemoter proxy, IImportHolder holder)
         {

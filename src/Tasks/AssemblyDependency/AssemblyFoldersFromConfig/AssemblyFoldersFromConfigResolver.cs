@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
@@ -24,13 +24,10 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         ///     Regex for breaking up the search path pieces.
         /// </summary>
         private static readonly Lazy<Regex> s_crackAssemblyFoldersFromConfigSentinel = new Lazy<Regex>(
-            () => new Regex
-                (
+            () => new Regex(
                 AssemblyResolutionConstants.assemblyFoldersFromConfigSentinel +
                 "(?<ASSEMBLYFOLDERCONFIGFILE>[^,]*),(?<TARGETRUNTIMEVERSION>[^,]*)}",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled
-                )
-            );
+                RegexOptions.IgnoreCase | RegexOptions.Compiled));
 
         /// <summary>
         /// Whether or not the search path could be cracked.
@@ -93,7 +90,9 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         private void LazyInitialize()
         {
             if (_isInitialized)
+            {
                 return;
+            }
 
             _isInitialized = true;
 
@@ -118,7 +117,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 
                     bool useCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
                     string key = "6f7de854-47fe-4ae2-9cfe-9b33682abd91" + searchPathElement;
-                    
+
                     if (useCache && _buildEngine != null)
                     {
                         _assemblyFoldersCache = _buildEngine.GetRegisteredTaskObject(key, RegisteredTaskObjectLifetime.Build) as AssemblyFoldersFromConfigCache;
@@ -167,8 +166,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <param name="foundPath">The path where the file was found.</param>
         /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
         /// <returns>True if the file was resolved.</returns>
-        public override bool Resolve
-        (
+        public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
@@ -179,8 +177,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             string assemblyFolderKey,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
-            out bool userRequestedSpecificFile
-        )
+            out bool userRequestedSpecificFile)
         {
             foundPath = null;
             userRequestedSpecificFile = false;
@@ -212,7 +209,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                                     foundPath = candidatePath;
                                     return true;
                                 }
-                                
+
                                 // Lets see if the processor architecture matches, note this this method will cache the result when it was first called.
                                 AssemblyNameExtension foundAssembly = getAssemblyName(candidatePath);
 

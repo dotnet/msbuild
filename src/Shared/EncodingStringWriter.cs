@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -10,7 +13,7 @@ namespace Microsoft.Build.Shared
     /// StringWriter class that allows Encoding to be specified. In the standard StringWriter
     /// class only UTF16 is allowed.
     /// </summary>
-    internal class EncodingStringWriter : StringWriter
+    internal sealed class EncodingStringWriter : StringWriter
     {
         /// <summary>
         /// Default ctor (Encoding = UTF8)

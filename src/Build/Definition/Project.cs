@@ -1,37 +1,37 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
-using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Globbing;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Internal.Constants;
+using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
+using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
-using System.Globalization;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Definition;
-using Microsoft.Build.Evaluation.Context;
-using Microsoft.Build.Globbing;
-using Microsoft.Build.ObjectModelRemoting;
-using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
-using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using Microsoft.Build.FileSystem;
 
 #nullable disable
 
@@ -2660,9 +2660,9 @@ namespace Microsoft.Build.Evaluation
             {
                 return (excludeGlob, removeGlob) switch
                 {
-                    (null,     null)     => includeGlob,
-                    (not null, null)     => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
-                    (null,     not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
+                    (null, null) => includeGlob,
+                    (not null, null) => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
+                    (null, not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
                     (not null, not null) => new MSBuildGlobWithGaps(includeGlob, new CompositeGlob(excludeGlob, removeGlob))
                 };
             }
@@ -4296,14 +4296,12 @@ namespace Microsoft.Build.Evaluation
                     toolsVersionLocation = Project.Xml.ToolsVersionLocation;
                 }
 
-                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-                (
+                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                     ExplicitToolsVersion,
                     Project.Xml.ToolsVersion,
                     Project.ProjectCollection.GetToolset,
                     Project.ProjectCollection.DefaultToolsVersion,
-                    out var usingDifferentToolsVersionFromProjectFile
-                );
+                    out var usingDifferentToolsVersionFromProjectFile);
 
                 UsingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 

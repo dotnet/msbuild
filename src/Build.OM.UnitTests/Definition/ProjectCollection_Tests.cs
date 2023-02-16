@@ -1,20 +1,20 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using System.Reflection;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement xml = ProjectRootElement.Create(path);
                 xml.Save();
 
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
 
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 project.Save(path);
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject(path);
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectCollection collection = new ProjectCollection();
                 Project project = new Project(collection);
 
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 project.Save(path);
 
                 Project project2 = collection.LoadProject(path);
@@ -132,7 +132,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (path != null) File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -293,7 +296,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.Save(path);
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
@@ -337,7 +340,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement.Create(path).Save();
 
                 ProjectCollection collection1 = new ProjectCollection();
@@ -769,8 +772,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Console.WriteLine(ex.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -823,8 +825,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file1 = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file1 = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
 
                 Project project = new Project();
                 project.Save(file1);
@@ -838,8 +840,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 
@@ -855,8 +864,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file1 = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file1 = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
 
                 var project = new Project();
                 project.Save(file1);
@@ -874,8 +883,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 
@@ -891,8 +907,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file1 = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file1 = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
 
                 var project = new Project();
                 project.Save(file1);
@@ -910,8 +926,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                if (file1 != null) File.Delete(file1);
-                if (file2 != null) File.Delete(file2);
+                if (file1 != null)
+                {
+                    File.Delete(file1);
+                }
+
+                if (file2 != null)
+                {
+                    File.Delete(file2);
+                }
             }
         }
 
@@ -1073,7 +1096,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #else
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
 #endif
-        [Trait("Category", "mono-osx-failing")]
         public void DefaultToolsVersion2()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20) != null)
@@ -1433,7 +1455,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private static string CreateProjectFile()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
-            string path = FileUtilities.GetTemporaryFile();
+            string path = FileUtilities.GetTemporaryFileName();
             xml.Save(path);
             return path;
         }

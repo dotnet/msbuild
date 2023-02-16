@@ -1,12 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 
+#if !FEATURE_CULTUREINFO_GETCULTURES
+using System.Linq;
 using Microsoft.Build.Framework;
+#endif
+
 
 // Declare this to get init properties. See https://github.com/dotnet/roslyn/issues/45510#issuecomment-694977239
 #nullable disable
@@ -72,7 +75,7 @@ namespace Microsoft.Build.Shared
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
 #if CLR2COMPATIBILITY
-            return (AssemblyName) assemblyNameToClone.Clone();
+            return (AssemblyName)assemblyNameToClone.Clone();
 #else
 
             // NOTE: In large projects, this is called a lot. Avoid calling AssemblyName.Clone
@@ -136,7 +139,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void Initialize()
         {
-            if (s_initialized) return;
+            if (s_initialized)
+            {
+                return;
+            }
 
             s_assemblylocationProperty = typeof(Assembly).GetProperty("Location", typeof(string));
             s_cultureInfoGetCultureMethod = typeof(CultureInfo).GetMethod("GetCultures");
@@ -161,7 +167,7 @@ namespace Microsoft.Build.Shared
 
             var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
 
-            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] {allCulturesEnumValue}) as CultureInfo[];
+            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] { allCulturesEnumValue }) as CultureInfo[];
 
             FrameworkErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
 

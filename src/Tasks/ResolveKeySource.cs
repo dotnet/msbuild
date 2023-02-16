@@ -1,17 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 using System.IO;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Build.Framework;
+#if FEATURE_PFX_SIGNING
+using System.Globalization;
+using System.Security.Cryptography;
+using Microsoft.Runtime.Hosting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_PFX_SIGNING
-using Microsoft.Runtime.Hosting;
 #endif
 
 #nullable disable
@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
 #if !RUNTIME_TYPE_NETCORE
         private const string pfxFileContainerPrefix = "VS_KEY_";
 #endif
-        
+
         #region Properties
 
         public string KeyFile { get; set; }

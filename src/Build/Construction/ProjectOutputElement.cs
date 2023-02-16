@@ -1,9 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Xml;
 using System.Diagnostics;
+using System.Xml;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -138,14 +138,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectOutputElement CreateDisconnected(string taskParameter, string itemType, string propertyName, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgument
-                (
+            ErrorUtilities.VerifyThrowArgument(
                 String.IsNullOrEmpty(itemType) ^ String.IsNullOrEmpty(propertyName),
                 "OM_EitherAttributeButNotBoth",
                 XMakeElements.output,
                 XMakeAttributes.propertyName,
-                XMakeAttributes.itemName
-                );
+                XMakeAttributes.itemName);
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.output);
 

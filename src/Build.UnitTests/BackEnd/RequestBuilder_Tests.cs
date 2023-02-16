@@ -1,26 +1,26 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.IO;
-using Microsoft.Build.Framework;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
     using System.Threading.Tasks;
+    using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
     public class RequestBuilder_Tests : IDisposable
     {
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
     }
 
-    internal class TestTargetBuilder : ITargetBuilder, IBuildComponent
+    internal sealed class TestTargetBuilder : ITargetBuilder, IBuildComponent
     {
         private IBuildComponentHost _host;
         private IResultsCache _cache;

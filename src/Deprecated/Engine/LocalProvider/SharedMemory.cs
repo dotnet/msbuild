@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -174,19 +178,19 @@ namespace Microsoft.Build.BuildEngine
                     Marshal.StructureToPtr(saAttr, pointerToSecurityAttributes, true);
                 }
 
-               // The file mapping has either the default (current user) security permissions or 
-               // permissions restricted to only administrator users depending on the check above.
-               // If pointerToSecurityAttributes is null the default permissions are used.
-               this.pageFileMapping =
-                    NativeMethods.CreateFileMapping
-                    (
-                        NativeMethods.InvalidHandle,
-                        pointerToSecurityAttributes,
-                        NativeMethods.PAGE_READWRITE,
-                        0,
-                        size + 4,
-                        memoryMapName
-                    );
+                // The file mapping has either the default (current user) security permissions or 
+                // permissions restricted to only administrator users depending on the check above.
+                // If pointerToSecurityAttributes is null the default permissions are used.
+                this.pageFileMapping =
+                     NativeMethods.CreateFileMapping
+                     (
+                         NativeMethods.InvalidHandle,
+                         pointerToSecurityAttributes,
+                         NativeMethods.PAGE_READWRITE,
+                         0,
+                         size + 4,
+                         memoryMapName
+                     );
 
                 // If only new mappings are allowed and the current one has been created by somebody else
                 // delete the mapping. Note that we would like to compare the GetLastError value against
@@ -218,8 +222,8 @@ namespace Microsoft.Build.BuildEngine
                         NativeMethods.FILE_MAP_ALL_ACCESS, // Give the map read, write, and copy access
                         0,  // Start mapped view at high order offset 0
                         0,  // Start mapped view at low order offset 0
-                         // The size of the shared memory plus some extra space for an int
-                         // to write the number of bytes written
+                            // The size of the shared memory plus some extra space for an int
+                            // to write the number of bytes written
                         (IntPtr)(size + 4)
                     );
 
@@ -930,8 +934,8 @@ namespace Microsoft.Build.BuildEngine
         private Semaphore unreadBatchCounter;
 
         //Used to inform the shared memory reader threads the writer thread has written something in shared memory to read.
-	//The semaphore is incremented when the shared memory is full and when there is an unreadBatch availiable to be read or the shared memory is full.
-	//The semaphore is decremented when the shared memory reader thread is about to read from the shared memory.
+        //The semaphore is incremented when the shared memory is full and when there is an unreadBatch availiable to be read or the shared memory is full.
+        //The semaphore is decremented when the shared memory reader thread is about to read from the shared memory.
         private Semaphore readActionCounter;
 
         // Whether or not the shared memory is full

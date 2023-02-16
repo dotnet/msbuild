@@ -1,9 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -92,11 +91,11 @@ namespace Microsoft.Build.BackEnd
                     return constructor;
                 });
 
-            var targetInstanceChild = (ITranslatable) parameterlessConstructor.Invoke(Array.Empty<object>());
+            var targetInstanceChild = (ITranslatable)parameterlessConstructor.Invoke(Array.Empty<object>());
 
             targetInstanceChild.Translate(translator);
 
-            return (T) targetInstanceChild;
+            return (T)targetInstanceChild;
         }
 
         public static void TranslateOptionalBuildEventContext(this ITranslator translator, ref BuildEventContext buildEventContext)

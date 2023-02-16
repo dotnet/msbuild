@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -103,9 +103,9 @@ namespace Microsoft.Build.FileSystem
             return Enumerable.Concat(directories, files);
         }
 
-#endregion
+        #endregion
 
-#region IFileSystem pass-through implementation
+        #region IFileSystem pass-through implementation
 
         public FileAttributes GetAttributes(string path) => _fileSystem.GetAttributes(path);
 
@@ -119,6 +119,6 @@ namespace Microsoft.Build.FileSystem
 
         public byte[] ReadFileAllBytes(string path) => _fileSystem.ReadFileAllBytes(path);
 
-#endregion
+        #endregion
     }
 }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -8,8 +8,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+#if !RUNTIME_TYPE_NETCORE
 using System.Security;
 using System.Security.Permissions;
+#endif
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -185,11 +187,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private XmlElement GetInputRequestedPrivilegeElement()
         {
             if (_inputTrustInfoDocument == null)
+            {
                 return null;
+            }
+
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(_inputTrustInfoDocument.NameTable);
             XmlElement trustInfoElement = _inputTrustInfoDocument.DocumentElement;
-            XmlElement securityElement = (XmlElement) trustInfoElement?.SelectSingleNode(XPaths.securityElement, nsmgr);
-            XmlElement requestedPrivilegeElement = (XmlElement) securityElement?.SelectSingleNode(XPaths.requestedPrivilegeElement, nsmgr);
+            XmlElement securityElement = (XmlElement)trustInfoElement?.SelectSingleNode(XPaths.securityElement, nsmgr);
+            XmlElement requestedPrivilegeElement = (XmlElement)securityElement?.SelectSingleNode(XPaths.requestedPrivilegeElement, nsmgr);
             return requestedPrivilegeElement;
         }
 
@@ -240,7 +245,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 //  here so we can allow the passed-in node to override it if there is a comment present
                 //
                 System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-                commentString = resources.GetString("TrustInfo.RequestedExecutionLevelComment"); 
+                commentString = resources.GetString("TrustInfo.RequestedExecutionLevelComment");
             }
             else
             {
@@ -394,7 +399,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
 #if RUNTIME_TYPE_NETCORE
                 // Always use full-trust on .NET Core.
-               return true;
+                return true;
 #else
                 GetInputPermissionSet();
                 return _isFullTrust;
@@ -504,7 +509,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
             XmlAttribute sameSiteAttribute = (XmlAttribute)psElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.sameSiteAttribute));
             if (sameSiteAttribute != null)
+            {
                 _sameSiteSetting = sameSiteAttribute.Value;
+            }
         }
 
         /// <summary>
@@ -731,7 +738,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             XmlNodeList permissionSetNodes = applicationRequestMinimumElement.SelectNodes(XPaths.permissionSetElement, nsmgr);
             foreach (XmlNode permissionSetNode in permissionSetNodes)
+            {
                 applicationRequestMinimumElement.RemoveChild(permissionSetNode);
+            }
 
             XmlElement fullTrustPermissionSetElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.permissionSetElement), XmlNamespaces.asmv2);
             XmlAttribute unrestrictedAttribute = document.CreateAttribute(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute), XmlNamespaces.asmv2);

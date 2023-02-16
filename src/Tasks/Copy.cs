@@ -1,18 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Collections.Generic;
-using System.Threading;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks.Dataflow;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Eventing;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -170,11 +170,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="sourceFile">The source file</param>
         /// <param name="destinationFile">The destination file</param>
-        private static bool IsMatchingSizeAndTimeStamp
-        (
+        private static bool IsMatchingSizeAndTimeStamp(
             FileState sourceFile,
-            FileState destinationFile
-        )
+            FileState destinationFile)
         {
             // If the destination doesn't exist, then it is not a matching file.
             if (!destinationFile.FileExists)
@@ -224,11 +222,9 @@ namespace Microsoft.Build.Tasks
         /// leave the file read-write.
         /// </summary>
         /// <returns>Return true to indicate success, return false to indicate failure and NO retry, return NULL to indicate retry.</returns>
-        private bool? CopyFileWithLogging
-        (
+        private bool? CopyFileWithLogging(
             FileState sourceFileState,      // The source file
-            FileState destinationFileState  // The destination file
-        )
+            FileState destinationFileState)  // The destination file
         {
             bool destinationFileExists = false;
 
@@ -283,10 +279,10 @@ namespace Microsoft.Build.Tasks
             // Create hard links if UseHardlinksIfPossible is true
             if (UseHardlinksIfPossible)
             {
-                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out hardLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage));
-                if(!hardLinkCreated)
+                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out hardLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage, Log));
+                if (!hardLinkCreated)
                 {
-                    if(UseSymboliclinksIfPossible)
+                    if (UseSymboliclinksIfPossible)
                     {
                         // This is a message for fallback to SymbolicLinks if HardLinks fail when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
                         Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.Name, destinationFileState.Name, errorMessage);
@@ -301,8 +297,12 @@ namespace Microsoft.Build.Tasks
             // Create symbolic link if UseSymboliclinksIfPossible is true and hard link is not created
             if (!hardLinkCreated && UseSymboliclinksIfPossible)
             {
-                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
-                if(!symbolicLinkCreated)
+                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    errorMessage = Log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "symlink()", errorMessage);
+                }
+                if (!symbolicLinkCreated)
                 {
                     Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
                 }
@@ -390,11 +390,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="parallelism">
         /// Thread parallelism allowed during copies. 1 uses the original algorithm, >1 uses newer algorithm.
         /// </param>
-        internal bool Execute
-        (
+        internal bool Execute(
             CopyFileWithState copyFile,
-            int parallelism
-        )
+            int parallelism)
         {
             // If there are no source files then just return success.
             if (SourceFiles == null || SourceFiles.Length == 0)
@@ -739,8 +737,7 @@ namespace Microsoft.Build.Tasks
                         sourceFileState.Name,
                         destinationFileState.Name,
                         "SkipUnchangedFiles",
-                        "true"
-                    );
+                        "true");
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
                 }
                 // We only do the cheap check for identicalness here, we try the more expensive check

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// <summary>
     /// Provide ability to export and import OM objects to another collections.
     /// </summary>
-    internal class ProjectCollectionLinker : ExternalProjectsProvider
+    internal sealed class ProjectCollectionLinker : ExternalProjectsProvider
     {
         internal static int _collecitonId = 0;
 
@@ -154,12 +154,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private ProjectCollectionLinker(ConnectedProjectCollections group)
         {
             this.LinkedCollections = group;
-            this.CollectionId = (UInt32) Interlocked.Increment(ref _collecitonId);
+            this.CollectionId = (UInt32)Interlocked.Increment(ref _collecitonId);
             this.Collection = new ProjectCollection();
             this.LinkFactory = LinkedObjectsFactory.Get(this.Collection);
         }
 
-        public Project LoadProject(string path) =>  this.Collection.LoadProject(path);
+        public Project LoadProject(string path) => this.Collection.LoadProject(path);
         public Project LoadProjectIgnoreMissingImports(string path) => LoadProjectWithSettings(path, ProjectLoadSettings.IgnoreMissingImports);
         public Project LoadProjectWithSettings(string path, ProjectLoadSettings settings) => new Project(path, null, null, this.Collection, settings);
 
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             }
         }
 
-        private void ConnectTo (ProjectCollectionLinker other)
+        private void ConnectTo(ProjectCollectionLinker other)
         {
             if (other.CollectionId == this.CollectionId)
             {
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private static bool dbgValidateDuplicateViews = false;
 
 
-        internal  void ValidateNoDuplicates()
+        internal void ValidateNoDuplicates()
         {
             foreach (var r in imported)
             {
@@ -329,7 +329,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             {
                 var proxy = (ILinkMock)external;
 
-                remoter = (RMock) proxy.Remoter;
+                remoter = (RMock)proxy.Remoter;
                 return;
             }
 
@@ -371,7 +371,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             object Linked { get; }
         }
 
-        private class ActiveImport<T, RMock> : ImportedLinksMap.LinkedObject<RMock>, IImportHolder, IActiveImportDBG
+        private sealed class ActiveImport<T, RMock> : ImportedLinksMap.LinkedObject<RMock>, IImportHolder, IActiveImportDBG
             where T : class
             where RMock : MockLinkRemoter<T>
         {
@@ -388,8 +388,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             public ProjectCollectionLinker Linker { get; private set; }
 
-            public T Linked { get; protected set; }
-            public RMock Remoter { get; protected set; }
+            public T Linked { get; private set; }
+            public RMock Remoter { get; private set; }
         }
 
 
@@ -398,7 +398,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return new ConnectedProjectCollections();
         }
 
-        internal class ConnectedProjectCollections
+        internal sealed class ConnectedProjectCollections
         {
             private List<ProjectCollectionLinker> group = new List<ProjectCollectionLinker>();
             public ProjectCollectionLinker AddNew()
@@ -441,7 +441,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        private class ExternalConnection
+        private sealed class ExternalConnection
         {
             public ExternalConnection(ProjectCollectionLinker linker)
             {

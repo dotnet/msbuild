@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -10,15 +10,16 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CreateItem_Tests
+    public sealed class CreateItem_Tests
     {
         internal const string CreateItemWithInclude = @"
             <Project>
@@ -313,8 +314,7 @@ namespace Microsoft.Build.UnitTests
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Windows platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(@"z:\**")]
         [InlineData(@"z:\**\*.log")]
         [InlineData(@"z:\\\\**\*.log")]
@@ -327,8 +327,7 @@ namespace Microsoft.Build.UnitTests
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Unix platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(@"\**")]
         [InlineData(@"\**\*.log")]
         public void LogUnixWarningUponCreateItemExecution(string itemSpec)
@@ -393,8 +392,7 @@ namespace Microsoft.Build.UnitTests
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Windows platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             CreateItemWithInclude,
             @"z:\**")]
@@ -421,8 +419,7 @@ namespace Microsoft.Build.UnitTests
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Unix platform.
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
         [InlineData(
             CreateItemWithInclude,
             @"\**")]

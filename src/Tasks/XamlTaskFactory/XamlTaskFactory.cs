@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -13,14 +13,13 @@ namespace Microsoft.Build.Tasks
 {
 #if FEATURE_XAMLTASKFACTORY
 
-    using Microsoft.Build.Tasks.Xaml;
-    using System.CodeDom.Compiler;
     using System.CodeDom;
+    using System.CodeDom.Compiler;
     using System.IO;
     using System.Reflection;
     using System.Text;
     using System.Threading;
-    using System.Xml;
+    using Microsoft.Build.Tasks.Xaml;
 
     /// <summary>
     /// The task factory provider for XAML tasks.
@@ -118,16 +117,14 @@ namespace Microsoft.Build.Tasks
 
             // create the code generator options    
             // Since we are running msbuild 12.0 these had better load.
-            var compilerParameters = new CompilerParameters
-            (
+            var compilerParameters = new CompilerParameters(
                 new[]
                 {
                     "System.dll",
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Framework.dll"),
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"),
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
-                }
-            )
+                })
             {
                 GenerateInMemory = true,
                 TreatWarningsAsErrors = false
@@ -246,7 +243,7 @@ namespace Microsoft.Build.Tasks
     public sealed class XamlTaskFactory : ITaskFactory
     {
         public string FactoryName => "XamlTaskFactory";
-    
+
         public Type TaskType { get; } = null;
 
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
@@ -256,7 +253,7 @@ namespace Microsoft.Build.Tasks
                 TaskResources = AssemblyResources.PrimaryResources,
                 HelpKeywordPrefix = "MSBuild."
             };
-            
+
             log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(XamlTaskFactory));
 
             return false;

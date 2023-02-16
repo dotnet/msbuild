@@ -1,8 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -47,6 +46,31 @@ namespace Microsoft.Build.Utilities
         public const string ARM64 = nameof(ARM64);
 
         /// <summary>
+        /// Represents the WebAssembly platform.
+        /// </summary>
+        public const string WASM = nameof(WASM);
+
+        /// <summary>
+        /// Represents the S390x processor architecture.
+        /// </summary>
+        public const string S390X = nameof(S390X);
+
+        /// <summary>
+        /// Represents the LoongAarch64 processor architecture.
+        /// </summary>
+        public const string LOONGARCH64 = nameof(LOONGARCH64);
+
+        /// <summary>
+        /// Represents the 32-bit ARMv6 processor architecture.
+        /// </summary>
+        public const string ARMV6 = nameof(ARMV6);
+
+        /// <summary>
+        /// Represents the PowerPC 64-bit (little-endian) processor architecture.
+        /// </summary>
+        public const string PPC64LE = nameof(PPC64LE);
+
+        /// <summary>
         /// Lazy-initted property for getting the architecture of the currently running process
         /// </summary>
         public static string CurrentProcessArchitecture => GetCurrentProcessArchitecture();
@@ -64,6 +88,11 @@ namespace Microsoft.Build.Utilities
                 NativeMethodsShared.ProcessorArchitectures.IA64 => IA64,
                 NativeMethodsShared.ProcessorArchitectures.ARM => ARM,
                 NativeMethodsShared.ProcessorArchitectures.ARM64 => ARM64,
+                NativeMethodsShared.ProcessorArchitectures.WASM => WASM,
+                NativeMethodsShared.ProcessorArchitectures.S390X => S390X,
+                NativeMethodsShared.ProcessorArchitectures.LOONGARCH64 => LOONGARCH64,
+                NativeMethodsShared.ProcessorArchitectures.ARMV6 => ARMV6,
+                NativeMethodsShared.ProcessorArchitectures.PPC64LE => PPC64LE,
                 // unknown architecture? return null
                 _ => null,
             };

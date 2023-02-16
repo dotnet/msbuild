@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,11 +8,11 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -139,8 +139,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     File.Delete(file);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add new metadata on imported item definition should succeed,
@@ -166,8 +165,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectItemDefinition definition = project.ItemDefinitions["i"];
                 definition.SetMetadataValue("n", "n0");
 
-                string expected = String.Format
-                    (
+                string expected = String.Format(
     ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup>
@@ -177,8 +175,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemDefinitionGroup>
   <Import Project=""{0}"" />
 </Project>"),
-                   file
-                   );
+                   file);
 
                 Helpers.VerifyAssertProjectContent(expected, project.Xml);
             }
@@ -477,8 +474,7 @@ ObjectModelHelpers.CleanupFileContents(
 </Project>");
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
@@ -500,8 +496,7 @@ ObjectModelHelpers.CleanupFileContents(
 </Project>");
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
@@ -523,8 +518,7 @@ ObjectModelHelpers.CleanupFileContents(
 </Project>");
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
@@ -546,8 +540,7 @@ ObjectModelHelpers.CleanupFileContents(
 </Project>");
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
@@ -569,8 +562,7 @@ ObjectModelHelpers.CleanupFileContents(
 </Project>");
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
@@ -592,8 +584,7 @@ ObjectModelHelpers.CleanupFileContents(
 </Project>");
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
@@ -615,8 +606,7 @@ ObjectModelHelpers.CleanupFileContents(
 </Project>");
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
@@ -638,8 +628,7 @@ ObjectModelHelpers.CleanupFileContents(
 </Project>");
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Custom metadata is allowed in item definition conditions.

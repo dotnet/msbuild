@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 
@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CommandLineBuilderExtensionTest
+    public sealed class CommandLineBuilderExtensionTest
     {
         /*
         * Method:   AppendItemWithInvalidBooleanAttribute
@@ -38,13 +38,11 @@ namespace Microsoft.Build.UnitTests
                 // Validate that a legitimate bool works first.
                 try
                 {
-                    c.AppendSwitchIfNotNull
-                    (
+                    c.AppendSwitchIfNotNull(
                         "/myswitch:",
                         new ITaskItem[] { i },
                         new string[] { "Name", "Private" },
-                        new bool[] { false, true }
-                    );
+                        new bool[] { false, true });
                     Assert.Equal(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
                 }
                 catch (ArgumentException e)
@@ -54,15 +52,12 @@ namespace Microsoft.Build.UnitTests
 
                 // Now try a bogus boolean.
                 i.SetMetadata("Private", "Maybe");       // This is our flag.
-                c.AppendSwitchIfNotNull
-                (
+                c.AppendSwitchIfNotNull(
                     "/myswitch:",
                     new ITaskItem[] { i },
                     new string[] { "Name", "Private" },
-                    new bool[] { false, true }
-                );  // <-- Expect an ArgumentException here.
-            }
-           );
+                    new bool[] { false, true });  // <-- Expect an ArgumentException here.
+            });
         }
         /// <summary>
         /// When appending an ITaskItem[] where some of the optional attributes are
@@ -87,13 +82,11 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineBuilderExtension c = new CommandLineBuilderExtension();
 
-            c.AppendSwitchIfNotNull
-            (
+            c.AppendSwitchIfNotNull(
                 "/myswitch:",
                 new ITaskItem[] { i, j },
                 new string[] { "Name", "HintPath", "Access" },
-                null
-            );
+                null);
 
             Assert.Equal(
                @"/myswitch:MySoundEffect.wav,Kenny "
