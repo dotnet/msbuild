@@ -307,15 +307,24 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var allFeatureBands = RecordRepository.GetFeatureBandsWithInstallationRecords();
 
+            Log?.LogMessage($"Clean --all: Attempting to delete all workload installation records.");
+
             foreach (SdkFeatureBand potentialBandToClean in allFeatureBands)
             {
+                Log?.LogMessage($"Clean --all: Detected band with installation record: '{potentialBandToClean}'.");
+
                 if (potentialBandToClean.CompareTo(featureBand) < 1)
                 {
-                    var workloadInstallationRecordIds = RecordRepository.GetInstalledWorkloadsForFeatureBandAndBelow(potentialBandToClean);
+                    Log?.LogMessage($"Clean --all: '{potentialBandToClean}' is confirmed to be less than or current to the current band.");
+
+                    var workloadInstallationRecordIds = RecordRepository.GetInstalledWorkloads(potentialBandToClean);
                     foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
                     {
+                        Log?.LogMessage($"Clean --all: Workload {workloadInstallationRecordId} for '{potentialBandToClean}' has been marked for deletion.");
                         RecordRepository.DeleteWorkloadInstallationRecord(workloadInstallationRecordId, potentialBandToClean);
                     }
+
+                    Log?.LogMessage($"Clean --all: No more workloads detected in band: '{potentialBandToClean}'.");
                 }
             }
         }
