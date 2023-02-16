@@ -101,6 +101,8 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             var extraBelowPackRecordPath = MakePackRecord(installRoot, belowSdkFeatureBand);
             var extraPackPath = MakePack(installRoot);
             var workloadInstallationRecordDirectory = Path.Combine(installRoot, "metadata", "workloads", _sdkFeatureVersion, "InstalledWorkloads");
+            var oldWorkloadInstallationRecordDirectory = workloadInstallationRecordDirectory.Replace(_sdkFeatureVersion, belowSdkFeatureBand);
+            MakePsuedoWorkloadRecord(oldWorkloadInstallationRecordDirectory);
 
             var cleanCommand = GenerateWorkloadCleanAllCommand(workloadResolver, userProfileDir, dotnetRoot);
             cleanCommand.Execute();
@@ -108,6 +110,7 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             AssertExtraneousPacksAreRemoved(extraPackPath, extraBelowPackRecordPath, true);
             AssertExtraneousPacksAreNotRemoved(extraPackPath, extraAbovePackRecordPath);
             AssertWorkloadInstallationRecordIsRemoved(workloadInstallationRecordDirectory);
+            AssertWorkloadInstallationRecordIsRemoved(oldWorkloadInstallationRecordDirectory);
             AssertValidPackCountsMatchExpected(installRoot, expectedPackCount: 1, expectedPackRecordCount: 1);
         }
 
@@ -155,6 +158,12 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             var packPath = Path.Combine(installRoot, "packs", "Test.Pack.A", "1.0.0");
             Directory.CreateDirectory(packPath);
             return packPath;
+        }
+
+        private void MakePsuedoWorkloadRecord(string installationPath)
+        {
+            Directory.CreateDirectory(installationPath);
+            File.WriteAllText(Path.Combine(installationPath, "foo"), "");
         }
 
         private void AssertExtraneousPacksAreRemoved(string extraPackPath, string extraPackRecordPath, bool entirePackRootPathShouldRemain = false)

@@ -315,23 +315,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         .Where(recordPath =>
                             {
                                 var featureBand = new SdkFeatureBand(Path.GetFileName(recordPath));
-                                return !installedSdkFeatureBands.Contains(featureBand) && featureBand.CompareTo(_sdkFeatureBand) < 1;
+                                return featureBand.CompareTo(_sdkFeatureBand) < 1 &&
+                                    (!installedSdkFeatureBands.Contains(featureBand) || cleanAllPacks );
                             }
                     );
 
                     // Mark packs for GC that don't have a corresponding workload installation record (or all packs).
                     var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
                     if (
-                        new SdkFeatureBand(Path.GetFileName(currentBandRecordPath)).CompareTo(_sdkFeatureBand) < 1 &&
-                        (
-                            (bandRecordPaths.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
-                            ||
-                            cleanAllPacks
-                        )
+                        bandRecordPaths.Contains(currentBandRecordPath) && // A pack for this band exists.
+                        new SdkFeatureBand(Path.GetFileName(currentBandRecordPath)).CompareTo(_sdkFeatureBand) < 1 && // We can parse the format of that band (its older than our band or current.)
+                        ( !currentBandInstallRecords.Contains(currentBandRecordPath) || cleanAllPacks ) // The pack has no workload record for it or we want to cleann all.
                        )
                     {
                         unneededBandRecordPaths = unneededBandRecordPaths.Append(currentBandRecordPath);
-                    }
+                    } 
 
                     if (!unneededBandRecordPaths.Any())
                     {
