@@ -74,14 +74,14 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
             if (IsDaemonPush)
             {
                 var localDaemon = GetLocalDaemon(msg => Log.LogMessage(msg));
-                if (!localDaemon.IsAvailable().GetAwaiter().GetResult())
+                if (!localDaemon.IsAvailableAsync(default).GetAwaiter().GetResult())
                 {
                     Log.LogError("The local daemon is not available, but pushing to a local daemon was requested. Please start the daemon and try again.");
                     return false;
                 }
                 try
                 {
-                    localDaemon.Load(builtImage, sourceImageReference, destinationImageReference).Wait();
+                    localDaemon.LoadAsync(builtImage, sourceImageReference, destinationImageReference, default).Wait();
                     SafeLog("Pushed container '{0}' to local daemon", destinationImageReference.RepositoryAndTag);
                 }
                 catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
@@ -93,7 +93,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
             {
                 try
                 {
-                    destinationImageReference.Registry?.Push(builtImage, sourceImageReference, destinationImageReference, message => SafeLog(message)).Wait();
+                    destinationImageReference.Registry?.PushAsync(builtImage, sourceImageReference, destinationImageReference, message => SafeLog(message), default).Wait();
                     SafeLog("Pushed container '{0}' to registry '{2}'", destinationImageReference.RepositoryAndTag, OutputRegistry);
                 }
                 catch (ContainerHttpException e)
@@ -207,7 +207,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
     {
         if (SourceRegistry.Value is {} registry)
         {
-            return registry.GetImageManifest(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier, RuntimeIdentifierGraphPath).Result;
+            return registry.GetImageManifestAsync(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier, RuntimeIdentifierGraphPath, cancellationToken: default).Result;
         }
         else
         {

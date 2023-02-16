@@ -12,10 +12,10 @@ internal interface ILocalDaemon {
     /// <summary>
     /// Loads an image (presumably from a tarball) into the local container runtime.
     /// </summary>
-    public Task Load(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference);
+    public Task LoadAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, CancellationToken cancellationToken);
 
     /// <summary>
     /// Checks to see if the local container runtime is available. This is used to give nice errors to the user.
     /// </summary>
-    public Task<bool> IsAvailable();
+    public Task<bool> IsAvailableAsync(CancellationToken cancellationToken);
 }

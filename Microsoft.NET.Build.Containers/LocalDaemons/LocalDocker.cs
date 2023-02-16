@@ -19,8 +19,10 @@ internal sealed class LocalDocker : ILocalDaemon
         this.logger = logger;
     }
 
-    public async Task Load(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference)
+    public async Task LoadAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         // call `docker load` and get it ready to receive input
         ProcessStartInfo loadInfo = new("docker", $"load");
         loadInfo.RedirectStandardInput = true;
@@ -36,23 +38,30 @@ internal sealed class LocalDocker : ILocalDaemon
 
         // Create new stream tarball
 
-        await WriteImageToStream(image, sourceReference, destinationReference, loadProcess.StandardInput.BaseStream).ConfigureAwait(false);
+        await WriteImageToStreamAsync(image, sourceReference, destinationReference, loadProcess.StandardInput.BaseStream, cancellationToken).ConfigureAwait(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         loadProcess.StandardInput.Close();
 
-        await loadProcess.WaitForExitAsync().ConfigureAwait(false);
+        await loadProcess.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (loadProcess.ExitCode != 0)
         {
-            throw new DockerLoadException(Resource.FormatString(nameof(Strings.ImageLoadFailed), await loadProcess.StandardError.ReadToEndAsync().ConfigureAwait(false)));
+            throw new DockerLoadException(Resource.FormatString(nameof(Strings.ImageLoadFailed), await loadProcess.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false)));
         }
     }
 
-    public async Task<bool> IsAvailable()
+    public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         try
         {
-            var config = await GetConfig().ConfigureAwait(false);
+            JsonDocument config = await GetConfigAsync(cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (!config.RootElement.TryGetProperty("ServerErrors", out var errorProperty)) {
                 return true;
             } else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0) {
@@ -71,25 +80,35 @@ internal sealed class LocalDocker : ILocalDaemon
         }
     }
 
-    private static async Task<JsonDocument> GetConfig()
+    private static async Task<JsonDocument> GetConfigAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var psi = new ProcessStartInfo("docker", "info --format=\"{{json .}}\"")
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true
         };
-        var proc = Process.Start(psi);
-        if (proc is null) throw new Exception(Resource.GetString(nameof(Strings.DockerProcessCreationFailed)));
-        await proc.WaitForExitAsync().ConfigureAwait(false);
-        if (proc.ExitCode != 0) throw new Exception(Resource.FormatString(
+        Process proc = Process.Start(psi) ?? throw new Exception(Resource.GetString(nameof(Strings.DockerProcessCreationFailed)));
+
+        await proc.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+
+        if (proc.ExitCode != 0)
+        {
+            throw new Exception(Resource.FormatString(
             nameof(Strings.DockerInfoFailed),
             proc.ExitCode,
             await proc.StandardOutput.ReadToEndAsync().ConfigureAwait(false)));
-        return await JsonDocument.ParseAsync(proc.StandardOutput.BaseStream).ConfigureAwait(false);
+        }
+
+        return await JsonDocument.ParseAsync(proc.StandardOutput.BaseStream, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    private static async Task WriteImageToStream(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream)
+    private static async Task WriteImageToStreamAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using TarWriter writer = new(imageStream, TarEntryFormat.Pax, leaveOpen: true);
 
 
@@ -100,12 +119,13 @@ internal sealed class LocalDocker : ILocalDaemon
         {
             if (sourceReference.Registry is { } registry)
             {
-                string localPath = await registry.DownloadBlob(sourceReference.Repository, d).ConfigureAwait(false);;
+                cancellationToken.ThrowIfCancellationRequested();
+                string localPath = await registry.DownloadBlobAsync(sourceReference.Repository, d, cancellationToken).ConfigureAwait(false);;
 
                 // Stuff that (uncompressed) tarball into the image tar stream
                 // TODO uncompress!!
                 string layerTarballPath = $"{d.Digest.Substring("sha256:".Length)}/layer.tar";
-                await writer.WriteEntryAsync(localPath, layerTarballPath).ConfigureAwait(false);
+                await writer.WriteEntryAsync(localPath, layerTarballPath, cancellationToken).ConfigureAwait(false);
                 layerTarballPaths.Add(layerTarballPath);
             }
             else
@@ -116,7 +136,7 @@ internal sealed class LocalDocker : ILocalDaemon
 
         // add config
         string configTarballPath = $"{image.ImageSha}.json";
-
+        cancellationToken.ThrowIfCancellationRequested();
         using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(image.Config)))
         {
             PaxTarEntry configEntry = new(TarEntryType.RegularFile, configTarballPath)
@@ -124,7 +144,7 @@ internal sealed class LocalDocker : ILocalDaemon
                 DataStream = configStream
             };
 
-            await writer.WriteEntryAsync(configEntry).ConfigureAwait(false);
+            await writer.WriteEntryAsync(configEntry, cancellationToken).ConfigureAwait(false);
         }
 
         // Add manifest
@@ -140,6 +160,7 @@ internal sealed class LocalDocker : ILocalDaemon
             { "Layers", layerTarballPaths }
         });
 
+        cancellationToken.ThrowIfCancellationRequested();
         using (MemoryStream manifestStream = new MemoryStream(Encoding.UTF8.GetBytes(manifestNode.ToJsonString())))
         {
             PaxTarEntry manifestEntry = new(TarEntryType.RegularFile, "manifest.json")
@@ -147,7 +168,7 @@ internal sealed class LocalDocker : ILocalDaemon
                 DataStream = manifestStream
             };
 
-            await writer.WriteEntryAsync(manifestEntry).ConfigureAwait(false);
+            await writer.WriteEntryAsync(manifestEntry, cancellationToken).ConfigureAwait(false);
         }
     }
 }
