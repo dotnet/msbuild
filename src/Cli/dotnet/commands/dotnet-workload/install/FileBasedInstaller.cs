@@ -325,7 +325,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     if (
                         bandRecordPaths.Contains(currentBandRecordPath) && // A pack for this band exists.
                         new SdkFeatureBand(Path.GetFileName(currentBandRecordPath)).CompareTo(_sdkFeatureBand) < 1 && // We can parse the format of that band (its older than our band or current.)
-                        ( !currentBandInstallRecords.Contains(currentBandRecordPath) || cleanAllPacks ) // The pack has no workload record for it or we want to cleann all.
+                        ( !currentBandInstallRecords.Contains(currentBandRecordPath) || cleanAllPacks ) // The pack has no workload record for it or we want to clean all.
                        )
                     {
                         unneededBandRecordPaths = unneededBandRecordPaths.Append(currentBandRecordPath);
