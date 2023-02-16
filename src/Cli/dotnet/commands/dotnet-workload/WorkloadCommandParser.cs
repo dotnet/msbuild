@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -28,12 +29,13 @@ namespace Microsoft.DotNet.Cli
             return Command;
         }
 
-        internal static void ShowWorkloadsInfo(IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null)
+        internal static void ShowWorkloadsInfo(IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null, string dotnetDir = null)
         {
             workloadInfoHelper ??= new WorkloadInfoHelper();
             IEnumerable<WorkloadId> installedList = workloadInfoHelper.InstalledSdkWorkloadIds;
             InstalledWorkloadsCollection installedWorkloads = workloadInfoHelper.AddInstalledVsWorkloads(installedList);
             reporter ??= Cli.Utils.Reporter.Output;
+            string dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
 
             if (!installedList.Any())
             {
@@ -65,7 +67,7 @@ namespace Microsoft.DotNet.Cli
                 reporter.WriteLine($"       {workloadManifest.ManifestPath,align}");
 
                 reporter.Write($"{separator}{CommonStrings.WorkloadInstallTypeColumn}:");
-                reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), workloadManifest.ManifestPath).ToString(),align}"
+                reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), dotnetPath),align}"
                 );
                 reporter.WriteLine("");
             }
