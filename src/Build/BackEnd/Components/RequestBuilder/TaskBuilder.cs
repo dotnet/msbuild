@@ -426,10 +426,7 @@ namespace Microsoft.Build.BackEnd
                     if (requirements != null)
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
-                        if (MSBuildEventSource.Log.IsEnabled())
-                        {
-                            MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-                        }
+                        MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
                         try
@@ -485,10 +482,7 @@ namespace Microsoft.Build.BackEnd
                                 taskResult = new WorkUnitResult(WorkUnitResultCode.Success, taskResult.ActionCode, taskResult.Exception);
                             }
 
-                            if (MSBuildEventSource.Log.IsEnabled())
-                            {
-                                MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-                            }
+                            MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         }
                     }
                 }
