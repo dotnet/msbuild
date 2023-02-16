@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Containers.Tasks;
 /// <summary>
 /// This task will shell out to the net7.0-targeted application for VS scenarios.
 /// </summary>
-public partial class CreateNewImage : ToolTask
+public partial class CreateNewImage : ToolTask, ICancelableTask
 {
     // Unused, ToolExe is set via targets and overrides this.
     protected override string ToolName => "dotnet";
