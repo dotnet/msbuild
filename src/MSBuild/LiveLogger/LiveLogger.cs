@@ -29,15 +29,13 @@ namespace Microsoft.Build.Logging.LiveLogger
         public static readonly string[] ConfigurableForwardingLoggerParameters =
         {
             "BUILDSTARTEDEVENT",
-            "PROJECTSTARTEDEVENT",
-            "TARGETSTARTEDEVENT",
-            "TASKSTARTEDEVENT",
             "BUILDFINISHEDEVENT",
+            "PROJECTSTARTEDEVENT",
             "PROJECTFINISHEDEVENT",
+            "TARGETSTARTEDEVENT",
             "TARGETFINISHEDEVENT",
+            "TASKSTARTEDEVENT",
             "HIGHMESSAGEEVENT",
-            "NORMALMESSAGEEVENT",
-            "LOWMESSAGEEVENT",
             "WARNINGEVENT",
             "ERROREVENT"
         };
@@ -50,20 +48,21 @@ namespace Microsoft.Build.Logging.LiveLogger
         public void Initialize(IEventSource eventSource)
         {
             // Register for different events. Make sure that ConfigurableForwardingLoggerParameters are in sync with them.
-            // Started
+            // Started and Finished events  
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
-            eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
-            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
-            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
-            // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
+            eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
+            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
             eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
-            // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
-            // Raised
+            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
+
+            // Messages/Warnings/Errors
+            // BuildMessageEventHandler event handler below currently process only High importance events. 
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
+
             // Cancelled
             Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
 
@@ -234,21 +233,6 @@ namespace Microsoft.Build.Logging.LiveLogger
                 if (line is not null)
                 {
                     blockedProjects[e.ProjectFile] = line.Id;
-                }
-            }
-        }
-
-        private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
-        {
-            if (e.TaskName.Equals("MSBuild"))
-            {
-                if (blockedProjects.TryGetValue(e.ProjectFile, out int lineId))
-                {
-                    TerminalBuffer.DeleteLine(lineId);
-                    if (projects.TryGetValue(e.BuildEventContext!.ProjectInstanceId, out ProjectNode? node))
-                    {
-                        node.ShouldRerender = true;
-                    }
                 }
             }
         }
