@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             }
         }
 
-        //Provides thread safe Dictionary for creating critical section
+        // Provides a thread safe Dictionary for creating critical section
         internal class NamedMonitor
         {
             private readonly ConcurrentDictionary<string, object> _dictionary = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
