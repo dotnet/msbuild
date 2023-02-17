@@ -88,6 +88,11 @@ namespace Microsoft.DotNet.GenAPI
             return declaration;
         }
 
+        // Sometimes the metadata can contain names that are not valid C# identifiers. For example,
+        // to express a set of type parameters, they can be prefixed with angle brackets.
+        // Normalize them by replacing these special characters with '_'.
+        private static string NormalizeIdentifier(string s) => s.Replace('<', '_').Replace('>', '_');
+
         // SynthesizeDummyFields yields private fields for the namedType, because they can be part of the API contract.
         // - A struct containing a field that is a reference type cannot be used as a reference.
         // - A struct containing nonempty fields needs to be fully initialized. (See "definite assignment" rules)
@@ -115,7 +120,7 @@ namespace Microsoft.DotNet.GenAPI
                 {
                     yield return CreateDummyField(
                         genericField.Type.ToDisplayString(),
-                        genericField.Name,
+                        NormalizeIdentifier(genericField.Name),
                         FromAttributeData(genericField.GetAttributes()),
                         namedType.IsReadOnly);
                 }

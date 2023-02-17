@@ -1076,6 +1076,34 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
+        void TestSynthesizePrivateFieldsAngleBrackets()
+        {
+            RunTest(original: """
+                using System.Collections.Generic;
+
+                namespace Foo
+                {
+                    public readonly struct Bar<T> where T : notnull
+                    {
+                        public List<Bar<T>> Baz { get; }
+                    }
+                }
+                """,
+            expected: """
+                namespace Foo
+                {
+                    public readonly partial struct Bar<T>
+                    {
+                        private readonly System.Collections.Generic.List<Bar<T>> _Baz_k__BackingField;
+                        private readonly object _dummy;
+                        private readonly int _dummyPrimitive;
+                        public System.Collections.Generic.List<Bar<T>> Baz { get { throw null; } }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
         public void TestBaseTypeWithoutExplicitDefaultConstructor()
         {
             RunTest(original: """
