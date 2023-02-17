@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -310,5 +314,57 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("The operation was invalid");
             engine.AssertLogContains("An I/O error occurred");
         }
+
+#if NET6_0_OR_GREATER
+
+        public static IEnumerable<object[]> InterpolatedLogTestData()
+        {
+            Action<Task> logMessage = t => t.Log.LogMessage($"echo {0} and {"1"} {2} {3} {4} {5} {6} {7} {8} {9} {10}");
+            Action<Task> logWarning = t => t.Log.LogWarning($"echo {0} and {"1"}");
+            Action<Task> logError = t => t.Log.LogError($"echo {0} and {"1"}");
+
+            yield return new object[] { logMessage, "echo 0 and 1 2 3 4 5 6 7 8 9 10", typeof(BuildMessageEventArgs) };
+            yield return new object[] { logWarning, "echo 0 and 1", typeof(BuildWarningEventArgs) };
+            yield return new object[] { logError, "echo 0 and 1", typeof(BuildErrorEventArgs) };
+        }
+
+        [Theory]
+        [MemberData(nameof(InterpolatedLogTestData))]
+        public void LogWithInterpolatedString(Action<Task> logAction, string expectedResult, Type expectedEventType)
+        {
+            MockEngine mockEngine = new MockEngine();
+            Task t = new MockTask();
+            t.BuildEngine = mockEngine;
+
+            logAction(t);
+
+            mockEngine.BuildEventArgs.Count.ShouldBe(1);
+            mockEngine.BuildEventArgs[0].ShouldBeOfType(expectedEventType);
+            mockEngine.BuildEventArgs[0].Message.ShouldBe(expectedResult);
+
+            MethodBody logActionBody = logAction
+                .GetMethodInfo()
+                .GetMethodBody();
+
+            logActionBody
+                .LocalVariables
+                .Select(lvi => lvi.LocalType)
+                .ShouldContain(typeof(LogInterpolatedStringHandler), "Wrong logging method was bound");
+        }
+
+        [Fact]
+        public void LogMessageWithInterpolatedString_RespectsImportanceLevel()
+        {
+            MockEngine mockEngine = new MockEngine();
+            Task t = new MockTask();
+            t.BuildEngine = mockEngine;
+
+            mockEngine.MinimumMessageImportance = MessageImportance.High;
+            t.Log.LogMessage(MessageImportance.Low, $"echo {0} and {"1"}");
+
+            mockEngine.BuildEventArgs.Count.ShouldBe(0);
+        }
+#endif
+
     }
 }
