@@ -66,13 +66,22 @@ namespace Microsoft.DotNet.GenAPI
                 }
             }
 
-            if (symbol is IEventSymbol eventSymbol && !eventSymbol.IsAbstract)
+            if (symbol is IEventSymbol eventSymbol)
             {
-                // adds generation of add & remove accessors for the non abstract events.
-                return syntaxGenerator.CustomEventDeclaration(eventSymbol.Name,
-                    syntaxGenerator.TypeExpression(eventSymbol.Type),
-                    eventSymbol.DeclaredAccessibility,
-                    DeclarationModifiers.From(eventSymbol));
+                if (eventSymbol.IsAbstract)
+                {
+                    // adds abstract keyword.
+                    EventFieldDeclarationSyntax eventDeclaration = (EventFieldDeclarationSyntax)syntaxGenerator.Declaration(symbol);
+                    return eventDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.AbstractKeyword));
+                }
+                else
+                {
+                    // adds generation of add & remove accessors for the non abstract events.
+                    return syntaxGenerator.CustomEventDeclaration(eventSymbol.Name,
+                        syntaxGenerator.TypeExpression(eventSymbol.Type),
+                        eventSymbol.DeclaredAccessibility,
+                        DeclarationModifiers.From(eventSymbol));
+                }
             }
 
             try

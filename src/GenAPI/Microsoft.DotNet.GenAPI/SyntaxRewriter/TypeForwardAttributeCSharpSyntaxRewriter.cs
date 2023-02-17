@@ -28,9 +28,16 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             TypeArgumentListSyntax typeArgumentList = node.TypeArgumentList;
             SeparatedSyntaxList<TypeSyntax> newArguments = new();
 
-            foreach (IdentifierNameSyntax argument in typeArgumentList.Arguments)
+            foreach (TypeSyntax argument in typeArgumentList.Arguments)
             {
-                newArguments = newArguments.Add(argument.WithIdentifier(SyntaxFactory.Identifier(string.Empty)));
+                if (argument is IdentifierNameSyntax identifier)
+                {
+                    newArguments = newArguments.Add(identifier.WithIdentifier(SyntaxFactory.Identifier(string.Empty)));
+                }
+                else
+                {
+                    newArguments = newArguments.Add(argument);
+                }
             }
 
             typeArgumentList = typeArgumentList.WithArguments(newArguments);

@@ -447,7 +447,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public abstract partial class AbstractEvents
                     {
-                        public event System.EventHandler<bool> TextChanged;
+                        public abstract event System.EventHandler<bool> TextChanged;
                     }
 
                     public partial class Events
