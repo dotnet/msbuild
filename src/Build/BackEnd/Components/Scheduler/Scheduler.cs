@@ -965,23 +965,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestsByTraversalsFirst(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
-            if (idleNodes.Contains(InProcNodeId))
-            {
-                // Assign traversal projects first (to find more work.)
-                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
-                foreach (SchedulableRequest request in unscheduledRequests)
-                {
-                    if (CanScheduleRequestToNode(request, InProcNodeId))
-                    {
-                        if (IsTraversalRequest(request.BuildRequest))
-                        {
-                            AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
-                            idleNodes.Remove(InProcNodeId);
-                            break;
-                        }
-                    }
-                }
-            }
+            AssignUnscheduledRequestsToInProcNode(responses, idleNodes, request => IsTraversalRequest(request.BuildRequest));
         }
 
         /// <summary>
@@ -990,12 +974,17 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledProxyBuildRequestsToInProcNode(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
+            AssignUnscheduledRequestsToInProcNode(responses, idleNodes, request => request.IsProxyBuildRequest());
+        }
+
+        private void AssignUnscheduledRequestsToInProcNode(List<ScheduleResponse> responses, HashSet<int> idleNodes, Func<SchedulableRequest, bool> shouldBeScheduled)
+        {
             if (idleNodes.Contains(InProcNodeId))
             {
                 List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
                 foreach (SchedulableRequest request in unscheduledRequests)
                 {
-                    if (CanScheduleRequestToNode(request, InProcNodeId) && request.IsProxyBuildRequest())
+                    if (CanScheduleRequestToNode(request, InProcNodeId) && shouldBeScheduled(request))
                     {
                         AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
                         idleNodes.Remove(InProcNodeId);
