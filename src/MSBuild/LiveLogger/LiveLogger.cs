@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -314,18 +314,19 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             // Emmpty line
             Console.WriteLine();
-            if (succeeded)
-            {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-            }
-            else
-            {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-            }
+
+            string prettyDuration = buildDuration.TotalHours > 1.0 ?
+                buildDuration.ToString(@"h\:mm\:ss") :
+                buildDuration.ToString(@"m\:ss");
+
+            string status = succeeded ?
+                ANSIBuilder.Formatting.Color("succeeded", ANSIBuilder.Formatting.ForegroundColor.Green) :
+                ANSIBuilder.Formatting.Color("failed", ANSIBuilder.Formatting.ForegroundColor.Red);
+
+            Console.WriteLine($"Build {status} in {prettyDuration}");
             Console.WriteLine($"\t{warningCount} Warnings(s)");
             Console.WriteLine($"\t{errorCount} Errors(s)");
             Console.WriteLine();
-            Console.WriteLine($"Time elapsed {buildDuration.ToString()}");
         }
     }
 }
