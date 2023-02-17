@@ -6,6 +6,8 @@ using Microsoft.NET.Build.Containers;
 using System.CommandLine.Parsing;
 using System.Text;
 
+#pragma warning disable CA1852 
+
 var publishDirectoryArg = new Argument<DirectoryInfo>(
     name: "PublishDirectory",
     description: "The directory for the build outputs to be published.")

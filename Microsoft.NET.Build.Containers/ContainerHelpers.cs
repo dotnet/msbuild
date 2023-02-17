@@ -8,6 +8,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 #endif
 using System.Text.RegularExpressions;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 public static class ContainerHelpers
@@ -273,7 +274,7 @@ public static class ContainerHelpers
         {
             if (!Char.IsLetterOrDigit(containerImageName, 0))
             {
-                throw new ArgumentException("The first character of the image name must be a lowercase letter or a digit.");
+                throw new ArgumentException(Resources.Resource.GetString(nameof(Strings.InvalidImageName)));
             }
             var loweredImageName = containerImageName.ToLowerInvariant();
             normalizedImageName = imageNameCharacters.Replace(loweredImageName, "-");

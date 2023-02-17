@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -12,7 +14,7 @@ public static class ContainerBuilder
         var isDaemonPull = String.IsNullOrEmpty(registryName);
         if (isDaemonPull)
         {
-            throw new NotSupportedException("Don't know how to pull images from local daemons at the moment");
+            throw new NotSupportedException(Resource.GetString(nameof(Strings.DontKnowHowToPullImages)));
         }
 
         Registry baseRegistry = new Registry(ContainerHelpers.TryExpandRegistryToUri(registryName));

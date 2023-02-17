@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -42,7 +43,7 @@ internal static class ContentStore
             "application/vnd.docker.image.rootfs.diff.tar"
             or "application/vnd.oci.image.layer.v1.tar"
                 => ".tar",
-            _ => throw new ArgumentException($"Unrecognized mediaType '{descriptor.MediaType}'")
+            _ => throw new ArgumentException(Resource.FormatString(nameof(Strings.UnrecognizedMediaType), descriptor.MediaType))
         };
 
         return GetPathForHash(contentHash) + extension;

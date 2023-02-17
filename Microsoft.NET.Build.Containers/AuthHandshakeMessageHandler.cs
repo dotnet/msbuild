@@ -12,6 +12,7 @@ using Valleysoft.DockerCredsProvider;
 
 using Microsoft.NET.Build.Containers.Credentials;
 using System.Net.Sockets;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -73,7 +74,7 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
     /// </remarks>
     private sealed record TokenResponse(string? token, string? access_token, int? expires_in, DateTimeOffset? issued_at)
     {
-        public string ResolvedToken => token ?? access_token ?? throw new ArgumentException("Token response had neither token nor access_token.");
+        public string ResolvedToken => token ?? access_token ?? throw new ArgumentException(Resource.GetString(nameof(Strings.InvalidTokenResponse)));
     }
 
     /// <summary>
@@ -139,7 +140,7 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
             TokenResponse? token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream(cancellationToken));
             if (token is null)
             {
-                throw new ArgumentException("Could not deserialize token from JSON");
+                throw new ArgumentException(Resource.GetString(nameof(Strings.CouldntDeserializeJsonToken)));
             }
 
             // save the retrieved token in the cache
@@ -156,7 +157,7 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
     {
         if (request.RequestUri is null)
         {
-            throw new ArgumentException("No RequestUri specified", nameof(request));
+            throw new ArgumentException(Resource.GetString(nameof(Strings.NoRequestUriSpecified)), nameof(request));
         }
 
         // attempt to use cached token for the request if available
@@ -204,7 +205,7 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
             }
         }
 
-        throw new ApplicationException("Too many retries, stopping");
+        throw new ApplicationException(Resource.GetString(nameof(Strings.TooManyRetries)));
     }
 
     [GeneratedRegex("(?<key>\\w+)=\"(?<value>[^\"]*)\"(?:,|$)")]

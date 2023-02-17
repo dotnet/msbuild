@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.NET.Build.Containers.Resources;
+
 namespace Microsoft.NET.Build.Containers;
 
 /// <summary>
@@ -23,7 +25,7 @@ internal sealed class AmazonECRMessageHandler : DelegatingHandler
         }
         catch (HttpRequestException e) when (e.InnerException is IOException ioe && ioe.Message.Equals("The response ended prematurely.", StringComparison.OrdinalIgnoreCase))
         {
-            var message = "Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry.";
+            string message = Resource.GetString(nameof(Strings.AmazonRegistryFailed));
             throw new ContainerHttpException(message, request.RequestUri?.ToString(), null);
         }
         catch

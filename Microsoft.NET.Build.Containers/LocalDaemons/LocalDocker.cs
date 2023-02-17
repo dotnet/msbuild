@@ -6,6 +6,7 @@ using System.Formats.Tar;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -30,7 +31,7 @@ internal sealed class LocalDocker : ILocalDaemon
 
         if (loadProcess is null)
         {
-            throw new NotImplementedException("Failed creating docker process");
+            throw new NotImplementedException(Resource.GetString(Strings.DockerProcessCreationFailed));
         }
 
         // Create new stream tarball
@@ -43,7 +44,7 @@ internal sealed class LocalDocker : ILocalDaemon
 
         if (loadProcess.ExitCode != 0)
         {
-            throw new DockerLoadException($"Failed to load image to local Docker daemon. stdout: {await loadProcess.StandardError.ReadToEndAsync().ConfigureAwait(false)}");
+            throw new DockerLoadException(Resource.FormatString(nameof(Strings.ImageLoadFailed), await loadProcess.StandardError.ReadToEndAsync().ConfigureAwait(false)));
         }
     }
 
@@ -78,9 +79,12 @@ internal sealed class LocalDocker : ILocalDaemon
             RedirectStandardError = true
         };
         var proc = Process.Start(psi);
-        if (proc is null) throw new Exception("Failed to start docker client process");
+        if (proc is null) throw new Exception(Resource.GetString(nameof(Strings.DockerProcessCreationFailed)));
         await proc.WaitForExitAsync().ConfigureAwait(false);
-        if (proc.ExitCode != 0) throw new Exception($"Failed to get docker info({proc.ExitCode})\n{await proc.StandardOutput.ReadToEndAsync().ConfigureAwait(false)}\n{await proc.StandardError.ReadToEndAsync().ConfigureAwait(false)}");
+        if (proc.ExitCode != 0) throw new Exception(Resource.FormatString(
+            nameof(Strings.DockerInfoFailed),
+            proc.ExitCode,
+            await proc.StandardOutput.ReadToEndAsync().ConfigureAwait(false)));
         return await JsonDocument.ParseAsync(proc.StandardOutput.BaseStream).ConfigureAwait(false);
     }
 
@@ -106,7 +110,7 @@ internal sealed class LocalDocker : ILocalDaemon
             }
             else
             {
-                throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
+                throw new NotImplementedException(Resource.GetString(nameof(Strings.MissingLinkToRegistry)));
             }
         }
 
