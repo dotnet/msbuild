@@ -1,8 +1,9 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
@@ -17,8 +18,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         private int finishedProjects = 0;
         private Dictionary<string, int> blockedProjects = new();
 
-        private DateTime startTime;
-        private DateTime endTime;
+        private Stopwatch? _stopwatch;
 
         public LoggerVerbosity Verbosity { get; set; }
         public string Parameters { get; set; }
@@ -30,6 +30,10 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public void Initialize(IEventSource eventSource)
         {
+            // Start the stopwatch as soon as the logger is initialized to capture
+            // any time before the BuildStarted event
+            _stopwatch = Stopwatch.StartNew();
+
             // Register for different events
             // Started
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
@@ -122,7 +126,6 @@ namespace Microsoft.Build.Logging.LiveLogger
         // Build
         private void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
         {
-            startTime = DateTime.Now;
         }
 
         private void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
@@ -291,7 +294,6 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public void Shutdown()
         {
-            TimeSpan buildDuration = endTime - startTime;
             TerminalBuffer.Terminate();
             int errorCount = 0;
             int warningCount = 0;
@@ -312,8 +314,11 @@ namespace Microsoft.Build.Logging.LiveLogger
                 Console.WriteLine();
             }
 
-            // Emmpty line
+            // Empty line
             Console.WriteLine();
+
+            Debug.Assert(_stopwatch is not null, $"Expected {nameof(_stopwatch)} to be initialized long before Shutdown()");
+            TimeSpan buildDuration = _stopwatch.Elapsed;
 
             string prettyDuration = buildDuration.TotalHours > 1.0 ?
                 buildDuration.ToString(@"h\:mm\:ss") :
