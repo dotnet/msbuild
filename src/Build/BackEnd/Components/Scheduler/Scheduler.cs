@@ -909,49 +909,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestsWithPlanByMostImmediateReferences(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
-            foreach (int idleNodeId in idleNodes)
-            {
-                SchedulingPlan.PlanConfigData bestConfig = null;
-                SchedulableRequest bestRequest = null;
-
-                // Find the most expensive request in the plan to schedule from among the ones available.
-                foreach (SchedulableRequest request in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
-                {
-                    if (CanScheduleRequestToNode(request, idleNodeId))
-                    {
-
-                        SchedulingPlan.PlanConfigData configToConsider = _schedulingPlan.GetConfiguration(request.BuildRequest.ConfigurationId);
-                        if (configToConsider is null)
-                        {
-                            // By default we assume configs we don't know about aren't as important, and will only schedule them
-                            // if nothing else is suitable
-                            if (bestRequest is null)
-                            {
-                                bestRequest = request;
-                            }
-                        }
-                        else
-                        {
-                            if (bestConfig == null || bestConfig.ReferencesCount < configToConsider.ReferencesCount)
-                            {
-                                bestConfig = configToConsider;
-                                bestRequest = request;
-                            }
-                        }
-                    }
-                }
-
-                if (bestRequest is not null)
-                {
-                    AssignUnscheduledRequestToNode(bestRequest, idleNodeId, responses);
-                }
-            }
+            AssignUnscheduledRequestsWithPlan(responses, idleNodes, (plan1, plan2) => plan1.ReferencesCount < plan2.ReferencesCount);
         }
 
         /// <summary>
         /// Assigns requests to nodes based on those which have the most plan time.
         /// </summary>
         private void AssignUnscheduledRequestsWithPlanByGreatestPlanTime(List<ScheduleResponse> responses, HashSet<int> idleNodes)
+        {
+            AssignUnscheduledRequestsWithPlan(responses, idleNodes, (plan1, plan2) => plan1.TotalPlanTime < plan2.TotalPlanTime);
+        }
+
+        private void AssignUnscheduledRequestsWithPlan(List<ScheduleResponse> responses, HashSet<int> idleNodes, Func<SchedulingPlan.PlanConfigData, SchedulingPlan.PlanConfigData, bool> comparisonFunction)
         {
             foreach (int idleNodeId in idleNodes)
             {
@@ -970,12 +939,12 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // By default we assume configs we don't know about aren't as important, and will only schedule them
                                 // if nothing else is suitable
-                                bestRequest = request;
+                                bestRequest ??= request;
                             }
                         }
                         else
                         {
-                            if (bestConfig is null || bestConfig.TotalPlanTime < configToConsider.TotalPlanTime)
+                            if (bestConfig is null || comparisonFunction(bestConfig, configToConsider))
                             {
                                 bestConfig = configToConsider;
                                 bestRequest = request;
