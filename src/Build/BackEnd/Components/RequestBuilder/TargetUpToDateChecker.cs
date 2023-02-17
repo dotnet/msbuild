@@ -203,7 +203,7 @@ namespace Microsoft.Build.BackEnd
                          * 
                          */
                         ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
-                        ErrorUtilities.VerifyThrow(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, earlyExitIfNonEmpty: true).Count > 0, "The target must have inputs.");
+                        ErrorUtilities.VerifyThrow(!IsItemVectorEmpty(itemVectorsInTargetInputs), "The target must have inputs.");
 
                         result = PerformDependencyAnalysisIfDiscreteInputs(itemVectorsInTargetInputs,
                                     itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs, itemVectorsReferencedOnlyInTargetInputs,
@@ -853,23 +853,32 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private static bool IsItemVectorEmpty(ItemVectorPartitionCollection itemVectors)
+        {
+            foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
+            {
+                if (GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value).Any())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Retrieves the item-specs of all items in the given item vector collection.
         /// </summary>
         /// <param name="itemVectors"></param>
         /// <param name="earlyExitIfNonEmpty"></param>
         /// <returns>list of item-specs</returns>
-        private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, bool earlyExitIfNonEmpty = false)
+        private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors)
         {
             List<string> itemSpecs = new();
 
             foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
             {
                 itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value));
-                if (earlyExitIfNonEmpty && itemSpecs.Count > 0)
-                {
-                    return itemSpecs;
-                }
             }
 
             return itemSpecs;
