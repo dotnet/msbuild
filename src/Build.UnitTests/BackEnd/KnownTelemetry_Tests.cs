@@ -15,19 +15,19 @@ public class KnownTelemetry_Tests
     [Fact]
     public void BuildTelemetryCanBeSetToNull()
     {
-        KnownTelemetry.BuildTelemetry = new BuildTelemetry();
-        KnownTelemetry.BuildTelemetry = null;
+        KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry();
+        KnownTelemetry.PartialBuildTelemetry = null;
 
-        KnownTelemetry.BuildTelemetry.ShouldBeNull();
+        KnownTelemetry.PartialBuildTelemetry.ShouldBeNull();
     }
 
     [Fact]
     public void BuildTelemetryCanBeSet()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
-        KnownTelemetry.BuildTelemetry = buildTelemetry;
+        KnownTelemetry.PartialBuildTelemetry = buildTelemetry;
 
-        KnownTelemetry.BuildTelemetry.ShouldBeSameAs(buildTelemetry);
+        KnownTelemetry.PartialBuildTelemetry.ShouldBeSameAs(buildTelemetry);
     }
 
     [Fact]
