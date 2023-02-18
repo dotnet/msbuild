@@ -672,7 +672,7 @@ namespace Microsoft.Build.Utilities
             string message,
             params object[] messageArgs)
         {
-            LogError(subcategory, errorCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
+            LogError(subcategory, errorCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, null, null, null, messageArgs);
         }
 
         /// <summary>
@@ -704,6 +704,44 @@ namespace Microsoft.Build.Utilities
             string message,
             params object[] messageArgs)
         {
+            LogError(subcategory, errorCode, helpKeyword, helpLink, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, null, null, null, messageArgs);
+        }
+
+        /// <summary>
+        /// Logs an error using the specified string and other error details.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="subcategory">Description of the error type (can be null).</param>
+        /// <param name="errorCode">The error code (can be null).</param>
+        /// <param name="helpKeyword">The help keyword for the host IDE (can be null).</param>
+        /// <param name="file">The path to the file containing the error (can be null).</param>
+        /// <param name="lineNumber">The line in the file where the error occurs (set to zero if not available).</param>
+        /// <param name="columnNumber">The column in the file where the error occurs (set to zero if not available).</param>
+        /// <param name="endLineNumber">The last line of a range of lines in the file where the error occurs (set to zero if not available).</param>
+        /// <param name="endColumnNumber">The last column of a range of columns in the file where the error occurs (set to zero if not available).</param>
+        /// <param name="message">The message string.</param>
+        /// <param name="helpLink">A link pointing to more information about the error.</param>
+        /// <param name="additionalContentType">The type of the additional content.</param>
+        /// <param name="additionalContentText">The additional content.</param>
+        /// <param name="additionalContentSimpleText">The additional content simplified for a text logger.</param>
+        /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
+        public void LogError(
+            string subcategory,
+            string errorCode,
+            string helpKeyword,
+            string helpLink,
+            string file,
+            int lineNumber,
+            int columnNumber,
+            int endLineNumber,
+            int endColumnNumber,
+            string message,
+            string additionalContentType,
+            string additionalContentText,
+            string additionalContentSimpleText,
+            params object[] messageArgs)
+        {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
@@ -722,20 +760,46 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            var e = new BuildErrorEventArgs(
-                    subcategory,
-                    errorCode,
-                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                    endLineNumber,
-                    endColumnNumber,
-                    message,
-                    helpKeyword,
-                    TaskName,
-                    helpLink,
-                    DateTime.UtcNow,
-                    messageArgs);
+            BuildErrorEventArgs e;
+
+            if (!string.IsNullOrEmpty(additionalContentType) && !string.IsNullOrEmpty(additionalContentText))
+            {
+                e = new BuildErrorWithContentEventArgs(
+                        subcategory,
+                        errorCode,
+                        fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                        fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                        fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                        endLineNumber,
+                        endColumnNumber,
+                        message,
+                        helpKeyword,
+                        TaskName,
+                        helpLink,
+                        DateTime.UtcNow,
+                        additionalContentType,
+                        additionalContentText,
+                        additionalContentSimpleText,
+                        messageArgs);
+            }
+            else
+            {
+                e = new BuildErrorEventArgs(
+                        subcategory,
+                        errorCode,
+                        fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                        fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                        fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                        endLineNumber,
+                        endColumnNumber,
+                        message,
+                        helpKeyword,
+                        TaskName,
+                        helpLink,
+                        DateTime.UtcNow,
+                        messageArgs);
+            }
+
             BuildEngine.LogErrorEvent(e);
 
             HasLoggedErrors = true;
