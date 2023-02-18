@@ -3444,7 +3444,7 @@ namespace Microsoft.Build.CommandLine
             }
             // If terminal is dumb
             if (
-                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (Environment.GetEnvironmentVariable("WT_SESSION") == "" || Environment.GetEnvironmentVariable("WT_SESSION") == null))
+                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WT_SESSION")))
                 || Environment.GetEnvironmentVariable("TERM") == "dumb")
             {
                 messagesToLogInBuildLoggers.Add(
