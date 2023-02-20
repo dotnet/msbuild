@@ -12,7 +12,7 @@ You can create a binary log by passing the `-bl` parameter to MSBuild (`MSBuild.
 
 ## Capturing Binary Logs Through Visual Studio
 ### (Preferred way) Capturing logs for all MSBuild invocations
-Via setting `MSBUILDDEBUGENGINE` environment variable to `'1'` and (optionaly) `MSBUILDDEBUGPATH` to an existing destination folder to store the captured logs and starting the Visual Studio from the same shell to inherit the environment:
+Set `MSBUILDDEBUGENGINE` environment variable to `'1'` and (optionally) set `MSBUILDDEBUGPATH` to an existing destination folder to store the captured logs. Then start Visual Studio from the same shell to inherit the environment:
 
 `cmd:`
 ```
