@@ -16,7 +16,12 @@ public class RegistryTests
 
         // Don't need rid graph for local registry image pulls - since we're only pushing single image manifests (not manifest lists)
         // as part of our setup, we could put literally anything in here. The file at the passed-in path would only get read when parsing manifests lists.
-        ImageBuilder? downloadedImage = await registry.GetImageManifest(DockerRegistryManager.BaseImage, DockerRegistryManager.Net6ImageTag, "linux-x64", ridgraphfile).ConfigureAwait(false);
+        ImageBuilder? downloadedImage = await registry.GetImageManifestAsync(
+            DockerRegistryManager.BaseImage,
+            DockerRegistryManager.Net6ImageTag,
+            "linux-x64",
+            ridgraphfile,
+            cancellationToken: default).ConfigureAwait(false);
 
         Assert.NotNull(downloadedImage);
     }

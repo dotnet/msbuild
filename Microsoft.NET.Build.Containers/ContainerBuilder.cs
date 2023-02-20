@@ -9,8 +9,26 @@ namespace Microsoft.NET.Build.Containers;
 
 public static class ContainerBuilder
 {
-    public static async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string[] entrypointArgs, string imageName, string[] imageTags, string? outputRegistry, string[] labels, Port[] exposedPorts, string[] envVars, string containerRuntimeIdentifier, string ridGraphPath, string localContainerDaemon)
+    public static async Task ContainerizeAsync(
+        DirectoryInfo folder,
+        string workingDir,
+        string registryName,
+        string baseName,
+        string baseTag,
+        string[] entrypoint,
+        string[] entrypointArgs,
+        string imageName,
+        string[] imageTags,
+        string? outputRegistry,
+        string[] labels,
+        Port[] exposedPorts,
+        string[] envVars,
+        string containerRuntimeIdentifier,
+        string ridGraphPath,
+        string localContainerDaemon,
+        CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var isDaemonPull = String.IsNullOrEmpty(registryName);
         if (isDaemonPull)
         {
@@ -22,7 +40,9 @@ public static class ContainerBuilder
         var isDockerPush = String.IsNullOrEmpty(outputRegistry);
         var destinationImageReferences = imageTags.Select(t => new ImageReference(isDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(outputRegistry!)), imageName, t));
 
-        ImageBuilder imageBuilder = await baseRegistry.GetImageManifest(baseName, baseTag, containerRuntimeIdentifier, ridGraphPath).ConfigureAwait(false);
+        ImageBuilder imageBuilder = await baseRegistry.GetImageManifestAsync(baseName, baseTag, containerRuntimeIdentifier, ridGraphPath, cancellationToken).ConfigureAwait(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         imageBuilder.SetWorkingDirectory(workingDir);
 
@@ -60,13 +80,20 @@ public static class ContainerBuilder
 
         BuiltImage builtImage = imageBuilder.Build();
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         foreach (var destinationImageReference in destinationImageReferences)
         {
             if (destinationImageReference.Registry is { } outReg)
             {
                 try
                 {
-                    outReg.Push(builtImage, sourceImageReference, destinationImageReference, (message) => Console.WriteLine($"Containerize: {message}")).Wait();
+                    await outReg.PushAsync(
+                        builtImage,
+                        sourceImageReference,
+                        destinationImageReference,
+                        (message) => Console.WriteLine($"Containerize: {message}"),
+                        cancellationToken).ConfigureAwait(false);
                     Console.WriteLine($"Containerize: Pushed container '{destinationImageReference.RepositoryAndTag}' to registry '{outputRegistry}'");
                 }
                 catch (Exception e)
@@ -79,7 +106,7 @@ public static class ContainerBuilder
             {
 
                 var localDaemon = GetLocalDaemon(localContainerDaemon, Console.WriteLine);
-                if (!(await localDaemon.IsAvailable().ConfigureAwait(false)))
+                if (!(await localDaemon.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
                     Console.WriteLine("Containerize: error CONTAINER007: The Docker daemon is not available, but pushing to a local daemon was requested. Please start Docker and try again.");
                     Environment.ExitCode = 7;
@@ -87,7 +114,7 @@ public static class ContainerBuilder
                 }
                 try
                 {
-                    localDaemon.Load(builtImage, sourceImageReference, destinationImageReference).Wait();
+                    await localDaemon.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
                     Console.WriteLine("Containerize: Pushed container '{0}' to Docker daemon", destinationImageReference.RepositoryAndTag);
                 }
                 catch (Exception e)

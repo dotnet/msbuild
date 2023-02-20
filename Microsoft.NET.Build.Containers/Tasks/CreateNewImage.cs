@@ -7,8 +7,10 @@ using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
-public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
+public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICancelableTask
 {
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
     /// <summary>
     /// Unused. For interface parity with the ToolTask implementation of the task.
     /// </summary>
@@ -23,8 +25,16 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
 
     private bool IsDaemonPull => string.IsNullOrEmpty(BaseRegistry);
 
+    public void Cancel() => _cancellationTokenSource.Cancel();
+
     public override bool Execute()
     {
+        return Task.Run(() => ExecuteAsync(_cancellationTokenSource.Token)).GetAwaiter().GetResult();
+    }
+
+    internal async Task<bool> ExecuteAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
         if (!Directory.Exists(PublishDirectory))
         {
             Log.LogError("{0} '{1}' does not exist", nameof(PublishDirectory), PublishDirectory);
@@ -33,7 +43,20 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         ImageReference sourceImageReference = new(SourceRegistry.Value, BaseImageName, BaseImageTag);
         var destinationImageReferences = ImageTags.Select(t => new ImageReference(DestinationRegistry.Value, ImageName, t));
 
-        ImageBuilder imageBuilder = GetBaseImage();
+        ImageBuilder? imageBuilder;
+        if (SourceRegistry.Value is { } registry)
+        {
+            imageBuilder = await registry.GetImageManifestAsync(
+                BaseImageName,
+                BaseImageTag,
+                ContainerRuntimeIdentifier,
+                RuntimeIdentifierGraphPath,
+                cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            throw new NotSupportedException("Don't know how to pull images from local daemons at the moment");
+        }
 
         if (imageBuilder is null)
         {
@@ -48,7 +71,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         imageBuilder.SetWorkingDirectory(WorkingDirectory);
         imageBuilder.SetEntryPoint(Entrypoint.Select(i => i.ItemSpec).ToArray(), EntrypointArgs.Select(i => i.ItemSpec).ToArray());
 
-        foreach (var label in Labels)
+        foreach (ITaskItem label in Labels)
         {
             imageBuilder.AddLabel(label.ItemSpec, label.GetMetadata("Value"));
         }
@@ -64,24 +87,25 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         }
 
         BuiltImage builtImage = imageBuilder.Build();
+        cancellationToken.ThrowIfCancellationRequested();
 
         // at this point we're done with modifications and are just pushing the data other places
         GeneratedContainerManifest = JsonSerializer.Serialize(builtImage.Manifest);
         GeneratedContainerConfiguration = builtImage.Config;
 
-        foreach (var destinationImageReference in destinationImageReferences)
+        foreach (ImageReference destinationImageReference in destinationImageReferences)
         {
             if (IsDaemonPush)
             {
-                var localDaemon = GetLocalDaemon(msg => Log.LogMessage(msg));
-                if (!localDaemon.IsAvailable().GetAwaiter().GetResult())
+                LocalDocker localDaemon = GetLocalDaemon(msg => Log.LogMessage(msg));
+                if (!(await localDaemon.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
                     Log.LogError("The local daemon is not available, but pushing to a local daemon was requested. Please start the daemon and try again.");
                     return false;
                 }
                 try
                 {
-                    localDaemon.Load(builtImage, sourceImageReference, destinationImageReference).Wait();
+                    await localDaemon.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
                     SafeLog("Pushed container '{0}' to local daemon", destinationImageReference.RepositoryAndTag);
                 }
                 catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
@@ -93,8 +117,16 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
             {
                 try
                 {
-                    destinationImageReference.Registry?.Push(builtImage, sourceImageReference, destinationImageReference, message => SafeLog(message)).Wait();
-                    SafeLog("Pushed container '{0}' to registry '{2}'", destinationImageReference.RepositoryAndTag, OutputRegistry);
+                    if (destinationImageReference.Registry is not null)
+                    {
+                        await (destinationImageReference.Registry.PushAsync(
+                            builtImage,
+                            sourceImageReference,
+                            destinationImageReference,
+                            message => SafeLog(message),
+                            cancellationToken)).ConfigureAwait(false);
+                        SafeLog("Pushed container '{0}' to registry '{2}'", destinationImageReference.RepositoryAndTag, OutputRegistry);
+                    }
                 }
                 catch (ContainerHttpException e)
                 {
@@ -200,18 +232,6 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task
         foreach (ITaskItem envVar in envVars)
         {
             img.AddEnvironmentVariable(envVar.ItemSpec, envVar.GetMetadata("Value"));
-        }
-    }
-
-    private ImageBuilder GetBaseImage()
-    {
-        if (SourceRegistry.Value is {} registry)
-        {
-            return registry.GetImageManifest(BaseImageName, BaseImageTag, ContainerRuntimeIdentifier, RuntimeIdentifierGraphPath).Result;
-        }
-        else
-        {
-            throw new ArgumentException("Don't know how to pull images from local daemons at the moment");
         }
     }
 

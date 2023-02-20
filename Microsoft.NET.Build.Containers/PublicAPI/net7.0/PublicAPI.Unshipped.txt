@@ -109,6 +109,7 @@ Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseImageTag.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseImageTag.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseRegistry.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseRegistry.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Cancel() -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerEnvironmentVariables.get -> Microsoft.Build.Framework.ITaskItem![]!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerEnvironmentVariables.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerizeDirectory.get -> string!
@@ -169,7 +170,7 @@ Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ParsedContainerReg
 Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ParsedContainerTag.get -> string!
 override Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Execute() -> bool
 override Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.Execute() -> bool
-static Microsoft.NET.Build.Containers.ContainerBuilder.Containerize(System.IO.DirectoryInfo! folder, string! workingDir, string! registryName, string! baseName, string! baseTag, string![]! entrypoint, string![]! entrypointArgs, string! imageName, string![]! imageTags, string? outputRegistry, string![]! labels, Microsoft.NET.Build.Containers.Port[]! exposedPorts, string![]! envVars, string! containerRuntimeIdentifier, string! ridGraphPath, string! localContainerDaemon) -> System.Threading.Tasks.Task!
+static Microsoft.NET.Build.Containers.ContainerBuilder.ContainerizeAsync(System.IO.DirectoryInfo! folder, string! workingDir, string! registryName, string! baseName, string! baseTag, string![]! entrypoint, string![]! entrypointArgs, string! imageName, string![]! imageTags, string? outputRegistry, string![]! labels, Microsoft.NET.Build.Containers.Port[]! exposedPorts, string![]! envVars, string! containerRuntimeIdentifier, string! ridGraphPath, string! localContainerDaemon, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 static Microsoft.NET.Build.Containers.ContainerHelpers.TryParsePort(string! input, out Microsoft.NET.Build.Containers.Port? port, out Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError? error) -> bool
 static Microsoft.NET.Build.Containers.ContainerHelpers.TryParsePort(string? portNumber, string? portType, out Microsoft.NET.Build.Containers.Port? port, out Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError? error) -> bool
 static readonly Microsoft.NET.Build.Containers.KnownDaemonTypes.SupportedLocalDaemonTypes -> string![]!
