@@ -3747,19 +3747,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<ArgumentNullException>(() => { item.HasMetadata(null); });
         }
 
-        /// <summary>
-        /// GetMetadataValueEscaped with non present and invalid value
-        /// </summary>
-        [Fact]
-        public void GetMetadataValueEscaped()
-        {
-            ProjectItem item = GetOneItemFromFragment(@"<i Include='i0'/>");
-            item.GetMetadataValueEscaped("m2", returnNullIfNotFound: true).ShouldBeNull();
-            item.GetMetadataValueEscaped("m2", returnNullIfNotFound: false).ShouldBeEmpty();
-            Assert.Throws<ArgumentNullException>(() => { item.GetMetadataValueEscaped(null, returnNullIfNotFound: true); });
-            Assert.Throws<ArgumentException>(() => { item.GetMetadataValueEscaped("", returnNullIfNotFound: true); });
-        }
-
         private static List<ProjectItem> GetItemsFromFragmentWithGlobs(string itemGroupFragment, params string[] globFiles)
         {
             var formattedProjectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(itemGroupFragment);

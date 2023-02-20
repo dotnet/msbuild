@@ -1110,7 +1110,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Test metadata item functions with empty string metadata and not present metadata
         /// </summary>
         [Fact]
-        public void MetadataFuntionTestingWithEmtpyString()
+        public void MetadataFunctionTestingWithEmtpyString()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess("""
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">

@@ -475,7 +475,59 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            return GetMetadataValueEscaped(name, returnNullIfNotFound: false);
+            return GetMetadataEscaped(name, returnNullIfNotFound: false);
+        }
+
+        /// <summary>
+        /// Returns the metadata with the specified key.
+        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
+        /// </summary>
+        string IItem.GetMetadataValueEscaped(string name, bool returnNullIfNotFound)
+        {
+            return GetMetadataEscaped(name, returnNullIfNotFound);
+        }
+
+        /// <summary>
+        /// Returns the metadata with the specified key.
+        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
+        /// </summary>
+        public string GetMetadataEscaped(string name, bool returnNullIfNotFound)
+        {
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+
+            string value = null;
+
+            if (_directMetadata != null)
+            {
+                ProjectMetadata metadatum = _directMetadata[name];
+                if (metadatum != null)
+                {
+                    value = metadatum.EvaluatedValueEscaped;
+                }
+            }
+
+            if (value == null)
+            {
+                value = GetBuiltInMetadataEscaped(name);
+            }
+
+            if (value == null)
+            {
+                ProjectMetadata metadatum = GetItemDefinitionMetadata(name);
+
+                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
+                {
+                    Expander<ProjectProperty, ProjectItem> expander = new Expander<ProjectProperty, ProjectItem>(null, null, new BuiltInMetadataTable(this), FileSystems.Default);
+
+                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, metadatum.Location);
+                }
+                else if (metadatum != null)
+                {
+                    value = metadatum.EvaluatedValueEscaped;
+                }
+            }
+
+            return returnNullIfNotFound ? value : value ?? string.Empty;
         }
 
         /// <summary>
@@ -861,49 +913,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             return metadataFromDefinition;
-        }
-
-        /// <summary>
-        /// Returns the metadata with the specified key.
-        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
-        /// </summary>
-        public string GetMetadataValueEscaped(string name, bool returnNullIfNotFound)
-        {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-
-            string value = null;
-
-            if (_directMetadata != null)
-            {
-                ProjectMetadata metadatum = _directMetadata[name];
-                if (metadatum != null)
-                {
-                    value = metadatum.EvaluatedValueEscaped;
-                }
-            }
-
-            if (value == null)
-            {
-                value = GetBuiltInMetadataEscaped(name);
-            }
-
-            if (value == null)
-            {
-                ProjectMetadata metadatum = GetItemDefinitionMetadata(name);
-
-                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
-                {
-                    Expander<ProjectProperty, ProjectItem> expander = new Expander<ProjectProperty, ProjectItem>(null, null, new BuiltInMetadataTable(this), FileSystems.Default);
-
-                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, metadatum.Location);
-                }
-                else if (metadatum != null)
-                {
-                    value = metadatum.EvaluatedValueEscaped;
-                }
-            }
-
-            return returnNullIfNotFound ? value : value ?? string.Empty;
         }
 
         /// <summary>

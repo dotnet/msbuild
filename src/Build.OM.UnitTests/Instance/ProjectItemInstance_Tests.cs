@@ -545,19 +545,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// GetMetadataValueEscaped with non present and invalid value
-        /// </summary>
-        [Fact]
-        public void GetMetadataValueEscaped()
-        {
-            ProjectItemInstance item = GetItemInstance();
-            item.GetMetadataValueEscaped("m2", returnNullIfNotFound: true).ShouldBeNull();
-            item.GetMetadataValueEscaped("m2", returnNullIfNotFound: false).ShouldBeEmpty();
-            Assert.Throws<ArgumentNullException>(() => { item.GetMetadataValueEscaped(null, returnNullIfNotFound: true); });
-            Assert.Throws<ArgumentException>(() => { item.GetMetadataValueEscaped("", returnNullIfNotFound: true); });
-        }
-
-        /// <summary>
         /// Metadata on items can refer to metadata above
         /// </summary>
         [Fact]

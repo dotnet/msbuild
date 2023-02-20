@@ -432,6 +432,15 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Returns the metadata with the specified key.
+        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
+        /// </summary>
+        string IItem.GetMetadataValueEscaped(string name, bool returnNullIfNotFound)
+        {
+            return _taskItem.GetMetadataEscaped(name, returnNullIfNotFound);
+        }
+
+        /// <summary>
         /// Sets the specified metadata.  Discards the xml part except for the name.
         /// Discards the location of the original element. This is not interesting in the Execution world
         /// as it should never be needed for any messages, and is just extra bulk.
@@ -706,15 +715,6 @@ namespace Microsoft.Build.Execution
                                         _project.Directory,
                                         _project.IsImmutable,
                                         definingFileEscaped);
-        }
-
-        /// <summary>
-        /// Returns the metadata with the specified key.
-        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
-        /// </summary>
-        public string GetMetadataValueEscaped(string name, bool returnNullIfNotFound)
-        {
-            return _taskItem.GetMetadataEscaped(name, returnNullIfNotFound);
         }
 
         /// <summary>

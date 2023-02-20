@@ -2788,7 +2788,7 @@ namespace Microsoft.Build.Evaluation
 
                         try
                         {
-                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName, true);
+                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName, returnNullIfNotFound: true);
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2824,7 +2824,7 @@ namespace Microsoft.Build.Evaluation
 
                         try
                         {
-                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName, true);
+                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName, returnNullIfNotFound: true);
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2863,7 +2863,7 @@ namespace Microsoft.Build.Evaluation
 
                             try
                             {
-                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName, true);
+                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName, returnNullIfNotFound: true);
                             }
                             catch (ArgumentException ex) // Blank metadata name
                             {
