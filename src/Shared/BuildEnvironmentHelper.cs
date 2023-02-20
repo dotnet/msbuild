@@ -599,7 +599,7 @@ namespace Microsoft.Build.Shared
 
                 MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
                 MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : CurrentMSBuildToolsDirectory;
-                MSBuildToolsDirectoryArm64 = existsCheck(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : null;
+                MSBuildToolsDirectoryArm64 = existsCheck(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : CurrentMSBuildToolsDirectory;
             }
 
             MSBuildExtensionsPath = mode == BuildEnvironmentMode.VisualStudio
