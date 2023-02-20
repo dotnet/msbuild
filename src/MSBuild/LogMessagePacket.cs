@@ -17,7 +17,7 @@ namespace Microsoft.Build.CommandLine
     /// <summary>
     /// A packet to encapsulate a BuildEventArg logging message.
     /// Contents:
-    /// Build Event Type
+    /// Build Event NodeType
     /// Build Event Args
     /// </summary>
     internal class LogMessagePacket : LogMessagePacketBase

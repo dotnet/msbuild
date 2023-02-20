@@ -22,7 +22,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
-        /// <param name="type">The Type to be loaded</param>
+        /// <param name="type">The NodeType to be loaded</param>
         /// <param name="assemblyLoadInfo">Information used to load the assembly</param>
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Shared
 #if !NET35
             // Properties set in this block aren't used by TaskHosts. Properties below are only used on the NodeProvider side to get information about the
             // properties and reflect over them without needing them to be fully loaded, so it also isn't need for TaskHosts.
-            // MetadataLoadContext-loaded Type objects don't support testing for inherited attributes, so we manually walk the BaseType chain.
+            // MetadataLoadContext-loaded NodeType objects don't support testing for inherited attributes, so we manually walk the BaseType chain.
             Type t = type;
             while (t is not null)
             {

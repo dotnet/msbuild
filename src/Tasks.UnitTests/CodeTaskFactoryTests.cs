@@ -224,7 +224,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify we get an error if a the Type attribute is set but it is empty
+        /// Verify we get an error if a the NodeType attribute is set but it is empty
         /// </summary>
         [Fact]
         public void EmptyType()
@@ -867,7 +867,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify we get an error if a the Type attribute is set but it is empty
+        /// Verify we get an error if a the NodeType attribute is set but it is empty
         /// </summary>
         [Fact]
         public void MultipleCodeElements()
@@ -898,7 +898,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify we get an error if a the Type attribute is set but it is empty
+        /// Verify we get an error if a the NodeType attribute is set but it is empty
         /// </summary>
         [Fact]
         public void ReferenceNestedInCode()

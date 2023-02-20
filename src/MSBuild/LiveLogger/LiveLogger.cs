@@ -2,255 +2,54 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Build.Logging.Ansi;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.LiveLogger
+namespace Microsoft.Build.Logging
 {
     internal class LiveLogger : ILogger
     {
-        private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
+        private readonly ConcurrentDictionary<int, ProjectNode> _projectsDictionary;
 
-        private bool Succeeded;
-        public string Parameters { get; set; }
-        public int StartedProjects = 0;
-        public int FinishedProjects = 0;
+        private volatile bool _succeeded;
+
+        private int _countStartedProjects = 0;
+
+        private int _countFinishedProjects = 0;
+
+        internal LiveLogger() => _projectsDictionary = new();
+
+        #region ILogger
+        public string Parameters { get; set; } = string.Empty;
+
         public LoggerVerbosity Verbosity { get; set; }
-
-        public LiveLogger()
-        {
-            Parameters = "";
-        }
 
         public void Initialize(IEventSource eventSource)
         {
             // Register for different events
             // Started
-            eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
-            eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
-            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
-            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
+            eventSource.BuildStarted += OnBuildStarted;
+            eventSource.ProjectStarted += OnProjectStarted;
+            eventSource.TargetStarted += OnTargetStarted;
+            eventSource.TaskStarted += OnTaskStarted;
+
             // Finished
-            eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
-            eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
-            eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
-            // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
+            eventSource.BuildFinished += OnBuildFinished;
+            eventSource.ProjectFinished += OnProjectFinished;
+            eventSource.TargetFinished += OnTargetFinished;
+
             // Raised
-            eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
-            eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
-            eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
+            eventSource.MessageRaised += OnMessageRaised;
+            eventSource.WarningRaised += OnWarningRaised;
+            eventSource.ErrorRaised += OnErrorRaised;
+
             // Cancelled
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
+            Console.CancelKeyPress += OnCancelKeyPressed;
 
-            Task.Run(() =>
-            {
-                Render();
-            });
-        }
-
-        private void Render()
-        {
-            // Initialize LiveLoggerBuffer
-            TerminalBuffer.Initialize();
-            // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            TerminalBuffer.WriteNewLine(string.Empty);
-            // First render
-            TerminalBuffer.Render();
-            int i = 0;
-            // Rerender periodically
-            while (!TerminalBuffer.IsTerminated)
-            {
-                i++;
-                // Delay by 1/60 seconds
-                // Use task delay to avoid blocking the task, so that keyboard input is listened continously
-                Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
-                {
-                    // Rerender projects only when needed
-                    foreach (var project in projects)
-                    {
-                        project.Value.Log();
-                    }
-                    // Rerender buffer
-                    TerminalBuffer.Render();
-                });
-                // Handle keyboard input
-                if (Console.KeyAvailable)
-                {
-                    ConsoleKey key = Console.ReadKey().Key;
-                    switch (key)
-                    {
-                        case ConsoleKey.UpArrow:
-                            if (TerminalBuffer.TopLineIndex > 0)
-                            {
-                                TerminalBuffer.TopLineIndex--;
-                            }
-                            TerminalBuffer.ShouldRerender = true;
-                            break;
-                        case ConsoleKey.DownArrow:
-                            TerminalBuffer.TopLineIndex++;
-                            TerminalBuffer.ShouldRerender = true;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-
-        private void UpdateFooter()
-        {
-            float percentage = (float)FinishedProjects / StartedProjects;
-            TerminalBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
-                $"Build progress (approx.) [{ANSIBuilder.Graphics.ProgressBar(percentage)}]",
-                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
-                Console.BufferWidth);
-        }
-
-        // Build
-        private void eventSource_BuildStarted(object sender, BuildStartedEventArgs e)
-        {
-        }
-
-        private void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
-        {
-            Succeeded = e.Succeeded;
-        }
-
-        // Project
-        private void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
-        {
-            StartedProjects++;
-            // Get project id
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            // If id already exists...
-            if (projects.ContainsKey(id))
-            {
-                return;
-            }
-            // Add project
-            ProjectNode node = new ProjectNode(e);
-            projects[id] = node;
-            // Log
-            // Update footer
-            UpdateFooter();
-            node.ShouldRerender = true;
-        }
-
-        private void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
-        {
-            // Get project id
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out ProjectNode? node))
-            {
-                return;
-            }
-            // Update line
-            node.Finished = true;
-            FinishedProjects++;
-            UpdateFooter();
-            node.ShouldRerender = true;
-        }
-
-        // Target
-        private void eventSource_TargetStarted(object sender, TargetStartedEventArgs e)
-        {
-            // Get project id
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out ProjectNode? node))
-            {
-                return;
-            }
-            // Update
-            node.AddTarget(e);
-            // Log
-            node.ShouldRerender = true;
-        }
-
-        private void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
-        {
-            // Get project id
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out ProjectNode? node))
-            {
-                return;
-            }
-            // Update
-            node.FinishedTargets++;
-            // Log
-            node.ShouldRerender = true;
-        }
-
-        // Task
-        private void eventSource_TaskStarted(object sender, TaskStartedEventArgs e)
-        {
-            // Get project id
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out ProjectNode? node))
-            {
-                return;
-            }
-            // Update
-            node.AddTask(e);
-            // Log
-            node.ShouldRerender = true;
-        }
-
-        private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
-        {
-        }
-
-        // Raised messages, warnings and errors
-        private void eventSource_MessageRaised(object sender, BuildMessageEventArgs e)
-        {
-            if (e is TaskCommandLineEventArgs)
-            {
-                return;
-            }
-            // Get project id
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out ProjectNode? node))
-            {
-                return;
-            }
-            // Update
-            node.AddMessage(e);
-            // Log
-            node.ShouldRerender = true;
-        }
-
-        private void eventSource_WarningRaised(object sender, BuildWarningEventArgs e)
-        {
-            // Get project id
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out ProjectNode? node))
-            {
-                return;
-            }
-            // Update
-            node.AddWarning(e);
-            // Log
-            node.ShouldRerender = true;
-        }
-
-        private void eventSource_ErrorRaised(object sender, BuildErrorEventArgs e)
-        {
-            // Get project id
-            int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out ProjectNode? node))
-            {
-                return;
-            }
-            // Update
-            node.AddError(e);
-            // Log
-            node.ShouldRerender = true;
-        }
-
-        private void console_CancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs)
-        {
-            // Shutdown logger
-            Shutdown();
+            _ = Task.Run(Render);
         }
 
         public void Shutdown()
@@ -258,37 +57,195 @@ namespace Microsoft.Build.Logging.LiveLogger
             TerminalBuffer.Terminate();
             int errorCount = 0;
             int warningCount = 0;
-            foreach (var project in projects)
+            foreach (KeyValuePair<int, ProjectNode> kvp in _projectsDictionary)
             {
-                if (project.Value.AdditionalDetails.Count == 0)
+                int id = kvp.Key;
+                ProjectNode projectNode = kvp.Value;
+                if (projectNode.AdditionalDetailsCount > 0)
                 {
-                    continue;
-                }
+                    Console.WriteLine(projectNode.ToAnsiString());
+                    errorCount += projectNode.ErrorCount;
+                    warningCount += projectNode.WarningCount;
+                    foreach (MessageNode message in projectNode.GetAdditionalDetails())
+                    {
+                        Console.WriteLine($"    └── {message.ToAnsiString()}");
+                    }
 
-                Console.WriteLine(project.Value.ToANSIString());
-                errorCount += project.Value.ErrorCount;
-                warningCount += project.Value.WarningCount;
-                foreach (var message in project.Value.AdditionalDetails)
-                {
-                    Console.WriteLine($"    └── {message.ToANSIString()}");
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
             }
 
-            // Emmpty line
             Console.WriteLine();
-            if (Succeeded)
+            if (_succeeded)
             {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine($"\t{warningCount} Warning(s)");
-                Console.WriteLine($"\t{errorCount} Error(s)");
+                Console.WriteLine(AnsiBuilder.Formatter.Color("Build succeeded.", ForegroundColor.Green));
             }
             else
             {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-                Console.WriteLine($"\t{warningCount} Warnings(s)");
-                Console.WriteLine($"\t{errorCount} Errors(s)");
+                Console.WriteLine(AnsiBuilder.Formatter.Color("Build failed.", ForegroundColor.Red));
+            }
+
+            Console.WriteLine($"\t{warningCount} Warnings(s)");
+            Console.WriteLine($"\t{errorCount} Errors(s)");
+        }
+        #endregion
+
+        private void Render()
+        {
+            // Initialize LiveLoggerBuffer
+            TerminalBuffer.Initialize();
+
+            // TODO: Fix. First line does not appear at top. Leaving empty line for now
+            _ = TerminalBuffer.WriteNewLine(string.Empty);
+
+            // First render
+            TerminalBuffer.Render();
+            int i = 0;
+
+            // Rerender periodically
+            while (!TerminalBuffer.IsTerminated)
+            {
+                // Delay by 1/60 seconds
+                // Use task delay to avoid blocking the task, so that keyboard input is listened continously
+                _ = Task.Delay(i++ / 60 * 1_000).ContinueWith(
+                    t =>
+                    {
+                        // Rerender _projectsDictionary only when needed
+                        foreach (KeyValuePair<int, ProjectNode> kvp in _projectsDictionary)
+                        {
+                            ProjectNode projectNode = kvp.Value;
+                            projectNode.Log();
+                        }
+
+                        // Rerender buffer
+                        TerminalBuffer.Render();
+                    },
+                    TaskScheduler.Default);
+
+                if (Console.KeyAvailable)
+                {
+                    HandleKeyboardIput();
+                }
             }
         }
+
+        private void HandleKeyboardIput()
+        {
+            ConsoleKey key = Console.ReadKey().Key;
+            if (key is ConsoleKey.UpArrow)
+            {
+                if (TerminalBuffer.TopLineIndex > 0)
+                {
+                    TerminalBuffer.DecrementTopLineIndex();
+                }
+
+                TerminalBuffer.ShouldRerender = true;
+            }
+            else if (key is ConsoleKey.DownArrow)
+            {
+                TerminalBuffer.IncrementTopLineIndex();
+                TerminalBuffer.ShouldRerender = true;
+            }
+        }
+
+        private void UpdateFooter()
+        {
+            float percentage = (float)_countFinishedProjects / _countStartedProjects;
+            TerminalBuffer.FooterText = AnsiBuilder.Aligner.SpaceBetween(
+                $"Build progress (approx.) [{AnsiBuilder.Graphics.ProgressBar(percentage)}]",
+                AnsiBuilder.Formatter.Italic(AnsiBuilder.Formatter.Dim("[Up][Down] Scroll")),
+                Console.BufferWidth);
+        }
+
+        private void UpdateNode<TEventArg>(BuildEventContext? context, TEventArg e, Action<TEventArg, ProjectNode> nodeUpdater)
+        {
+            if (context == null)
+            {
+                return;
+            }
+
+            int id = context!.ProjectInstanceId;
+            if (_projectsDictionary.TryGetValue(id, out ProjectNode? projectNode) && projectNode != null)
+            {
+                nodeUpdater(e, projectNode);
+                projectNode.ShouldRerender = true;
+            }
+        }
+
+        #region handlers Build
+        private void OnBuildStarted(object sender, BuildStartedEventArgs e)
+        {
+        }
+
+        private void OnBuildFinished(object sender, BuildFinishedEventArgs e) => _succeeded = e.Succeeded;
+        #endregion
+
+        #region handlers Project
+        private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
+        {
+            _countStartedProjects++;
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (_projectsDictionary.ContainsKey(id))
+            {
+                return;
+            }
+
+            ProjectNode projectNode = new(e);
+            _ = _projectsDictionary.AddOrUpdate(id, projectNode, (x, y) => projectNode);
+            UpdateFooter();
+            projectNode.ShouldRerender = true;
+        }
+
+        private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
+        {
+            int id = e.BuildEventContext!.ProjectInstanceId;
+            if (_projectsDictionary.TryGetValue(id, out ProjectNode? projectNode) && projectNode != null)
+            {
+                projectNode.Finished = true;
+                _countFinishedProjects++;
+                UpdateFooter();
+                projectNode.ShouldRerender = true;
+            }
+        }
+        #endregion
+
+        #region handlers Target
+        private void OnTargetStarted(object sender, TargetStartedEventArgs e) => UpdateNode(e.BuildEventContext, e, (x, y) => y.AddTarget(x));
+
+        private void OnTargetFinished(object sender, TargetFinishedEventArgs e)
+        {
+            if (_projectsDictionary.TryGetValue(e.BuildEventContext!.ProjectInstanceId, out ProjectNode? projectNode) && projectNode != null)
+            {
+                projectNode.IncrementFinishedTargetsCount();
+                projectNode.ShouldRerender = true;
+            }
+        }
+        #endregion
+
+        #region handlers Task
+        private void OnTaskStarted(object sender, TaskStartedEventArgs e) => UpdateNode(e.BuildEventContext, e, (x, y) => y.AddTask(x));
+
+        private void OnTaskFinished(object sender, TaskFinishedEventArgs e)
+        {
+        }
+        #endregion
+
+        #region handlers Raised messages, warnings and errors
+        private void OnMessageRaised(object sender, BuildMessageEventArgs e)
+        {
+            if (e is TaskCommandLineEventArgs)
+            {
+                return;
+            }
+
+            UpdateNode(e.BuildEventContext, e, (x, y) => y.AddMessage(x));
+        }
+
+        private void OnWarningRaised(object sender, BuildWarningEventArgs e) => UpdateNode(e.BuildEventContext, e, (x, y) => y.AddWarning(x));
+
+        private void OnErrorRaised(object sender, BuildErrorEventArgs e) => UpdateNode(e.BuildEventContext, e, (x, y) => y.AddError(x));
+
+        private void OnCancelKeyPressed(object? sender, ConsoleCancelEventArgs eventArgs) => Shutdown();
+        #endregion
     }
 }

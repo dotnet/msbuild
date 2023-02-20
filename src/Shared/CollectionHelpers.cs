@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared
         /// Returns a new list containing the input list
         /// contents, except for nulls
         /// </summary>
-        /// <typeparam name="T">Type of list elements</typeparam>
+        /// <typeparam name="T">NodeType of list elements</typeparam>
         internal static List<T> RemoveNulls<T>(List<T> inputs)
         {
             List<T> inputsWithoutNulls = new List<T>(inputs.Count);

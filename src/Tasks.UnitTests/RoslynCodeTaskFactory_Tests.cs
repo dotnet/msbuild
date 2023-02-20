@@ -464,7 +464,7 @@ End Namespace
             {
                 TransientTestFile file = testEnvironment.CreateFile(fileName: "236D48CE30064161B31B55DBF088C8B2", contents: "6159BD98607A460AA4F11D2FA92E5436");
 
-                // When Source is provided and Type is not provided, Type is expected to default to Type="Class".
+                // When Source is provided and NodeType is not provided, NodeType is expected to default to NodeType="Class".
                 TryLoadTaskBodyAndExpectSuccess($"<Code Source=\"{file.Path}\"/>", expectedCodeType: RoslynCodeTaskFactoryCodeType.Class);
 
                 foreach (RoslynCodeTaskFactoryCodeType codeType in Enum.GetValues(typeof(RoslynCodeTaskFactoryCodeType)).Cast<RoslynCodeTaskFactoryCodeType>())

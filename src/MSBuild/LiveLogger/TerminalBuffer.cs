@@ -5,94 +5,48 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
-namespace Microsoft.Build.Logging.LiveLogger
+namespace Microsoft.Build.Logging
 {
-    internal class TerminalBufferLine
+    internal static class TerminalBuffer
     {
-        private static int Counter = 0;
-        private string _text = string.Empty;
-        public List<string> WrappedText { get; private set; } = new();
-        public int Id;
-        public bool ShouldWrapLines;
-        public string Text
-        {
-            get => _text;
-            set
-            {
-                // Set text value and get wrapped lines
-                _text = value;
-                if (ShouldWrapLines)
-                {
-                    WrappedText = ANSIBuilder.ANSIWrap(value, Console.BufferWidth);
-                }
-                else
-                {
-                    WrappedText = new List<string> { value };
-                }
-                // Buffer should rerender
-                TerminalBuffer.ShouldRerender = true;
-            }
-        }
+        private static readonly int ScrollableAreaHeight = Console.BufferHeight - 3;
 
-        public TerminalBufferLine()
-        {
-            Id = Counter++;
-            Text = string.Empty;
-            ShouldWrapLines = false;
-        }
-        public TerminalBufferLine(string text)
-            : this()
-        {
-            Text = text;
-        }
-        public TerminalBufferLine(string text, bool shouldWrapLines)
-            : this()
-        {
-            ShouldWrapLines = shouldWrapLines;
-            Text = text;
-        }
-    }
+        private static List<TerminalBufferLine> s_terminalBufferLines = new();
 
-    internal class TerminalBuffer
-    {
-        private static List<TerminalBufferLine> Lines = new();
-        public static string FooterText = string.Empty;
-        public static int TopLineIndex = 0;
-        public static string Footer = string.Empty;
-        internal static bool IsTerminated = false;
-        internal static bool ShouldRerender = true;
-        internal static int ScrollableAreaHeight
-        {
-            get
-            {
-                // Height of the buffer -3 (titlebar, footer, and footer line)
-                return Console.BufferHeight - 3;
-            }
-        }
-        public static void Initialize()
+        private static volatile int s_topLineIndex = 0;
+
+        internal static bool ShouldRerender { get; set; } = true;
+
+        internal static bool IsTerminated { get; private set; } = false;
+
+        internal static int TopLineIndex { get; } = 0;
+
+        internal static string FooterText { get; set; } = string.Empty;
+
+        internal static void Initialize()
         {
             // Configure buffer, encoding and cursor
             Console.OutputEncoding = Encoding.UTF8;
-            Console.Write(ANSIBuilder.Buffer.UseAlternateBuffer());
-            Console.Write(ANSIBuilder.Cursor.Invisible());
+            Console.Write(AnsiBuilder.Bufferer.UseAlternateBuffer());
+            Console.Write(AnsiBuilder.Cursor.Invisible());
         }
 
-        public static void Terminate()
+        internal static void Terminate()
         {
             IsTerminated = true;
+
             // Delete contents from alternate buffer before switching back to main buffer
-            Console.Write(
-                ANSIBuilder.Cursor.Home() +
-                ANSIBuilder.Eraser.DisplayCursorToEnd());
+            Console.Write(AnsiBuilder.Cursor.Home() + AnsiBuilder.Eraser.DisplayCursorToEnd());
+
             // Reset configuration for buffer and cursor, and clear screen
-            Console.Write(ANSIBuilder.Buffer.UseMainBuffer());
-            Console.Write(ANSIBuilder.Cursor.Visible());
-            Lines = new();
+            Console.Write(AnsiBuilder.Bufferer.UseMainBuffer());
+            Console.Write(AnsiBuilder.Cursor.Visible());
+            s_terminalBufferLines = new();
         }
 
-        #region Rendering
-        public static void Render()
+        internal static void Render()
         {
             if (IsTerminated || !ShouldRerender)
             {
@@ -101,14 +55,13 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             ShouldRerender = false;
             Console.Write(
-                // Write header
-                ANSIBuilder.Cursor.Home() +
-                ANSIBuilder.Eraser.LineCursorToEnd() + ANSIBuilder.Formatting.Inverse(ANSIBuilder.Alignment.Center("MSBuild - Build in progress")) +
-                // Write footer
-                ANSIBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + ANSIBuilder.Eraser.LineCursorToEnd() +
+                AnsiBuilder.Cursor.Home() +
+                AnsiBuilder.Eraser.LineCursorToEnd() +
+                AnsiBuilder.Formatter.Inverse(AnsiBuilder.Aligner.Center("MSBuild - Build in progress")) +
+                AnsiBuilder.Cursor.Position(Console.BufferHeight - 1, 0) + AnsiBuilder.Eraser.LineCursorToEnd() +
                 new string('-', Console.BufferWidth) + '\n' + FooterText);
 
-            if (Lines.Count == 0)
+            if (s_terminalBufferLines.Count == 0)
             {
                 return;
             }
@@ -117,12 +70,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             string contents = string.Empty;
             int accumulatedLineCount = 0;
             int lineIndex = 0;
-            foreach (TerminalBufferLine line in Lines)
+            foreach (TerminalBufferLine line in s_terminalBufferLines)
             {
                 // Continue if accum line count + next lines < scrolling area
-                if (accumulatedLineCount + line.WrappedText.Count < TopLineIndex)
+                if (accumulatedLineCount + line.WrappedTextItemsCount < TopLineIndex)
                 {
-                    accumulatedLineCount += line.WrappedText.Count;
+                    accumulatedLineCount += line.WrappedTextItemsCount;
                     continue;
                 }
 
@@ -132,57 +85,61 @@ namespace Microsoft.Build.Logging.LiveLogger
                     break;
                 }
 
-                foreach (string s in line.WrappedText)
+                foreach (string s in line.GetWrappedTextItems())
                 {
                     // Get line index relative to scroll area
                     lineIndex = accumulatedLineCount - TopLineIndex;
+
                     // Print if line in scrolling area
                     if (lineIndex >= 0 && lineIndex < ScrollableAreaHeight)
                     {
-                        contents += ANSIBuilder.Cursor.Position(lineIndex + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd() + s;
+                        contents += AnsiBuilder.Cursor.Position(lineIndex + 2, 0) + AnsiBuilder.Eraser.LineCursorToEnd() + s;
                     }
 
                     accumulatedLineCount++;
                 }
             }
+
             // Iterate for the rest of the screen
             for (int i = lineIndex + 1; i < ScrollableAreaHeight; i++)
             {
-                contents += ANSIBuilder.Cursor.Position(i + 2, 0) + ANSIBuilder.Eraser.LineCursorToEnd();
+                contents += AnsiBuilder.Cursor.Position(i + 2, 0) + AnsiBuilder.Eraser.LineCursorToEnd();
             }
+
             Console.Write(contents);
         }
-        #endregion
-        #region Line identification
-        public static int GetLineIndexById(int lineId)
-        {
-            return Lines.FindIndex(x => x.Id == lineId);
-        }
 
-        public static TerminalBufferLine? GetLineById(int lineId)
+        internal static void IncrementTopLineIndex() => Interlocked.Increment(ref s_topLineIndex);
+
+        internal static void DecrementTopLineIndex() => Interlocked.Decrement(ref s_topLineIndex);
+
+        internal static int GetLineIndexById(int lineId) => s_terminalBufferLines.FindIndex(x => x.Id == lineId);
+
+        internal static TerminalBufferLine? WriteNewLineAfter(int lineId, string text) => WriteNewLineAfter(lineId, text, true);
+
+        internal static TerminalBufferLine? WriteNewLineAfter(int lineId, string text, bool shouldWrapLines) =>
+            WriteNewLineAfter(lineId, new TerminalBufferLine(text, shouldWrapLines));
+
+        internal static TerminalBufferLine? WriteNewLine(string text) => WriteNewLine(text, true);
+
+        internal static TerminalBufferLine? WriteNewLine(string text, bool shouldWrapLines) =>
+            WriteNewLine(new TerminalBufferLine(text, shouldWrapLines));
+
+        internal static void DeleteLine(int lineId)
         {
-            int index = GetLineIndexById(lineId);
-            if (index == -1)
+            // Get line index
+            int lineIndex = GetLineIndexById(lineId);
+            if (lineIndex == -1)
             {
-                return null;
+                return;
             }
 
-            return Lines[index];
+            // Delete
+            s_terminalBufferLines.RemoveAt(lineIndex);
+            ShouldRerender = true;
         }
-        #endregion
 
-        #region Line create, update and delete
-        // Write new line
-        public static TerminalBufferLine? WriteNewLineAfter(int lineId, string text)
-        {
-            return WriteNewLineAfter(lineId, text, true);
-        }
-        public static TerminalBufferLine? WriteNewLineAfter(int lineId, string text, bool shouldWrapLines)
-        {
-            TerminalBufferLine line = new TerminalBufferLine(text, shouldWrapLines);
-            return WriteNewLineAfter(lineId, line);
-        }
-        public static TerminalBufferLine? WriteNewLineAfter(int lineId, TerminalBufferLine line)
+        private static TerminalBufferLine? WriteNewLineAfter(int lineId, TerminalBufferLine line)
         {
             if (lineId != -1)
             {
@@ -192,50 +149,22 @@ namespace Microsoft.Build.Logging.LiveLogger
                 {
                     return null;
                 }
+
                 // Get line end index
-                Lines.Insert(lineIndex, line);
+                s_terminalBufferLines.Insert(lineIndex, line);
             }
             else
             {
-                Lines.Add(line);
+                s_terminalBufferLines.Add(line);
             }
+
             return line;
         }
 
-        public static TerminalBufferLine? WriteNewLine(string text)
-        {
-            return WriteNewLine(text, true);
-        }
-        public static TerminalBufferLine? WriteNewLine(string text, bool shouldWrapLines)
-        {
-            TerminalBufferLine line = new TerminalBufferLine(text, shouldWrapLines);
-            return WriteNewLine(line);
-        }
-        public static TerminalBufferLine? WriteNewLine(TerminalBufferLine line)
-        {
-            return WriteNewLineAfter(Lines.Count > 0 ? Lines.Last().Id : -1, line);
-        }
-
-        // Update line
-        // TODO: Remove. Use line.Text instead
-        public static TerminalBufferLine? UpdateLine(int lineId, string text)
-        {
-            return null;
-        }
-
-        // Delete line
-        public static void DeleteLine(int lineId)
-        {
-            // Get line index
-            int lineIndex = GetLineIndexById(lineId);
-            if (lineIndex == -1)
-            {
-                return;
-            }
-            // Delete
-            Lines.RemoveAt(lineIndex);
-            ShouldRerender = true;
-        }
-        #endregion
+        private static TerminalBufferLine? WriteNewLine(TerminalBufferLine line) => WriteNewLineAfter(
+                s_terminalBufferLines.Count > 0
+                ? s_terminalBufferLines.Last().Id
+                : -1,
+                line);
     }
 }

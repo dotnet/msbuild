@@ -3,17 +3,20 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.LiveLogger
+namespace Microsoft.Build.Logging
 {
-
     internal class TaskNode
     {
-        public int Id;
-        public string TaskName;
         public TaskNode(TaskStartedEventArgs args)
         {
             Id = args.BuildEventContext!.TaskId;
-            TaskName = args.TaskName;
+            TaskName = string.IsNullOrEmpty(args?.TaskName)
+                ? "task name"
+                : args.TaskName;
         }
+
+        public int Id { get; }
+
+        public string TaskName { get; }
     }
 }

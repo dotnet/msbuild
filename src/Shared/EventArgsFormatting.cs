@@ -49,7 +49,7 @@ namespace Microsoft.Build.Shared
         /// Format the message and all the other event data into a
         /// single string.
         /// </summary>
-        /// <param name="e">Message to format</param>
+        /// <param name="e">_message to format</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
         /// <param name="projectConfigurationDescription">Properties to Print along with message</param>
         /// <param name="nonNullMessage">The complete message (including property name) for an environment-derived property</param>
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Shared
         /// Format the message and all the other event data into a
         /// single string.
         /// </summary>
-        /// <param name="e">Message to format</param>
+        /// <param name="e">_message to format</param>
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildMessageEventArgs e)
         {
@@ -142,7 +142,7 @@ namespace Microsoft.Build.Shared
         /// Format the message and all the other event data into a
         /// single string.
         /// </summary>
-        /// <param name="e">Message to format</param>
+        /// <param name="e">_message to format</param>
         /// <param name="showProjectFile">Show project file or not</param>
         /// <param name="nonNullMessage">For an EnvironmentVariableReadEventArgs, adds an explanatory note and the name of the variable.</param>
         /// <returns>The formatted message string.</returns>

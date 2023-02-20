@@ -176,6 +176,15 @@
     <Compile Include="InitializationException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="LiveLogger\Ansi\AnsiAligner.cs" />
+    <Compile Include="LiveLogger\Ansi\AnsiBufferer.cs" />
+    <Compile Include="LiveLogger\Ansi\AnsiCursor.cs" />
+    <Compile Include="LiveLogger\Ansi\AnsiEraser.cs" />
+    <Compile Include="LiveLogger\Ansi\AnsiFormatting.cs" />
+    <Compile Include="LiveLogger\Ansi\AnsiGraphics.cs" />
+    <Compile Include="LiveLogger\Ansi\BackgroundColor.cs" />
+    <Compile Include="LiveLogger\Ansi\CursorStyle.cs" />
+    <Compile Include="LiveLogger\Ansi\ForegroundColor.cs" />
     <Compile Include="MSBuildClientApp.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="LogMessagePacket.cs" />

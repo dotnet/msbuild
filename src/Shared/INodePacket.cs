@@ -109,7 +109,7 @@ namespace Microsoft.Build.BackEnd
         /// A logging message.
         /// 
         /// Contents:
-        /// Build Event Type
+        /// Build Event NodeType
         /// Build Event Args
         /// </summary>
         LogMessage,
@@ -162,7 +162,7 @@ namespace Microsoft.Build.BackEnd
         TaskHostTaskComplete,
 
         /// <summary>
-        /// Message sent from the node to its paired task host when a task that 
+        /// _message sent from the node to its paired task host when a task that 
         /// supports ICancellableTask is cancelled.  
         /// 
         /// Contents:
@@ -171,22 +171,22 @@ namespace Microsoft.Build.BackEnd
         TaskHostTaskCancelled,
 
         /// <summary>
-        /// Message sent from a node when it needs to have an SDK resolved.
+        /// _message sent from a node when it needs to have an SDK resolved.
         /// </summary>
         ResolveSdkRequest,
 
         /// <summary>
-        /// Message sent back to a node when an SDK has been resolved.
+        /// _message sent back to a node when an SDK has been resolved.
         /// </summary>
         ResolveSdkResponse,
 
         /// <summary>
-        /// Message sent from a node when a task is requesting or returning resources from the scheduler.
+        /// _message sent from a node when a task is requesting or returning resources from the scheduler.
         /// </summary>
         ResourceRequest,
 
         /// <summary>
-        /// Message sent back to a node informing it about the resource that were granted by the scheduler.
+        /// _message sent back to a node informing it about the resource that were granted by the scheduler.
         /// </summary>
         ResourceResponse,
 

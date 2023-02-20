@@ -19,7 +19,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Type of parameter, used to figure out how to serialize it.
+    /// NodeType of parameter, used to figure out how to serialize it.
     /// </summary>
     internal enum TaskParameterType
     {

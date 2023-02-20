@@ -464,7 +464,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         internal class TaskBuilderTestTaskFactory : ITaskFactory
         {
             /// <summary>
-            /// Type of the task wrapped by the task factory
+            /// NodeType of the task wrapped by the task factory
             /// </summary>
             private Type _type = typeof(TaskBuilderTestTask);
 

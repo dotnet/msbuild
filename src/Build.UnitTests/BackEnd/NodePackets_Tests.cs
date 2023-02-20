@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Verify when creating a LogMessagePacket
-        /// that the correct Event Type is set.
+        /// that the correct Event NodeType is set.
         /// </summary>
         [Fact]
         public void VerifyEventType()

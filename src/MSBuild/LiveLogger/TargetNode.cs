@@ -3,19 +3,24 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.LiveLogger
+namespace Microsoft.Build.Logging
 {
-
     internal class TargetNode
     {
-        public int Id;
-        public string TargetName;
-        public TaskNode? CurrentTaskNode;
         public TargetNode(TargetStartedEventArgs args)
         {
             Id = args.BuildEventContext!.TargetId;
-            TargetName = args.TargetName;
+            TargetName = string.IsNullOrEmpty(args?.TargetName)
+                ? "task name"
+                : args.TargetName;
         }
+
+        public int Id { get; }
+
+        public TaskNode? CurrentTaskNode { get; private set; }
+
+        public string TargetName { get; }
+
         public TaskNode AddTask(TaskStartedEventArgs args)
         {
             CurrentTaskNode = new TaskNode(args);

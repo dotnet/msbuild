@@ -5,82 +5,87 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using Microsoft.Build.Logging.Ansi;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.LiveLogger
+namespace Microsoft.Build.Logging
 {
     internal class ProjectNode
     {
+        private const string PropertyTargetFramework = "_targetFramework";
+
+        private readonly List<MessageNode> _additionalDetails = new();
+
+        private readonly string _targetFramework;
+
+        private readonly string _projectPath;
+
+        private readonly TerminalBufferLine? _currentTargetLine;
+
+        private string? _projectOutputExe;
+
+        private volatile int _messageCount = 0;
+
+        private volatile int _finishedTargetsCount = 0;
+
+        private int _warningCount = 0;
+
+        private int _errorCount = 0;
+
         /// <summary>
-        /// Given a list of paths, this method will get the shortest not ambiguous path for a project.
-        /// Example: for `/users/documents/foo/project.csproj` and `/users/documents/bar/project.csproj`, the respective non ambiguous paths would be `foo/project.csproj` and `bar/project.csproj`
-        /// Still work in progress...
+        /// <see cref="TerminalBufferLine"/> to display project info.
         /// </summary>
-        private static string GetUnambiguousPath(string path)
+        private TerminalBufferLine? _terminalBufferLine;
+
+        private TargetNode? _currentTargetNode;
+
+        internal ProjectNode(ProjectStartedEventArgs args)
         {
-            return Path.GetFileName(path);
+            _projectPath = args.ProjectFile!;
+            _targetFramework = args.GlobalProperties != null
+                && args.GlobalProperties.TryGetValue(PropertyTargetFramework, out string? value)
+                ? value
+                : "";
         }
 
-        public int Id;
-        public string ProjectPath;
-        public string TargetFramework;
-        public bool Finished;
-        public string? ProjectOutputExecutable;
-        // Line to display project info
-        public TerminalBufferLine? Line;
-        // Targets
-        public int FinishedTargets;
-        public TerminalBufferLine? CurrentTargetLine;
-        public TargetNode? CurrentTargetNode;
-        // Messages, errors and warnings
-        public List<MessageNode> AdditionalDetails = new();
-        // Count messages, warnings and errors
-        public int MessageCount = 0;
-        public int WarningCount = 0;
-        public int ErrorCount = 0;
-        // Bool if node should rerender
-        internal bool ShouldRerender = true;
-        public ProjectNode(ProjectStartedEventArgs args)
+        internal int AdditionalDetailsCount => _additionalDetails.Count;
+
+        internal string ProjectOutputExe => _projectOutputExe ?? string.Empty;
+
+        internal bool Finished { get; set; } = false;
+
+        internal int FinishedTargets => _finishedTargetsCount;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether bool if node should rerender.
+        /// </summary>
+        internal bool ShouldRerender { get; set; } = true;
+
+        internal int WarningCount => _warningCount;
+
+        internal int ErrorCount => _errorCount;
+
+        internal string ToAnsiString()
         {
-            Id = args.ProjectId;
-            ProjectPath = args.ProjectFile!;
-            Finished = false;
-            FinishedTargets = 0;
-            if (args.GlobalProperties != null && args.GlobalProperties.ContainsKey("TargetFramework"))
-            {
-                TargetFramework = args.GlobalProperties["TargetFramework"];
-            }
-            else
-            {
-                TargetFramework = "";
-            }
+            ForegroundColor color = GetFormattingColor();
+            return GetIconString() +
+                " " +
+                AnsiBuilder.Formatter.Color(AnsiBuilder.Formatter.Bold(GetUnambiguousPath(_projectPath)), color) +
+                " " +
+                AnsiBuilder.Formatter.Inverse(_targetFramework);
         }
 
-        public string ToANSIString()
+        internal IEnumerable<MessageNode> GetAdditionalDetails()
         {
-            ANSIBuilder.Formatting.ForegroundColor color = ANSIBuilder.Formatting.ForegroundColor.Default;
-            string icon = ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner()) + " ";
-
-            if (Finished && WarningCount + ErrorCount == 0)
+            foreach (MessageNode msg in _additionalDetails)
             {
-                color = ANSIBuilder.Formatting.ForegroundColor.Green;
-                icon = "✓";
+                yield return msg;
             }
-            else if (ErrorCount > 0)
-            {
-                color = ANSIBuilder.Formatting.ForegroundColor.Red;
-                icon = "X";
-            }
-            else if (WarningCount > 0)
-            {
-                color = ANSIBuilder.Formatting.ForegroundColor.Yellow;
-                icon = "✓";
-            }
-            return icon + " " + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), color) + " " + ANSIBuilder.Formatting.Inverse(TargetFramework);
         }
 
         // TODO: Rename to Render() after LiveLogger's API becomes internal
-        public void Log()
+        internal void Log()
         {
             if (!ShouldRerender)
             {
@@ -88,35 +93,23 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             ShouldRerender = false;
-            // Project details
-            string lineContents = ANSIBuilder.Alignment.SpaceBetween(ToANSIString(), $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)", Console.BufferWidth - 1);
+
             // Create or update line
-            if (Line is null)
-            {
-                Line = TerminalBuffer.WriteNewLine(lineContents, false);
-            }
-            else
-            {
-                Line.Text = lineContents;
-            }
+            SetTerminalBufferLineText(AnsiBuilder.Aligner.SpaceBetween(ToAnsiString(), $"({_messageCount} ℹ️, {_warningCount} ⚠️, {_errorCount} ❌)", Console.BufferWidth - 1));
 
             // For finished projects
             if (Finished)
             {
-                if (CurrentTargetLine is not null)
+                if (_currentTargetLine is not null)
                 {
-                    TerminalBuffer.DeleteLine(CurrentTargetLine.Id);
+                    TerminalBuffer.DeleteLine(_currentTargetLine.Id);
                 }
 
-                foreach (MessageNode node in AdditionalDetails.ToList())
+                foreach (MessageNode node in _additionalDetails.ToList())
                 {
                     // Only delete high priority messages
-                    if (node.Type != MessageNode.MessageType.HighPriorityMessage)
-                    {
-                        continue;
-                    }
-
-                    if (node.Line is not null)
+                    if (node.NodeType is MessageNodeType.HighPriorityMessage
+                        && node.Line is not null)
                     {
                         TerminalBuffer.DeleteLine(node.Line.Id);
                     }
@@ -124,87 +117,136 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             // Current target details
-            if (CurrentTargetNode is null)
+            if (_currentTargetNode != null)
             {
-                return;
+                string targetLineContents = $"    └── {_currentTargetNode.TargetName} : {_currentTargetNode.CurrentTaskNode?.TaskName ?? string.Empty}";
+                SetTerminalBufferLineText(_terminalBufferLine!.Id, targetLineContents);
+
+                // Messages, warnings and errors
+                foreach (MessageNode node in _additionalDetails)
+                {
+                    if (Finished
+                        && node.NodeType is not MessageNodeType.HighPriorityMessage
+                        && node.Line is null)
+                    {
+                        node.Line = TerminalBuffer.WriteNewLineAfter(_terminalBufferLine!.Id, "Message");
+                        node.Log();
+                    }
+                }
+            }
+        }
+
+        internal void IncrementFinishedTargetsCount() => _ = Interlocked.Increment(ref _finishedTargetsCount);
+
+        internal TargetNode AddTarget(TargetStartedEventArgs args)
+        {
+            _currentTargetNode = new TargetNode(args);
+            return _currentTargetNode;
+        }
+
+        internal TaskNode? AddTask(TaskStartedEventArgs args) =>
+            _currentTargetNode?.Id == args.BuildEventContext!.TargetId
+            ? _currentTargetNode.AddTask(args)
+            : null;
+
+        internal MessageNode? AddMessage(BuildMessageEventArgs args)
+        {
+            if (args.Importance == MessageImportance.High)
+            {
+                _ = Interlocked.Add(ref _messageCount, 1);
+                MessageNode node = new(args);
+
+                // Add output executable path
+                if (node.ProjectOutputExecPath is not null)
+                {
+                    _projectOutputExe = node.ProjectOutputExecPath;
+                }
+
+                _additionalDetails.Add(node);
+                return node;
             }
 
-            string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
-            if (CurrentTargetLine is null)
+            return null;
+        }
+
+        internal MessageNode? AddWarning(BuildWarningEventArgs args) => AddMessageNode(x => new MessageNode(x), args, ref _warningCount);
+
+        internal MessageNode? AddError(BuildErrorEventArgs args) => AddMessageNode(x => new MessageNode(x), args, ref _errorCount);
+
+        /// <summary>
+        /// Given a list of paths, this method will get the shortest not ambiguous path for a project.
+        /// </summary>
+        /// <example>for `/users/documents/foo/project.csproj` and `/users/documents/bar/project.csproj`, the respective non ambiguous paths would be `foo/project.csproj` and `bar/project.csproj`
+        /// Still work in progress...
+        /// </example>
+        private static string GetUnambiguousPath(string path) => Path.GetFileName(path);
+
+        private MessageNode? AddMessageNode<T>(Func<T, MessageNode> factory, T args, ref int count)
+        {
+            _ = Interlocked.Add(ref count, 1);
+            MessageNode node = factory(args);
+            _additionalDetails.Add(node);
+            return node;
+        }
+
+        private void SetTerminalBufferLineText(string text)
+        {
+            if (_terminalBufferLine is null)
             {
-                CurrentTargetLine = TerminalBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
+                _terminalBufferLine = TerminalBuffer.WriteNewLine(text, false);
             }
             else
             {
-                CurrentTargetLine.Text = currentTargetLineContents;
-            }
-
-            // Messages, warnings and errors
-            foreach (MessageNode node in AdditionalDetails)
-            {
-                if (Finished && node.Type == MessageNode.MessageType.HighPriorityMessage)
-                {
-                    continue;
-                }
-
-                if (node.Line is null)
-                {
-                    node.Line = TerminalBuffer.WriteNewLineAfter(Line!.Id, "Message");
-                }
-
-                node.Log();
+                _terminalBufferLine.Text = text;
             }
         }
 
-        public TargetNode AddTarget(TargetStartedEventArgs args)
+        private void SetTerminalBufferLineText(int lineId, string text)
         {
-            CurrentTargetNode = new TargetNode(args);
-            return CurrentTargetNode;
-        }
-        public TaskNode? AddTask(TaskStartedEventArgs args)
-        {
-            // Get target id
-            int targetId = args.BuildEventContext!.TargetId;
-            if (CurrentTargetNode?.Id == targetId)
+            if (_terminalBufferLine is null)
             {
-                return CurrentTargetNode.AddTask(args);
+                _terminalBufferLine = TerminalBuffer.WriteNewLineAfter(lineId, text);
             }
             else
             {
-                return null;
+                _terminalBufferLine.Text = text;
             }
         }
-        public MessageNode? AddMessage(BuildMessageEventArgs args)
+
+        private string GetIconString()
         {
-            if (args.Importance != MessageImportance.High)
+            if (Finished && _warningCount + _errorCount == 0)
             {
-                return null;
+                return "✓";
+            }
+            else if (_errorCount > 0)
+            {
+                return "X";
+            }
+            else if (_warningCount > 0)
+            {
+                return "✓";
             }
 
-            MessageCount++;
-            MessageNode node = new MessageNode(args);
-            // Add output executable path
-            if (node.ProjectOutputExecutablePath is not null)
+            return $"{AnsiBuilder.Formatter.Blinking(AnsiBuilder.Graphics.Spinner())} ";
+        }
+
+        private ForegroundColor GetFormattingColor()
+        {
+            if (Finished && _warningCount + _errorCount == 0)
             {
-                ProjectOutputExecutable = node.ProjectOutputExecutablePath;
+                return ForegroundColor.Green;
+            }
+            else if (_errorCount > 0)
+            {
+                return ForegroundColor.Red;
+            }
+            else if (_warningCount > 0)
+            {
+                return ForegroundColor.Yellow;
             }
 
-            AdditionalDetails.Add(node);
-            return node;
-        }
-        public MessageNode? AddWarning(BuildWarningEventArgs args)
-        {
-            WarningCount++;
-            MessageNode node = new MessageNode(args);
-            AdditionalDetails.Add(node);
-            return node;
-        }
-        public MessageNode? AddError(BuildErrorEventArgs args)
-        {
-            ErrorCount++;
-            MessageNode node = new MessageNode(args);
-            AdditionalDetails.Add(node);
-            return node;
+            return ForegroundColor.Default;
         }
     }
 }

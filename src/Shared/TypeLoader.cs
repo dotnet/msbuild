@@ -39,7 +39,7 @@ namespace Microsoft.Build.Shared
         private static ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
 
         /// <summary>
-        /// Type filter for this typeloader
+        /// NodeType filter for this typeloader
         /// </summary>
         private Func<Type, object, bool> _isDesiredType;
 
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Shared
             private readonly Object _lockObject = new Object();
 
             /// <summary>
-            /// Type filter to pick the correct types out of an assembly
+            /// NodeType filter to pick the correct types out of an assembly
             /// </summary>
             private Func<Type, object, bool> _isDesiredType;
 
@@ -344,7 +344,7 @@ namespace Microsoft.Build.Shared
                         }
                         catch (ArgumentException)
                         {
-                            // Type.GetType() will throw this exception if the type name is invalid -- but we have no idea if it's the
+                            // NodeType.GetType() will throw this exception if the type name is invalid -- but we have no idea if it's the
                             // type or the assembly name that's the problem -- so just ignore the exception, because we're going to
                             // check the existence/validity of the assembly and type respectively, below anyway
                         }

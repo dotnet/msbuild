@@ -16,7 +16,7 @@ namespace Microsoft.Build.Collections
     /// <remarks>
     /// Thus this is an omission from the BCL.
     /// </remarks>
-    /// <typeparam name="T">Type of element in the collection</typeparam>
+    /// <typeparam name="T">NodeType of element in the collection</typeparam>
     internal class ReadOnlyEmptyCollection<T> : ICollection<T>, ICollection
     {
         /// <summary>

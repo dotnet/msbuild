@@ -146,7 +146,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// A packet to encapsulate a BuildEventArg logging message.
     /// Contents:
-    /// Build Event Type
+    /// Build Event NodeType
     /// Build Event Args
     /// </summary>
     internal abstract class LogMessagePacketBase : INodePacket
@@ -254,7 +254,7 @@ namespace Microsoft.Build.Shared
         #region Properties
 
         /// <summary>
-        /// The nodePacket Type, in this case the packet is a Logging Message
+        /// The nodePacket NodeType, in this case the packet is a Logging _message
         /// </summary>
         public NodePacketType Type
         {
@@ -805,7 +805,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Write a "standard" Message Log the translator 
+        /// Write a "standard" _message Log the translator 
         /// </summary>
         private void WriteBuildMessageEventToStream(BuildMessageEventArgs buildMessageEventArgs, ITranslator translator)
         {
