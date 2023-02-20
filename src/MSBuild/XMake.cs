@@ -224,7 +224,7 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
-            KnownTelemetry.BuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -309,18 +309,18 @@ namespace Microsoft.Build.CommandLine
                     IsInteractiveBuild(commandLineSwitches))
                 {
                     canRunServer = false;
-                    if (KnownTelemetry.BuildTelemetry != null)
+                    if (KnownTelemetry.PartialBuildTelemetry != null)
                     {
-                        KnownTelemetry.BuildTelemetry.ServerFallbackReason = "Arguments";
+                        KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
                     }
                 }
             }
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace("Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {0}", ex);
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
+                    KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
                 }
                 canRunServer = false;
             }
@@ -631,7 +631,7 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build, if not initialized already
-            KnownTelemetry.BuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
+            KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
 
             // Indicate to the engine that it can toss extraneous file content
             // when it loads microsoft.*.targets. We can't do this in the general case,

@@ -8,7 +8,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     /// <summary>
     /// Class representation of a task output property.
     /// </summary>
-    internal class OutputProperty : TaskParameter
+    internal sealed class OutputProperty : TaskParameter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OutputProperty"/> class.

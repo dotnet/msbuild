@@ -12,8 +12,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
@@ -24,9 +22,11 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests
             string GetMetadataValue(string key);
         }
 
-        internal class ProjectItemTestItemAdapter : ITestItem
+        internal sealed class ProjectItemTestItemAdapter : ITestItem
         {
             private readonly ProjectItem _projectInstance;
 
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class ProjectItemInstanceTestItemAdapter : ITestItem
+        internal sealed class ProjectItemInstanceTestItemAdapter : ITestItem
         {
             private readonly ProjectItemInstance _projectInstance;
 
@@ -671,8 +671,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Create a project in memory. Load up the given XML.
         /// </summary>
-        /// <param name="xml"></param>
-        /// <returns></returns>
+        /// <param name="xml">the project to be created in string format.</param>
+        /// <returns>Returns created <see cref="Project"/>.</returns>
         internal static Project CreateInMemoryProject(string xml)
         {
             return CreateInMemoryProject(xml, new ConsoleLogger());
@@ -681,53 +681,58 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Create a project in memory. Load up the given XML.
         /// </summary>
-        /// <param name="xml"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        internal static Project CreateInMemoryProject(string xml, ILogger logger /* May be null */)
+        /// <param name="xml">the project to be created in string format.</param>
+        /// <param name="loggers">The array of loggers to attach on project evaluation.</param>
+        /// <returns>Returns created <see cref="Project"/>.</returns>
+        internal static Project CreateInMemoryProject(string xml, params ILogger[] loggers)
         {
-            return CreateInMemoryProject(new ProjectCollection(), xml, logger);
+            return CreateInMemoryProject(new ProjectCollection(), xml, loggers);
         }
 
         /// <summary>
         /// Create an in-memory project and attach it to the passed-in engine.
         /// </summary>
-        /// <param name="engine"></param>
-        /// <param name="xml"></param>
-        /// <param name="logger">May be null</param>
-        /// <returns></returns>
-        internal static Project CreateInMemoryProject(ProjectCollection e, string xml, ILogger logger /* May be null */)
+        /// <param name="projectCollection"><see cref="ProjectCollection"/> to use for project creation.</param>
+        /// <param name="xml">the project to be created in string format.</param>
+        /// <param name="loggers">The array of loggers to attach on project evaluation. May be null.</param>
+        /// <returns>Returns created <see cref="Project"/>.</returns>
+        internal static Project CreateInMemoryProject(ProjectCollection projectCollection, string xml, params ILogger[] loggers)
         {
-            return CreateInMemoryProject(e, xml, logger, null);
+            return CreateInMemoryProject(projectCollection, xml, null, loggers);
         }
 
         /// <summary>
         /// Create an in-memory project and attach it to the passed-in engine.
         /// </summary>
-        /// <param name="logger">May be null</param>
-        /// <param name="toolsVersion">May be null</param>
+        /// <param name="projectCollection"><see cref="ProjectCollection"/> to use for project creation.</param>
+        /// <param name="xml">the project to be created in string format.</param>
+        /// <param name="toolsVersion">The tools version to use on project creation. May be null.</param>
+        /// <param name="loggers">The array of loggers to attach to project collection before evaluation. May be null.</param>
+        /// <returns>Returns created <see cref="Project"/>.</returns>
         internal static Project CreateInMemoryProject(
             ProjectCollection projectCollection,
             string xml,
-            ILogger logger /* May be null */,
-            string toolsVersion) /* may be null */
+            string toolsVersion /* may be null */,
+            params ILogger[] loggers)
         {
             XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+            if (loggers != null)
+            {
+                foreach (ILogger logger in loggers)
+                {
+                    projectCollection.RegisterLogger(logger);
+                }
+            }
 
             Project project = new Project(
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
-                null,
+                globalProperties: null,
                 toolsVersion,
                 projectCollection);
 
             Guid guid = Guid.NewGuid();
             project.FullPath = Path.Combine(TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
             project.ReevaluateIfNecessary();
-
-            if (logger != null)
-            {
-                project.ProjectCollection.RegisterLogger(logger);
-            }
 
             return project;
         }
@@ -736,48 +741,61 @@ namespace Microsoft.Build.UnitTests
         /// Creates a project in memory and builds the default targets.  The build is
         /// expected to succeed.
         /// </summary>
-        /// <param name="projectContents"></param>
-        /// <returns></returns>
+        /// <param name="projectContents">The project file content in string format.</param>
+        /// <param name="testOutputHelper"><see cref="ITestOutputHelper"/> to log to.</param>
+        /// <param name="loggerVerbosity">The required logging verbosity.</param>
+        /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
         internal static MockLogger BuildProjectExpectSuccess(
             string projectContents,
-            ITestOutputHelper testOutputHelper = null)
+            ITestOutputHelper testOutputHelper = null,
+            LoggerVerbosity loggerVerbosity = LoggerVerbosity.Normal)
         {
-            MockLogger logger = new MockLogger(testOutputHelper);
+            MockLogger logger = new MockLogger(testOutputHelper, verbosity: loggerVerbosity);
             BuildProjectExpectSuccess(projectContents, logger);
             return logger;
         }
 
+        /// <summary>
+        /// Creates a project in memory and builds the default targets.  The build is
+        /// expected to succeed.
+        /// </summary>
+        /// <param name="projectContents">The project file content in string format.</param>
+        /// <param name="loggers">The array of loggers to use.</param>
         internal static void BuildProjectExpectSuccess(
             string projectContents,
             params ILogger[] loggers)
         {
-            Project project = CreateInMemoryProject(projectContents, logger: null); // logger is null so we take care of loggers ourselves
-            project.Build(loggers).ShouldBeTrue();
+            using ProjectCollection collection = new();
+            Project project = CreateInMemoryProject(collection, projectContents, loggers);
+            project.Build().ShouldBeTrue();
         }
 
         /// <summary>
         /// Creates a project in memory and builds the default targets.  The build is
         /// expected to fail.
         /// </summary>
-        /// <param name="projectContents"></param>
-        /// <returns></returns>
-        internal static MockLogger BuildProjectExpectFailure(
-            string projectContents)
+        /// <param name="projectContents">The project file content in string format.</param>
+        /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
+        internal static MockLogger BuildProjectExpectFailure(string projectContents)
         {
             MockLogger logger = new MockLogger();
             BuildProjectExpectFailure(projectContents, logger);
-
             return logger;
         }
 
+        /// <summary>
+        /// Creates a project in memory and builds the default targets.  The build is
+        /// expected to fail.
+        /// </summary>
+        /// <param name="projectContents">The project file content in string format.</param>
+        /// <param name="loggers">The array of loggers to use.</param>
         internal static void BuildProjectExpectFailure(
             string projectContents,
-            ILogger logger)
+            params ILogger[] loggers)
         {
-            Project project = CreateInMemoryProject(projectContents, logger);
-
-            bool success = project.Build(logger);
-            Assert.False(success); // "Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details"
+            using ProjectCollection collection = new();
+            Project project = CreateInMemoryProject(collection, projectContents, loggers);
+            project.Build().ShouldBeFalse("Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details\"");
         }
 
         /// <summary>
@@ -1979,7 +1997,7 @@ namespace Microsoft.Build.UnitTests
                 ? path
                 : path.ToSlash();
 
-        internal class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
+        internal sealed class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
         {
             public bool Equals(ElementLocation x, ElementLocation y)
             {
@@ -2007,7 +2025,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class BuildManagerSession : IDisposable
+        internal sealed class BuildManagerSession : IDisposable
         {
             private readonly TestEnvironment _env;
             private readonly BuildManager _buildManager;
@@ -2154,7 +2172,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class LoggingFileSystem : MSBuildFileSystemBase
+        internal sealed class LoggingFileSystem : MSBuildFileSystemBase
         {
             private int _fileSystemCalls;
 

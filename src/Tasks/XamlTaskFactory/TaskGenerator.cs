@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
-using System.CodeDom;
-
 using Microsoft.Build.Shared;
 
 #nullable disable

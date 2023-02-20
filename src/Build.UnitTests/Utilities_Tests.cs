@@ -3,26 +3,20 @@
 
 using System;
 using System.Collections;
-
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Shared;
-
+using Shouldly;
+using Xunit;
+using Xunit.Abstractions;
 using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-
 using Toolset = Microsoft.Build.Evaluation.Toolset;
-
-
 using XmlDocumentWithLocation = Microsoft.Build.Construction.XmlDocumentWithLocation;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
-
-using Xunit;
-using System.Collections.Generic;
-using System.IO;
-using Xunit.Abstractions;
-using Shouldly;
 
 #nullable disable
 

@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    internal class MockRemoteHostObject : ITaskHost, ITestRemoteHostObject
+    internal sealed class MockRemoteHostObject : ITaskHost, ITestRemoteHostObject
     {
         private int _state;
 

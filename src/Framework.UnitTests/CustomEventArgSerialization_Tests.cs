@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
     public class CustomEventArgSerialization_Tests : IDisposable
     {
         // Generic build class to test custom serialization of abstract class BuildEventArgs
-        internal class GenericBuildEventArg : BuildEventArgs
+        internal sealed class GenericBuildEventArg : BuildEventArgs
         {
             internal GenericBuildEventArg(
             string message,

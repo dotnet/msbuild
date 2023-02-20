@@ -1,16 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_SYMLINK_TARGET
-        [Fact]
+        [RequiresSymbolicLinksFact]
         public void DoNotFollowRecursiveSymlinks()
         {
             TransientTestFolder testFolder = _env.CreateFolder();
@@ -1970,7 +1970,7 @@ namespace Microsoft.Build.UnitTests
         /// It accepts multiple sets of files and keeps track of how many files were "hit"
         /// In this case, "hit" means that the caller asked for that file directly.
         /// </summary>
-        internal class MockFileSystem
+        internal sealed class MockFileSystem
         {
             /// <summary>
             /// Array of files (set1)
@@ -2613,7 +2613,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        private class FileSystemAdapter : IFileSystem
+        private sealed class FileSystemAdapter : IFileSystem
         {
             private readonly MockFileSystem _mockFileSystem;
 

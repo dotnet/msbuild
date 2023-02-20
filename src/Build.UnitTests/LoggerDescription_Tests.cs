@@ -3,10 +3,9 @@
 
 using System;
 using System.IO;
-
 using Microsoft.Build.Framework;
-using Xunit;
 using Microsoft.Build.Logging;
+using Xunit;
 
 #nullable disable
 

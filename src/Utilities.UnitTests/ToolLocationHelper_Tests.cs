@@ -1153,7 +1153,7 @@ namespace Microsoft.Build.UnitTests
             ILogger logger = new MockLogger(_output);
 
             ProjectCollection collection = new ProjectCollection();
-            Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, logger, "4.0");
+            Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, "4.0", logger);
 
             bool success = p.Build(logger);
 
@@ -1196,7 +1196,7 @@ namespace Microsoft.Build.UnitTests
             globalProperties.Add("VisualStudioVersion", "10.0");
 
             ProjectCollection collection = new ProjectCollection(globalProperties);
-            Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, logger, "4.0");
+            Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, "4.0", logger);
 
             bool success = p.Build(logger);
 
@@ -1249,7 +1249,7 @@ namespace Microsoft.Build.UnitTests
             globalProperties.Add("VisualStudioVersion", "11.0");
 
             ProjectCollection collection = new ProjectCollection(globalProperties);
-            Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, logger, "4.0");
+            Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, "4.0", logger);
 
             bool success = p.Build(logger);
 
@@ -2810,7 +2810,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This class will provide delegates and properties to allow differen combinations of ToolLocationHelper GetDotNetFrameworkPaths and GetReferenceAssemblyPaths to be simulated.
         /// </summary>
-        internal class LegacyFrameworkTestHelper
+        internal sealed class LegacyFrameworkTestHelper
         {
             /// <summary>
             /// Paths which simulate the fact that the frameworks are installed including their reference assemblies
@@ -4197,7 +4197,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), "Test");
 
-                Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents, null);
+                Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents);
 
                 string propertyValue = project.GetPropertyValue("PlatformSDKLocation");
                 string propsLocation = project.GetPropertyValue("PropsLocation");
@@ -4275,7 +4275,7 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), "Test");
                 File.WriteAllText(Path.Combine(platformDirectory2, "Platform.xml"), "Test");
 
-                Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents, null);
+                Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents);
 
                 string propertyValue = project.GetPropertyValue("PlatformSDKLocation");
                 string propsLocation = project.GetPropertyValue("PropsLocation");

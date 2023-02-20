@@ -36,7 +36,7 @@ namespace Microsoft.Build.Unittest
             };
         }
 
-        internal class ConfigurableMockSdkResolver : SdkResolver
+        internal sealed class ConfigurableMockSdkResolver : SdkResolver
         {
             private readonly Dictionary<string, SdkResult> _resultMap;
             private readonly Func<SdkReference, SdkResolverContext, SdkResultFactory, Framework.SdkResult> _resolveFunc;
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Unittest
             }
         }
 
-        internal class FileBasedMockSdkResolver : SdkResolver
+        internal sealed class FileBasedMockSdkResolver : SdkResolver
         {
             private readonly Dictionary<string, string> _mapping;
 

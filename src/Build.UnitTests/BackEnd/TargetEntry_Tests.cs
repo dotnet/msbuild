@@ -1193,7 +1193,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The mock component host.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
             #region IBuildComponentHost Members
 

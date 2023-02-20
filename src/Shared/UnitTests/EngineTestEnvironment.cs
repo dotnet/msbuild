@@ -28,9 +28,9 @@ namespace Microsoft.Build.UnitTests
         private object _resetBuildManager = new ResetDefaultBuildManager();
 #pragma warning restore CA1823 // Avoid unused private fields
 
-        private class ResetDefaultBuildManager
+        private sealed class ResetDefaultBuildManager
         {
-            protected internal static FieldInfo SingletonField;
+            internal static FieldInfo SingletonField;
 
             public ResetDefaultBuildManager()
             {

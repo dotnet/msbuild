@@ -59,6 +59,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 * [Target maps](wiki/Target-Maps.md)
 * [Managing parallelism in MSBuild](specs/resource-management.md)
 * [SDK resolution](specs/sdk-resolvers-algorithm.md)
+* [Nodes orchestration](wiki/Nodes-Orchestration.md)
 
 ### Tasks
 
