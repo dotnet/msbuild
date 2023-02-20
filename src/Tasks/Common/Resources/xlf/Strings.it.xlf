@@ -149,7 +149,7 @@
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelOutputPath">
         <source>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</source>
-        <target state="new">NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</target>
+        <target state="translated">NETSDK1194: l'opzione "--output" non è supportata durante la compilazione di una soluzione. Se si specifica un percorso di output a livello di soluzione, tutti i progetti copiano gli output nella stessa directory, con possibili compilazioni incoerenti.</target>
         <note>{StrBegin="NETSDK1194: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
