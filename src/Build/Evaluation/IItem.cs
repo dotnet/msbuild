@@ -54,6 +54,12 @@ namespace Microsoft.Build.Evaluation
         string GetMetadataValueEscaped(string name);
 
         /// <summary>
+        /// Returns the metadata with the specified key.
+        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
+        /// </summary>
+        string GetMetadataValueEscaped(string name, bool returnNullIfNotFound);
+
+        /// <summary>
         /// Returns true if a particular piece of metadata is defined on this item (even if
         /// its value is empty string) otherwise false.
         /// This includes built-in metadata and metadata from item definitions.
@@ -63,11 +69,5 @@ namespace Microsoft.Build.Evaluation
         /// care where the metadata originated.
         /// </remarks>
         bool HasMetadata(string name);
-
-        /// <summary>
-        /// Returns the metadata with the specified key.
-        /// Returns null if returnNullIfNotFound is true otherwise returns empty string when metadata not present
-        /// </summary>
-        string GetMetadataValueEscaped(string name, bool returnNullIfNotFound);
     }
 }
