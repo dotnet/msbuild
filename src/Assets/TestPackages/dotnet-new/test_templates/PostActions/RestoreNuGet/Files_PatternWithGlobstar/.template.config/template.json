@@ -1,0 +1,28 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.PostActions.RestoreNuGet.Files_PatternWithGlobstar",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.PostActions.RestoreNuGet.Files_PatternWithGlobstar",
+    "precedence": "100",
+    "identity": "TestAssets.PostActions.RestoreNuGet.Files_PatternWithGlobstar",
+    "shortName": "TestAssets.PostActions.RestoreNuGet.Files_PatternWithGlobstar",
+    "sourceName": "Tool",
+    "primaryOutputs": [
+        { "path": "Tool/Tool.csproj" },
+        { "path": "Tool.Test/Tool.Test.csproj" }
+    ],
+    "postActions": [
+        {
+            "description": "Restore NuGet packages required by this project.",
+            "manualInstructions": [
+                { "text": "Run 'dotnet restore'" }
+            ],
+            "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+            "continueOnError": true,
+            "args": {
+                "files": [ "**/Tool.Library.csproj" ]
+            }
+        }
+    ]
+}
