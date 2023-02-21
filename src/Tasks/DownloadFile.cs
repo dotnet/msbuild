@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.ToString());
                         break;
                     }
                 }
