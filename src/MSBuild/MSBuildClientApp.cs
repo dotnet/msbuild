@@ -78,9 +78,9 @@ namespace Microsoft.Build.CommandLine
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.UnknownServerState ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.LaunchError)
             {
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry.ServerFallbackReason = exitResult.MSBuildClientExitType.ToString();
+                    KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = exitResult.MSBuildClientExitType.ToString();
                 }
 
                 // Server is busy, fallback to old behavior.
