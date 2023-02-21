@@ -342,6 +342,7 @@ namespace Microsoft.NET.Build.Tasks
                         _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "libclrjit.so");
                     }
                     else if (RuntimeInformation.OSArchitecture == Architecture.X64)
+                    //else if(RuntimeInformation.OSArchitecture == Architecture.X64 || RuntimeInformation.OSArchitecture == Architecture.AMD64)
                     {
                         string xarchPath = (_targetArchitecture == Architecture.Arm ? "x64_arm" : "x64_arm64");
                         _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", xarchPath, "crossgen");
