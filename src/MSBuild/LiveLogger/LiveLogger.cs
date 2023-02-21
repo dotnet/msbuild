@@ -150,7 +150,6 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         private void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
-            endTime = DateTime.Now;
             succeeded = e.Succeeded;
         }
 
@@ -323,7 +322,7 @@ namespace Microsoft.Build.Logging.LiveLogger
             Console.WriteLine();
 
             Debug.Assert(_stopwatch is not null, $"Expected {nameof(_stopwatch)} to be initialized long before Shutdown()");
-            TimeSpan buildDuration = _stopwatch.Elapsed;
+            TimeSpan buildDuration = _stopwatch!.Elapsed;
 
             string prettyDuration = buildDuration.TotalHours > 1.0 ?
                 buildDuration.ToString(@"h\:mm\:ss") :
