@@ -4,7 +4,7 @@ The feature is meant to simplify the process of fixing, testing and contributing
 
 It is inspired by the golang modules design - where a standalone dependency (module) has a pointer to it's source location as a first-class citizen within the ecosystem (go.mod) and the relation between the source codes and runtime dependecy is unambigously guaranteed by the compiler.
 
-The feature is envisioned to be facilitated via [`SourceLink`](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/sourcelink) repository metadata, [`PE headers`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.portableexecutable.peheaders?view=net-7.0) metadata, in-memory switching between `PackageReference` and `ProjectReference` and possibly verification of proper outputs (for `deterministic build` enabled projects).
+The feature is envisioned to be facilitated via [`SourceLink`](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/sourcelink) repository metadata, [`PE headers`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.portableexecutable.peheaders?view=net-7.0) and pdb metadata ([`MetadataReader`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.metadata.metadatareader)), in-memory or persistent switching between `PackageReference` and `ProjectReference` and possibly verification of proper outputs (for `deterministic build` enabled projects).
 
 # User scenarios
 
@@ -54,7 +54,7 @@ The feature is envisioned to be facilitated via [`SourceLink`](https://learn.mic
 # Scope
 
 ## In scope
-* API for initiating the `Package Sourcing` for particular nuget (sdk?). API for flipping the `PackageReference` (msbuild?)
+* API/CLI for initiating the `Package Sourcing` for particular nuget(s) (sdk?). API for flipping the `PackageReference` (msbuild?)
 * Flip to interactive reference and patching should survive between builds on a single machine 
 
 ## Out of scope
@@ -82,6 +82,8 @@ The feature is envisioned to be facilitated via [`SourceLink`](https://learn.mic
  Some of those problems might be eliminated by simplifying the workflow and e.g. providing a command that prepares a project and edits the original MSBuild file to replace `PackageReference` with `ProjectReference` - the consuming of code patches and indicating the altered reference to user would not be needed.
  
  ## Possible Implementations
+
+ Following sections discuss possible implementations of individual [subproblems outlined above](#subproblems).
 
  ### Opting-in
 
@@ -132,7 +134,7 @@ To be decided (nuget cache? Submodules of the current git context? ...)
  This is the most challenging part of the story - as .NET ecosystem currently doesn't enforce custom build pre-requisities standards nor conventions and hence it is not possible to replicate the package build process without possible manual steps. This part will hence be 'best efforts' with sensible communication of issues to user. 
  
  We envision multiple options to achieve this goal (with possibility of fallback/combination of multiple approaches):
- * Option A: Using Roslyn to extract information from PE and reconstruct the compilation ([experimental code](https://github.com/dotnet/roslyn/blob/main/src/Compilers/Core/Rebuild/CompilationFactory.cs#L45))
+ * Option A: Using Pdb info/ Roslyn to extract information from PE/Pdbs and reconstruct the compilation ([roslyn experimental code](https://github.com/dotnet/roslyn/blob/main/src/Tools/BuildValidator/Program.cs#L268), [NugetPackageExplorer SymbolValidator](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/blob/main/Core/SymbolValidation/SymbolValidator.cs#L145)). Access to symbol files (whether published as .snupkg on nuget.org or on microsoft or corporate symbols servers) is crucial for this method. As well as usage of particualr compiler toolchain used to generate the inspected package (**TBD** - what minimal version do we need for .NET (?[5.0.3 or MSBuild 16.10](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/commit/a272c8c314257dfa99c6befd2cfeff39b8a6ecbe), what we need for .NET Framework (if supporrted at all)?)
  * Option B: Sources crawling and finding project by name/assembly name; build; compare results
  * Option C: Working backwards from the nuget (finding pack script or msbuild properties indicating nuget creation ...); build; compare results
  * Option D: Seting up convention for explicit description of build prerequisites and package build. Inspiration for this can be `.proj` files describing external dependencies build recipe in dotnet source build ([sample build descriptions](https://github.com/dotnet/source-build-externals/tree/main/repos))
@@ -148,3 +150,23 @@ To be decided (nuget cache? Submodules of the current git context? ...)
 
  To be decided.
  But likely this will be no-op for the initial version - standard usage scenarios for project references will kick in.
+
+ # Security considerations
+
+ [Under construction]
+ * The build verification mode (out of scope) needs proper design of handling of symbols embedded files and pointers to any sources outside of expected repository root. (otherwise intruder with access to the production build can infect not only the binary, but the symbol file as well)
+ * MIM for the symbol server (offering crafted symbol file with pointers to custom sources that can allow execution of intruder code on the developer machine)
+ * Possible licensing considerations - there can be packages with different redistribution requirements for packages and originating sources, but allowing user to switch from package reference to source references we are technically making it easier for the user to miss and fail license agreement.
+
+ # Cross team dependencies considerations
+
+ * **Nuget - No dependency** - the proposal doesn't evision changes to the nuget client nor server contracts
+ * **Visual Studio, Project System - No dependency in initial version** - the proposal envision exposing functionality via CLI (and API) only, after the whole concept is constructed and alive, we should start reaching out to those teams to consider exposing the functionality via GUI - e.g.:
+ ![vs context menu proposal](sourcing-vs-context.png)
+ * **SDK - No dependency** - the initial version would be delivered as standalone (optional) dotnet tool
+ * **Roslyn - Consultation and engineering** - ideally packing and exporting the [BuildValidator](https://github.com/dotnet/roslyn/tree/main/src/Tools/BuildValidator) and mainly [Rebuild](https://github.com/dotnet/roslyn/tree/main/src/Compilers/Core/Rebuild). MSBuild team should fund this effort
+ * **MSBuild - Likely no dependency** - There migh need to be some support for allowing storing info about link between original PackageReference and injected ProjectReference - however current MSBuild constructs should suffice here.
+
+ There can be possible leverage of the work by other teams:
+ * Nuget - [NugetPackageExplorrer](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer) - as it currently heavily uses custom code to extract information from PE/Pdb metadata.
+ * Source Build / VMR - to validate buildability of 3rd party components and low touch process of enlisting new 3rd party dependencies into source build
