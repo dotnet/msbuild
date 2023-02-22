@@ -47,6 +47,7 @@
       OutputPath="$(GenAPITargetPath)"
       HeaderFile="$(GenAPIHeaderFile)"
       ExceptionMessage="$(GenAPIExceptionMessage)"
+      ExcludeApiFiles="@(GenAPIExcludeApiList)"
       ExcludeAttributesFiles="@(GenAPIExcludeAttributesList)"
       IncludeVisibleOutsideOfAssembly="$(GenAPIIncludeVisibleOutsideOfAssembly)"
       IncludeAssemblyAttributes="$(GenAPIIncludeAssemblyAttributes)" />

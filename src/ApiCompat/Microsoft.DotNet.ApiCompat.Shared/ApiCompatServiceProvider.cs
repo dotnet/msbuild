@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ApiCompat
 
                 if (excludeAttributesFiles != null)
                 {
-                    compositeSymbolFilter.Add(new AttributeSymbolFilter(excludeAttributesFiles));
+                    compositeSymbolFilter.Add(new DocIdSymbolFilter(excludeAttributesFiles));
                 }
 
                 SymbolEqualityComparer symbolEqualityComparer = new();

@@ -116,18 +116,8 @@ namespace Microsoft.DotNet.GenAPI
 
             foreach (INamedTypeSymbol typeMember in typeMembers.Order())
             {
-                SyntaxNode typeDeclaration = _syntaxGenerator.DeclarationExt(typeMember, _symbolFilter);
-
-                foreach (AttributeData attribute in typeMember.GetAttributes()
-                    .Where(a => a.AttributeClass != null && _symbolFilter.Include(a.AttributeClass)))
-                {
-                    // The C# compiler emits the DefaultMemberAttribute on any type containing an indexer.
-                    // In C# it is an error to manually attribute a type with the DefaultMemberAttribute if the type also declares an indexer.
-                    if (!attribute.IsDefaultMemberAttribute() || !typeMember.HasIndexer())
-                    {
-                        typeDeclaration = _syntaxGenerator.AddAttributes(typeDeclaration, _syntaxGenerator.Attribute(attribute));
-                    }
-                }
+                SyntaxNode typeDeclaration = _syntaxGenerator.DeclarationExt(typeMember, _symbolFilter)
+                    .AddMemberAttributes(_syntaxGenerator, _symbolFilter, typeMember);
 
                 typeDeclaration = Visit(typeDeclaration, typeMember);
 
@@ -163,13 +153,8 @@ namespace Microsoft.DotNet.GenAPI
                     continue;
                 }
 
-                SyntaxNode memberDeclaration = _syntaxGenerator.DeclarationExt(member, _symbolFilter);
-
-                foreach (AttributeData attribute in member.GetAttributes()
-                    .Where(a => a.AttributeClass != null && _symbolFilter.Include(a.AttributeClass)))
-                {
-                    memberDeclaration = _syntaxGenerator.AddAttributes(memberDeclaration, _syntaxGenerator.Attribute(attribute));
-                }
+                SyntaxNode memberDeclaration = _syntaxGenerator.DeclarationExt(member, _symbolFilter)
+                    .AddMemberAttributes(_syntaxGenerator, _symbolFilter, member);
 
                 if (member is INamedTypeSymbol nestedTypeSymbol)
                 {
@@ -195,7 +180,7 @@ namespace Microsoft.DotNet.GenAPI
 
         private SyntaxNode GenerateForwardedTypeAssemblyAttributes(IAssemblySymbol assembly, SyntaxNode compilationUnit)
         {
-            foreach (INamedTypeSymbol symbol in assembly.GetForwardedTypes())
+            foreach (INamedTypeSymbol symbol in assembly.GetForwardedTypes().Where(_symbolFilter.Include))
             {
                 if (symbol.TypeKind != TypeKind.Error)
                 {

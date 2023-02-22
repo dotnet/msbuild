@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
@@ -8,31 +8,29 @@ using Microsoft.CodeAnalysis;
 namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
 {
     /// <summary>
-    /// Implements the logic of filtering out attribute symbols. Reads the file with the list of attributes in DocId format.
+    /// Implements the logic of filtering out api.
+    /// Reads the file with the list of attributes, types, members in DocId format.
     /// </summary>
-    public class AttributeSymbolFilter : ISymbolFilter
+    public class DocIdSymbolFilter : ISymbolFilter
     {
-        private readonly HashSet<string> _attributesToExclude;
+        private readonly HashSet<string> _docIdsToExclude;
 
-        public AttributeSymbolFilter(string[] excludeAttributesFiles)
+        public DocIdSymbolFilter(string[] docIdsToExcludeFiles)
         {
-            _attributesToExclude = new HashSet<string>(ReadDocIdsAttributes(excludeAttributesFiles));
+            _docIdsToExclude = new HashSet<string>(ReadDocIdsAttributes(docIdsToExcludeFiles));
         }
 
         /// <summary>
-        ///  Determines whether the attribute <see cref="ISymbol"/> should be included.
+        ///  Determines whether the <see cref="ISymbol"/> should be included.
         /// </summary>
         /// <param name="symbol"><see cref="ISymbol"/> to evaluate.</param>
         /// <returns>True to include the <paramref name="symbol"/> or false to filter it out.</returns>
         public bool Include(ISymbol symbol)
         {
-            if (symbol is INamedTypeSymbol namedType)
+            string? docId = symbol.GetDocumentationCommentId();
+            if (docId != null && _docIdsToExclude.Contains(docId))
             {
-                string? docId = namedType.GetDocumentationCommentId();
-                if (docId != null && _attributesToExclude.Contains(docId))
-                {
-                    return false;
-                }
+                return false;
             }
 
             return true;

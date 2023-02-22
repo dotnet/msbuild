@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.GenAPI
             {
                 if (eventSymbol.IsAbstract)
                 {
-                    // adds abstract keyword.
+                    // TODO: remove a work around solution after the Roslyn issue https://github.com/dotnet/roslyn/issues/66966 is fixed
                     EventFieldDeclarationSyntax eventDeclaration = (EventFieldDeclarationSyntax)syntaxGenerator.Declaration(symbol);
                     return eventDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.AbstractKeyword));
                 }

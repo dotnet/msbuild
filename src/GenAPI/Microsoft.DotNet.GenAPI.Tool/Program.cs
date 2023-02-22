@@ -32,6 +32,13 @@ namespace Microsoft.DotNet.GenAPI.Tool
                 Arity = ArgumentArity.ZeroOrMore
             };
 
+            Option<string[]?> excludeApiFilesOption = new("--exclude-api-file",
+                description: "The path to one or more api exclusion files with types in DocId format.",
+                parseArgument: ParseAssemblyArgument)
+            {
+                Arity = ArgumentArity.ZeroOrMore
+            };
+
             Option<string[]?> excludeAttributesFilesOption = new("--exclude-attributes-file",
                 description: "The path to one or more attribute exclusion files with types in DocId format.",
                 parseArgument: ParseAssemblyArgument)
@@ -61,6 +68,7 @@ namespace Microsoft.DotNet.GenAPI.Tool
             };
             rootCommand.AddGlobalOption(assembliesOption);
             rootCommand.AddGlobalOption(assemblyReferencesOption);
+            rootCommand.AddGlobalOption(excludeApiFilesOption);
             rootCommand.AddGlobalOption(excludeAttributesFilesOption);
             rootCommand.AddGlobalOption(outputPathOption);
             rootCommand.AddGlobalOption(headerFileOption);
@@ -76,6 +84,7 @@ namespace Microsoft.DotNet.GenAPI.Tool
                     context.ParseResult.GetValue(outputPathOption),
                     context.ParseResult.GetValue(headerFileOption),
                     context.ParseResult.GetValue(exceptionMessageOption),
+                    context.ParseResult.GetValue(excludeApiFilesOption),
                     context.ParseResult.GetValue(excludeAttributesFilesOption),
                     context.ParseResult.GetValue(includeVisibleOutsideOfAssemblyOption),
                     context.ParseResult.GetValue(includeAssemblyAttributesOption)

@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.GenAPI
                 string? outputPath,
                 string? headerFile,
                 string? exceptionMessage,
+                string[]? excludeApiFiles,
                 string[]? excludeAttributesFiles,
                 bool includeVisibleOutsideOfAssembly,
                 bool includeAssemblyAttributes)
@@ -35,6 +36,7 @@ namespace Microsoft.DotNet.GenAPI
                 OutputPath = outputPath;
                 HeaderFile = headerFile;
                 ExceptionMessage = exceptionMessage;
+                ExcludeApiFiles = excludeApiFiles;
                 ExcludeAttributesFiles = excludeAttributesFiles;
                 IncludeVisibleOutsideOfAssembly = includeVisibleOutsideOfAssembly;
                 IncludeAssemblyAttributes = includeAssemblyAttributes;
@@ -65,6 +67,11 @@ namespace Microsoft.DotNet.GenAPI
             /// Method bodies should throw PlatformNotSupportedException.
             /// </summary>
             public string? ExceptionMessage { get; }
+
+            /// <summary>
+            /// The path to one or more api exclusion files with types in DocId format.
+            /// </summary>
+            public string[]? ExcludeApiFiles { get; }
 
             /// <summary>
             /// The path to one or more attribute exclusion files with types in DocId format.
@@ -105,7 +112,12 @@ namespace Microsoft.DotNet.GenAPI
 
             if (context.ExcludeAttributesFiles != null)
             {
-                compositeSymbolFilter.Add(new AttributeSymbolFilter(context.ExcludeAttributesFiles));
+                compositeSymbolFilter.Add(new DocIdSymbolFilter(context.ExcludeAttributesFiles));
+            }
+
+            if (context.ExcludeApiFiles != null)
+            {
+                compositeSymbolFilter.Add(new DocIdSymbolFilter(context.ExcludeApiFiles));
             }
 
             IReadOnlyList<IAssemblySymbol?> assemblySymbols = loader.LoadAssemblies(context.Assemblies);
