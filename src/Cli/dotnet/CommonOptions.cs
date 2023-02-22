@@ -52,9 +52,7 @@ namespace Microsoft.DotNet.Cli
             .AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
         private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
-        /*private static Func<string, IEnumerable<string>> RuntimeArgFunc =
-            o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };*/
-        private static IEnumerable<string> RuntimeArgFunc(string rid)
+        public static IEnumerable<string> RuntimeArgFunc(string rid)
         {
             if (GetArchFromRid(rid) == "amd64")
             {

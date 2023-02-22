@@ -3,11 +3,10 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Restore;
+using Microsoft.TemplateEngine.Cli.Commands;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -143,15 +142,10 @@ namespace Microsoft.DotNet.Cli
             if (includeRuntimeOption)
             {
                 options = options.Append(
-                    new ForwardedOption<IEnumerable<string>>(
-                        useShortOptions ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
-                        LocalizableStrings.CmdRuntimeOptionDescription)
-                    {
-                        ArgumentHelpName = LocalizableStrings.CmdRuntimeOption,
-                        IsHidden = !showHelp
-                    }.ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
-                    .AllowSingleArgPerToken()
-                    .AddCompletions(Complete.RunTimesFromProjectFile)
+                     CommonOptions.RuntimeOption
+                     .WithDescription(LocalizableStrings.CmdRuntimeOptionDescription)
+                     .AllowSingleArgPerToken()
+                     .AddCompletions(Complete.RunTimesFromProjectFile)
                 ).ToArray();
             }
 
