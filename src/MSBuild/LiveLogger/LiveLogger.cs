@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
@@ -16,6 +17,8 @@ namespace Microsoft.Build.Logging.LiveLogger
         private int startedProjects = 0;
         private int finishedProjects = 0;
         private Dictionary<string, int> blockedProjects = new();
+
+        private Stopwatch? _stopwatch;
 
         public LoggerVerbosity Verbosity { get; set; }
         public string Parameters { get; set; }
@@ -47,6 +50,9 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public void Initialize(IEventSource eventSource)
         {
+            // Start the stopwatch as soon as the logger is initialized to capture
+            // any time before the BuildStarted event
+            _stopwatch = Stopwatch.StartNew();
             // Register for different events. Make sure that ConfigurableForwardingLoggerParameters are in sync with them.
             // Started and Finished events  
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
@@ -312,20 +318,24 @@ namespace Microsoft.Build.Logging.LiveLogger
                 Console.WriteLine();
             }
 
-            // Emmpty line
+            // Empty line
             Console.WriteLine();
-            if (succeeded)
-            {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine($"\t{warningCount} Warning(s)");
-                Console.WriteLine($"\t{errorCount} Error(s)");
-            }
-            else
-            {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-                Console.WriteLine($"\t{warningCount} Warnings(s)");
-                Console.WriteLine($"\t{errorCount} Errors(s)");
-            }
+
+            Debug.Assert(_stopwatch is not null, $"Expected {nameof(_stopwatch)} to be initialized long before Shutdown()");
+            TimeSpan buildDuration = _stopwatch!.Elapsed;
+
+            string prettyDuration = buildDuration.TotalHours > 1.0 ?
+                buildDuration.ToString(@"h\:mm\:ss") :
+                buildDuration.ToString(@"m\:ss");
+
+            string status = succeeded ?
+                ANSIBuilder.Formatting.Color("succeeded", ANSIBuilder.Formatting.ForegroundColor.Green) :
+                ANSIBuilder.Formatting.Color("failed", ANSIBuilder.Formatting.ForegroundColor.Red);
+
+            Console.WriteLine($"Build {status} in {prettyDuration}");
+            Console.WriteLine($"\t{warningCount} Warnings(s)");
+            Console.WriteLine($"\t{errorCount} Errors(s)");
+            Console.WriteLine();
         }
     }
 }
