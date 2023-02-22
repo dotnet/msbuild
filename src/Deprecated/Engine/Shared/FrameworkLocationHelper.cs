@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -42,7 +46,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal const string dotNetFrameworkVersionFolderPrefixV30 = "v3.0"; // v3.0 is for WinFx.
         private const string dotNetFrameworkVersionV30 = "v3.0"; // full WinFx version to pass to NativeMethodsShared.GetRequestedRuntimeInfo().
         private const string dotNetFrameworkAssemblyFoldersRegistryKeyV30 = dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30;
-        private const string dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 +"\\Setup";
+        private const string dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 + "\\Setup";
 
         private const string dotNetFrameworkSdkRegistryPathV35 = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A";
         internal const string fullDotNetFrameworkSdkRegistryKeyV35 = "HKEY_LOCAL_MACHINE\\" + dotNetFrameworkSdkRegistryPathV35;
@@ -357,7 +361,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                     if (FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 == null)
                     {
-                       FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV40);
+                        FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV40);
                     }
                 }
 
@@ -448,7 +452,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>True if the registry key is 1 false if it is not there. This method also return true if the complus enviornment variables are set.</returns>
         internal static bool CheckForFrameworkInstallation(string registryEntryToCheckInstall, string registryValueToCheckInstall)
         {
-             // Get the complus install root and version
+            // Get the complus install root and version
             string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
             string complusVersion = Environment.GetEnvironmentVariable("COMPLUS_VERSION");
 

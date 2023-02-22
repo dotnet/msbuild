@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Build.UnitTests;
@@ -11,7 +14,7 @@ namespace Microsoft.Build.Graph.UnitTests
 {
     public class ParallelWorkSet_Tests
     {
-        private class ParallelWorkSetTestCase
+        private sealed class ParallelWorkSetTestCase
         {
             internal int DegreeOfParallelism { get; set; }
             internal List<WorkItem> WorkItemsToAdd { get; set; } = new List<WorkItem>();
@@ -267,7 +270,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             _workSet.WaitForAllWorkAndComplete();
             _workSet.IsCompleted.ShouldBeTrue();
-            _workSet.CompletedWork.ShouldBeSameIgnoringOrder((IReadOnlyCollection<KeyValuePair<string, string>>) tt.ExpectedCompletedWork);
+            _workSet.CompletedWork.ShouldBeSameIgnoringOrder((IReadOnlyCollection<KeyValuePair<string, string>>)tt.ExpectedCompletedWork);
         }
     }
 }

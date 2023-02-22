@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ResolveNonMSBuildProjectOutput_Tests
+    public sealed class ResolveNonMSBuildProjectOutput_Tests
     {
         private const string attributeProject = "Project";
 
@@ -25,16 +25,24 @@ namespace Microsoft.Build.UnitTests
             _output = output;
         }
 
-        static internal ITaskItem CreateReferenceItem(string itemSpec, string projectGuid, string package, string name)
+        internal static ITaskItem CreateReferenceItem(string itemSpec, string projectGuid, string package, string name)
         {
             TaskItem reference = new TaskItem(itemSpec);
 
             if (projectGuid != null)
+            {
                 reference.SetMetadata(attributeProject, projectGuid);
+            }
+
             if (package != null)
+            {
                 reference.SetMetadata("Package", package);
+            }
+
             if (name != null)
+            {
                 reference.SetMetadata("Name", name);
+            }
 
             return reference;
         }
@@ -76,7 +84,7 @@ namespace Microsoft.Build.UnitTests
                 false, "Project");
         }
 
-        static internal string CreatePregeneratedPathDoc(IDictionary projectOutputs)
+        internal static string CreatePregeneratedPathDoc(IDictionary projectOutputs)
         {
             string xmlString = "<VSIDEResolvedNonMSBuildProjectOutputs>";
 
@@ -117,7 +125,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestResolve()
         {
             // empty pre-generated string
@@ -201,7 +208,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestManagedCheck()
         {
             Hashtable unresolvedOutputs = null;
@@ -231,7 +237,6 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that the UnresolvedProjectReferences output parameter is populated correctly.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestUnresolvedReferences()
         {
             ArrayList projectRefs = new ArrayList();

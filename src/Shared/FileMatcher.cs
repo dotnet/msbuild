@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Buffers;
@@ -251,8 +251,8 @@ namespace Microsoft.Build.Shared
                     return (ShouldEnforceMatching(pattern)
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
                             .Where(o => IsFileNameMatch(o, pattern))
-                        : fileSystem.EnumerateFileSystemEntries(path, pattern)
-                        ).ToArray();
+                        : fileSystem.EnumerateFileSystemEntries(path, pattern))
+                        .ToArray();
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -291,8 +291,7 @@ namespace Microsoft.Build.Shared
             return searchPattern.IndexOf("?.", StringComparison.Ordinal) != -1 ||
                    (
                        Path.GetExtension(searchPattern).Length == (3 + 1 /* +1 for the period */) &&
-                       searchPattern.IndexOf('*') != -1
-                   ) ||
+                       searchPattern.IndexOf('*') != -1) ||
                    searchPattern.EndsWith("?", StringComparison.Ordinal);
         }
 
@@ -308,14 +307,12 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>Files that can be accessed.</returns>
-        private static IReadOnlyList<string> GetAccessibleFiles
-        (
+        private static IReadOnlyList<string> GetAccessibleFiles(
             IFileSystem fileSystem,
             string path,
             string filespec,     // can be null
             string projectDirectory,
-            bool stripProjectDirectory
-        )
+            bool stripProjectDirectory)
         {
             try
             {
@@ -376,12 +373,10 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern">Pattern to match</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>Accessible directories.</returns>
-        private static IReadOnlyList<string> GetAccessibleDirectories
-        (
+        private static IReadOnlyList<string> GetAccessibleDirectories(
             IFileSystem fileSystem,
             string path,
-            string pattern
-        )
+            string pattern)
         {
             try
             {
@@ -429,10 +424,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="path">The short path.</param>
         /// <returns>The long path.</returns>
-        internal string GetLongPathName
-        (
-            string path
-        )
+        internal string GetLongPathName(
+            string path)
         {
             return GetLongPathName(path, _getFileSystemEntries);
         }
@@ -443,11 +436,9 @@ namespace Microsoft.Build.Shared
         /// <param name="path">The short path.</param>
         /// <param name="getFileSystemEntries">Delegate.</param>
         /// <returns>The long path.</returns>
-        internal static string GetLongPathName
-        (
+        internal static string GetLongPathName(
             string path,
-            GetFileSystemEntries getFileSystemEntries
-        )
+            GetFileSystemEntries getFileSystemEntries)
         {
             if (path.IndexOf("~", StringComparison.Ordinal) == -1)
             {
@@ -555,13 +546,11 @@ namespace Microsoft.Build.Shared
             out string wildcardDirectoryPart,
             out string filenamePart)
         {
-            PreprocessFileSpecForSplitting
-            (
+            PreprocessFileSpecForSplitting(
                 filespec,
                 out fixedDirectoryPart,
                 out wildcardDirectoryPart,
-                out filenamePart
-            );
+                out filenamePart);
 
             /*
              * Handle the special case in which filenamePart is '**'.
@@ -590,13 +579,11 @@ namespace Microsoft.Build.Shared
         /// <param name="fixedDirectoryPart">Receives the fixed directory part.</param>
         /// <param name="wildcardDirectoryPart">The wildcard directory part.</param>
         /// <param name="filenamePart">The filename part.</param>
-        private static void PreprocessFileSpecForSplitting
-        (
+        private static void PreprocessFileSpecForSplitting(
             string filespec,
             out string fixedDirectoryPart,
             out string wildcardDirectoryPart,
-            out string filenamePart
-        )
+            out string filenamePart)
         {
             filespec = FileUtilities.FixFilePath(filespec);
             int indexOfLastDirectorySeparator = filespec.LastIndexOfAny(directorySeparatorCharacters);
@@ -622,8 +609,7 @@ namespace Microsoft.Build.Shared
             if
             (
                 -1 == indexOfFirstWildcard
-                || indexOfFirstWildcard > indexOfLastDirectorySeparator
-            )
+                || indexOfFirstWildcard > indexOfLastDirectorySeparator)
             {
                 /*
                  * There is at least one dir separator, but either there is no wild card or the
@@ -682,10 +668,8 @@ namespace Microsoft.Build.Shared
         /// Removes the leading ".\" from all of the paths in the array.
         /// </summary>
         /// <param name="paths">Paths to remove .\ from.</param>
-        private static IEnumerable<string> RemoveInitialDotSlash
-        (
-            IEnumerable<string> paths
-        )
+        private static IEnumerable<string> RemoveInitialDotSlash(
+            IEnumerable<string> paths)
         {
             foreach (string path in paths)
             {
@@ -714,11 +698,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="paths">Paths to remove current directory from.</param>
         /// <param name="projectDirectory"></param>
-        internal static IEnumerable<string> RemoveProjectDirectory
-        (
+        internal static IEnumerable<string> RemoveProjectDirectory(
             IEnumerable<string> paths,
-            string projectDirectory
-        )
+            string projectDirectory)
         {
             bool directoryLastCharIsSeparator = IsDirectorySeparator(projectDirectory[projectDirectory.Length - 1]);
             foreach (string path in paths)
@@ -748,7 +730,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        struct RecursiveStepResult
+        private struct RecursiveStepResult
         {
             public string RemainingWildcardDirectory;
             public bool ConsiderFiles;
@@ -757,14 +739,13 @@ namespace Microsoft.Build.Shared
             public bool NeedsDirectoryRecursion;
         }
 
-        class FilesSearchData
+        private class FilesSearchData
         {
             public FilesSearchData(
                 string filespec,                // can be null
                 string directoryPattern,        // can be null
                 Regex regexFileMatch,           // can be null
-                bool needsRecursion
-                )
+                bool needsRecursion)
             {
                 Filespec = filespec;
                 DirectoryPattern = directoryPattern;
@@ -793,7 +774,7 @@ namespace Microsoft.Build.Shared
             public bool NeedsRecursion { get; }
         }
 
-        struct RecursionState
+        private struct RecursionState
         {
             /// <summary>
             /// The directory to search in
@@ -1105,10 +1086,8 @@ namespace Microsoft.Build.Shared
             return recursionState.SearchData.RegexFileMatch.IsMatch(file);
         }
 
-        private static RecursiveStepResult GetFilesRecursiveStep
-        (
-            RecursionState recursionState
-        )
+        private static RecursiveStepResult GetFilesRecursiveStep(
+            RecursionState recursionState)
         {
             RecursiveStepResult ret = new RecursiveStepResult();
 
@@ -1198,12 +1177,10 @@ namespace Microsoft.Build.Shared
         /// <param name="wildcardDirectoryPart">The wildcard directory part.</param>
         /// <param name="filenamePart">The filename part.</param>
         /// <returns>The regular expression string.</returns>
-        internal static string RegularExpressionFromFileSpec
-        (
+        internal static string RegularExpressionFromFileSpec(
             string fixedDirectoryPart,
             string wildcardDirectoryPart,
-            string filenamePart
-        )
+            string filenamePart)
         {
 #if DEBUG
             ErrorUtilities.VerifyThrow(
@@ -1212,8 +1189,7 @@ namespace Microsoft.Build.Shared
                 + FileSpecRegexParts.FilenameGroupStart.Length
                 + (FileSpecRegexParts.GroupEnd.Length * 2)
                 + FileSpecRegexParts.EndOfLine.Length,
-                "Checked-in length of known regex components differs from computed length. Update checked-in constant."
-            );
+                "Checked-in length of known regex components differs from computed length. Update checked-in constant.");
 #endif
             using (var matchFileExpression = new ReuseableStringBuilder(FileSpecRegexMinLength + NativeMethodsShared.MAX_PATH))
             {
@@ -1636,8 +1612,7 @@ namespace Microsoft.Build.Shared
             if
             (
                 -1 != rightmostColon
-                && 1 != rightmostColon
-            )
+                && 1 != rightmostColon)
             {
                 return false;
             }
@@ -1858,24 +1833,20 @@ namespace Microsoft.Build.Shared
         /// <param name="filespec">The filespec.</param>
         /// <param name="fileToMatch">The candidate to match against.</param>
         /// <returns>The result class.</returns>
-        internal Result FileMatch
-        (
+        internal Result FileMatch(
             string filespec,
-            string fileToMatch
-        )
+            string fileToMatch)
         {
             Result matchResult = new Result();
 
             fileToMatch = GetLongPathName(fileToMatch, _getFileSystemEntries);
 
             Regex regexFileMatch;
-            GetFileSpecInfoWithRegexObject
-            (
+            GetFileSpecInfoWithRegexObject(
                 filespec,
                 out regexFileMatch,
                 out matchResult.isFileSpecRecursive,
-                out matchResult.isLegalFileSpec
-            );
+                out matchResult.isLegalFileSpec);
 
             if (matchResult.isLegalFileSpec)
             {
@@ -1910,7 +1881,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        class TaskOptions
+        private class TaskOptions
         {
             public TaskOptions(int maxTasks)
             {
@@ -1940,12 +1911,10 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The search action, array of files, and Exclude file spec (if applicable).</returns>
-        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec) GetFiles
-            (
+        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec) GetFiles(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            List<string> excludeSpecsUnescaped = null
-            )
+            List<string> excludeSpecsUnescaped = null)
         {
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
@@ -2090,15 +2059,13 @@ namespace Microsoft.Build.Shared
             stripProjectDirectory = false;
             result = new RecursionState();
 
-            GetFileSpecInfo
-            (
+            GetFileSpecInfo(
                 filespecUnescaped,
                 out string fixedDirectoryPart,
                 out string wildcardDirectoryPart,
                 out string filenamePart,
                 out bool needsRecursion,
-                out bool isLegalFileSpec
-            );
+                out bool isLegalFileSpec);
 
             /*
              * If the filespec is invalid, then just return now.
@@ -2344,7 +2311,7 @@ namespace Microsoft.Build.Shared
         /// Returns true if the given character is a valid drive letter.
         /// </summary>
         /// <remarks>
-        /// Copied from https://github.com/dotnet/corefx/blob/master/src/Common/src/System/IO/PathInternal.Windows.cs#L77-L83
+        /// Copied from https://github.com/dotnet/corefx/blob/b8b81a66738bb10ef0790023598396861d92b2c4/src/Common/src/System/IO/PathInternal.Windows.cs#L53-L59
         /// </remarks>
         private static bool IsValidDriveChar(char value)
         {
@@ -2675,7 +2642,7 @@ namespace Microsoft.Build.Shared
 
             // Ensure that the prefix match wasn't to a distinct directory, so that
             // x\y\prefix doesn't falsely match x\y\prefixmatch.
-            if (directorySeparatorCharacters.Contains(possibleParent[possibleParent.Length-1]))
+            if (directorySeparatorCharacters.Contains(possibleParent[possibleParent.Length - 1]))
             {
                 return true;
             }

@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
@@ -125,7 +128,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void HigherThanHighestInRedistListForMSBuildAssembly()
         {
             MockEngine e = new MockEngine(_output);
@@ -262,7 +264,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DependenciesHigherThanHighestInRedistListForMSBuildAssembly()
         {
             MockEngine e = new MockEngine(_output);

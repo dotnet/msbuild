@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,12 +9,11 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
 using Microsoft.Build.Framework;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
+using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
 #nullable disable
 
@@ -157,8 +156,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem(null, "i1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item empty item type
@@ -170,8 +168,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem(String.Empty, "i1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item null include
@@ -183,8 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem("i", null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item null metadata
@@ -349,8 +345,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build(new string[] { null }, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Null logger in array should give ArgumentNullException
@@ -362,8 +357,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build("t", new ILogger[] { null });
-            }
-           );
+            });
         }
         /// <summary>
         /// Null remote logger in array should give ArgumentNullException
@@ -375,8 +369,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build("t", null, new ForwardingLoggerRecord[] { null });
-            }
-           );
+            });
         }
         /// <summary>
         /// Null target name should imply the default target

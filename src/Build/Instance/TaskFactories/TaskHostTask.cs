@@ -1,18 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
-
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -124,11 +123,19 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskHostTask(IElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskHostParameters, LoadedType taskType
+        ///
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        public TaskHostTask(
+            IElementLocation taskLocation,
+            TaskLoggingContext taskLoggingContext,
+            IBuildComponentHost buildComponentHost,
+            IDictionary<string, string> taskHostParameters,
+            LoadedType taskType
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup appDomainSetup
 #endif
             )
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType, nameof(taskType));
 
@@ -254,8 +261,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             TaskHostConfiguration hostConfiguration =
-                new TaskHostConfiguration
-                    (
+                new TaskHostConfiguration(
                         _buildComponentHost.BuildParameters.NodeId,
                         NativeMethodsShared.GetCurrentDirectory(),
                         CommunicationsUtilities.GetEnvironmentVariables(),
@@ -275,9 +281,7 @@ namespace Microsoft.Build.BackEnd
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
                         _taskLoggingContext.GetWarningsAsErrors(),
                         _taskLoggingContext.GetWarningsNotAsErrors(),
-                        _taskLoggingContext.GetWarningsAsMessages()
-                        
-                    );
+                        _taskLoggingContext.GetWarningsAsMessages());
 
             try
             {

@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections;
@@ -73,7 +77,7 @@ namespace Microsoft.Build.BuildEngine
             if (options == Options.ProcessWhen)
             {
                 conditionAttribute = ProjectXmlUtilities.GetConditionAttribute(whenElement, /*verify sole attribute*/ true);
-                ProjectErrorUtilities.VerifyThrowInvalidProject(conditionAttribute != null, whenElement, "MissingCondition", XMakeElements.when);            
+                ProjectErrorUtilities.VerifyThrowInvalidProject(conditionAttribute != null, whenElement, "MissingCondition", XMakeElements.when);
             }
             else
             {
@@ -207,7 +211,7 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-       /// <summary>
+        /// <summary>
         /// Evaluates a When clause.  Checks if the condition is true, and if it is,
         /// applies all of the contained property group, item lists, and import statements.
         /// Returns true if the When clause is process (because the condition is true), false
@@ -225,9 +229,9 @@ namespace Microsoft.Build.BuildEngine
             Hashtable conditionedPropertiesTable
         )
         {
-            if  (
-                    (this.Condition != null) 
-                    && 
+            if (
+                    (this.Condition != null)
+                    &&
                     !Utilities.EvaluateCondition(this.Condition, this.ConditionAttribute,
                         new Expander(parentPropertyBag, parentProject.EvaluatedItemsByName),
                         conditionedPropertiesTable, ParserOptions.AllowProperties, this.parentProject.ParentEngine.LoggingServices, this.parentProject.ProjectBuildEventContext)
@@ -269,16 +273,16 @@ namespace Microsoft.Build.BuildEngine
                 if (propOrItem is BuildPropertyGroup &&
                     pass == ProcessingPass.Pass1)
                 {
-                    ((BuildPropertyGroup) propOrItem).Evaluate(parentPropertyBag, conditionedPropertiesTable, pass);
+                    ((BuildPropertyGroup)propOrItem).Evaluate(parentPropertyBag, conditionedPropertiesTable, pass);
                 }
                 else if (propOrItem is BuildItemGroup &&
                     pass == ProcessingPass.Pass2)
                 {
-                    ((BuildItemGroup) propOrItem).Evaluate(parentPropertyBag, parentProject.EvaluatedItemsByName, ignoreCondition, honorCondition, pass);
+                    ((BuildItemGroup)propOrItem).Evaluate(parentPropertyBag, parentProject.EvaluatedItemsByName, ignoreCondition, honorCondition, pass);
                 }
                 else if (propOrItem is Choose)
                 {
-                    ((Choose) propOrItem).Evaluate(parentPropertyBag, ignoreCondition, honorCondition, conditionedPropertiesTable, pass);
+                    ((Choose)propOrItem).Evaluate(parentPropertyBag, ignoreCondition, honorCondition, conditionedPropertiesTable, pass);
                 }
             }
         }

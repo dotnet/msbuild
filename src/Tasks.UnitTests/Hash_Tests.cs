@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Framework;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Xunit;
@@ -33,7 +36,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void HashTaskEmptyInputTest()
         {
             // Hash should be valid for empty item
-            var emptyItemHash = ExecuteHashTask(new ITaskItem[] {new TaskItem("")});
+            var emptyItemHash = ExecuteHashTask(new ITaskItem[] { new TaskItem("") });
             Assert.False(string.IsNullOrWhiteSpace(emptyItemHash));
             Assert.NotEmpty(emptyItemHash);
 

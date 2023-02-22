@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
-using System.IO;
-using System.Runtime.Serialization;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
@@ -49,15 +49,13 @@ namespace Microsoft.Build.Framework
         /// <param name="targetNames">targets we are going to build (empty indicates default targets)</param>
         /// <param name="properties">list of properties</param>
         /// <param name="items">list of items</param>
-        public ProjectStartedEventArgs
-        (
+        public ProjectStartedEventArgs(
             string message,
             string helpKeyword,
             string projectFile,
             string targetNames,
             IEnumerable properties,
-            IEnumerable items
-        )
+            IEnumerable items)
             : this(message, helpKeyword, projectFile, targetNames, properties, items, DateTime.UtcNow)
         {
         }
@@ -74,8 +72,7 @@ namespace Microsoft.Build.Framework
         /// <param name="properties">list of properties</param>
         /// <param name="items">list of items</param>
         /// <param name="parentBuildEventContext">event context info for the parent project</param>
-        public ProjectStartedEventArgs
-        (
+        public ProjectStartedEventArgs(
             int projectId,
             string message,
             string helpKeyword,
@@ -83,8 +80,7 @@ namespace Microsoft.Build.Framework
             string targetNames,
             IEnumerable properties,
             IEnumerable items,
-            BuildEventContext parentBuildEventContext
-        )
+            BuildEventContext parentBuildEventContext)
             : this(projectId, message, helpKeyword, projectFile, targetNames, properties, items, parentBuildEventContext, DateTime.UtcNow)
         {
         }
@@ -103,8 +99,7 @@ namespace Microsoft.Build.Framework
         /// <param name="parentBuildEventContext">event context info for the parent project</param>
         /// <param name="globalProperties">An <see cref="IDictionary{String, String}"/> containing global properties.</param>
         /// <param name="toolsVersion">The tools version.</param>
-        public ProjectStartedEventArgs
-        (
+        public ProjectStartedEventArgs(
             int projectId,
             string message,
             string helpKeyword,
@@ -114,8 +109,7 @@ namespace Microsoft.Build.Framework
             IEnumerable items,
             BuildEventContext parentBuildEventContext,
             IDictionary<string, string> globalProperties,
-            string toolsVersion
-        )
+            string toolsVersion)
             : this(projectId, message, helpKeyword, projectFile, targetNames, properties, items, parentBuildEventContext)
         {
             this.GlobalProperties = globalProperties;
@@ -133,16 +127,14 @@ namespace Microsoft.Build.Framework
         /// <param name="properties">list of properties</param>
         /// <param name="items">list of items</param>
         /// <param name="eventTimestamp">The <see cref="DateTime"/> of the event.</param>
-        public ProjectStartedEventArgs
-        (
+        public ProjectStartedEventArgs(
             string message,
             string helpKeyword,
             string projectFile,
             string targetNames,
             IEnumerable properties,
             IEnumerable items,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.projectFile = projectFile;
@@ -164,8 +156,7 @@ namespace Microsoft.Build.Framework
         /// <param name="items">list of items</param>
         /// <param name="parentBuildEventContext">event context info for the parent project</param>
         /// <param name="eventTimestamp">The <see cref="DateTime"/> of the event.</param>
-        public ProjectStartedEventArgs
-        (
+        public ProjectStartedEventArgs(
             int projectId,
             string message,
             string helpKeyword,
@@ -174,8 +165,7 @@ namespace Microsoft.Build.Framework
             IEnumerable properties,
             IEnumerable items,
             BuildEventContext parentBuildEventContext,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : this(message, helpKeyword, projectFile, targetNames, properties, items, eventTimestamp)
         {
             parentProjectBuildEventContext = parentBuildEventContext;

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -8,7 +8,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System;
     using System.Collections.Generic;
 
-    internal class LinkedObjectsMap<KeyType> : IDisposable
+    internal sealed class LinkedObjectsMap<KeyType> : IDisposable
     {
         private static object Lock { get; } = new object();
         private static UInt32 nextCollectionId = 0;
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
         private UInt32 CollectionId { get; set; }
 
-        public static LinkedObjectsMap<KeyType>  Create()
+        public static LinkedObjectsMap<KeyType> Create()
         {
             lock (Lock)
             {
@@ -269,7 +269,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             public virtual bool IsNull => false;
         }
 
-        private class WeakHolder
+        private sealed class WeakHolder
         {
             public WeakHolder(LinkedObject ro)
             {

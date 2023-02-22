@@ -1,13 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
-using Microsoft.Build.BackEnd;
 using System.IO;
 using System.Reflection;
+using Microsoft.Build.BackEnd;
 using Shouldly;
 using Xunit;
 
@@ -550,7 +550,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ContentType = AssemblyContentType.WindowsRuntime,
                 CultureName = "zh-HK",
             };
-            value.SetPublicKey(new byte[]{ 3, 2, 1});
+            value.SetPublicKey(new byte[] { 3, 2, 1 });
             value.SetPublicKeyToken(new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 });
 
             TranslationHelpers.GetWriteTranslator().Translate(ref value);
@@ -779,10 +779,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((BaseClass) obj);
+                if (ReferenceEquals(null, obj))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+
+                if (obj.GetType() != this.GetType())
+                {
+                    return false;
+                }
+
+                return Equals((BaseClass)obj);
             }
 
             public override int GetHashCode()
@@ -793,7 +805,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static public IComparer<BaseClass> Comparer
+            public static IComparer<BaseClass> Comparer
             {
                 get { return new BaseClassComparer(); }
             }
@@ -831,7 +843,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Comparer for BaseClass.
             /// </summary>
-            private class BaseClassComparer : IComparer<BaseClass>
+            private sealed class BaseClassComparer : IComparer<BaseClass>
             {
                 /// <summary>
                 /// Constructor.
@@ -861,7 +873,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Derived class for testing.
         /// </summary>
-        private class DerivedClass : BaseClass
+        private sealed class DerivedClass : BaseClass
         {
             /// <summary>
             /// A field.
@@ -887,7 +899,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static new public IComparer<DerivedClass> Comparer
+            public static new IComparer<DerivedClass> Comparer
             {
                 get { return new DerivedClassComparer(); }
             }
@@ -916,7 +928,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Comparer for DerivedClass.
             /// </summary>
-            private class DerivedClassComparer : IComparer<DerivedClass>
+            private sealed class DerivedClassComparer : IComparer<DerivedClass>
             {
                 /// <summary>
                 /// Constructor

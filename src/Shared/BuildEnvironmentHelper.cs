@@ -1,13 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -15,7 +14,7 @@ using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
-    internal class BuildEnvironmentHelper
+    internal sealed class BuildEnvironmentHelper
     {
         // Since this class is added as 'link' to shared source in multiple projects,
         // MSBuildConstants.CurrentVisualStudioVersion is not available in all of them.
@@ -28,12 +27,12 @@ namespace Microsoft.Build.Shared
         /// Name of the Visual Studio (and Blend) process.
         /// VS ASP intellisense server fails without Microsoft.VisualStudio.Web.Host. Remove when issue fixed: https://devdiv.visualstudio.com/DevDiv/_workitems/edit/574986
         /// </summary>
-        private static readonly string[] s_visualStudioProcess = {"DEVENV", "BLEND", "Microsoft.VisualStudio.Web.Host"};
+        private static readonly string[] s_visualStudioProcess = { "DEVENV", "BLEND", "Microsoft.VisualStudio.Web.Host" };
 
         /// <summary>
         /// Name of the MSBuild process(es)
         /// </summary>
-        private static readonly string[] s_msBuildProcess = {"MSBUILD", "MSBUILDTASKHOST"};
+        private static readonly string[] s_msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
 
         /// <summary>
         /// Name of MSBuild executable files.
@@ -93,7 +92,9 @@ namespace Microsoft.Build.Shared
             {
                 var env = location();
                 if (env != null)
+                {
                     return env;
+                }
             }
 
             // If we can't find a suitable environment, continue in the 'None' mode. If not running tests,
@@ -135,10 +136,15 @@ namespace Microsoft.Build.Shared
         private static BuildEnvironment TryFromVisualStudioProcess()
         {
             if (!NativeMethodsShared.IsWindows)
+            {
                 return null;
+            }
 
             var vsProcess = s_getProcessFromRunningProcess();
-            if (!IsProcessInList(vsProcess, s_visualStudioProcess)) return null;
+            if (!IsProcessInList(vsProcess, s_visualStudioProcess))
+            {
+                return null;
+            }
 
             var vsRoot = FileUtilities.GetFolderAbove(vsProcess, 3);
             string msBuildExe = GetMSBuildExeFromVsRoot(vsRoot);
@@ -154,7 +160,10 @@ namespace Microsoft.Build.Shared
         private static BuildEnvironment TryFromMSBuildProcess()
         {
             var msBuildExe = s_getProcessFromRunningProcess();
-            if (!IsProcessInList(msBuildExe, s_msBuildProcess)) return null;
+            if (!IsProcessInList(msBuildExe, s_msBuildProcess))
+            {
+                return null;
+            }
 
             // First check if we're in a VS installation
             if (NativeMethodsShared.IsWindows &&
@@ -180,7 +189,10 @@ namespace Microsoft.Build.Shared
         private static BuildEnvironment TryFromMSBuildAssembly()
         {
             var buildAssembly = s_getExecutingAssemblyPath();
-            if (buildAssembly == null) return null;
+            if (buildAssembly == null)
+            {
+                return null;
+            }
 
             // Check for MSBuild.[exe|dll] next to the current assembly
             var msBuildExe = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), "MSBuild.exe");
@@ -195,8 +207,14 @@ namespace Microsoft.Build.Shared
 
             // We're not in VS, check for MSBuild.exe / dll to consider this a standalone environment.
             string msBuildPath = null;
-            if (FileSystems.Default.FileExists(msBuildExe)) msBuildPath = msBuildExe;
-            else if (FileSystems.Default.FileExists(msBuildDll)) msBuildPath = msBuildDll;
+            if (FileSystems.Default.FileExists(msBuildExe))
+            {
+                msBuildPath = msBuildExe;
+            }
+            else if (FileSystems.Default.FileExists(msBuildDll))
+            {
+                msBuildPath = msBuildDll;
+            }
 
             if (!string.IsNullOrEmpty(msBuildPath))
             {
@@ -247,7 +265,10 @@ namespace Microsoft.Build.Shared
             var vsVersion = s_getEnvironmentVariable("VisualStudioVersion");
 
             if (string.IsNullOrEmpty(vsInstallDir) || string.IsNullOrEmpty(vsVersion) ||
-                vsVersion != CurrentVisualStudioVersion || !FileSystems.Default.DirectoryExists(vsInstallDir)) return null;
+                vsVersion != CurrentVisualStudioVersion || !FileSystems.Default.DirectoryExists(vsInstallDir))
+            {
+                return null;
+            }
 
             return new BuildEnvironment(
                 BuildEnvironmentMode.VisualStudio,
@@ -271,7 +292,10 @@ namespace Microsoft.Build.Shared
                 .Where(i => i.Version.Major == v.Major && FileSystems.Default.DirectoryExists(i.Path))
                 .ToList();
 
-            if (instances.Count == 0) return null;
+            if (instances.Count == 0)
+            {
+                return null;
+            }
 
             if (instances.Count > 1)
             {
@@ -294,7 +318,10 @@ namespace Microsoft.Build.Shared
             // but the toolset files are copied to the app's directory via "contentFiles".
 
             var appContextBaseDirectory = s_getAppContextBaseDirectory();
-            if (string.IsNullOrEmpty(appContextBaseDirectory)) return null;
+            if (string.IsNullOrEmpty(appContextBaseDirectory))
+            {
+                return null;
+            }
 
             // Look for possible MSBuild exe names in the AppContextBaseDirectory
             return s_msBuildExeNames
@@ -498,7 +525,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// Defines the current environment for build tools.
     /// </summary>
-    internal class BuildEnvironment
+    internal sealed class BuildEnvironment
     {
         public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInVisualStudio, string visualStudioPath)
         {
@@ -530,7 +557,9 @@ namespace Microsoft.Build.Shared
 
             // We can't detect an environment, don't try to set other paths.
             if (mode == BuildEnvironmentMode.None || currentMSBuildExeFile == null || currentToolsDirectory == null)
+            {
                 return;
+            }
 
             var msBuildExeName = currentMSBuildExeFile.Name;
 

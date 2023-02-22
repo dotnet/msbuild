@@ -1,18 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Xml;
-using Microsoft.Build.Construction;
-
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Xml;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
+using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
 #nullable disable
@@ -215,11 +214,12 @@ namespace Microsoft.Build.Evaluation
             s_getEntriesNumber++;
             ErrorUtilities.VerifyThrow(
                 s_getEntriesNumber == 1,
-                "Reentrance to the ProjectRootElementCache.Get function detected."
-            );
+                "Reentrance to the ProjectRootElementCache.Get function detected.");
 
-            try {
+            try
+            {
 #endif
+#pragma warning disable format // the release configuration fails as try-catch block is conditioned only for Debug; making the formatting in correct in Release.
                 // Should already have been canonicalized
                 ErrorUtilities.VerifyThrowInternalRooted(projectFile);
 
@@ -283,8 +283,7 @@ namespace Microsoft.Build.Evaluation
                         projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
                         "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
                         projectFile,
-                        projectRootElement.FullPath
-                    );
+                        projectRootElement.FullPath);
 
                     // An implicit load will never reset the explicit flag.
                     if (isExplicitlyLoaded)
@@ -303,8 +302,8 @@ namespace Microsoft.Build.Evaluation
                     DebugTraceCache("Satisfied from XML cache: ", projectFile);
                 }
 
-
                 return projectRootElement;
+#pragma warning restore format
 #if DEBUG
             }
             finally

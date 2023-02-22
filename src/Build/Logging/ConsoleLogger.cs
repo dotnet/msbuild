@@ -1,15 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
-using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
+using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 
 #nullable disable
 
@@ -85,13 +83,11 @@ namespace Microsoft.Build.Logging
         /// <param name="write"></param>
         /// <param name="colorSet"></param>
         /// <param name="colorReset"></param>
-        public ConsoleLogger
-        (
+        public ConsoleLogger(
             LoggerVerbosity verbosity,
             WriteHandler write,
             ColorSetter colorSet,
-            ColorResetter colorReset
-        )
+            ColorResetter colorReset)
         {
             _verbosity = verbosity;
             _write = write;
@@ -105,7 +101,10 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void InitializeBaseConsoleLogger()
         {
-            if (_consoleLogger != null) return;
+            if (_consoleLogger != null)
+            {
+                return;
+            }
 
             bool useMPLogger = false;
             bool disableConsoleColor = false;
@@ -116,7 +115,10 @@ namespace Microsoft.Build.Logging
                 string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
                 foreach (string param in parameterComponents)
                 {
-                    if (param.Length <= 0) continue;
+                    if (param.Length <= 0)
+                    {
+                        continue;
+                    }
 
                     if (string.Equals(param, "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
                     {

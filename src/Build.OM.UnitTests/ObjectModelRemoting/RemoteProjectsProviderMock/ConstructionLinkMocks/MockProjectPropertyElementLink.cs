@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectPropertyElementLinkRemoter : MockProjectElementLinkRemoter
+    internal sealed class MockProjectPropertyElementLinkRemoter : MockProjectElementLinkRemoter
     {
         public ProjectPropertyElement PropertyXml => (ProjectPropertyElement)Source;
 
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public void ChangeName(string newName) { PropertyXml.Name = newName; }
     }
 
-    internal class MockProjectPropertyElementLink : ProjectPropertyElementLink, ILinkMock, IProjectElementLinkHelper
+    internal sealed class MockProjectPropertyElementLink : ProjectPropertyElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectPropertyElementLink(MockProjectPropertyElementLinkRemoter proxy, IImportHolder holder)
         {

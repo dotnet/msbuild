@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -235,8 +235,7 @@ namespace Microsoft.Build.Evaluation
                     child.NodeType == XmlNodeType.Element &&
                     sourceDocument.DocumentElement == child &&                                      // This is the root element, not some random element named 'Project'
                     destinationDocument.DocumentElement != null &&                                  // Skip <Project> tag from the outer project
-                    String.Equals(XMakeElements.project, child.Name, StringComparison.Ordinal)
-                   )
+                    String.Equals(XMakeElements.project, child.Name, StringComparison.Ordinal))
                 {
                     // But suffix any InitialTargets attribute
                     string outerInitialTargets = destinationDocument.DocumentElement.GetAttribute(XMakeAttributes.initialTargets).Trim();
@@ -283,7 +282,7 @@ namespace Microsoft.Build.Evaluation
                     string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
 
                     // Get the Sdk attribute of the Project element if specified
-                    string projectSdk = source.NodeType == XmlNodeType.Element && String.Equals(XMakeElements.project, source.Name, StringComparison.Ordinal) ? ((XmlElement) source).GetAttribute(XMakeAttributes.sdk) : String.Empty;
+                    string projectSdk = source.NodeType == XmlNodeType.Element && String.Equals(XMakeElements.project, source.Name, StringComparison.Ordinal) ? ((XmlElement)source).GetAttribute(XMakeAttributes.sdk) : String.Empty;
 
                     IList<ProjectRootElement> resolvedList;
                     if (!_importTable.TryGetValue((XmlElement)child, out resolvedList))

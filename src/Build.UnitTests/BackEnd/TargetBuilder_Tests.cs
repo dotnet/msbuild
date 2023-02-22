@@ -1,27 +1,26 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Xml;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Microsoft.Build.Framework;
+using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
-
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Xunit;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
+using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
 #nullable disable
 
@@ -249,8 +248,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             Thread.Sleep(100);
 
-            string content = String.Format
-                (
+            string content = String.Format(
 @"
 <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
@@ -285,8 +283,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
   </Target>
 </Project>
             ",
-             path
-             );
+             path);
 
             Project p = new Project(XmlReader.Create(new StringReader(content)));
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
@@ -1652,7 +1649,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// The mock component host object.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
             #region IBuildComponentHost Members
 

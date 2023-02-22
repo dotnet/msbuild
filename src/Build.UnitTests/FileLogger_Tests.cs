@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #pragma warning disable 436
 
@@ -8,10 +8,9 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-
+using Xunit;
 using EventSourceSink = Microsoft.Build.BackEnd.Logging.EventSourceSink;
 using Project = Microsoft.Build.Evaluation.Project;
-using Xunit;
 
 #nullable disable
 
@@ -67,7 +66,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -77,7 +79,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void InvalidFile()
         {
             Assert.Throws<LoggerException>(() =>
@@ -90,10 +91,12 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if (log != null) File.Delete(log);
+                    if (log != null)
+                    {
+                        File.Delete(log);
+                    }
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Specific verbosity overrides global verbosity
@@ -119,7 +122,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -169,8 +175,7 @@ namespace Microsoft.Build.UnitTests
                 fl.Parameters = "verbosity=CookiesAndCream";
                 EventSourceSink es = new EventSourceSink();
                 fl.Initialize(es);
-            }
-           );
+            });
         }
         /// <summary>
         /// Invalid encoding setting
@@ -192,10 +197,12 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if (log != null) File.Delete(log);
+                    if (log != null)
+                    {
+                        File.Delete(log);
+                    }
                 }
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -218,7 +225,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -243,7 +253,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -285,7 +298,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -306,7 +322,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (log != null) File.Delete(log);
+                if (log != null)
+                {
+                    File.Delete(log);
+                }
             }
         }
 
@@ -344,7 +363,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Note: Only the ParallelConsoleLogger supports this scenario (log file empty on no error/warn). We
                 // need to explicitly enable it here with the 'ENABLEMPLOGGING' flag.
-                FileLogger fileLogger = new FileLogger {Parameters = $"{loggerOption};logfile={logFile};ENABLEMPLOGGING" };
+                FileLogger fileLogger = new FileLogger { Parameters = $"{loggerOption};logfile={logFile};ENABLEMPLOGGING" };
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(@"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -519,8 +538,7 @@ namespace Microsoft.Build.UnitTests
                 fileLogger.Parameters = "logfile=";
                 fileLogger.Initialize(new EventSourceSink());
                 Assert.True(false);
-            }
-           );
+            });
         }
         #endregion
 

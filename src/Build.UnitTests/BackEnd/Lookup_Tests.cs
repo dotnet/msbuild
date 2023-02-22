@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -213,9 +213,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectItemInstance[] newItems = new ProjectItemInstance[]
             {
                 new ProjectItemInstance(project, "i1", "a1", project.FullPath), // Should get added
-                new ProjectItemInstance(project, "i1", "a2", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m1" ) }, project.FullPath), // Should get added               
-                new ProjectItemInstance(project, "i1", "a1", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m1" ) }, project.FullPath), // Should not get added               
-                new ProjectItemInstance(project, "i1", "a1", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m3" ) }, project.FullPath), // Should get added               
+                new ProjectItemInstance(project, "i1", "a2", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m1") }, project.FullPath), // Should get added               
+                new ProjectItemInstance(project, "i1", "a1", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m1") }, project.FullPath), // Should not get added               
+                new ProjectItemInstance(project, "i1", "a1", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m3") }, project.FullPath), // Should get added               
             };
 
             // Perform the addition
@@ -1014,8 +1014,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
                 Lookup lookup = LookupHelpers.CreateLookup(new ItemDictionary<ProjectItemInstance>());
                 lookup.AddNewItem(new ProjectItemInstance(project, "x", "y", project.FullPath));
-            }
-           );
+            });
         }
         /// <summary>
         /// After modification, should be able to GetItem and then modify it again
@@ -1286,7 +1285,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
     }
 
-    internal class LookupHelpers
+    internal sealed class LookupHelpers
     {
         internal static Lookup CreateEmptyLookup()
         {

@@ -1,6 +1,9 @@
-﻿using Microsoft.Build.Shared;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Diagnostics;
+using Microsoft.Build.Shared;
 using Xunit.Abstractions;
 
 #nullable disable
@@ -10,6 +13,9 @@ namespace Microsoft.Build.UnitTests.Shared
     public static class RunnerUtilities
     {
         public static string PathToCurrentlyRunningMsBuildExe => BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+#if !FEATURE_RUN_EXE_IN_TESTS
+        private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
+#endif
 
         /// <summary>
         /// Invoke the currently running msbuild and return the stdout, stderr, and process exit status.
@@ -29,7 +35,7 @@ namespace Microsoft.Build.UnitTests.Shared
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
 #else
-            var pathToExecutable = ResolveRuntimeExecutableName();
+            var pathToExecutable = s_dotnetExePath;
             msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
 #endif
 
@@ -51,20 +57,6 @@ namespace Microsoft.Build.UnitTests.Shared
                 throw new NotImplementedException();
             }
         }
-
-#if !FEATURE_RUN_EXE_IN_TESTS
-        /// <summary>
-        /// Resolve the platform specific path to the runtime executable that msbuild.exe needs to be run in (unix-mono, {unix, windows}-corerun).
-        /// </summary>
-        private static string ResolveRuntimeExecutableName()
-        {
-            // Run the child process with the same host as the currently-running process.
-            using (Process currentProcess = Process.GetCurrentProcess())
-            {
-                return currentProcess.MainModule.FileName;
-            }
-        }
-#endif
 
         /// <summary>
         /// Run the process and get stdout and stderr

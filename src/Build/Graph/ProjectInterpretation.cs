@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -61,6 +61,25 @@ namespace Microsoft.Build.Graph
                 ReferenceConfiguration = referenceConfiguration;
                 ProjectReferenceItem = projectReferenceItem;
             }
+        }
+
+        private readonly struct TargetSpecification
+        {
+            public TargetSpecification(string target, bool skipIfNonexistent)
+            {
+                // Verify that if this target is skippable then it equals neither 
+                // ".default" nor ".projectReferenceTargetsOrDefaultTargets".
+                ErrorUtilities.VerifyThrow(
+                    !skipIfNonexistent || (!target.Equals(MSBuildConstants.DefaultTargetsMarker)
+                    && !target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker)),
+                    target + " cannot be marked as SkipNonexistentTargets");
+                Target = target;
+                SkipIfNonexistent = skipIfNonexistent;
+            }
+
+            public string Target { get; }
+
+            public bool SkipIfNonexistent { get; }
         }
 
         public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance, ProjectCollection _projectCollection, ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory)
@@ -233,8 +252,7 @@ namespace Microsoft.Build.Graph
         /// </remarks>
         private static GlobalPropertyPartsForMSBuildTask ProjectReferenceGlobalPropertiesModifier(
             GlobalPropertyPartsForMSBuildTask defaultParts,
-            ProjectItemInstance projectReference
-        )
+            ProjectItemInstance projectReference)
         {
             // ProjectReference defines yet another metadata name containing properties to undefine. Merge it in if non empty.
             var globalPropertiesToRemove = SplitPropertyNames(projectReference.GetMetadataValue(GlobalPropertiesToRemoveMetadataName));
@@ -294,7 +312,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        delegate GlobalPropertyPartsForMSBuildTask GlobalPropertiesModifier(GlobalPropertyPartsForMSBuildTask defaultParts, ProjectItemInstance projectReference);
+        private delegate GlobalPropertyPartsForMSBuildTask GlobalPropertiesModifier(GlobalPropertyPartsForMSBuildTask defaultParts, ProjectItemInstance projectReference);
 
         /// <summary>
         ///     Gets the effective global properties for an item that will get passed to <see cref="MSBuild.Projects"/>.
@@ -392,10 +410,10 @@ namespace Microsoft.Build.Graph
 
         public readonly struct TargetsToPropagate
         {
-            private readonly ImmutableList<string> _outerBuildTargets;
-            private readonly ImmutableList<string> _allTargets;
+            private readonly ImmutableList<TargetSpecification> _outerBuildTargets;
+            private readonly ImmutableList<TargetSpecification> _allTargets;
 
-            private TargetsToPropagate(ImmutableList<string> outerBuildTargets, ImmutableList<string> nonOuterBuildTargets)
+            private TargetsToPropagate(ImmutableList<TargetSpecification> outerBuildTargets, ImmutableList<TargetSpecification> nonOuterBuildTargets)
             {
                 _outerBuildTargets = outerBuildTargets;
 
@@ -417,23 +435,22 @@ namespace Microsoft.Build.Graph
             /// <returns></returns>
             public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, ImmutableList<string> entryTargets)
             {
-                var targetsForOuterBuild = ImmutableList.CreateBuilder<string>();
-                var targetsForInnerBuild = ImmutableList.CreateBuilder<string>();
+                ImmutableList<TargetSpecification>.Builder targetsForOuterBuild = ImmutableList.CreateBuilder<TargetSpecification>();
+                ImmutableList<TargetSpecification>.Builder targetsForInnerBuild = ImmutableList.CreateBuilder<TargetSpecification>();
 
-                var projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
+                ICollection<ProjectItemInstance> projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
 
-                foreach (var entryTarget in entryTargets)
+                foreach (string entryTarget in entryTargets)
                 {
-                    foreach (var projectReferenceTarget in projectReferenceTargets)
+                    foreach (ProjectItemInstance projectReferenceTarget in projectReferenceTargets)
                     {
                         if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
                         {
-                            var targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
-
-                            var targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
-
-                            var targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue).ToArray();
-
+                            string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                            bool skipNonexistentTargets = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets"));
+                            bool targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
+                            TargetSpecification[] targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue)
+                                .Select(t => new TargetSpecification(t, skipNonexistentTargets)).ToArray();
                             if (targetsAreForOuterBuild)
                             {
                                 targetsForOuterBuild.AddRange(targets);
@@ -451,11 +468,20 @@ namespace Microsoft.Build.Graph
 
             public ImmutableList<string> GetApplicableTargetsForReference(ProjectInstance reference)
             {
-                return (GetProjectType(reference)) switch
+                ImmutableList<string> RemoveNonexistentTargetsIfSkippable(ImmutableList<TargetSpecification> targets)
                 {
-                    ProjectType.InnerBuild => _allTargets,
-                    ProjectType.OuterBuild => _outerBuildTargets,
-                    ProjectType.NonMultitargeting => _allTargets,
+                    // Keep targets that are non-skippable or that exist but are skippable.
+                    return targets
+                        .Where(t => !t.SkipIfNonexistent || reference.Targets.ContainsKey(t.Target))
+                        .Select(t => t.Target)
+                        .ToImmutableList();
+                }
+
+                return GetProjectType(reference) switch
+                {
+                    ProjectType.InnerBuild => RemoveNonexistentTargetsIfSkippable(_allTargets),
+                    ProjectType.OuterBuild => RemoveNonexistentTargetsIfSkippable(_outerBuildTargets),
+                    ProjectType.NonMultitargeting => RemoveNonexistentTargetsIfSkippable(_allTargets),
                     _ => throw new ArgumentOutOfRangeException(),
                 };
             }

@@ -1,8 +1,12 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
 using Xunit;
@@ -24,7 +28,7 @@ namespace Microsoft.Build.UnitTests
 {
     public class MSBuildTestAssemblyFixture : IDisposable
     {
-        bool _disposed;
+        private bool _disposed;
         private TestEnvironment _testEnvironment;
 
         public MSBuildTestAssemblyFixture()
@@ -36,7 +40,8 @@ namespace Microsoft.Build.UnitTests
             var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             runningTestsField.SetValue(null, true);
 
-            _testEnvironment = TestEnvironment.Create();
+            // Note: build error files will be initialized in test environments for particular tests, also we don't have output to report error files into anyway...
+            _testEnvironment = TestEnvironment.Create(output: null, ignoreBuildErrorFiles: true);
 
             _testEnvironment.DoNotLaunchDebugger();
 
@@ -59,6 +64,9 @@ namespace Microsoft.Build.UnitTests
             var assemblyTempFolder = _testEnvironment.CreateFolder(newTempPath);
 
             _testEnvironment.SetTempPath(assemblyTempFolder.Path);
+
+            // Lets clear FileUtilities.TempFileDirectory in case it was already initialized by other code, so it picks up new TempPath
+            FileUtilities.ClearTempFileDirectory();
 
             _testEnvironment.CreateFile(
                 transientTestFolder: assemblyTempFolder,
@@ -131,7 +139,7 @@ namespace Microsoft.Build.UnitTests
 
     public class MSBuildTestEnvironmentFixture : IDisposable
     {
-        bool _disposed;
+        private bool _disposed;
         private TestEnvironment _testEnvironment;
 
         public MSBuildTestEnvironmentFixture()

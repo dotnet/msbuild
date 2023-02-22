@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -80,18 +80,15 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [InlineData(
             "a/b/c",
             "**",
-            "a/b/c"
-            )]
+            "a/b/c")]
         [InlineData(
             "a/b/c",
             "../../**",
-            "a"
-            )]
+            "a")]
         [InlineData(
             "a/b/c",
             "../d/e/**",
-            "a/b/d/e"
-            )]
+            "a/b/d/e")]
         public void GlobWithRelativeFixedDirectoryPartShouldMismatchTheGlobRoot(string globRoot, string filespec, string expectedFixedDirectoryPart)
         {
             var glob = MSBuildGlob.Parse(globRoot, filespec);
