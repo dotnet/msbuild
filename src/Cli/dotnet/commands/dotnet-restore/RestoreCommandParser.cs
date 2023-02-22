@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Cli
             {
                 command.AddOption(option);
             }
-
+            command.AddOption(CommonOptions.ArchitectureOption);
             command.SetHandler(RestoreCommand.Run);
 
             return command;
