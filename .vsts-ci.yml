@@ -2,16 +2,17 @@ trigger:
   batch: true
   branches:
     include:
-    - master
+    - main
+    - release/7.0.3xx
+    - internal/release/*
+
+pr:
+  branches:
+    include:
     - main
     - release/*
-    - internal/release/3.*
-    - internal/release/5.*
-    - internal/release/6.*
-    - internal/release/7.*
-  paths:
-    exclude:
-    - "*.md"
+    - internal/release/*
+
 
 variables:
   - name: teamName
@@ -158,9 +159,9 @@ stages:
         pool:
           vmImage: 'macOS-latest'
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1100.Amd64.Open
+          helixTargetQueue: OSX.1200.Amd64.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1100.Amd64
+          helixTargetQueue: OSX.1200.Amd64
         strategy:
           matrix:
             Build_Release:
