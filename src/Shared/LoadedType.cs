@@ -104,6 +104,11 @@ namespace Microsoft.Build.Shared
                     PropertyAssemblyQualifiedNames[i] = Properties[i].PropertyType.AssemblyQualifiedName;
                 }
             }
+#else
+            // For v3.5 fallback to old full type approach, as oppose to reflection only
+            HasLoadInSeparateAppDomainAttribute = this.Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
+            HasSTAThreadAttribute = this.Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
+            IsMarshalByRef = this.Type.IsMarshalByRef;
 #endif
         }
 
