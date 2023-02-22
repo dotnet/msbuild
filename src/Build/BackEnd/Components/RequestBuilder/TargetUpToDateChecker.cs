@@ -857,7 +857,6 @@ namespace Microsoft.Build.BackEnd
         /// Retrieves the item-specs of all items in the given item vector collection.
         /// </summary>
         /// <param name="itemVectors"></param>
-        /// <param name="earlyExitIfNonEmpty"></param>
         /// <returns>list of item-specs</returns>
         private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors)
         {
