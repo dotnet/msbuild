@@ -77,6 +77,7 @@ The feature is envisioned to be facilitated via [`SourceLink`](https://learn.mic
  * Locating and fetching proper source codes
  * Infering the proper 'build recipe' for the binary and verifying the result (in case of determinictic build)
  * Verifying that the locally build package is correct - leveraging deterministic build; signature stripping etc.
+ * Converting `PackageReference` to `ProjectReference`
  * Allowing to quickly consume local code patches (via edit and continue/ hot reload mechanism)
 
  Some of those problems might be eliminated by simplifying the workflow and e.g. providing a command that prepares a project and edits the original MSBuild file to replace `PackageReference` with `ProjectReference` - the consuming of code patches and indicating the altered reference to user would not be needed.
@@ -146,6 +147,12 @@ To be decided (nuget cache? Submodules of the current git context? ...)
  In case deterministic build was opted-out, this would be very challenging and nearly impossible - so not supported.
  For signed assemblies we'll need to strip signatures ([`ImageRemoveCertificate`](https://learn.microsoft.com/en-us/windows/win32/api/imagehlp/nf-imagehlp-imageremovecertificate)). Removing signature might nullify checksum bytes in PE header - so binary comparison to the locally built assembly might not match (solution is to temporarily remove the PE header checksum from the local binary as well - to facilitate binary equality).
 
+ ### Converting `PackageReference` to `ProjectReference`
+
+ [To Be Investigated]
+ There might be possible inconsitencies between [`PackageReference`](https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files) and [`ProjectReference`](https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items?view=vs-2022#projectreference) items metadata (and even behavior with same metadata - e.g. https://github.com/dotnet/msbuild/issues/4371).
+ So there needs to be some decision of what's supported and what not and what's the behavior for attempt to translate `PackageReference` using untranslatable metadata.
+
  ### Allowing to quickly consume local code patches
 
  To be decided.
@@ -165,7 +172,7 @@ To be decided (nuget cache? Submodules of the current git context? ...)
  ![vs context menu proposal](sourcing-vs-context.png)
  * **SDK - No dependency** - the initial version would be delivered as standalone (optional) dotnet tool
  * **Roslyn - Consultation and engineering** - ideally packing and exporting the [BuildValidator](https://github.com/dotnet/roslyn/tree/main/src/Tools/BuildValidator) and mainly [Rebuild](https://github.com/dotnet/roslyn/tree/main/src/Compilers/Core/Rebuild). MSBuild team should fund this effort
- * **MSBuild - Likely no dependency** - There migh need to be some support for allowing storing info about link between original PackageReference and injected ProjectReference - however current MSBuild constructs should suffice here.
+ * **MSBuild - Likely no dependency** - There migh need to be some support for allowing storing info about link between original PackageReference and injected ProjectReference - however current MSBuild constructs should suffice here. There might be some work needed to bring `PackageReference` and `ProjectReference` functionaly closer together (as outlined [above](#converting-packagereference-to-projectreference))
 
  There can be possible leverage of the work by other teams:
  * Nuget - [NugetPackageExplorrer](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer) - as it currently heavily uses custom code to extract information from PE/Pdb metadata.
