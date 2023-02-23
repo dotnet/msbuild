@@ -121,19 +121,19 @@
     <value>Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry.</value>
   </data>
   <data name="BlobUploadFailed" xml:space="preserve">
-    <value>Failed to upload blob to {0}; received {1} with detail {2}</value>
+    <value>Failed to upload blob to {0}; received {1} with detail {2}.</value>
   </data>
   <data name="CouldntDeserializeJsonToken" xml:space="preserve">
-    <value>Could not deserialize token from JSON</value>
+    <value>Could not deserialize token from JSON.</value>
   </data>
   <data name="DockerInfoFailed" xml:space="preserve">
-    <value>Failed to get docker info({0})\n{1}</value>
+    <value>Failed to get docker info({0})\n{1}\n{2}</value>
   </data>
   <data name="DockerProcessCreationFailed" xml:space="preserve">
-    <value>Failed creating docker process</value>
+    <value>Failed creating docker process.</value>
   </data>
   <data name="DontKnowHowToPullImages" xml:space="preserve">
-    <value>Don't know how to pull images from local daemons at the moment</value>
+    <value>Don't know how to pull images from local daemons at the moment.</value>
   </data>
   <data name="FailedRetrievingCredentials" xml:space="preserve">
     <value>Failed retrieving credentials for "{0}": {1}</value>
@@ -147,32 +147,29 @@
   <data name="InvalidTokenResponse" xml:space="preserve">
     <value>Token response had neither token nor access_token.</value>
   </data>
-  <data name="MissingBaseImageConfigNode" xml:space="preserve">
-    <value>Expected base image to have a config node</value>
-  </data>
   <data name="MissingLayerNode" xml:space="preserve">
     <value>Tried to get layer information but there is no layer node?</value>
   </data>
   <data name="MissingLinkToRegistry" xml:space="preserve">
-    <value>Need a good error for 'couldn't download a thing because no link to registry'</value>
+    <value>Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</value>
   </data>
   <data name="NoRequestUriSpecified" xml:space="preserve">
-    <value>No RequestUri specified</value>
+    <value>No RequestUri specified.</value>
   </data>
   <data name="RegistryPushFailed" xml:space="preserve">
     <value>Registry push failed.</value>
   </data>
   <data name="TooManyRetries" xml:space="preserve">
-    <value>Too many retries, stopping</value>
+    <value>Too many retries, stopping.</value>
   </data>
   <data name="UnknownDaemonType" xml:space="preserve">
-    <value>Unknown local container daemon type '{0}'. Valid local container daemon types are {1}</value>
+    <value>Unknown local container daemon type '{0}'. Valid local container daemon types are {1}.</value>
   </data>
   <data name="UnknownMediaType" xml:space="preserve">
     <value>The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.</value>
   </data>
   <data name="UnrecognizedMediaType" xml:space="preserve">
-    <value>Unrecognized mediaType '{0}'</value>
+    <value>Unrecognized mediaType '{0}'.</value>
   </data>
   <data name="_Test" xml:space="preserve">
     <value>Value for unit test {0}</value>

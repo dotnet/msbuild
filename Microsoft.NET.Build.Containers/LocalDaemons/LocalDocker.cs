@@ -176,7 +176,10 @@ internal sealed class LocalDocker : ILocalDaemon
             }
             else
             {
-                throw new NotImplementedException(Resource.GetString(nameof(Strings.MissingLinkToRegistry)));
+                throw new NotImplementedException(Resource.FormatString(
+                    nameof(Strings.MissingLinkToRegistry),
+                    d.Digest,
+                    sourceReference.Registry?.ToString() ?? "<null>"));
             }
         }
 
