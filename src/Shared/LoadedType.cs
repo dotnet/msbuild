@@ -42,8 +42,10 @@ namespace Microsoft.Build.Shared
             LoadedAssembly = loadedAssembly;
 
 #if !NET35
-            // Properties set in this block aren't used by TaskHosts. Properties below are only used on the NodeProvider side to get information about the
+            // This block is reflection only loaded type implementation. Net35 does not support it, and fall backs to former implementation in #else
+            // Property `Properties` set in this block aren't used by TaskHosts. Properties below are only used on the NodeProvider side to get information about the
             // properties and reflect over them without needing them to be fully loaded, so it also isn't need for TaskHosts.
+
             // MetadataLoadContext-loaded Type objects don't support testing for inherited attributes, so we manually walk the BaseType chain.
             Type t = type;
             while (t is not null)
