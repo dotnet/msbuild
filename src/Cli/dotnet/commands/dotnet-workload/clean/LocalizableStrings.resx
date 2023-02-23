@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CleanAllOptionDescription" xml:space="preserve">
-    <value>Clean every workload pack, including non-orphaned ones. In addition, clean SDK feature bands (versions) that are less than or equal to the current running SDK, as opposed to only the current version.</value>
+    <value>Clean up and uninstall all CLI workloads for every SDK feature band (version) that is less than or equal to the current running SDK.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
     <value>Remove orphaned workload components that may be on the machine.</value>
@@ -130,7 +130,7 @@
     <value>The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</value>
   </data>
   <data name="CannotAnalyzeVSWorkloadBand" xml:space="preserve">
-    <value>Workloads managed by Visual Studio must be uninstalled by Visual Studio. For the Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK, Error:
+    <value>Workloads managed by Visual Studio must be uninstalled in Visual Studio. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK, Error:
 
 {1}.</value>
   </data>

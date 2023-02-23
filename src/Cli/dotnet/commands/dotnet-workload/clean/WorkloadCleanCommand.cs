@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
 using Microsoft.Deployment.DotNet.Releases;
@@ -8,6 +9,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.Installer.Windows;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Workloads.Workload.List;
@@ -77,7 +79,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
         }
 
         /// <summary>
-        /// Print VS Workloads which can't be uninstalled through the SDK CLI to increase user awareness that they must uninstall via VS.
+        /// Print VS Workloads with the same machine arch which can't be uninstalled through the SDK CLI to increase user awareness that they must uninstall via VS.
         /// </summary>
         private void DisplayUninstallableVSWorkloads()
         {
@@ -85,34 +87,43 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
             if (OperatingSystem.IsWindows())
             {
                 // All VS Workloads should have a corresponding MSI based SDK. This means we can pull all of the VS SDK feature bands using MSI/VS related registry keys.
-                var installedVSSdkBands = NetSdkMsiInstallerClient.GetInstalledFeatureBands();
+                var installedSDKVersionsWithPotentialVSRecords = MsiInstallerBase.GetInstalledSdkVersions();
+                HashSet<string> vsWorkloadUninstallWarnings = new();
 
-                foreach (SdkFeatureBand featureBand in installedVSSdkBands)
+                foreach (string sdkVersion in installedSDKVersionsWithPotentialVSRecords)
                 {
                     try
                     {
 #pragma warning disable CS8604 // We error in the constructor if the dotnet path is null.
                         // The below environment expansion should be architecture agnostic for the C:\Program Files path, but only works on windows 7+. https://learn.microsoft.com/en-us/windows/win32/winprog64/wow64-implementation-details?redirectedfrom=MSDN
+                        // In addition, we don't need to worry about when dotnet will be dotnet/x64 (x64 on processor arch of arm64) because MSI install thru VS will only support installs on processor arch, not chip/emulation arch.
                         string defaultDotnetWinPath = Path.Combine(Environment.ExpandEnvironmentVariables("%ProgramW6432%"), "dotnet");
-                        // We don't know if the dotnet installation for the other bands is in a different directory.
-                        var bandedDotnetPath = Path.Exists(Path.Combine(_dotnetPath, "sdk", featureBand.ToString())) ? _dotnetPath : defaultDotnetWinPath;
 
-                        var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(bandedDotnetPath, featureBand.ToString(), _userProfileDir);
-                        var bandedResolver = WorkloadResolver.Create(workloadManifestProvider, bandedDotnetPath, featureBand.ToString(), _userProfileDir);
+                        // We don't know if the dotnet installation for the other bands is in a different directory than the current dotnet; check the default directory if it isn't.
+                        var bandedDotnetPath = Path.Exists(Path.Combine(_dotnetPath, "sdk", sdkVersion)) ? _dotnetPath : defaultDotnetWinPath;
+
+                        var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(bandedDotnetPath, sdkVersion, _userProfileDir);
+                        var bandedResolver = WorkloadResolver.Create(workloadManifestProvider, bandedDotnetPath, sdkVersion.ToString(), _userProfileDir);
 #pragma warning restore CS8604
 
                         InstalledWorkloadsCollection vsWorkloads = new();
-                        VisualStudioWorkloads.GetInstalledWorkloads(bandedResolver, vsWorkloads, _cleanAll ? null : featureBand);
+                        VisualStudioWorkloads.GetInstalledWorkloads(bandedResolver, vsWorkloads, _cleanAll ? null : new SdkFeatureBand(sdkVersion));
                         foreach (var vsWorkload in vsWorkloads.AsEnumerable())
                         {
-                            Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.VSWorkloadNotRemoved, $"{vsWorkload.Key} ({vsWorkload.Value})")));
+                            vsWorkloadUninstallWarnings.Add(string.Format(LocalizableStrings.VSWorkloadNotRemoved, $"{vsWorkload.Key} ({vsWorkload.Value})"));
                         }
                     }
                     catch (Exception ex)
                     {
                         // Limitation: We don't know the dotnetPath of the other feature bands when making the manifestProvider and resolvers.
-                        Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, featureBand, ex)));
+                        // It can theoretically be customized, but that is not currently supported for workloads with VS.
+                        Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, sdkVersion, ex)));
                     }
+                }
+
+                foreach(string warning in vsWorkloadUninstallWarnings)
+                {
+                    Reporter.WriteLine(AnsiColorExtensions.Yellow(warning));
                 }
             }
 #endif

@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                         continue;
                     }
 
-                    if (packageId.StartsWith(s_visualStudioSdkPackageIdPrefix)) // Check if SDK is installed VS.
+                    if (packageId.StartsWith(s_visualStudioSdkPackageIdPrefix)) // Check if the package owning SDK is installed via VS. Note: if a user checks to add a workload in VS but does not install the SDK, this will cause those workloads to be ignored.
                     {
                         // After trimming the package prefix we should be left with a valid semantic version. If we can't
                         // parse the version we'll skip this instance.

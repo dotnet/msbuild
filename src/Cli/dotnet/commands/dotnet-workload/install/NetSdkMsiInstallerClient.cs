@@ -875,7 +875,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// Gets a set of all the installed SDK feature bands.
         /// </summary>
         /// <returns>A List of all the installed SDK feature bands.</returns>
-        public static IEnumerable<SdkFeatureBand> GetInstalledFeatureBands(ISetupLogger log = null)
+        private static IEnumerable<SdkFeatureBand> GetInstalledFeatureBands(ISetupLogger log = null)
         {
             HashSet<SdkFeatureBand> installedFeatureBands = new();
             foreach (string sdkVersion in GetInstalledSdkVersions())
