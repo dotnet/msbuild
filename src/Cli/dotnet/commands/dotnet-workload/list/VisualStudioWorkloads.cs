@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                         continue;
                     }
 
-                    if (packageId.StartsWith(s_visualStudioSdkPackageIdPrefix))
+                    if (packageId.StartsWith(s_visualStudioSdkPackageIdPrefix)) // Check if SDK is installed VS.
                     {
                         // After trimming the package prefix we should be left with a valid semantic version. If we can't
                         // parse the version we'll skip this instance.

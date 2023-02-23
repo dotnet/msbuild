@@ -129,4 +129,9 @@
   <data name="InvalidWorkloadProcessPath" xml:space="preserve">
     <value>The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</value>
   </data>
+  <data name="CannotAnalyzeVSWorkloadBand" xml:space="preserve">
+    <value>Workloads managed by Visual Studio must be uninstalled by Visual Studio. For the Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK, Error:
+
+{1}.</value>
+  </data>
 </root>

@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Log?.LogMessage($"Starting garbage collection.");
                 Log?.LogMessage($"Garbage Collection Mode: CleanAllPacks={cleanAllPacks}.");
 
-                IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands();
+                IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands(Log);
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
 
                 var installedPacks = installedWorkloads.SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
@@ -875,7 +875,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// Gets a set of all the installed SDK feature bands.
         /// </summary>
         /// <returns>A List of all the installed SDK feature bands.</returns>
-        private IEnumerable<SdkFeatureBand> GetInstalledFeatureBands()
+        public static IEnumerable<SdkFeatureBand> GetInstalledFeatureBands(ISetupLogger log = null)
         {
             HashSet<SdkFeatureBand> installedFeatureBands = new();
             foreach (string sdkVersion in GetInstalledSdkVersions())
@@ -886,7 +886,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 catch (Exception e)
                 {
-                    Log?.LogMessage($"Failed to map SDK version {sdkVersion} to a feature band. ({e.Message})");
+                    log?.LogMessage($"Failed to map SDK version {sdkVersion} to a feature band. ({e.Message})");
                 }
             }
 

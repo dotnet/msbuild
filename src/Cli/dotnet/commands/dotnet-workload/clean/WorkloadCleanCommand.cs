@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
@@ -19,6 +20,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
     internal class WorkloadCleanCommand : WorkloadCommandBase
     {
         private readonly bool _cleanAll;
+
+        private string? _dotnetPath;
+        private string _userProfileDir;
 
         private readonly ReleaseVersion _sdkVersion;
         private readonly IInstaller _workloadInstaller;
@@ -35,20 +39,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
         {
             _cleanAll = parseResult.GetValue(WorkloadCleanCommandParser.CleanAllOption);
 
-            string? dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            if (dotnetPath == null)
+            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            if (_dotnetPath == null)
             {
                 throw new GracefulException(String.Format(LocalizableStrings.InvalidWorkloadProcessPath, Environment.ProcessPath ?? "null"));
             }
 
-            userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir, true);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(WorkloadUninstallCommandParser.VersionOption), version, _dotnetPath, userProfileDir, true);
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
 
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
-            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, _workloadResolver, Verbosity, userProfileDir, VerifySignatures, PackageDownloader, dotnetPath);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), _userProfileDir);
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
+            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, _workloadResolver, Verbosity, _userProfileDir, VerifySignatures, PackageDownloader, _dotnetPath);
+            
         }
 
         public override int Execute()
@@ -61,21 +66,53 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
         {
             if (_cleanAll)
             {
-                _workloadInstaller.GarbageCollectInstalledWorkloadPacks(cleanAllPacks: true);
+                //_workloadInstaller.GarbageCollectInstalledWorkloadPacks(cleanAllPacks: true);
             }
             else
             {
                 _workloadInstaller.GarbageCollectInstalledWorkloadPacks();
             }
 
+            DisplayUninstallableVSWorkloads();
+        }
+
+        /// <summary>
+        /// Print VS Workloads which can't be uninstalled through the SDK CLI to increase user awareness that they must uninstall via VS.
+        /// </summary>
+        private void DisplayUninstallableVSWorkloads()
+        {
 #if !DOT_NET_BUILD_FROM_SOURCE
             if (OperatingSystem.IsWindows())
             {
-                InstalledWorkloadsCollection vsWorkloads = new();
-                VisualStudioWorkloads.GetInstalledWorkloads(_workloadResolver, vsWorkloads, _cleanAll ? null : new SdkFeatureBand(_sdkVersion));
-                foreach (var vsWorkload in vsWorkloads.AsEnumerable())
+                // All VS Workloads should have a corresponding MSI based SDK. This means we can pull all of the VS SDK feature bands using MSI/VS related registry keys.
+                var installedVSSdkBands = NetSdkMsiInstallerClient.GetInstalledFeatureBands();
+
+                foreach (SdkFeatureBand featureBand in installedVSSdkBands)
                 {
-                    Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.VSWorkloadNotRemoved, vsWorkload.Key)));
+                    try
+                    {
+#pragma warning disable CS8604 // We error in the constructor if the dotnet path is null.
+                        // The below environment expansion should be architecture agnostic for the C:\Program Files path, but only works on windows 7+. https://learn.microsoft.com/en-us/windows/win32/winprog64/wow64-implementation-details?redirectedfrom=MSDN
+                        string defaultDotnetWinPath = Path.Combine(Environment.ExpandEnvironmentVariables("%ProgramW6432%"), "dotnet");
+                        // We don't know if the dotnet installation for the other bands is in a different directory.
+                        var bandedDotnetPath = Path.Exists(Path.Combine(_dotnetPath, "sdk", featureBand.ToString())) ? _dotnetPath : defaultDotnetWinPath;
+
+                        var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(bandedDotnetPath, featureBand.ToString(), _userProfileDir);
+                        var bandedResolver = WorkloadResolver.Create(workloadManifestProvider, bandedDotnetPath, featureBand.ToString(), _userProfileDir);
+#pragma warning restore CS8604
+
+                        InstalledWorkloadsCollection vsWorkloads = new();
+                        VisualStudioWorkloads.GetInstalledWorkloads(bandedResolver, vsWorkloads, _cleanAll ? null : featureBand);
+                        foreach (var vsWorkload in vsWorkloads.AsEnumerable())
+                        {
+                            Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.VSWorkloadNotRemoved, $"{vsWorkload.Key} ({vsWorkload.Value})")));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Limitation: We don't know the dotnetPath of the other feature bands when making the manifestProvider and resolvers.
+                        Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, featureBand, ex)));
+                    }
                 }
             }
 #endif

@@ -2,6 +2,15 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="CannotAnalyzeVSWorkloadBand">
+        <source>Workloads managed by Visual Studio must be uninstalled by Visual Studio. For the Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK, Error:
+
+{1}.</source>
+        <target state="new">Workloads managed by Visual Studio must be uninstalled by Visual Studio. For the Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK, Error:
+
+{1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
         <source>Clean every workload pack, including non-orphaned ones. In addition, clean SDK feature bands (versions) that are less than or equal to the current running SDK, as opposed to only the current version.</source>
         <target state="new">Clean every workload pack, including non-orphaned ones. In addition, clean SDK feature bands (versions) that are less than or equal to the current running SDK, as opposed to only the current version.</target>

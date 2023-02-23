@@ -418,7 +418,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// Get a list of all MSI based SDK installations that match the current host architecture.
         /// </summary>
         /// <returns>A collection of all the installed SDKs. The collection may be empty if no installed versions are found.</returns>
-        protected IEnumerable<string> GetInstalledSdkVersions()
+        protected static IEnumerable<string> GetInstalledSdkVersions()
         {
             // The SDK, regardless of the installer's platform, writes detection keys to the 32-bit hive.
             using RegistryKey hklm32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
