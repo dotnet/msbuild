@@ -9,7 +9,9 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.FileAccess;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -433,6 +435,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleTaskHostTaskComplete(TaskHostTaskComplete taskHostTaskComplete)
         {
+            foreach (FileAccessData fileAccessData in taskHostTaskComplete.FileAccessData)
+            {
+                ((IFileAccessManager)_buildComponentHost.GetComponent(BuildComponentType.FileAccessManager))
+                    .ReportFileAccess(fileAccessData, _buildComponentHost.BuildParameters.NodeId);
+            }
+
             // If it crashed, or if it failed, it didn't succeed.   
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 

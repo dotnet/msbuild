@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Framework.FileAccess;
+#endif
 
 #nullable disable
 
@@ -127,6 +130,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="value">The value to be translated.</param>
         void Translate(ref int value);
+
+        /// <summary>
+        /// Translates an unsigned integer.
+        /// </summary>
+        /// <param name="unsignedInteger">The unsigned integer to translate.</param>
+        void Translate(ref uint unsignedInteger);
 
         /// <summary>
         /// Translates an <see langword="int"/> array.

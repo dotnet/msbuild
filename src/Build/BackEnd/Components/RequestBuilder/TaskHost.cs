@@ -6,22 +6,24 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 #if FEATURE_APPDOMAIN
-using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
+using System.Runtime.Remoting.Lifetime;
 #endif
-using System.Threading;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
 using System.Diagnostics;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Execution;
+using Microsoft.Build.FileAccesses;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Components.Caching;
-using System.Reflection;
-using Microsoft.Build.Eventing;
 
 #nullable disable
 
@@ -932,6 +934,13 @@ namespace Microsoft.Build.BackEnd
 
             /// <inheritdoc/>
             public override bool IsTaskInputLoggingEnabled => _taskHost._host.BuildParameters.LogTaskInputs;
+
+            /// <inheritdoc/>
+            public override void ReportFileAccess(FileAccessData fileAccessData)
+            {
+                IBuildComponentHost buildComponentHost = _taskHost._host;
+                ((IFileAccessManager)buildComponentHost.GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessData, buildComponentHost.BuildParameters.NodeId);
+            }
         }
 
         public EngineServices EngineServices { get; }

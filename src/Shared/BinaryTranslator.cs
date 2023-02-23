@@ -8,6 +8,9 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Framework.FileAccess;
+#endif
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -147,6 +150,9 @@ namespace Microsoft.Build.BackEnd
             {
                 value = _reader.ReadInt32();
             }
+
+            /// <inheritdoc/>
+            public void Translate(ref uint unsignedInteger) => unsignedInteger = _reader.ReadUInt32();
 
             /// <summary>
             /// Translates an <see langword="int"/> array.
@@ -905,6 +911,9 @@ namespace Microsoft.Build.BackEnd
             {
                 _writer.Write(value);
             }
+
+            /// <inheritdoc/>
+            public void Translate(ref uint unsignedInteger) => _writer.Write(unsignedInteger);
 
             /// <summary>
             /// Translates an <see langword="int"/> array.

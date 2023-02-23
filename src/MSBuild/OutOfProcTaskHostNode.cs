@@ -5,14 +5,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Globalization;
-using System.Threading;
+using System.IO;
 using System.Reflection;
-
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Framework.FileAccess;
+#endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
@@ -163,6 +165,11 @@ namespace Microsoft.Build.CommandLine
         /// The task object cache.
         /// </summary>
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
+
+        /// <summary>
+        /// The file accesses reported by the most recently completed task.
+        /// </summary>
+        private List<FileAccessData> _fileAccessData;
 #endif
 
         /// <summary>
@@ -193,6 +200,7 @@ namespace Microsoft.Build.CommandLine
 
 #if !CLR2COMPATIBILITY
             EngineServices = new EngineServicesImpl(this);
+            _fileAccessData = new List<FileAccessData>();
 #endif
         }
 
@@ -531,6 +539,9 @@ namespace Microsoft.Build.CommandLine
                     return _taskHost._currentConfiguration.IsTaskInputLoggingEnabled;
                 }
             }
+
+            /// <inheritdoc/>
+            public override void ReportFileAccess(FileAccessData fileAccessData) => _taskHost._fileAccessData.Add(fileAccessData);
         }
 
         public EngineServices EngineServices { get; }
@@ -936,8 +947,11 @@ namespace Microsoft.Build.CommandLine
                     lock (_taskCompleteLock)
                     {
                         _taskCompletePacket = new TaskHostTaskComplete(
-                                                        taskResult,
-                                                        currentEnvironment);
+                            taskResult,
+#if !CLR2COMPATIBILITY
+                            _fileAccessData,
+#endif
+                            currentEnvironment);
                     }
 
 #if FEATURE_APPDOMAIN
@@ -956,11 +970,20 @@ namespace Microsoft.Build.CommandLine
                     lock (_taskCompleteLock)
                     {
                         // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
-                        _taskCompletePacket = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e), null);
+                        _taskCompletePacket = new TaskHostTaskComplete(
+                            new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
+#if !CLR2COMPATIBILITY
+                            _fileAccessData,
+#endif
+                            null);
                     }
                 }
                 finally
                 {
+#if !CLR2COMPATIBILITY
+                    _fileAccessData = new List<FileAccessData>();
+#endif
+
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
                     _taskWrapper.CleanupTask();
 

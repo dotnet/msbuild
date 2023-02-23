@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Framework.FileAccess;
+#endif
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -49,6 +52,10 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskHostTaskComplete : INodePacket
     {
+#if !CLR2COMPATIBILITY
+        private List<FileAccessData> _fileAccessData;
+#endif
+
         /// <summary>
         /// Result of the task's execution. 
         /// </summary>
@@ -83,11 +90,17 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<string, string> _buildProcessEnvironment = null;
 
         /// <summary>
-        /// Constructor
+        /// Initializes a new instance of the <see cref="TaskHostTaskComplete"/> class.
         /// </summary>
-        /// <param name="result">Result of the task's execution.</param>
+        /// <param name="result">The result of the task's execution.</param>
+        /// <param name="fileAccessData">The file accesses reported by the task.</param>
         /// <param name="buildProcessEnvironment">The build process environment as it was at the end of the task's execution.</param>
-        public TaskHostTaskComplete(OutOfProcTaskHostTaskResult result, IDictionary<string, string> buildProcessEnvironment)
+        public TaskHostTaskComplete(
+            OutOfProcTaskHostTaskResult result,
+#if !CLR2COMPATIBILITY
+            List<FileAccessData> fileAccessData,
+#endif
+            IDictionary<string, string> buildProcessEnvironment)
         {
             ErrorUtilities.VerifyThrowInternalNull(result, nameof(result));
 
@@ -95,6 +108,9 @@ namespace Microsoft.Build.BackEnd
             _taskException = result.TaskException;
             _taskExceptionMessage = result.ExceptionMessage;
             _taskExceptionMessageArgs = result.ExceptionMessageArgs;
+#if !CLR2COMPATIBILITY
+            _fileAccessData = fileAccessData;
+#endif
 
             if (result.FinalParameterValues != null)
             {
@@ -201,6 +217,17 @@ namespace Microsoft.Build.BackEnd
             get { return NodePacketType.TaskHostTaskComplete; }
         }
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Gets the file accesses reported by the task.
+        /// </summary>
+        public List<FileAccessData> FileAccessData
+        {
+            [DebuggerStepThrough]
+            get => _fileAccessData;
+        }
+#endif
+
         /// <summary>
         /// Translates the packet to/from binary form.
         /// </summary>
@@ -213,6 +240,9 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _taskExceptionMessageArgs);
             translator.TranslateDictionary(ref _taskOutputParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+#if !CLR2COMPATIBILITY
+            translator.Translate(ref _fileAccessData);
+#endif
         }
 
         /// <summary>
