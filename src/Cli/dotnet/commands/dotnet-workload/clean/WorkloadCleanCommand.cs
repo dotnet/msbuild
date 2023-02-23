@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
         {
             if (_cleanAll)
             {
-                //_workloadInstaller.GarbageCollectInstalledWorkloadPacks(cleanAllPacks: true);
+                _workloadInstaller.GarbageCollectInstalledWorkloadPacks(cleanAllPacks: true);
             }
             else
             {

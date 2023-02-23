@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
         public void GivenWorkloadCleanFileBasedItRemovesPacksAndPackRecords(bool userLocal, bool cleanAll)
         {
             // Setup ( I wish we could not copy this everywhere, but these are convenient as locals. )
-            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
+            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? $"userlocal-{cleanAll}" : $"default-{cleanAll}").Path;
             var dotnetRoot = Path.Combine(testDirectory, dotnet);
             var userProfileDir = Path.Combine(testDirectory, _profileDirectoryLeafName);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
