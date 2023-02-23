@@ -7,6 +7,7 @@ using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.Build.Containers.IntegrationTests;
+using Microsoft.NET.Build.Containers.UnitTests;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 
@@ -20,7 +21,7 @@ public class CreateNewImageTests
         _testOutput = testOutput;
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void CreateNewImage_Baseline()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(CreateNewImage_Baseline)));
@@ -60,7 +61,7 @@ public class CreateNewImageTests
         newProjectDir.Delete(true);
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void ParseContainerProperties_EndToEnd()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(ParseContainerProperties_EndToEnd)));
@@ -116,7 +117,7 @@ public class CreateNewImageTests
     /// <summary>
     /// Creates a console app that outputs the environment variable added to the image.
     /// </summary>
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void Tasks_EndToEnd_With_EnvironmentVariable_Validation()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(Tasks_EndToEnd_With_EnvironmentVariable_Validation)));

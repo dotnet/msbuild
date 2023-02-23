@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.CommandUtils;
-using Microsoft.NET.Build.Containers;
 using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.NET.Build.Containers.UnitTests;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
@@ -30,7 +30,7 @@ public class EndToEndTests
         return callerMemberName;
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public async Task ApiEndToEndWithRegistryPushAndPull()
     {
         string publishDirectory = BuildLocalApp();
@@ -73,7 +73,7 @@ public class EndToEndTests
             .Should().Pass();
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public async Task ApiEndToEndWithLocalLoad()
     {
         string publishDirectory = BuildLocalApp();
@@ -135,7 +135,7 @@ public class EndToEndTests
         return publishDirectory;
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public async Task EndToEnd_NoAPI()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "CreateNewImageTest"));
@@ -272,28 +272,18 @@ public class EndToEndTests
         privateNuGetAssets.Delete(true);
     }
 
-    // These two are commented because the Github Actions runners don't let us easily configure the Docker Buildx config -
-    // we need to configure it to allow emulation of other platforms on amd64 hosts before these two will run.
-    // They do run locally, however.
-
-    //[InlineData("linux-arm", false, "/app", "linux/arm/v7")] // packaging framework-dependent because emulating arm on x64 Docker host doesn't work
-    //[InlineData("linux-arm64", false, "/app", "linux/arm64/v8")] // packaging framework-dependent because emulating arm64 on x64 Docker host doesn't work
-
-    // this one should be skipped in all cases because we don't ship linux-x86 runtime packs, so we can't execute the 'apphost' version of the app
-    //[InlineData("linux-x86", false, "/app", "linux/386")] // packaging framework-dependent because missing runtime packs for x86 linux.
-
-    // This one should be skipped because containers can't be configured to run on Linux hosts :(
-    //[InlineData("win-x64", true, "C:\\app", "windows/amd64")]
-
-    // As a result, we only have one actual data-driven test
-    [InlineData("linux-x64", true, "/app", "linux/amd64")]
-    [Theory]
-    public async Task CanPackageForAllSupportedContainerRIDs(string rid, bool isRIDSpecific, string workingDir, string dockerPlatform)
+    [DockerSupportsArchInlineData("linux/arm/v7", "linux-arm", "/app")]
+    [DockerSupportsArchInlineData("linux/arm64/v8", "linux-arm64", "/app")]
+    [DockerSupportsArchInlineData("linux/386", "linux-x86", "/app", Skip="There's no apphost for linux-x86 so we can't execute self-contained, and there's no .NET runtime base image for linux-x86 so we can't execute framework-dependent.")]
+    [DockerSupportsArchInlineData("windows/amd64", "win-x64", "C:\\app")]
+    [DockerSupportsArchInlineData("linux/amd64", "linux-x64", "/app")]
+    [DockerDaemonAvailableTheory]
+    public async Task CanPackageForAllSupportedContainerRIDs(string dockerPlatform, string rid, string workingDir)
     {
-        string publishDirectory = isRIDSpecific ? BuildLocalApp(tfm: "net7.0", rid: rid) : BuildLocalApp(tfm: "net7.0");
+        string publishDirectory = BuildLocalApp(tfm: "net7.0", rid: rid);
 
         // Build the image
-        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.BaseImageSource));
+        Registry registry = new(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.BaseImageSource));
 
         ImageBuilder? imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.BaseImage,
@@ -308,7 +298,7 @@ public class EndToEndTests
         imageBuilder.AddLayer(l);
         imageBuilder.SetWorkingDirectory(workingDir);
 
-        string[] entryPoint = DecideEntrypoint(rid, isRIDSpecific, "MinimalTestApp", workingDir);
+        string[] entryPoint = DecideEntrypoint(rid, "MinimalTestApp", workingDir);
         imageBuilder.SetEntryPoint(entryPoint);
 
         BuiltImage builtImage = imageBuilder.Build();
@@ -332,17 +322,10 @@ public class EndToEndTests
             .Should()
             .Pass();
 
-        string[] DecideEntrypoint(string rid, bool isRIDSpecific, string appName, string workingDir)
+        string[] DecideEntrypoint(string rid, string appName, string workingDir)
         {
             var binary = rid.StartsWith("win", StringComparison.Ordinal) ? $"{appName}.exe" : appName;
-            if (isRIDSpecific)
-            {
-                return new[] { $"{workingDir}/{binary}" };
-            }
-            else
-            {
-                return new[] { "dotnet", $"{workingDir}/{binary}.dll" };
-            }
+            return new[] { $"{workingDir}/{binary}" };
         }
     }
 }

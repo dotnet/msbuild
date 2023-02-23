@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.CommandUtils;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
@@ -20,6 +19,9 @@ public class DockerRegistryManager
     public static void StartAndPopulateDockerRegistry(ITestOutputHelper testOutput)
     {
         testOutput.WriteLine("Spawning local registry");
+        if (!new LocalDocker(testOutput.WriteLine).IsAvailable()) {
+            throw new InvalidOperationException("Docker daemon is not started, tests cannot run");
+        }
         CommandResult processResult = new BasicCommand(testOutput, "docker", "run", "--rm", "--publish", "5010:5000", "--detach", "registry:2").Execute();
         processResult.Should().Pass().And.HaveStdOut();
         using var reader = new StringReader(processResult.StdOut!);

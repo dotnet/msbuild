@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.NET.Build.Containers.IntegrationTests;
+using Microsoft.NET.Build.Containers.UnitTests;
 using Xunit;
 using static Microsoft.NET.Build.Containers.KnownStrings;
 using static Microsoft.NET.Build.Containers.KnownStrings.Properties;
@@ -12,7 +13,7 @@ namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 [Collection("Docker tests")]
 public class ParseContainerPropertiesTests
 {
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void Baseline()
     {
         var (project, _) = ProjectInitializer.InitProject(new () {
@@ -33,7 +34,7 @@ public class ParseContainerPropertiesTests
         instance.GetItems("ProjectCapability").Select(i => i.EvaluatedInclude).ToArray().Should().BeEquivalentTo(new[] { "NetSdkOCIImageBuild" });
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void SpacesGetReplacedWithDashes()
     {
          var (project, _) = ProjectInitializer.InitProject(new () {
@@ -49,7 +50,7 @@ public class ParseContainerPropertiesTests
         Assert.Equal("7.0", instance.GetPropertyValue(ContainerBaseTag));
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void RegexCatchesInvalidContainerNames()
     {
          var (project, logs) = ProjectInitializer.InitProject(new () {
@@ -58,13 +59,13 @@ public class ParseContainerPropertiesTests
             [ContainerImageName] = "dotnet testimage",
             [ContainerImageTag] = "5.0"
         });
-        
+
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
         Assert.Contains(logs.Messages, m => m.Code == ErrorCodes.CONTAINER001 && m.Importance == global::Microsoft.Build.Framework.MessageImportance.High);
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void RegexCatchesInvalidContainerTags()
     {
         var (project, logs) = ProjectInitializer.InitProject(new () {
@@ -81,7 +82,7 @@ public class ParseContainerPropertiesTests
         Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER004);
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void CanOnlySupplyOneOfTagAndTags()
     {
         var (project, logs) = ProjectInitializer.InitProject(new () {

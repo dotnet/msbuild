@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Formats.Tar;
-using Microsoft.NET.Build.Containers;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Globalization;
 using Xunit.Abstractions;
 using Xunit;
 
@@ -75,7 +73,7 @@ public sealed class LayerEndToEndTests : IDisposable
         //Assert.AreEqual("sha256:26140bc75f2fcb3bf5da7d3b531d995c93d192837e37df0eb5ca46e2db953124", l.Descriptor.Digest); // TODO: determinism!
 
         VerifyDescriptorInfo(l);
-        
+
         var allEntries = LoadAllTarEntries(l.BackingFile);
         Assert.True(allEntries.TryGetValue("app/", out var appEntryType) && appEntryType == TarEntryType.Directory, "Missing app directory entry");
         Assert.True(allEntries.TryGetValue("app/TestFile.txt", out var fileEntryType) && fileEntryType == TarEntryType.RegularFile, "Missing TestFile.txt file entry");
@@ -117,14 +115,14 @@ public sealed class LayerEndToEndTests : IDisposable
             ContentStore.ArtifactRoot = priorArtifactRoot;
         }
     }
-    
+
     private static Dictionary<string, TarEntryType> LoadAllTarEntries(string file)
     {
         using var gzip = new GZipStream(File.OpenRead(file), CompressionMode.Decompress);
         using var tar = new TarReader(gzip);
-        
+
         var entries = new Dictionary<string, TarEntryType>();
-        
+
         TarEntry? entry;
         while ((entry = tar.GetNextEntry()) != null)
         {

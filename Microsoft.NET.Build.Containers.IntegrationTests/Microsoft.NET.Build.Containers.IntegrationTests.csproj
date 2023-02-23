@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" />
-   
+
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="all" />
     <PackageReference Include="xunit" />
@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.NET.Build.Containers\Microsoft.NET.Build.Containers.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.Build.Containers.UnitTests\Microsoft.NET.Build.Containers.UnitTests.csproj" />
   </ItemGroup>
 
 </Project>

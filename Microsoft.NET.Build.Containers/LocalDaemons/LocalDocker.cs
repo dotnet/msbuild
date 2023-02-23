@@ -102,7 +102,7 @@ internal sealed class LocalDocker : ILocalDaemon
     /// <param name="sync">when <see langword="true"/>, the method is executed synchronously.</param>
     /// <param name="cancellationToken"></param>
     /// <exception cref="DockerLoadException">when failed to retrieve docker configuration.</exception>
-    private static async Task<JsonDocument> GetConfigAsync(bool sync, CancellationToken cancellationToken)
+    internal static async Task<JsonDocument> GetConfigAsync(bool sync, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var psi = new ProcessStartInfo("docker", "info --format=\"{{json .}}\"")

@@ -7,7 +7,7 @@ namespace Microsoft.NET.Build.Containers.UnitTests;
 
 public class DockerDaemonTests
 {
-    [Fact]
+    [DockerDaemonAvailableFact]
     public async Task Can_detect_when_no_daemon_is_running() {
         // mimic no daemon running by setting the DOCKER_HOST to a nonexistent socket
         try {
@@ -19,7 +19,7 @@ public class DockerDaemonTests
         }
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public async Task Can_detect_when_daemon_is_running() {
         var available = await new LocalDocker(Console.WriteLine).IsAvailableAsync(default).ConfigureAwait(false);
         Assert.True(available, "Should have found a working daemon");
