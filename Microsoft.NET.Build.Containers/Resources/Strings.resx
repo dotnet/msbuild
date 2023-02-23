@@ -119,57 +119,75 @@
   </resheader>
   <data name="AmazonRegistryFailed" xml:space="preserve">
     <value>CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry.</value>
+    <comment>{StrBegin="CONTAINER1002: "}</comment>
   </data>
   <data name="BlobUploadFailed" xml:space="preserve">
     <value>CONTAINER1001: Failed to upload blob to {0}; received {1} with detail {2}.</value>
+    <comment>{StrBegin="CONTAINER1001: "}</comment>
   </data>
   <data name="CouldntDeserializeJsonToken" xml:space="preserve">
     <value>CONTAINER1007: Could not deserialize token from JSON.</value>
+    <comment>{StrBegin="CONTAINER1007: "}</comment>
   </data>
   <data name="DockerInfoFailed" xml:space="preserve">
     <value>CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</value>
+    <comment>{StrBegin="CONTAINER3002: "}</comment>
   </data>
   <data name="DockerProcessCreationFailed" xml:space="preserve">
     <value>CONTAINER3001: Failed creating docker process.</value>
+    <comment>{StrBegin="CONTAINER3001: "}</comment>
   </data>
   <data name="DontKnowHowToPullImages" xml:space="preserve">
-    <value>CONTAINER1009: Don't know how to pull images from local daemons at the moment.</value>
+    <value>CONTAINER1010: Don't know how to pull images from local daemons at the moment.</value>
+    <comment>{StrBegin="CONTAINER1010: "}</comment>
   </data>
   <data name="FailedRetrievingCredentials" xml:space="preserve">
-    <value>CONTAINER1007: Failed retrieving credentials for "{0}": {1}</value>
+    <value>CONTAINER1008: Failed retrieving credentials for "{0}": {1}</value>
+    <comment>{StrBegin="CONTAINER1008: "}</comment>
   </data>
   <data name="ImageLoadFailed" xml:space="preserve">
-    <value>CONTAINER1008: Failed to load image to local Docker daemon. stdout: {0}</value>
+    <value>CONTAINER1009: Failed to load image to local Docker daemon. stdout: {0}</value>
+    <comment>{StrBegin="CONTAINER1009: "}</comment>
   </data>
   <data name="InvalidImageName" xml:space="preserve">
     <value>CONTAINER2005: The first character of the image name must be a lowercase letter or a digit.</value>
+    <comment>{StrBegin="CONTAINER2005: "}</comment>
   </data>
   <data name="InvalidTokenResponse" xml:space="preserve">
     <value>CONTAINER1003: Token response had neither token nor access_token.</value>
+    <comment>{StrBegin="CONTAINER1003: "}</comment>
   </data>
   <data name="MissingLayerNode" xml:space="preserve">
     <value>CONTAINER2006: Tried to get layer information but there is no layer node?</value>
+    <comment>{StrBegin="CONTAINER2006: "}</comment>
   </data>
   <data name="MissingLinkToRegistry" xml:space="preserve">
     <value>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</value>
+    <comment>{StrBegin="CONTAINER2004: "}</comment>
   </data>
   <data name="NoRequestUriSpecified" xml:space="preserve">
     <value>CONTAINER1004: No RequestUri specified.</value>
+    <comment>{StrBegin="CONTAINER1004: "}</comment>
   </data>
   <data name="RegistryPushFailed" xml:space="preserve">
     <value>CONTAINER1005: Registry push failed.</value>
+    <comment>{StrBegin="CONTAINER1005: "}</comment>
   </data>
   <data name="TooManyRetries" xml:space="preserve">
     <value>CONTAINER1006: Too many retries, stopping.</value>
+    <comment>{StrBegin="CONTAINER1006: "}</comment>
   </data>
   <data name="UnknownDaemonType" xml:space="preserve">
     <value>CONTAINER2002: Unknown local container daemon type '{0}'. Valid local container daemon types are {1}.</value>
+    <comment>{StrBegin="CONTAINER2002: "}</comment>
   </data>
   <data name="UnknownMediaType" xml:space="preserve">
     <value>CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.</value>
+    <comment>{StrBegin="CONTAINER2003: "}</comment>
   </data>
   <data name="UnrecognizedMediaType" xml:space="preserve">
     <value>CONTAINER2001: Unrecognized mediaType '{0}'.</value>
+    <comment>{StrBegin="CONTAINER2001: "}</comment>
   </data>
   <data name="_Test" xml:space="preserve">
     <value>Value for unit test {0}</value>

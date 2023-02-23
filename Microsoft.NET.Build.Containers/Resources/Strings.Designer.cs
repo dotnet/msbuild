@@ -115,7 +115,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1009: Don&apos;t know how to pull images from local daemons at the moment..
+        ///   Looks up a localized string similar to CONTAINER1010: Don&apos;t know how to pull images from local daemons at the moment..
         /// </summary>
         internal static string DontKnowHowToPullImages {
             get {
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1007: Failed retrieving credentials for &quot;{0}&quot;: {1}.
+        ///   Looks up a localized string similar to CONTAINER1008: Failed retrieving credentials for &quot;{0}&quot;: {1}.
         /// </summary>
         internal static string FailedRetrievingCredentials {
             get {
@@ -133,7 +133,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1008: Failed to load image to local Docker daemon. stdout: {0}.
+        ///   Looks up a localized string similar to CONTAINER1009: Failed to load image to local Docker daemon. stdout: {0}.
         /// </summary>
         internal static string ImageLoadFailed {
             get {
