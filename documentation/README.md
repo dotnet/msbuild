@@ -39,6 +39,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 ### Problems?
 
 * [Rebuilding when nothing changed](wiki/Rebuilding-when-nothing-changed.md)
+* [Controling Dependencies Behavior](wiki/Controlling-Dependencies-Behavior.md)
 * [Something's wrong in my build](wiki/Something's-wrong-in-my-build.md)
 * [Some gotchas around the Microsoft.Build.Framework project/assembly](wiki/Microsoft.Build.Framework.md)
 * [GAC and MSBuild](wiki/UnGAC.md)
@@ -50,16 +51,16 @@ The folder contains collection of docs and references for MSBuild, detailed info
 * [`ProjectReference`](ProjectReference-Protocol.md)
 * [MSBuild Server](MSBuild-Server.md)
 * [Low priority nodes](specs/low-priority-switch.md)
+* [Threading in MSBuild worker nodes](specs/threading.md)
+* [Nodes orchestration](wiki/Nodes-Orchestration.md)
 * [Project cache plugin](specs/project-cache.md)
 * [Support for remote host objects](specs/remote-host-object.md)
 * [Static graph](specs/static-graph.md)
 * [Single project isolated builds: implementation details](specs/single-project-isolated-builds.md)
 * [Task isolation](specs/task-isolation-and-dependencies.md)
-* [Threading in MSBuild worker nodes](specs/threading.md)
 * [Target maps](wiki/Target-Maps.md)
 * [Managing parallelism in MSBuild](specs/resource-management.md)
 * [SDK resolution](specs/sdk-resolvers-algorithm.md)
-* [Nodes orchestration](wiki/Nodes-Orchestration.md)
 
 ### Tasks
 
