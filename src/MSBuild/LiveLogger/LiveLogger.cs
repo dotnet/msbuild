@@ -173,6 +173,7 @@ namespace Microsoft.Build.Logging.LiveLogger
                 if (restoringProjects == 0)
                 {
                     TerminalBuffer.IsRestoring = false;
+                    TerminalBuffer.DeleteAllLines();
                     TerminalBuffer.WriteNewLine($"Restore completed in {(e.Timestamp - restoreTimestamp)?.TotalMilliseconds} milliseconds");
                     startedProjects = 0;
                     finishedProjects = 0;

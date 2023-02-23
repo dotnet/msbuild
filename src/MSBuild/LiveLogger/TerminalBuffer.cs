@@ -274,6 +274,12 @@ namespace Microsoft.Build.Logging.LiveLogger
             return null;
         }
 
+        public static void DeleteAllLines()
+        {
+            Lines.Clear();
+            ShouldRerender = true;
+        }
+
         // Delete line
         public static void DeleteLine(int lineId)
         {
