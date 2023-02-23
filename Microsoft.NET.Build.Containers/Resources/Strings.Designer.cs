@@ -70,7 +70,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry..
+        ///   Looks up a localized string similar to CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry..
         /// </summary>
         internal static string AmazonRegistryFailed {
             get {
@@ -79,7 +79,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to upload blob to {0}; received {1} with detail {2}..
+        ///   Looks up a localized string similar to CONTAINER1001: Failed to upload blob to {0}; received {1} with detail {2}..
         /// </summary>
         internal static string BlobUploadFailed {
             get {
@@ -88,7 +88,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not deserialize token from JSON..
+        ///   Looks up a localized string similar to CONTAINER1007: Could not deserialize token from JSON..
         /// </summary>
         internal static string CouldntDeserializeJsonToken {
             get {
@@ -97,7 +97,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to get docker info({0})\n{1}\n{2}.
+        ///   Looks up a localized string similar to CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}.
         /// </summary>
         internal static string DockerInfoFailed {
             get {
@@ -106,7 +106,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed creating docker process..
+        ///   Looks up a localized string similar to CONTAINER3001: Failed creating docker process..
         /// </summary>
         internal static string DockerProcessCreationFailed {
             get {
@@ -115,7 +115,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Don&apos;t know how to pull images from local daemons at the moment..
+        ///   Looks up a localized string similar to CONTAINER1009: Don&apos;t know how to pull images from local daemons at the moment..
         /// </summary>
         internal static string DontKnowHowToPullImages {
             get {
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed retrieving credentials for &quot;{0}&quot;: {1}.
+        ///   Looks up a localized string similar to CONTAINER1007: Failed retrieving credentials for &quot;{0}&quot;: {1}.
         /// </summary>
         internal static string FailedRetrievingCredentials {
             get {
@@ -133,7 +133,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to load image to local Docker daemon. stdout: {0}.
+        ///   Looks up a localized string similar to CONTAINER1008: Failed to load image to local Docker daemon. stdout: {0}.
         /// </summary>
         internal static string ImageLoadFailed {
             get {
@@ -142,7 +142,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The first character of the image name must be a lowercase letter or a digit..
+        ///   Looks up a localized string similar to CONTAINER2005: The first character of the image name must be a lowercase letter or a digit..
         /// </summary>
         internal static string InvalidImageName {
             get {
@@ -151,7 +151,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Token response had neither token nor access_token..
+        ///   Looks up a localized string similar to CONTAINER1003: Token response had neither token nor access_token..
         /// </summary>
         internal static string InvalidTokenResponse {
             get {
@@ -160,7 +160,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tried to get layer information but there is no layer node?.
+        ///   Looks up a localized string similar to CONTAINER2006: Tried to get layer information but there is no layer node?.
         /// </summary>
         internal static string MissingLayerNode {
             get {
@@ -169,7 +169,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to download layer with descriptor &apos;{0}&apos; from registry &apos;{1}&apos; because it does not exist..
+        ///   Looks up a localized string similar to CONTAINER2004: Unable to download layer with descriptor &apos;{0}&apos; from registry &apos;{1}&apos; because it does not exist..
         /// </summary>
         internal static string MissingLinkToRegistry {
             get {
@@ -178,7 +178,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No RequestUri specified..
+        ///   Looks up a localized string similar to CONTAINER1004: No RequestUri specified..
         /// </summary>
         internal static string NoRequestUriSpecified {
             get {
@@ -187,7 +187,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Registry push failed..
+        ///   Looks up a localized string similar to CONTAINER1005: Registry push failed..
         /// </summary>
         internal static string RegistryPushFailed {
             get {
@@ -196,7 +196,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Too many retries, stopping..
+        ///   Looks up a localized string similar to CONTAINER1006: Too many retries, stopping..
         /// </summary>
         internal static string TooManyRetries {
             get {
@@ -205,7 +205,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unknown local container daemon type &apos;{0}&apos;. Valid local container daemon types are {1}..
+        ///   Looks up a localized string similar to CONTAINER2002: Unknown local container daemon type &apos;{0}&apos;. Valid local container daemon types are {1}..
         /// </summary>
         internal static string UnknownDaemonType {
             get {
@@ -214,7 +214,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message..
+        ///   Looks up a localized string similar to CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message..
         /// </summary>
         internal static string UnknownMediaType {
             get {
@@ -223,7 +223,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unrecognized mediaType &apos;{0}&apos;..
+        ///   Looks up a localized string similar to CONTAINER2001: Unrecognized mediaType &apos;{0}&apos;..
         /// </summary>
         internal static string UnrecognizedMediaType {
             get {
