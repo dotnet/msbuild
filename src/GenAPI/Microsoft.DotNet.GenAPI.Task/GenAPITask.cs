@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.GenAPI.Task
         /// <summary>
         /// Includes assembly attributes which are values that provide information about an assembly.
         /// </summary>
-        public bool IncludeAssemblyAttributes { get; }
+        public bool IncludeAssemblyAttributes { get; set; }
 
         protected override void ExecuteCore()
         {
