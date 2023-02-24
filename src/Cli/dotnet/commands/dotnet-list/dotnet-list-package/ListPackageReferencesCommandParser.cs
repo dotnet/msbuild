@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option HighestMinorOption = new ForwardedOption<bool>("--highest-minor", LocalizableStrings.CmdHighestMinorDescription)
             .ForwardAs("--highest-minor");
 
-        public static readonly Option ConfigOption = new ForwardedOption<string>("--config", LocalizableStrings.CmdConfigDescription)
+        public static readonly Option ConfigOption = new ForwardedOption<string>(new string[] { "--config", "--configfile"}, LocalizableStrings.CmdConfigDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdConfig
         }.ForwardAsMany(o => new[] { "--config", o });
