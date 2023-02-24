@@ -143,5 +143,18 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void ArchOptionsAMD64toX64()
+        {
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                var msbuildPath = "<msbuildpath>";
+                var command = BuildCommand.FromArgs(new string[] { "--arch", "amd64", "--os", "os" }, msbuildPath);
+                command.GetArgumentsToMSBuild()
+                    .Should()
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-x64 -property:SelfContained=false");
+            });
+        }
     }
 }
