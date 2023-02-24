@@ -1,13 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Tools.Restore;
 using FluentAssertions;
-using Xunit;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
+using Microsoft.DotNet.Tools.Restore;
 using Microsoft.NET.TestFramework;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -24,10 +21,10 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-s", "<source>" }, "-property:RestoreSources=<source>")]
         [InlineData(new string[] { "--source", "<source>" }, "-property:RestoreSources=<source>")]
         [InlineData(new string[] { "-s", "<source0>", "-s", "<source1>" }, "-property:RestoreSources=<source0>%3B<source1>")]
-        [InlineData(new string[] { "-r", "<runtime>" }, "-property:RuntimeIdentifier=<runtime> -property:_CommandLineDefinedRuntimeIdentifier=true")]
-        [InlineData(new string[] { "-r", "linux-amd64" }, "-property:RuntimeIdentifier=linux-x64 -property:_CommandLineDefinedRuntimeIdentifier=true")]
-        [InlineData(new string[] { "--runtime", "<runtime>" }, "-property:RuntimeIdentifier=<runtime> -property:_CommandLineDefinedRuntimeIdentifier=true")]
-        [InlineData(new string[] { "-r", "<runtime0>", "-r", "<runtime1>" }, "-property:RuntimeIdentifiers=<runtime0>%3B<runtime1> -property:_CommandLineDefinedRuntimeIdentifier=true")]
+        [InlineData(new string[] { "-r", "<runtime>" }, "-property:RuntimeIdentifiers=<runtime>")]
+        [InlineData(new string[] { "-r", "linux-amd64" }, "-property:RuntimeIdentifiers=linux-x64")]
+        [InlineData(new string[] { "--runtime", "<runtime>" }, "-property:RuntimeIdentifiers=<runtime>")]
+        [InlineData(new string[] { "-r", "<runtime0>", "-r", "<runtime1>" }, "-property:RuntimeIdentifiers=<runtime0>%3B<runtime1>")]
         [InlineData(new string[] { "--packages", "<packages>" }, "-property:RestorePackagesPath=<cwd><packages>")]
         [InlineData(new string[] { "--disable-parallel" }, "-property:RestoreDisableParallel=true")]
         [InlineData(new string[] { "--configfile", "<config>" }, "-property:RestoreConfigFile=<cwd><config>")]

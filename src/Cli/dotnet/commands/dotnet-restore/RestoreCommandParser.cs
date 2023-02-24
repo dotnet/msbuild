@@ -1,9 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -85,6 +87,24 @@ namespace Microsoft.DotNet.Cli
                 command.AddOption(option);
             }
         }
+        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-"));
+        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-") + 1, rid.Length - rid.LastIndexOf("-") - 1);
+        public static string RestoreRuntimeArgFunc(IEnumerable<string> rids) 
+        {
+            List<string> convertedRids = new();
+            foreach (string rid in rids)
+            {
+                if (GetArchFromRid(rid.ToString()) == "amd64")
+                {
+                    convertedRids.Add($"{GetOsFromRid(rid.ToString())}-x64");
+                }
+                else
+                {
+                    convertedRids.Add($"{rid}");
+                }
+            }
+            return $"-property:RuntimeIdentifiers={string.Join("%3B", convertedRids)}";
+        }
 
         private static Option[] ImplicitRestoreOptions(bool showHelp, bool useShortOptions, bool includeRuntimeOption, bool includeNoDependenciesOption)
         {
@@ -142,10 +162,15 @@ namespace Microsoft.DotNet.Cli
             if (includeRuntimeOption)
             {
                 options = options.Append(
-                     CommonOptions.RuntimeOption
-                     .WithDescription(LocalizableStrings.CmdRuntimeOptionDescription)
-                     .AllowSingleArgPerToken()
-                     .AddCompletions(Complete.RunTimesFromProjectFile)
+                    new ForwardedOption<IEnumerable<string>>(
+                        useShortOptions ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
+                        LocalizableStrings.CmdRuntimeOptionDescription)
+                    {
+                        ArgumentHelpName = LocalizableStrings.CmdRuntimeOption,
+                        IsHidden = !showHelp
+                    }.ForwardAsSingle(RestoreRuntimeArgFunc)
+                    .AllowSingleArgPerToken()
+                    .AddCompletions(Complete.RunTimesFromProjectFile)
                 ).ToArray();
             }
 
