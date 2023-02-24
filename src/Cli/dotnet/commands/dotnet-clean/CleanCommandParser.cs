@@ -52,6 +52,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(OutputOption);
             command.AddOption(NoLogoOption);
+            command.AddOption(CommonOptions.DisableBuildServersOption);
 
             command.SetHandler(CleanCommand.Run);
 

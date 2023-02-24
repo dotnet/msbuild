@@ -110,6 +110,11 @@ export PATH="$PATH:{0}"
         <target state="translated">Uygulamanızı çerçeveye bağımlı bir uygulama olarak yayımlayın. Uygulamanızı çalıştırmak için hedef makineye uyumlu bir .NET çalışma zamanı yüklenmelidir.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildAdditionalOptionTitle">
+        <source>.NET Cli Options:</source>
+        <target state="new">.NET Cli Options:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">`{0}` içinde birden fazla proje bulundu. Hangisinin kullanılacağını belirtin.</target>

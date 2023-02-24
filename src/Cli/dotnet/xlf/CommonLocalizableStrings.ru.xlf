@@ -110,6 +110,11 @@ export PATH="$PATH:{0}"
         <target state="translated">Опубликуйте приложение как зависимое от платформы. Для запуска приложения на целевом компьютере должна быть установлена совместимая среда выполнения .NET.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildAdditionalOptionTitle">
+        <source>.NET Cli Options:</source>
+        <target state="new">.NET Cli Options:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">Найдено несколько проектов в "{0}". Выберите один.</target>

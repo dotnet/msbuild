@@ -281,6 +281,28 @@ namespace Microsoft.DotNet.Cli
                 }
             }
 
+            public void additionalOption(HelpContext context)
+            {
+                List<TwoColumnHelpRow> options = new();
+                HashSet<Option> uniqueOptions = new();
+                foreach (Option option in context.Command.Options)
+                {
+                    if (!option.IsHidden && uniqueOptions.Add(option))
+                    {
+                        options.Add(context.HelpBuilder.GetTwoColumnRow(option, context));
+                    }
+                }
+
+                if (options.Count <= 0)
+                {
+                    return;
+                }
+
+                context.Output.WriteLine(CommonLocalizableStrings.MSBuildAdditionalOptionTitle);
+                context.HelpBuilder.WriteColumns(options, context);
+                context.Output.WriteLine();
+            }
+
             public override void Write(HelpContext context)
             {
                 var command = context.Command;
@@ -296,6 +318,8 @@ namespace Microsoft.DotNet.Cli
                 else if (command.Name.Equals(MSBuildCommandParser.GetCommand().Name))
                 {
                     new MSBuildForwardingApp(helpArgs).Execute();
+                    context.Output.WriteLine();
+                    additionalOption(context);
                 }
                 else if (command.Name.Equals(VSTestCommandParser.GetCommand().Name))
                 {
@@ -342,6 +366,9 @@ namespace Microsoft.DotNet.Cli
                     base.Write(context);
                 }
             }
+
+
+
         }
     }
 }

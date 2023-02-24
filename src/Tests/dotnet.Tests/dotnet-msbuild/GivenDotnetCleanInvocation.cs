@@ -1,13 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Tools.Clean;
 using FluentAssertions;
-using Xunit;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
+using Microsoft.DotNet.Tools.Clean;
 using Microsoft.NET.TestFramework;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -37,6 +34,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--configuration", "<configuration>" }, "-property:Configuration=<configuration>")]
         [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
+        [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false")]
+
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
