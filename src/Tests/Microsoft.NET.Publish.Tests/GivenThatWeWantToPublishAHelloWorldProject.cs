@@ -745,7 +745,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: tfm);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
 
             Assert.Equal("", properties["SelfContained"]);
             Assert.Equal("", properties["PublishAot"]);
