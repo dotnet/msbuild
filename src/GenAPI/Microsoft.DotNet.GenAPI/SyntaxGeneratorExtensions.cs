@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.GenAPI
                             if (baseTypeConstructors.Any())
                             {
                                 ConstructorDeclarationSyntax declaration = (ConstructorDeclarationSyntax)syntaxGenerator.Declaration(method);
-                                return declaration.WithInitializer(GenerateBaseConstructorInitializer(baseTypeConstructors.First()));
+                                return declaration.WithInitializer(baseTypeConstructors.First().GenerateBaseConstructorInitializer());
                             }
                         }
                     }
@@ -93,25 +93,6 @@ namespace Microsoft.DotNet.GenAPI
                 // re-throw the ArgumentException with the symbol that caused it.
                 throw new ArgumentException(ex.Message, symbol.ToDisplayString());
             }
-        }
-
-        private static ConstructorInitializerSyntax GenerateBaseConstructorInitializer(IMethodSymbol baseTypeConstructor)
-        {
-            ConstructorInitializerSyntax constructorInitializer = SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer);
-
-            foreach (IParameterSymbol parameter in baseTypeConstructor.Parameters)
-            {
-                IdentifierNameSyntax identifier;
-                // If the parameter's type is known to be a value type or has top-level nullability annotation
-                if (parameter.Type.IsValueType || parameter.NullableAnnotation == NullableAnnotation.Annotated)
-                    identifier = SyntaxFactory.IdentifierName("default");
-                else
-                    identifier = SyntaxFactory.IdentifierName("default!");
-
-                constructorInitializer = constructorInitializer.AddArgumentListArguments(SyntaxFactory.Argument(identifier));
-            }
-
-            return constructorInitializer;
         }
 
         // Gets the list of base class and interfaces for a given symbol <see cref="INamedTypeSymbol"/>.

@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 
 namespace Microsoft.DotNet.GenAPI
@@ -28,14 +29,14 @@ namespace Microsoft.DotNet.GenAPI
                 return true;
             }
 
-            foreach(INamedTypeSymbol memberType in ty.GetTypeMembers())
+            foreach (INamedTypeSymbol memberType in ty.GetTypeMembers())
             {
                 if (!visited.Contains(memberType) && WalkTypeSymbol(memberType, visited, f))
                 {
                     return true;
                 }
             }
-            
+
             return false;
         }
 
@@ -45,8 +46,8 @@ namespace Microsoft.DotNet.GenAPI
 
         // Walk type with predicate that checks if a type is unmanaged or a reference that's not the root.
         private static bool IsOrContainsNonEmptyStruct(ITypeSymbol root) =>
-            WalkTypeSymbol(root, new(SymbolEqualityComparer.Default), ty => 
-                ty.IsUnmanagedType || 
+            WalkTypeSymbol(root, new(SymbolEqualityComparer.Default), ty =>
+                ty.IsUnmanagedType ||
                     ((ty.IsReferenceType || ty.IsRefLikeType) && !SymbolEqualityComparer.Default.Equals(root, ty)));
 
         // Convert IEnumerable<AttributeData> to a SyntaxList<AttributeListSyntax>.
@@ -54,7 +55,7 @@ namespace Microsoft.DotNet.GenAPI
         {
             IEnumerable<SyntaxNode?> syntaxNodes = attrData.Select(ad =>
                 ad.ApplicationSyntaxReference?.GetSyntax(new System.Threading.CancellationToken(false)));
-            
+
             IEnumerable<AttributeListSyntax?> asNodes = syntaxNodes.Select(sn =>
             {
                 if (sn is AttributeSyntax atSyntax) {
@@ -65,7 +66,7 @@ namespace Microsoft.DotNet.GenAPI
 
                 return null;
             });
-            
+
             List<AttributeListSyntax> asList = asNodes.Where(a => a != null).OfType<AttributeListSyntax>().ToList();
             return SyntaxFactory.List(asList);
         }
@@ -104,7 +105,7 @@ namespace Microsoft.DotNet.GenAPI
             IEnumerable<IFieldSymbol> excludedFields = namedType.GetMembers()
                 .Where(member => !symbolFilter.Include(member) && member is IFieldSymbol)
                 .Select(m => (IFieldSymbol)m);
-            
+
             if (excludedFields.Any())
             {
                 // Collect generic excluded fields
@@ -116,7 +117,7 @@ namespace Microsoft.DotNet.GenAPI
                 });
 
                 // Add a dummy field for each generic excluded field
-                foreach(IFieldSymbol genericField in genericTypedFields)
+                foreach (IFieldSymbol genericField in genericTypedFields)
                 {
                     yield return CreateDummyField(
                         genericField.Type.ToDisplayString(),
@@ -163,6 +164,66 @@ namespace Microsoft.DotNet.GenAPI
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Synthesize an internal default constructor for the type with implicit default constructor and the base type without.
+        /// </summary>
+        /// <param name="namedType">A loaded named type symbol <see cref="INamedTypeSymbol"/>.</param>
+        /// <param name="symbolFilter">Assembly symbol filter <see cref="ISymbolFilter"/>.</param>
+        public static IEnumerable<SyntaxNode> TryGetInternalDefaultConstructor(this INamedTypeSymbol namedType, ISymbolFilter symbolFilter)
+        {
+            if (namedType.BaseType != null && !namedType.Constructors.Any(symbolFilter.Include))
+            {
+                IEnumerable<IMethodSymbol> baseConstructors = namedType.BaseType.Constructors.Where(symbolFilter.Include);
+                if (baseConstructors.Any() && baseConstructors.All(c => !c.Parameters.IsEmpty))
+                {
+                    SyntaxKind visibility = SyntaxKind.InternalKeyword;
+
+                    Func<ISymbolFilter, bool> includeInternalSymbols = filter =>
+                        filter is AccessibilitySymbolFilter accessibilityFilter && accessibilityFilter.IncludeInternalSymbols;
+
+                    // Use the `Private` visibility if internal symbols are not filtered out.
+                    if (includeInternalSymbols(symbolFilter) ||
+                        (symbolFilter is CompositeSymbolFilter compositeSymbolFilter &&
+                            compositeSymbolFilter.Filters.Any(filter => includeInternalSymbols(filter))))
+                    {
+                        visibility = SyntaxKind.PrivateKeyword;
+                    }
+
+                    yield return SyntaxFactory.ConstructorDeclaration(
+                        new SyntaxList<AttributeListSyntax>(),
+                        SyntaxFactory.TokenList(new[] { SyntaxFactory.Token(visibility) }),
+                        SyntaxFactory.Identifier(namedType.ToDisplayString()),
+                        SyntaxFactory.ParameterList(),
+                        default!,
+                        default(BlockSyntax)!).WithInitializer(baseConstructors.First().GenerateBaseConstructorInitializer());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Synthesize a base class initializer. 
+        /// </summary>
+        /// <param name="baseTypeConstructor">Represents a base class constructor <see cref="IMethodSymbol"/>.</param>
+        /// <returns>Returns the syntax node <see cref="ConstructorInitializerSyntax"/>.</returns>
+        public static ConstructorInitializerSyntax GenerateBaseConstructorInitializer(this IMethodSymbol baseTypeConstructor)
+        {
+            ConstructorInitializerSyntax constructorInitializer = SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer);
+
+            foreach (IParameterSymbol parameter in baseTypeConstructor.Parameters)
+            {
+                IdentifierNameSyntax identifier;
+                // If the parameter's type is known to be a value type or has top-level nullability annotation
+                if (parameter.Type.IsValueType || parameter.NullableAnnotation == NullableAnnotation.Annotated)
+                    identifier = SyntaxFactory.IdentifierName("default");
+                else
+                    identifier = SyntaxFactory.IdentifierName("default!");
+
+                constructorInitializer = constructorInitializer.AddArgumentListArguments(SyntaxFactory.Argument(identifier));
+            }
+
+            return constructorInitializer;
         }
     }
 }
