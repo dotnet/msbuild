@@ -695,7 +695,7 @@ public static class Program
         public void PublishRelease_does_not_override_Configuration_property_across_formats(string configOpt)
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", $"PublishReleaseHelloWorldCsProjConfigPropOverride{configOpt}")
+               .CopyTestAsset("HelloWorld", identifier: configOpt)
                .WithSource()
                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
                .WithProjectChanges(project =>
@@ -705,21 +705,14 @@ public static class Program
                    propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
                });
 
-            new BuildCommand(helloWorldAsset)
-           .Execute(configOpt)
-           .Should()
-           .Pass();
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+               .Execute(configOpt)
+               .Should()
+               .Pass().And.NotHaveStdErr();
 
-            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
-
-            publishCommand
-            .Execute(configOpt)
-            .Should()
-            .Pass().And.NotHaveStdErr();
-
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
-            var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
         }
 
