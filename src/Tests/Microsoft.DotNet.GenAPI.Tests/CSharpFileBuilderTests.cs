@@ -35,7 +35,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
             string expected,
             bool includeInternalSymbols = true,
             bool includeEffectivelyPrivateSymbols = true,
-            bool includeExplicitInterfaceImplementationSymbols = true)
+            bool includeExplicitInterfaceImplementationSymbols = true,
+            bool allowUnsafe = false)
         {
             StringWriter stringWriter = new();
 
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
             IAssemblySymbolWriter csharpFileBuilder = new CSharpFileBuilder(new ConsoleLog(MessageImportance.Low),
                 compositeFilter, stringWriter, null, false, MetadataReferences);
 
-            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true);
+            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true, allowUnsafe: allowUnsafe);
             csharpFileBuilder.WriteAssembly(assemblySymbol);
 
             StringBuilder stringBuilder = stringWriter.GetStringBuilder();
@@ -1416,6 +1417,122 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     }
                     """,
                 includeInternalSymbols: false);
+        }
+
+        [Fact (Skip="https://github.com/dotnet/roslyn/issues/67019")]
+        public void TestInterfaceWithOperatorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public interface IntType
+                        {
+                            public static IntType operator +(IntType left, IntType right) => left + right;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial interface IntType
+                        {
+                            public static IntType operator +(IntType left, IntType right) => left + right;
+                        }
+                    }
+                    """,
+                 includeInternalSymbols: false);
+        }
+
+        [Fact(Skip = "https://github.com/dotnet/roslyn/issues/67019")]
+        public void TestInterfaceWithCheckedOperatorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public interface IAdditionOperators<TSelf, TOther, TResult>
+                            where TSelf : IAdditionOperators<TSelf, TOther, TResult>?
+                        {
+                            static abstract TResult operator +(TSelf left, TOther right);
+                            static virtual TResult operator checked +(TSelf left, TOther right) => left + right;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public interface IAdditionOperators<TSelf, TOther, TResult>
+                            where TSelf : IAdditionOperators<TSelf, TOther, TResult>?
+                        {
+                            static abstract TResult operator +(TSelf left, TOther right);
+                            static virtual TResult operator checked +(TSelf left, TOther right) { throw null; }
+                        }
+                    }
+                    """,
+                 includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestUnsafeFieldGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public struct Node
+                        {
+                            public unsafe Node* Left;
+                            public unsafe Node* Right;
+                            public int Value;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial struct Node
+                        {
+                            public unsafe Node* Left;
+                            public unsafe Node* Right;
+                            public int Value;
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false,
+                allowUnsafe: true);
+        }
+
+        [Fact]
+        public void TestUnsafeMethodGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public unsafe class A
+                        {
+                            public virtual void F(char* p) {}
+                        }
+
+                        public class B: A
+                        {
+                            public unsafe override void F(char* p) {}
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class A
+                        {
+                            public virtual unsafe void F(char* p) { }
+                        }
+
+                        public partial class B : A
+                        {
+                            public override unsafe void F(char* p) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false,
+                allowUnsafe: true);
         }
 
         [Fact]
