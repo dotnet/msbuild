@@ -8,6 +8,8 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -1589,8 +1591,20 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">Any exception which is a ExceptionHandling.IsCriticalException will not be wrapped</exception>
         private void InitializeLogger(ILogger logger, IEventSource sourceForLogger)
         {
+            ILogger UnwrapLoggerType(ILogger log)
+            {
+                while (log is ProjectCollection.ReusableLogger reusableLogger)
+                {
+                    log = reusableLogger.OriginalLogger;
+                }
+
+                return log;
+            }
+
             try
             {
+                using var assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, UnwrapLoggerType(logger).GetType());
+
                 INodeLogger nodeLogger = logger as INodeLogger;
                 if (nodeLogger != null)
                 {

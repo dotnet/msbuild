@@ -292,6 +292,8 @@ namespace Microsoft.Build.CommandLine
                     new TaskLoader.LogError(LogErrorDelegate),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
+                    // custom app domain assembly loading won't be available for task host
+                    null,
 #endif
                     true /* always out of proc */
 #if FEATURE_APPDOMAIN
@@ -299,7 +301,6 @@ namespace Microsoft.Build.CommandLine
 #endif
                     );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
