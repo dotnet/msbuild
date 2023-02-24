@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
   
-  <!-- We need to put the UseStandardOutputPaths logic after the import of Directory.Build.props, but before the MSBuild Project Extensions .props import.
+  <!-- We need to put the UseArtifactsOutput logic after the import of Directory.Build.props, but before the MSBuild Project Extensions .props import.
        However, both of these things happen in Microsoft.Common.props with no opportunity to insert logic in between them.
 
        So what we do here is duplicate the Directory.Build.props import logic from Microsoft.Common.props, and then set ImportDirectoryBuildProps to
@@ -57,26 +57,32 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
   </PropertyGroup>
 
-  <!-- Setting RootOutputPath automatically opts in to standard output paths -->
-  <PropertyGroup Condition="'$(RootOutputPath)' != ''">
-    <UseStandardOutputPaths Condition="'$(UseStandardOutputPaths)' == ''">true</UseStandardOutputPaths>
-    <BaseStandardOutputPath>$(RootOutputPath)</BaseStandardOutputPath>
+  <!-- Setting ArtifactsPath automatically opts in to the artifacts output format -->
+  <PropertyGroup Condition="'$(ArtifactsPath)' != ''">
+    <UseArtifactsOutput Condition="'$(UseArtifactsOutput)' == ''">true</UseArtifactsOutput>
   </PropertyGroup>
 
-  <!-- Set up base standard output folders if UseStandardOutputPaths is set -->
-  <PropertyGroup Condition="'$(UseStandardOutputPaths)' == 'true'">
-    <UseStandardIntermediateOutput Condition="'$(UseStandardIntermediateOutput)' == ''">true</UseStandardIntermediateOutput>
+  <!-- Set up base output folders if UseArtifactsOutput is set -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(ArtifactsPath)' == '' And '$(_DirectoryBuildPropsBasePath)' != ''">
+    <!-- Default ArtifactsPath to be in the directory where Directory.Build.props is found
+         Note that we do not append a backslash to the ArtifactsPath as we do with most paths, because it may be a global property passed in on the command-line which we can't easily change -->
+    <ArtifactsPath>$(_DirectoryBuildPropsBasePath)\.artifacts</ArtifactsPath>
+    <IncludeProjectNameInArtifactsPaths Condition="'$(IncludeProjectNameInArtifactsPaths)' == ''">true</IncludeProjectNameInArtifactsPaths>
+  </PropertyGroup>
 
-    <BaseStandardOutputPath Condition="'$(BaseStandardOutputPath)' == ''">bin\</BaseStandardOutputPath>
-    <BaseStandardOutputPath>$([MSBuild]::EnsureTrailingSlash($(BaseStandardOutputPath)))</BaseStandardOutputPath>
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(ArtifactsPath)' == ''">
+    <!-- If there was no Directory.Build.props file, then put the artifacts path in the project folder -->
+    <ArtifactsPath>$(MSBuildProjectDirectory)\.artifacts</ArtifactsPath>
+  </PropertyGroup>
 
-    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(BaseStandardOutputPath)build\</BaseOutputPath>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(BaseStandardOutputPath)obj\</BaseIntermediateOutputPath>
-
-    <!-- If RootOutputPath is set, then projects share the BaseStandardOutputPath, and the project name should be appended to the output and
-         intermediate output paths -->
-    <BaseOutputPath Condition="'$(RootOutputPath)' != ''">$(BaseOutputPath)$(MSBuildProjectName)\</BaseOutputPath>
-    <BaseIntermediateOutputPath Condition="'$(RootOutputPath)' != ''">$(BaseIntermediateOutputPath)$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
+    <UseArtifactsIntermediateOutput Condition="'$(UseArtifactsIntermediateOutput)' == ''">true</UseArtifactsIntermediateOutput>
+    <ArtifactsProjectName Condition="'$(ArtifactsProjectName)' == ''">$(MSBuildProjectName)</ArtifactsProjectName>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(BaseIntermediateOutputPath)' == '' And '$(UseArtifactsIntermediateOutput)' == 'true'">
+    <BaseIntermediateOutputPath Condition="'$(IncludeProjectNameInArtifactsPaths)' == 'true'">$(ArtifactsPath)\obj\$(ArtifactsProjectName)\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(ArtifactsPath)\obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectFullPath)' == '$(ProjectToOverrideProjectExtensionsPath)'">

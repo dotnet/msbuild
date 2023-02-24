@@ -22,13 +22,13 @@ using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class RootOutputPathTests : SdkTest
+    public class ArtifactsOutputPathTests : SdkTest
     {
-        public RootOutputPathTests(ITestOutputHelper log) : base(log)
+        public ArtifactsOutputPathTests(ITestOutputHelper log) : base(log)
         {
         }
 
-        (List<TestProject> testProjects, TestAsset testAsset) GetTestProjects(bool setRootOutputInProject, [CallerMemberName] string callingMethod = "")
+        (List<TestProject> testProjects, TestAsset testAsset) GetTestProjects(bool setUseArtifactsOutputInProject, [CallerMemberName] string callingMethod = "")
         {
             var testProject1 = new TestProject()
             {
@@ -52,23 +52,23 @@ namespace Microsoft.NET.Build.Tests
 
             List<TestProject> testProjects = new() { testProject1, testProject2, testLibraryProject };
 
-            if (setRootOutputInProject)
+            if (setUseArtifactsOutputInProject)
             {
                 foreach (var testProject in testProjects)
                 {
-                    testProject.AdditionalProperties["RootOutputPath"] = "..\\artifacts";
+                    testProject.AdditionalProperties["UseArtifactsOutput"] = "true";
                 }
             }
 
-            var testAsset = _testAssetsManager.CreateTestProjects(testProjects, callingMethod: callingMethod, identifier: setRootOutputInProject.ToString());
+            var testAsset = _testAssetsManager.CreateTestProjects(testProjects, callingMethod: callingMethod, identifier: setUseArtifactsOutputInProject.ToString());
 
-            if (!setRootOutputInProject)
+            if (!setUseArtifactsOutputInProject)
             {
                 File.WriteAllText(Path.Combine(testAsset.Path, "Directory.Build.props"),
                    """
                     <Project>
                         <PropertyGroup>
-                            <RootOutputPath>$(MSBuildThisFileDirectory)\artifacts</RootOutputPath>
+                            <UseArtifactsOutput>true</UseArtifactsOutput>
                         </PropertyGroup>
                     </Project>
                     """);
@@ -80,9 +80,9 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ItUsesRootOutputPathForBuild(bool setRootOutputInProject)
+        public void ItUsesRootOutputPathForBuild(bool setUseArtifactsOutputInProject)
         {
-            var (testProjects, testAsset) = GetTestProjects(setRootOutputInProject);
+            var (testProjects, testAsset) = GetTestProjects(setUseArtifactsOutputInProject);
 
             new DotnetCommand(Log, "build")
                 .WithWorkingDirectory(testAsset.Path)
@@ -90,11 +90,11 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            ValidateIntermediatePaths(testAsset, testProjects, setRootOutputInProject);
+            ValidateIntermediatePaths(testAsset, testProjects, setUseArtifactsOutputInProject);
 
             foreach (var testProject in testProjects)
             {
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "build", testProject.Name, "debug", testProject.Name + ".dll"))
+                new FileInfo(Path.Combine(testAsset.TestRoot, ".artifacts", "bin", testProject.Name, "debug", testProject.Name + ".dll"))
                     .Should()
                     .Exist();
             }
@@ -178,7 +178,7 @@ namespace Microsoft.NET.Build.Tests
                         .Should()
                         .NotHaveSubDirectories();
 
-                    new DirectoryInfo(Path.Combine(testAsset.TestRoot, "artifacts", "obj", testProject.Name, configuration))
+                    new DirectoryInfo(Path.Combine(testAsset.TestRoot, ".artifacts", "obj", testProject.Name, configuration))
                         .Should()
                         .Exist();
                 };

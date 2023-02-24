@@ -126,8 +126,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there.
-       If using standard output path format, PublishDir is already set in Microsoft.NET.DefaultOutputPaths.targets -->
-  <PropertyGroup Condition="'$(UseStandardOutputPaths)' != 'true'">
+       If using artifacts output path format, PublishDir is already set in Microsoft.NET.DefaultOutputPaths.targets -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true'">
     <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
     <!-- ensure the PublishDir is RID specific-->
     <PublishDir Condition="'$(PublishDir)' == '' and
