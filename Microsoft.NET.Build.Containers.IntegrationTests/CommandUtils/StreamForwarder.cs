@@ -40,7 +40,14 @@ namespace Microsoft.DotNet.CommandUtils
 
         public StreamForwarder ForwardTo(Action<string> writeLine)
         {
-            ThrowIfNull(writeLine);
+#if NET
+            ArgumentNullException.ThrowIfNull(writeLine);
+#else
+            if (writeLine is null)
+            {
+                throw new ArgumentNullException(nameof(writeLine));
+            }
+#endif
 
             ThrowIfForwarderSet();
 
@@ -97,11 +104,6 @@ namespace Microsoft.DotNet.CommandUtils
             {
                 _writeLine(str);
             }
-        }
-
-        private static void ThrowIfNull(object obj)
-        {
-            ArgumentNullException.ThrowIfNull(obj);
         }
 
         private void ThrowIfForwarderSet()

@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.CommandUtils
     internal abstract class TestCommand
     {
         private readonly ITestOutputHelper? _log;
+        private bool _doNotEscapeArguments;
 
         protected TestCommand(ITestOutputHelper? log)
         {
@@ -52,19 +53,10 @@ namespace Microsoft.DotNet.CommandUtils
             return this;
         }
 
-        internal TestCommand WithNoUpdateCheck()
+        internal TestCommand WithRawArguments()
         {
-            Arguments.Add("--no-update-check");
+            _doNotEscapeArguments = true;
             return this;
-        }
-
-        internal ProcessStartInfo GetProcessStartInfo(params string[] args)
-        {
-            SdkCommandSpec commandSpec = CreateCommandSpec(args);
-
-            var psi = commandSpec.ToProcessStartInfo();
-
-            return psi;
         }
 
         internal CommandResult Execute(params string[] args)
@@ -76,7 +68,7 @@ namespace Microsoft.DotNet.CommandUtils
         internal virtual CommandResult Execute(IEnumerable<string> args)
         {
             Command command = CreateCommandSpec(args)
-                .ToCommand()
+                .ToCommand(_doNotEscapeArguments)
                 .CaptureStdOut()
                 .CaptureStdErr();
 

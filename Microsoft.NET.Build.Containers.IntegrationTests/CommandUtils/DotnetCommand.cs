@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.CommandUtils
         {
             if (!string.IsNullOrEmpty(executableFilePath))
             {
-                _executableFilePath = executableFilePath;
+                _executableFilePath = executableFilePath!;
             }
             return this;
         }

@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFrameworks>net7.0;net472</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
@@ -20,6 +21,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.NET.Build.Containers\Microsoft.NET.Build.Containers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <Compile Remove="DockerDaemonAvailableUtils.cs" />
+    <Compile Remove="DockerDaemonTests.cs" />
+    <Compile Remove="RegistryTests.cs" />
+    <Compile Remove="DescriptorTests.cs" />
+    <Compile Remove="ImageBuilderTests.cs" />
   </ItemGroup>
 
 </Project>

@@ -3,8 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0;net472</TargetFrameworks>
     <ImplicitUsings Condition="'$(TargetFramework)' != 'net472'">enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <LangVersion>preview</LangVersion>
 
     <TargetsForTfmSpecificBuildOutput>
       $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
@@ -26,7 +24,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Nuget.Packaging" /> 
+    <PackageReference Include="Nuget.Packaging" />
     <PackageReference Include="Valleysoft.DockerCredsProvider" />
   </ItemGroup>
 
@@ -44,6 +42,7 @@
     <Compile Include="Port.cs" />
     <Compile Include="Resources\Resource.cs" />
     <Compile Include="Resources\Strings.Designer.cs" />
+    <Compile Include="Globals.cs" />
   </ItemGroup>
 
   <!-- core remove files specific to net472 workarounds -->

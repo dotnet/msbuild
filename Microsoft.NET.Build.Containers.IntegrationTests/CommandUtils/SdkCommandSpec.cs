@@ -17,22 +17,22 @@ namespace Microsoft.DotNet.CommandUtils
 
         public string? WorkingDirectory { get; set; }
 
-        public Command ToCommand()
+        public Command ToCommand(bool doNotEscapeArguments = false)
         {
             var process = new Process()
             {
-                StartInfo = ToProcessStartInfo()
+                StartInfo = ToProcessStartInfo(doNotEscapeArguments)
             };
             var ret = new Command(process, trimtrailingNewlines: true);
             return ret;
         }
 
-        public ProcessStartInfo ToProcessStartInfo()
+        public ProcessStartInfo ToProcessStartInfo(bool doNotEscapeArguments = false)
         {
             var ret = new ProcessStartInfo
             {
                 FileName = FileName,
-                Arguments = EscapeArgs(),
+                Arguments = doNotEscapeArguments ? string.Join(" ", Arguments) : EscapeArgs(),
                 UseShellExecute = false
             };
             foreach (var kvp in Environment)

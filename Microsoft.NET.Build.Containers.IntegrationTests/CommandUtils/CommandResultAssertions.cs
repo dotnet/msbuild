@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Linq;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -103,6 +104,7 @@ namespace Microsoft.DotNet.CommandUtils
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+#if NET
         internal AndConstraint<CommandResultAssertions> HaveStdOutContainingIgnoreCase(string pattern)
         {
             if (_commandResult.StdOut is null)
@@ -113,6 +115,7 @@ namespace Microsoft.DotNet.CommandUtils
                 .FailWith(AppendDiagnosticsTo($"The command output did not contain expected result (ignoring case): {pattern}{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
+#endif
 
         internal AndConstraint<CommandResultAssertions> HaveStdOutMatching(string pattern, RegexOptions options = RegexOptions.None)
         {
