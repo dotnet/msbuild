@@ -1105,6 +1105,36 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
+        void TestSynthesizePrivateFieldsForInaccessibleNestedGenericTypes()
+        {
+            RunTest(original: """
+                namespace A
+                {
+                    internal class Bar<T> {}
+
+                    public struct Foo<T>
+                    {
+                        #pragma warning disable 0169
+                        // as the includeInternalSymbols field is set to false and the Bar<> class is internal -
+                        //   we must skip generation of the `_field` private field.
+                        private Bar<T> _field;
+                    }
+                }
+                """,
+            expected: """
+                namespace A
+                {
+                    public partial struct Foo<T>
+                    {
+                        private object _dummy;
+                        private int _dummyPrimitive;
+                    }
+                }
+                """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact]
         public void TestBaseTypeWithoutExplicitDefaultConstructor()
         {
             RunTest(original: """
