@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -11,12 +12,12 @@ namespace Microsoft.Build.Logging.LiveLogger
 {
     internal class LiveLogger : ILogger
     {
-        private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
+        private ConcurrentDictionary<int, ProjectNode> projects = new();
 
         private bool succeeded;
         private int startedProjects = 0;
         private int finishedProjects = 0;
-        private Dictionary<string, int> blockedProjects = new();
+        private ConcurrentDictionary<string, int> blockedProjects = new();
 
         private Stopwatch? _stopwatch;
 
@@ -162,16 +163,17 @@ namespace Microsoft.Build.Logging.LiveLogger
             int id = e.BuildEventContext!.ProjectInstanceId;
 
             // If id does not exist...
-            if (!projects.ContainsKey(id))
+            projects.GetOrAdd(id, (_) =>
             {
                 // Add project
                 ProjectNode node = new(e)
                 {
                     ShouldRerender = true,
                 };
-                projects[id] = node;
                 UpdateFooter();
-            }
+
+                return node;
+            });
         }
 
         private void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
