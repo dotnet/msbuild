@@ -1685,8 +1685,53 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         {
                             public Bar() { }
                         }
-                    
+
                         public partial class Foo : Bar
+                        {
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestGenericBaseInterfaceWithInaccessibleTypeArguments()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        internal class IOption2
+                        {
+                        }
+
+                        public interface IOption
+                        {
+                        }
+
+                        public interface AreEqual<T>
+                        {
+                            bool Compare(T other);
+                        }
+
+                        public class PerLanguageOption : AreEqual<IOption2>, IOption
+                        {
+                            bool AreEqual<IOption2>.Compare(IOption2 other) => false;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial interface AreEqual<T>
+                        {
+                            bool Compare(T other);
+                        }
+
+                        public partial interface IOption
+                        {
+                        }
+                    
+                        public partial class PerLanguageOption : IOption
                         {
                         }
                     }
@@ -1695,3 +1740,4 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
     }
 }
+

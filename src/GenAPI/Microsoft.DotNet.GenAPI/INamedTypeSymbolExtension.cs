@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 
 namespace Microsoft.DotNet.GenAPI
@@ -165,6 +164,15 @@ namespace Microsoft.DotNet.GenAPI
 
             return true;
         }
+
+        /// <summary>
+        /// Detects if a generic type contains inaccessible type arguments.
+        /// </summary>
+        /// <param name="namedType">A loaded named type symbol <see cref="INamedTypeSymbol"/>.</param>
+        /// <param name="symbolFilter">Assembly symbol filter <see cref="ISymbolFilter"/>.</param>
+        /// <returns>Boolean</returns>
+        public static bool HasInaccessibleTypeArgument(this INamedTypeSymbol namedType, ISymbolFilter symbolFilter)
+            => namedType.IsGenericType && namedType.TypeArguments.Any(a => !symbolFilter.Include(a));
 
         /// <summary>
         /// Synthesize an internal default constructor for the type with implicit default constructor and the base type without.
