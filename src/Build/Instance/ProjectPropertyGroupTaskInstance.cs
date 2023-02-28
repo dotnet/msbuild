@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
-
 using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 
 #nullable disable
 

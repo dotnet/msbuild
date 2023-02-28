@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-
-using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 using Xunit;
+using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 
 #nullable disable
 
@@ -25,7 +24,6 @@ namespace Microsoft.Build.UnitTests
         ///  - Verify that OutputFiles defaults appropriately
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void InputFiles()
         {
             ResGen t = new ResGen();
@@ -87,7 +85,6 @@ namespace Microsoft.Build.UnitTests
         ///  - Verify that if OutputFiles are set explicitly, they map and show up on the command line as expected
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void OutputFiles()
         {
             ResGen t = new ResGen();
@@ -164,7 +161,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests ResGen's /publicClass switch
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PublicClass()
         {
             ResGen t = new ResGen();
@@ -185,7 +181,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests the /r: parameter (passing in reference assemblies)
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void References()
         {
             ResGen t = new ResGen();
@@ -469,7 +464,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests ResGen's /useSourcePath switch
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UseSourcePath()
         {
             ResGen t = new ResGen();

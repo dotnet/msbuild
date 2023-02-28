@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
@@ -16,17 +15,16 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
-
-using Task = System.Threading.Tasks.Task;
-// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
-using ProvenanceResultTupleList = System.Collections.Generic.List<(string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int)>;
-using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
-using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
+using ProvenanceResultTupleList = System.Collections.Generic.List<(string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int)>;
+using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
+using Task = System.Threading.Tasks.Task;
+using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 
 #nullable disable
 
@@ -975,7 +973,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #else
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
 #endif
-        [Trait("Category", "mono-osx-failing")]
         public void ChangeGlobalPropertiesInitiallyFromProjectCollection()
         {
             Dictionary<string, string> initial = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1243,7 +1240,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// environment
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -3855,8 +3851,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportedEventFalseCondition()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -3900,8 +3894,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportedEventNoMatchingFiles()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -4161,8 +4153,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportEvent()
         {
             using (var env = TestEnvironment.Create(_output))

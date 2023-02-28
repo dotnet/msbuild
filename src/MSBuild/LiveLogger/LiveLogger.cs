@@ -1,48 +1,75 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 {
-    internal class FancyLogger : ILogger
+    internal class LiveLogger : ILogger
     {
-        private Dictionary<int, FancyLoggerProjectNode> projects = new Dictionary<int, FancyLoggerProjectNode>();
+        private ConcurrentDictionary<int, ProjectNode> projects = new();
 
-        private bool Succeeded;
+        private bool succeeded;
+        private int startedProjects = 0;
+        private int finishedProjects = 0;
+        private ConcurrentDictionary<string, int> blockedProjects = new();
 
-        private float existingTasks = 1;
-        private float completedTasks = 0;
-
-        public string Parameters { get; set; }
+        private Stopwatch? _stopwatch;
 
         public LoggerVerbosity Verbosity { get; set; }
+        public string Parameters { get; set; }
 
-        public FancyLogger()
+        /// <summary>
+        /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
+        /// </summary>
+        /// <remarks>
+        /// If LiveLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+        /// </remarks>
+        public static readonly string[] ConfigurableForwardingLoggerParameters =
+        {
+            "BUILDSTARTEDEVENT",
+            "BUILDFINISHEDEVENT",
+            "PROJECTSTARTEDEVENT",
+            "PROJECTFINISHEDEVENT",
+            "TARGETSTARTEDEVENT",
+            "TARGETFINISHEDEVENT",
+            "TASKSTARTEDEVENT",
+            "HIGHMESSAGEEVENT",
+            "WARNINGEVENT",
+            "ERROREVENT"
+        };
+
+        public LiveLogger()
         {
             Parameters = "";
         }
 
         public void Initialize(IEventSource eventSource)
         {
-            // Register for different events
-            // Started
+            // Start the stopwatch as soon as the logger is initialized to capture
+            // any time before the BuildStarted event
+            _stopwatch = Stopwatch.StartNew();
+            // Register for different events. Make sure that ConfigurableForwardingLoggerParameters are in sync with them.
+            // Started and Finished events  
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
-            eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
-            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
-            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
-            // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
+            eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
+            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
             eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
-            // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
-            // Raised
+            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
+
+            // Messages/Warnings/Errors
+            // BuildMessageEventHandler event handler below currently process only High importance events. 
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
+
             // Cancelled
             Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
 
@@ -54,28 +81,35 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         private void Render()
         {
-            // Initialize FancyLoggerBuffer
-            FancyLoggerBuffer.Initialize();
+            // Initialize LiveLoggerBuffer
+            TerminalBuffer.Initialize();
             // TODO: Fix. First line does not appear at top. Leaving empty line for now
-            FancyLoggerBuffer.WriteNewLine(string.Empty);
+            TerminalBuffer.WriteNewLine(string.Empty);
+
+            // Top line indicates the number of finished projects.
+            TerminalBuffer.FinishedProjects = this.finishedProjects;
+
             // First render
-            FancyLoggerBuffer.Render();
+            TerminalBuffer.Render();
             int i = 0;
             // Rerender periodically
-            while (!FancyLoggerBuffer.IsTerminated)
+            while (!TerminalBuffer.IsTerminated)
             {
                 i++;
                 // Delay by 1/60 seconds
                 // Use task delay to avoid blocking the task, so that keyboard input is listened continously
                 Task.Delay((i / 60) * 1_000).ContinueWith((t) =>
                 {
+                    TerminalBuffer.FinishedProjects = this.finishedProjects;
+
                     // Rerender projects only when needed
                     foreach (var project in projects)
                     {
                         project.Value.Log();
                     }
+
                     // Rerender buffer
-                    FancyLoggerBuffer.Render();
+                    TerminalBuffer.Render();
                 });
                 // Handle keyboard input
                 if (Console.KeyAvailable)
@@ -84,21 +118,30 @@ namespace Microsoft.Build.Logging.FancyLogger
                     switch (key)
                     {
                         case ConsoleKey.UpArrow:
-                            if (FancyLoggerBuffer.TopLineIndex > 0)
+                            if (TerminalBuffer.TopLineIndex > 0)
                             {
-                                FancyLoggerBuffer.TopLineIndex--;
+                                TerminalBuffer.TopLineIndex--;
                             }
-                            FancyLoggerBuffer.ShouldRerender = true;
+                            TerminalBuffer.ShouldRerender = true;
                             break;
                         case ConsoleKey.DownArrow:
-                            FancyLoggerBuffer.TopLineIndex++;
-                            FancyLoggerBuffer.ShouldRerender = true;
+                            TerminalBuffer.TopLineIndex++;
+                            TerminalBuffer.ShouldRerender = true;
                             break;
                         default:
                             break;
                     }
                 }
             }
+        }
+
+        private void UpdateFooter()
+        {
+            float percentage = startedProjects == 0 ? 0.0f : (float)finishedProjects / startedProjects;
+            TerminalBuffer.FooterText = ANSIBuilder.Alignment.SpaceBetween(
+                $"Build progress (approx.) [{ANSIBuilder.Graphics.ProgressBar(percentage)}]",
+                ANSIBuilder.Formatting.Italic(ANSIBuilder.Formatting.Dim("[Up][Down] Scroll")),
+                Console.BufferWidth);
         }
 
         // Build
@@ -108,38 +151,45 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         private void eventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
         {
-            Succeeded = e.Succeeded;
+            succeeded = e.Succeeded;
         }
 
         // Project
         private void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
+            startedProjects++;
+
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            // If id already exists...
-            if (projects.ContainsKey(id))
+
+            // If id does not exist...
+            projects.GetOrAdd(id, (_) =>
             {
-                return;
-            }
-            // Add project
-            FancyLoggerProjectNode node = new FancyLoggerProjectNode(e);
-            projects[id] = node;
-            // Log
-            node.ShouldRerender = true;
+                // Add project
+                ProjectNode node = new(e)
+                {
+                    ShouldRerender = true,
+                };
+                UpdateFooter();
+
+                return node;
+            });
         }
 
         private void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
+
             // Update line
             node.Finished = true;
-            // Log
             node.ShouldRerender = true;
+            finishedProjects++;
+            UpdateFooter();
         }
 
         // Target
@@ -147,7 +197,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -161,7 +211,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -176,20 +226,23 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
             // Update
             node.AddTask(e);
-            existingTasks++;
             // Log
             node.ShouldRerender = true;
-        }
 
-        private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
-        {
-            completedTasks++;
+            if (e.TaskName.Equals("MSBuild"))
+            {
+                TerminalBufferLine? line = null; // TerminalBuffer.WriteNewLineAfterMidpoint($"{e.ProjectFile} is blocked by the MSBuild task.");
+                if (line is not null)
+                {
+                    blockedProjects[e.ProjectFile] = line.Id;
+                }
+            }
         }
 
         // Raised messages, warnings and errors
@@ -201,7 +254,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -215,7 +268,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -229,7 +282,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             // Get project id
             int id = e.BuildEventContext!.ProjectInstanceId;
-            if (!projects.TryGetValue(id, out FancyLoggerProjectNode? node))
+            if (!projects.TryGetValue(id, out ProjectNode? node))
             {
                 return;
             }
@@ -247,35 +300,44 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         public void Shutdown()
         {
-            FancyLoggerBuffer.Terminate();
-            // TODO: Remove. There is a bug that causes switching to main buffer without deleting the contents of the alternate buffer
-            Console.Clear();
+            TerminalBuffer.Terminate();
             int errorCount = 0;
             int warningCount = 0;
             foreach (var project in projects)
             {
+                if (project.Value.AdditionalDetails.Count == 0)
+                {
+                    continue;
+                }
+
+                Console.WriteLine(project.Value.ToANSIString());
                 errorCount += project.Value.ErrorCount;
                 warningCount += project.Value.WarningCount;
                 foreach (var message in project.Value.AdditionalDetails)
                 {
-                    Console.WriteLine(message.ToANSIString());
+                    Console.WriteLine($"    └── {message.ToANSIString()}");
                 }
+                Console.WriteLine();
             }
 
-            // Emmpty line
+            // Empty line
             Console.WriteLine();
-            if (Succeeded)
-            {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine($"\t{warningCount} Warning(s)");
-                Console.WriteLine($"\t{errorCount} Error(s)");
-            }
-            else
-            {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-                Console.WriteLine($"\t{warningCount} Warnings(s)");
-                Console.WriteLine($"\t{errorCount} Errors(s)");
-            }
+
+            Debug.Assert(_stopwatch is not null, $"Expected {nameof(_stopwatch)} to be initialized long before Shutdown()");
+            TimeSpan buildDuration = _stopwatch!.Elapsed;
+
+            string prettyDuration = buildDuration.TotalHours > 1.0 ?
+                buildDuration.ToString(@"h\:mm\:ss") :
+                buildDuration.ToString(@"m\:ss");
+
+            string status = succeeded ?
+                ANSIBuilder.Formatting.Color("succeeded", ANSIBuilder.Formatting.ForegroundColor.Green) :
+                ANSIBuilder.Formatting.Color("failed", ANSIBuilder.Formatting.ForegroundColor.Red);
+
+            Console.WriteLine($"Build {status} in {prettyDuration}");
+            Console.WriteLine($"\t{warningCount} Warnings(s)");
+            Console.WriteLine($"\t{errorCount} Errors(s)");
+            Console.WriteLine();
         }
     }
 }

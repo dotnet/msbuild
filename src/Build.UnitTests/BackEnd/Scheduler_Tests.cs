@@ -2,18 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Xml;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Framework;
+using System.Xml;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -597,6 +597,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(4, nextNodeId); // 3 nodes
         }
 
+        [Fact]
+        public void BuildResultNotPlacedInCurrentCacheIfConfigExistsInOverrideCache()
+        {
+            ConfigCache overrideConfigCache = new();
+            ResultsCache overrideResultsCache = new();
+            CreateConfiguration(1, "test.csproj", overrideConfigCache);
+            BuildRequest br1 = CreateBuildRequest(1, 1, new string[] { "A" });
+            CacheBuildResult(br1, "A", BuildResultUtilities.GetSuccessResult(), overrideResultsCache);
+            _host = new MockHost(overrideConfigCache, overrideResultsCache);
+            _scheduler = new Scheduler();
+            _scheduler.InitializeComponent(_host);
+            BuildRequest br2 = CreateBuildRequest(1, 1, new string[] { "B" });
+            _scheduler.RecordResultToCurrentCacheIfConfigNotInOverrideCache(CreateBuildResult(br2, "B", BuildResultUtilities.GetSuccessResult()));
+            Assert.Null(((ResultsCacheWithOverride)_host.GetComponent(BuildComponentType.ResultsCache)).CurrentCache.GetResultsForConfiguration(1));
+        }
+
         /// <summary>
         /// Verify that if we get two requests but one of them is a failure, we only get the failure result back.
         /// </summary>
@@ -706,26 +722,48 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Creates a configuration and stores it in the cache.
+        /// Creates a configuration to store in the <see cref="ConfigCache"/>.
         /// </summary>
-        private void CreateConfiguration(int configId, string file)
+        /// <param name="configId">The configuration id.</param>
+        /// <param name="projectFullPath">The project's full path.</param>
+        /// <param name="configCache">The config cache in which to place the configuration. If
+        /// <see cref="langword"="null" />, use the host's config cache.</param>
+        private void CreateConfiguration(int configId, string projectFullPath, ConfigCache configCache = null)
         {
-            BuildRequestData data = new BuildRequestData(file, new Dictionary<string, string>(), "4.0", Array.Empty<string>(), null);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(configId, data, "4.0");
-            config.ProjectInitialTargets = new List<string>();
-            config.ProjectDefaultTargets = new List<string>();
-
-            (_host.GetComponent(BuildComponentType.ConfigCache) as IConfigCache).AddConfiguration(config);
+            BuildRequestData data = new(projectFullPath, new Dictionary<string, string>(), "4.0", Array.Empty<string>(), null);
+            BuildRequestConfiguration config = new(configId, data, "4.0") { ProjectInitialTargets = new List<string>(), ProjectDefaultTargets = new List<string>() };
+            if (configCache == null)
+            {
+                (_host.GetComponent(BuildComponentType.ConfigCache) as IConfigCache).AddConfiguration(config);
+            }
+            else
+            {
+                configCache.AddConfiguration(config);
+            }
         }
 
         /// <summary>
-        /// Creates and caches a built result.
+        /// Creates and caches a <see cref="BuildResult"/> in the <see cref="ResultsCache"/>.
         /// </summary>
-        private BuildResult CacheBuildResult(BuildRequest request, string target, WorkUnitResult workUnitResult)
+        /// <param name="request">The build request corresponding to the <see cref="BuildResult"/> to be
+        /// created and cached.</param>
+        /// <param name="target">The target for which there will be a result.</param>
+        /// <param name="workUnitResult">The result of executing the specified target.</param>
+        /// <param name="resultsCache">The results cache to contain the <see cref="BuildResult"/>.
+        /// If <see cref="langword"="null"/>, use the host's results cache.</param>
+        /// <returns>The build result.</returns>
+        private BuildResult CacheBuildResult(BuildRequest request, string target, WorkUnitResult workUnitResult, ResultsCache resultsCache = null)
         {
             BuildResult result = CreateBuildResult(request, target, workUnitResult);
-            IResultsCache resultsCache = _host.GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
-            resultsCache.AddResult(result);
+            if (resultsCache == null)
+            {
+                (_host.GetComponent(BuildComponentType.ResultsCache) as IResultsCache).AddResult(result);
+            }
+            else
+            {
+                resultsCache.AddResult(result);
+            }
+
             return result;
         }
 

@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Evaluation;
-using System.Collections.Generic;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using Xunit;
 
 #nullable disable
@@ -61,7 +61,6 @@ namespace Microsoft.Build.UnitTests
         /// Test basic function of the AssignLinkMetadata task
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Basic()
         {
             ITaskItem item = GetParentedTaskItem(_defaultItemSpec);
@@ -88,7 +87,6 @@ namespace Microsoft.Build.UnitTests
         /// output any items that aren't problematic.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void InvalidItemPathWithOtherValidItem()
         {
             ITaskItem item1 = GetParentedTaskItem(itemSpec: "|||");

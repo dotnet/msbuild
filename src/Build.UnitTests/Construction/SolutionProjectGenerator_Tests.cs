@@ -6,29 +6,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
-
-using Project = Microsoft.Build.Evaluation.Project;
-using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-using Toolset = Microsoft.Build.Evaluation.Toolset;
-
-using InternalUtilities = Microsoft.Build.Internal.Utilities;
-
-using XMakeElements = Microsoft.Build.Shared.XMakeElements;
-using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
+using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using Microsoft.Build.UnitTests.Shared;
+using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
+using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
+using Project = Microsoft.Build.Evaluation.Project;
+using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
+using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
+using Toolset = Microsoft.Build.Evaluation.Toolset;
+using XMakeElements = Microsoft.Build.Shared.XMakeElements;
 
 #nullable disable
 
@@ -336,7 +332,6 @@ EndGlobal
         /// on the Solution File Format Version.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject9()
@@ -372,7 +367,6 @@ EndGlobal
         /// on the Solution File Format Version.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject10()
@@ -485,7 +479,6 @@ EndGlobal
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version,
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SolutionBasedSubToolsetVersionOverriddenByEnvironment()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", "ABC");
@@ -1208,7 +1201,6 @@ EndGlobal
         /// The repro below has one of each case. WebProjects can't build so they are set as SkipNonexistentProjects='Build'
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void Regress751742_SkipNonexistentProjects()
@@ -1611,7 +1603,6 @@ EndGlobal
         /// Tests the algorithm for choosing default Venus configuration values for solutions
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void TestVenusConfigurationDefaults()
@@ -1642,7 +1633,6 @@ EndGlobal
         /// Tests that the correct value for TargetFrameworkVersion gets set when creating Venus solutions
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void VenusSolutionDefaultTargetFrameworkVersion()
@@ -1682,7 +1672,6 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths0()
@@ -1708,7 +1697,6 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths1()
@@ -1735,7 +1723,6 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths2()
@@ -1935,7 +1922,6 @@ EndGlobal
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSkipInvalidConfigurationsCase()
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();

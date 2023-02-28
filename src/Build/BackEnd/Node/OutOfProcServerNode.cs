@@ -7,11 +7,11 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental
 {
@@ -369,15 +369,13 @@ namespace Microsoft.Build.Experimental
             ConsoleConfiguration.Provider = command.ConsoleConfiguration;
 
             // Initiate build telemetry
-            if (KnownTelemetry.BuildTelemetry == null)
-            {
-                KnownTelemetry.BuildTelemetry = new BuildTelemetry();
-            }
             if (command.PartialBuildTelemetry != null)
             {
-                KnownTelemetry.BuildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
-                KnownTelemetry.BuildTelemetry.InitialServerState = command.PartialBuildTelemetry.InitialServerState;
-                KnownTelemetry.BuildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
+                BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
+
+                buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
+                buildTelemetry.InitialServerState = command.PartialBuildTelemetry.InitialServerState;
+                buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
             }
 
             // Also try our best to increase chance custom Loggers which use Console static members will work as expected.

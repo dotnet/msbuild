@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 {
 
-    internal class FancyLoggerMessageNode
+    internal class MessageNode
     {
         // Use this to change the max lenngth (relative to screen size) of messages
         private static int MAX_LENGTH = 3 * Console.BufferWidth;
@@ -15,16 +16,18 @@ namespace Microsoft.Build.Logging.FancyLogger
         {
             HighPriorityMessage,
             Warning,
-            Error
+            Error,
+            ProjectOutputMessage
         }
         public string Message;
-        public FancyLoggerBufferLine? Line;
+        public TerminalBufferLine? Line;
         public MessageType Type;
         public string? Code;
         public string? FilePath;
         public int? LineNumber;
         public int? ColumnNumber;
-        public FancyLoggerMessageNode(LazyFormattedBuildEventArgs args)
+        public string? ProjectOutputExecutablePath;
+        public MessageNode(LazyFormattedBuildEventArgs args)
         {
             Message = args.Message ?? string.Empty;
             if (Message.Length > MAX_LENGTH)
@@ -34,8 +37,20 @@ namespace Microsoft.Build.Logging.FancyLogger
             // Get type
             switch (args)
             {
-                case BuildMessageEventArgs:
-                    Type = MessageType.HighPriorityMessage;
+                case BuildMessageEventArgs message:
+                    // Detect output messages
+                    var finalOutputMarker = " -> ";
+                    int i = message.Message!.IndexOf(finalOutputMarker, StringComparison.Ordinal);
+                    if (i > 0)
+                    {
+                        Type = MessageType.ProjectOutputMessage;
+                        ProjectOutputExecutablePath = message.Message!.Substring(i + finalOutputMarker.Length);
+                    }
+                    else
+                    {
+                        Type = MessageType.HighPriorityMessage;
+                        Code = message.Subcategory;
+                    }
                     break;
                 case BuildWarningEventArgs warning:
                     Type = MessageType.Warning;
@@ -66,13 +81,15 @@ namespace Microsoft.Build.Logging.FancyLogger
                     return $"❌ {ANSIBuilder.Formatting.Color(
                         $"Error {Code}: {FilePath}({LineNumber},{ColumnNumber}) {Message}",
                         ANSIBuilder.Formatting.ForegroundColor.Red)}";
+                case MessageType.ProjectOutputMessage:
+                    return $"⚙️ {ANSIBuilder.Formatting.Hyperlink(ProjectOutputExecutablePath!, Path.GetDirectoryName(ProjectOutputExecutablePath)!)}";
                 case MessageType.HighPriorityMessage:
                 default:
-                    return $"ℹ️ {ANSIBuilder.Formatting.Italic(Message)}";
+                    return $"ℹ️ {Code}{(Code is not null ? ": " : string.Empty)} {ANSIBuilder.Formatting.Italic(Message)}";
             }
         }
 
-        // TODO: Rename to Log after FancyLogger's API becomes internal
+        // TODO: Rename to Log after LiveLogger's API becomes internal
         public void Log()
         {
             if (Line == null)

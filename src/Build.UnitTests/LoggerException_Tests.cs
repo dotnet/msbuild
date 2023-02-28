@@ -3,10 +3,10 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Exceptions;
-using Xunit;
 using System.Runtime.Serialization.Formatters.Binary;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
+using Xunit;
 
 #nullable disable
 

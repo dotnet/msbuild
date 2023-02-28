@@ -5,18 +5,16 @@
 
 using System;
 using System.Collections.Generic;
-
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
-using Xunit;
-using Microsoft.Build.Shared;
 using System.IO;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Shouldly;
+using Xunit;
+// TYPELIBATTR clashes with the one in InteropServices.
+using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 
 #nullable disable
 
@@ -475,7 +473,6 @@ namespace Microsoft.Build.UnitTests
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CheckSetCopyLocalToFalseOnEmbedInteropTypesAssemblies()
         {
             string gacPath = @"C:\windows\gac";
@@ -564,7 +561,6 @@ namespace Microsoft.Build.UnitTests
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CheckSetCopyLocalToFalseOnGacAssemblies()
         {
             string gacPath = @"C:\windows\gac";

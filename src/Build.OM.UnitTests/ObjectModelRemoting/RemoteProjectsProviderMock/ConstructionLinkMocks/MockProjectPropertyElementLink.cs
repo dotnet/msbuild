@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectPropertyElementLinkRemoter : MockProjectElementLinkRemoter
+    internal sealed class MockProjectPropertyElementLinkRemoter : MockProjectElementLinkRemoter
     {
         public ProjectPropertyElement PropertyXml => (ProjectPropertyElement)Source;
 
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public void ChangeName(string newName) { PropertyXml.Name = newName; }
     }
 
-    internal class MockProjectPropertyElementLink : ProjectPropertyElementLink, ILinkMock, IProjectElementLinkHelper
+    internal sealed class MockProjectPropertyElementLink : ProjectPropertyElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectPropertyElementLink(MockProjectPropertyElementLinkRemoter proxy, IImportHolder holder)
         {

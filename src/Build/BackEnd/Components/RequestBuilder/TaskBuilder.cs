@@ -13,6 +13,7 @@ using System.Runtime.ExceptionServices;
 #endif
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -661,6 +662,8 @@ namespace Microsoft.Build.BackEnd
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
 
+            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, (_taskExecutionHost as TaskExecutionHost)?.TaskInstance?.GetType());
+
             try
             {
                 // UNDONE: Move this and the task host.
@@ -1024,7 +1027,8 @@ namespace Microsoft.Build.BackEnd
 
         private List<string> GetUndeclaredProjects(MSBuild msbuildTask)
         {
-            if (!_componentHost.BuildParameters.IsolateProjects)
+            ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
+            if (isolateProjects == ProjectIsolationMode.False || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation)
             {
                 return null;
             }
@@ -1051,11 +1055,7 @@ namespace Microsoft.Build.BackEnd
                     !(declaredProjects.Contains(normalizedMSBuildProject)
                       || _buildRequestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(normalizedMSBuildProject)))
                 {
-                    if (undeclaredProjects == null)
-                    {
-                        undeclaredProjects = new List<string>(projectReferenceItems.Count);
-                    }
-
+                    undeclaredProjects ??= new List<string>(projectReferenceItems.Count);
                     undeclaredProjects.Add(normalizedMSBuildProject);
                 }
             }

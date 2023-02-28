@@ -5,8 +5,8 @@ using System;
 using System.Collections;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -125,7 +125,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestResolve()
         {
             // empty pre-generated string
@@ -209,7 +208,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestManagedCheck()
         {
             Hashtable unresolvedOutputs = null;
@@ -239,7 +237,6 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that the UnresolvedProjectReferences output parameter is populated correctly.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestUnresolvedReferences()
         {
             ArrayList projectRefs = new ArrayList();

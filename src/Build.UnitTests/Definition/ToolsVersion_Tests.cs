@@ -6,18 +6,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
-
-using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
-using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
+using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
+using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
 
 #nullable disable
 
@@ -87,8 +87,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void OverrideTaskPathHasInvalidChars()
         {
             ProjectCollection e = new ProjectCollection();

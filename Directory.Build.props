@@ -14,8 +14,8 @@
 
   <PropertyGroup>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
-    
-    <!-- 
+
+    <!--
         When updating the version of .NET Core for MSBuild, this property is the 'source of truth'.
         Other locations to update the version number:
           global.json
@@ -43,8 +43,10 @@
   <PropertyGroup>
     <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
 
-    <!-- NU1603: Microsoft.xunit.netcore.extensions package has dependencies to versions which aren't published, so ignore those warnings
-         NU5105: we're explicitly opting in to semver2, as is most of .NET Core
+    <!--
+        NU1507: ManagePackageVersionsCentrally implies source mapping, which we should consider turning on but it's nontrivial
+        NU1603: Microsoft.xunit.netcore.extensions package has dependencies to versions which aren't published, so ignore those warnings
+        NU5105: we're explicitly opting in to semver2, as is most of .NET Core
         CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
         you don't get those defaults.
         SYSLIB0011: Removing binary formatter will happen as part of a larger .NET-wide effort.
@@ -52,7 +54,7 @@
         RS0016 & RS0017: Roslyn analyzers seem to be bugged, claiming that API's that exist don't and vise-versa: https://github.com/dotnet/msbuild/issues/7903
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702;SYSLIB0011;SYSLIB0037;SYSLIB0044;RS0016;RS0017;</NoWarn>
+    <NoWarn>$(NoWarn);NU1507;NU1603;NU5105;1701;1702;SYSLIB0011;SYSLIB0037;SYSLIB0044;RS0016;RS0017;</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
@@ -84,11 +86,17 @@
     <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
 
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <DirectoryPackagesPropsPath>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', 'eng', 'Packages.props'))</DirectoryPackagesPropsPath>
+
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
   </PropertyGroup>
 
   <!-- Enable SDK supplied netanalyzers for all target frameworks -->
   <PropertyGroup>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
-  
+
 </Project>

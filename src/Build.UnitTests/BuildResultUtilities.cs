@@ -10,7 +10,7 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.Unittest
 {
-    internal class BuildResultUtilities
+    internal sealed class BuildResultUtilities
     {
         public static TargetResult GetEmptyFailingTargetResult()
         {

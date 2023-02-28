@@ -16,7 +16,7 @@ namespace Microsoft.Build.Shared.Debugging
     /// </summary>
     internal static class PrintLineDebuggerWriters
     {
-        public class IdBasedFilesWriter
+        public sealed class IdBasedFilesWriter
         {
             private string LogFileRoot { get; }
 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Shared.Debugging
             }
         }
 
-        public class CompositeWriter
+        public sealed class CompositeWriter
         {
             private IEnumerable<CommonWriterType> Writers { get; }
 

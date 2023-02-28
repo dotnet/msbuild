@@ -9,6 +9,7 @@ using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -29,9 +30,7 @@ namespace Microsoft.Build.UnitTests
             _outputHelper = outputHelper;
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio install for .NET.")]
         public void TestDesktopMSBuildShouldRunPortableTask()
         {
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(true);

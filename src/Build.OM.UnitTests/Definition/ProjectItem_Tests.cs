@@ -13,9 +13,11 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using Xunit.NetCore.Extensions;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -54,7 +56,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-        protected TestEnvironment _env;
+        protected readonly TestEnvironment _env;
+        private DummyMappedDrive _mappedDrive = null;
 
         public ProjectItem_Tests()
         {
@@ -64,6 +67,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void Dispose()
         {
             _env.Dispose();
+            _mappedDrive?.Dispose();
         }
 
         /// <summary>
@@ -703,8 +707,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, excludeString, normalizeSlashes: true);
         }
 
-        [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyTheory]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/**/*.cs",
             new[]
@@ -792,23 +795,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
-        [InlineData(@"z:\**\*.log")]
-        [InlineData(@"z:$(empty)\**\*.log")]
-        [InlineData(@"z:\**")]
-        [InlineData(@"z:\\**")]
-        [InlineData(@"z:\\\\\\\\**")]
-        [InlineData(@"z:\**\*.cs")]
+        [WindowsOnlyTheory]
+        [InlineData(@"%DRIVE%:\**\*.log")]
+        [InlineData(@"%DRIVE%:$(empty)\**\*.log")]
+        [InlineData(@"%DRIVE%:\**")]
+        [InlineData(@"%DRIVE%:\\**")]
+        [InlineData(@"%DRIVE%:\\\\\\\\**")]
+        [InlineData(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
+            var mappedDrive = GetDummyMappedDrive();
+            unevaluatedInclude = UpdatePathToMappedDrive(unevaluatedInclude, mappedDrive.MappedDriveLetter);
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        [UnixOnlyTheory]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [InlineData(@"/**/*.log")]
         [InlineData(@"$(empty)/**/*.log")]
         [InlineData(@"/$(empty)**/*.log")]
@@ -877,34 +879,56 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project instance created from a file that contains a drive enumerating wildcard results in a logged warning on the Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(
             ImportProjectElement,
-            @"z:\**\*.targets",
+            @"%DRIVE%:\**\*.targets",
             null)]
 
         // LazyItem.IncludeOperation
         [InlineData(
             ItemWithIncludeAndExclude,
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
         // LazyItem.IncludeOperation for Exclude
         [InlineData(
             ItemWithIncludeAndExclude,
             @"$(EmptyProperty)\*.cs",
-            @"z:\$(Microsoft_WindowsAzure_EngSys)**")]
+            @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
+            var mappedDrive = GetDummyMappedDrive();
+            placeHolder = UpdatePathToMappedDrive(placeHolder, mappedDrive.MappedDriveLetter);
+            excludePlaceHolder = UpdatePathToMappedDrive(excludePlaceHolder, mappedDrive.MappedDriveLetter);
             content = string.Format(content, placeHolder, excludePlaceHolder);
             CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Theory]
+        private DummyMappedDrive GetDummyMappedDrive()
+        {
+            if (NativeMethods.IsWindows)
+            {
+                // let's create the mapped drive only once it's needed by any test, then let's reuse;
+                _mappedDrive ??= new DummyMappedDrive();
+            }
+
+            return _mappedDrive;
+        }
+
+        private static string UpdatePathToMappedDrive(string path, char driveLetter)
+        {
+            const string drivePlaceholder = "%DRIVE%";
+            // if this seems to be rooted path - replace with the dummy mount
+            if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
+            {
+                path = driveLetter + path.Substring(drivePlaceholder.Length);
+            }
+            return path;
+        }
+
+        [UnixOnlyTheory]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [InlineData(
             ImportProjectElement,
             @"\**\*.targets",
@@ -2148,7 +2172,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents);
 
                 var metadata = project.GetItems("I").FirstOrDefault().SetMetadataValue("M", "$(P);@(Foo)", true);
 
@@ -2174,7 +2198,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents);
 
                 var item = project.GetItems("I").FirstOrDefault();
                 var metadata = item.SetMetadataValue("M", "V", true);
@@ -2547,7 +2571,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, content, null, null);
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, content);
 
                 var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
 
@@ -2584,7 +2608,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, content, null, null);
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, content);
 
                 var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
 

@@ -1,16 +1,15 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.Configuration;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-
-using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
 using Xunit;
-using System;
-using System.Collections.Generic;
+using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
 
 #nullable disable
 
@@ -198,7 +197,6 @@ namespace Microsoft.Build.UnitTests.Definition
         /// name attribute is missing from toolset element 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ToolsVersionTest_NameNotSpecified()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -255,7 +253,6 @@ namespace Microsoft.Build.UnitTests.Definition
         /// empty toolset element 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ToolsVersionTest_EmptyElement()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -323,7 +320,6 @@ namespace Microsoft.Build.UnitTests.Definition
         ///  name attribute is missing
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyTest_NameNotSpecified()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -400,7 +396,6 @@ namespace Microsoft.Build.UnitTests.Definition
         ///  property element is an empty element
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyTest_EmptyElement()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>

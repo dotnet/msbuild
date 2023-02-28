@@ -6,11 +6,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 using Microsoft.Build.Tasks;
+using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -148,8 +148,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
 
     /// <summary>
     /// Test the GetInstalledSDKLocations task
-    /// </summary>
-    [PlatformSpecific(TestPlatforms.Windows)]
+    /// </summary>W
     public class GetInstalledSDKLocationsTestFixture : IClassFixture<FakeSDKStructure>
     {
         private readonly string _fakeSDKStructureRoot;
@@ -165,7 +164,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Make sure we get a ArgumentException if null is passed into the target platform version.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void NullTargetPlatformVersion()
         {
             Assert.Throws<ArgumentNullException>(() =>
@@ -179,7 +178,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Make sure we get a ArgumentException if null is passed into the target platform version.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void NullTargetPlatformIdentifier()
         {
             Assert.Throws<ArgumentNullException>(() =>
@@ -193,7 +192,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Make sure we get an error message if an empty platform identifier is passed in.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void EmptyTargetPlatformIdentifier()
         {
             MockEngine engine = new MockEngine();
@@ -211,7 +210,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Make sure we get an error message if an empty platform Version is passed in.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void EmptyTargetPlatformVersion()
         {
             MockEngine engine = new MockEngine();
@@ -230,7 +229,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Make sure we get an error message if an empty platform Version is passed in.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void BadTargetPlatformVersion()
         {
             MockEngine engine = new MockEngine();
@@ -249,7 +248,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Make sure we get an Warning if no SDKs were found.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void NoSDKsFound()
         {
             MockEngine engine = new MockEngine();
@@ -267,7 +266,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void GetSDKVersions()
         {
             try
@@ -314,7 +313,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void GetGoodSDKs()
         {
             try
@@ -388,7 +387,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact]
         public void GetGoodSDKs2()
         {
             try

@@ -3,13 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
-using System.Threading;
-
-using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
+using System.IO;
 using System.Linq;
+using System.Threading;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 #nullable disable
 

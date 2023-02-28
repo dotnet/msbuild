@@ -12,6 +12,7 @@ using Shouldly;
 
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -151,7 +152,7 @@ $@"<Project DefaultTargets=`Build` xmlns=`msbuildnamespace` ToolsVersion=`msbuil
         /// <summary>
         /// Test for [MSBuild]::NormalizePath and [MSBuild]::NormalizeDirectory returning current directory instead of current Project directory.
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsWindows), Skip = "Skipping this test for now until we have a consensus about this issue.")]
+        [WindowsOnlyFact(Skip = "Skipping this test for now until we have a consensus about this issue.")]
         public void MSBuildNormalizePathShouldReturnProjectDirectory()
         {
             // Arrange

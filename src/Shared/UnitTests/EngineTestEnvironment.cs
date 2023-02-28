@@ -28,9 +28,9 @@ namespace Microsoft.Build.UnitTests
         private object _resetBuildManager = new ResetDefaultBuildManager();
 #pragma warning restore CA1823 // Avoid unused private fields
 
-        private class ResetDefaultBuildManager
+        private sealed class ResetDefaultBuildManager
         {
-            protected internal static FieldInfo SingletonField;
+            internal static FieldInfo SingletonField;
 
             public ResetDefaultBuildManager()
             {
@@ -153,8 +153,9 @@ namespace Microsoft.Build.UnitTests
         {
             var result = new List<(ILogger logger, Func<string> textGetter)>();
 
-            result.Add(GetMockLogger());
+            // Add binlogger first - so that it get's all messages (the logger initialization messages goes only to so far initialized loggers)
             result.Add(GetBinaryLogger());
+            result.Add(GetMockLogger());
 
 #if MICROSOFT_BUILD_ENGINE_UNITTESTS
             result.Add(GetSerialLogger());

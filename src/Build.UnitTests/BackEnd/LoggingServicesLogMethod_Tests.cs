@@ -2,24 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using System.IO;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using Microsoft.Build.Execution;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
-
-using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
-using Xunit;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
+using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -1021,7 +1020,6 @@ namespace Microsoft.Build.UnitTests.Logging
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/437")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void LogBuildStartedCriticalOnly()
         {
             ProcessBuildEventHelper service =
@@ -1783,7 +1781,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// we can test most of the logging methods without relying on the
         /// exact implementation of process logging events.
         /// </summary>
-        internal class ProcessBuildEventHelper : LoggingService
+        internal sealed class ProcessBuildEventHelper : LoggingService
         {
             #region Data
             /// <summary>
@@ -1797,7 +1795,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// Create a constructor which calls the base class constructor
             /// </summary>
             /// <param name="loggerMode">Is the logging service supposed to be Synchronous or Asynchronous</param>
-            protected ProcessBuildEventHelper(LoggerMode loggerMode, int nodeId, IBuildComponentHost componentHost)
+            private ProcessBuildEventHelper(LoggerMode loggerMode, int nodeId, IBuildComponentHost componentHost)
                 : base(loggerMode, nodeId)
             {
                 if (componentHost == null)
@@ -1875,7 +1873,7 @@ namespace Microsoft.Build.UnitTests.Logging
             #endregion
         }
 
-        private class EventArgsEqualityComparer<T> : IEqualityComparer<T> where T : BuildEventArgs
+        private sealed class EventArgsEqualityComparer<T> : IEqualityComparer<T> where T : BuildEventArgs
         {
             public bool Equals(T x, T y)
             {

@@ -60,7 +60,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PokeNoNamespace()
         {
             const string query = "//variable/@Name";
@@ -271,7 +270,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PokeElement()
         {
             const string query = "//variable/.";

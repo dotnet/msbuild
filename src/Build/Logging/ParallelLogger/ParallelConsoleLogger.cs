@@ -3,15 +3,15 @@
 
 using System;
 using System.Collections;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
+using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using System.Linq;
 
 #nullable disable
 
@@ -1120,6 +1120,11 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
             if (showOnlyErrors || showOnlyWarnings)
+            {
+                return;
+            }
+
+            if (e.BuildEventContext == null && e is AssemblyLoadBuildEventArgs)
             {
                 return;
             }

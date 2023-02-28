@@ -5,6 +5,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -32,7 +33,6 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests that the assembly being imported is passed to the command line
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ActiveXControlNameWithSpaces()
         {
             var t = new ResolveComReference.AxImp();
@@ -70,14 +70,9 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /nologo switch
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("The /nologo switch is not available on Mono.")]
         public void NoLogo()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "The /nologo switch is not available on Mono"
-            }
-
             var t = new ResolveComReference.AxImp();
 
             Assert.False(t.NoLogo); // "NoLogo should be false by default"

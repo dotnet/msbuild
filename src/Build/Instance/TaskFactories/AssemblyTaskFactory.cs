@@ -8,9 +8,10 @@ using System.Reflection;
 using System.Threading.Tasks;
 #endif
 
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System.IO;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
@@ -210,6 +211,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (appDomain != null)
                 {
+                    AssemblyLoadsTracker.StopTracking(appDomain);
                     // Unload the AppDomain asynchronously to avoid a deadlock that can happen because
                     // AppDomain.Unload blocks for the process's one Finalizer thread to finalize all
                     // objects. Some objects are RCWs for STA COM objects and as such would need the
@@ -269,6 +271,10 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
+
+                string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
+                using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
+
                 _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
@@ -384,6 +390,7 @@ namespace Microsoft.Build.BackEnd
                     new TaskLoader.LogError(ErrorLoggingDelegate),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
+                    appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
 #endif
                     isOutOfProc
 #if FEATURE_APPDOMAIN
@@ -393,9 +400,13 @@ namespace Microsoft.Build.BackEnd
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
 #if FEATURE_APPDOMAIN
-                if (taskAppDomain != null)
+                if (taskAppDomain != null && taskInstance != null)
                 {
                     _tasksAndAppDomains[taskInstance] = taskAppDomain;
+                }
+                else if (taskAppDomain != null)
+                {
+                    AssemblyLoadsTracker.StopTracking(taskAppDomain);
                 }
 #endif
 

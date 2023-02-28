@@ -7,7 +7,7 @@ namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// This interface extends the ILogger interface to provide a property which can be used to forward events
-    /// to a logger running in a different process. It can also be used create filtering loggers.
+    /// to a logger running in a different process. It can also be used to create filtering loggers.
     /// </summary>
     public interface IForwardingLogger : INodeLogger
     {

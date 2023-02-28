@@ -11,7 +11,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     /// <summary>
     /// Class representation of an MSBuild task execution.
     /// </summary>
-    internal class Task : LogProcessNode
+    internal sealed class Task : LogProcessNode
     {
         /// <summary>
         /// The assembly from which the task originated.

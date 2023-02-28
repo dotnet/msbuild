@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-internal class Program
+internal sealed class Program
 {
     public static int Main(string[] args)
     {

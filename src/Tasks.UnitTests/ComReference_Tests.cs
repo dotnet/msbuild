@@ -3,9 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -39,14 +40,9 @@ namespace Microsoft.Build.UnitTests
             return ExistingFilesDictionary.ContainsKey(filepath);
         }
 
-        [Fact]
+        [WindowsOnlyFact("COM is only found on Windows.")]
         public void TestStripTypeLibNumber()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "COM is only found on Windows"
-            }
-
             Assert.Null(ComReference.StripTypeLibNumberFromPath(null, new FileExists(FileExistsMock)));
             Assert.Equal("", ComReference.StripTypeLibNumberFromPath("", new FileExists(FileExistsMock)));
             Assert.Equal(@"C:\test\typelib1.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib1.dll", new FileExists(FileExistsMock)));

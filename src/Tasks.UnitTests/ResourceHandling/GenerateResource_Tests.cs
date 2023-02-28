@@ -2,27 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Collections;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
-
-using System.Text;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
-    [Trait("Category", "mono-osx-failing")]
-    [Trait("Category", "mono-windows-failing")]
     public sealed class RequiredTransformations : IDisposable
     {
         private readonly TestEnvironment _env;
@@ -1523,8 +1521,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <remarks>
         /// Regression test for legacy-codepath-resources case of https://github.com/dotnet/msbuild/issues/4582
         /// </remarks>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/2272")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "https://github.com/dotnet/msbuild/issues/2272")]
         public void StronglyTypedResourcesEmitTypeIntoClass()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1946,8 +1943,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Cause failures in ResourceReader
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core MSBuild doesn't try to read binary input resources")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core MSBuild doesn't try to read binary input resources.")]
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -1976,10 +1972,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
-        [Theory]
+        [DotNetOnlyTheory(additionalMessage: "This error is .NET Core only.")]
         [InlineData(".resources")]
         [InlineData(".dll")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This error is .NET Core only")]
         public void ResourceReaderRejectsNonCoreCompatFormats(string inputExtension)
         {
             using var env = TestEnvironment.Create(_output);
@@ -2037,9 +2032,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// Reference passed in that can't be loaded should error
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,
-            reason: ".NET Core MSBuild doesn't load refs so it pushes this failure to runtime")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core MSBuild doesn't load refs so it pushes this failure to runtime.")]
         public void InvalidReference()
         {
             string txtFile = null;
@@ -2319,8 +2312,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  STR class name derived from output file transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
+
         public void StronglyTypedClassName()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2366,8 +2358,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  STR class file name derived from class name transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2520,8 +2510,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Read-only StateFile yields message
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2657,7 +2646,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Invalid StronglyTypedLanguage yields CodeDOM exception
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UnknownStronglyTypedLanguage()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2942,9 +2930,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;
@@ -2982,9 +2968,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             _output = output;
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
-        [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3160,9 +3144,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// which fails (LoadFile requires an absolute path).  The fix was to use
         /// Assembly.LoadFrom instead.
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
-        [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

@@ -3,15 +3,15 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Framework;
+using System.Linq;
+using System.Reflection;
+using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using System.Xml;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Xunit;
-using System.Reflection;
+using Microsoft.Build.Framework;
 using Shouldly;
-using System.Linq;
+using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -58,7 +58,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Then these items and properties should be visible to the onerror targets.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void FailingTaskStillPublishesOutputs()
         {
             MockLogger l = new MockLogger();

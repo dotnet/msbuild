@@ -7,9 +7,9 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Logging.FancyLogger
+namespace Microsoft.Build.Logging.LiveLogger
 {
-    internal class FancyLoggerProjectNode
+    internal class ProjectNode
     {
         /// <summary>
         /// Given a list of paths, this method will get the shortest not ambiguous path for a project.
@@ -25,21 +25,22 @@ namespace Microsoft.Build.Logging.FancyLogger
         public string ProjectPath;
         public string TargetFramework;
         public bool Finished;
+        public string? ProjectOutputExecutable;
         // Line to display project info
-        public FancyLoggerBufferLine? Line;
+        public TerminalBufferLine? Line;
         // Targets
         public int FinishedTargets;
-        public FancyLoggerBufferLine? CurrentTargetLine;
-        public FancyLoggerTargetNode? CurrentTargetNode;
+        public TerminalBufferLine? CurrentTargetLine;
+        public TargetNode? CurrentTargetNode;
         // Messages, errors and warnings
-        public List<FancyLoggerMessageNode> AdditionalDetails = new();
+        public List<MessageNode> AdditionalDetails = new();
         // Count messages, warnings and errors
         public int MessageCount = 0;
         public int WarningCount = 0;
         public int ErrorCount = 0;
         // Bool if node should rerender
         internal bool ShouldRerender = true;
-        public FancyLoggerProjectNode(ProjectStartedEventArgs args)
+        public ProjectNode(ProjectStartedEventArgs args)
         {
             Id = args.ProjectId;
             ProjectPath = args.ProjectFile!;
@@ -55,7 +56,30 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
 
-        // TODO: Rename to Render() after FancyLogger's API becomes internal
+        public string ToANSIString()
+        {
+            ANSIBuilder.Formatting.ForegroundColor color = ANSIBuilder.Formatting.ForegroundColor.Default;
+            string icon = ANSIBuilder.Graphics.Spinner() + " ";
+
+            if (Finished && WarningCount + ErrorCount == 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Green;
+                icon = "✓";
+            }
+            else if (ErrorCount > 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Red;
+                icon = "X";
+            }
+            else if (WarningCount > 0)
+            {
+                color = ANSIBuilder.Formatting.ForegroundColor.Yellow;
+                icon = "✓";
+            }
+            return icon + " " + ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), color) + " " + ANSIBuilder.Formatting.Inverse(TargetFramework);
+        }
+
+        // TODO: Rename to Render() after LiveLogger's API becomes internal
         public void Log()
         {
             if (!ShouldRerender)
@@ -65,20 +89,11 @@ namespace Microsoft.Build.Logging.FancyLogger
 
             ShouldRerender = false;
             // Project details
-            string lineContents = ANSIBuilder.Alignment.SpaceBetween(
-                // Show indicator
-                (Finished ? ANSIBuilder.Formatting.Color("✓", ANSIBuilder.Formatting.ForegroundColor.Green) : ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner())) +
-                // Project
-                ANSIBuilder.Formatting.Dim("Project: ") +
-                // Project file path with color
-                $"{ANSIBuilder.Formatting.Color(ANSIBuilder.Formatting.Bold(GetUnambiguousPath(ProjectPath)), Finished ? ANSIBuilder.Formatting.ForegroundColor.Green : ANSIBuilder.Formatting.ForegroundColor.Default)} [{TargetFramework ?? "*"}]",
-                $"({MessageCount} Messages, {WarningCount} Warnings, {ErrorCount} Errors)",
-                Console.WindowWidth);
-
+            string lineContents = ANSIBuilder.Alignment.SpaceBetween(ToANSIString(), $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)", Console.BufferWidth - 1);
             // Create or update line
             if (Line is null)
             {
-                Line = FancyLoggerBuffer.WriteNewLine(lineContents, false);
+                Line = TerminalBuffer.WriteNewLineBeforeMidpoint(lineContents, false);
             }
             else
             {
@@ -90,21 +105,42 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 if (CurrentTargetLine is not null)
                 {
-                    FancyLoggerBuffer.DeleteLine(CurrentTargetLine.Id);
+                    TerminalBuffer.DeleteLine(CurrentTargetLine.Id);
                 }
 
-                foreach (FancyLoggerMessageNode node in AdditionalDetails.ToList())
+                bool foundErrorOrWarning = false;
+
+                foreach (MessageNode node in AdditionalDetails)
                 {
+                    if (node.Type != MessageNode.MessageType.HighPriorityMessage)
+                    {
+                        foundErrorOrWarning = true;
+                    }
+
                     // Only delete high priority messages
-                    if (node.Type != FancyLoggerMessageNode.MessageType.HighPriorityMessage)
+                    if (node.Type != MessageNode.MessageType.HighPriorityMessage)
                     {
                         continue;
                     }
 
                     if (node.Line is not null)
                     {
-                        FancyLoggerBuffer.DeleteLine(node.Line.Id);
+                        TerminalBuffer.DeleteLine(node.Line.Id);
                     }
+                }
+
+                if (!foundErrorOrWarning && this.Line is not null)
+                {
+                    foreach (MessageNode node in AdditionalDetails)
+                    {
+                        int? id = node.Line?.Id;
+                        if (id is not null)
+                        {
+                            TerminalBuffer.DeleteLine(id.Value);
+                        }
+                    }
+
+                    TerminalBuffer.DeleteLine(this.Line.Id);
                 }
             }
 
@@ -117,7 +153,7 @@ namespace Microsoft.Build.Logging.FancyLogger
             string currentTargetLineContents = $"    └── {CurrentTargetNode.TargetName} : {CurrentTargetNode.CurrentTaskNode?.TaskName ?? String.Empty}";
             if (CurrentTargetLine is null)
             {
-                CurrentTargetLine = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
+                CurrentTargetLine = TerminalBuffer.WriteNewLineAfter(Line!.Id, currentTargetLineContents);
             }
             else
             {
@@ -125,28 +161,28 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
 
             // Messages, warnings and errors
-            foreach (FancyLoggerMessageNode node in AdditionalDetails)
+            foreach (MessageNode node in AdditionalDetails)
             {
-                if (Finished && node.Type == FancyLoggerMessageNode.MessageType.HighPriorityMessage)
+                if (Finished && node.Type == MessageNode.MessageType.HighPriorityMessage)
                 {
                     continue;
                 }
 
                 if (node.Line is null)
                 {
-                    node.Line = FancyLoggerBuffer.WriteNewLineAfter(Line!.Id, "Message");
+                    node.Line = TerminalBuffer.WriteNewLineAfter(Line!.Id, "Message");
                 }
 
                 node.Log();
             }
         }
 
-        public FancyLoggerTargetNode AddTarget(TargetStartedEventArgs args)
+        public TargetNode AddTarget(TargetStartedEventArgs args)
         {
-            CurrentTargetNode = new FancyLoggerTargetNode(args);
+            CurrentTargetNode = new TargetNode(args);
             return CurrentTargetNode;
         }
-        public FancyLoggerTaskNode? AddTask(TaskStartedEventArgs args)
+        public TaskNode? AddTask(TaskStartedEventArgs args)
         {
             // Get target id
             int targetId = args.BuildEventContext!.TargetId;
@@ -159,7 +195,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 return null;
             }
         }
-        public FancyLoggerMessageNode? AddMessage(BuildMessageEventArgs args)
+        public MessageNode? AddMessage(BuildMessageEventArgs args)
         {
             if (args.Importance != MessageImportance.High)
             {
@@ -167,22 +203,30 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
 
             MessageCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
+            // Add output executable path
+            if (node.ProjectOutputExecutablePath is not null)
+            {
+                ProjectOutputExecutable = node.ProjectOutputExecutablePath;
+            }
+
             AdditionalDetails.Add(node);
             return node;
         }
-        public FancyLoggerMessageNode? AddWarning(BuildWarningEventArgs args)
+        public MessageNode? AddWarning(BuildWarningEventArgs args)
         {
             WarningCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
+            TerminalBuffer.overallBuildState = TerminalBuffer.overallBuildState == OverallBuildState.Error ? OverallBuildState.Error : OverallBuildState.Warning;
             return node;
         }
-        public FancyLoggerMessageNode? AddError(BuildErrorEventArgs args)
+        public MessageNode? AddError(BuildErrorEventArgs args)
         {
             ErrorCount++;
-            FancyLoggerMessageNode node = new FancyLoggerMessageNode(args);
+            MessageNode node = new MessageNode(args);
             AdditionalDetails.Add(node);
+            TerminalBuffer.overallBuildState = OverallBuildState.Error;
             return node;
         }
     }

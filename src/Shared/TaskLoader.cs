@@ -3,7 +3,6 @@
 
 using System;
 using System.Reflection;
-
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -52,6 +51,7 @@ namespace Microsoft.Build.Shared
             LogError logError,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
+            Action<AppDomain> appDomainCreated,
 #endif
             bool isOutOfProc
 #if FEATURE_APPDOMAIN
@@ -118,6 +118,7 @@ namespace Microsoft.Build.Shared
 
                         // Hook up last minute dumping of any exceptions 
                         taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
+                        appDomainCreated?.Invoke(taskAppDomain);
                     }
                 }
                 else

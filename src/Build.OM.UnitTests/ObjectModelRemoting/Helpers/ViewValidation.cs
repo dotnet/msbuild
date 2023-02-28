@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
     }
 
-    internal class ValidationContext
+    internal sealed class ValidationContext
     {
         public ValidationContext() { }
         public ValidationContext(ProjectPair pair) { this.Pair = pair; }

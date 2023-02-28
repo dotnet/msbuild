@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -123,9 +124,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Make sure shutdown will correctly null out the send data delegate
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/282")]
+        [WindowsFullFrameworkOnlyFact("https://github.com/dotnet/msbuild/issues/282")]
         public void TestShutDown()
         {
             SendDataDelegate transportDelegate = new(PacketProcessor);

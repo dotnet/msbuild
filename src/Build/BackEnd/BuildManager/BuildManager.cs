@@ -256,6 +256,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
 
+        /// <summary>
+        /// Build telemetry to be send when this build ends.
+        /// <remarks>Could be null</remarks>
+        /// </summary>
+        private BuildTelemetry _buildTelemetry;
+
         private ProjectCacheService _projectCacheService;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
@@ -504,11 +510,22 @@ namespace Microsoft.Build.Execution
 
                 // Initiate build telemetry data
                 DateTime now = DateTime.UtcNow;
-                KnownTelemetry.BuildTelemetry ??= new()
+
+                // Acquire it from static variable so we can apply data collected up to this moment
+                _buildTelemetry = KnownTelemetry.PartialBuildTelemetry;
+                if (_buildTelemetry != null)
                 {
-                    StartAt = now,
-                };
-                KnownTelemetry.BuildTelemetry.InnerStartAt = now;
+                    KnownTelemetry.PartialBuildTelemetry = null;
+                }
+                else
+                {
+                    _buildTelemetry = new()
+                    {
+                        StartAt = now,
+                    };
+                }
+
+                _buildTelemetry.InnerStartAt = now;
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
@@ -525,9 +542,14 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
-                if (_buildParameters.UsesCachedResults())
+                if (_buildParameters.UsesCachedResults() && parameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
-                    _buildParameters.IsolateProjects = true;
+                    // If input or output caches are used and the project isolation mode is set to
+                    // ProjectIsolationMode.False, then set it to ProjectIsolationMode.True. The explicit
+                    // condition on ProjectIsolationMode is necessary to ensure that, if we're using input
+                    // or output caches and ProjectIsolationMode is set to ProjectIsolationMode.MessageUponIsolationViolation,
+                    // ProjectIsolationMode isn't changed to ProjectIsolationMode.True.
+                    _buildParameters.ProjectIsolationMode = ProjectIsolationMode.True;
                 }
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
@@ -819,10 +841,10 @@ namespace Microsoft.Build.Execution
 
                 var newSubmission = new BuildSubmission(this, GetNextSubmissionId(), requestData, _buildParameters.LegacyThreadingSemantics);
 
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (_buildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectFullPath;
-                    KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                    _buildTelemetry.Project ??= requestData.ProjectFullPath;
+                    _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
 
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -847,12 +869,12 @@ namespace Microsoft.Build.Execution
 
                 var newSubmission = new GraphBuildSubmission(this, GetNextSubmissionId(), requestData);
 
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (_buildTelemetry != null)
                 {
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
-                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
-                    KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                    _buildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
+                    _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
 
                 _graphBuildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -998,13 +1020,13 @@ namespace Microsoft.Build.Execution
 
                         loggingService.LogBuildFinished(_overallBuildSuccess);
 
-                        if (KnownTelemetry.BuildTelemetry != null)
+                        if (_buildTelemetry != null)
                         {
-                            KnownTelemetry.BuildTelemetry.FinishedAt = DateTime.UtcNow;
-                            KnownTelemetry.BuildTelemetry.Success = _overallBuildSuccess;
-                            KnownTelemetry.BuildTelemetry.Version = ProjectCollection.Version;
-                            KnownTelemetry.BuildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
-                            KnownTelemetry.BuildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
+                            _buildTelemetry.FinishedAt = DateTime.UtcNow;
+                            _buildTelemetry.Success = _overallBuildSuccess;
+                            _buildTelemetry.Version = ProjectCollection.Version;
+                            _buildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
+                            _buildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
 
                             string host = null;
                             if (BuildEnvironmentState.s_runningInVisualStudio)
@@ -1019,12 +1041,12 @@ namespace Microsoft.Build.Execution
                             {
                                 host = "VSCode";
                             }
-                            KnownTelemetry.BuildTelemetry.Host = host;
+                            _buildTelemetry.Host = host;
 
-                            KnownTelemetry.BuildTelemetry.UpdateEventProperties();
-                            loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.BuildTelemetry.EventName, KnownTelemetry.BuildTelemetry.Properties);
+                            _buildTelemetry.UpdateEventProperties();
+                            loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.Properties);
                             // Clean telemetry to make it ready for next build submission.
-                            KnownTelemetry.BuildTelemetry = null;
+                            _buildTelemetry = null;
                         }
                     }
 
@@ -1053,8 +1075,11 @@ namespace Microsoft.Build.Execution
 
             void SerializeCaches()
             {
-                var errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
-
+                string errorMessage = CacheSerialization.SerializeCaches(
+                    _configCache,
+                    _resultsCache,
+                    _buildParameters.OutputResultsCacheFile,
+                    _buildParameters.ProjectIsolationMode);
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     LogErrorAndShutdown(errorMessage);
@@ -1389,7 +1414,7 @@ namespace Microsoft.Build.Execution
                 ((IBuildComponentHost)this).LoggingService,
                 request.BuildEventContext,
                 false /* loaded by solution parser*/,
-                config.TargetNames,
+                config.RequestedTargets,
                 SdkResolverService,
                 request.SubmissionId);
 
@@ -2328,23 +2353,17 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleResult(int node, BuildResult result)
         {
-            // Update cache with the default and initial targets, as needed.
+            // Update cache with the default, initial, and project targets, as needed.
             BuildRequestConfiguration configuration = _configCache[result.ConfigurationId];
             if (result.DefaultTargets != null)
             {
-                // If the result has Default and Initial targets, we populate the configuration cache with them if it
+                // If the result has Default, Initial, and project targets, we populate the configuration cache with them if it
                 // doesn't already have entries.  This can happen if we created a configuration based on a request from
                 // an external node, but hadn't yet received a result since we may not have loaded the Project locally
-                // and thus wouldn't know what the default and initial targets were.
-                if (configuration.ProjectDefaultTargets == null)
-                {
-                    configuration.ProjectDefaultTargets = result.DefaultTargets;
-                }
-
-                if (configuration.ProjectInitialTargets == null)
-                {
-                    configuration.ProjectInitialTargets = result.InitialTargets;
-                }
+                // and thus wouldn't know what the default, initial, and project targets were.
+                configuration.ProjectDefaultTargets ??= result.DefaultTargets;
+                configuration.ProjectInitialTargets ??= result.InitialTargets;
+                configuration.ProjectTargets ??= result.ProjectTargets;
             }
 
             IEnumerable<ScheduleResponse> response = _scheduler.ReportResult(node, result);

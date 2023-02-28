@@ -3,12 +3,12 @@
 
 using System;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Unittest;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Microsoft.Build.Unittest;
 using Xunit;
-using Microsoft.Build.Engine.UnitTests.TestComparers;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
