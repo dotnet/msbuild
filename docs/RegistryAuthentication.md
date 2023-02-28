@@ -30,7 +30,7 @@ All of the above mechanisms are supported by this package. When we push or pull 
 
 The following registries have been explicitly tested:
 
-* Azure Container Registry*
+* Azure Container Registry
 * GitLab Container Registry
 * Google Cloud Artifact Registry
 * Quay.io
@@ -43,10 +43,6 @@ The following registries have been explicitly tested:
 None! We're compatible with most registries.
 
 ## Notes for specific registries
-
-### Azure Container Registry
-
-When authenticating to an Azure Container Registry, at this moment only authentication with an admin username and password is supported. This is the same as running `az acr login -n <registry> -u <username> -p <password>`. Token-based login, like `az  acr login -n <registry>` is not supported yet.
 
 ### Docker Hub
 
