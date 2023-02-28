@@ -12,27 +12,30 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.Xml.Linq;
 using NuGet.Frameworks;
 using Xunit.Sdk;
+using System.ComponentModel.DataAnnotations;
 
 namespace Microsoft.NET.TestFramework
 {
     public class OutputPathCalculator
     {
         public string ProjectPath { get; set; }
+        public bool UseArtifactsOutput { get; set; }
+        public bool IncludeProjectNameInArtifactsPaths { get; set; }
+        public string ArtifactsPath { get; set; }
         public string TargetFramework { get; set; }
+        public string TargetFrameworks { get; set; }
+
         public string RuntimeIdentifier { get; set; }
-        public bool? UseStandardOutputPaths { get; set; }
-        
 
         public bool IsSdkProject { get; set; } = true;
 
-
-        public static OutputPathCalculator FromTestAsset(string projectPath, TestAsset testAsset = null)
+        public static OutputPathCalculator FromProject(string projectPath, TestAsset testAsset)
         {
-            if (testAsset?.TestProject != null)
-            {
-                return FromTestProject(projectPath, testAsset.TestProject);
-            }
+            return FromProject(projectPath, testAsset?.TestProject);
+        }
 
+        public static OutputPathCalculator FromProject(string projectPath, TestProject testProject = null)
+        {
             if (!File.Exists(projectPath) && Directory.Exists(projectPath))
             {
                 projectPath = Directory.GetFiles(projectPath, "*.*proj").FirstOrDefault();
@@ -43,126 +46,122 @@ namespace Microsoft.NET.TestFramework
                 ProjectPath = projectPath,
             };
 
-            return calculator;
-        }
-
-        public static OutputPathCalculator FromTestProject(string projectPath, TestProject testProject)
-        {
-            var calculator = new OutputPathCalculator()
+            if (testProject != null)
             {
-                ProjectPath = projectPath,
-                TargetFramework = testProject.TargetFrameworks,
-                RuntimeIdentifier = testProject.RuntimeIdentifier,
-                UseStandardOutputPaths = testProject.UseStandardOutputPaths,
-                IsSdkProject = testProject.IsSdkProject
-            };
+                calculator.UseArtifactsOutput = testProject.UseArtifactsOutput;
+                calculator.IsSdkProject = testProject.IsSdkProject;
+                calculator.IncludeProjectNameInArtifactsPaths = testProject.UseDirectoryBuildPropsForArtifactsOutput;
 
-            return calculator;
-        }
-
-        public string TryGetTargetFramework()
-        {
-            string targetFramework = TargetFramework;
-
-            if (string.IsNullOrEmpty(targetFramework))
-            {
-                var project = XDocument.Load(ProjectPath);
-
-                var ns = project.Root.Name.Namespace;
-
-                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                var targetFrameworksElement = propertyGroup.Element(ns + "TargetFrameworks");
-                if (targetFrameworksElement != null)
+                if (testProject.TargetFrameworks.Contains(';'))
                 {
-                    string targetFrameworks = targetFrameworksElement.Value;
-                    if (!targetFrameworks.Contains(';'))
-                    {
-                        targetFramework = targetFrameworks;
-                    }
+                    calculator.TargetFrameworks = testProject.TargetFrameworks;
                 }
                 else
                 {
-                    var targetFrameworkElement = propertyGroup.Element(ns + "TargetFramework");
-                    targetFramework = targetFrameworkElement?.Value;
+                    calculator.TargetFramework = testProject.TargetFrameworks;
+                }
+
+                calculator.RuntimeIdentifier = testProject.RuntimeIdentifier;
+
+                if (calculator.IncludeProjectNameInArtifactsPaths)
+                {
+                    string directoryBuildPropsFile = GetDirectoryBuildPropsPath(projectPath);
+                    if (directoryBuildPropsFile == null)
+                    {
+                        throw new InvalidOperationException("Couldn't find Directory.Build.props for test project " + projectPath);
+                    }
+                    calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(directoryBuildPropsFile), ".artifacts");
+                }
+                else
+                {
+                    calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(projectPath), ".artifacts");
                 }
             }
-            return targetFramework ?? "";
+            else
+            {
+                var project = XDocument.Load(projectPath);
+                var ns = project.Root.Name.Namespace;
+
+                var useArtifactsOutputElement = project.Root.Elements(ns + "PropertyGroup").Elements("UseArtifactsOutput").FirstOrDefault();
+                if (useArtifactsOutputElement != null)
+                {
+                    calculator.UseArtifactsOutput = bool.Parse(useArtifactsOutputElement.Value);
+                    if (calculator.UseArtifactsOutput)
+                    {
+                        calculator.IncludeProjectNameInArtifactsPaths = false;
+                        calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(projectPath), ".artifacts");
+                    }
+                }
+
+                var targetFrameworkElement = project.Root.Elements(ns + "PropertyGroup").Elements("TargetFramework").FirstOrDefault();
+                if (targetFrameworkElement != null)
+                {
+                    calculator.TargetFramework = targetFrameworkElement.Value;
+                }
+
+                var targetFrameworksElement = project.Root.Elements(ns + "PropertyGroup").Elements("TargetFrameworks").FirstOrDefault();
+                if (targetFrameworksElement != null)
+                {
+                    calculator.TargetFrameworks = targetFrameworksElement.Value;
+                }
+
+                var runtimeIdentifierElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "RuntimeIdentifier").FirstOrDefault();
+                if (runtimeIdentifierElement != null)
+                {
+                    calculator.RuntimeIdentifier = runtimeIdentifierElement.Value;
+                }
+
+                var directoryBuildPropsFile = GetDirectoryBuildPropsPath(projectPath);
+                if (directoryBuildPropsFile != null)
+                {
+                    var dbp = XDocument.Load(directoryBuildPropsFile);
+                    var dbpns = dbp.Root.Name.Namespace;
+
+                    var dbpUsesArtifacts = dbp.Root.Elements(ns + "PropertyGroup").Elements("UseArtifactsOutput").FirstOrDefault();
+                    if (dbpUsesArtifacts != null)
+                    {
+
+                        calculator.UseArtifactsOutput = bool.Parse(dbpUsesArtifacts.Value);
+                        if (calculator.UseArtifactsOutput)
+                        {
+                            calculator.IncludeProjectNameInArtifactsPaths = true;
+                            calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(directoryBuildPropsFile), ".artifacts");
+                        }
+                    }
+                }
+            }
+
+            return calculator;
+        }
+
+        private static string GetDirectoryBuildPropsPath(string projectPath)
+        {
+            string folder = Path.GetDirectoryName(projectPath);
+            while (folder != null)
+            {
+                string directoryBuildPropsFile = Path.Combine(folder, "Directory.Build.props");
+                if (File.Exists(directoryBuildPropsFile))
+                {
+                    return directoryBuildPropsFile;
+                }
+                folder = Path.GetDirectoryName(folder);
+            }
+            return null;
         }
 
         public bool IsMultiTargeted()
         {
-            if (!string.IsNullOrEmpty(TargetFramework) && TargetFramework.Contains(';'))
-            { 
-                return true;
-            }
-            var project = XDocument.Load(ProjectPath);
-
-            var ns = project.Root.Name.Namespace;
-
-            var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-            var targetFrameworksElement = propertyGroup.Element(ns + "TargetFrameworks");
-            if (targetFrameworksElement != null)
-            {
-                string targetFrameworks = targetFrameworksElement.Value;
-                return !string.IsNullOrEmpty(targetFrameworks);
-            }
-
-            return false;
-
-        }
-
-        private bool UsesStandardOutputPaths()
-        {
-            if (UseStandardOutputPaths.HasValue)
-            {
-                return UseStandardOutputPaths.Value;
-            }
-
-            
-
-            //  If we end up enabling standard output paths when targeting a certain version of .NET or higher, the logic for the rest of this method would look something like this:s
-            //if (!IsSdkProject)
-            //{
-            //    return false;
-            //}
-
-            //string targetFramework = TryGetTargetFramework();
-
-            //if (targetFramework == null)
-            //{
-            //    return false;
-            //}
-
-            //if (IsMultiTargeted())
-            //{
-            //    return false;
-            //}
-
-            //var framework = NuGetFramework.Parse(targetFramework);
-            //if (framework.Framework != ".NETCoreApp")
-            //{
-            //    return false;
-            //}
-            //if (framework.Version.Major >= 8)
-            //{
-            //    return true;
-            //}
-            //else
-            //{
-            //    return false;
-            //}
-
-            return false;
+            return !string.IsNullOrEmpty(TargetFrameworks);
         }
 
         public string GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
         {
-            if (UsesStandardOutputPaths())
+            if (UseArtifactsOutput)
             {
                 string pivot = configuration.ToLowerInvariant();
-                if (IsMultiTargeted() && !string.IsNullOrEmpty(targetFramework))
+                if (IsMultiTargeted())
                 {
-                    pivot += "_" + targetFramework;
+                    pivot += "_" + targetFramework ?? TargetFramework;
                 }
                 if (string.IsNullOrEmpty(runtimeIdentifier))
                 {
@@ -172,17 +171,21 @@ namespace Microsoft.NET.TestFramework
                 {
                     pivot += "_" + runtimeIdentifier;
                 }
-                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", "build", pivot);
+
+                if (IncludeProjectNameInArtifactsPaths)
+                {
+                    return Path.Combine(ArtifactsPath, "bin", Path.GetFileNameWithoutExtension(ProjectPath), pivot);
+                }
+                else
+                {
+                    return Path.Combine(ArtifactsPath, "bin", pivot);
+                }
             }
             else
             {
-                if (string.IsNullOrEmpty(targetFramework))
-                {
-                    targetFramework = TryGetTargetFramework();
-                }
-
+                targetFramework = targetFramework ?? TargetFramework;
                 configuration = configuration ?? string.Empty;
-                runtimeIdentifier = runtimeIdentifier ?? string.Empty;
+                runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier;
 
                 if (IsSdkProject)
                 {
@@ -199,12 +202,12 @@ namespace Microsoft.NET.TestFramework
 
         public string GetPublishDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
         {
-            if (UsesStandardOutputPaths())
+            if (UseArtifactsOutput)
             {
                 string pivot = configuration.ToLowerInvariant();
-                if (IsMultiTargeted() && !string.IsNullOrEmpty(targetFramework))
+                if (IsMultiTargeted())
                 {
-                    pivot += "_" + targetFramework;
+                    pivot += "_" + targetFramework ?? TargetFramework;
                 }
                 if (string.IsNullOrEmpty(runtimeIdentifier))
                 {
@@ -214,15 +217,19 @@ namespace Microsoft.NET.TestFramework
                 {
                     pivot += "_" + runtimeIdentifier;
                 }
-                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", "publish", pivot);
+
+                if (IncludeProjectNameInArtifactsPaths)
+                {
+                    return Path.Combine(ArtifactsPath, "publish", Path.GetFileNameWithoutExtension(ProjectPath), pivot);
+                }
+                else
+                {
+                    return Path.Combine(ArtifactsPath, "publish", pivot);
+                }
             }
             else
             {
-                if (string.IsNullOrEmpty(targetFramework))
-                {
-                    targetFramework = TryGetTargetFramework();
-                }
-
+                targetFramework = targetFramework ?? TargetFramework;
                 configuration = configuration ?? string.Empty;
                 runtimeIdentifier = runtimeIdentifier ?? string.Empty;
 
@@ -233,11 +240,26 @@ namespace Microsoft.NET.TestFramework
 
         public string GetIntermediateDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
         {
-            if (string.IsNullOrEmpty(targetFramework))
+            //  IncludeProjectNameInArtifactsPath is likely to be true if UseArtifactsOutput was set in Directory.Build.props, and hence the intermediate folder should be in the artifacts path
+            if (UseArtifactsOutput && IncludeProjectNameInArtifactsPaths)
             {
-                targetFramework = TryGetTargetFramework();
+                string pivot = configuration.ToLowerInvariant();
+                if (IsMultiTargeted())
+                {
+                    pivot += "_" + targetFramework ?? TargetFramework;
+                }
+                if (string.IsNullOrEmpty(runtimeIdentifier))
+                {
+                    runtimeIdentifier = RuntimeIdentifier;
+                }
+                if (!string.IsNullOrEmpty(runtimeIdentifier))
+                {
+                    pivot += "_" + runtimeIdentifier;
+                }
+                return Path.Combine(ArtifactsPath, "obj", Path.GetFileNameWithoutExtension(ProjectPath), pivot);
             }
 
+            targetFramework = targetFramework ?? TargetFramework;
             configuration = configuration ?? string.Empty;
             runtimeIdentifier = runtimeIdentifier ?? string.Empty;
 
@@ -247,9 +269,9 @@ namespace Microsoft.NET.TestFramework
 
         public string GetPackageDirectory(string configuration = "Debug")
         {
-            if (UsesStandardOutputPaths())
+            if (UseArtifactsOutput)
             {
-                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", "package", configuration.ToLowerInvariant());
+                return System.IO.Path.Combine(ArtifactsPath, "package", configuration.ToLowerInvariant());
             }
             else
             {

@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli.Clean.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputFolder = new DirectoryInfo(OutputPathCalculator.FromTestAsset(testInstance.Path).GetOutputDirectory(configuration: configuration, runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64"));
+            var outputFolder = new DirectoryInfo(OutputPathCalculator.FromProject(testInstance.Path).GetOutputDirectory(configuration: configuration, runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64"));
 
             outputFolder.Should().NotBeEmpty();
 

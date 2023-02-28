@@ -49,7 +49,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public string TargetFrameworkProfile { get; set; }
 
-        public bool? UseStandardOutputPaths { get; set; }
+        public bool UseArtifactsOutput { get; set; }
+
+        public bool UseDirectoryBuildPropsForArtifactsOutput { get; set; }
 
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 
@@ -244,6 +246,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             foreach (var additionalProperty in AdditionalProperties)
             {
                 propertyGroup.Add(new XElement(ns + additionalProperty.Key, additionalProperty.Value));
+            }
+
+            if (UseArtifactsOutput && !UseDirectoryBuildPropsForArtifactsOutput)
+            {
+                propertyGroup.Add(new XElement(ns + "UseArtifactsOutput", "true"));
             }
 
             if (AdditionalItems.Any())
@@ -504,7 +511,7 @@ namespace {safeThisName}
 
         private OutputPathCalculator GetOutputPathCalculator(string testRoot)
         {
-            return OutputPathCalculator.FromTestProject(Path.Combine(testRoot, Name, Name + ".csproj"), this);
+            return OutputPathCalculator.FromProject(Path.Combine(testRoot, Name, Name + ".csproj"), this);
         }
 
         public string GetOutputDirectory(string testRoot, string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")

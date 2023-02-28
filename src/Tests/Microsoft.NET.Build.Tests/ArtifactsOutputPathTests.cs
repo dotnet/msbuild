@@ -19,16 +19,17 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-
 namespace Microsoft.NET.Build.Tests
 {
+    using ArtifactsTestExtensions;
+
     public class ArtifactsOutputPathTests : SdkTest
     {
         public ArtifactsOutputPathTests(ITestOutputHelper log) : base(log)
         {
         }
 
-        (List<TestProject> testProjects, TestAsset testAsset) GetTestProjects(bool setUseArtifactsOutputInProject, [CallerMemberName] string callingMethod = "")
+        (List<TestProject> testProjects, TestAsset testAsset) GetTestProjects(bool useDirectoryBuildProps, [CallerMemberName] string callingMethod = "")
         {
             var testProject1 = new TestProject()
             {
@@ -52,17 +53,15 @@ namespace Microsoft.NET.Build.Tests
 
             List<TestProject> testProjects = new() { testProject1, testProject2, testLibraryProject };
 
-            if (setUseArtifactsOutputInProject)
+            foreach (var testProject in testProjects)
             {
-                foreach (var testProject in testProjects)
-                {
-                    testProject.AdditionalProperties["UseArtifactsOutput"] = "true";
-                }
+                testProject.UseArtifactsOutput = true;
+                testProject.UseDirectoryBuildPropsForArtifactsOutput = useDirectoryBuildProps;
             }
 
-            var testAsset = _testAssetsManager.CreateTestProjects(testProjects, callingMethod: callingMethod, identifier: setUseArtifactsOutputInProject.ToString());
+            var testAsset = _testAssetsManager.CreateTestProjects(testProjects, callingMethod: callingMethod, identifier: useDirectoryBuildProps.ToString());
 
-            if (!setUseArtifactsOutputInProject)
+            if (useDirectoryBuildProps)
             {
                 File.WriteAllText(Path.Combine(testAsset.Path, "Directory.Build.props"),
                    """
@@ -80,21 +79,23 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ItUsesRootOutputPathForBuild(bool setUseArtifactsOutputInProject)
+        public void ItUsesArtifactsOutputPathForBuild(bool useDirectoryBuildProps)
         {
-            var (testProjects, testAsset) = GetTestProjects(setUseArtifactsOutputInProject);
+            var (testProjects, testAsset) = GetTestProjects(useDirectoryBuildProps);
 
             new DotnetCommand(Log, "build")
                 .WithWorkingDirectory(testAsset.Path)
+                .SetEnvironmentVariables(useDirectoryBuildProps)
                 .Execute()
                 .Should()
                 .Pass();
 
-            ValidateIntermediatePaths(testAsset, testProjects, setUseArtifactsOutputInProject);
+            ValidateIntermediatePaths(testAsset, testProjects, useDirectoryBuildProps);
 
             foreach (var testProject in testProjects)
             {
-                new FileInfo(Path.Combine(testAsset.TestRoot, ".artifacts", "bin", testProject.Name, "debug", testProject.Name + ".dll"))
+                OutputPathCalculator outputPathCalculator = OutputPathCalculator.FromProject(Path.Combine(testAsset.Path, testProject.Name), testProject);
+                new FileInfo(Path.Combine(outputPathCalculator.GetOutputDirectory(), testProject.Name + ".dll"))
                     .Should()
                     .Exist();
             }
@@ -103,25 +104,26 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ItUsesRootOutputPathForPublish(bool setRootOutputInProject)
+        public void ItUsesArtifactsOutputPathForPublish(bool useDirectoryBuildProps)
         {
-            var (testProjects, testAsset) = GetTestProjects(setRootOutputInProject);
+            var (testProjects, testAsset) = GetTestProjects(useDirectoryBuildProps);
 
             new DotnetCommand(Log, "publish")
                 .WithWorkingDirectory(testAsset.Path)
+                .SetEnvironmentVariables(useDirectoryBuildProps)
                 .Execute()
                 .Should()
                 .Pass();
 
-            ValidateIntermediatePaths(testAsset, testProjects, setRootOutputInProject, "release");
+            ValidateIntermediatePaths(testAsset, testProjects, useDirectoryBuildProps, "release");
 
             foreach (var testProject in testProjects)
             {
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "build", testProject.Name, "release", testProject.Name + ".dll"))
+                OutputPathCalculator outputPathCalculator = OutputPathCalculator.FromProject(Path.Combine(testAsset.Path, testProject.Name), testProject);
+                new FileInfo(Path.Combine(outputPathCalculator.GetOutputDirectory(configuration: "release"), testProject.Name + ".dll"))
                     .Should()
                     .Exist();
-
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "publish", testProject.Name, "release", testProject.Name + ".dll"))
+                new FileInfo(Path.Combine(outputPathCalculator.GetPublishDirectory(configuration: "release"), testProject.Name + ".dll"))
                     .Should()
                     .Exist();
             }
@@ -130,35 +132,36 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ItUsesRootOutputPathForPack(bool setRootOutputInProject)
+        public void ItUsesRootOutputPathForPack(bool useDirectoryBuildProps)
         {
-            var (testProjects, testAsset) = GetTestProjects(setRootOutputInProject);
+            var (testProjects, testAsset) = GetTestProjects(useDirectoryBuildProps);
 
             new DotnetCommand(Log, "pack")
                 .WithWorkingDirectory(testAsset.Path)
+                .SetEnvironmentVariables(useDirectoryBuildProps)
                 .Execute()
                 .Should()
                 .Pass();
 
-            ValidateIntermediatePaths(testAsset, testProjects, setRootOutputInProject, "release");
+            ValidateIntermediatePaths(testAsset, testProjects, useDirectoryBuildProps, "release");
 
             foreach (var testProject in testProjects)
             {
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "build", testProject.Name, "release", testProject.Name + ".dll"))
+                OutputPathCalculator outputPathCalculator = OutputPathCalculator.FromProject(Path.Combine(testAsset.Path, testProject.Name), testProject);
+                new FileInfo(Path.Combine(outputPathCalculator.GetOutputDirectory(configuration: "release"), testProject.Name + ".dll"))
                     .Should()
                     .Exist();
-
-                new FileInfo(Path.Combine(testAsset.TestRoot, "artifacts", "package", "release", testProject.Name + ".1.0.0.nupkg"))
+                new FileInfo(Path.Combine(outputPathCalculator.GetPackageDirectory(configuration: "release"), testProject.Name + ".1.0.0.nupkg"))
                     .Should()
                     .Exist();
             }
         }
 
-        void ValidateIntermediatePaths(TestAsset testAsset, IEnumerable<TestProject> testProjects, bool setRootOutputInProject, string configuration = "debug")
+        void ValidateIntermediatePaths(TestAsset testAsset, IEnumerable<TestProject> testProjects, bool useDirectoryBuildProps, string configuration = "debug")
         {
             foreach (var testProject in testProjects)
             {
-                if (setRootOutputInProject)
+                if (!useDirectoryBuildProps)
                 {
                     new DirectoryInfo(Path.Combine(testAsset.TestRoot, testProject.Name))
                         .Should()
@@ -182,6 +185,31 @@ namespace Microsoft.NET.Build.Tests
                         .Should()
                         .Exist();
                 };
+            }
+        }
+
+        
+
+    }
+
+    namespace ArtifactsTestExtensions
+    {
+        static class Extensions
+        {
+            public static TestCommand SetEnvironmentVariables(this TestCommand command, bool useDirectoryBuildProps)
+            {
+                //  There is an empty Directory.Build.props file in the test execution root, to stop other files further up in the repo from
+                //  impacting the tests.  So if a project set UseArtifactsOutput to true, the logic would find that file and put the output
+                //  in that folder.  To simulate the situation where there is no Directory.Build.props, we turn it off via an environment
+                //  variable.
+                if (!useDirectoryBuildProps)
+                {
+                    return command.WithEnvironmentVariable("ImportDirectoryBuildProps", "false");
+                }
+                else
+                {
+                    return command;
+                }
             }
         }
     }

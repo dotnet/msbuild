@@ -71,7 +71,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             buildCommand.Execute()
                 .Should().Pass();
 
-            var buildOutputDirectory = OutputPathCalculator.FromTestAsset(Path.Combine(testInstance.TestRoot, "blazorwasm")).GetOutputDirectory();
+            var buildOutputDirectory = OutputPathCalculator.FromProject(Path.Combine(testInstance.TestRoot, "blazorwasm")).GetOutputDirectory();
 
             var serviceWorkerAssetsManifest = Path.Combine(buildOutputDirectory, "wwwroot", "custom-service-worker-assets.js");
             // Trim prefix 'self.assetsManifest = ' and suffix ';'

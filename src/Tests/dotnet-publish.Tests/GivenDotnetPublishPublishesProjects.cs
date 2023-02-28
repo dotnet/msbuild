@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
-            var outputDll = Path.Combine(OutputPathCalculator.FromTestAsset(testProjectDirectory).GetPublishDirectory(configuration: configuration), $"{testAppName}.dll");
+            var outputDll = Path.Combine(OutputPathCalculator.FromProject(testProjectDirectory).GetPublishDirectory(configuration: configuration), $"{testAppName}.dll");
 
             new DotnetCommand(Log)
                 .Execute(outputDll)
@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
-            return new DirectoryInfo(OutputPathCalculator.FromTestAsset(testProjectDirectory).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid));
+            return new DirectoryInfo(OutputPathCalculator.FromProject(testProjectDirectory).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid));
         }
 
         [Fact]
@@ -331,7 +331,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
-            var outputProgram = Path.Combine(OutputPathCalculator.FromTestAsset(rootDir).GetPublishDirectory(configuration: configuration), $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(OutputPathCalculator.FromProject(rootDir).GetPublishDirectory(configuration: configuration), $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
@@ -383,7 +383,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
-            var outputProgram = Path.Combine(OutputPathCalculator.FromTestAsset(rootPath).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid), $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(OutputPathCalculator.FromProject(rootPath).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid), $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()

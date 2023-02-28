@@ -79,7 +79,7 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             if (TestAsset != null)
             {
-                return new DirectoryInfo(OutputPathCalculator.FromTestAsset(ProjectFile, TestAsset).GetOutputDirectory(targetFramework, configuration, runtimeIdentifier));
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetOutputDirectory(targetFramework, configuration, runtimeIdentifier));
             }
 
             targetFramework = targetFramework ?? string.Empty;
@@ -94,7 +94,7 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             if (TestAsset != null)
             {
-                return new DirectoryInfo(OutputPathCalculator.FromTestAsset(ProjectFile, TestAsset).GetIntermediateDirectory(targetFramework, configuration, runtimeIdentifier));
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetIntermediateDirectory(targetFramework, configuration, runtimeIdentifier));
             }
 
             targetFramework = targetFramework ?? string.Empty;
@@ -109,7 +109,7 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             if (TestAsset != null)
             {
-                return new DirectoryInfo(OutputPathCalculator.FromTestAsset(ProjectFile, TestAsset).GetPackageDirectory(configuration));
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetPackageDirectory(configuration));
             }
 
             string output = Path.Combine(ProjectRootPath, "bin", configuration);

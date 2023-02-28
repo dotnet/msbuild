@@ -28,7 +28,7 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             if (TestAsset != null)
             {
-                return new DirectoryInfo(OutputPathCalculator.FromTestAsset(ProjectFile, TestAsset).GetPublishDirectory(targetFramework, configuration, runtimeIdentifier));
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetPublishDirectory(targetFramework, configuration, runtimeIdentifier));
             }
 
             if (string.IsNullOrEmpty(targetFramework))

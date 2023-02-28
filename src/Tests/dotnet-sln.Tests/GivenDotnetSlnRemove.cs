@@ -619,7 +619,7 @@ EndGlobal
 
             var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";
 
-            var outputCalculator = OutputPathCalculator.FromTestAsset(Path.Combine(projectDirectory, "App"));
+            var outputCalculator = OutputPathCalculator.FromProject(Path.Combine(projectDirectory, "App"));
 
             new DirectoryInfo(outputCalculator.GetOutputDirectory(configuration: "Debug")).Should().NotExist(reasonString);
 

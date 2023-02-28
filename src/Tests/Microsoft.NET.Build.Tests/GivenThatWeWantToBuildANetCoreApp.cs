@@ -607,12 +607,6 @@ public static class Program
                 .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase)
                 ;
 
-            if (crossTarget)
-            {
-                //  Let the GetOutputDirectory logic know that this project doesn't use the artifacts output format
-                testProject.UseStandardOutputPaths = false;
-            }
-
             var outputDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().NotHaveFile("Humanizer.resources.dll");
             outputDirectory.Should().HaveFile(Path.Combine("fr", "Humanizer.resources.dll"));

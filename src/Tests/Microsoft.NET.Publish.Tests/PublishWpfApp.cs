@@ -57,7 +57,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDirectory = OutputPathCalculator.FromTestAsset(Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj")).GetPublishDirectory(
+            var publishDirectory = OutputPathCalculator.FromProject(Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj")).GetPublishDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid);
 

@@ -832,12 +832,12 @@ EndGlobal
 
             var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";
 
-            var appPathCalculator = OutputPathCalculator.FromTestAsset(Path.Combine(projectDirectory, "App", "App.csproj"));
+            var appPathCalculator = OutputPathCalculator.FromProject(Path.Combine(projectDirectory, "App", "App.csproj"));
             new DirectoryInfo(appPathCalculator.GetOutputDirectory(configuration: "Debug")).Should().NotExist(reasonString);
             new DirectoryInfo(appPathCalculator.GetOutputDirectory(configuration: "Release")).Should().Exist()
                 .And.HaveFile("App.dll");
 
-            var libPathCalculator = OutputPathCalculator.FromTestAsset(Path.Combine(projectDirectory, "Lib", "Lib.csproj"));
+            var libPathCalculator = OutputPathCalculator.FromProject(Path.Combine(projectDirectory, "Lib", "Lib.csproj"));
             new DirectoryInfo(libPathCalculator.GetOutputDirectory(configuration: "Debug")).Should().NotExist(reasonString);
             new DirectoryInfo(libPathCalculator.GetOutputDirectory(configuration: "Release")).Should().Exist()
                 .And.HaveFile("Lib.dll");

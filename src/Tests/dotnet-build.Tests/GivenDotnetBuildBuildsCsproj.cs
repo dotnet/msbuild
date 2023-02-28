@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputPathCalculator = OutputPathCalculator.FromTestAsset(testInstance.Path);
+            var outputPathCalculator = OutputPathCalculator.FromProject(testInstance.Path);
 
             var outputDll = Path.Combine(outputPathCalculator.GetOutputDirectory(configuration: configuration), $"{testAppName}.dll");
 
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputDll = Directory.EnumerateFiles(
-                OutputPathCalculator.FromTestAsset(rootPath).GetOutputDirectory(configuration: configuration), "*.dll",
+                OutputPathCalculator.FromProject(rootPath).GetOutputDirectory(configuration: configuration), "*.dll",
                 SearchOption.TopDirectoryOnly)
                 .Single();
 

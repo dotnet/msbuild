@@ -53,7 +53,7 @@ namespace Microsoft.NET.TestFramework.Commands
             string targetFramework = null)
             : base(testAsset, "WriteValuesToFile", relativePathToProject: null)
         {
-            _targetFramework = targetFramework ?? OutputPathCalculator.FromTestAsset(ProjectFile, testAsset).TryGetTargetFramework();
+            _targetFramework = targetFramework ?? OutputPathCalculator.FromProject(ProjectFile, testAsset).TargetFramework;
 
             _valueName = valueName;
             _valueType = valueType;
