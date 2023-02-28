@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
@@ -10,15 +12,37 @@ namespace Microsoft.Build.Logging.LiveLogger
 {
     internal class LiveLogger : ILogger
     {
-        private Dictionary<int, ProjectNode> projects = new Dictionary<int, ProjectNode>();
+        private ConcurrentDictionary<int, ProjectNode> projects = new();
 
         private bool succeeded;
         private int startedProjects = 0;
         private int finishedProjects = 0;
-        private Dictionary<string, int> blockedProjects = new();
+        private ConcurrentDictionary<string, int> blockedProjects = new();
+
+        private Stopwatch? _stopwatch;
 
         public LoggerVerbosity Verbosity { get; set; }
         public string Parameters { get; set; }
+
+        /// <summary>
+        /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
+        /// </summary>
+        /// <remarks>
+        /// If LiveLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+        /// </remarks>
+        public static readonly string[] ConfigurableForwardingLoggerParameters =
+        {
+            "BUILDSTARTEDEVENT",
+            "BUILDFINISHEDEVENT",
+            "PROJECTSTARTEDEVENT",
+            "PROJECTFINISHEDEVENT",
+            "TARGETSTARTEDEVENT",
+            "TARGETFINISHEDEVENT",
+            "TASKSTARTEDEVENT",
+            "HIGHMESSAGEEVENT",
+            "WARNINGEVENT",
+            "ERROREVENT"
+        };
 
         public LiveLogger()
         {
@@ -27,21 +51,25 @@ namespace Microsoft.Build.Logging.LiveLogger
 
         public void Initialize(IEventSource eventSource)
         {
-            // Register for different events
-            // Started
+            // Start the stopwatch as soon as the logger is initialized to capture
+            // any time before the BuildStarted event
+            _stopwatch = Stopwatch.StartNew();
+            // Register for different events. Make sure that ConfigurableForwardingLoggerParameters are in sync with them.
+            // Started and Finished events  
             eventSource.BuildStarted += new BuildStartedEventHandler(eventSource_BuildStarted);
-            eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
-            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
-            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
-            // Finished
             eventSource.BuildFinished += new BuildFinishedEventHandler(eventSource_BuildFinished);
+            eventSource.ProjectStarted += new ProjectStartedEventHandler(eventSource_ProjectStarted);
             eventSource.ProjectFinished += new ProjectFinishedEventHandler(eventSource_ProjectFinished);
+            eventSource.TargetStarted += new TargetStartedEventHandler(eventSource_TargetStarted);
             eventSource.TargetFinished += new TargetFinishedEventHandler(eventSource_TargetFinished);
-            // eventSource.TaskFinished += new TaskFinishedEventHandler(eventSource_TaskFinished);
-            // Raised
+            eventSource.TaskStarted += new TaskStartedEventHandler(eventSource_TaskStarted);
+
+            // Messages/Warnings/Errors
+            // BuildMessageEventHandler event handler below currently process only High importance events. 
             eventSource.MessageRaised += new BuildMessageEventHandler(eventSource_MessageRaised);
             eventSource.WarningRaised += new BuildWarningEventHandler(eventSource_WarningRaised);
             eventSource.ErrorRaised += new BuildErrorEventHandler(eventSource_ErrorRaised);
+
             // Cancelled
             Console.CancelKeyPress += new ConsoleCancelEventHandler(console_CancelKeyPressed);
 
@@ -135,16 +163,17 @@ namespace Microsoft.Build.Logging.LiveLogger
             int id = e.BuildEventContext!.ProjectInstanceId;
 
             // If id does not exist...
-            if (!projects.ContainsKey(id))
+            projects.GetOrAdd(id, (_) =>
             {
                 // Add project
                 ProjectNode node = new(e)
                 {
                     ShouldRerender = true,
                 };
-                projects[id] = node;
                 UpdateFooter();
-            }
+
+                return node;
+            });
         }
 
         private void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
@@ -212,21 +241,6 @@ namespace Microsoft.Build.Logging.LiveLogger
                 if (line is not null)
                 {
                     blockedProjects[e.ProjectFile] = line.Id;
-                }
-            }
-        }
-
-        private void eventSource_TaskFinished(object sender, TaskFinishedEventArgs e)
-        {
-            if (e.TaskName.Equals("MSBuild"))
-            {
-                if (blockedProjects.TryGetValue(e.ProjectFile, out int lineId))
-                {
-                    TerminalBuffer.DeleteLine(lineId);
-                    if (projects.TryGetValue(e.BuildEventContext!.ProjectInstanceId, out ProjectNode? node))
-                    {
-                        node.ShouldRerender = true;
-                    }
                 }
             }
         }
@@ -306,20 +320,24 @@ namespace Microsoft.Build.Logging.LiveLogger
                 Console.WriteLine();
             }
 
-            // Emmpty line
+            // Empty line
             Console.WriteLine();
-            if (succeeded)
-            {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build succeeded.", ANSIBuilder.Formatting.ForegroundColor.Green));
-                Console.WriteLine($"\t{warningCount} Warning(s)");
-                Console.WriteLine($"\t{errorCount} Error(s)");
-            }
-            else
-            {
-                Console.WriteLine(ANSIBuilder.Formatting.Color("Build failed.", ANSIBuilder.Formatting.ForegroundColor.Red));
-                Console.WriteLine($"\t{warningCount} Warnings(s)");
-                Console.WriteLine($"\t{errorCount} Errors(s)");
-            }
+
+            Debug.Assert(_stopwatch is not null, $"Expected {nameof(_stopwatch)} to be initialized long before Shutdown()");
+            TimeSpan buildDuration = _stopwatch!.Elapsed;
+
+            string prettyDuration = buildDuration.TotalHours > 1.0 ?
+                buildDuration.ToString(@"h\:mm\:ss") :
+                buildDuration.ToString(@"m\:ss");
+
+            string status = succeeded ?
+                ANSIBuilder.Formatting.Color("succeeded", ANSIBuilder.Formatting.ForegroundColor.Green) :
+                ANSIBuilder.Formatting.Color("failed", ANSIBuilder.Formatting.ForegroundColor.Red);
+
+            Console.WriteLine($"Build {status} in {prettyDuration}");
+            Console.WriteLine($"\t{warningCount} Warnings(s)");
+            Console.WriteLine($"\t{errorCount} Errors(s)");
+            Console.WriteLine();
         }
     }
 }

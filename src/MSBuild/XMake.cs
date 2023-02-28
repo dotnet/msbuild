@@ -224,7 +224,7 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
-            KnownTelemetry.BuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -309,18 +309,18 @@ namespace Microsoft.Build.CommandLine
                     IsInteractiveBuild(commandLineSwitches))
                 {
                     canRunServer = false;
-                    if (KnownTelemetry.BuildTelemetry != null)
+                    if (KnownTelemetry.PartialBuildTelemetry != null)
                     {
-                        KnownTelemetry.BuildTelemetry.ServerFallbackReason = "Arguments";
+                        KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
                     }
                 }
             }
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace("Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {0}", ex);
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
+                    KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
                 }
                 canRunServer = false;
             }
@@ -631,7 +631,7 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build, if not initialized already
-            KnownTelemetry.BuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
+            KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
 
             // Indicate to the engine that it can toss extraneous file content
             // when it loads microsoft.*.targets. We can't do this in the general case,
@@ -3253,8 +3253,12 @@ namespace Microsoft.Build.CommandLine
                 originalVerbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
                 verbosity = originalVerbosity;
             }
+            var loggers = new List<ILogger>();
 
-            var loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity);
+            var outVerbosity = verbosity;
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
+
+            ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
 
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
@@ -3264,7 +3268,7 @@ namespace Microsoft.Build.CommandLine
                 (liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true" || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
                 && DoesEnvironmentSupportLiveLogger())
             {
-                ProcessLiveLogger(noConsoleLogger, loggers);
+                ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
             }
             else
             {
@@ -3275,10 +3279,10 @@ namespace Microsoft.Build.CommandLine
 
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
-
             // TOOD: Review
             // ProcessLiveLogger(noConsoleLogger, loggers);
+
+            verbosity = outVerbosity;
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
 
@@ -3454,7 +3458,7 @@ namespace Microsoft.Build.CommandLine
             }
             // If terminal is dumb
             if (
-                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.GetEnvironmentVariable("WT_SESSION") == "")
+                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WT_SESSION")))
                 || Environment.GetEnvironmentVariable("TERM") == "dumb")
             {
                 messagesToLogInBuildLoggers.Add(
@@ -3466,13 +3470,27 @@ namespace Microsoft.Build.CommandLine
 
         private static void ProcessLiveLogger(
             bool noConsoleLogger,
+            List<DistributedLoggerRecord> distributedLoggerRecords,
+            int cpuCount,
             List<ILogger> loggers)
         {
-            // Check for flags and env variables
             if (!noConsoleLogger)
             {
-                LiveLogger l = new LiveLogger();
-                loggers.Add(l);
+                // A central logger will be created for both single proc and multiproc.
+                LiveLogger logger = new LiveLogger();
+
+                // Check to see if there is a possibility we will be logging from an out-of-proc node.
+                // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
+                if (cpuCount == 1 && !Traits.Instance.InProcNodeDisabled)
+                {
+                    loggers.Add(logger);
+                }
+                else
+                {
+                    // For performance, register this logger using the forwarding logger mechanism.
+                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", LiveLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    distributedLoggerRecords.Add(forwardingLoggerRecord);
+                }
             }
         }
 
@@ -3664,10 +3682,8 @@ namespace Microsoft.Build.CommandLine
         /// Figures out which additional loggers are going to listen to build events.
         /// </summary>
         /// <returns>List of loggers.</returns>
-        private static List<ILogger> ProcessLoggerSwitch(string[] parameters, LoggerVerbosity verbosity)
+        private static void ProcessLoggerSwitch(string[] parameters, List<ILogger> loggers, LoggerVerbosity verbosity)
         {
-            var loggers = new List<ILogger>();
-
             foreach (string parameter in parameters)
             {
                 string unquotedParameter = QuotingUtilities.Unquote(parameter);
@@ -3679,8 +3695,6 @@ namespace Microsoft.Build.CommandLine
                     loggers.Add(logger);
                 }
             }
-
-            return loggers;
         }
 
         /// <summary>

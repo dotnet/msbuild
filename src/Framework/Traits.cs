@@ -104,6 +104,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Log all environment variables whether or not they are used in a build in the binary log.
         /// </summary>
+        public readonly bool LogAllAssemblyLoads = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLASSEMBLYLOADS"));
+
+        /// <summary>
+        /// Log all environment variables whether or not they are used in a build in the binary log.
+        /// </summary>
         public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"))
 #if !TASKHOST
             && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4)

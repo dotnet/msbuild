@@ -52,6 +52,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_MainReferenceTargetForPublish Condition="'$(NoBuild)' != 'true'">$(_MainReferenceTargetForBuild)</_MainReferenceTargetForPublish>
     <ProjectReferenceTargetsForPublish>GetTargetFrameworks;$(_MainReferenceTargetForPublish);GetNativeManifest;GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
 
+    <!-- When DeployOnBuild=true, the Publish target is hooked to the Build target -->
+    <ProjectReferenceTargetsForBuild Condition="'$(DeployOnBuild)' == 'true'">$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForRebuild Condition="'$(DeployOnBuild)' == 'true'">$(ProjectReferenceTargetsForRebuild);$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForRebuild>
+
     <ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)</ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>
   </PropertyGroup>
 
@@ -59,7 +63,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForBuildInOuterBuild)' != '' " OuterBuild="true" />
     <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworks" OuterBuild="true" SkipNonexistentTargets="true" />
     <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
-    
+
     <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForCleanInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForCleanInOuterBuild)' != '' " OuterBuild="true" />
     <ProjectReferenceTargets Include="Clean" Targets="GetTargetFrameworks" OuterBuild="true" SkipNonexistentTargets="true" />
     <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
