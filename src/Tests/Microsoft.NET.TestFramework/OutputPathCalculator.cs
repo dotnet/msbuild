@@ -185,7 +185,7 @@ namespace Microsoft.NET.TestFramework
             {
                 targetFramework = targetFramework ?? TargetFramework;
                 configuration = configuration ?? string.Empty;
-                runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier;
+                runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
 
                 if (IsSdkProject)
                 {
@@ -231,7 +231,7 @@ namespace Microsoft.NET.TestFramework
             {
                 targetFramework = targetFramework ?? TargetFramework;
                 configuration = configuration ?? string.Empty;
-                runtimeIdentifier = runtimeIdentifier ?? string.Empty;
+                runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
 
                 string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration, targetFramework, runtimeIdentifier, "publish");
                 return output;
@@ -261,7 +261,7 @@ namespace Microsoft.NET.TestFramework
 
             targetFramework = targetFramework ?? TargetFramework;
             configuration = configuration ?? string.Empty;
-            runtimeIdentifier = runtimeIdentifier ?? string.Empty;
+            runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
 
             string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "obj", configuration, targetFramework, runtimeIdentifier);
             return output;
