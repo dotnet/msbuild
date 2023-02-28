@@ -140,12 +140,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                try
-                {
-                    // Parse the raw importance string into a strongly typed enumeration.  
-                    messageImportance = (MessageImportance)Enum.Parse(typeof(MessageImportance), Importance, ignoreCase: true);
-                }
-                catch (ArgumentException)
+                if (!Enum.TryParse(Importance, ignoreCase: true, out messageImportance))
                 {
                     Log.LogErrorWithCodeFromResources("Message.InvalidImportance", Importance);
                     return false;
@@ -229,6 +224,7 @@ namespace Microsoft.Build.Tasks
 
             Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
 
+            // Ignore touching the disk when FailIfNotIncremental.
             if (FailIfNotIncremental)
             {
                 return true;
