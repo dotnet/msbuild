@@ -517,11 +517,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_GET_COMMANDLINE
                 @$"c:\bin\msbuild.exe {indicator} ")
 #else
-<<<<<<< HEAD
-                new[] { @"c:\bin\msbuild.exe", indicator }
-=======
                 new[] { @"c:\bin\msbuild.exe", indicator })
->>>>>>> upstream/main
 #endif
             .ShouldBe(MSBuildApp.ExitType.Success);
         }
