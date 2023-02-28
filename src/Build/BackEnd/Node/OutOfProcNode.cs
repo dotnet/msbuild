@@ -153,10 +153,11 @@ namespace Microsoft.Build.Execution
 
             // Create a factory for the out-of-proc SDK resolver service which can pass our SendPacket delegate to be used for sending packets to the main node
             OutOfProcNodeSdkResolverServiceFactory sdkResolverServiceFactory = new OutOfProcNodeSdkResolverServiceFactory(SendPacket);
-
             ((IBuildComponentHost)this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
-
             _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
+            ((IBuildComponentHost)this).RegisterFactory(
+                BuildComponentType.FileAccessManager,
+                (componentType) => OutOfProcNodeFileAccessManager.CreateComponent(componentType, SendPacket));
 
             if (s_projectRootElementCacheBase == null)
             {

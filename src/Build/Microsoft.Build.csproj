@@ -159,8 +159,11 @@
     <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
     <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
-    <Compile Include="BackEnd\Components\FileAccesses\FileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\IFileAccessManager.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\FileAccessManager.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\FileAccessReport.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\OutOfProcNodeFileAccessManager.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\ProcessReport.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />

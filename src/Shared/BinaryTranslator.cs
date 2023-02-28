@@ -397,6 +397,83 @@ namespace Microsoft.Build.BackEnd
                     _reader.ReadInt32());
             }
 
+            /// <inheritdoc/>
+            public void Translate(ref FileAccessData fileAccessData)
+            {
+                ReportedFileOperation reportedFileOperation = default;
+                RequestedAccess requestedAccess = default;
+                uint processId = default;
+                uint error = default;
+                DesiredAccess desiredAccess = default;
+                FlagsAndAttributes flagsAndAttributes = default;
+                string path = default;
+#nullable enable
+                string? processArgs = default;
+#nullable disable
+                bool isAnAugmentedFileAccess = default;
+                TranslateEnum(ref reportedFileOperation, (int)reportedFileOperation);
+                TranslateEnum(ref requestedAccess, (int)requestedAccess);
+                Translate(ref processId);
+                Translate(ref error);
+                TranslateEnum(ref desiredAccess, (int)desiredAccess);
+                TranslateEnum(ref flagsAndAttributes, (int)flagsAndAttributes);
+                Translate(ref path);
+                Translate(ref processArgs);
+                Translate(ref isAnAugmentedFileAccess);
+                fileAccessData = new FileAccessData(
+                    reportedFileOperation,
+                    requestedAccess,
+                    processId,
+                    error,
+                    desiredAccess,
+                    flagsAndAttributes,
+                    path,
+                    processArgs,
+                    isAnAugmentedFileAccess);
+            }
+
+            /// <inheritdoc/>
+            public void Translate(ref List<FileAccessData> fileAccessDataList)
+            {
+                if (!TranslateNullable(fileAccessDataList))
+                {
+                    return;
+                }
+
+                int count = default;
+                Translate(ref count);
+                fileAccessDataList = new List<FileAccessData>(count);
+                for (int i = 0; i < count; i++)
+                {
+                    FileAccessData fileAccessData = default;
+                    Translate(ref fileAccessData);
+                    fileAccessDataList.Add(fileAccessData);
+                }
+            }
+
+            /// <inheritdoc/>
+            public void Translate(ref ProcessData processData)
+            {
+                string processName = default;
+                uint processId = default;
+                uint parentProcessId = default;
+                DateTime creationDateTime = default;
+                DateTime exitDateTime = default;
+                uint exitCode = default;
+                Translate(ref processName);
+                Translate(ref processId);
+                Translate(ref parentProcessId);
+                Translate(ref creationDateTime);
+                Translate(ref exitDateTime);
+                Translate(ref exitCode);
+                processData = new ProcessData(
+                    processName,
+                    processId,
+                    parentProcessId,
+                    creationDateTime,
+                    exitDateTime,
+                    exitCode);
+            }
 #endif
 
             /// <summary>
@@ -1054,6 +1131,60 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.TaskId);
             }
 
+            /// <inheritdoc/>
+            public void Translate(ref FileAccessData fileAccessData)
+            {
+                ReportedFileOperation reportedFileOperation = fileAccessData.Operation;
+                RequestedAccess requestedAccess = fileAccessData.RequestedAccess;
+                uint processId = fileAccessData.ProcessId;
+                uint error = fileAccessData.Error;
+                DesiredAccess desiredAccess = fileAccessData.DesiredAccess;
+                FlagsAndAttributes flagsAndAttributes = fileAccessData.FlagsAndAttributes;
+                string path = fileAccessData.Path;
+#nullable enable
+                string? processArgs = fileAccessData.ProcessArgs;
+#nullable disable
+                bool isAnAugmentedFileAccess = fileAccessData.IsAnAugmentedFileAccess;
+                TranslateEnum(ref reportedFileOperation, (int)reportedFileOperation);
+                TranslateEnum(ref requestedAccess, (int)requestedAccess);
+                Translate(ref processId);
+                Translate(ref error);
+                TranslateEnum(ref desiredAccess, (int)desiredAccess);
+                TranslateEnum(ref flagsAndAttributes, (int)flagsAndAttributes);
+                Translate(ref path);
+                Translate(ref processArgs);
+                Translate(ref isAnAugmentedFileAccess);
+            }
+
+            /// <inheritdoc/>
+            public void Translate(ref List<FileAccessData> fileAccessDataList)
+            {
+                if (!TranslateNullable(fileAccessDataList))
+                {
+                    return;
+                }
+
+                int count = fileAccessDataList.Count;
+                Translate(ref count);
+                fileAccessDataList.ForEach(fileAccessData => Translate(ref fileAccessData));
+            }
+
+            /// <inheritdoc/>
+            public void Translate(ref ProcessData processData)
+            {
+                string processName = processData.ProcessName;
+                uint processId = processData.ProcessId;
+                uint parentProcessId = processData.ParentProcessId;
+                DateTime creationDateTime = processData.CreationDateTime;
+                DateTime exitDateTime = processData.ExitDateTime;
+                uint exitCode = processData.ExitCode;
+                Translate(ref processName);
+                Translate(ref processId);
+                Translate(ref parentProcessId);
+                Translate(ref creationDateTime);
+                Translate(ref exitDateTime);
+                Translate(ref exitCode);
+            }
 #endif 
 
             /// <summary>

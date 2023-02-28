@@ -213,6 +213,16 @@ namespace Microsoft.Build.BackEnd
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
         ServerNodeBuildCancel = 0xF3,
+
+        /// <summary>
+        /// Message sent from a node reporting a file access.
+        /// </summary>
+        FileAccessReport,
+
+        /// <summary>
+        /// Message sent from a node reporting process data.
+        /// </summary>
+        ProcessReport,
     }
     #endregion
 

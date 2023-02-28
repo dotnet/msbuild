@@ -588,7 +588,9 @@ namespace Microsoft.Build.Execution
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfiguration, BuildRequestConfiguration.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfigurationResponse, BuildRequestConfigurationResponse.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildResult, BuildResult.FactoryForDeserialization, this);
+                _nodeManager.RegisterPacketHandler(NodePacketType.FileAccessReport, FileAccessReport.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+                _nodeManager.RegisterPacketHandler(NodePacketType.ProcessReport, ProcessReport.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResourceRequest, ResourceRequest.FactoryForDeserialization, this);
 
@@ -1568,6 +1570,16 @@ namespace Microsoft.Build.Execution
                         HandleNodeShutdown(node, shutdownPacket);
                         break;
 
+                    case NodePacketType.FileAccessReport:
+                        FileAccessReport fileAccessReport = ExpectPacketType<FileAccessReport>(packet, NodePacketType.FileAccessReport);
+                        HandleFileAccessReport(node, fileAccessReport);
+                        break;
+
+                    case NodePacketType.ProcessReport:
+                        ProcessReport processReport = ExpectPacketType<ProcessReport>(packet, NodePacketType.ProcessReport);
+                        HandleProcessReport(node, processReport);
+                        break;
+
                     default:
                         ErrorUtilities.ThrowInternalError("Unexpected packet received by BuildManager: {0}", packet.Type);
                         break;
@@ -2472,6 +2484,22 @@ namespace Microsoft.Build.Execution
 
             CheckForActiveNodesAndCleanUpSubmissions();
         }
+
+        /// <summary>
+        /// Report the received <paramref name="fileAccessReport"/> to the <see cref="FileAccessManager"/>.
+        /// </summary>
+        /// <param name="nodeId">The id of the node from which the <paramref name="fileAccessReport"/> was received.</param>
+        /// <param name="fileAccessReport">The file access to report to the <see cref="FileAccessManager"/>.</param>
+        private void HandleFileAccessReport(int nodeId, FileAccessReport fileAccessReport) =>
+            ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessReport.FileAccessData, nodeId);
+
+        /// <summary>
+        /// Report the received <paramref name="processReport"/> to the <see cref="FileAccessManager"/>.
+        /// </summary>
+        /// <param name="nodeId">The id of the node from which the <paramref name="processReport"/> was received.</param>
+        /// <param name="processReport">The process data to report to the <see cref="FileAccessManager"/>.</param>
+        private void HandleProcessReport(int nodeId, ProcessReport processReport) =>
+            ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportProcess(processReport.ProcessData, nodeId);
 
         /// <summary>
         /// If there are no more active nodes, cleans up any remaining submissions.
