@@ -37,6 +37,8 @@ using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 #nullable disable
 
@@ -715,9 +717,9 @@ namespace Microsoft.Build.CommandLine
                                     inputResultsCaches,
                                     outputResultsCache,
                                     commandLine))
-                            {
-                                exitType = ExitType.BuildError;
-                            }
+                        {
+                            exitType = ExitType.BuildError;
+                        }
                     } // end of build
 
                     DateTime t2 = DateTime.Now;
@@ -1244,7 +1246,7 @@ namespace Microsoft.Build.CommandLine
                             {
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new[]{ new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
                                 }
                                 else
                                 {
@@ -1512,7 +1514,7 @@ namespace Microsoft.Build.CommandLine
             Thread thisThread = Thread.CurrentThread;
 
             // Eliminate the complex script cultures from the language selection.
-            thisThread.CurrentUICulture = CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture();
+            thisThread.CurrentUICulture = GetExternalOverridenUILanguageIfSupportableWithEncoding() ?? CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture();
 
             // Determine if the language can be displayed in the current console codepage, otherwise set to US English
             int codepage;
@@ -1545,6 +1547,74 @@ namespace Microsoft.Build.CommandLine
             // see the .NET Core Notes in https://msdn.microsoft.com/en-us/library/system.diagnostics.process(v=vs.110).aspx
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
+        }
+
+        /// <summary>
+        /// The .NET SDK and Visual Studio both have environment variables that set a custom language. MSBuild should respect those variables.
+        /// To use the correspoding UI culture, in certain cases the console encoding must be changed. This function will change the encoding in these cases.
+        /// This code introduces a breaking change due to the encoding of the console being changed.
+        /// If the environment variables are undefined, this function should be a no-op.
+        /// </summary>
+        /// <returns>The custom language that was set by the user for an 'external' tool besides MSBuild.
+        /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns null if none are set.</returns>
+        private static CultureInfo GetExternalOverridenUILanguageIfSupportableWithEncoding()
+        {
+            CultureInfo externalLanguageSetting = GetExternalOverriddenUILanguage();
+            if (externalLanguageSetting != null)
+            {
+                if (
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && // Encoding is only an issue on Windows
+                    !externalLanguageSetting.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase) &&
+                    Environment.OSVersion.Version.Major >= 10 // UTF-8 is only officially supported on 10+.
+                    )
+                {
+                    // Setting both encodings causes a change in the CHCP, making it so we dont need to P-Invoke ourselves.
+                    Console.OutputEncoding = Encoding.UTF8;
+                    // If the InputEncoding is not set, the encoding will work in CMD but not in Powershell, as the raw CHCP page won't be changed.
+                    Console.InputEncoding = Encoding.UTF8;
+                    return externalLanguageSetting;
+                }
+                else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return externalLanguageSetting;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Look at UI language overrides that can be set by known external invokers. (DOTNET_CLI_UI_LANGUAGE and VSLANG).
+        /// Does NOT check System Locale or OS Display Language.
+        /// Ported from the .NET SDK: https://github.com/dotnet/sdk/src/Cli/Microsoft.DotNet.Cli.Utils/UILanguageOverride.cs.
+        /// </summary>
+        /// <returns>The custom language that was set by the user for an 'external' tool besides MSBuild.
+        /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns null if none are set.</returns>
+        private static CultureInfo GetExternalOverriddenUILanguage()
+        {
+            // DOTNET_CLI_UI_LANGUAGE=<culture name> is the main way for users to customize the CLI's UI language via the .NET SDK.
+            string dotnetCliLanguage = Environment.GetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE");
+            if (dotnetCliLanguage != null)
+            {
+                try
+                {
+                    return new CultureInfo(dotnetCliLanguage);
+                }
+                catch (CultureNotFoundException) { }
+            }
+
+            // VSLANG=<lcid> is set by Visual Studio.
+            string vsLang = Environment.GetEnvironmentVariable("VSLANG");
+            if (vsLang != null && int.TryParse(vsLang, out int vsLcid))
+            {
+                try
+                {
+                    return new CultureInfo(vsLcid);
+                }
+                catch (ArgumentOutOfRangeException) { }
+                catch (CultureNotFoundException) { }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -2406,7 +2476,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (parameter.Trim().Equals("NoBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    options = options with {Build = false};
+                    options = options with { Build = false };
                 }
                 else
                 {
@@ -2893,7 +2963,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 // if there are no project, solution filter, or solution files in the directory, we can't build
                 else if (actualProjectFiles.Count == 0 &&
-                         actualSolutionFiles.Count== 0 &&
+                         actualSolutionFiles.Count == 0 &&
                          solutionFilterFiles.Count == 0)
                 {
                     InitializationException.Throw("MissingProjectError", null, null, false);
@@ -3183,7 +3253,7 @@ namespace Microsoft.Build.CommandLine
 
             string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
 
-            BinaryLogger logger = new BinaryLogger {Parameters = arguments};
+            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
