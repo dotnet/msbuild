@@ -62,7 +62,7 @@ public class ParseContainerPropertiesTests
 
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
-        Assert.Contains(logs.Messages, m => m.Code == ErrorCodes.CONTAINER001 && m.Importance == global::Microsoft.Build.Framework.MessageImportance.High);
+        Assert.Contains(logs.Messages, m => m.Code == ErrorCodes.CONTAINER2007 && m.Importance == global::Microsoft.Build.Framework.MessageImportance.High);
     }
 
     [DockerDaemonAvailableFact]
@@ -79,7 +79,7 @@ public class ParseContainerPropertiesTests
         Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
 
         Assert.True(logs.Errors.Count > 0);
-        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER004);
+        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2008);
     }
 
     [DockerDaemonAvailableFact]
@@ -97,6 +97,6 @@ public class ParseContainerPropertiesTests
         Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
 
         Assert.True(logs.Errors.Count > 0);
-        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER005);
+        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2009);
     }
 }

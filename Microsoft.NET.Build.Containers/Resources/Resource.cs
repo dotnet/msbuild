@@ -5,19 +5,22 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
-using System.Runtime.CompilerServices;
-
-[assembly: NeutralResourcesLanguage("en")]
-[assembly: InternalsVisibleTo("Test.Microsoft.NET.Build.Containers")]
 
 namespace Microsoft.NET.Build.Containers.Resources
 {
     /// <summary>
     /// This class provides access to the assembly's resources.
     /// </summary>
+    /// <remarks>
+    /// Codes used for warnings/errors:
+    /// CONTAINER1xxx: HTTP or local daemon related failures
+    /// CONTAINER2xxx: Invalid/missing data related failures
+    /// CONTAINER3xxx: Docker process related failures
+    /// CONTAINER4xxx: Invalid command line parameters
+    /// </remarks>
     internal static class Resource
     {
-        private static readonly ResourceManager resourceManager = new ResourceManager("Microsoft.NET.Build.Containers.Resources.Strings", typeof(Resource).GetTypeInfo().Assembly);
+        private static readonly ResourceManager resourceManager = new ResourceManager(typeof(Strings).FullName!, typeof(Resource).GetTypeInfo().Assembly);
 
         /// <summary>
         /// Looks up a resource value for a particular name. Looks in the CurrentUICulture, and if not found, all parent CultureInfos.
@@ -28,7 +31,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         {
             string? resource = resourceManager.GetString(name, CultureInfo.CurrentUICulture);
 
-            Debug.Assert(resource != null, $"Resource with name {name} not found");
+            Debug.Assert(resource != null, $"Resource with name {name} was not found");
 
             return resource ?? $"<{name}>";
         }
@@ -42,7 +45,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         {
             string? resource = resourceManager.GetString(name, CultureInfo.CurrentUICulture);
 
-            Debug.Assert(resource != null, $"Resource with name {name} not found");
+            Debug.Assert(resource != null, $"Resource with name {name} was not found");
 
             return resource is null ?
                 $"<{name}>" :

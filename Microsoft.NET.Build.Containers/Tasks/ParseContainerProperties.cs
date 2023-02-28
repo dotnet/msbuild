@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
+using static Microsoft.NET.Build.Containers.KnownStrings;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
@@ -84,7 +85,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
         string[] validTags;
         if (!String.IsNullOrEmpty(ContainerImageTag) && ContainerImageTags.Length >= 1)
         {
-            Log.LogError(null, "CONTAINER005", "Container.AmbiguousTags", null, 0, 0, 0, 0, $"Both {nameof(ContainerImageTag)} and {nameof(ContainerImageTags)} were provided, but only one or the other is allowed.");
+            Log.LogError(null, ErrorCodes.CONTAINER2008, "Container.AmbiguousTags", null, 0, 0, 0, 0, $"Both {nameof(ContainerImageTag)} and {nameof(ContainerImageTags)} were provided, but only one or the other is allowed.");
             return !Log.HasLoggedErrors;
         }
 
@@ -97,7 +98,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             else
             {
                 validTags = Array.Empty<string>();
-                Log.LogError(null, KnownStrings.ErrorCodes.CONTAINER004, "Container.InvalidTag", null, 0, 0, 0, 0, "Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period.", nameof(ContainerImageTag), ContainerImageTag);
+                Log.LogError(null, ErrorCodes.CONTAINER2007, "Container.InvalidTag", null, 0, 0, 0, 0, "Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period.", nameof(ContainerImageTag), ContainerImageTag);
             }
         }
         else if (ContainerImageTags.Length != 0 && TryValidateTags(ContainerImageTags, out var valids, out var invalids))
@@ -105,7 +106,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             validTags = valids;
             if (invalids.Any())
             {
-                Log.LogError(null, KnownStrings.ErrorCodes.CONTAINER004, "Container.InvalidTag", null, 0, 0, 0, 0, "Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", nameof(ContainerImageTags), String.Join(",", invalids));
+                Log.LogError(null, ErrorCodes.CONTAINER2007, "Container.InvalidTag", null, 0, 0, 0, 0, "Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", nameof(ContainerImageTags), String.Join(",", invalids));
                 return !Log.HasLoggedErrors;
             }
         }
@@ -142,7 +143,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
         {
             if (!ContainerHelpers.NormalizeImageName(ContainerImageName, out var normalizedImageName))
             {
-                Log.LogMessage(null, KnownStrings.ErrorCodes.CONTAINER001, "Container.InvalidImageName", null, 0, 0, 0, 0, MessageImportance.High, "'{0}' was not a valid container image name, it was normalized to '{1}'", nameof(ContainerImageName), normalizedImageName);
+                Log.LogMessage(null, ErrorCodes.CONTAINER2009, "Container.InvalidImageName", null, 0, 0, 0, 0, MessageImportance.High, "'{0}' was not a valid container image name, it was normalized to '{1}'", nameof(ContainerImageName), normalizedImageName);
                 NewContainerImageName = normalizedImageName!; // known to be not null due to output of NormalizeImageName
             }
             else
