@@ -570,6 +570,9 @@ namespace Microsoft.Build.CommandLine
                 VerifyThrowSupportedOS();
 
                 // Setup the console UI.
+                Encoding originalOutputEncoding = Console.OutputEncoding;
+                Encoding originalInputEncoding = Console.InputEncoding;
+                CultureInfo originalThreadCulture = Thread.CurrentThread.CurrentUICulture;
                 SetConsoleUI();
 
                 // reset the application state for this new build
@@ -738,6 +741,10 @@ namespace Microsoft.Build.CommandLine
                     // if there was no need to start the build e.g. because /help was triggered
                     // do nothing
                 }
+
+                // The encoding may be changed to support non-en characters for environment variables set by external tools. We don't want to impact other programs on the console.
+                Console.OutputEncoding = originalOutputEncoding;
+                Console.InputEncoding = originalInputEncoding;
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks below! Exceptions should be caught as close to their point of origin as
