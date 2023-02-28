@@ -1684,7 +1684,7 @@ namespace Microsoft.Build.CommandLine
         /// If the environment variables are undefined, this function should be a no-op.
         /// </summary>
         /// <returns>The custom language that was set by the user for an 'external' tool besides MSBuild.
-        /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns null if none are set.</returns>
+        /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns <see langword="null"/> if none are set.</returns>
         private static CultureInfo GetExternalOverridenUILanguageIfSupportableWithEncoding()
         {
             CultureInfo externalLanguageSetting = GetExternalOverriddenUILanguage();
