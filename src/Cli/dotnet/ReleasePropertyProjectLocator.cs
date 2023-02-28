@@ -188,13 +188,15 @@ namespace Microsoft.DotNet.Cli
         private Dictionary<string, string> GetGlobalPropertiesFromUserArgs(ParseResult parseResult)
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
             string[] globalPropEnumerable = parseResult.GetValueForOption(CommonOptions.PropertiesOption);
 
-            foreach (var keyEqVal in globalPropEnumerable)
+            foreach (var keyEqValString in globalPropEnumerable)
             {
-                string[] keyValuePair = keyEqVal.Split("=", 2);
-                globalProperties[keyValuePair[0]] = keyValuePair[1];
+                var propertyPairs = MSBuildPropertyParser.ParseProperties(keyEqValString);
+                foreach (var propertyKeyValue in propertyPairs)
+                {
+                    globalProperties[propertyKeyValue.key] = propertyKeyValue.value;
+                }
             }
             return globalProperties;
         }
