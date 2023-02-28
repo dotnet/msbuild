@@ -20,6 +20,8 @@ using System.IO.Compression;
 using System.Reflection;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Logging;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 #nullable disable
 
@@ -518,7 +520,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_GET_COMMANDLINE
                 @$"c:\bin\msbuild.exe {indicator} "
 #else
-                new [] {@"c:\bin\msbuild.exe", indicator}
+                new[] { @"c:\bin\msbuild.exe", indicator }
 #endif
             ).ShouldBe(MSBuildApp.ExitType.Success);
         }
@@ -646,6 +648,35 @@ namespace Microsoft.Build.UnitTests
 
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
+        }
+
+
+        [Fact]
+        public void ConsoleUIRespectsSDKLanguage()
+        {
+            const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
+
+            // Save the current environment info so it can be restored.
+            var originalUILanguage = Environment.GetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE);
+            Encoding originalOutputEncoding = Console.OutputEncoding;
+            Encoding originalInputEncoding = Console.InputEncoding;
+            Thread thisThread = Thread.CurrentThread;
+            CultureInfo originalUICulture = thisThread.CurrentUICulture;
+
+            // Set the UI language based on the SDK environment var.
+            Environment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // japanese chose arbitrarily.
+
+            MSBuildApp.SetConsoleUI();
+
+            Assert.Equal(thisThread.CurrentUICulture, new CultureInfo("ja"));
+            Assert.Equal(65001, System.Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
+
+            // Restore the current UI culture back to the way it was at the beginning of this unit test.
+            thisThread.CurrentUICulture = originalUICulture;
+            Environment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, originalUILanguage);
+            // MSbuild should also restore the encoding upon exit, but we don't create that context here.
+            Console.OutputEncoding = originalOutputEncoding;
+            Console.InputEncoding = originalInputEncoding;
         }
 
 #if FEATURE_SYSTEM_CONFIGURATION
