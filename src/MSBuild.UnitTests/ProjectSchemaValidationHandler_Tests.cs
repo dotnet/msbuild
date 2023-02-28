@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_XML_SCHEMA_VALIDATION
 using System;
@@ -56,7 +56,11 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (projectFilename != null) File.Delete(projectFilename);
+                if (projectFilename != null)
+                {
+                    File.Delete(projectFilename);
+                }
+
                 CleanupSchemaFiles(msbuildTempXsdFilenames);
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
                 Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
@@ -80,7 +84,7 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBuildOldOM", "");
 
                 // Create schema files in the temp folder
-                invalidSchemaFile = FileUtilities.GetTemporaryFile();
+                invalidSchemaFile = FileUtilities.GetTemporaryFileName();
 
                 File.WriteAllText(invalidSchemaFile, "<this_is_invalid_schema_content/>");
 
@@ -95,8 +99,16 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (projectFilename != null) File.Delete(projectFilename);
-                if (invalidSchemaFile != null) File.Delete(invalidSchemaFile);
+                if (projectFilename != null)
+                {
+                    File.Delete(projectFilename);
+                }
+
+                if (invalidSchemaFile != null)
+                {
+                    File.Delete(invalidSchemaFile);
+                }
+
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
                 Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
@@ -120,7 +132,7 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBuildOldOM", "");
 
                 // Create schema files in the temp folder
-                invalidSchemaFile = FileUtilities.GetTemporaryFile();
+                invalidSchemaFile = FileUtilities.GetTemporaryFileName();
 
                 File.WriteAllText(invalidSchemaFile, @"<?xml version=""1.0"" encoding=""UTF-8""?>
 <xs:schema targetNamespace=""http://schemas.microsoft.com/developer/msbuild/2003"" xmlns:msb=""http://schemas.microsoft.com/developer/msbuild/2003"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" elementFormDefault=""qualified"">
@@ -147,8 +159,16 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (invalidSchemaFile != null) File.Delete(invalidSchemaFile);
-                if (projectFilename != null) File.Delete(projectFilename);
+                if (invalidSchemaFile != null)
+                {
+                    File.Delete(invalidSchemaFile);
+                }
+
+                if (projectFilename != null)
+                {
+                    File.Delete(projectFilename);
+                }
+
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
                 Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
@@ -255,6 +275,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Helper Functions
 
         /// <summary>
@@ -329,7 +350,7 @@ namespace Microsoft.Build.UnitTests
         /// <remarks>Stolen from ObjectModelHelpers because we use relatively little
         /// of the ObjectModelHelpers functionality, so as to avoid having to include in
         /// this project everything that ObjectModelHelpers depends on</remarks>
-        static internal string CreateTempFileOnDisk(string fileContents, params object[] args)
+        internal static string CreateTempFileOnDisk(string fileContents, params object[] args)
         {
             return CreateTempFileOnDiskNoFormat(String.Format(fileContents, args));
         }
@@ -340,9 +361,9 @@ namespace Microsoft.Build.UnitTests
         /// <remarks>Stolen from ObjectModelHelpers because we use relatively little
         /// of the ObjectModelHelpers functionality, so as to avoid having to include in
         /// this project everything that ObjectModelHelpers depends on</remarks>
-        static internal string CreateTempFileOnDiskNoFormat(string fileContents)
+        internal static string CreateTempFileOnDiskNoFormat(string fileContents)
         {
-            string projectFilePath = FileUtilities.GetTemporaryFile();
+            string projectFilePath = FileUtilities.GetTemporaryFileName();
 
             File.WriteAllText(projectFilePath, CleanupFileContents(fileContents));
 
@@ -357,7 +378,7 @@ namespace Microsoft.Build.UnitTests
         /// <remarks>Stolen from ObjectModelHelpers because we use relatively little
         /// of the ObjectModelHelpers functionality, so as to avoid having to include in
         /// this project everything that ObjectModelHelpers depends on</remarks>
-        static private string CleanupFileContents(string projectFileContents)
+        private static string CleanupFileContents(string projectFileContents)
         {
             // Replace reverse-single-quotes with double-quotes.
             projectFileContents = projectFileContents.Replace("`", "\"");
@@ -373,6 +394,7 @@ namespace Microsoft.Build.UnitTests
         private const string msbuildDefaultToolsVersion = "4.0";
 
         #endregion // Helper Functions
+#pragma warning restore format
     }
 }
 #endif

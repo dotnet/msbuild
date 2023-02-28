@@ -36,14 +36,14 @@
     <ProjectReference Include="..\Samples\TaskWithDependency\TaskWithDependency.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="TaskWithDependencyResolvedProjectReferencePath">
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' == 'true'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
-      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=net6.0</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=$(LatestDotNetCoreForMSBuild)</SetTargetFramework>
     </ProjectReference>
     <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="PortableTaskResolvedProjectReferencePath" />
 
     <ProjectReference Include="..\Samples\ProjectCachePlugin\ProjectCachePlugin.csproj" Private="false" ReferenceOutputAssembly="false">
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' == 'true'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
-      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=net6.0</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=$(LatestDotNetCoreForMSBuild)</SetTargetFramework>
     </ProjectReference>
   </ItemGroup>
 
@@ -76,6 +76,7 @@
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -117,6 +118,12 @@
     </Compile>
     <Compile Include="..\Shared\UnitTests\ImmutableDictionary_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full' and '$(MonoBuild)' != 'true'">
       <Link>Collections\ImmutableDictionary_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\LongPathSupportDisabledFactAttribute.cs">
+      <Link>Shared\LongPathSupportDisabledFactAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs">
+      <Link>RequiresSymbolicLinksFactAttribute.cs</Link>
     </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">

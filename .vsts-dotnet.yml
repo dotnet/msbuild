@@ -23,9 +23,12 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
+  # NOTE: the code is temporarily fixed. For the branches that should use opt-prof from the main branch we should use the latest working Opt-Prof collected from main 20230217.4.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
+    - name: OptProfDrop
+      value: 'OptimizationData/DotNet-msbuild-Trusted/main/20230217.4/7352286/1'   
     - name: SourceBranch
-      value: main
+      value: ''
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
@@ -36,6 +39,8 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
+  - name: Codeql.Enabled
+    value: true
 
 stages:
 - stage: build
@@ -122,6 +127,7 @@ stages:
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
                 /p:VisualStudioIbcDrop=$(OptProfDrop)
+                /p:GenerateSbom=true
       displayName: Build
       condition: succeeded()
 
@@ -147,7 +153,7 @@ stages:
         channelName: $(VisualStudio.ChannelName)
         manifests: $(VisualStudio.SetupManifestList)
         outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-        bootstrapperCoreVersion: 
+        bootstrapperCoreVersion:
       displayName: 'OptProf - Build VS bootstrapper'
       condition: succeeded()
 
@@ -159,6 +165,7 @@ stages:
                   -task VisualStudio.BuildIbcTrainingSettings
                   /p:VisualStudioDropName=$(VisualStudio.DropName)
                   /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+                  /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
       displayName: 'OptProf - Build IBC training settings'
       condition: succeeded()
 
@@ -247,7 +254,7 @@ stages:
     parameters:
       platform:
         name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
 
   - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:

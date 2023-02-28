@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
@@ -19,13 +20,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
-
-using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -418,9 +418,9 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
         {
-            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation);
+            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext);
 
             return (result == null) ? null : EscapingUtilities.UnescapeAll(result);
         }
@@ -432,7 +432,7 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
         {
             if (expression.Length == 0)
             {
@@ -442,7 +442,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
+            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem, loggingContext);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
@@ -472,11 +472,11 @@ namespace Microsoft.Build.Evaluation
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
         /// </summary>
-        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
         {
             ErrorUtilities.VerifyThrow((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
 
-            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation));
+            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext));
         }
 
         /// <summary>
@@ -1027,8 +1027,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (
                         (isBuiltInMetadata && ((_options & ExpanderOptions.ExpandBuiltInMetadata) != 0)) ||
-                       (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0))
-                        )
+                       (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0)))
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
@@ -1076,7 +1075,8 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext = null)
             {
                 return
                     ConvertToString(
@@ -1086,7 +1086,8 @@ namespace Microsoft.Build.Evaluation
                             options,
                             elementLocation,
                             usedUninitializedProperties,
-                            fileSystem));
+                            fileSystem,
+                            loggingContext));
             }
 
             /// <summary>
@@ -1112,7 +1113,8 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext = null)
             {
                 if (((options & ExpanderOptions.ExpandProperties) == 0) || String.IsNullOrEmpty(expression))
                 {
@@ -1226,7 +1228,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else // This is a regular property
                         {
-                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties);
+                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties, loggingContext);
                         }
 
                         if (propertyValue != null)
@@ -1464,7 +1466,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
             /// </summary>
-            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties, LoggingContext loggingContext = null)
             {
                 T property = properties.GetProperty(propertyName, startIndex, endIndex);
 
@@ -1509,6 +1511,11 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
+                    if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
+                    {
+                        environmentDerivedProperty.loggingContext = loggingContext;
+                    }
+
                     propertyValue = property.EvaluatedValueEscaped;
                 }
 
@@ -1925,8 +1932,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 bool includeNullEntries,
                 out bool isTransformExpression,
-                out List<Pair<string, S>> itemsFromCapture
-                )
+                out List<Pair<string, S>> itemsFromCapture)
                 where S : class, IItem
             {
                 ErrorUtilities.VerifyThrow(evaluatedItems != null, "Cannot expand items without providing items");
@@ -2103,8 +2109,7 @@ namespace Microsoft.Build.Evaluation
                 IItemProvider<S> evaluatedItems,
                 IElementLocation elementLocation,
                 SpanBasedStringBuilder builder,
-                ExpanderOptions options
-                )
+                ExpanderOptions options)
                 where S : class, IItem
             {
                 List<Pair<string, S>> itemsFromCapture;
@@ -3029,15 +3034,13 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly.</remarks>
             internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex
-                    (
+                () => new Regex(
                     @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
                     ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
                     ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
                     ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
                     ItemVectorWithTransformRHS + @"))",
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled
-                    ));
+                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
@@ -3116,8 +3119,7 @@ namespace Microsoft.Build.Evaluation
                     BindingFlags,
                     Remainder,
                     UsedUninitializedProperties,
-                    FileSystem
-                    );
+                    FileSystem);
             }
         }
 
@@ -3227,7 +3229,7 @@ namespace Microsoft.Build.Evaluation
                 IFileSystem fileSystem)
             {
                 // Used to aggregate all the components needed for a Function
-                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> {FileSystem = fileSystem};
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem };
 
                 // By default the expression root is the whole function expression
                 ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -3444,7 +3446,7 @@ namespace Microsoft.Build.Evaluation
                             //
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new []
+                            args = new[]
                             {
                                 args[0],
                                 startingDirectory,
@@ -3843,7 +3845,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (ElementsOfType(args, typeof(string)))
                             {
-                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string) o));
+                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string)o));
                                 return true;
                             }
                         }
@@ -4149,7 +4151,7 @@ namespace Microsoft.Build.Evaluation
                                 default:
                                     if (ElementsOfType(args, typeof(string)))
                                     {
-                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string) o));
+                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string)o));
                                         return true;
                                     }
                                     break;
@@ -4311,8 +4313,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (args[0] is string value0 &&
                     args[1] is string value1 &&
-                    args[2] is string value2
-                    )
+                    args[2] is string value2)
                 {
                     arg0 = value0;
                     arg1 = value1;
@@ -4339,8 +4340,7 @@ namespace Microsoft.Build.Evaluation
                 if (args[0] is string value0 &&
                     args[1] is string value1 &&
                     args[2] is string value2 &&
-                    args[3] is string value3
-                    )
+                    args[3] is string value3)
                 {
                     arg0 = value0;
                     arg1 = value1;

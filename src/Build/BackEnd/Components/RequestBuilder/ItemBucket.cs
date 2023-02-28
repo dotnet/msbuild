@@ -1,13 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -71,13 +70,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="metadata">Hashtable of item metadata values: null indicates no batching is occurring</param>
         /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
         /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
-        internal ItemBucket
-        (
+        internal ItemBucket(
             ICollection<string> itemNames,
             Dictionary<string, string> metadata,
             Lookup lookup,
-            int bucketSequenceNumber
-        )
+            int bucketSequenceNumber)
         {
             ErrorUtilities.VerifyThrow(lookup != null, "Need lookup.");
 

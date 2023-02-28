@@ -1,9 +1,13 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+#if NET5_0_OR_GREATER
+using System.Linq;
+using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -19,9 +23,15 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class CultureInfoCache
     {
-        private static readonly HashSet<string> ValidCultureNames = InitializeValidCultureNames();
+        private static readonly Lazy<HashSet<string>> ValidCultureNames = new Lazy<HashSet<string>>(() => InitializeValidCultureNames());
 
-        static HashSet<string> InitializeValidCultureNames()
+        // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing
+        // These pseudo-locales are available in versions of Windows from Vista and later.
+        // However, from Windows 10, version 1803, they are not returned when enumerating the
+        // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
+        private static readonly string[] pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
+
+        private static HashSet<string> InitializeValidCultureNames()
         {
 #if !FEATURE_CULTUREINFO_GETCULTURES
             if (!AssemblyUtilities.CultureInfoHasGetCultures())
@@ -35,12 +45,7 @@ namespace Microsoft.Build.Tasks
                 validCultureNames.Add(cultureName.Name);
             }
 
-            // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing
-            // These pseudo-locales are available in versions of Windows from Vista and later.
-            // However, from Windows 10, version 1803, they are not returned when enumerating the
-            // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
-            string[] pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
-
+            // Account for pseudo-locales (see above)
             foreach (string pseudoLocale in pseudoLocales)
             {
                 validCultureNames.Add(pseudoLocale);
@@ -56,7 +61,23 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the culture is determined to be valid.</returns>
         internal static bool IsValidCultureString(string name)
         {
-            return ValidCultureNames.Contains(name);
+#if NET5_0_OR_GREATER
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            {
+                try
+                {
+                    // GetCultureInfo throws if the culture doesn't exist
+                    CultureInfo.GetCultureInfo(name, predefinedOnly: true);
+                    return true;
+                }
+                catch
+                {
+                    // Second attempt: try pseudolocales (see above)
+                    return pseudoLocales.Contains(name, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+#endif
+            return ValidCultureNames.Value.Contains(name);
         }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES

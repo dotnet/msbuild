@@ -1,9 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -144,7 +145,7 @@ namespace Microsoft.Build.Evaluation
         ///     The expander needs to have a default item factory set.
         /// </summary>
         // todo Make this type immutable. Dealing with an Expander change is painful. See the ItemExpressionFragment
-            public Expander<P, I> Expander { get; set; }
+        public Expander<P, I> Expander { get; set; }
 
         /// <summary>
         ///     The xml attribute where this itemspec comes from
@@ -156,21 +157,23 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
         /// <param name="projectDirectory">The directory that the project is in.</param>
         /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
+        /// <param name="loggingContext">Context in which to log</param>
         public ItemSpec(
             string itemSpec,
             Expander<P, I> expander,
             IElementLocation itemSpecLocation,
             string projectDirectory,
-            bool expandProperties = true)
+            bool expandProperties = true,
+            LoggingContext loggingContext = null)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
+            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties, loggingContext);
         }
 
-        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
+        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties, LoggingContext loggingContext)
         {
             // Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
@@ -186,7 +189,8 @@ namespace Microsoft.Build.Evaluation
                 evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(
                     ItemSpecString,
                     ExpanderOptions.ExpandProperties,
-                    itemSpecLocation);
+                    itemSpecLocation,
+                    loggingContext);
             }
 
             var semicolonCount = 0;
@@ -579,7 +583,7 @@ namespace Microsoft.Build.Evaluation
                 options == MatchOnMetadataOptions.CaseInsensitive || FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase :
                 StringComparer.Ordinal;
             _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
-            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>) (p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
+            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>)(p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)

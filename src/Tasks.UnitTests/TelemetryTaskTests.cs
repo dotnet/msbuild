@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.UnitTests;
 using Xunit;
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Should not contain the first value
             //
             Assert.DoesNotContain("EE2493A167D24F00996DE7C8E769EAE6", engine.Log);
-            
+
             // Should contain the second value
             //
             Assert.Contains("4ADE3D2622CA400B8B95A039DF540037", engine.Log);

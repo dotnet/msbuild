@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -16,6 +16,7 @@
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
+    <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
   <ItemGroup>
@@ -329,6 +330,7 @@
     </Compile>
     <Compile Include="ResourceHandling\*.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
+    <Compile Include="SetRidAgnosticValueForProjects.cs" />
     <Compile Include="ResolveComReference.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
@@ -505,6 +507,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveSDKReference.cs" />
+    <Compile Include="RequiresFramework35SP1Assembly.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactory.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
@@ -625,9 +628,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RequiresFramework35SP1Assembly.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="StrongNameException.cs">
@@ -966,8 +966,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj"/>
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj"/>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
   <ItemGroup>

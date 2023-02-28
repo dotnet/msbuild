@@ -1,20 +1,21 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -23,7 +24,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the Exec task
     /// </summary>
-    sealed public class Exec_Tests
+    public sealed class Exec_Tests
     {
         private readonly ITestOutputHelper _output;
 
@@ -51,7 +52,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile()
@@ -74,7 +74,6 @@ namespace Microsoft.Build.UnitTests
         /// lying around.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
             using (var testEnvironment = TestEnvironment.Create())
@@ -168,8 +167,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void WindowsNewLineCharactersInCommandOnUnix()
         {
             var exec = PrepareExec("echo hello\r\n\r\n");
@@ -246,8 +244,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("[" + working + "]");
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]   // UNC is Windows-Only
+        [WindowsOnlyFact(additionalMessage: "UNC is Windows-Only.")]
         public void UNCWorkingDirectoryUsed()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -316,7 +313,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -351,7 +351,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -362,7 +365,7 @@ namespace Microsoft.Build.UnitTests
         public void TempPathContainsAmpersand3()
         {
             string directoryWithAmpersand = "nospace& space";
-            string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
+            string newTmp = Path.Combine(FileUtilities.TempFileDirectory, directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
             try
@@ -385,7 +388,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -419,7 +425,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -463,10 +472,9 @@ namespace Microsoft.Build.UnitTests
         /// Exec task will NOT use UTF8 when UTF8 Never is specified and non-ANSI characters are in the Command
         /// <remarks>Exec task will fail as the cmd processor will not be able to run the command.</remarks>
         /// </summary>
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("Never")]
         [InlineData("System")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void ExecTaskUtf8NeverWithNonAnsi(string useUtf8)
         {
             RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8, false);
@@ -552,7 +560,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (expectSuccess)
                 {
-                    ((MockEngine) exec.BuildEngine).AssertLogContains("[hello]");
+                    ((MockEngine)exec.BuildEngine).AssertLogContains("[hello]");
                 }
 
                 Assert.Equal(expectedEncoding, exec.StdOutEncoding);
@@ -561,7 +569,9 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 if (Directory.Exists(folder))
+                {
                     FileUtilities.DeleteWithoutTrailingBackslash(folder, true);
+                }
             }
 
             return;
@@ -596,9 +606,13 @@ namespace Microsoft.Build.UnitTests
         {
             Exec exec;
             if (NativeMethodsShared.IsWindows)
+            {
                 exec = PrepareExec("echo Some output & echo Some output & echo Some output & echo Some output ");
+            }
             else
+            {
                 exec = PrepareExec("echo Some output ; echo Some output ; echo Some output ; echo Some output ");
+            }
 
             exec.CustomErrorRegularExpression = "~!@#$%^_)(*&^%$#@@#XF &%^%T$REd((((([[[[";
             exec.CustomWarningRegularExpression = "*";
@@ -615,9 +629,14 @@ namespace Microsoft.Build.UnitTests
         {
             string cmdLine;
             if (NativeMethodsShared.IsWindows)
+            {
                 cmdLine = "echo Some output & echo ALERT:This is an error & echo Some more output";
+            }
             else
+            {
                 cmdLine = "echo Some output ; echo ALERT:This is an error ; echo Some more output";
+            }
+
             Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
 
@@ -641,9 +660,13 @@ namespace Microsoft.Build.UnitTests
         {
             string cmdLine;
             if (NativeMethodsShared.IsWindows)
+            {
                 cmdLine = "echo Some output & echo YOOHOO:This is a warning & echo Some more output";
+            }
             else
+            {
                 cmdLine = "echo Some output ; echo YOOHOO:This is a warning ; echo Some more output";
+            }
 
             Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
@@ -876,8 +899,7 @@ namespace Microsoft.Build.UnitTests
         /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
         /// in the current system encoding.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void CanEncodeTest()
         {
             var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
@@ -941,7 +963,6 @@ echo line 3"" />
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EndToEndMultilineExec_EscapeSpecialCharacters()
@@ -994,7 +1015,7 @@ echo line 3"" />
         }
     }
 
-    internal class ExecWrapper : Exec
+    internal sealed class ExecWrapper : Exec
     {
         public Encoding StdOutputEncoding
         {

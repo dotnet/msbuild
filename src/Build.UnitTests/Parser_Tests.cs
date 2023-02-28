@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Xunit;
@@ -215,16 +215,16 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("ItemFuncParseTest()");
 
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse("@(item->foo('ab'))", 
+            GenericExpressionNode tree = p.Parse("@(item->foo('ab'))",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
             Assert.IsType<StringExpressionNode>(tree);
             Assert.Equal("@(item->foo('ab'))", tree.GetUnexpandedValue(null));
 
-            tree = p.Parse("!@(item->foo())", 
+            tree = p.Parse("!@(item->foo())",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
             Assert.IsType<NotExpressionNode>(tree);
 
-            tree = p.Parse("(@(item->foo('ab')) and @(item->foo('bc')))", 
+            tree = p.Parse("(@(item->foo('ab')) and @(item->foo('bc')))",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
             Assert.IsType<AndExpressionNode>(tree);
         }
@@ -526,6 +526,74 @@ namespace Microsoft.Build.UnitTests
 
             // Make sure the log contains the correct strings.
             Assert.DoesNotContain("MSB4130:", ml.FullLog); // "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3."
+        }
+
+        // see https://github.com/dotnet/msbuild/issues/5436
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SupportItemDefinationGroupInWhenOtherwise(bool context)
+        {
+            var projectContent = $@"
+                <Project ToolsVersion= `msbuilddefaulttoolsversion` xmlns= `msbuildnamespace`>
+                    <Choose>
+                        <When Condition= `{context}`>
+                            <PropertyGroup>
+                                <Foo>bar</Foo>
+                            </PropertyGroup>
+                            <ItemGroup>
+                                <A Include= `$(Foo)`>
+                                    <n>n1</n>
+                                </A>
+                            </ItemGroup>
+                            <ItemDefinitionGroup>
+                                <A>
+                                    <m>m1</m>
+                                    <n>n2</n>
+                                </A>
+                            </ItemDefinitionGroup>
+                        </When>
+                        <Otherwise>
+                            <PropertyGroup>
+                                <Foo>bar</Foo>
+                            </PropertyGroup>
+                            <ItemGroup>
+                                <A Include= `$(Foo)`>
+                                    <n>n1</n>
+                                </A>
+                            </ItemGroup>
+                            <ItemDefinitionGroup>
+                                <A>
+                                    <m>m2</m>
+                                    <n>n2</n>
+                                </A>
+                            </ItemDefinitionGroup>
+                        </Otherwise>
+                    </Choose>
+                </Project>
+                ".Cleanup();
+
+
+            var project = ObjectModelHelpers.CreateInMemoryProject(projectContent);
+
+            var projectItem = project.GetItems("A").FirstOrDefault();
+            Assert.Equal("bar", projectItem.EvaluatedInclude);
+
+            var metadatam = projectItem.GetMetadata("m");
+            if (context)
+            {
+                // Go to when 
+                Assert.Equal("m1", metadatam.EvaluatedValue);
+            }
+            else
+            {
+                // Go to Otherwise
+                Assert.Equal("m2", metadatam.EvaluatedValue);
+            }
+
+            var metadatan = projectItem.GetMetadata("n");
+            Assert.Equal("n1", metadatan.EvaluatedValue);
+            Assert.Equal("n2", metadatan.Predecessor.EvaluatedValue);
         }
     }
 }

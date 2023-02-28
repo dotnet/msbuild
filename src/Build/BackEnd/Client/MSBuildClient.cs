@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -32,6 +32,11 @@ namespace Microsoft.Build.Experimental
         /// This property allows to add extra environment variables or reset some of the existing ones.
         /// </summary>
         private readonly Dictionary<string, string> _serverEnvironmentVariables;
+
+        /// <summary>
+        /// The console mode we had before the build.
+        /// </summary>
+        private uint? _originalConsoleMode;
 
         /// <summary>
         /// Full path to current MSBuild.exe if executable is MSBuild.exe,
@@ -72,7 +77,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// The named pipe stream for client-server communication.
         /// </summary>
-        private readonly NamedPipeClientStream _nodeStream;
+        private NamedPipeClientStream _nodeStream = null!;
 
         /// <summary>
         /// A way to cache a byte array when writing out packets
@@ -94,6 +99,11 @@ namespace Microsoft.Build.Experimental
         /// Capture configuration of Client Console.
         /// </summary>
         private TargetConsoleConfiguration? _consoleConfiguration;
+
+        /// <summary>
+        /// Incoming packet pump and redirection.
+        /// </summary>
+        private MSBuildClientPacketPump _packetPump = null!;
 
         /// <summary>
         /// Public constructor with parameters.
@@ -120,14 +130,26 @@ namespace Microsoft.Build.Experimental
             // Client <-> Server communication stream
             _handshake = GetHandshake();
             _pipeName = OutOfProcServerNode.GetPipeName(_handshake);
-            _nodeStream = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
-#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                                                                         | PipeOptions.CurrentUserOnly
-#endif
-            );
-
             _packetMemoryStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetMemoryStream);
+
+            CreateNodePipeStream();
+        }
+
+        private void CreateNodePipeStream()
+        {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            _nodeStream = new NamedPipeClientStream(
+                serverName: ".",
+                _pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                | PipeOptions.CurrentUserOnly
+#endif
+            );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            _packetPump = new MSBuildClientPacketPump(_nodeStream);
         }
 
         /// <summary>
@@ -148,37 +170,46 @@ namespace Microsoft.Build.Experimental
 #endif
 
             CommunicationsUtilities.Trace("Executing build with command line '{0}'", descriptiveCommandLine);
-            string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
-            string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
 
-            // Start server it if is not running.
-            bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
-            if (KnownTelemetry.BuildTelemetry != null)
+            try
             {
-                KnownTelemetry.BuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
-            }
-            if (!serverIsAlreadyRunning)
-            {
-                CommunicationsUtilities.Trace("Server was not running. Starting server now.");
-                if (!TryLaunchServer())
+                bool serverIsAlreadyRunning = ServerIsRunning();
+                if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
-                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
+                    KnownTelemetry.PartialBuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
+                }
+                if (!serverIsAlreadyRunning)
+                {
+                    CommunicationsUtilities.Trace("Server was not running. Starting server now.");
+                    if (!TryLaunchServer())
+                    {
+                        _exitResult.MSBuildClientExitType = (_exitResult.MSBuildClientExitType == MSBuildClientExitType.Success) ? MSBuildClientExitType.LaunchError : _exitResult.MSBuildClientExitType;
+                        return _exitResult;
+                    }
+                }
+
+                // Check that server is not busy.
+                bool serverWasBusy = ServerWasBusy();
+                if (serverWasBusy)
+                {
+                    CommunicationsUtilities.Trace("Server is busy, falling back to former behavior.");
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
+                    return _exitResult;
+                }
+
+                // Connect to server.
+                if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : 20_000))
+                {
                     return _exitResult;
                 }
             }
-
-            // Check that server is not busy.
-            var serverWasBusy = ServerNamedMutex.WasOpen(serverBusyMutexName);
-            if (serverWasBusy)
+            catch (IOException ex) when (ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace("Server is busy, falling back to former behavior.");
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
-                return _exitResult;
-            }
-
-            // Connect to server.
-            if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : 20_000))
-            {
+                // For unknown root cause, Mutex.TryOpenExisting can sometimes throw 'Connection timed out' exception preventing to obtain the build server state through it (Running or not, Busy or not).
+                // See: https://github.com/dotnet/msbuild/issues/7993
+                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
+                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return _exitResult;
             }
 
@@ -187,18 +218,99 @@ namespace Microsoft.Build.Experimental
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
-            if (!TrySendBuildCommand())
+            if (TrySendBuildCommand())
             {
-                return _exitResult;
+                _numConsoleWritePackets = 0;
+                _sizeOfConsoleWritePackets = 0;
+
+                ReadPacketsLoop(cancellationToken);
+
+                MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
+                CommunicationsUtilities.Trace("Build finished.");
             }
 
-            _numConsoleWritePackets = 0;
-            _sizeOfConsoleWritePackets = 0;
+            if (NativeMethodsShared.IsWindows && _originalConsoleMode is not null)
+            {
+                IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+                NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
+            }
 
+            return _exitResult;
+        }
+
+        /// <summary>
+        /// Attempt to shutdown MSBuild Server node.
+        /// </summary>
+        /// <remarks>
+        /// It shutdown only server created by current user with current admin elevation.
+        /// </remarks>
+        /// <param name="cancellationToken"></param>
+        /// <returns>True if server is not running anymore.</returns>
+        public static bool ShutdownServer(CancellationToken cancellationToken)
+        {
+            // Neither commandLine nor msbuildlocation is involved in node shutdown
+            var client = new MSBuildClient(commandLine: null!, msbuildLocation: null!);
+
+            return client.TryShutdownServer(cancellationToken);
+        }
+
+        private bool TryShutdownServer(CancellationToken cancellationToken)
+        {
+            CommunicationsUtilities.Trace("Trying shutdown server node.");
+
+            bool serverIsAlreadyRunning = ServerIsRunning();
+            if (!serverIsAlreadyRunning)
+            {
+                CommunicationsUtilities.Trace("No need to shutdown server node for it is not running.");
+                return true;
+            }
+
+            // Check that server is not busy.
+            bool serverWasBusy = ServerWasBusy();
+            if (serverWasBusy)
+            {
+                CommunicationsUtilities.Trace("Server cannot be shut down for it is not idle.");
+                return false;
+            }
+
+            // Connect to server.
+            if (!TryConnectToServer(1_000))
+            {
+                CommunicationsUtilities.Trace("Client cannot connect to idle server to shut it down.");
+                return false;
+            }
+
+            if (!TrySendShutdownCommand())
+            {
+                CommunicationsUtilities.Trace("Failed to send shutdown command to the server.");
+                return false;
+            }
+
+            ReadPacketsLoop(cancellationToken);
+
+            return _exitResult.MSBuildClientExitType == MSBuildClientExitType.Success;
+        }
+
+        internal bool ServerIsRunning()
+        {
+            string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
+            bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
+            return serverIsAlreadyRunning;
+        }
+
+        private bool ServerWasBusy()
+        {
+            string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
+            var serverWasBusy = ServerNamedMutex.WasOpen(serverBusyMutexName);
+            return serverWasBusy;
+        }
+
+        private void ReadPacketsLoop(CancellationToken cancellationToken)
+        {
             try
             {
                 // Start packet pump
-                using MSBuildClientPacketPump packetPump = new(_nodeStream);
+                using MSBuildClientPacketPump packetPump = _packetPump;
 
                 packetPump.RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, packetPump);
                 packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization, packetPump);
@@ -207,7 +319,7 @@ namespace Microsoft.Build.Experimental
                 WaitHandle[] waitHandles =
                 {
                     cancellationToken.WaitHandle,
-                    packetPump.PacketPumpErrorEvent,
+                    packetPump.PacketPumpCompleted,
                     packetPump.PacketReceivedEvent
                 };
 
@@ -224,7 +336,7 @@ namespace Microsoft.Build.Experimental
                             break;
 
                         case 1:
-                            HandlePacketPumpError(packetPump);
+                            HandlePacketPumpCompleted(packetPump);
                             break;
 
                         case 2:
@@ -246,10 +358,6 @@ namespace Microsoft.Build.Experimental
                 CommunicationsUtilities.Trace("MSBuild client error: problem during packet handling occurred: {0}.", ex);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
-
-            MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
-            CommunicationsUtilities.Trace("Build finished.");
-            return _exitResult;
         }
 
         private void ConfigureAndQueryConsoleProperties()
@@ -274,15 +382,15 @@ namespace Microsoft.Build.Experimental
                     if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
                     {
                         bool success;
-                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING &&
-                            (consoleMode & NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN) == NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN)
+                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING)
                         {
                             // Console is already in required state
                             success = true;
                         }
                         else
                         {
-                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING | NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN;
+                            _originalConsoleMode = consoleMode;
+                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING;
                             success = NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
                         }
 
@@ -374,22 +482,34 @@ namespace Microsoft.Build.Experimental
         private bool TryLaunchServer()
         {
             string serverLaunchMutexName = $@"Global\msbuild-server-launch-{_handshake.ComputeHash()}";
-            using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
-            if (!mutexCreatedNew)
-            {
-                // Some other client process launching a server and setting a build request for it. Fallback to usual msbuild app build.
-                CommunicationsUtilities.Trace("Another process launching the msbuild server, falling back to former behavior.");
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
-                return false;
-            }
-
-            string[] msBuildServerOptions = new string[] {
-                "/nologo",
-                "/nodemode:8"
-            };
 
             try
             {
+                // For unknown root cause, opening mutex can sometimes throw 'Connection timed out' exception. See: https://github.com/dotnet/msbuild/issues/7993
+                using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
+
+                if (!mutexCreatedNew)
+                {
+                    // Some other client process launching a server and setting a build request for it. Fallback to usual msbuild app build.
+                    CommunicationsUtilities.Trace("Another process launching the msbuild server, falling back to former behavior.");
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
+                    return false;
+                }
+            }
+            catch (IOException ex) when (ex is not PathTooLongException)
+            {
+                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
+                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
+                return false;
+            }
+
+            try
+            {
+                string[] msBuildServerOptions = new string[] {
+                    "/nologo",
+                    "/nodemode:8"
+                };
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));
@@ -409,6 +529,13 @@ namespace Microsoft.Build.Experimental
 
         private bool TrySendCancelCommand() => TrySendPacket(() => new ServerNodeBuildCancel());
 
+        private bool TrySendShutdownCommand()
+        {
+            CommunicationsUtilities.Trace("Sending shutdown command to server.");
+            _packetPump.ServerWillDisconnect();
+            return TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
+        }
+
         private ServerNodeBuildCommand GetServerNodeBuildCommand()
         {
             Dictionary<string, string> envVars = new();
@@ -426,14 +553,14 @@ namespace Microsoft.Build.Experimental
             // We remove env variable used to invoke MSBuild server as that might be equal to 1, so we do not get an infinite recursion here. 
             envVars.Remove(Traits.UseMSBuildServerEnvVarName);
 
-            Debug.Assert(KnownTelemetry.BuildTelemetry == null || KnownTelemetry.BuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");
+            Debug.Assert(KnownTelemetry.PartialBuildTelemetry == null || KnownTelemetry.PartialBuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");
 
-            PartialBuildTelemetry? partialBuildTelemetry = KnownTelemetry.BuildTelemetry == null
+            PartialBuildTelemetry? partialBuildTelemetry = KnownTelemetry.PartialBuildTelemetry == null
                 ? null
                 : new PartialBuildTelemetry(
-                    startedAt: KnownTelemetry.BuildTelemetry.StartAt.GetValueOrDefault(),
-                    initialServerState: KnownTelemetry.BuildTelemetry.InitialServerState,
-                    serverFallbackReason: KnownTelemetry.BuildTelemetry.ServerFallbackReason);
+                    startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
+                    initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialServerState,
+                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
 
             return new ServerNodeBuildCommand(
                         _commandLine,
@@ -457,16 +584,21 @@ namespace Microsoft.Build.Experimental
         {
             TrySendCancelCommand();
 
-            CommunicationsUtilities.Trace("MSBuild client sent cancelation command.");
+            CommunicationsUtilities.Trace("MSBuild client sent cancellation command.");
         }
 
         /// <summary>
-        /// Handle packet pump error.
+        /// Handle when packet pump is completed both successfully or with error.
         /// </summary>
-        private void HandlePacketPumpError(MSBuildClientPacketPump packetPump)
+        private void HandlePacketPumpCompleted(MSBuildClientPacketPump packetPump)
         {
-            CommunicationsUtilities.Trace("MSBuild client error: packet pump unexpectedly shut down: {0}", packetPump.PacketPumpException);
-            throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
+            if (packetPump.PacketPumpException != null)
+            {
+                CommunicationsUtilities.Trace("MSBuild client error: packet pump unexpectedly shut down: {0}", packetPump.PacketPumpException);
+                throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
+            }
+
+            _buildFinished = true;
         }
 
         /// <summary>
@@ -517,17 +649,35 @@ namespace Microsoft.Build.Experimental
         /// Connects to MSBuild server.
         /// </summary>
         /// <returns> Whether the client connected to MSBuild server successfully.</returns>
-        private bool TryConnectToServer(int timeout)
+        private bool TryConnectToServer(int timeoutMilliseconds)
         {
-            try
+            bool tryAgain = true;
+            Stopwatch sw = Stopwatch.StartNew();
+
+            while (tryAgain && sw.ElapsedMilliseconds < timeoutMilliseconds)
             {
-                NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, timeout);
-            }
-            catch (Exception ex)
-            {
-                CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
-                return false;
+                tryAgain = false;
+                try
+                {
+                    NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
+                }
+                catch (Exception ex)
+                {
+                    if (ex is not TimeoutException && sw.ElapsedMilliseconds < timeoutMilliseconds)
+                    {
+                        CommunicationsUtilities.Trace("Retrying to connect to server after {0} ms", sw.ElapsedMilliseconds);
+                        // This solves race condition for time in which server started but have not yet listen on pipe or
+                        // when it just finished build request and is recycling pipe.
+                        tryAgain = true;
+                        CreateNodePipeStream();
+                    }
+                    else
+                    {
+                        CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
+                        _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
+                        return false;
+                    }
+                }
             }
 
             return true;

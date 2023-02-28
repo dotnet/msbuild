@@ -1,20 +1,20 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using Microsoft.Build.Collections;
 using System;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
-using ObjectModel = System.Collections.ObjectModel;
 using Xunit;
-using Microsoft.Build.BackEnd;
+using ObjectModel = System.Collections.ObjectModel;
 
 #nullable disable
 
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 enumerator.MoveNext().ShouldBeFalse();
                 Should.Throw<InvalidOperationException>(() =>
                 {
-                    object o = ((IEnumerator) enumerator).Current;
+                    object o = ((IEnumerator)enumerator).Current;
                 });
                 enumerator.Current.ShouldBeNull();
             }
@@ -241,8 +241,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Throws<InternalErrorException>(() =>
             {
                 new ReadOnlyCollection<string>(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify non generic enumeration does not recurse

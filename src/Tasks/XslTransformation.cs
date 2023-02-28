@@ -1,13 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Xml;
-using System.Xml.Xsl;
 using System.Xml.XPath;
+using System.Xml.Xsl;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -51,6 +51,11 @@ namespace Microsoft.Build.Tasks
         /// The XSLT input as string.
         /// </summary>
         public string XslContent { get; set; }
+
+        /// <summary>
+        /// Flag to preserve whitespaces in the XSLT file.
+        /// </summary>
+        public bool PreserveWhitespace { get; set; }
 
         /// <summary>
         /// The XSLT input as compiled dll.
@@ -98,7 +103,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 xmlinput = new XmlInput(XmlInputPaths, XmlContent);
-                xsltinput = new XsltInput(XslInputPath, XslContent, XslCompiledDllPath, Log);
+                xsltinput = new XsltInput(XslInputPath, XslContent, XslCompiledDllPath, Log, PreserveWhitespace);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -343,6 +348,11 @@ namespace Microsoft.Build.Tasks
             private readonly string _data;
 
             /// <summary>
+            /// Flag to preserve whitespaces in the XSLT file.
+            /// </summary>
+            private bool _preserveWhitespace;
+
+            /// <summary>
             /// Tool for logging build messages, warnings, and errors
             /// </summary>
             private readonly TaskLoggingHelper _log;
@@ -355,7 +365,8 @@ namespace Microsoft.Build.Tasks
             /// <param name="xslt">The raw to XSLT or null.</param>
             /// <param name="xsltCompiledDll">The path to compiled XSLT file or null.</param>
             /// <param name="logTool">Log helper.</param>
-            public XsltInput(ITaskItem xsltFile, string xslt, ITaskItem xsltCompiledDll, TaskLoggingHelper logTool)
+            /// <param name="preserveWhitespace">Flag for xslt whitespace option.</param>
+            public XsltInput(ITaskItem xsltFile, string xslt, ITaskItem xsltCompiledDll, TaskLoggingHelper logTool, bool preserveWhitespace)
             {
                 _log = logTool;
                 if ((xsltFile != null && xslt != null) ||
@@ -384,6 +395,8 @@ namespace Microsoft.Build.Tasks
                     _xslMode = XslModes.XsltCompiledDll;
                     _data = xsltCompiledDll.ItemSpec;
                 }
+
+                _preserveWhitespace = preserveWhitespace;
             }
 
             /// <summary>
@@ -443,7 +456,8 @@ namespace Microsoft.Build.Tasks
 
                         using (XmlReader reader = XmlReader.Create(new StreamReader(_data), new XmlReaderSettings { CloseInput = true }, _data))
                         {
-                            xslct.Load(new XPathDocument(reader), settings, new XmlUrlResolver());
+                            XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
+                            xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, new XmlUrlResolver());
                         }
                         break;
                     case XslModes.XsltCompiledDll:

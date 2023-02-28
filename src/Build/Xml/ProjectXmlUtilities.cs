@@ -1,15 +1,29 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
+using System.IO;
+using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
 namespace Microsoft.Build.Internal
 {
+    /// <summary>
+    /// Exception indicating that we tried to build a type of project MSBuild did not recognize.
+    /// </summary>
+    internal sealed class UnbuildableProjectTypeException : Exception
+    {
+        internal UnbuildableProjectTypeException(string file)
+            : base(file)
+        {
+        }
+    }
+
     /// <summary>
     /// Project-related Xml utilities
     /// </summary>
@@ -68,13 +82,37 @@ namespace Microsoft.Build.Internal
         /// <returns>True when the namespace is in the MSBuild namespace or no namespace.</returns>
         internal static bool VerifyValidProjectNamespace(XmlElementWithLocation element)
         {
-            return
-                // Prefix must be empty
-                element.Prefix.Length == 0 &&
+            if (element.Prefix.Length != 0)
+            {
+                return false;
+            }
+            else if (string.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            else if (string.IsNullOrEmpty(element.NamespaceURI))
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) && Path.GetExtension(element.Location.File).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
+                {
+                    bool validMSBuildProject = true;
+                    foreach (XmlNode child in element.ChildNodes)
+                    {
+                        if (child.Name.Equals("Database", StringComparison.OrdinalIgnoreCase))
+                        {
+                            validMSBuildProject = false;
+                            throw new UnbuildableProjectTypeException(element.Location.File);
+                        }
+                    }
 
-                // Namespace must equal to the MSBuild namespace or empty
-                (string.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace,
-                     StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(element.NamespaceURI));
+                    return validMSBuildProject;
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -90,15 +128,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectAttributeEitherMissingOrNotEmpty(XmlElementWithLocation xmlElement, XmlAttributeWithLocation attribute, string attributeName)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 attribute == null || attribute.Value.Length > 0,
                 attribute?.Location,
                 "InvalidAttributeValue",
                 String.Empty,
                 attributeName,
-                xmlElement.Name
-            );
+                xmlElement.Name);
         }
 
         /// <summary>

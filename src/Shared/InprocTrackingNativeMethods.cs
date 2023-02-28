@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_FILE_TRACKER
 
@@ -11,9 +11,6 @@ using System.Runtime.ConstrainedExecution;
 #endif
 using System.Security;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
-#endif
 #if FEATURE_RESOURCE_EXPOSURE
 using System.Runtime.Versioning;
 #endif
@@ -34,6 +31,7 @@ namespace Microsoft.Build.Shared
     /// </comments>
     internal static class InprocTrackingNativeMethods
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Delegates for the tracking functions
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -149,15 +147,15 @@ namespace Microsoft.Build.Shared
         }
 
         #endregion // Public API
-
+#pragma warning restore format
         private static class FileTrackerDllStub
         {
-            private readonly static Lazy<string> fileTrackerDllName = new Lazy<string>(() => RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "FileTrackerA4.dll" : (IntPtr.Size == sizeof(Int32)) ? "FileTracker32.dll" : "FileTracker64.dll");
+            private static readonly Lazy<string> fileTrackerDllName = new Lazy<string>(() => RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "FileTrackerA4.dll" : (IntPtr.Size == sizeof(Int32)) ? "FileTracker32.dll" : "FileTracker64.dll");
 
             // Handle for FileTracker.dll itself
             [SecurityCritical]
             private static SafeHandle s_fileTrackerDllHandle;
-
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
             #region Function pointers to native functions
 
             internal static StartTrackingContextDelegate startTrackingContextDelegate;
@@ -238,7 +236,9 @@ namespace Microsoft.Build.Shared
                 IntPtr entryPoint = GetProcAddress(s_fileTrackerDllHandle, entryPointName);
 
                 if (IntPtr.Zero == entryPoint)
+                {
                     throw new EntryPointNotFoundException(fileTrackerDllName.Value + "!" + entryPointName);
+                }
 
                 return (DT)(Object)Marshal.GetDelegateForFunctionPointer(entryPoint, typeof(DT));
             }
@@ -274,7 +274,7 @@ namespace Microsoft.Build.Shared
             }
 
             #endregion  // Initialization code
-
+#pragma warning restore format
             // Specialized handle to make sure we free FileTracker.dll 
             [SecurityCritical]
             private class SafeLibraryHandle : SafeHandle

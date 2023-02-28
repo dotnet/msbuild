@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -23,7 +23,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -352,8 +351,8 @@ namespace Microsoft.Build.Execution
 
             this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, project.Items, projectItemToInstanceMap);
 
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
-            foreach (var property in project.GlobalProperties)
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalPropertiesCount);
+            foreach (var property in project.GlobalPropertiesEnumerable)
             {
                 _globalProperties.Set(ProjectPropertyInstance.Create(property.Key, property.Value));
             }
@@ -468,6 +467,21 @@ namespace Microsoft.Build.Execution
         {
             BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
             Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext, sdkResolverService, submissionId);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProjectInstance"/> class directly.
+        /// No intermediate Project object is created.
+        /// This is ideal if the project is simply going to be built, and not displayed or edited.
+        /// Global properties may be null.
+        /// Tools version may be null.
+        /// Used by SolutionProjectGenerator so that it can explicitly pass the vsVersionFromSolution in for use in
+        /// determining the sub-toolset version.
+        /// </summary>
+        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, ILoggingService loggingService, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
+        {
+            BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
         /// <summary>
@@ -1475,10 +1489,10 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, LoggingContext loggingContext)
         {
             // Mutability not verified as this is being populated during evaluation
-            ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable);
+            ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable, isEnvironmentVariable, loggingContext);
             _properties.Set(property);
             return property;
         }
@@ -1666,7 +1680,9 @@ namespace Microsoft.Build.Execution
                 foreach (var item in GetItems(itemType))
                 {
                     if (string.Equals(item.EvaluatedInclude, evaluatedInclude, StringComparison.OrdinalIgnoreCase))
+                    {
                         yield return item;
+                    }
                 }
             }
             else
@@ -1674,7 +1690,9 @@ namespace Microsoft.Build.Execution
                 foreach (var item in GetItemsByEvaluatedInclude(evaluatedInclude))
                 {
                     if (string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase))
+                    {
                         yield return item;
+                    }
                 }
             }
         }
@@ -2219,8 +2237,7 @@ namespace Microsoft.Build.Execution
                 if (
                        String.Equals(toolsVersion, "2.0", StringComparison.OrdinalIgnoreCase) ||
                        String.Equals(toolsVersion, "3.0", StringComparison.OrdinalIgnoreCase) ||
-                       String.Equals(toolsVersion, "3.5", StringComparison.OrdinalIgnoreCase)
-                   )
+                       String.Equals(toolsVersion, "3.5", StringComparison.OrdinalIgnoreCase))
                 {
                     // Spawn the Orcas SolutionWrapperProject generator.  
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedExplicitToolsVersion", toolsVersion);
@@ -2436,8 +2453,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowInternalLength(targetName, nameof(targetName));
             ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), "Target {0} already exists.", targetName);
 
-            ProjectTargetInstance target = new ProjectTargetInstance
-                (
+            ProjectTargetInstance target = new ProjectTargetInstance(
                 targetName,
                 condition ?? String.Empty,
                 inputs ?? String.Empty,
@@ -2458,8 +2474,7 @@ namespace Microsoft.Build.Execution
                 String.IsNullOrEmpty(afterTargets) ? null : ElementLocation.EmptyLocation,
                 new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(new List<ProjectTargetInstanceChild>()),
                 new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(new List<ProjectOnErrorInstance>()),
-                parentProjectSupportsReturnsAttribute
-                );
+                parentProjectSupportsReturnsAttribute);
 
             _actualTargets[targetName] = target;
 
@@ -2497,9 +2512,8 @@ namespace Microsoft.Build.Execution
         /// <param name="sdkResolverService"></param>
         /// <param name="submissionId"></param>
         /// <returns>The ProjectRootElement for the root traversal and each of the metaprojects.</returns>
-        private static ProjectInstance[] GenerateSolutionWrapper
+        private static ProjectInstance[] GenerateSolutionWrapper(
 
-            (
                 string projectFile,
                 IDictionary<string, string> globalProperties,
                 string toolsVersion,
@@ -2507,8 +2521,7 @@ namespace Microsoft.Build.Execution
                 BuildEventContext projectBuildEventContext,
                 IReadOnlyCollection<string> targetNames,
                 ISdkResolverService sdkResolverService,
-                int submissionId
-            )
+                int submissionId)
         {
             SolutionFile sp = SolutionFile.Parse(projectFile);
 
@@ -2552,8 +2565,8 @@ namespace Microsoft.Build.Execution
         /// <param name="submissionId"></param>
         /// <returns>An appropriate ProjectRootElement</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM
-        (string projectFile,
+        private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM(
+        string projectFile,
             IDictionary<string, string> globalProperties,
             string toolsVersion,
             ProjectRootElementCacheBase projectRootElementCache,
@@ -2585,8 +2598,7 @@ namespace Microsoft.Build.Execution
                     if (environmentVariableName != null &&
                         (!XmlUtilities.IsValidElementName(environmentVariableName)
                         || XMakeElements.ReservedItemNames.Contains(environmentVariableName)
-                        || ReservedPropertyNames.IsReservedProperty(environmentVariableName))
-                       )
+                        || ReservedPropertyNames.IsReservedProperty(environmentVariableName)))
                     {
                         if (clearedVariables == null)
                         {
@@ -2710,14 +2722,12 @@ namespace Microsoft.Build.Execution
                 toolsVersionLocation = xml.ToolsVersionLocation;
             }
 
-            var toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-            (
+            var toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                 explicitToolsVersion,
                 xml.ToolsVersion,
                 buildParameters.GetToolset,
                 buildParameters.DefaultToolsVersion,
-                out var usingDifferentToolsVersionFromProjectFile
-            );
+                out var usingDifferentToolsVersionFromProjectFile);
 
             _usingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 
@@ -2966,7 +2976,7 @@ namespace Microsoft.Build.Execution
             {
                 // Allow reserved property names, since this is how they are added to the project instance. 
                 // The caller has prevented users setting them themselves.
-                ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable);
+                ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable, property.IsEnvironmentProperty);
                 _properties.Set(instance);
             }
         }

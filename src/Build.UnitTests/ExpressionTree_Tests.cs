@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -103,22 +103,20 @@ namespace Microsoft.Build.UnitTests
             expander.Metadata = new StringMetadataTable(null);
             bool value;
 
-            string fileThatMustAlwaysExist = FileUtilities.GetTemporaryFile();
+            string fileThatMustAlwaysExist = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(fileThatMustAlwaysExist, "foo");
             string command = "Exists('" + fileThatMustAlwaysExist + "')";
             tree = p.Parse(command, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
 
             ConditionEvaluator.IConditionEvaluationState state =
-                            new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                                (
+                            new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                                     command,
                                     expander,
                                     ExpanderOptions.ExpandAll,
                                     null,
                                     Directory.GetCurrentDirectory(),
                                     ElementLocation.EmptyLocation,
-                                    FileSystems.Default
-                                );
+                                    FileSystems.Default);
 
             value = tree.Evaluate(state);
             Assert.True(value);
@@ -334,16 +332,14 @@ namespace Microsoft.Build.UnitTests
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), itemBag, FileSystems.Default);
             Dictionary<string, List<string>> conditionedProperties = new Dictionary<string, List<string>>();
             ConditionEvaluator.IConditionEvaluationState state =
-                               new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                                   (
+                               new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                                        String.Empty,
                                        expander,
                                        ExpanderOptions.ExpandAll,
                                        conditionedProperties,
                                        Directory.GetCurrentDirectory(),
                                        ElementLocation.EmptyLocation,
-                                       FileSystems.Default
-                                   );
+                                       FileSystems.Default);
             AssertParseEvaluate(p, "'0' == '1'", expander, false, state);
             Assert.Empty(conditionedProperties);
 
@@ -445,16 +441,14 @@ namespace Microsoft.Build.UnitTests
             if (state == null)
             {
                 state =
-                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                    (
+                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                         String.Empty,
                         expander,
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
                         ElementLocation.EmptyLocation,
-                        FileSystems.Default
-                    );
+                        FileSystems.Default);
             }
 
             bool result = tree.Evaluate(state);
@@ -483,16 +477,14 @@ namespace Microsoft.Build.UnitTests
                 if (state == null)
                 {
                     state =
-                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
-                        (
+                    new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                             String.Empty,
                             expander,
                             ExpanderOptions.ExpandAll,
                             null,
                             Directory.GetCurrentDirectory(),
                             ElementLocation.EmptyLocation,
-                            FileSystems.Default
-                        );
+                            FileSystems.Default);
                 }
                 tree.Evaluate(state);
             }

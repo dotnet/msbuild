@@ -1,16 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
 
 #nullable disable
 
@@ -54,13 +54,11 @@ namespace Microsoft.Build.Internal
         /// and EvaluationLoggingContext.</param>
         /// <param name="excludeLocation">Location of Exclude element in file, used after drive enumeration detection.</param>
         /// <returns>Array of file paths, unescaped.</returns>
-        internal static string[] GetFileListUnescaped
-            (
+        internal static string[] GetFileListUnescaped(
             string directoryEscaped,
             string filespecEscaped,
             object loggingMechanism = null,
-            IElementLocation excludeLocation = null
-            )
+            IElementLocation excludeLocation = null)
         {
             return GetFileList(
                 directoryEscaped,
@@ -99,8 +97,7 @@ namespace Microsoft.Build.Internal
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
         /// <returns>Array of file paths, escaped.</returns>
-        internal static string[] GetFileListEscaped
-            (
+        internal static string[] GetFileListEscaped(
             string directoryEscaped,
             string filespecEscaped,
             IEnumerable<string> excludeSpecsEscaped = null,
@@ -112,8 +109,7 @@ namespace Microsoft.Build.Internal
             IElementLocation importLocation = null,
             BuildEventContext buildEventContext = null,
             string buildEventFileInfoFullPath = null,
-            bool disableExcludeDriveEnumerationWarning = false
-            )
+            bool disableExcludeDriveEnumerationWarning = false)
         {
             return GetFileList(
                 directoryEscaped,
@@ -172,8 +168,7 @@ namespace Microsoft.Build.Internal
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
         /// <returns>Array of file paths.</returns>
-        private static string[] GetFileList
-            (
+        private static string[] GetFileList(
             string directoryEscaped,
             string filespecEscaped,
             bool returnEscaped,
@@ -186,8 +181,7 @@ namespace Microsoft.Build.Internal
             IElementLocation importLocation = null,
             BuildEventContext buildEventContext = null,
             string buildEventFileInfoFullPath = null,
-            bool disableExcludeDriveEnumerationWarning = false
-            )
+            bool disableExcludeDriveEnumerationWarning = false)
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
 
@@ -240,7 +234,7 @@ namespace Microsoft.Build.Internal
                                     includeLocation,
                                     excludeLocation,
                                     excludeFileSpecIsEmpty,
-                                    disableExcludeDriveEnumerationWarning,                                
+                                    disableExcludeDriveEnumerationWarning,
                                     fileSpec);
 
                                 break;

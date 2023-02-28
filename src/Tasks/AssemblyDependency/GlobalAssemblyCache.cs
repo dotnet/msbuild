@@ -1,16 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.Build.Shared;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
-using Microsoft.Build.Framework;
-using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -188,11 +188,14 @@ namespace Microsoft.Build.Tasks
 
                 ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
 
-                var assemblyInfo = new ASSEMBLY_INFO { cbAssemblyInfo = (uint) Marshal.SizeOf<ASSEMBLY_INFO>() };
+                var assemblyInfo = new ASSEMBLY_INFO { cbAssemblyInfo = (uint)Marshal.SizeOf<ASSEMBLY_INFO>() };
 
                 assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
 
-                if (assemblyInfo.cbAssemblyInfo == 0) return null;
+                if (assemblyInfo.cbAssemblyInfo == 0)
+                {
+                    return null;
+                }
 
                 assemblyInfo.pszCurrentAssemblyPathBuf = new string(new char[assemblyInfo.cchBuf]);
 
@@ -236,8 +239,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
         /// <param name="specificVersion">Whether to check for a specific version.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
-        internal static string GetLocation
-        (
+        internal static string GetLocation(
             AssemblyNameExtension strongName,
             ProcessorArchitecture targetProcessorArchitecture,
             GetAssemblyRuntimeVersion getRuntimeVersion,
@@ -246,8 +248,7 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetPathFromFusionName getPathFromFusionName,
             GetGacEnumerator getGacEnumerator,
-            bool specificVersion
-        )
+            bool specificVersion)
         {
             return GetLocation(null, strongName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, getPathFromFusionName, getGacEnumerator, specificVersion);
         }
@@ -266,8 +267,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
         /// <param name="specificVersion">Whether to check for a specific version.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
-        internal static string GetLocation
-        (
+        internal static string GetLocation(
             IBuildEngine4 buildEngine,
             AssemblyNameExtension strongName,
             ProcessorArchitecture targetProcessorArchitecture,
@@ -277,8 +277,7 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetPathFromFusionName getPathFromFusionName,
             GetGacEnumerator getGacEnumerator,
-            bool specificVersion
-        )
+            bool specificVersion)
         {
             ConcurrentDictionary<AssemblyNameExtension, string> fusionNameToResolvedPath = null;
             bool useGacRarCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEGACRARCACHE") == null;

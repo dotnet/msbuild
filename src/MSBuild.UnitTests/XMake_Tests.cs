@@ -1,27 +1,24 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
-
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using System.IO.Compression;
-using System.Reflection;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Logging;
-using Newtonsoft.Json.Linq;
-using System.Text;
 
 #nullable disable
 
@@ -518,11 +515,15 @@ namespace Microsoft.Build.UnitTests
         {
             MSBuildApp.Execute(
 #if FEATURE_GET_COMMANDLINE
-                @$"c:\bin\msbuild.exe {indicator} "
+                @$"c:\bin\msbuild.exe {indicator} ")
 #else
+<<<<<<< HEAD
                 new[] { @"c:\bin\msbuild.exe", indicator }
+=======
+                new[] { @"c:\bin\msbuild.exe", indicator })
+>>>>>>> upstream/main
 #endif
-            ).ShouldBe(MSBuildApp.ExitType.Success);
+            .ShouldBe(MSBuildApp.ExitType.Success);
         }
 
         [Fact]
@@ -566,8 +567,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<CommandLineSwitchException>(() =>
             {
                 MSBuildApp.ProcessVerbositySwitch("loquacious");
-            }
-           );
+            });
         }
         [Fact]
         public void ValidMaxCPUCountSwitch()
@@ -589,8 +589,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<CommandLineSwitchException>(() =>
             {
                 MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "-1" });
-            }
-           );
+            });
         }
 
         [Fact]
@@ -599,8 +598,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<CommandLineSwitchException>(() =>
             {
                 MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "0" });
-            }
-           );
+            });
         }
 
         [Fact]
@@ -609,8 +607,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<CommandLineSwitchException>(() =>
             {
                 MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "foo" });
-            }
-           );
+            });
         }
 
         [Fact]
@@ -620,8 +617,7 @@ namespace Microsoft.Build.UnitTests
             {
                 // Too big
                 MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "1025" });
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1425,8 +1421,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = { ".phantomextension", null };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1441,8 +1436,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = { ".phantomextension", string.Empty };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
-            }
-           );
+            });
         }
         /// <summary>
         /// If only a dot is specified then the extension is invalid
@@ -1456,8 +1450,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = { "phantomextension" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase);
-            }
-           );
+            });
         }
         /// <summary>
         /// Put some junk into the extension, in this case there should be an exception
@@ -1471,8 +1464,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = { ".C:\\boocatmoo.a" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
-            }
-           );
+            });
         }
         /// <summary>
         /// Test what happens if there are no project or solution files in the directory
@@ -1486,8 +1478,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = { ".proj*", ".nativeproj?" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
-            }
-           );
+            });
         }
         [Fact]
         public void TestProcessProjectSwitch()
@@ -1567,8 +1558,7 @@ namespace Microsoft.Build.UnitTests
                 var extensionsToIgnore = new[] { ".nativeproj", ".vcproj" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where there is a solution and a project in the same directory but they have different names
@@ -1582,8 +1572,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where we have two proj files in the same directory
@@ -1597,8 +1586,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where we have two native project files in the same directory
@@ -1612,8 +1600,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test when there are two solutions in the same directory
@@ -1627,8 +1614,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
-            }
-           );
+            });
         }
         /// <summary>
         /// Check the case where there are more than two projects in the directory and one is a proj file
@@ -1642,8 +1628,7 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test what happens if there are no project or solution files in the directory
@@ -1657,13 +1642,12 @@ namespace Microsoft.Build.UnitTests
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
-            }
-           );
+            });
         }
         /// <summary>
         /// Helper class to simulate directory work for ignore project extensions
         /// </summary>
-        internal class IgnoreProjectExtensionsHelper
+        internal sealed class IgnoreProjectExtensionsHelper
         {
             private readonly List<string> _directoryFileNameList;
 
@@ -1772,14 +1756,12 @@ namespace Microsoft.Build.UnitTests
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
             var loggers = new List<ILogger>();
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -1795,14 +1777,12 @@ namespace Microsoft.Build.UnitTests
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
             var loggers = new List<ILogger>();
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected one distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -1818,14 +1798,12 @@ namespace Microsoft.Build.UnitTests
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
             var loggers = new List<ILogger>();
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected a central loggers to be attached"
 
@@ -1834,14 +1812,12 @@ namespace Microsoft.Build.UnitTests
 
             loggers = new List<ILogger>();
             fileLoggerParameters = new[] { "Parameter" };
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
 
@@ -1849,14 +1825,12 @@ namespace Microsoft.Build.UnitTests
 
             loggers = new List<ILogger>();
             fileLoggerParameters = new[] { "Parameter1", "Parameter" };
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -1872,14 +1846,12 @@ namespace Microsoft.Build.UnitTests
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
             var loggers = new List<ILogger>();
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1889,14 +1861,12 @@ namespace Microsoft.Build.UnitTests
 
             loggers = new List<ILogger>();
             fileLoggerParameters = new[] { "verbosity=Normal;" };
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1906,14 +1876,12 @@ namespace Microsoft.Build.UnitTests
 
             loggers = new List<ILogger>();
             fileLoggerParameters = new[] { "verbosity=Normal", "" };
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1923,14 +1891,12 @@ namespace Microsoft.Build.UnitTests
 
             loggers = new List<ILogger>();
             fileLoggerParameters = new[] { "", "Parameter1" };
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($";Parameter1;logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1940,14 +1906,12 @@ namespace Microsoft.Build.UnitTests
 
             loggers = new List<ILogger>();
             fileLoggerParameters = new[] { "Parameter1", "verbosity=Normal;logfile=" + (NativeMethodsShared.IsWindows ? "c:\\temp\\cat.log" : "/tmp/cat.log") };
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe(fileLoggerParameters[0] + ";" + fileLoggerParameters[1], StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1955,14 +1919,12 @@ namespace Microsoft.Build.UnitTests
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
             loggers = new List<ILogger>();
             fileLoggerParameters = new[] { "Parameter1", "verbosity=Normal;logfile=" + Path.Combine("..", "cat.log") + ";Parameter1" };
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;verbosity=Normal;logFile={Path.Combine(Directory.GetCurrentDirectory(), "..", "cat.log")};Parameter1", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1970,14 +1932,12 @@ namespace Microsoft.Build.UnitTests
             loggers = new List<ILogger>();
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
             fileLoggerParameters = new[] { "Parameter1", ";Parameter;", "", ";", ";Parameter", "Parameter;" };
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           2
-                       );
+                           2);
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;Parameter;;;Parameter;Parameter;logFile={Path.Combine(Directory.GetCurrentDirectory(), "msbuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
 
@@ -1992,14 +1952,12 @@ namespace Microsoft.Build.UnitTests
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
             var loggers = new List<ILogger>();
-            MSBuildApp.ProcessDistributedFileLogger
-                       (
+            MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
                            distributedLoggerRecords,
                            loggers,
-                           1
-                       );
+                           1);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -2014,27 +1972,23 @@ namespace Microsoft.Build.UnitTests
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
             string[] consoleLoggerParameters = { "Parameter1", ";Parameter;", "", ";", ";Parameter", "Parameter;" };
 
-            MSBuildApp.ProcessConsoleLoggerSwitch
-                       (
+            MSBuildApp.ProcessConsoleLoggerSwitch(
                            true,
                            consoleLoggerParameters,
                            distributedLoggerRecords,
                            verbosity,
                            1,
-                           loggers
-                       );
+                           loggers);
             loggers.ShouldBeEmpty("Expected no central loggers to be attached");
             distributedLoggerRecords.ShouldBeEmpty("Expected no distributed loggers to be attached");
 
-            MSBuildApp.ProcessConsoleLoggerSwitch
-                       (
+            MSBuildApp.ProcessConsoleLoggerSwitch(
                            false,
                            consoleLoggerParameters,
                            distributedLoggerRecords,
                            verbosity,
                            1,
-                           loggers
-                       );
+                           loggers);
             loggers.ShouldHaveSingleItem("Expected a central logger to be attached");
             loggers[0].ShouldBeOfType<ConsoleLogger>();
             loggers[0].Parameters.ShouldBe(
@@ -2042,15 +1996,13 @@ namespace Microsoft.Build.UnitTests
                 "Expected parameter in logger to match parameters passed in",
                 StringCompareShould.IgnoreCase);
 
-            MSBuildApp.ProcessConsoleLoggerSwitch
-                       (
+            MSBuildApp.ProcessConsoleLoggerSwitch(
                           false,
                           consoleLoggerParameters,
                           distributedLoggerRecords,
                           verbosity,
                           2,
-                          loggers
-                      );
+                          loggers);
             loggers.ShouldHaveSingleItem("Expected a central logger to be attached");
             distributedLoggerRecords.ShouldHaveSingleItem("Expected a distributed logger to be attached");
             DistributedLoggerRecord distributedLogger = distributedLoggerRecords[0];

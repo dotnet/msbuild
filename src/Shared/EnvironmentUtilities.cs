@@ -1,10 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.InteropServices;
-
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -14,5 +12,12 @@ namespace Microsoft.Build.Shared
 
         public static bool Is64BitOperatingSystem =>
             Environment.Is64BitOperatingSystem;
+
+        public static bool IsWellKnownEnvironmentDerivedProperty(string propertyName)
+        {
+            return propertyName.StartsWith("MSBUILD") ||
+                propertyName.StartsWith("COMPLUS_") ||
+                propertyName.StartsWith("DOTNET_");
+        }
     }
 }

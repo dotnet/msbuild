@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -11,12 +11,13 @@ using System.Threading;
 
 namespace Microsoft.Build.Evaluation
 {
-    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-    using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
-    using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-    using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+    using Microsoft.Build.BackEnd.Logging;
     using Microsoft.Build.Shared;
     using Microsoft.Build.Shared.FileSystem;
+    using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
+    using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+    using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
     internal static class ConditionEvaluator
     {
@@ -35,18 +36,13 @@ namespace Microsoft.Build.Evaluation
         /// concatenated together with a vertical bar, as in '
         ///     $(Configuration)|$(Platform)' == 'Debug|x86'
         /// </summary>
-        /// <param name="conditionedPropertiesTable"></param>
-        /// <param name="leftValue"></param>
-        /// <param name="rightValueExpanded"></param>
-        internal static void UpdateConditionedPropertiesTable
-        (
-            Dictionary<string, List<string>> conditionedPropertiesTable,   // List of possible values, keyed by property name
-
-            string leftValue,                       // The raw value on the left side of the operator
-
-            string rightValueExpanded               // The fully expanded value on the right side
-                                                    // of the operator.
-        )
+        /// <param name="conditionedPropertiesTable">List of possible values, keyed by property name.</param>
+        /// <param name="leftValue">The raw value on the left side of the operator.</param>
+        /// <param name="rightValueExpanded">The fully expanded value on the right side of the operator.</param>
+        internal static void UpdateConditionedPropertiesTable(
+            Dictionary<string, List<string>> conditionedPropertiesTable,
+            string leftValue,
+            string rightValueExpanded)
         {
             if ((conditionedPropertiesTable != null) && (rightValueExpanded.Length > 0))
             {
@@ -170,8 +166,7 @@ namespace Microsoft.Build.Evaluation
         /// This method uses cached expression trees to avoid generating them from scratch every time it's called.
         /// This method is thread safe and is called from engine and task execution module threads
         /// </summary>
-        internal static bool EvaluateCondition<P, I>
-            (
+        internal static bool EvaluateCondition<P, I>(
             string condition,
             ParserOptions options,
             Expander<P, I> expander,
@@ -181,7 +176,8 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase projectRootElementCache = null)
+            ProjectRootElementCacheBase projectRootElementCache = null,
+            LoggingContext loggingContext = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -196,7 +192,8 @@ namespace Microsoft.Build.Evaluation
                 loggingServices,
                 buildEventContext,
                 fileSystem,
-                projectRootElementCache);
+                projectRootElementCache,
+                loggingContext);
         }
 
         /// <summary>
@@ -206,8 +203,7 @@ namespace Microsoft.Build.Evaluation
         /// This method is thread safe and is called from engine and task execution module threads
         /// Logging service may be null.
         /// </summary>
-        internal static bool EvaluateConditionCollectingConditionedProperties<P, I>
-        (
+        internal static bool EvaluateConditionCollectingConditionedProperties<P, I>(
             string condition,
             ParserOptions options,
             Expander<P, I> expander,
@@ -218,8 +214,8 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase projectRootElementCache = null
-        )
+            ProjectRootElementCacheBase projectRootElementCache = null,
+            LoggingContext loggingContext = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -279,7 +275,7 @@ namespace Microsoft.Build.Evaluation
             {
                 try
                 {
-                    result = parsedExpression.Evaluate(state);
+                    result = parsedExpression.Evaluate(state, loggingContext);
                 }
                 finally
                 {
@@ -353,7 +349,7 @@ namespace Microsoft.Build.Evaluation
             ///     May return null if the expression would expand to non-empty and it broke out early.
             ///     Otherwise, returns the correctly expanded expression.
             /// </summary>
-            string ExpandIntoStringBreakEarly(string expression);
+            string ExpandIntoStringBreakEarly(string expression, LoggingContext loggingContext = null);
 
             /// <summary>
             ///     Expands the specified expression into a list of TaskItem's.
@@ -363,7 +359,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             ///     Expands the specified expression into a string.
             /// </summary>
-            string ExpandIntoString(string expression);
+            string ExpandIntoString(string expression, LoggingContext loggingContext = null);
 
             /// <summary>
             ///     PRE cache
@@ -409,8 +405,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public ProjectRootElementCacheBase LoadedProjectsCache { get; }
 
-            internal ConditionEvaluationState
-                (
+            internal ConditionEvaluationState(
                 string condition,
                 Expander<P, I> expander,
                 ExpanderOptions expanderOptions,
@@ -418,8 +413,7 @@ namespace Microsoft.Build.Evaluation
                 string evaluationDirectory,
                 ElementLocation elementLocation,
                 IFileSystem fileSystem,
-                ProjectRootElementCacheBase projectRootElementCache = null
-                )
+                ProjectRootElementCacheBase projectRootElementCache = null)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
                 ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
@@ -440,11 +434,11 @@ namespace Microsoft.Build.Evaluation
             /// May return null if the expression would expand to non-empty and it broke out early.
             /// Otherwise, returns the correctly expanded expression.
             /// </summary>
-            public string ExpandIntoStringBreakEarly(string expression)
+            public string ExpandIntoStringBreakEarly(string expression, LoggingContext loggingContext = null)
             {
                 var originalValue = _expander.WarnForUninitializedProperties;
 
-                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation);
+                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation, loggingContext);
 
                 _expander.WarnForUninitializedProperties = originalValue;
 
@@ -471,12 +465,13 @@ namespace Microsoft.Build.Evaluation
             /// Expands the specified expression into a string.
             /// </summary>
             /// <param name="expression">The expression to expand.</param>
+            /// <param name="loggingContext"></param>
             /// <returns>The expanded string.</returns>
-            public string ExpandIntoString(string expression)
+            public string ExpandIntoString(string expression, LoggingContext loggingContext = null)
             {
                 var originalValue = _expander.WarnForUninitializedProperties;
 
-                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation);
+                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation, loggingContext);
 
                 _expander.WarnForUninitializedProperties = originalValue;
 

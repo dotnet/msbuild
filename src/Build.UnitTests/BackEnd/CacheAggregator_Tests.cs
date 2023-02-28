@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -75,11 +75,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RejectCachesWithMoreConfigEntriesThanResultEntries()
         {
             var configCache = new ConfigCache();
-            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
-            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 2, new BuildRequestData("path2", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"c", "d"}, null), "13"));
+            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "a", "b" }, null), "13"));
+            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 2, new BuildRequestData("path2", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "c", "d" }, null), "13"));
 
             var resultsCache = new ResultsCache();
-            var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
+            var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>() { "a", "b" }, null, BuildEventContext.Invalid, null));
             buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
             resultsCache.AddResult(buildResult);
 
@@ -97,15 +97,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RejectCachesWithMoreResultEntriesThanConfigEntries()
         {
             var configCache = new ConfigCache();
-            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
+            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "a", "b" }, null), "13"));
 
             var resultsCache = new ResultsCache();
-            var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
+            var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>() { "a", "b" }, null, BuildEventContext.Invalid, null));
             buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
 
             resultsCache.AddResult(buildResult);
 
-            var buildResult2 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
+            var buildResult2 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>() { "a", "b" }, null, BuildEventContext.Invalid, null));
             buildResult2.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
 
             resultsCache.AddResult(buildResult2);
@@ -126,10 +126,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // one entry in each cache but different config ids
 
             var configCache = new ConfigCache();
-            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
+            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "a", "b" }, null), "13"));
 
             var resultsCache = new ResultsCache();
-            var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
+            var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>() { "a", "b" }, null, BuildEventContext.Invalid, null));
             buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
             resultsCache.AddResult(buildResult);
 
@@ -148,18 +148,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // collides with the config id from configCache2
             var configCache1 = new ConfigCache();
-            configCache1.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
+            configCache1.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "a", "b" }, null), "13"));
 
             var resultsCache1 = new ResultsCache();
-            var buildResult11 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
+            var buildResult11 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>() { "a", "b" }, null, BuildEventContext.Invalid, null));
             buildResult11.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
             resultsCache1.AddResult(buildResult11);
 
             var configCache2 = new ConfigCache();
-            configCache2.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
+            configCache2.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "a", "b" }, null), "13"));
 
             var resultsCache2 = new ResultsCache();
-            var buildResult21 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"e", "f"}, null, BuildEventContext.Invalid, null));
+            var buildResult21 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>() { "e", "f" }, null, BuildEventContext.Invalid, null));
             buildResult21.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
             resultsCache2.AddResult(buildResult21);
 
@@ -185,17 +185,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var results = aggregator.Aggregate();
 
-            AssertAggregation(new[] {(configCache, resultsCache)}, results);
+            AssertAggregation(new[] { (configCache, resultsCache) }, results);
         }
 
         [Fact]
         public void SingleCacheWithSingleEntry()
         {
             var configCache = new ConfigCache();
-            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
+            configCache.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "a", "b" }, null), "13"));
 
             var resultsCache = new ResultsCache();
-            var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
+            var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>() { "a", "b" }, null, BuildEventContext.Invalid, null));
             buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
             resultsCache.AddResult(buildResult);
 
@@ -203,32 +203,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var results = aggregator.Aggregate();
 
-            AssertAggregation(new[] {(configCache, resultsCache)}, results);
+            AssertAggregation(new[] { (configCache, resultsCache) }, results);
         }
 
         [Fact]
         public void MultipleCachesMultipleEntries()
         {
             var configCache1 = new ConfigCache();
-            configCache1.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
-            configCache1.AddConfiguration(new BuildRequestConfiguration(configId: 2, new BuildRequestData("path2", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"c", "d"}, null), "13"));
+            configCache1.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "a", "b" }, null), "13"));
+            configCache1.AddConfiguration(new BuildRequestConfiguration(configId: 2, new BuildRequestData("path2", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "c", "d" }, null), "13"));
 
             var resultsCache1 = new ResultsCache();
-            var buildResult11 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
+            var buildResult11 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>() { "a", "b" }, null, BuildEventContext.Invalid, null));
             buildResult11.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
-            var buildResult12 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>(){"c", "d"}, null, BuildEventContext.Invalid, null));
+            var buildResult12 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>() { "c", "d" }, null, BuildEventContext.Invalid, null));
             buildResult12.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
             resultsCache1.AddResult(buildResult11);
             resultsCache1.AddResult(buildResult12);
 
             var configCache2 = new ConfigCache();
-            configCache2.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path3", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"e", "f"}, null), "13"));
-            configCache2.AddConfiguration(new BuildRequestConfiguration(configId: 2, new BuildRequestData("path4", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"g", "h"}, null), "13"));
+            configCache2.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path3", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "e", "f" }, null), "13"));
+            configCache2.AddConfiguration(new BuildRequestConfiguration(configId: 2, new BuildRequestData("path4", new Dictionary<string, string>() { ["p"] = "v" }, "13", new[] { "g", "h" }, null), "13"));
 
             var resultsCache2 = new ResultsCache();
-            var buildResult21 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"e", "f"}, null, BuildEventContext.Invalid, null));
+            var buildResult21 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>() { "e", "f" }, null, BuildEventContext.Invalid, null));
             buildResult21.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
-            var buildResult22 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>(){"g", "h"}, null, BuildEventContext.Invalid, null));
+            var buildResult22 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>() { "g", "h" }, null, BuildEventContext.Invalid, null));
             buildResult22.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
             resultsCache2.AddResult(buildResult21);
             resultsCache2.AddResult(buildResult22);
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var results = aggregator.Aggregate();
 
-            AssertAggregation(new[] {(configCache1, resultsCache1), (configCache2, resultsCache2)}, results);
+            AssertAggregation(new[] { (configCache1, resultsCache1), (configCache2, resultsCache2) }, results);
         }
 
         private void AssertAggregation((ConfigCache configCache, ResultsCache resultsCache)[] inputCaches, CacheAggregation aggregation)

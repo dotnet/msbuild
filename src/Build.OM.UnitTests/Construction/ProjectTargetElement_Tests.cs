@@ -1,13 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Shouldly;
+using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Xunit;
 
 #nullable disable
 
@@ -28,8 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.CreateTargetElement("@#$invalid@#$");
-            }
-           );
+            });
         }
         /// <summary>
         /// Read targets in an empty project
@@ -103,8 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.Inputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null outputs on the target element
@@ -116,8 +118,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.Outputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null dependsOnTargets on the target element
@@ -129,8 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.DependsOnTargets = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null dependsOnTargets on the target element
@@ -142,8 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.KeepDuplicateOutputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null condition on the target element
@@ -172,8 +171,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read a target with an invalid attribute
@@ -190,8 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an target with two task children
@@ -337,6 +334,49 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.Null(target.Returns);
             Assert.True(project.HasUnsavedChanges);
+        }
+
+        /// <summary>
+        /// Parse invalid property under target
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReadInvalidPropertyUnderTarget(bool enableNewBehavior)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                ChangeWaves.ResetStateForTests();
+                if (!enableNewBehavior)
+                {
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                }
+
+                string projectFile = @"
+                    <Project>
+                        <Target Name='t'>
+                            <test>m</test>
+                        </Target>
+                    </Project>";
+                TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
+                ProjectCollection collection = new ProjectCollection();
+                var error = Assert.Throws<InvalidProjectFileException>(() =>
+                {
+                    collection.LoadProject(file.Path).Build().ShouldBeTrue();
+                });
+
+                error.ErrorCode.ShouldMatch("MSB4067");
+                var expectedString = "<PropertyGroup>";
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+                {
+                    error.Message.ShouldMatch(expectedString);
+                }
+                else
+                {
+                    error.Message.ShouldNotMatch(expectedString);
+                }
+            }
         }
 
         /// <summary>

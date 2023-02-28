@@ -1,21 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -142,41 +139,41 @@ namespace Microsoft.Build.Logging
             currentRecordStream.SetLength(0);
         }
 
-/*
-Base types and inheritance ("EventArgs" suffix omitted):
+        /*
+        Base types and inheritance ("EventArgs" suffix omitted):
 
-Build
-    Telemetry
-    LazyFormattedBuild
-        BuildMessage
-            CriticalBuildMessage
-            EnvironmentVariableRead
-            MetaprojectGenerated
-            ProjectImported
-            PropertyInitialValueSet
-            PropertyReassignment
-            TargetSkipped
-            TaskCommandLine
-            TaskParameter
-            UninitializedPropertyRead
-        BuildStatus
-            TaskStarted
-            TaskFinished
-            TargetStarted
-            TargetFinished
-            ProjectStarted
-            ProjectFinished
-            BuildStarted
-            BuildFinished
-            ProjectEvaluationStarted
-            ProjectEvaluationFinished
-        BuildError
-        BuildWarning
-        CustomBuild
-            ExternalProjectStarted
-            ExternalProjectFinished
+        Build
+            Telemetry
+            LazyFormattedBuild
+                BuildMessage
+                    CriticalBuildMessage
+                    EnvironmentVariableRead
+                    MetaprojectGenerated
+                    ProjectImported
+                    PropertyInitialValueSet
+                    PropertyReassignment
+                    TargetSkipped
+                    TaskCommandLine
+                    TaskParameter
+                    UninitializedPropertyRead
+                BuildStatus
+                    TaskStarted
+                    TaskFinished
+                    TargetStarted
+                    TargetFinished
+                    ProjectStarted
+                    ProjectFinished
+                    BuildStarted
+                    BuildFinished
+                    ProjectEvaluationStarted
+                    ProjectEvaluationFinished
+                BuildError
+                BuildWarning
+                CustomBuild
+                    ExternalProjectStarted
+                    ExternalProjectFinished
 
-*/
+        */
 
         private void WriteCore(BuildEventArgs e)
         {
@@ -251,7 +248,14 @@ Build
         {
             Write(BinaryLogRecordKind.BuildStarted);
             WriteBuildEventArgsFields(e);
-            Write(e.BuildEnvironment);
+            if (Traits.LogAllEnvironmentVariables)
+            {
+                Write(e.BuildEnvironment);
+            }
+            else
+            {
+                Write(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)));
+            }
         }
 
         private void Write(BuildFinishedEventArgs e)
@@ -424,6 +428,7 @@ Build
         {
             switch (e)
             {
+                case ResponseFileUsedEventArgs responseFileUsed: Write(responseFileUsed); break;
                 case TaskParameterEventArgs taskParameter: Write(taskParameter); break;
                 case ProjectImportedEventArgs projectImported: Write(projectImported); break;
                 case TargetSkippedEventArgs targetSkipped: Write(targetSkipped); break;
@@ -433,6 +438,7 @@ Build
                 case EnvironmentVariableReadEventArgs environmentVariableRead: Write(environmentVariableRead); break;
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: Write(propertyInitialValueSet); break;
                 case CriticalBuildMessageEventArgs criticalBuildMessage: Write(criticalBuildMessage); break;
+                case AssemblyLoadBuildEventArgs assemblyLoad: Write(assemblyLoad); break;
                 default: // actual BuildMessageEventArgs
                     Write(BinaryLogRecordKind.Message);
                     WriteMessageFields(e, writeImportance: true);
@@ -462,6 +468,18 @@ Build
             Write((int)e.BuildReason);
             Write((int)e.SkipReason);
             binaryWriter.WriteOptionalBuildEventContext(e.OriginalBuildEventContext);
+        }
+
+        private void Write(AssemblyLoadBuildEventArgs e)
+        {
+            Write(BinaryLogRecordKind.AssemblyLoad);
+            WriteMessageFields(e, writeMessage: false, writeImportance: false);
+            Write((int)e.LoadingContext);
+            WriteDeduplicatedString(e.LoadingInitiator);
+            WriteDeduplicatedString(e.AssemblyName);
+            WriteDeduplicatedString(e.AssemblyPath);
+            Write(e.MVID);
+            WriteDeduplicatedString(e.AppDomainDescriptor);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)
@@ -502,7 +520,12 @@ Build
             WriteMessageFields(e, writeImportance: true);
             WriteDeduplicatedString(e.EnvironmentVariableName);
         }
-
+        private void Write(ResponseFileUsedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.ResponseFileUsed);
+            WriteMessageFields(e);
+            WriteDeduplicatedString(e.ResponseFilePath);
+        }
         private void Write(TaskCommandLineEventArgs e)
         {
             Write(BinaryLogRecordKind.TaskCommandLine);
@@ -518,7 +541,8 @@ Build
             Write((int)e.Kind);
             WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
-            if (e.Kind == TaskParameterMessageKind.AddItem)
+            if (e.Kind == TaskParameterMessageKind.AddItem
+               || e.Kind == TaskParameterMessageKind.TaskOutput)
             {
                 CheckForFilesToEmbed(e.ItemType, e.Items);
             }
@@ -1075,6 +1099,15 @@ Build
         private void Write(bool boolean)
         {
             binaryWriter.Write(boolean);
+        }
+
+        private unsafe void Write(Guid guid)
+        {
+            byte* ptr = (byte*)&guid;
+            for (int i = 0; i < sizeof(Guid); i++, ptr++)
+            {
+                binaryWriter.Write(*ptr);
+            }
         }
 
         private void WriteDeduplicatedString(string text)

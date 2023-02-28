@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -156,6 +156,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
         private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
+            string fullDestinationDirectoryPath = Path.GetFullPath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
+
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
                 if (ShouldSkipEntry(zipArchiveEntry))
@@ -164,7 +166,10 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
+                string fullDestinationPath = Path.GetFullPath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
+                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
+
+                FileInfo destinationPath = new(fullDestinationPath);
 
                 // Zip archives can have directory entries listed explicitly.
                 // If this entry is a directory we should create it and move to the next entry.

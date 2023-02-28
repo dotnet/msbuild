@@ -1,8 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -170,7 +171,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
 
                 string contents = @"a message here
                     error abcd12345: hey jude.
@@ -202,7 +203,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (file != null) File.Delete(file);
+                if (file != null)
+                {
+                    File.Delete(file);
+                }
             }
         }
 
@@ -223,8 +227,7 @@ namespace Microsoft.Build.UnitTests
                     Console.WriteLine(e.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the LogErrorFromException & LogWarningFromException methods
@@ -282,6 +285,30 @@ namespace Microsoft.Build.UnitTests
                 engine.AssertLogContains(stackTrace);
                 engine.AssertLogContains("InvalidOperationException");
             }
+        }
+
+        /// <summary>
+        /// Verify that <see cref="TaskLoggingHelper.LogErrorFromException(Exception, bool, bool, string)" /> logs inner exceptions from an <see cref="AggregateException" />.
+        /// </summary>
+        [Fact]
+        public void TestLogFromExceptionWithAggregateException()
+        {
+            AggregateException aggregateException = new AggregateException(
+                new InvalidOperationException("The operation was invalid"),
+                new IOException("An I/O error occurred"));
+
+            MockEngine engine = new MockEngine();
+            MockTask task = new MockTask
+            {
+                BuildEngine = engine
+            };
+
+            task.Log.LogErrorFromException(aggregateException);
+
+            engine.Errors.ShouldBe(2);
+
+            engine.AssertLogContains("The operation was invalid");
+            engine.AssertLogContains("An I/O error occurred");
         }
     }
 }

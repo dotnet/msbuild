@@ -1,14 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
-
+using Xunit;
+using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
 using Marshal = System.Runtime.InteropServices.Marshal;
 using VarEnum = System.Runtime.InteropServices.VarEnum;
-using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
-using Xunit;
 
 #nullable disable
 
@@ -111,12 +110,12 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public class MockTypeInfo : ITypeInfo, ICompositeTypeInfo, IFixedTypeInfo
     {
-        static private int s_HREF_IMPLTYPES_OFFSET = 1000;
-        static private int s_HREF_VARS_OFFSET = 2000;
-        static private int s_HREF_FUNCSRET_OFFSET = 3000;
-        static private int s_HREF_FUNCSPARAM_OFFSET = 4000;
-        static private int s_HREF_FUNCSPARAM_OFFSET_PERFUNC = 100;
-        static private int s_HREF_RANGE = 999;
+        private static int s_HREF_IMPLTYPES_OFFSET = 1000;
+        private static int s_HREF_VARS_OFFSET = 2000;
+        private static int s_HREF_FUNCSRET_OFFSET = 3000;
+        private static int s_HREF_FUNCSPARAM_OFFSET = 4000;
+        private static int s_HREF_FUNCSPARAM_OFFSET_PERFUNC = 100;
+        private static int s_HREF_RANGE = 999;
 
         private MockTypeLib _containingTypeLib;
 

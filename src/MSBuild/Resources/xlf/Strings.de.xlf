@@ -116,7 +116,7 @@
                      value that comes from a response file.
     </source>
         <target state="translated">  -interactive[:True|False]
-                     Weist darauf hin, dass für Aktionen im Build eine 
+                     Weist darauf hin, dass für Aktionen im Build eine
                      Interaktion mit dem Benutzer zugelassen ist. Verwenden Sie dieses Argument
                      in einem automatisierten Szenario, in dem keine Interaktivität
                      erwartet wird.
@@ -130,8 +130,17 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_35_IsolateProjectsSwitch">
-        <source>  -isolateProjects[:True|False]
+        <source>  -isolateProjects[:True|MessageUponIsolationViolation|False]
                      Causes MSBuild to build each project in isolation.
+
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
                      This is a more restrictive mode of MSBuild as it requires
                      that the project graph be statically discoverable at
@@ -141,11 +150,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True|False]
+        <target state="needs-review-translation">  -isolateProjects[:True|False]
                      Führt dazu, dass MSBuild jedes Projekt isoliert erstellt.
 
                      Dies ist ein restriktiverer Modus von MSBuild, da er erfordert, dass
-                     der Projektgraph zur Auswertungszeit statisch ermittelbar ist. Er kann jedoch 
+                     der Projektgraph zur Auswertungszeit statisch ermittelbar ist. Er kann jedoch
                      die Planung verbessern und den Speichermehraufwand
                      beim Erstellen einer großen Anzahl von Projekten verringern.
                      (Kurzform: -isolate)
@@ -337,8 +346,8 @@ Beispiel:
                      Antwortdateien anzugeben, geben Sie jede Antwortdatei
                      gesondert an.
 
-                     Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch 
-                     in den folgenden Speicherorten verwendet: 
+                     Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch
+                     in den folgenden Speicherorten verwendet:
                      (1) Verzeichnis von "msbuild.exe"
                      (2) Verzeichnis des ersten erstellten Projekts oder Projektmappe
 </target>
@@ -429,7 +438,7 @@ Beispiel:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
+        <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben,
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
                        [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
@@ -438,7 +447,7 @@ Beispiel:
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
                        {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
-                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
+                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
                      Beispiele:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -513,39 +522,41 @@ Beispiel:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleloggerparameters:&lt;Parameter&gt;
-                     Parameter für die Konsolenprotokollierung. (Kurzform: -clp)
-                     Folgende Parameter sind verfügbar:
-                        PerformanceSummary: Zeigt die in Aufgaben, Zielen und
-                            Projekten verbrachte Zeit an.
-                        Summary: Zeigt abschließend eine Zusammenfassung der Fehler und Warnungen an.
-                        NoSummary: Zeigt keine Fehler- und Warnungsübersicht am
-                            Ende an.
-                        ErrorsOnly: Zeigt nur Fehler an.
-                        WarningsOnly: Zeigt nur Warnungen an.
-                        NoItemAndPropertyList: Zeigt keine Liste der Elemente
-                            und Eigenschaften am Anfang jeder Projekterstellung an.
-                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an. 
-                        ShowTimestamp: Zeigt den Timestamp als Präfix einer
-                            Meldung an.                                           
-                        ShowEventId: Zeigt die eventId für gestartete
-                            Ereignisse, abgeschlossene Ereignisse und Meldungen an.
-                        ForceNoAlign: Richtet den Text nicht an der Größe des
-                            Konsolenpuffers aus.
-                        DisableConsoleColor: Verwendet die Standardkonsolenfarben
-                            für alle Protokollierungsmeldungen.
-                        DisableMPLogging: Deaktiviert die Ausgabe wie
-                            bei der Mehrprozessorprotokollierung im Modus mit nur einem Prozessor.
-                        EnableMPLogging: Aktiviert das Format der
-                            Mehrprozessorprotokollierung auch bei der Ausführung
-                            im Modus mit nur einem Prozessor. Dieses Protokollierungsformat ist standardmäßig aktiviert. 
-                        ForceConsoleColor: Verwendet selbst dann
-                            ANSI-Konsolenfarben, wenn
-                            die Konsole dies nicht unterstützt.
-                        Verbosity: Überschreibt die Einstellung für -verbosity für 
-                            diese Protokollierung.
-                     Beispiel:
-                        -consoleloggerparameters:PerformanceSummary;NoSummary;
+        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parameters to console logger. (Short form: -clp)
+                     The available parameters are:
+                        PerformanceSummary--Show time spent in tasks, targets
+                            and projects.
+                        Summary--Show error and warning summary at the end.
+                        NoSummary--Don't show error and warning summary at the
+                            end.
+                        ErrorsOnly--Show only errors.
+                        WarningsOnly--Show only warnings.
+                        NoItemAndPropertyList--Don't show list of items and
+                            properties at the start of each project build.
+                        ShowCommandLine--Show TaskCommandLineEvent messages
+                        ShowTimestamp--Display the Timestamp as a prefix to any
+                            message.
+                        ShowEventId--Show eventId for started events, finished
+                            events, and messages
+                        ForceNoAlign--Does not align the text to the size of
+                            the console buffer
+                        DisableConsoleColor--Use the default console colors
+                            for all logging messages.
+                        DisableMPLogging-- Disable the multiprocessor
+                            logging style of output when running in
+                            non-multiprocessor mode.
+                        EnableMPLogging--Enable the multiprocessor logging
+                            style even when running in non-multiprocessor
+                            mode. This logging style is on by default.
+                        ForceConsoleColor--Use ANSI console colors even if
+                            console does not support it
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
+                            logger.
+                     Example:
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -642,11 +653,10 @@ Beispiel:
       <trans-unit id="HelpMessage_InputCachesFiles">
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+        <target state="needs-review-translation">  -inputResultsCaches:&lt;cacheFile&gt;...
                      Durch Semikolons getrennte Liste von Eingabecachedateien, aus denen MSBuild
                      Buildergebnisse liest.
                      Durch Festlegen dieser Option werden auch isolierte Builds aktiviert (-isolate).
@@ -661,10 +671,10 @@ Beispiel:
         <source>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
+                     If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[Cachedatei]
+        <target state="needs-review-translation">  -outputResultsCache:[Cachedatei]
                      Ausgabecachedateien, in die MSBuild am Ende des Buildvorgangs die Inhalte
                      der zugehörigen Caches mit Buildergebnissen schreibt.
                      Durch Festlegung dieser Option werden außerdem isolierte Builds aktiviert (-isolate).
@@ -701,8 +711,8 @@ Beispiel:
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
         <target state="translated">  -distributedlogger:&lt;Zentrale Protokollierung&gt;*&lt;Weiterleitende Protokollierung&gt;
-                     Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert, wobei an jeden Knoten eine andere 
-                     Protokollierungsinstanz angefügt wird. Um mehrere Protokollierungen anzugeben, wird jede Protokollierung 
+                     Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert, wobei an jeden Knoten eine andere
+                     Protokollierungsinstanz angefügt wird. Um mehrere Protokollierungen anzugeben, wird jede Protokollierung
                      gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
@@ -712,7 +722,7 @@ Beispiel:
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
                        {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
-                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
+                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
                      Beispiele:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -737,8 +747,8 @@ Beispiel:
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreprojectextensions:&lt;Erweiterungen&gt;
-                     Liste der zu ignorierenden Erweiterungen, wenn die zu erstellende 
-                     Projektdatei ermittelt wird. Verwenden Sie ein Semikolon oder ein Komma, 
+                     Liste der zu ignorierenden Erweiterungen, wenn die zu erstellende
+                     Projektdatei ermittelt wird. Verwenden Sie ein Semikolon oder ein Komma,
                      um mehrere Erweiterungen voneinander zu trennen.
                      (Kurzform: -ignore)
                      Beispiel:
@@ -764,8 +774,8 @@ Beispiel:
    </source>
         <target state="translated">  -toolsversion:&lt;Version&gt;
                      Die Version des MSBuild-Toolsets (Aufgaben, Ziele usw.),
-                     die während des Erstellens zu verwenden ist. Diese Version überschreibt die 
-                     von einzelnen Projekten angegebenen Versionen. (Kurzform: 
+                     die während des Erstellens zu verwenden ist. Diese Version überschreibt die
+                     von einzelnen Projekten angegebenen Versionen. (Kurzform:
                      -tv)
                      Beispiel:
                        -toolsversion:3.5
@@ -824,14 +834,14 @@ Beispiel:
         <target state="translated">  -distributedFileLogger
                      Protokolliert die Erstellungsausgabe in mehrere Dateien, eine Protokolldatei
                      pro MSBuild-Knoten. Der anfängliche Speicherort für diese Dateien ist
-                     das aktuelle Verzeichnis. Standardmäßig werden die Dateien 
+                     das aktuelle Verzeichnis. Standardmäßig werden die Dateien
                      "MSBuild&lt;Knoten-ID&gt;.log" benannt. Der Speicherort der Datei und
-                     andere Parameter für fileLogger können durch das Hinzufügen 
+                     andere Parameter für fileLogger können durch das Hinzufügen
                      des Schalters "-fileLoggerParameters" angegeben werden.
 
                      Wenn mithilfe des fileLoggerParameters-Parameters ein Protokolldateiname festgelegt wurde,
-                     verwendet die verteilte Protokollierung den Dateinamen als 
-                     Vorlage und fügt die Knoten-ID an diesen Dateinamen an, 
+                     verwendet die verteilte Protokollierung den Dateinamen als
+                     Vorlage und fügt die Knoten-ID an diesen Dateinamen an,
                      um für jeden Knoten eine Protokolldatei zu erstellen.
     </target>
         <note>
@@ -875,31 +885,31 @@ Beispiel:
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;Parameter&gt;
                      Gibt zusätzliche Parameter für Dateiprotokollierungen an.
-                     Dieser Schalter bedeutet, dass der entsprechende 
+                     Dieser Schalter bedeutet, dass der entsprechende
                      Schalter "-fileLogger[n]" ebenfalls vorhanden ist.
                      "n" (optional) kann eine Zahl von 1–9 sein.
-                     "-fileLoggerParameters" wird auch von verteilten 
+                     "-fileLoggerParameters" wird auch von verteilten
                      Dateiprotokollierungen verwendet (siehe Beschreibung zu "-distributedFileLogger").
                      (Kurzform: -flp[n])
                      Es sind dieselben Parameter wie für die Konsolenprotokollierung
                      verfügbar. Einige zusätzliche Parameter:
-                        LogFile: Pfad der Protokolldatei, in die das 
+                        LogFile: Pfad der Protokolldatei, in die das
                             Buildprotokoll geschrieben wird.
-                        Append: Gibt an, ob das Buildprotokoll erweitert oder 
+                        Append: Gibt an, ob das Buildprotokoll erweitert oder
                             oder überschrieben wird. Mit diesem Schalter
                             wird das Buildprotokoll an die Protokolldatei angefügt;
-                            Ohne diesen Schalter wird der Inhalt 
-                            der vorhandenen Protokolldatei überschrieben. 
+                            Ohne diesen Schalter wird der Inhalt
+                            der vorhandenen Protokolldatei überschrieben.
                             Standardmäßig wird die Protokolldatei nicht erweitert.
-                        Encoding: Gibt die Codierung der Datei an, 
+                        Encoding: Gibt die Codierung der Datei an,
                             z. B. UTF-8, Unicode oder ASCII.
                      Die Standardeinstellung für "verbosity" ist "Detailed".
                      Beispiele:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -925,7 +935,7 @@ Beispiel:
         <target state="translated">  -nodeReuse:&lt;Parameter&gt;
                      Aktiviert oder deaktiviert die Wiederverwendung von MSBuild-Knoten.
                      Die Parameter lauten:
-                     True: Knoten bleiben nach dem Abschluss der Erstellung 
+                     True: Knoten bleiben nach dem Abschluss der Erstellung
                      erhalten und werden bei folgenden Erstellungen wiederverwendet (Standardeinstellung).
                      False: Knoten bleiben nach dem Abschluss der Erstellung nicht erhalten.
                      (Kurzform: -nr)
@@ -1022,11 +1032,12 @@ Beispiel:
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1056: Der Wert für das Isolieren von Projekten ist nicht gültig. {0}</target>
+        <target state="needs-review-translation">MSBUILD : error MSB1056: Der Wert für das Isolieren von Projekten ist nicht gültig. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent
+      to Boolean.TrueString, nameof(ProjectIsolationMode.MessageUponIsolationViolation), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

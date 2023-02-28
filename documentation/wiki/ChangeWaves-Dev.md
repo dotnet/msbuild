@@ -7,7 +7,7 @@ A Change Wave is a set of risky features developed under the same opt-out flag. 
 Opt-out is a better approach for us because we'd likely get limited feedback when a feature impacts customer builds. When a feature does impact a customer negatively, it's a quick switch to disable and allows time to adapt. The key aspect to Change Waves is that it smooths the transition for customers adapting to risky changes that the MSBuild team feels strongly enough to take.
 
 ## How do They Work?
-The opt-out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
+The opt-out comes in the form of setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## Choosing a Change Wave for a New Feature
 This is determined on a case by case basis and should be discussed with the MSBuild team. A safe bet would be to check our [currently active Change Waves](ChangeWaves.md#change-waves-&-associated-features) and pick the version after the latest MSBuild version. This version corresponds to the latest version of Visual Studio.
@@ -51,12 +51,12 @@ Surround your feature with the following:
 
 If you need to condition a Task or Target, use the built in `AreFeaturesEnabled` function.
 ```xml
-<Target Name="SomeRiskyChange" Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))"">
+<Target Name="SomeRiskyChange" Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">
 <!-- Where '17.4' is the change wave assigned to your feature. -->
 ```
 
 ## Test Your Feature
-Create tests as you normally would. Include one test with environment variable `MSBuildDisableFeaturesFromVersion` set to `ChangeWaves.Wave17_4`. Set this like so:
+Create tests as you normally would. Include one test with environment variable `MSBUILDDISABLEFEATURESFROMVERSION` set to `ChangeWaves.Wave17_4`. Set this like so:
 ```c#
 using TestEnvironment env = TestEnvironment.Create();
 

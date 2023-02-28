@@ -1,37 +1,37 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
-using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Globbing;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Internal.Constants;
+using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
+using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
-using System.Globalization;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Definition;
-using Microsoft.Build.Evaluation.Context;
-using Microsoft.Build.Globbing;
-using Microsoft.Build.ObjectModelRemoting;
-using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
-using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using Microsoft.Build.FileSystem;
 
 #nullable disable
 
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// * and ? are invalid file name characters, but they occur in globs as wild cards.
         /// </summary>
-        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\' && c != ':').ToArray();
+        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c != '/' && c != '\\' && c != ':').ToArray();
 
         /// <summary>
         /// Context to log messages and events in.
@@ -599,6 +599,21 @@ namespace Microsoft.Build.Evaluation
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
+
+        /// <summary>
+        /// Indicates whether the global properties dictionary contains the specified key.
+        /// </summary>
+        internal bool GlobalPropertiesContains(string key) => implementation.GlobalPropertiesContains(key);
+
+        /// <summary>
+        /// Indicates how many elements are in the global properties dictionary.
+        /// </summary>
+        internal int GlobalPropertiesCount => implementation.GlobalPropertiesCount();
+
+        /// <summary>
+        /// Enumerates the values in the global properties dictionary.
+        /// </summary>
+        internal IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable => implementation.GlobalPropertiesEnumerable();
 
         /// <summary>
         /// Item types in this project.
@@ -2088,6 +2103,37 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesContains(string)"/>.
+            /// </summary>
+            /// <param name="key">The key to check for its value.</param>
+            /// <returns>Whether the key is in the global properties dictionary.</returns>
+            public override bool GlobalPropertiesContains(string key)
+            {
+                return _data.GlobalPropertiesDictionary.Contains(key);
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesCount()"/>.
+            /// </summary>
+            /// <returns>The number of properties in the global properties dictionary</returns>
+            public override int GlobalPropertiesCount()
+            {
+                return _data.GlobalPropertiesDictionary.Count;
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesEnumerable()"/>.
+            /// </summary>
+            /// <returns>An IEnumerable of the keys and values of the global properties dictionary</returns>
+            public override IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable()
+            {
+                foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
+                {
+                    yield return new KeyValuePair<string, string>(property.Name, ((IProperty)property).EvaluatedValueEscaped);
+                }
+            }
+
+            /// <summary>
             /// Read only dictionary of the global properties used in the evaluation
             /// of this project.
             /// </summary>
@@ -2614,9 +2660,9 @@ namespace Microsoft.Build.Evaluation
             {
                 return (excludeGlob, removeGlob) switch
                 {
-                    (null,     null)     => includeGlob,
-                    (not null, null)     => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
-                    (null,     not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
+                    (null, null) => includeGlob,
+                    (not null, null) => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
+                    (null, not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
                     (not null, not null) => new MSBuildGlobWithGaps(includeGlob, new CompositeGlob(excludeGlob, removeGlob))
                 };
             }
@@ -2736,12 +2782,13 @@ namespace Microsoft.Build.Evaluation
                     return new List<ProvenanceResult>();
                 }
 
-                return
-                    projectItemElements
+                return projectItemElements
                     .AsParallel()
-                    .AsOrdered()
-                    .Select(i => ComputeProvenanceResult(itemToMatch, i))
-                    .Where(r => r != null)
+                    .Select((item, index) => (Result: ComputeProvenanceResult(itemToMatch, item), Index: index))
+                    .Where(pair => pair.Result != null)
+                    .AsSequential()
+                    .OrderBy(pair => pair.Index)
+                    .Select(pair => pair.Result)
                     .ToList();
             }
 
@@ -2924,7 +2971,7 @@ namespace Microsoft.Build.Evaluation
                     string originalValue = (existing == null) ? String.Empty : ((IProperty)existing).EvaluatedValueEscaped;
 
                     _data.GlobalPropertiesDictionary.Set(ProjectPropertyInstance.Create(name, escapedValue));
-                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, true /* is global */, false /* may not be reserved name */));
+                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, isGlobalProperty: true, mayBeReserved: false, loggingContext: null));
 
                     ProjectCollection.AfterUpdateLoadedProjectGlobalProperties(Owner);
                     MarkDirty();
@@ -4249,14 +4296,12 @@ namespace Microsoft.Build.Evaluation
                     toolsVersionLocation = Project.Xml.ToolsVersionLocation;
                 }
 
-                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-                (
+                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                     ExplicitToolsVersion,
                     Project.Xml.ToolsVersion,
                     Project.ProjectCollection.GetToolset,
                     Project.ProjectCollection.DefaultToolsVersion,
-                    out var usingDifferentToolsVersionFromProjectFile
-                );
+                    out var usingDifferentToolsVersionFromProjectFile);
 
                 UsingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 
@@ -4394,9 +4439,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null)
             {
-                ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
+                ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
                 Properties.Set(property);
 
                 AddToAllEvaluatedPropertiesList(property);

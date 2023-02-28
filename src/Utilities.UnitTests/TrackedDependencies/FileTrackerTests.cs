@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_FILE_TRACKER
 
@@ -68,11 +68,13 @@ namespace Microsoft.Build.UnitTests.FileTracking
                     Environment.ExpandEnvironmentVariables("%windir%\\system32;%windir%"));
             }
 
+#if ENABLE_TRACKER_TESTS // https://github.com/dotnet/msbuild/issues/649
             // Call StopTrackingAndCleanup here, just in case one of the unit tests failed before it called it
             // In real code StopTrackingAndCleanup(); would always be in a finally {} block.
             FileTracker.StopTrackingAndCleanup();
             FileTrackerTestHelper.CleanTlogs();
             FileTracker.SetThreadCount(1);
+#endif
         }
 
         public void Dispose()
@@ -83,7 +85,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
                 Environment.SetEnvironmentVariable("PATH", s_oldPath);
                 s_oldPath = null;
             }
-
             FileTrackerTestHelper.CleanTlogs();
         }
 
@@ -314,7 +315,7 @@ namespace ConsoleApplication4
 
             try
             {
-                codeFile = FileUtilities.GetTemporaryFile();
+                codeFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
                 csc.BuildEngine = new MockEngine();
@@ -418,7 +419,7 @@ namespace ConsoleApplication4
             try
             {
                 string inputPath = Path.GetFullPath("test.in");
-                codeFile = FileUtilities.GetTemporaryFile();
+                codeFile = FileUtilities.GetTemporaryFileName();
                 string codeContent = @"using System.IO; class X { static void Main() { File.ReadAllText(@""" + inputPath + @"""); File.ReadAllText(@""" + inputPath + @"""); }}";
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
@@ -837,11 +838,9 @@ class X
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
 
-        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
+        [Fact]
         public void FileTrackerFileIsUnderPath()
         {
-            Console.WriteLine("Test: FileTrackerFileIsUnderPath");
-
             // YES: Both refer to something under baz, so yes this is on the path
             Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\", @"c:\foo\bar\baz\"));
 
@@ -883,11 +882,9 @@ class X
             Assert.False(FileTracker.FileIsUnderPath(@"c:\foo\rumble.cpp", @"c:\foo\rumble\"));
         }
 
-        [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
+        [Fact]
         public void FileTrackerFileIsExcludedFromDependencies()
         {
-            Console.WriteLine("Test: FileTrackerFileIsExcludedFromDependencies");
-
             string applicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string localApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string localLowApplicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData\\LocalLow");
@@ -903,7 +900,7 @@ class X
                                       ? tempPath
                                       : FileUtilities.EnsureTrailingSlash(
                                           NativeMethodsShared.GetLongFilePath(tempPath).ToUpperInvariant());
-            
+
             // We don't want to be including these as dependencies or outputs:
             // 1. Files under %USERPROFILE%\Application Data in XP and %USERPROFILE%\AppData\Roaming in Vista and later.
             // 2. Files under %USERPROFILE%\Local Settings\Application Data in XP and %USERPROFILE%\AppData\Local in Vista and later.
@@ -1024,8 +1021,7 @@ class X
 
                 // This should throw a COMException, since we have cleaned up
                 FileTracker.WriteContextTLogs(Path.GetFullPath("."), tlogRootName);
-            }
-           );
+            });
         }
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
         public void InProcTrackingTestNotStop()
@@ -1359,8 +1355,7 @@ class X
                     File.Delete(tlogWriteFile);
                     File.Delete(tlogWriteFile2);
                 }
-            }
-           );
+            });
         }
 
         [Fact(Skip = "Test fails in xunit because tracker includes the PID in the log file.")]

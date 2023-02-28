@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -61,8 +62,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 HostServices hostServices = new HostServices();
                 TestHostObject hostObject = new TestHostObject();
                 hostServices.RegisterHostObject(null, "target", "task", hostObject);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test ensuring a null target for host object registration throws.
@@ -75,8 +75,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 HostServices hostServices = new HostServices();
                 TestHostObject hostObject = new TestHostObject();
                 hostServices.RegisterHostObject("project", null, "task", hostObject);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test ensuring a null task for host object registration throws.
@@ -89,8 +88,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 HostServices hostServices = new HostServices();
                 TestHostObject hostObject = new TestHostObject();
                 hostServices.RegisterHostObject("project", "target", null, hostObject);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test which verifies host object unregistration.
@@ -223,8 +221,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 hostServices.RegisterHostObject("project", "target", "task", hostObject);
                 Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
                 hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test which ensures that setting an Any affinity for a project with a host object throws.
@@ -239,15 +236,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 hostServices.RegisterHostObject("project", "target", "task", hostObject);
                 Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
                 hostServices.SetNodeAffinity("project", NodeAffinity.Any);
-            }
-           );
+            });
         }
 
         /// <summary>
         /// Test which ensures that setting an Any affinity for a project with a remote host object does not throws.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void TestNoContradictoryRemoteHostObjectAffinity()
         {
@@ -282,8 +277,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 TestHostObject hostObject = new TestHostObject();
                 hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
                 hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test which ensures the host object can be set for a project which has the Any affinity specifically set.
@@ -301,8 +295,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures the remote host object cannot affect a project which has the Any affinity specifically set.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void TestRegisterRemoteHostObjectNoAffect_Any2()
         {
@@ -340,8 +333,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures the affinity for a project can be changed once the in process host object is registered
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void TestAffinityChangeAfterRegisterInprocessHostObject()
         {
@@ -450,8 +442,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests that register overrides existing reigsted remote host object.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void TestRegisterOverrideExistingRegisted()
         {
@@ -525,7 +516,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// A dummy host object class.
         /// </summary>
-        private class TestHostObject : ITaskHost
+        private sealed class TestHostObject : ITaskHost
         {
             /// <summary>
             /// Constructor.

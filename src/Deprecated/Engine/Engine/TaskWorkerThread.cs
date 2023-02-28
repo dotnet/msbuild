@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections;
@@ -14,7 +18,7 @@ namespace Microsoft.Build.BuildEngine
     /// </summary>
     internal class TaskWorkerThread
     {
-        enum NodeLoopExecutionMode
+        private enum NodeLoopExecutionMode
         {
             /// <summary>
             /// This is a mode of a thread that is not executing a task but is responsible for picking up
@@ -254,7 +258,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="executionMode">Current execution mode</param>
         /// <returns>Array of handles to wait on</returns>
-        private WaitHandle [] GetHandlesArray( NodeLoopExecutionMode executionMode )
+        private WaitHandle[] GetHandlesArray(NodeLoopExecutionMode executionMode)
         {
             WaitHandle[] waitHandles = null;
 
@@ -307,7 +311,7 @@ namespace Microsoft.Build.BuildEngine
         (
             NodeLoopExecutionMode executionMode,
             int handleId,
-            BuildResult [] buildResults
+            BuildResult[] buildResults
         )
         {
             // Create an array of event to the node thread responds
@@ -350,7 +354,7 @@ namespace Microsoft.Build.BuildEngine
                     continueExecution = false;
                 }
                 // New work item has appeared in the queue
-                else if (eventType == 1 && executionMode != NodeLoopExecutionMode.WaitingPassiveThread )
+                else if (eventType == 1 && executionMode != NodeLoopExecutionMode.WaitingPassiveThread)
                 {
                     ErrorUtilities.VerifyThrow(
                                     executionMode == NodeLoopExecutionMode.WaitingActiveThread ||
@@ -499,7 +503,7 @@ namespace Microsoft.Build.BuildEngine
         (
             int handleId,
             BuildResult[] buildResults,
-            BuildRequest [] buildRequests
+            BuildRequest[] buildRequests
         )
         {
             TaskWorkerThread workerThread = GetWorkerThreadForHandleId(handleId);
@@ -519,7 +523,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
 
-        internal int [] GetWaitingTasksData(List<BuildRequest[]> outstandingRequests)
+        internal int[] GetWaitingTasksData(List<BuildRequest[]> outstandingRequests)
         {
             int[] waitingTasksArray;
             lock (waitingTasks)
@@ -548,7 +552,7 @@ namespace Microsoft.Build.BuildEngine
             return waitingTasksArray;
         }
 
-        internal void PostWorkItem( TaskExecutionState workItem)
+        internal void PostWorkItem(TaskExecutionState workItem)
         {
             lock (workItemQueue)
             {
@@ -557,7 +561,7 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        internal void PostBuildResult( BuildResult buildResult)
+        internal void PostBuildResult(BuildResult buildResult)
         {
             TaskWorkerThread workerThread = GetWorkerThreadForHandleId(buildResult.HandleId);
 

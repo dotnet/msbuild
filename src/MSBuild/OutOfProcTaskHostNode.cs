@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -792,7 +792,7 @@ namespace Microsoft.Build.CommandLine
 
             if (_debugCommunications)
             {
-                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(Path.GetTempPath(), @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
+                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
                 {
                     writer.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
                 }
@@ -901,8 +901,7 @@ namespace Microsoft.Build.CommandLine
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();
 
-                taskResult = _taskWrapper.ExecuteTask
-                (
+                taskResult = _taskWrapper.ExecuteTask(
                     this as IBuildEngine,
                     taskName,
                     taskLocation,
@@ -912,8 +911,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
 #endif
-                    taskParams
-                );
+                    taskParams);
             }
             catch (ThreadAbortException)
             {
@@ -937,11 +935,9 @@ namespace Microsoft.Build.CommandLine
 
                     lock (_taskCompleteLock)
                     {
-                        _taskCompletePacket = new TaskHostTaskComplete
-                                                    (
+                        _taskCompletePacket = new TaskHostTaskComplete(
                                                         taskResult,
-                                                        currentEnvironment
-                                                    );
+                                                        currentEnvironment);
                     }
 
 #if FEATURE_APPDOMAIN
@@ -1173,13 +1169,11 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log messages!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildMessageEventArgs message = new BuildMessageEventArgs
-                                                (
+            BuildMessageEventArgs message = new BuildMessageEventArgs(
                                                     ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
                                                     null,
                                                     _currentConfiguration.TaskName,
-                                                    importance
-                                                );
+                                                    importance);
 
             LogMessageEvent(message);
         }
@@ -1192,8 +1186,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log warnings!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildWarningEventArgs warning = new BuildWarningEventArgs
-                                                (
+            BuildWarningEventArgs warning = new BuildWarningEventArgs(
                                                     null,
                                                     null,
                                                     ProjectFileOfTaskNode,
@@ -1203,8 +1196,7 @@ namespace Microsoft.Build.CommandLine
                                                     0,
                                                     ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
                                                     null,
-                                                    _currentConfiguration.TaskName
-                                                );
+                                                    _currentConfiguration.TaskName);
 
             LogWarningEvent(warning);
         }
@@ -1217,8 +1209,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log errors!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildErrorEventArgs error = new BuildErrorEventArgs
-                                                (
+            BuildErrorEventArgs error = new BuildErrorEventArgs(
                                                     null,
                                                     null,
                                                     ProjectFileOfTaskNode,
@@ -1228,8 +1219,7 @@ namespace Microsoft.Build.CommandLine
                                                     0,
                                                     AssemblyResources.GetString(messageResource),
                                                     null,
-                                                    _currentConfiguration.TaskName
-                                                );
+                                                    _currentConfiguration.TaskName);
 
             LogErrorEvent(error);
         }

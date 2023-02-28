@@ -1,15 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using System;
 using System.IO;
-using Microsoft.Build.Shared;
+using System.Linq;
 using System.Reflection;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
 
 #nullable disable
 
@@ -20,6 +21,8 @@ namespace Microsoft.Build.UnitTests
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "PortableTask");
         private const string ProjectFileName = "portableTaskTest.proj";
         private const string DLLFileName = "PortableTask.dll";
+        private static string PortableTaskFolderPath = Path.GetFullPath(
+                    Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "..", "..", "..", "Samples", "PortableTask"));
 
         private readonly ITestOutputHelper _output;
 
@@ -54,7 +57,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.True(TypeLoader.IsPartialTypeNameMatch("Csc", "Microsoft.Build.Tasks.Csc"));
         }
-        
+
 
         [Fact]
         public void LoadNonExistingAssembly()
@@ -91,6 +94,28 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void LoadTaskDependingOnMSBuild()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                string currentAssembly = Assembly.GetExecutingAssembly().Location;
+                string utilitiesName = "Microsoft.Build.Utilities.Core.dll";
+                string newAssemblyLocation = Path.Combine(folder.Path, Path.GetFileName(currentAssembly));
+
+                // The "first" directory is "Debug" or "Release"
+                string portableTaskPath = Path.Combine(Directory.GetDirectories(PortableTaskFolderPath).First(), "netstandard2.0", "OldMSBuild");
+                string utilities = Path.Combine(portableTaskPath, utilitiesName);
+                File.Copy(utilities, Path.Combine(folder.Path, utilitiesName));
+                File.Copy(currentAssembly, newAssemblyLocation);
+                TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
+
+                // If we cannot accept MSBuild next to the task assembly we're loading, this will throw.
+                typeLoader.Load("TypeLoader_Tests", AssemblyLoadInfo.Create(null, newAssemblyLocation), useTaskHost: true);
+            }
+        }
+
+        [Fact]
         public void LoadOutsideAssembly()
         {
             using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
@@ -115,7 +140,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact (Skip = "https://github.com/dotnet/msbuild/issues/325")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/325")]
         public void LoadInsideAssemblyWhenGivenOutsideAssemblyWithSameName()
         {
             using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))

@@ -6,22 +6,36 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>true</IsPackable>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
-    <LangVersion>8.0</LangVersion>
     <PackageId>Microsoft.NET.StringTools</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <SemanticVersioningV1>true</SemanticVersioningV1>
 
+    <EnablePackageValidation>true</EnablePackageValidation>
+
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
     <PackageDescription>This package contains the $(AssemblyName) assembly which implements common string-related functionality such as weak interning.</PackageDescription>
+    
+    <IncludeBuildOutput Condition="'$(TargetFramework)' == 'net35'">false</IncludeBuildOutput>
+    <!-- Don't publish the reference assembly if the build output isn't included. -->
+    <TargetsForTfmSpecificBuildOutput Condition="'$(IncludeBuildOutput)' == 'false'" />
+    <!-- NU5128: Add lib or ref assemblies for the net35 target framework. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <!-- Place the netstandard2.0 ref assembly to /ref instead of /lib to work around a NuGet pack misbehavior. -->
+    <!-- Without this customization both the ref and implementation assembly would go to /lib, creating a conflict. -->
+    <TargetsForTfmSpecificBuildOutput />
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackRefAssembly</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
     <AssemblyName>Microsoft.NET.StringTools.net35</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net35' AND '$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
   </ItemGroup>
@@ -36,4 +50,10 @@
     <Compile Remove="InternableString.Simple.cs" />
     <Compile Remove="WeakStringCache.Locking.cs" />
   </ItemGroup>
+
+  <Target Name="PackRefAssembly">
+      <ItemGroup>
+        <TfmSpecificPackageFile Include="$(TargetRefPath);@(FinalDocFile)" PackagePath="ref/$(TargetFramework)" />
+      </ItemGroup>
+  </Target>
 </Project>

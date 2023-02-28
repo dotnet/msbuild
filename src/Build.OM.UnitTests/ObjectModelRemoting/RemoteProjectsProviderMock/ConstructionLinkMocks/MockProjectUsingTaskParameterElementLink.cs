@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectUsingTaskParameterElementLinkRemoter : MockProjectElementLinkRemoter
+    internal sealed class MockProjectUsingTaskParameterElementLinkRemoter : MockProjectElementLinkRemoter
     {
         public ProjectUsingTaskParameterElement TaskParamXml => (ProjectUsingTaskParameterElement)Source;
         public override ProjectElement ImportImpl(ProjectCollectionLinker remote)
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public string Name { get => this.TaskParamXml.Name; set => TaskParamXml.Name = value; }
     }
 
-    internal class MockProjectUsingTaskParameterElementLink : ProjectUsingTaskParameterElementLink, ILinkMock, IProjectElementLinkHelper
+    internal sealed class MockProjectUsingTaskParameterElementLink : ProjectUsingTaskParameterElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectUsingTaskParameterElementLink(MockProjectUsingTaskParameterElementLinkRemoter proxy, IImportHolder holder)
         {
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         object ILinkMock.Remoter => this.Proxy;
         MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
 
-        public override string Name { get => Proxy.Name; set =>Proxy.Name = value; }
+        public override string Name { get => Proxy.Name; set => Proxy.Name = value; }
         #region ProjectElementLink redirectors
         private IProjectElementLinkHelper EImpl => (IProjectElementLinkHelper)this;
         public override ProjectElementContainer Parent => EImpl.GetParent();

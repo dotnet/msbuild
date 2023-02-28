@@ -1,12 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
-using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Utilities;
 using Xunit;
 
 #nullable disable
@@ -213,9 +210,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         public static IEnumerable<object[]> Parse_Valid_TestData()
         {
-            foreach (var prefix in new[] { "", "v",  "V"})
+            foreach (var prefix in new[] { "", "v", "V", " ", "\t", "\tv" })
             {
-                foreach (var suffix in new[] { "", "-pre", "-pre+metadata", "+metadata"})
+                foreach (var suffix in new[] { "", "-pre", "-pre+metadata", "+metadata", " ", "\n", "-pre \r\n" })
                 {
                     yield return new object[] { $"{prefix}1{suffix}", new SimpleVersion(1) };
                     yield return new object[] { $"{prefix}1.2{suffix}", new SimpleVersion(1, 2) };
@@ -241,7 +238,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             yield return new object[] { "1,2,3,4", typeof(FormatException) }; // Input contains invalid separator
             yield return new object[] { "1.2.3.4.5", typeof(FormatException) }; // Input has more than 4 version components
 
-            yield return new object[] { "1." , typeof(FormatException) }; // Input contains empty component
+            yield return new object[] { "1.", typeof(FormatException) }; // Input contains empty component
             yield return new object[] { "1.2,", typeof(FormatException) }; // Input contains empty component
             yield return new object[] { "1.2.3.", typeof(FormatException) }; // Input contains empty component
             yield return new object[] { "1.2.3.4.", typeof(FormatException) }; // Input contains empty component
@@ -257,7 +254,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             yield return new object[] { "1.2.2147483648.4", typeof(FormatException) }; // Input contains a value > int.MaxValue
             yield return new object[] { "1.2.3.2147483648", typeof(FormatException) }; // Input contains a value > int.MaxValue
 
-            // System.Version allows whitespace around components, but we don't
+            // System.Version allows whitespace around components, but we only allow it at the beginning and end of the string.
             yield return new object[] { "2  .3.    4.  \t\r\n15  ", typeof(FormatException) };
             yield return new object[] { "   2  .3.    4.  \t\r\n15  ", typeof(FormatException) };
 
@@ -285,7 +282,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         public static IEnumerable<object[]> ToString_TestData()
         {
-            yield return new object[] { new SimpleVersion(1), "1.0.0.0"};
+            yield return new object[] { new SimpleVersion(1), "1.0.0.0" };
             yield return new object[] { new SimpleVersion(1, 2), "1.2.0.0" };
             yield return new object[] { new SimpleVersion(1, 2, 3), "1.2.3.0" };
             yield return new object[] { new SimpleVersion(1, 2, 3, 4), "1.2.3.4" };

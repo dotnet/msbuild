@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
 using System.IO;
@@ -30,7 +30,13 @@ namespace Microsoft.Build.Shared
                 // can be quite long, leaving very little room for the actual pipe name. Fortunately,
                 // '/tmp' is mandated by POSIX to always be a valid temp directory, so we can use that
                 // instead.
+#if !CLR2COMPATIBILITY
                 return Path.Combine("/tmp", pipeName);
+#else
+                // We should never get here. This would be a net35 task host running on unix.
+                ErrorUtilities.ThrowInternalError("Task host used on unix in retrieving the pipe name.");
+                return string.Empty;
+#endif
             }
             else
             {

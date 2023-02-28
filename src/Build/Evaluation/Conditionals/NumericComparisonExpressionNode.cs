@@ -1,8 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             bool isLeftNum = LeftChild.TryNumericEvaluate(state, out double leftNum);
             bool isLeftVersion = LeftChild.TryVersionEvaluate(state, out Version leftVersion);
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Evaluation
                     state.Condition,
                     /* helpfully display unexpanded token and expanded result in error message */
                     isLeftNum ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
-                    isLeftNum ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
+                    isLeftNum ? RightChild.GetExpandedValue(state, loggingContext) : LeftChild.GetExpandedValue(state, loggingContext));
             }
 
             return (isLeftNum, isLeftVersion, isRightNum, isRightVersion) switch

@@ -1,8 +1,5 @@
-﻿// --------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-// --------------------------------------------------------------------
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 // --------------------------------------------------------------------
 // 
@@ -24,7 +21,7 @@ using Shouldly;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
-    internal class SolutionFileBuilder
+    internal sealed class SolutionFileBuilder
     {
         public static readonly IReadOnlyCollection<SolutionConfigurationInSolution> SolutionConfigurationPlatformsDefaults = new[]
         {
@@ -95,7 +92,7 @@ namespace Microsoft.Build.Engine.UnitTests
             return new SolutionFileBuilder
             {
                 Projects = graph.ProjectNodes.ToDictionary(
-                    n => GraphTestingUtilities.GetProjectNumber((ProjectGraphNode) n).ToString(),
+                    n => GraphTestingUtilities.GetProjectNumber((ProjectGraphNode)n).ToString(),
                     n => n.ProjectInstance.FullPath),
                 ProjectConfigurations = projectConfigurations,
                 SolutionDependencies = solutionDependencies,
@@ -121,7 +118,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     projectInfos.ShouldContainKey(parent);
                     projectInfos.ShouldContainKey(dependency);
 
-                    projectInfos[parent].AddDependency(projectInfos[dependency]); 
+                    projectInfos[parent].AddDependency(projectInfos[dependency]);
                 }
             }
 
@@ -141,9 +138,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     sc => new ProjectConfigurationInSolution(
                         sc.ConfigurationName,
                         sc.PlatformName,
-                        true)
-                    )
-                );
+                        true)));
 
             var sb = new StringBuilder();
 

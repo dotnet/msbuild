@@ -8,29 +8,28 @@
     the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
      -->
   <ItemGroup>
-    <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
-    <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftNetCompilersToolsetVersion)" />
-    <PackageReference Update="Microsoft.CodeAnalysis.Collections" Version="$(MicrosoftCodeAnalysisCollectionsVersion)" />
-    <PackageReference Update="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
-    <PackageReference Update="Microsoft.IO.Redist" Version="$(MicrosoftIORedistVersion)" />
-    <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" />
-    <PackageReference Update="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
-    <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
-    <PackageReference Update="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-    <PackageReference Update="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
-    <PackageReference Update="System.Net.Http" Version="$(SystemNetHttpVersion)" />
-    <PackageReference Update="System.Memory" Version="$(SystemMemoryVersion)" />
-    <PackageReference Update="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
-    <PackageReference Update="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
-    <PackageReference Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
-    <PackageReference Update="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
-    <PackageReference Update="System.Security.Permissions" Version="$(SystemSecurityPermissionsVersion)" />
-    <PackageReference Update="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
-    <PackageReference Update="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesVersion)" />
-    <PackageReference Update="System.Text.Json" Version="$(SystemTextJsonVersion)" />
-    <PackageReference Update="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
-    <PackageReference Update="xunit.assert" Version="$(XUnitVersion)" />
-    <PackageReference Update="xunit.console" Version="$(XUnitVersion)" />
-    <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
+    <PackageVersion Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftNetCompilersToolsetVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Collections" Version="$(MicrosoftCodeAnalysisCollectionsVersion)" />
+    <PackageVersion Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.IO.Redist" Version="$(MicrosoftIORedistVersion)" />
+    <PackageVersion Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
+    <PackageVersion Include="System.Memory" Version="$(SystemMemoryVersion)" />
+    <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
+    <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
+    <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
+    <PackageVersion Include="System.Security.Permissions" Version="$(SystemSecurityPermissionsVersion)" />
+    <PackageVersion Include="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesVersion)" />
+    <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
+    <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
+    <PackageVersion Include="xunit.assert" Version="$(XUnitVersion)" />
+    <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
+    <PackageVersion Include="xunit.core" Version="$(XUnitVersion)" />
   </ItemGroup>
 </Project>

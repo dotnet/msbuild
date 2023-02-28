@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -12,9 +12,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -95,7 +95,11 @@ namespace Microsoft.Build.Tasks
             var assemblyList = new List<AssemblyEntry>();
             var remappingEntries = new List<AssemblyRemapping>();
 
-            if (assemblyTableInfos == null) throw new ArgumentNullException(nameof(assemblyTableInfos));
+            if (assemblyTableInfos == null)
+            {
+                throw new ArgumentNullException(nameof(assemblyTableInfos));
+            }
+
             foreach (AssemblyTableInfo assemblyTableInfo in assemblyTableInfos)
             {
                 ReadFile(assemblyTableInfo, assemblyList, errors, errorFilenames, remappingEntries);
@@ -332,7 +336,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static RedistList GetRedistList(AssemblyTableInfo[] assemblyTables)
         {
-            if (assemblyTables == null) throw new ArgumentNullException(nameof(assemblyTables));
+            if (assemblyTables == null)
+            {
+                throw new ArgumentNullException(nameof(assemblyTables));
+            }
+
             Array.Sort(assemblyTables);
 
             var keyBuilder = assemblyTables.Length > 0 ? new StringBuilder(assemblyTables[0].Descriptor) : new StringBuilder();
@@ -359,14 +367,22 @@ namespace Microsoft.Build.Tasks
 
         private static string GetSimpleName(string assemblyName)
         {
-            if (assemblyName == null) throw new ArgumentNullException(nameof(assemblyName));
+            if (assemblyName == null)
+            {
+                throw new ArgumentNullException(nameof(assemblyName));
+            }
+
             int i = assemblyName.IndexOf(",", StringComparison.Ordinal);
             return i > 0 ? assemblyName.Substring(0, i) : assemblyName;
         }
 
         private AssemblyEntry GetUnifiedAssemblyEntry(string assemblyName)
         {
-            if (assemblyName == null) throw new ArgumentNullException(nameof(assemblyName));
+            if (assemblyName == null)
+            {
+                throw new ArgumentNullException(nameof(assemblyName));
+            }
+
             if (!_assemblyNameToUnifiedAssemblyName.TryGetValue(assemblyName, out AssemblyEntry unifiedEntry))
             {
                 string simpleName = GetSimpleName(assemblyName);
@@ -875,7 +891,10 @@ namespace Microsoft.Build.Tasks
             public int Compare(AssemblyEntry firstEntry, AssemblyEntry secondEntry)
             {
                 Debug.Assert(firstEntry != null && secondEntry != null);
-                if (firstEntry == null || secondEntry == null) return 0;
+                if (firstEntry == null || secondEntry == null)
+                {
+                    return 0;
+                }
 
                 AssemblyNameExtension firstAssemblyName = firstEntry.AssemblyNameExtension;
                 AssemblyNameExtension secondAssemblyName = secondEntry.AssemblyNameExtension;
@@ -918,8 +937,8 @@ namespace Microsoft.Build.Tasks
 
         internal AssemblyTableInfo(string path, string frameworkDirectory)
         {
-            Path = path;
-            FrameworkDirectory = frameworkDirectory;
+            Path = FileUtilities.NormalizeForPathComparison(path);
+            FrameworkDirectory = FileUtilities.NormalizeForPathComparison(frameworkDirectory);
         }
 
         internal string Path { get; }
@@ -1105,7 +1124,7 @@ namespace Microsoft.Build.Tasks
 
         public string FullName { get; }
         public bool InGAC { get; }
-        public bool? IsRedistRoot { get;  }
+        public bool? IsRedistRoot { get; }
         public string RedistName { get; }
         public string SimpleName { get; }
         public string FrameworkDirectory { get; }

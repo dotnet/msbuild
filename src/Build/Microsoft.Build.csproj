@@ -4,7 +4,7 @@
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(FullFrameworkTFM);net6.0</TargetFrameworks>
+    <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
@@ -20,6 +20,7 @@
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
+    <EnablePackageValidation>true</EnablePackageValidation>
 
     <!-- Do not generate a warning that our 'stable' package should not have a prerelease dependency. -->
     <NoWarn>$(NoWarn);NU5104</NoWarn>
@@ -147,6 +148,7 @@
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitResult.cs" />
@@ -156,6 +158,7 @@
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
     <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />

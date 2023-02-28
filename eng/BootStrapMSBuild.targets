@@ -36,6 +36,7 @@
         <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGet.'))' == 'True'" />
         <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Newtonsoft.Json'))' == 'True'" />
         <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.Extensions.'))' == 'True'" />
 
         <!-- NuGet.targets will be in the ResolvedRuntimeTargets ItemGroup -->
         <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'True'" />
@@ -56,6 +57,7 @@
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'True'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'True'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'True'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'True'" />
     </ItemGroup>
   </Target>
 
@@ -102,6 +104,7 @@
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
 
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
+      <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.tlb" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.pdb" />
@@ -210,7 +213,7 @@
          Copy it from "next to MSBuild" in the pre-bootstrap SDK to our little weirdo bootstrap
          layout next to the SDK tasks, so it can get loaded by the SDK tasks that need it. -->
     <Copy SourceFiles="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Microsoft.Extensions.DependencyModel.dll"
-          DestinationFolder="$(BootstrapDestination)Sdks\Microsoft.NET.Sdk\tools\net6.0" />
+          DestinationFolder="$(BootstrapDestination)Sdks\Microsoft.NET.Sdk\tools\$(LatestDotNetCoreForMSBuild)" />
 
     <Copy SourceFiles="@(InstalledExtensions)"
           DestinationFolder="$(BootstrapDestination)Current\%(RecursiveDir)" />

@@ -9,7 +9,7 @@ Goals:
  * structure (preserves the exact build event args that can later be replayed to reconstruct the exact events and information as if a real build was running). File logs erase structure and are harder to parse (especially for multicore /m builds). Build analyzer tools are conceivable that could benefit from the structure in a binary log. An API is available to load and query binary logs.
  * optionally collect the project files (and all imported targets files) used during the build. This can help analyzing the logs and even view preprocessed source for all projects (with all imported projects inlined).
 
-See http://msbuildlog.com for more information.
+See https://msbuildlog.com/ for more information.
 
 # Creating a binary log during a build
 
@@ -62,16 +62,11 @@ Once you have the `StructuredLogger.dll` on disk you can pass it to MSBuild like
 # Using MSBuild Structured Log Viewer
 
 You can use the MSBuild Structured Log Viewer tool to view `.binlog` files:
-http://msbuildlog.com
+https://msbuildlog.com/
 
 # Collecting binary logs from Visual Studio builds
 
-If you need to capture a binary log in Visual Studio, instead of the command line, you'll need a Visual Studio plugin:
-
-- https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.ProjectSystemTools for VS 2017 & 2019
-- https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.ProjectSystemTools2022 for VS 2022
-
-After installing that, enable logging and run your build ([more details](https://github.com/dotnet/project-system-tools)).
+[see more details](Providing-Binary-Logs.md#capturing-binary-logs-through-visual-studio)
 
 # Binary log file format
 

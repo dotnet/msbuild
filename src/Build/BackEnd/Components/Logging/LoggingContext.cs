@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Diagnostics;
 using Microsoft.Build.Exceptions;
@@ -268,6 +271,16 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrow(IsValid, "must be valid");
             LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
             _hasLoggedErrors = true;
+        }
+
+        /// <summary>
+        /// Logs a file to be included in the binary logger
+        /// </summary>
+        /// <param name="filePath">Path to response file</param>
+        internal void LogIncludeFile(string filePath)
+        {
+            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            _loggingService.LogIncludeFile(BuildEventContext, filePath);
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -89,8 +89,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="appDomainSetup">The AppDomainSetup that we want to use to launch our AppDomainIsolated tasks</param>
         /// <param name="taskParams">Parameters that will be passed to the task when created</param>
         /// <returns>Task completion result showing success, failure or if there was a crash</returns>
-        internal OutOfProcTaskHostTaskResult ExecuteTask
-            (
+        internal OutOfProcTaskHostTaskResult ExecuteTask(
                 IBuildEngine oopTaskHostNode,
                 string taskName,
                 string taskLocation,
@@ -100,8 +99,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
-                IDictionary<string, TaskParameter> taskParams
-            )
+                IDictionary<string, TaskParameter> taskParams)
         {
             buildEngine = oopTaskHostNode;
             this.taskName = taskName;
@@ -123,13 +121,11 @@ namespace Microsoft.Build.CommandLine
                 // so just save that instead.
                 Exception exceptionToReturn = e is TargetInvocationException ? e.InnerException : e;
 
-                return new OutOfProcTaskHostTaskResult
-                            (
+                return new OutOfProcTaskHostTaskResult(
                                 TaskCompleteType.CrashedDuringInitialization,
                                 exceptionToReturn,
                                 "TaskInstantiationFailureError",
-                                new string[] { taskName, taskLocation, String.Empty }
-                            );
+                                new string[] { taskName, taskLocation, String.Empty });
             }
 
             OutOfProcTaskHostTaskResult taskResult;
@@ -142,13 +138,11 @@ namespace Microsoft.Build.CommandLine
 #endif
                     taskParams);
 #else
-                return new OutOfProcTaskHostTaskResult
-                                                (
+                return new OutOfProcTaskHostTaskResult(
                                                     TaskCompleteType.CrashedDuringInitialization,
                                                     null,
                                                     "TaskInstantiationFailureNotSupported",
-                                                    new string[] { taskName, taskLocation, typeof(RunInSTAAttribute).FullName }
-                                                );
+                                                    new string[] { taskName, taskLocation, typeof(RunInSTAAttribute).FullName });
 #endif
             }
             else
@@ -189,8 +183,7 @@ namespace Microsoft.Build.CommandLine
         /// STA thread launching code lifted from XMakeBuildEngine\BackEnd\Components\RequestBuilder\TaskBuilder.cs, ExecuteTaskInSTAThread method.  
         /// Any bug fixes made to this code, please ensure that you also fix that code.  
         /// </comment>
-        private OutOfProcTaskHostTaskResult InstantiateAndExecuteTaskInSTAThread
-            (
+        private OutOfProcTaskHostTaskResult InstantiateAndExecuteTaskInSTAThread(
                 IBuildEngine oopTaskHostNode,
                 LoadedType taskType,
                 string taskName,
@@ -201,8 +194,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
-                IDictionary<string, TaskParameter> taskParams
-            )
+                IDictionary<string, TaskParameter> taskParams)
         {
             ManualResetEvent taskRunnerFinished = new ManualResetEvent(false);
             OutOfProcTaskHostTaskResult taskResult = null;
@@ -214,8 +206,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     try
                     {
-                        taskResult = InstantiateAndExecuteTask
-                                            (
+                        taskResult = InstantiateAndExecuteTask(
                                                 oopTaskHostNode,
                                                 taskType,
                                                 taskName,
@@ -226,8 +217,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                                                 appDomainSetup,
 #endif
-                                                taskParams
-                                            );
+                                                taskParams);
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -238,7 +228,7 @@ namespace Microsoft.Build.CommandLine
                         taskRunnerFinished.Set();
                     }
                 };
-                
+
                 Thread staThread = new Thread(taskRunnerDelegate);
                 staThread.SetApartmentState(ApartmentState.STA);
                 staThread.Name = "MSBuild STA task runner thread";
@@ -272,8 +262,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Do the work of actually instantiating and running the task. 
         /// </summary>
-        private OutOfProcTaskHostTaskResult InstantiateAndExecuteTask
-            (
+        private OutOfProcTaskHostTaskResult InstantiateAndExecuteTask(
                 IBuildEngine oopTaskHostNode,
                 LoadedType taskType,
                 string taskName,
@@ -284,8 +273,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
-                IDictionary<string, TaskParameter> taskParams
-            )
+                IDictionary<string, TaskParameter> taskParams)
         {
 #if FEATURE_APPDOMAIN
             _taskAppDomain = null;
@@ -294,16 +282,25 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                wrappedTask = TaskLoader.CreateTask(taskType, taskName, taskFile, taskLine, taskColumn, new TaskLoader.LogError(LogErrorDelegate),
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                wrappedTask = TaskLoader.CreateTask(
+                    taskType,
+                    taskName,
+                    taskFile,
+                    taskLine,
+                    taskColumn,
+                    new TaskLoader.LogError(LogErrorDelegate),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
+                    // custom app domain assembly loading won't be available for task host
+                    null,
 #endif
                     true /* always out of proc */
 #if FEATURE_APPDOMAIN
                     , out _taskAppDomain
 #endif
                     );
-
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -317,13 +314,11 @@ namespace Microsoft.Build.CommandLine
                     exceptionToReturn = e.InnerException;
                 }
 
-                return new OutOfProcTaskHostTaskResult
-                (
+                return new OutOfProcTaskHostTaskResult(
                     TaskCompleteType.CrashedDuringInitialization,
                     exceptionToReturn,
                     "TaskInstantiationFailureError",
-                    new string[] { taskName, taskLocation, String.Empty }
-                );
+                    new string[] { taskName, taskLocation, String.Empty });
             }
 
             foreach (KeyValuePair<string, TaskParameter> param in taskParams)
@@ -335,14 +330,12 @@ namespace Microsoft.Build.CommandLine
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    return new OutOfProcTaskHostTaskResult
-                            (
+                    return new OutOfProcTaskHostTaskResult(
                                 TaskCompleteType.CrashedDuringInitialization,
                                 // If it's a TargetInvocationException, we only care about the contents of the inner exception, so save that instead.
                                 e is TargetInvocationException ? e.InnerException : e,
                                 "InvalidTaskAttributeError",
-                                new string[] { param.Key, param.Value.ToString(), taskName }
-                            );
+                                new string[] { param.Key, param.Value.ToString(), taskName });
                 }
             }
 
@@ -402,9 +395,7 @@ namespace Microsoft.Build.CommandLine
                                                     0,
                                                     ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
                                                     null,
-                                                    taskName
-                                                )
-                                            );
+                                                    taskName));
         }
     }
 }

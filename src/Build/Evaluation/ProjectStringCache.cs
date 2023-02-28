@@ -1,13 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Xml;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -84,6 +85,13 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Add(string key, XmlDocument document)
         {
+            // Remove string interning in ChangeWave 17.6
+            // Note: When ready to remove the ChangeWaves under 17.6, please delete this entire class and all references to it. (See the PR https://github.com/dotnet/msbuild/pull/7952).
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+            {
+                return key;
+            }
+
             if (key.Length == 0)
             {
                 return String.Empty;

@@ -690,21 +690,21 @@ elementFormDefault="qualified">
                             <xs:element name="IncludeAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_IncludeAssets" _locComment="" -->Assets to include from this reference
+                                  <!-- _locID_text="ProjectReference_IncludeAssets" _locComment="" -->Assets to include from this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
                             <xs:element name="ExcludeAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_ExcludeAssets" _locComment="" -->Assets to exclude from this reference
+                                  <!-- _locID_text="ProjectReference_ExcludeAssets" _locComment="" -->Assets to exclude from this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
                             <xs:element name="PrivateAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_PrivateAssets" _locComment="" -->Assets that are private in this reference
+                                  <!-- _locID_text="ProjectReference_PrivateAssets" _locComment="" -->Assets that are private in this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
@@ -1303,6 +1303,11 @@ elementFormDefault="qualified">
 
     <xs:element name="VisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="MinimumVisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AccelerateBuildsInVisualStudio" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AccelerateBuildsInVisualStudio" _locComment="" -->Indicates whether to enable acceleration when building in Visual Studio (boolean).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="AdditionalFileItemNames" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AllowUnsafeBlocks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AnalysisMode" substitutionGroup="msb:Property">
@@ -1733,6 +1738,11 @@ elementFormDefault="qualified">
       </xs:annotation>
     </xs:element>
     <xs:element name="DisableXbfGeneration" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="DisableTransitiveProjectReferences" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="DisableTransitiveProjectReferences" _locComment="" -->When true, do not discover ProjectReference items representing projects referenced by this project's ProjectReferences. Applies only to projects using the .NET SDK.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="SuppressXamlWarnings" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="XamlRootsLog" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="XamlSavedStateFilePath" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -6152,10 +6162,10 @@ elementFormDefault="qualified">
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="PublicKey" type="xs:string" use="optional">
+          <xs:attribute name="Key" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>
-                <!-- _locID_text="InternalsVisibleTo_PublicKey" _locComment="" -->Optional public key associated with the strong name signature of the friend assembly.
+                <!-- _locID_text="InternalsVisibleTo_Key" _locComment="" -->Optional public key associated with the strong name signature of the friend assembly.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -7,9 +7,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
-
-using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -604,6 +603,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="eventName">The event name.</param>
         /// <param name="properties">The list of properties associated with the event.</param>
         void LogTelemetry(BuildEventContext buildEventContext, string eventName, IDictionary<string, string> properties);
+        #endregion
+
+        #region Log response files
+        /// <summary>
+        /// Helper method to create an event for including files. Typically response files
+        /// </summary>
+        /// <param name="buildEventContext">Event context information which describes where is the event getting logged</param>
+        /// <param name="filePath">Full path to the response file</param>
+        void LogIncludeFile(BuildEventContext buildEventContext, string filePath);
         #endregion
     }
 

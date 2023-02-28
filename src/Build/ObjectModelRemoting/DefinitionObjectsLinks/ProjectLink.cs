@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -68,7 +68,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         /// <summary>
         /// Access to remote <see cref="Project.ItemsIgnoringCondition"/>.
         /// </summary>
-        public abstract  ICollection<ProjectItem> ItemsIgnoringCondition { get; }
+        public abstract ICollection<ProjectItem> ItemsIgnoringCondition { get; }
 
         /// <summary>
         /// Access to remote <see cref="Project.Imports"/>.
@@ -259,5 +259,27 @@ namespace Microsoft.Build.ObjectModelRemoting
         /// Called by the local project collection to indicate to this project that it is no longer loaded.
         /// </summary>
         public abstract void Unload();
+
+        /// <summary>
+        /// Indicates whether a specified key is in the global properties dictionary. This provides a default implementation
+        /// to avoid a breaking change, but it is often overriden for performance.
+        /// </summary>
+        /// <param name="key">The key to check for in the dictionary</param>
+        /// <returns>True if the key is in the global properties; false otherwise</returns>
+        public virtual bool GlobalPropertiesContains(string key) => GlobalProperties.ContainsKey(key);
+
+        /// <summary>
+        /// Indicates how many properties are in the global properties dictionary. This provides a default implementation to
+        /// avoid a breaking change, but it is often overriden for performance.
+        /// </summary>
+        /// <returns>The number of properties in the global properties dictionary</returns>
+        public virtual int GlobalPropertiesCount() => GlobalProperties.Count;
+
+        /// <summary>
+        /// Allows enumeration over the keys and values in the global properties dictionary. This provides a default
+        /// implementation to avoid a breaking change, but it can be overriden for performance.
+        /// </summary>
+        /// <returns>An enumerable of the keys and values in the global properties dictionary</returns>
+        public virtual IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable() => GlobalProperties;
     }
 }

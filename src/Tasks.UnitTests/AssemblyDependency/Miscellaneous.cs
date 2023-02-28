@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,12 +11,14 @@ using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
-using Xunit;
-using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
-using Xunit.Abstractions;
 using Shouldly;
+using Xunit;
+using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
+using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable
 
@@ -94,6 +99,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
         }
 
+        [Fact]
+        public void VerifyPrimaryReferenceToBadImageDoesNotThrow()
+        {
+            ITaskItem x = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.dll"));
+            ITaskItem xpdb = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.pdb"));
+            ResolveAssemblyReference t = new()
+            {
+                BuildEngine = new MockEngine(),
+                AllowedRelatedFileExtensions = new string[] { ".pdb" },
+                Assemblies = new ITaskItem[] { xpdb },
+                AssemblyFiles = new ITaskItem[] { x },
+                SearchPaths = new string[] { "{RawFileName}" },
+            };
+
+            bool success = Execute(t);
+            success.ShouldBeTrue();
+        }
+
         /// <summary>
         /// Let us have the following dependency structure
         ///
@@ -104,7 +127,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to false and the parent of Z is in the GAC
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CopyLocalDependenciesWhenParentReferenceInGacFalseAllParentsInGac()
         {
             // Create the engine.
@@ -180,7 +202,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to false but one of the parents of Z is not in the GAC and Z is not in the gac we should be copy local
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CopyLocalDependenciesWhenParentReferenceInGacFalseSomeParentsInGac()
         {
             // Create the engine.
@@ -243,7 +264,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to true and Z is not in the GAC it will be copy local true
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CopyLocalDependenciesWhenParentReferenceInGacTrueAllParentsInGac()
         {
             // Create the engine.
@@ -292,7 +312,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to true and Z is not in the GAC it will be copy local true
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CopyLocalDependenciesWhenParentReferenceInGacTrueSomeParentsInGac()
         {
             // Create the engine.
@@ -333,7 +352,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CopyLocalDependenciesWhenParentReferenceNotInGac()
         {
             // Create the engine.
@@ -370,7 +388,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// where it was actually resolved). Sets DoNotCopyLocalIfInGac = true
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CopyLocalLegacyBehavior()
         {
             // Create the engine.
@@ -408,8 +425,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Very basic test.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void Basic()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -639,7 +654,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Make sure the imageruntime is correctly returned.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGetImageRuntimeVersion()
         {
             string imageRuntimeReportedByAsssembly = this.GetType().Assembly.ImageRuntimeVersion;
@@ -1020,7 +1034,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Invalid candidate assembly files should not crash
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress286699_InvalidCandidateAssemblyFiles()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1041,7 +1054,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Invalid assembly files should not crash
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress286699_InvalidAssemblyFiles()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1082,7 +1094,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target framework path with a newline should not crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress286699_InvalidTargetFrameworkDirectory()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1107,7 +1118,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Invalid search path should not crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress286699_InvalidSearchPath()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1178,7 +1188,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// that we don't find a strongly named assembly.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void StrongWeakMismatchInDependency()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1225,7 +1234,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// property, then the task should be able to resolve an assembly there.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UseSuppliedHintPath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1281,8 +1289,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Do the most basic AssemblyFoldersEx resolve.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExBasic()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1302,8 +1309,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify that higher alphabetical values for a component are chosen over lower alphabetic values of a component.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExVerifyComponentFolderSorting()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1324,8 +1330,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If the target framework version provided by the targets file doesn't begin
         /// with the letter "v", we should tolerate it and treat it as if it does.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExTargetFrameworkVersionDoesNotBeginWithV()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1349,8 +1354,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Expect it not to resolve and get a message on the console
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchDoesNotMatch()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1375,8 +1379,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target MSIL and get an assembly out of the X86 directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchMSILX86()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1398,9 +1401,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a warning.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Trait("Category", "mono-windows-failing")]
+        [WindowsOnlyFact]
         public void VerifyProcessArchitectureMismatchWarning()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1424,9 +1425,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a warning.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Trait("Category", "mono-windows-failing")]
+        [WindowsOnlyFact]
         public void VerifyProcessArchitectureMismatchWarningDefault()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1449,9 +1448,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a error.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [Trait("Category", "mono-windows-failing")]
+        [WindowsOnlyFact]
         public void VerifyProcessArchitectureMismatchError()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1478,8 +1475,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target None and get an assembly out of the X86 directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneX86()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1499,8 +1495,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If we are targeting NONE and there are two assemblies with the same name then we want to pick the first one rather than look for an assembly which
         /// has a MSIL architecture or a NONE architecture. NONE means you do not care what architecture is picked.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneMix()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1528,8 +1523,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target MSIL and get an assembly out of the MSIL directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchMSILLastFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1554,8 +1548,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target None and get an assembly out of the MSIL directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneLastFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1579,8 +1572,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target MSIL and get an assembly out of the MSIL directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchX86FirstFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1603,8 +1595,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target X86 and get an assembly out of the MSIL directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchX86MSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1626,8 +1617,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target X86 and get an assembly out of the None directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchX86None()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1649,8 +1639,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target None and get an assembly out of the None directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneNone()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1671,8 +1660,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target MSIL and get an assembly out of the None directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArcMSILNone()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1693,8 +1681,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target None and get an assembly out of the MSIL directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneMSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1716,8 +1703,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target MSIL and get an assembly out of the MSIL directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchMSILMSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1739,8 +1725,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Target X86 and get an assembly out of the X86 directory.
         ///
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchMatches()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1764,8 +1749,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// This means if there are remaining search paths to inspect, we should
         /// carry on and inspect those.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExTargetFrameworkVersionBogusValue()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1786,8 +1770,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Tolerate keys like v2.0.x86chk.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void Regress357227_AssemblyFoldersExAgainstRawDrop()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1807,8 +1790,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Matches that exist only in the HKLM hive.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExHKLM()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1827,8 +1809,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Matches that exist in both HKLM and HKCU should favor HKCU
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExHKCUTrumpsHKLM()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1852,8 +1833,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// When matches that have v3.0 (future) and v2.0 (current) versions, the 2.0 version wins.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExFutureTargetNDPVersionsDontMatch()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1872,8 +1852,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If there is no v2.0 (current target NDP) match, then v1.0 should match.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExMatchBackVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1892,8 +1871,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If there is a 2.0 and a 1.0 then match 2.0.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExCurrentTargetVersionTrumpsPastTargetVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1912,8 +1890,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If a control has a service pack then that wins over the control itself
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExServicePackTrumpsBaseVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1933,8 +1910,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Conditions (OSVersion/Platform) can be passed in SearchPaths to filter the result.
         /// Test MaxOSVersion condition
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExConditionFilterMaxOS()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1977,8 +1953,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Conditions (OSVersion/Platform) can be passed in SearchPaths to filter the result.
         /// Test MinOSVersion condition
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExConditionFilterMinOS()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -2291,8 +2266,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Conditions (OSVersion/Platform) can be passed in SearchPaths to filter the result.
         /// Test Platform condition
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void AssemblyFoldersExConditionFilterPlatform()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -2454,16 +2428,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // For {CandidateAssemblyFiles} we don't even want to see a comment logged for files with non-standard extensions.
             // This is because {CandidateAssemblyFiles} is very likely to contain non-assemblies and its best not to clutter
             // up the log.
-            engine.AssertLogDoesntContain
-            (
-                String.Format(".hiddenfile")
-            );
+            engine.AssertLogDoesntContain(
+                String.Format(".hiddenfile"));
 
             // ...but we do want to see a log entry for standard extensions, even if the base file name is empty.
-            engine.AssertLogContains
-            (
-                String.Format(@"NonUI\testDirectoryRoot\.dll")
-            );
+            engine.AssertLogContains(
+                String.Format(@"NonUI\testDirectoryRoot\.dll"));
         }
 
         /// <summary>
@@ -2519,7 +2489,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                   "<File AssemblyName='Microsoft.BuildEngine' Version='3.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='false' />" +
               "</FileList >";
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(redistFile, fullRedistListContentsDuplicates);
@@ -2672,7 +2642,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         private static List<AssemblyEntry> ExpectRedistEntries(string fullRedistListContentsDuplicates, int numberOfExpectedEntries, int numberofExpectedRemapEntries)
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             List<AssemblyEntry> assembliesReadIn = new List<AssemblyEntry>();
             List<AssemblyRemapping> remapEntries = new List<AssemblyRemapping>();
             try
@@ -2968,7 +2938,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// then try to resolve directly to that file name and make it a full path.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void RawFileNameRelative()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -3005,7 +2974,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// then try to resolve the file but make sure it is a full name
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void RelativeDirectoryResolver()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -3041,7 +3009,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If a relative file name is passed in through the HintPath then try to resolve directly to that file name and make it a full path.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void HintPathRelative()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -3158,7 +3125,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// because assemblyName was null and we were comparing the assemblyName from the hintPath to the null assemblyName.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress444793()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -3179,10 +3145,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(succeeded);
             engine.AssertLogDoesntContain("MSB4018");
 
-            engine.AssertLogContains
-            (
-                String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll")
-            );
+            engine.AssertLogContains(
+                String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll"));
         }
 
         /// <summary>
@@ -3190,7 +3154,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// then try to resolve directly to that file name.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void RawFileNameDoesntExist()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -3203,10 +3166,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool succeeded = Execute(t);
             Assert.True(succeeded);
-            engine.AssertLogContains
-            (
-                String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll")
-            );
+            engine.AssertLogContains(
+                String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll"));
         }
 
         /// <summary>
@@ -3272,7 +3233,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// instead we want to let the assembly be resolved normally so that the GAC and AF checks will work.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ParentAssemblyResolvedFromAForGac()
         {
             var parentReferenceFolders = new List<string>();
@@ -3373,6 +3333,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // There should have been one warning about the exception.
             Assert.Equal(1, engine.Warnings);
+            engine.AssertLogContains("MSB3246");
+
+            // There should have been no ugly callstack dumped
+            engine.AssertLogDoesntContain("Microsoft.Build.UnitTests");
+
+            // But it should contain the message from the BadImageFormatException, something like
+            //     WARNING MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. The format of the file 'C:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\BadImage.dll' is invalid
+            engine.AssertLogContains("'C:\\WINNT\\Microsoft.NET\\Framework\\v2.0.MyVersion\\BadImage.dll'"); // just search for the un-localized part
         }
 
         /// <summary>
@@ -3380,7 +3348,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// no reference. We don't want an exception.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ResolveBadImageInSecondary()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -3410,6 +3377,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // There should have been no warning about the exception because it's only a dependency
             Assert.Equal(0, engine.Warnings);
+
+            // There should have been no ugly callstack dumped
+            engine.AssertLogDoesntContain("Microsoft.Build.UnitTests");
         }
 
         /// <summary>
@@ -4064,7 +4034,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// The user browsed to an .exe, so that's what we should give them.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ExecutableExtensionEXE()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -4182,7 +4151,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Without an ExecutableExtension the first assembly out of .dll,.exe wins.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ExecutableExtensionDefaultEXEFirst()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -4262,7 +4230,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If specific version is false, then we should match the first "A" that we find.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SimpleNameWithSpecificVersionFalse()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -4516,7 +4483,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress275161_ScatterAssemblies()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -4569,7 +4535,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress317975_LeftoverLowerVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -4663,7 +4628,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress313086_Part2_MscorlibAsRawFilename()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -4723,7 +4687,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If a relative assemblyFile is passed in resolve it as a full path.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void RelativeAssemblyFiles()
         {
             string testPath = Path.Combine(Path.GetTempPath(), @"RelativeAssemblyFiles");
@@ -4890,7 +4853,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// this reference, especially given the fact that the HintPath was provided in the project file.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress276548_AssemblyNameDifferentThanFusionName()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -4902,11 +4864,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 new TaskItem("A")
             };
-            t.Assemblies[0].SetMetadata
-            (
+            t.Assemblies[0].SetMetadata(
                 "HintPath",
-                @"c:\MyNameMismatch\Foo.dll"
-            );
+                @"c:\MyNameMismatch\Foo.dll");
 
             t.SearchPaths = new string[]
             {
@@ -4938,11 +4898,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 new TaskItem("A")                    // Resolved by HintPath
             };
-            t.Assemblies[0].SetMetadata
-            (
+            t.Assemblies[0].SetMetadata(
                 "HintPath",
-                veryLongFile
-            );
+                veryLongFile);
 
             t.SearchPaths = new string[]
             {
@@ -4965,7 +4923,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Need to be robust in the face of assembly names with special characters.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress265003_EscapedCharactersInFusionName()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -5002,7 +4959,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// have a hintpath, then go ahead and resolve anyway because we know what the path should be.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress284081_UnescapedCharactersInFusionNameWithHintPath()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -5110,11 +5066,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-            (
+            string appConfigFile = WriteAppConfig(
                 "        <dependentAssembly\n" +        // Intentionally didn't close this XML tag.
-                "        </dependentAssembly>\n"
-            );
+                "        </dependentAssembly>\n");
 
             try
             {
@@ -5180,7 +5134,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress339786_CrossVersionsWithAppConfig()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -5197,13 +5150,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies[1].SetMetadata("HintPath", @"C:\Regress339786\FolderA\A.dll");
 
             // Construct the app.config.
-            string appConfigFile = WriteAppConfig
-            (
+            string appConfigFile = WriteAppConfig(
             "        <dependentAssembly>\n" +
             "            <assemblyIdentity name='C' PublicKeyToken='null' culture='neutral' />\n" +
             "            <bindingRedirect oldVersion='0.0.0.0-2.0.0.0' newVersion='2.0.0.0' />\n" +
-            "        </dependentAssembly>\n"
-            );
+            "        </dependentAssembly>\n");
             t.AppConfigFile = appConfigFile;
 
             try
@@ -5251,7 +5202,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// but became false when Crystal Reports started putting their assemblies in this table.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress407623_RedistListDoesNotImplyPresenceInFrameworks()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -5273,17 +5223,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\Regress407623"                    // Assembly is here.
             };
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='CrystalReports-Redist' >" +
                         "<File AssemblyName='CrystalReportsAssembly' Version='2.0.3600.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='2.0.40824.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 t.InstalledAssemblyTables = new TaskItem[] { new TaskItem(redistFile) };
 
@@ -5338,7 +5285,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress435487_FxFileResolvedByHintPathShouldByCopyLocal()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -5359,19 +5305,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
             t.TargetFrameworkDirectories = new string[] { @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx" };
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
 
             try
             {
-                File.Delete(redistFile);
-
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='MyFancy-Redist' >" +
                         "<File AssemblyName='Microsoft.Build.Engine' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 t.InstalledAssemblyTables = new TaskItem[] { new TaskItem(redistFile) };
 
@@ -5392,22 +5334,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void PartialNameMatchingFromRedist()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
 
             try
             {
-                File.Delete(redistFile);
-
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='MyFancy-Redist' >" +
                         // Simple name match where everything is the same except for version
                         "<File AssemblyName='A' Version='1.0.0.0' PublicKeyToken='a5d015c7d5a0b012' Culture='de-DE' FileVersion='2.0.40824.0' InGAC='true' />" +
                         "<File AssemblyName='A' Version='2.0.0.0' PublicKeyToken='a5d015c7d5a0b012' Culture='neutral' FileVersion='2.0.40824.0' InGAC='true' />" +
                         "<File AssemblyName='A' Version='3.0.0.0' PublicKeyToken='null' Culture='de-DE' FileVersion='2.0.40824.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyName v1 = new AssemblyName("A, Culture=de-DE, PublicKeyToken=a5d015c7d5a0b012, Version=1.0.0.0");
                 AssemblyName v2 = new AssemblyName("A, Culture=Neutral, PublicKeyToken=a5d015c7d5a0b012, Version=2.0.0.0");
@@ -5448,8 +5386,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void Regress46599_BogusInGACValueForAssemblyInRedistList()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -5501,8 +5437,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void VerifyFrameworkFileMetadataFiles()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -5540,7 +5474,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                          "<File AssemblyName='C' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
                     "</FileList >";
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(redistFile, redistListContents);
 
             bool success = false;
@@ -5607,7 +5541,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         "<File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
                     "</FileList >";
 
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, redistListContents);
             return tempFile;
         }
@@ -5691,8 +5625,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                                                                            new AssemblyTableInfo("c:\\AnotherRandomDirectory.xml", "TargetFrameworkDirectory")
                                                                                           },
                                                                                           whiteListErrors,
-                                                                                          whiteListErrorFileNames
-                                                                   );
+                                                                                          whiteListErrorFileNames);
 
                 // Since there were no white list expect the black list to return null
                 Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
@@ -5713,14 +5646,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGarbageSubsetListFiles()
         {
             string redistFile = CreateGenericRedistList();
-            string garbageSubsetFile = FileUtilities.GetTemporaryFile();
+            string garbageSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     garbageSubsetFile,
-                    "RandomGarbage, i am a bad file with random goo rather than anything important"
-                 );
+                    "RandomGarbage, i am a bad file with random goo rather than anything important");
 
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(garbageSubsetFile, "TargetFrameworkDirectory");
@@ -5757,7 +5688,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListNoSubsetListName()
         {
             string redistFile = CreateGenericRedistList();
-            string subsetFile = FileUtilities.GetTemporaryFile();
+            string subsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 string subsetListContents =
@@ -5802,8 +5733,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListNullkRedistListName()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
-            string subsetFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
+            string subsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 string subsetListContents =
@@ -5855,7 +5786,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListDifferentNameToSubSet()
         {
             string redistFile = CreateGenericRedistList();
-            string subsetFile = FileUtilities.GetTemporaryFile();
+            string subsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 string subsetListContents =
@@ -5892,7 +5823,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListEmptySubsetMatchingName()
         {
             string redistFile = CreateGenericRedistList();
-            string subsetFile = FileUtilities.GetTemporaryFile();
+            string subsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 string subsetListContents =
@@ -5949,16 +5880,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"{TargetFrameworkDirectory}"
             };
 
-            string redistListPath = FileUtilities.GetTemporaryFile();
-            string subsetListPath = FileUtilities.GetTemporaryFile();
+            string redistListPath = FileUtilities.GetTemporaryFileName();
+            string subsetListPath = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(subsetListPath, _xmlOnlySubset);
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistListPath,
-                   "RANDOMBOOOOOGOOGOOG"
-                );
+                   "RANDOMBOOOOOGOOGOOG");
 
                 t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(redistListPath) };
                 t.IgnoreDefaultInstalledAssemblyTables = true;
@@ -5983,7 +5912,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGoodListsSubsetIsSubsetOfRedist()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(goodSubsetFile, _engineOnlySubset);
@@ -6016,7 +5945,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListVerifyBlackListCache()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(goodSubsetFile, _engineOnlySubset);
@@ -6057,8 +5986,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGoodListsSubsetIsSameAsRedistList()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
-            string goodSubsetFile2 = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
+            string goodSubsetFile2 = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(goodSubsetFile, _engineOnlySubset);
@@ -6094,18 +6023,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGoodListsSubsetIsSuperSet()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     goodSubsetFile,
                   "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
                        "<File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='false' />" +
                        "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
                        "<File AssemblyName='System.Data' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
-                  "</FileList >"
-                 );
+                  "</FileList >");
 
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(goodSubsetFile, "TargetFrameworkDirectory");
@@ -6134,7 +6061,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RedistListGenerateBlackListGoodListsCheckCaseInsensitive()
         {
             string redistFile = CreateGenericRedistList();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(goodSubsetFile, _engineAndXmlSubset.ToUpperInvariant());
@@ -6165,8 +6092,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListGenerateBlackListGoodListsMultipleIdenticalAssembliesInRedistList()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
-            string goodSubsetFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
+            string goodSubsetFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 // Create a redist list which will contains both of the assemblies to search for
@@ -6209,8 +6136,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 SubsetListFinder finder = new SubsetListFinder(Array.Empty<string>());
                 finder.GetSubsetListPathsFromDisk(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where the subsetsToSearchFor are passed in as null
@@ -6221,8 +6147,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 SubsetListFinder finder = new SubsetListFinder(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where the subsetsToSearchFor are an empty array
@@ -6305,7 +6230,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void IgnoreDefaultInstalledAssemblyTables()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -7035,8 +6959,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference rar = new ResolveAssemblyReference();
                 rar.ProfileName = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure we get an argument null exception when the ProfileFullFrameworkFolders is set to null
@@ -7048,8 +6971,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference rar = new ResolveAssemblyReference();
                 rar.FullFrameworkFolders = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure we get an argument null exception when the ProfileFullFrameworkAssemblyTables is set to null
@@ -7061,8 +6983,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference rar = new ResolveAssemblyReference();
                 rar.FullFrameworkAssemblyTables = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify that setting a subset and a profile at the same time will cause an error to be logged and rar to return false
@@ -7217,7 +7138,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// way to specify a TargetFrameworkSubset is to pass one to the InstalledAssemblySubsetTables property.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void IgnoreDefaultInstalledSubsetTables()
         {
             string redistListPath = CreateGenericRedistList();
@@ -7304,7 +7224,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// is passed in. We expect to use that.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NoClientSubsetButInstalledSubTables()
         {
             string redistListPath = CreateGenericRedistList();
@@ -7356,8 +7275,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference reference = new ResolveAssemblyReference();
                 reference.InstalledAssemblySubsetTables = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the case where the targetFrameworkSubsets are null
@@ -7369,8 +7287,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference reference = new ResolveAssemblyReference();
                 reference.TargetFrameworkSubsets = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the case where the FulltargetFrameworkSubsetNames are null
@@ -7382,14 +7299,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference reference = new ResolveAssemblyReference();
                 reference.FullTargetFrameworkSubsetNames = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Test the case where a non existent subset list path is used and no additional subsets are passed in.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void FakeSubsetListPathsNoAdditionalSubsets()
         {
             string redistListPath = CreateGenericRedistList();
@@ -7599,7 +7514,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DoNotAssumeFilesDescribedByRedistListExistOnDisk()
         {
             string redistListPath = CreateGenericRedistList();
@@ -7785,7 +7699,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress393931_AllowAlternateAssemblyExtensions_Case1()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -7817,7 +7730,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Allow alternate extension values to be passed in.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress393931_AllowAlternateAssemblyExtensions()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -7846,7 +7758,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SGenDependeicies()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -7890,7 +7801,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// These two project references have different versions. Important: PKT is null.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress315619_TwoWeaklyNamedPrimariesIsInsoluble()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -7912,10 +7822,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            e.AssertLogContains
-            (
-                String.Format(AssemblyResources.GetString("ResolveAssemblyReference.ConflictUnsolvable"), @"MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", "MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null")
-            );
+            e.AssertLogContains(
+                String.Format(AssemblyResources.GetString("ResolveAssemblyReference.ConflictUnsolvable"), @"MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", "MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null"));
         }
 
         /// <summary>
@@ -7933,7 +7841,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ForwardRedistRoot()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -7952,20 +7859,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyRedist"
             };
 
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
 
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-(
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
                         "<File IsRedistRoot='true' AssemblyName='MyRedistRootAssembly' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true'/>" +
                         "<File IsRedistRoot='false' AssemblyName='MyOtherAssembly' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true'/>" +
                         "<File AssemblyName='MyThirdAssembly' Version='0.0.0.0' PublicKeyToken='null' Culture='Neutral' FileVersion='2.0.40824.0' InGAC='true'/>" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 t.InstalledAssemblyTables = new TaskItem[] { new TaskItem(redistFile) };
 
@@ -8062,7 +7966,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Check the Filtering based on Target Framework.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TargetFrameworkFiltering()
         {
             int resultSet = RunTargetFrameworkFilteringTest("3.0");
@@ -8084,12 +7987,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyGetSimpleNamesIsSorted()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
@@ -8098,8 +7999,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         "<File AssemblyName='System' Version='100.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                         "<File AssemblyName='System' Version='1.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                         "<File AssemblyName='System' Version='2.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8132,17 +8032,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListNonWindowsRedistName()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8163,17 +8060,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListWindowsRedistName()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Something' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8194,17 +8088,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListPartialMatches()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8237,17 +8128,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListDiffVersion()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8269,17 +8157,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListDiffPublicKey()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8301,17 +8186,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListDiffCulture()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='FR-fr' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
@@ -8333,17 +8215,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInRedistListDiffSimpleName()
         {
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
                     "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
                         "<File AssemblyName='System' Version='10.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
-                    "</FileList >"
-                );
+                    "</FileList >");
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });

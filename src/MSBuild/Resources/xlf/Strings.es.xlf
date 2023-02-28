@@ -130,8 +130,17 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_35_IsolateProjectsSwitch">
-        <source>  -isolateProjects[:True|False]
+        <source>  -isolateProjects[:True|MessageUponIsolationViolation|False]
                      Causes MSBuild to build each project in isolation.
+
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
                      This is a more restrictive mode of MSBuild as it requires
                      that the project graph be statically discoverable at
@@ -141,7 +150,7 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True|False]
+        <target state="needs-review-translation">  -isolateProjects[:True|False]
                      Hace que MSBuild compile cada proyecto en aislamiento.
 
                      Este es un modo de MSBuild más restrictivo ya que requiere
@@ -517,38 +526,40 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parámetros&gt;
-                     Parámetros del registrador de consola. (Forma corta: -clp)
-                     Los parámetros disponibles son:
-                        PerformanceSummary: muestra el tiempo empleado en tareas, destinos
-                            y proyectos.
-                        Summary: muestra un resumen de errores y advertencias al final.
-                        NoSummary: no muestra el resumen de errores y advertencias al
-                            final.
-                        ErrorsOnly: muestra solo errores.
-                        WarningsOnly: muestra solo advertencias.
-                        NoItemAndPropertyList: no muestra la lista de elementos y
-                            propiedades al principio de cada compilación del proyecto.
-                        ShowCommandLine: muestra los mensajes de TaskCommandLineEvent
-                        ShowTimestamp: muestra la marca de tiempo como un prefijo en los
-                            mensajes.
-                        ShowEventId: muestra el identificador de evento para los eventos iniciados, los eventos 
-                            finalizados y los mensajes.
-                        ForceNoAlign: no alinea el texto al tamaño del
-                            búfer de la consola
-                        DisableConsoleColor: usa los colores de consola predeterminados
-                            para todos los mensajes de registro.
-                        DisableMPLogging: deshabilita el estilo de registro de resultados
-                            de multiprocesador al ejecutarse en el
-                            modo de no multiprocesador.
-                        EnableMPLogging: habilita el estilo de registro de
-                            multiprocesador aunque se ejecute en el modo de
-                            no multiprocesador. Este estilo de registro está habilitado de forma predeterminada.
-                     ForceConsoleColor: usa los colores de consola ANSI incluso si
-                            la consola no lo admite.
-                        Verbosity: invalida el valor -verbosity para este
-                            registrador.
-                     Ejemplo:
+        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parameters to console logger. (Short form: -clp)
+                     The available parameters are:
+                        PerformanceSummary--Show time spent in tasks, targets
+                            and projects.
+                        Summary--Show error and warning summary at the end.
+                        NoSummary--Don't show error and warning summary at the
+                            end.
+                        ErrorsOnly--Show only errors.
+                        WarningsOnly--Show only warnings.
+                        NoItemAndPropertyList--Don't show list of items and
+                            properties at the start of each project build.
+                        ShowCommandLine--Show TaskCommandLineEvent messages
+                        ShowTimestamp--Display the Timestamp as a prefix to any
+                            message.
+                        ShowEventId--Show eventId for started events, finished
+                            events, and messages
+                        ForceNoAlign--Does not align the text to the size of
+                            the console buffer
+                        DisableConsoleColor--Use the default console colors
+                            for all logging messages.
+                        DisableMPLogging-- Disable the multiprocessor
+                            logging style of output when running in
+                            non-multiprocessor mode.
+                        EnableMPLogging--Enable the multiprocessor logging
+                            style even when running in non-multiprocessor
+                            mode. This logging style is on by default.
+                        ForceConsoleColor--Use ANSI console colors even if
+                            console does not support it
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
+                            logger.
+                     Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -646,11 +657,10 @@
       <trans-unit id="HelpMessage_InputCachesFiles">
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;archivoCaché&gt;...
+        <target state="needs-review-translation">  -inputResultsCaches:&lt;archivoCaché&gt;...
                      Lista de archivos de caché de entrada, separados por punto y coma, de la que MSBuild
                      leerá los resultados de la compilación.
                      Si se establece esta opción, se activan también las compilaciones aisladas (-isolate).
@@ -665,10 +675,10 @@
         <source>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
+                     If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[archivo-de-caché]
+        <target state="needs-review-translation">  -outputResultsCache:[archivo-de-caché]
                      Archivo de caché de salida donde MSBuild escribe
                      el contenido de las memorias caché de resultados
                      de compilación cuando esta acaba.
@@ -746,8 +756,8 @@
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;extensiones&gt;
-                     Lista de extensiones que se omiten al determinar el 
-                     archivo del proyecto que se va a compilar. Use el carácter de 
+                     Lista de extensiones que se omiten al determinar el
+                     archivo del proyecto que se va a compilar. Use el carácter de
                      punto y coma o coma para separar varias extensiones.
                     (Forma corta: -ignore)
                      Ejemplo:
@@ -898,9 +908,9 @@
                             sobrescribirá el archivo de registro. Si se establece el
                             modificador, se adjunta el registro de compilación al archivo de registro;
                             Si no se especifica el modificador, se sobrescribe
-                            el contenido del archivo de registro existente. 
+                            el contenido del archivo de registro existente.
                             El valor predeterminado es adjuntar el archivo de registro.
-                        Encoding: especifica la codificación del archivo, 
+                        Encoding: especifica la codificación del archivo,
                             por ejemplo, UTF-8, Unicode o ASCII
                      El nivel de detalle predeterminado es Detailed.
                      Ejemplos:
@@ -1031,11 +1041,12 @@
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1056: El valor de los proyectos aislados no es válido. {0}.</target>
+        <target state="needs-review-translation">MSBUILD : error MSB1056: El valor de los proyectos aislados no es válido. {0}.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent
+      to Boolean.TrueString, nameof(ProjectIsolationMode.MessageUponIsolationViolation), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

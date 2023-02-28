@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -9,12 +9,13 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Linq;
 using System.Threading;
 
@@ -78,8 +79,7 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions expanderOptions,
             ParserOptions parserOptions,
             Expander<P, I> expander,
-            LazyItemEvaluator<P, I, M, D> lazyEvaluator
-            )
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
             if (condition?.Length == 0)
             {
@@ -89,8 +89,7 @@ namespace Microsoft.Build.Evaluation
 
             using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
-                bool result = ConditionEvaluator.EvaluateCondition
-                    (
+                bool result = ConditionEvaluator.EvaluateCondition(
                     condition,
                     parserOptions,
                     expander,
@@ -99,8 +98,8 @@ namespace Microsoft.Build.Evaluation
                     element.ConditionLocation,
                     lazyEvaluator._loggingContext.LoggingService,
                     lazyEvaluator._loggingContext.BuildEventContext,
-                    lazyEvaluator.FileSystem
-                    );
+                    lazyEvaluator.FileSystem,
+                    loggingContext: lazyEvaluator._loggingContext);
                 MSBuildEventSource.Log.EvaluateConditionStop(condition, result);
 
                 return result;
@@ -269,7 +268,9 @@ namespace Microsoft.Build.Evaluation
                 foreach (ItemData data in GetItemData(globsToIgnore))
                 {
                     if (data.ConditionResult)
+                    {
                         items.Add(data.Item);
+                    }
                 }
 
                 return items.ToImmutable();
@@ -473,7 +474,7 @@ namespace Microsoft.Build.Evaluation
 
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
-            public ItemSpec<P,I> ItemSpec { get; set; }
+            public ItemSpec<P, I> ItemSpec { get; set; }
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
                 ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
@@ -624,7 +625,7 @@ namespace Microsoft.Build.Evaluation
 
         private void ProcessItemSpec(string rootDirectory, string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
         {
-            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
+            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory, loggingContext: _loggingContext);
 
             foreach (ItemSpecFragment fragment in builder.ItemSpec.Fragments)
             {
@@ -635,7 +636,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander)
+        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander, LoggingContext loggingContext = null)
         {
             // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
             // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
@@ -649,7 +650,8 @@ namespace Microsoft.Build.Evaluation
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Value,
                     expanderOptions,
-                    metadatumElement.Location);
+                    metadatumElement.Location,
+                    loggingContext);
 
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Condition,
@@ -664,7 +666,7 @@ namespace Microsoft.Build.Evaluation
             {
                 operationBuilder.Metadata.AddRange(itemElement.Metadata);
 
-                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander));
+                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander, _loggingContext));
                 if (itemsAndMetadataFound.Items != null)
                 {
                     foreach (var itemType in itemsAndMetadataFound.Items)

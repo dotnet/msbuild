@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 // ************************************************************************************************
 // ************************************************************************************************
@@ -23,7 +23,9 @@
 
 using System;
 using System.IO;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.Collections;
+#endif
 using System.Collections.Generic;
 using System.Resources;
 using System.CodeDom;
@@ -317,9 +319,13 @@ namespace Microsoft.Build.Tasks
             if (resourcesNamespace != null)
             {
                 if (resourcesNamespace.Length > 0)
+                {
                     resMgrCtorParam = resourcesNamespace + '.' + baseName;
+                }
                 else
+                {
                     resMgrCtorParam = baseName;
+                }
             }
             else if (!string.IsNullOrEmpty(nameSpace))
             {
@@ -339,9 +345,14 @@ namespace Microsoft.Build.Tasks
             CodeConstructor ctor = new CodeConstructor();
             ctor.CustomAttributes.Add(suppressMessageAttrib);
             if (useStatic || internalClass)
+            {
                 ctor.Attributes = MemberAttributes.FamilyAndAssembly;
+            }
             else
+            {
                 ctor.Attributes = MemberAttributes.Public;
+            }
+
             srClass.Members.Add(ctor);
 
             // Emit _resMgr field.
@@ -351,7 +362,10 @@ namespace Microsoft.Build.Tasks
                 Attributes = MemberAttributes.Private
             };
             if (useStatic)
+            {
                 field.Attributes |= MemberAttributes.Static;
+            }
+
             srClass.Members.Add(field);
 
             // Emit _resCulture field, and leave it set to null.
@@ -359,7 +373,10 @@ namespace Microsoft.Build.Tasks
             field = new CodeMemberField(CultureTypeReference, CultureInfoFieldName);
             field.Attributes = MemberAttributes.Private;
             if (useStatic)
+            {
                 field.Attributes |= MemberAttributes.Static;
+            }
+
             srClass.Members.Add(field);
 
             // Emit ResMgr property
@@ -370,11 +387,18 @@ namespace Microsoft.Build.Tasks
             resMgr.HasSet = false;
             resMgr.Type = ResMgrCodeTypeReference;
             if (internalClass)
+            {
                 resMgr.Attributes = MemberAttributes.Assembly;
+            }
             else
+            {
                 resMgr.Attributes = MemberAttributes.Public;
+            }
+
             if (useStatic)
+            {
                 resMgr.Attributes |= MemberAttributes.Static;
+            }
 
             // Mark the ResMgr property as advanced
             var editorBrowsableStateTypeRef =
@@ -396,16 +420,22 @@ namespace Microsoft.Build.Tasks
             culture.HasSet = true;
             culture.Type = CultureTypeReference;
             if (internalClass)
+            {
                 culture.Attributes = MemberAttributes.Assembly;
+            }
             else
+            {
                 culture.Attributes = MemberAttributes.Public;
+            }
 
             if (useStatic)
+            {
                 culture.Attributes |= MemberAttributes.Static;
+            }
 
             // Mark the Culture property as advanced
             culture.CustomAttributes.Add(editorBrowsableAdvancedAttribute);
-            
+
             /*
               // Here's what I'm trying to emit.  Since not all languages support
               // try/finally, we'll avoid our double lock pattern here.
@@ -466,7 +496,9 @@ namespace Microsoft.Build.Tasks
             {
                 // Stop at some length
                 if (commentString.Length > DocCommentLengthThreshold)
+                {
                     commentString = SR.GetString(SR.StringPropertyTruncatedComment, commentString.Substring(0, DocCommentLengthThreshold));
+                }
 
                 // Encode the comment so it is safe for xml.  SecurityElement.Escape is the only method I've found to do this. 
                 commentString = System.Security.SecurityElement.Escape(commentString);
@@ -543,12 +575,18 @@ namespace Microsoft.Build.Tasks
 
             prop.Type = valueType;
             if (internalClass)
+            {
                 prop.Attributes = MemberAttributes.Assembly;
+            }
             else
+            {
                 prop.Attributes = MemberAttributes.Public;
+            }
 
             if (useStatic)
+            {
                 prop.Attributes |= MemberAttributes.Static;
+            }
 
             // For Strings, emit this:
             //    return ResourceManager.GetString("name", _resCulture);
@@ -571,11 +609,17 @@ namespace Microsoft.Build.Tasks
             }
 
             if (isString)
+            {
                 getMethodName = "GetString";
+            }
             else if (isStream)
+            {
                 getMethodName = "GetStream";
+            }
             else
+            {
                 getMethodName = "GetObject";
+            }
 
             if (isString)
             {
@@ -585,9 +629,13 @@ namespace Microsoft.Build.Tasks
             { // Stream or Object
                 if (valueAsString == null ||
                     String.Equals(typeName, valueAsString)) // If the type did not override ToString, ToString just returns the type name.
+                {
                     text = SR.GetString(SR.NonStringPropertyComment, typeName);
+                }
                 else
+                {
                     text = SR.GetString(SR.NonStringPropertyDetailedComment, typeName, valueAsString);
+                }
             }
 
             prop.Comments.Add(new CodeCommentStatement(DocCommentSummaryStart, true));
@@ -623,29 +671,42 @@ namespace Microsoft.Build.Tasks
         private static String VerifyResourceName(String key, CodeDomProvider provider, bool isNameSpace)
         {
             if (key == null)
+            {
                 throw new ArgumentNullException(nameof(key));
+            }
+
             if (provider == null)
+            {
                 throw new ArgumentNullException(nameof(provider));
+            }
 
             foreach (char c in s_charsToReplace)
             {
                 // For namespaces, allow . and ::
                 if (!(isNameSpace && (c == '.' || c == ':')))
+                {
                     key = key.Replace(c, ReplacementChar);
+                }
             }
 
             if (provider.IsValidIdentifier(key))
+            {
                 return key;
+            }
 
             // Now try fixing up keywords like "for".  
             key = provider.CreateValidIdentifier(key);
             if (provider.IsValidIdentifier(key))
+            {
                 return key;
+            }
 
             // make one last ditch effort by prepending _.  This fixes keys that start with a number
             key = "_" + key;
             if (provider.IsValidIdentifier(key))
+            {
                 return key;
+            }
 
             return null;
         }
