@@ -46,4 +46,11 @@ None! We're compatible with most registries.
 
 ### Docker Hub
 
-When using Docker Hub as a base image registry (via ContainerBaseImage) or as the destination registry for pushing your images, you must use the `registry-1.docker.io` domain name instead of `docker.io`. The `docker.io` domain does not respond to the Registry API in the expected way.
+When using Docker Hub as a base image registry (via ContainerBaseImage) or as the destination registry for pushing your images (via ContainerRegistry), you must use the one of the URLs that point to the _registry_ portion of Docker Hub. This means one of the following domains must be used:
+
+* `registry.hub.docker.com`
+* `registry-1.docker.io`
+
+The `docker.io` domain doesn't support the Registry API, so attempting to use it will result in errors.
+
+In addition, you should be sure to login via `docker login registry.hub.docker.com` or `docker login registry-1.docker.io` and not `docker login docker.io`, to ensure that the correct credentials are used by the tooling.
