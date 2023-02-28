@@ -124,7 +124,13 @@ Successfuly reverted packages sourcing for: FooBar.Baz, Newtonsoft.Json.
 
 ### Local storage of sources
 
-To be decided (nuget cache? Submodules of the current git context? ...)
+To be decided (nuget cache?, Submodules of the current git context?, sibling folder of current project git root?, the `.vs` folder (for vs-centric solution)?, `%temp%`? ...)
+
+We can take inspiration from VS debugger decompilation features:
+
+![vs decompiled sources](https://learn.microsoft.com/en-us/visualstudio/debugger/media/decompilation-solution-explorer.png?view=vs-2022)
+
+![vs nuget source](https://devblogs.microsoft.com/visualstudio/wp-content/uploads/sites/4/2021/08/word-image-17.png)
 
  ### Locating proper sources
  * Most preferable way is via `SourceLink` metadata within the nuget package itself ([documentation](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/sourcelink), [reading the metadata](https://learn.microsoft.com/en-us/nuget/reference/nuget-client-sdk#get-package-metadata))
@@ -135,10 +141,23 @@ To be decided (nuget cache? Submodules of the current git context? ...)
  This is the most challenging part of the story - as .NET ecosystem currently doesn't enforce custom build pre-requisities standards nor conventions and hence it is not possible to replicate the package build process without possible manual steps. This part will hence be 'best efforts' with sensible communication of issues to user. 
  
  We envision multiple options to achieve this goal (with possibility of fallback/combination of multiple approaches):
- * Option A: Using Pdb info/ Roslyn to extract information from PE/Pdbs and reconstruct the compilation ([roslyn experimental code](https://github.com/dotnet/roslyn/blob/main/src/Tools/BuildValidator/Program.cs#L268), [NugetPackageExplorer SymbolValidator](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/blob/main/Core/SymbolValidation/SymbolValidator.cs#L145)). Access to symbol files (whether published as .snupkg on nuget.org or on microsoft or corporate symbols servers) is crucial for this method. As well as usage of particualr compiler toolchain used to generate the inspected package (**TBD** - what minimal version do we need for .NET (?[5.0.3 or MSBuild 16.10](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/commit/a272c8c314257dfa99c6befd2cfeff39b8a6ecbe), what we need for .NET Framework (if supporrted at all)?)
+ * Option A: Using Pdb info/ Roslyn to extract information from PE/Pdbs and reconstruct the compilation ([roslyn experimental code](https://github.com/dotnet/roslyn/blob/main/src/Tools/BuildValidator/Program.cs#L268), [NugetPackageExplorer SymbolValidator](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/blob/main/Core/SymbolValidation/SymbolValidator.cs#L145)). Access to symbol files (whether published as .snupkg on nuget.org or on microsoft or corporate symbols servers) is crucial for this method. As well as usage of particualr compiler toolchain used to generate the inspected package ([sdk 5.0.3 or MSBuild 16.10](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/commit/a272c8c314257dfa99c6befd2cfeff39b8a6ecbe))
  * Option B: Sources crawling and finding project by name/assembly name; build; compare results
  * Option C: Working backwards from the nuget (finding pack script or msbuild properties indicating nuget creation ...); build; compare results
  * Option D: Seting up convention for explicit description of build prerequisites and package build. Inspiration for this can be `.proj` files describing external dependencies build recipe in dotnet source build ([sample build descriptions](https://github.com/dotnet/source-build-externals/tree/main/repos))
+
+
+**Gotchas:**
+ * The `Option A` above infers the 'compile recipe', but not the 'build recipe' - which means some checked out files would not have their standard expected functionality (they would be completely ignored) - resource files (`.resx`), templates for code generators (`.tt`, `.aspx`, `.xaml`, etc.) and most importantly the project file itself (`.csproj`/`.fsproj`/`.vbproj`/...).
+
+   Possible solutions: 
+    * (short term) Mark such files read-only, add explicit pre-compilation check throwing error if hash of such a file changes 
+    * (long term) For code generators we can extend SourceLink to add info to symbol file what code generator was used and store it on symbols server (or in Executable Image Search Path location)
+    * project files - ??? (though one)
+
+ * Discrepancies between the `PackageReference` and `ProjectReference` configurability and behavior (different metadata support, different behavior for some of the same metadata, different layout of the the bin outputs yielding some assumptions breaks, nuget support for packaged props/targets, etc.)
+
+    Possible solutions: Those differences needs to be researched/catalogued and categorized first, then we can decide what to consolidate and what will not be explicitly supported.
 
 **_Extensive research needed for this subproblem._**
 
@@ -167,7 +186,7 @@ To be decided (nuget cache? Submodules of the current git context? ...)
 
  # Cross team dependencies considerations
 
- * **Nuget - No dependency** - the proposal doesn't evision changes to the nuget client nor server contracts
+ * **Nuget - possible dependency** - the proposal doesn't evision changes to the nuget client nor server contracts. However it might be beneficial to consolidate behavior of `ProjectReference` and `PackageReference` items and its metadata - coorfination with nuget team would be helpful here.
  * **Visual Studio, Project System - No dependency in initial version** - the proposal envision exposing functionality via CLI (and API) only, after the whole concept is constructed and alive, we should start reaching out to those teams to consider exposing the functionality via GUI - e.g.:
  ![vs context menu proposal](sourcing-vs-context.png)
  * **SDK - No dependency** - the initial version would be delivered as standalone (optional) dotnet tool
@@ -177,3 +196,9 @@ To be decided (nuget cache? Submodules of the current git context? ...)
  There can be possible leverage of the work by other teams:
  * Nuget - [NugetPackageExplorrer](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer) - as it currently heavily uses custom code to extract information from PE/Pdb metadata.
  * Source Build / VMR - to validate buildability of 3rd party components and low touch process of enlisting new 3rd party dependencies into source build
+
+ # Links:
+  * https://github.com/NuGetPackageExplorer/NuGetPackageExplorer
+  * https://devblogs.microsoft.com/visualstudio/debugging-external-sources-with-visual-studio/
+  * https://devblogs.microsoft.com/visualstudio/decompilation-of-c-code-made-easy-with-visual-studio/
+  * https://learn.microsoft.com/en-us/visualstudio/debugger/decompilation?view=vs-2022
