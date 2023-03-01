@@ -82,7 +82,7 @@ namespace Microsoft.NET.TestFramework
                 var project = XDocument.Load(projectPath);
                 var ns = project.Root.Name.Namespace;
 
-                var useArtifactsOutputElement = project.Root.Elements(ns + "PropertyGroup").Elements("UseArtifactsOutput").FirstOrDefault();
+                var useArtifactsOutputElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "UseArtifactsOutput").FirstOrDefault();
                 if (useArtifactsOutputElement != null)
                 {
                     calculator.UseArtifactsOutput = bool.Parse(useArtifactsOutputElement.Value);
@@ -93,13 +93,13 @@ namespace Microsoft.NET.TestFramework
                     }
                 }
 
-                var targetFrameworkElement = project.Root.Elements(ns + "PropertyGroup").Elements("TargetFramework").FirstOrDefault();
+                var targetFrameworkElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").FirstOrDefault();
                 if (targetFrameworkElement != null)
                 {
                     calculator.TargetFramework = targetFrameworkElement.Value;
                 }
 
-                var targetFrameworksElement = project.Root.Elements(ns + "PropertyGroup").Elements("TargetFrameworks").FirstOrDefault();
+                var targetFrameworksElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFrameworks").FirstOrDefault();
                 if (targetFrameworksElement != null)
                 {
                     calculator.TargetFrameworks = targetFrameworksElement.Value;
@@ -117,7 +117,7 @@ namespace Microsoft.NET.TestFramework
                     var dbp = XDocument.Load(directoryBuildPropsFile);
                     var dbpns = dbp.Root.Name.Namespace;
 
-                    var dbpUsesArtifacts = dbp.Root.Elements(ns + "PropertyGroup").Elements("UseArtifactsOutput").FirstOrDefault();
+                    var dbpUsesArtifacts = dbp.Root.Elements(dbpns + "PropertyGroup").Elements(dbpns + "UseArtifactsOutput").FirstOrDefault();
                     if (dbpUsesArtifacts != null)
                     {
 
@@ -183,7 +183,7 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                targetFramework = targetFramework ?? TargetFramework;
+                targetFramework = targetFramework ?? TargetFramework ?? string.Empty;
                 configuration = configuration ?? string.Empty;
                 runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
 
@@ -229,7 +229,7 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                targetFramework = targetFramework ?? TargetFramework;
+                targetFramework = targetFramework ?? TargetFramework ?? string.Empty;
                 configuration = configuration ?? string.Empty;
                 runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
 
@@ -259,7 +259,7 @@ namespace Microsoft.NET.TestFramework
                 return Path.Combine(ArtifactsPath, "obj", Path.GetFileNameWithoutExtension(ProjectPath), pivot);
             }
 
-            targetFramework = targetFramework ?? TargetFramework;
+            targetFramework = targetFramework ?? TargetFramework ?? string.Empty;
             configuration = configuration ?? string.Empty;
             runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
 
