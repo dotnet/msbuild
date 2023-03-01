@@ -24,7 +24,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
         }
 
-        public override DirectoryInfo GetOutputDirectory(string targetFramework = "", string configuration = "Debug", string runtimeIdentifier = "")
+        public override DirectoryInfo GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
         {
             if (TestAsset != null)
             {
