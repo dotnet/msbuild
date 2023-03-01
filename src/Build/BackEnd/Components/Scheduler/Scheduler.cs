@@ -906,27 +906,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestsWithPlanByMostImmediateReferences(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
-            foreach (int idleNodeId in idleNodes)
-            {
-                Dictionary<int, SchedulableRequest> configsWhichCanBeScheduledToThisNode = new Dictionary<int, SchedulableRequest>();
-
-                // Find the most expensive request in the plan to schedule from among the ones available.
-                foreach (SchedulableRequest request in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
-                {
-                    if (CanScheduleRequestToNode(request, idleNodeId))
-                    {
-                        configsWhichCanBeScheduledToThisNode[request.BuildRequest.ConfigurationId] = request;
-                    }
-                }
-
-                if (configsWhichCanBeScheduledToThisNode.Count > 0)
-                {
-                    int configToSchedule = _schedulingPlan.GetConfigWithGreatestNumberOfReferences(configsWhichCanBeScheduledToThisNode.Keys);
-
-                    ErrorUtilities.VerifyThrow(configToSchedule != BuildRequestConfiguration.InvalidConfigurationId, "No configuration returned even though there are some available.");
-                    AssignUnscheduledRequestToNode(configsWhichCanBeScheduledToThisNode[configToSchedule], idleNodeId, responses);
-                }
-            }
+            AssignUnscheduledRequestsWithPlan(responses, idleNodes, (plan1, plan2) => plan1.ReferencesCount < plan2.ReferencesCount);
         }
 
         /// <summary>
@@ -934,25 +914,45 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestsWithPlanByGreatestPlanTime(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
+            AssignUnscheduledRequestsWithPlan(responses, idleNodes, (plan1, plan2) => plan1.TotalPlanTime < plan2.TotalPlanTime);
+        }
+
+        private void AssignUnscheduledRequestsWithPlan(List<ScheduleResponse> responses, HashSet<int> idleNodes, Func<SchedulingPlan.PlanConfigData, SchedulingPlan.PlanConfigData, bool> comparisonFunction)
+        {
             foreach (int idleNodeId in idleNodes)
             {
-                Dictionary<int, SchedulableRequest> configsWhichCanBeScheduledToThisNode = new Dictionary<int, SchedulableRequest>();
+                SchedulingPlan.PlanConfigData bestConfig = null;
+                SchedulableRequest bestRequest = null;
 
                 // Find the most expensive request in the plan to schedule from among the ones available.
                 foreach (SchedulableRequest request in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
                 {
                     if (CanScheduleRequestToNode(request, idleNodeId))
                     {
-                        configsWhichCanBeScheduledToThisNode[request.BuildRequest.ConfigurationId] = request;
+                        SchedulingPlan.PlanConfigData configToConsider = _schedulingPlan.GetConfiguration(request.BuildRequest.ConfigurationId);
+                        if (configToConsider is null)
+                        {
+                            if (bestConfig is null)
+                            {
+                                // By default we assume configs we don't know about aren't as important, and will only schedule them
+                                // if nothing else is suitable
+                                bestRequest ??= request;
+                            }
+                        }
+                        else
+                        {
+                            if (bestConfig is null || comparisonFunction(bestConfig, configToConsider))
+                            {
+                                bestConfig = configToConsider;
+                                bestRequest = request;
+                            }
+                        }
                     }
                 }
 
-                if (configsWhichCanBeScheduledToThisNode.Count > 0)
+                if (bestRequest is not null)
                 {
-                    int configToSchedule = _schedulingPlan.GetConfigWithGreatestPlanTime(configsWhichCanBeScheduledToThisNode.Keys);
-
-                    ErrorUtilities.VerifyThrow(configToSchedule != BuildRequestConfiguration.InvalidConfigurationId, "No configuration returned even though there are some available.");
-                    AssignUnscheduledRequestToNode(configsWhichCanBeScheduledToThisNode[configToSchedule], idleNodeId, responses);
+                    AssignUnscheduledRequestToNode(bestRequest, idleNodeId, responses);
                 }
             }
         }
@@ -962,23 +962,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestsByTraversalsFirst(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
-            if (idleNodes.Contains(InProcNodeId))
-            {
-                // Assign traversal projects first (to find more work.)
-                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
-                foreach (SchedulableRequest request in unscheduledRequests)
-                {
-                    if (CanScheduleRequestToNode(request, InProcNodeId))
-                    {
-                        if (IsTraversalRequest(request.BuildRequest))
-                        {
-                            AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
-                            idleNodes.Remove(InProcNodeId);
-                            break;
-                        }
-                    }
-                }
-            }
+            AssignUnscheduledRequestsToInProcNode(responses, idleNodes, request => IsTraversalRequest(request.BuildRequest));
         }
 
         /// <summary>
@@ -987,12 +971,17 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledProxyBuildRequestsToInProcNode(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
+            AssignUnscheduledRequestsToInProcNode(responses, idleNodes, request => request.IsProxyBuildRequest());
+        }
+
+        private void AssignUnscheduledRequestsToInProcNode(List<ScheduleResponse> responses, HashSet<int> idleNodes, Func<SchedulableRequest, bool> shouldBeScheduled)
+        {
             if (idleNodes.Contains(InProcNodeId))
             {
                 List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
                 foreach (SchedulableRequest request in unscheduledRequests)
                 {
-                    if (CanScheduleRequestToNode(request, InProcNodeId) && request.IsProxyBuildRequest())
+                    if (CanScheduleRequestToNode(request, InProcNodeId) && shouldBeScheduled(request))
                     {
                         AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
                         idleNodes.Remove(InProcNodeId);
