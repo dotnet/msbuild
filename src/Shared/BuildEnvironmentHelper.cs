@@ -599,7 +599,13 @@ namespace Microsoft.Build.Shared
 
                 MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
                 MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : CurrentMSBuildToolsDirectory;
+#if RUNTIME_TYPE_NETCORE
+                // Fall back to "current" for any architecture since .NET SDK doesn't
+                // support cross-arch task invocations.
+                MSBuildToolsDirectoryArm64 = existsCheck(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : CurrentMSBuildToolsDirectory;
+#else
                 MSBuildToolsDirectoryArm64 = existsCheck(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : null;
+#endif
             }
 
             MSBuildExtensionsPath = mode == BuildEnvironmentMode.VisualStudio
