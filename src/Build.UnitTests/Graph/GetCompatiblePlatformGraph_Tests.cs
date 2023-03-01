@@ -35,7 +35,7 @@ namespace Microsoft.Build.Graph.UnitTests
     {
 
         [Fact]
-        public void ValidateSetPlatformOverride()
+        public void ValidateGlobalPropertyCopyByValueNotReference()
         {
             using (var env = TestEnvironment.Create())
             {
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
-        public void ValidateGlobalPropertyCopyByValueNotReference()
+        public void ValidateSetPlatformOverride()
         {
             using (var env = TestEnvironment.Create())
             {
