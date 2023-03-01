@@ -8,7 +8,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Interface for tasks which is supports incrementality.
     /// </summary>
-    /// <remarks>The tasks implementing this interface should return false to stop the build when in <see cref="FailIfNotIncremental"/> is true and task is not fully incremental.  Try to provide helpful information diagnose incremental behavior.</remarks>
+    /// <remarks>The tasks implementing this interface should return false to stop the build when in <see cref="FailIfNotIncremental"/> is true and task is not fully incremental.  Try to provide helpful information to diagnose incremental behavior.</remarks>
     public interface IIncrementalTask
     {
         /// <summary>

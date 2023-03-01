@@ -140,12 +140,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                try
-                {
-                    // Parse the raw importance string into a strongly typed enumeration.  
-                    messageImportance = (MessageImportance)Enum.Parse(typeof(MessageImportance), Importance, ignoreCase: true);
-                }
-                catch (ArgumentException)
+                if (!Enum.TryParse(Importance, ignoreCase: true, out messageImportance))
                 {
                     Log.LogErrorWithCodeFromResources("Message.InvalidImportance", Importance);
                     return false;
@@ -227,11 +222,15 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
-
+            // Ignore touching the disk when FailIfNotIncremental.
             if (FailIfNotIncremental)
             {
-                return true;
+                Log.LogErrorFromResources("Touch.Touching", file);
+                return false;
+            }
+            else
+            {
+                Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
             }
 
             // If the file is read only then we must either issue an error, or, if the user so 

@@ -401,9 +401,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.True(success);
-
-            Assert.Single(t.TouchedFiles);
+            Assert.False(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),
