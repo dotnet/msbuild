@@ -639,11 +639,9 @@ public static class Program
 
             if (useStandardOutputPaths)
             {
-                string outputFolder = Path.Combine(buildCommand.ProjectRootPath, "bin", "build", $"debug_{ToolsetInfo.CurrentTargetFramework}");
-                new DirectoryInfo(outputFolder).Should().Exist();
+                buildCommand.GetOutputDirectory().Should().Exist();
 
-                string intermediateFolder = Path.Combine(buildCommand.ProjectRootPath, "bin", "obj", $"debug_{ToolsetInfo.CurrentTargetFramework}");
-                new DirectoryInfo(intermediateFolder).Should().Exist();
+                buildCommand.GetIntermediateDirectory().Should().Exist();
             }
             else
             {

@@ -75,7 +75,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return buildProjectFiles[0];
         }
 
-        public virtual DirectoryInfo GetOutputDirectory(string targetFramework = "", string configuration = "Debug", string runtimeIdentifier = "")
+        public virtual DirectoryInfo GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = null)
         {
             if (TestAsset != null)
             {
@@ -90,7 +90,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
-        public virtual DirectoryInfo GetIntermediateDirectory(string targetFramework = "", string configuration = "Debug", string runtimeIdentifier = "")
+        public virtual DirectoryInfo GetIntermediateDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = null)
         {
             if (TestAsset != null)
             {
