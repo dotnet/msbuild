@@ -222,12 +222,15 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
-
             // Ignore touching the disk when FailIfNotIncremental.
             if (FailIfNotIncremental)
             {
-                return true;
+                Log.LogErrorFromResources("Touch.Touching", file);
+                return false;
+            }
+            else
+            {
+                Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
             }
 
             // If the file is read only then we must either issue an error, or, if the user so 
