@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.Cli
 
         public static int Main(string[] args)
         {
+            using AutomaticEncodingRestorer _ = new();
+
             // Setting output encoding is not available on those platforms
             if (!OperatingSystem.IsIOS() && !OperatingSystem.IsAndroid() && !OperatingSystem.IsTvOS() && !OperatingSystem.IsBrowser())
             {
@@ -39,7 +41,6 @@ namespace Microsoft.DotNet.Cli
             }
 
             DebugHelper.HandleDebugSwitch(ref args);
-            using AutomaticEncodingRestorer _ = new();
 
             // Capture the current timestamp to calculate the host overhead.
             DateTime mainTimeStamp = DateTime.Now;
