@@ -888,6 +888,8 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        public bool FailIfNotIncremental { get; set; }
+
         /// <summary>
         /// This is a list of all primary references resolved to full paths.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
@@ -1038,8 +1040,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem[] UnresolvedAssemblyConflicts => _unresolvedConflicts.ToArray();
-
-        public bool FailIfNotIncremental { get; set; }
 
         #endregion
         #region Logging

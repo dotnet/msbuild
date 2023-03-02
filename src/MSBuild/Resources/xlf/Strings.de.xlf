@@ -29,14 +29,18 @@
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
-        <source>  -question          (Experimental) Question the build if it is incremental.
-                     MSBuild will stop and error out as soon as it detects
-                     a target or task that isn't incremental.
+        <source>  -question
+                     (Experimental) Question the build if it is fully built.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="new">  -question          (Experimental) Question the build if it is incremental.
-                     MSBuild will stop and error out as soon as it detects
-                     a target or task that isn't incremental.
+        <target state="new">  -question
+                     (Experimental) Question the build if it is fully built.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
                      (Short form: -q)
     </target>
         <note>

@@ -2492,11 +2492,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="GenerateBindingRedirectsUpdateAppConfig"
     Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'">
 
-    <PropertyGroup Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">
-      <AppConfig>$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
+    <PropertyGroup>
+      <_NewGenerateBindingRedirectsIntermediateAppConfig Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">true</_NewGenerateBindingRedirectsIntermediateAppConfig>
+      <AppConfig Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
     </PropertyGroup>
     
-    <ItemGroup Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">
+    <ItemGroup Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
       <AppConfigWithTargetPath Include="$(AppConfig)">
         <TargetPath>$(TargetFileName).config</TargetPath>
