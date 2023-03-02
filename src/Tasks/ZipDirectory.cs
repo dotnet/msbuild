@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem SourceDirectory { get; set; }
 
         /// <summary>
-        /// Set by MSBuild when Question flag is used.
+        /// Question the incremental nature of this task.
         /// </summary>
         /// <remarks>This task does not support incremental build and will error out instead.</remarks>
         public bool FailIfNotIncremental { get; set; }
