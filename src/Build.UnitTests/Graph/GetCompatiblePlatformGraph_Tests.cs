@@ -35,6 +35,33 @@ namespace Microsoft.Build.Graph.UnitTests
     {
 
         [Fact]
+        public void ValidateGlobalPropertyCopyByValueNotReference()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+
+                TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
+                                                                                                <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                                                                <Platform>x64</Platform>
+                                                                                                <PlatformLookupTable>win32=x64</PlatformLookupTable>
+                                                                                            </PropertyGroup>
+                                                                                            <ItemGroup>
+                                                                                                <ProjectReference Include=""$(MSBuildThisFileDirectory)2.proj"" />
+                                                                                            </ItemGroup>");
+                var proj2 = env.CreateFile("2.proj", @"
+                                                    <Project>
+                                                        <PropertyGroup>
+                                                            <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                            <Platforms>AnyCPU</Platforms>
+                                                        </PropertyGroup>
+                                                    </Project>");
+
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                GetFirstNodeWithProjectNumber(graph, 1).ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+            }
+        }
+
+        [Fact]
         public void ValidateSetPlatformOverride()
         {
             using (var env = TestEnvironment.Create())
