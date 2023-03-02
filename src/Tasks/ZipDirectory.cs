@@ -29,6 +29,10 @@ namespace Microsoft.Build.Tasks
         [Required]
         public ITaskItem SourceDirectory { get; set; }
 
+        /// <summary>
+        /// Set by MSBuild when Question flag is used.
+        /// </summary>
+        /// <remarks>This task does not support incremental build and will error out instead.</remarks>
         public bool FailIfNotIncremental { get; set; }
 
         public override bool Execute()

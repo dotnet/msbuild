@@ -848,9 +848,11 @@
     </comment>
   </data>
   <data name="HelpMessage_41_QuestionSwitch" Visibility="Public">
-    <value>  -question          (Experimental) Question the build if it is incremental.
-                     MSBuild will stop and error out as soon as it detects
-                     a target or task that isn't incremental.
+    <value>  -question
+                     (Experimental) Question the build if it is fully built.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
                      (Short form: -q)
     </value>
     <comment>
