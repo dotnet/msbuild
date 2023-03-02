@@ -109,16 +109,21 @@ namespace Microsoft.DotNet.Cli.Utils
                     RegistryKey windowsVersionRegistry = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
                     var buildNumber = windowsVersionRegistry.GetValue("CurrentBuildNumber").ToString();
                     const int buildNumberThatOfficialySupportsUTF8 = 18363;
-                    return int.Parse(buildNumber) >= buildNumberThatOfficialySupportsUTF8;
+                    return int.Parse(buildNumber) >= buildNumberThatOfficialySupportsUTF8 || ForceUniversalEncodingOptInEnabled();
                 }
                 catch (Exception ex) when (ex is SecurityException || ex is ObjectDisposedException)
                 {
                     // We don't want to break those in VS on older versions of Windows with a non-en language.
                     // Allow those without registry permissions to force the encoding, however.
-                    return String.Equals(Environment.GetEnvironmentVariable("DOTNET_CLI_FORCE_UTF8_ENCODING"), "true", StringComparison.OrdinalIgnoreCase);
+                    return ForceUniversalEncodingOptInEnabled();
                 }
             }
             return false;
+        }
+
+        private static bool ForceUniversalEncodingOptInEnabled()
+        {
+            return String.Equals(Environment.GetEnvironmentVariable("DOTNET_CLI_FORCE_UTF8_ENCODING"), "true", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
