@@ -14,10 +14,10 @@ This behavior can be opted-out via `DisableTransitiveProjectReferences` property
 
 Let's imagine an `Onion Architecture` design:
 
-```
- ---------------       ------------------       --------------
-| Service Layer | --> | Repository Layer | --> | Domain Model |
- ---------------       ------------------       --------------
+```mermaid
+flowchart LR
+    Service[Service Layer] --> Repository
+    Repository[Repository Layer] --> Domain[Domain Layer]
 ```
 
 Service Layer definition:
