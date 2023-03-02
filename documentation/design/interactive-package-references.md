@@ -141,10 +141,11 @@ We can take inspiration from VS debugger decompilation features:
  This is the most challenging part of the story - as .NET ecosystem currently doesn't enforce custom build pre-requisities standards nor conventions and hence it is not possible to replicate the package build process without possible manual steps. This part will hence be 'best efforts' with sensible communication of issues to user. 
  
  We envision multiple options to achieve this goal (with possibility of fallback/combination of multiple approaches):
- * Option A: Using Pdb info/ Roslyn to extract information from PE/Pdbs and reconstruct the compilation ([roslyn experimental code](https://github.com/dotnet/roslyn/blob/main/src/Tools/BuildValidator/Program.cs#L268), [NugetPackageExplorer SymbolValidator](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/blob/main/Core/SymbolValidation/SymbolValidator.cs#L145)). Access to symbol files (whether published as .snupkg on nuget.org or on microsoft or corporate symbols servers) is crucial for this method. As well as usage of particualr compiler toolchain used to generate the inspected package ([sdk 5.0.3 or MSBuild 16.10](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/commit/a272c8c314257dfa99c6befd2cfeff39b8a6ecbe))
- * Option B: Sources crawling and finding project by name/assembly name; build; compare results
- * Option C: Working backwards from the nuget (finding pack script or msbuild properties indicating nuget creation ...); build; compare results
- * Option D: Seting up convention for explicit description of build prerequisites and package build. Inspiration for this can be `.proj` files describing external dependencies build recipe in dotnet source build ([sample build descriptions](https://github.com/dotnet/source-build-externals/tree/main/repos))
+ * Option A: Using Pdb info/ Roslyn to extract information from PE/Pdbs and reconstruct the compilation ([roslyn experimental code](https://github.com/dotnet/roslyn/blob/main/src/Tools/BuildValidator/Program.cs#L268), [NugetPackageExplorer SymbolValidator](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/blob/main/Core/SymbolValidation/SymbolValidator.cs#L145)). Access to symbol files (whether published as .snupkg on nuget.org or on microsoft or corporate symbols servers) is crucial for this method. As well as usage of particualr compiler toolchain used to generate the inspected package ([sdk 5.0.3 or MSBuild 16.10](https://github.com/NuGetPackageExplorer/NuGetPackageExplorer/commit/a272c8c314257dfa99c6befd2cfeff39b8a6ecbe)). Prototyping task: #8511
+ * Option B: Attempt to run build (`dotnet build`) on `.sln` in repo root or `src` folder, or fallback to discovery of most common build scripts in repo root (`build.<extension>` for few most common script types based on current OS). Prototyping task: #8512
+ * Option C: Sources crawling and finding project by name/assembly name; build; compare results.
+ * Option D: Working backwards from the nuget (finding pack script or msbuild properties indicating nuget creation ...); build; compare results
+ * Option E: Seting up convention for explicit description of build prerequisites and package build. Inspiration for this can be `.proj` files describing external dependencies build recipe in dotnet source build ([sample build descriptions](https://github.com/dotnet/source-build-externals/tree/main/repos)) or [`git dependencies`](https://fsprojects.github.io/Paket/git-dependencies.html) project for Paket
 
 
 **Gotchas:**
@@ -155,9 +156,14 @@ We can take inspiration from VS debugger decompilation features:
     * (long term) For code generators we can extend SourceLink to add info to symbol file what code generator was used and store it on symbols server (or in Executable Image Search Path location)
     * project files - ??? (though one)
 
+  * The `Option B` might not have acceptable success rate - it is still very appealing option if combined with other approach. 
+
  * Discrepancies between the `PackageReference` and `ProjectReference` configurability and behavior (different metadata support, different behavior for some of the same metadata, different layout of the the bin outputs yielding some assumptions breaks, nuget support for packaged props/targets, etc.)
 
-    Possible solutions: Those differences needs to be researched/catalogued and categorized first, then we can decide what to consolidate and what will not be explicitly supported.
+    Possible solutions: 
+      * Those differences needs to be researched/catalogued and categorized first, then we can decide what to consolidate and what will not be explicitly supported. Investigation item: #8507
+      * It might be beneficial to perform analysis of usage prevalence of the individual metadata. Investigation task: #8521
+  
 
 **_Extensive research needed for this subproblem._**
 
@@ -202,3 +208,4 @@ We can take inspiration from VS debugger decompilation features:
   * https://devblogs.microsoft.com/visualstudio/debugging-external-sources-with-visual-studio/
   * https://devblogs.microsoft.com/visualstudio/decompilation-of-c-code-made-easy-with-visual-studio/
   * https://learn.microsoft.com/en-us/visualstudio/debugger/decompilation?view=vs-2022
+  * https://fsprojects.github.io/Paket/git-dependencies.html
