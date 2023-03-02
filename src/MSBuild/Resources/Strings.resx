@@ -849,7 +849,7 @@
   </data>
   <data name="HelpMessage_41_QuestionSwitch" Visibility="Public">
     <value>  -question
-                     (Experimental) Question whether there is any build work to do.
+                     (Experimental) Question whether there is any build work.
                      MSBuild will error out when it detects a target or task
                      that can be incremental (has inputs and outputs),
                      but isn't up to date.
