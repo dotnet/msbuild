@@ -1,14 +1,22 @@
-# Controlling dependencies behavior
+# Controlling references behavior
 
-MSBuild recognizes [few types of dependencies](https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2015/msbuild/common-msbuild-project-items) (here we are mainly interested in `ProjectReference`, `PackageReference`, `Reference` aka assembly reference) and offers optional mechanisms to tailor some aspects of the dependencies workings - transitive dependencies resolution, multitargeted references resolution, copying dependencies to output directory.
+MSBuild recognizes a [few types of references](https://learn.microsoft.com/previous-versions/visualstudio/visual-studio-2015/msbuild/common-msbuild-project-items) (here we are mainly interested in `ProjectReference`, `PackageReference`, `Reference` aka assembly reference) and offers optional mechanisms to tailor some aspects of the references workings - transitive references resolution, multitargeted references resolution, copying references to output directory.
+
+## .NET SDK projects and access to transitive references
+
+For [.NET SDK projects](https://learn.microsoft.com/dotnet/core/project-sdk/overview) restore operation by default makes all transitive references accessible as if they were direct references.
+
+This is required by the compiler and analyzers to be able to properly inspect the whole dependency or/and inheritance chain of types when deciding about particular checks.
+
+It is facilitated via `project.assets.json` file created by NuGet client during the restore operation. This file captures the whole transitive closure of the project dependency tree.
+
+SDK build tasks require existence of this file (hence the infamous `Assets file <path>\project.assets.json not found` if the MSBuild.exe is run without prior restore operation). It is used to reconstruct the `ProjectReference`s and `PackageReference`s for the project and pass them to MSBuild. For this reason MSBuild and compiler by default sees those transitive references as if they were direct references.
 
 ## Access to transitive project references
 
-In [SDK-style projects](https://learn.microsoft.com/en-us/dotnet/core/project-sdk/overview) MSBuild by default makes all transitive `ProjectReference`s accessible as if they were direct dependencies.
+Above described behavior can lead to easy unintentional breaking out of layering architecture separation. 
 
-This can lead to easy unintentional breaking out of layering architecture separation. 
-
-This behavior can be opted-out via `DisableTransitiveProjectReferences` property on the referencing project.
+This behavior can be opted-out for `ProjectReference`s via `DisableTransitiveProjectReferences` property on the referencing project.
 
 <a name="OnionArchSample"></a>*Example*:
 
@@ -50,7 +58,7 @@ public class PersonsAccessor
 
 ## Access to transitive package references
 
-The transitive access to dependencies works by default for package dependencies as well. This can be opted out via `PrivateAssets=compile` on the `PackageReference` of the concern. (More details on [Controlling package dependency assets](https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets))
+The transitive access to references works by default for package references as well. This can be opted out via `PrivateAssets=compile` on the `PackageReference` of the concern. (More details on [Controlling package dependency assets](https://learn.microsoft.com/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets))
 
 *Example*:
 
@@ -80,13 +88,13 @@ public class PersonsAccessor
 
 ## Not copying dependencies to output
 
-By default the above mentioned dependency types are being copied to build output directory during the build (provided the target failed [up-to-date check](https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2015/msbuild/incremental-builds?view=vs-2015&redirectedfrom=MSDN#output-inference) and run). There can be various scenarios where this behavior is not desired (examples: dependency is compile time only or contains a logic for build; component is plugin to a main app and there is a desire not to duplicate common dependencies in output).
+By default the above mentioned dependency types are copied to the build output directory during the build. There can be various scenarios where this behavior is not desired (examples: dependency is compile time only or contains a logic for build; component is plugin to a main app and there is a desire not to duplicate common dependencies in output).
 
-Overriding this logic depends on a type of dependency.
+Overriding this logic depends on the type of the dependency.
 
 ### Not copying Assembly Reference
 
-Copying can be opted out via [Private metadata on the Reference item](https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2015/msbuild/common-msbuild-project-items?view=vs-2015#reference) (which corresponds to the `Copy Local` property of the reference in the Visual Studio properties dialog for the reference):
+Copying can be opted out via [Private metadata on the Reference item](https://learn.microsoft.com/previous-versions/visualstudio/visual-studio-2015/msbuild/common-msbuild-project-items?view=vs-2015#reference) (which corresponds to the `Copy Local` property of the reference in the Visual Studio properties dialog for the reference):
 
 ```xml
 <ItemGroup>
@@ -100,7 +108,7 @@ Copying can be opted out via [Private metadata on the Reference item](https://le
 
 ### Not copying PackageReference
 
-Detailed options description can be found in [Controlling package dependency assets](https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets). Here we'll offer three artifical examples:
+Detailed options description can be found in [Controlling package dependency assets](https://learn.microsoft.com/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets). Here we'll offer three artifical examples:
 
 **Not copying package dependency to the immediate output folder:**
 
@@ -149,13 +157,11 @@ The opt-out mechanism is analogous to [Assembly Reference copy opt-out](#not-cop
 </ItemGroup>
 ```
 
-**Note:** There is possible need to explicitly specify `_GetChildProjectCopyToPublishDirectoryItems=false` to opt-out copying of project dependencies when builiding through [`MSBuilt` task](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) ([source](https://github.com/dotnet/msbuild/issues/4795#issuecomment-669885298))
-
 ## ProjectReference without accessibility and copying to output
 
 In a specific scenarios we might want to indicate that specific project should be built prior our project but said project should not be reference accessible nor its output copied to current project output. This can be helpful for build time only dependencies - projects defining behavior that is going to be used as build step of a current project.
 
-Such a behavior can be achived with [`ReferenceOutputAssembly` metadata](https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items?view=vs-2022#projectreference):
+Such a behavior can be achived with [`ReferenceOutputAssembly` metadata](https://learn.microsoft.com/visualstudio/msbuild/common-msbuild-project-items?view=vs-2022#projectreference):
 
 ```xml
 <ItemGroup>
@@ -168,11 +174,11 @@ Such a behavior can be achived with [`ReferenceOutputAssembly` metadata](https:/
 </ItemGroup>
 ```
 
-**Note:** This technique doesn't fully work when referencing project with executable output type (`<OutputType>Exe</OutputType>`) - in such case the types defined within the project still cannot be referenced, however output is copied to the current project output folder. In that case we need to combine (or replace) the `ReferenceOutputAssembly` metadata with `Private` metadata - [as described above](#not-copying-projectreference).
+**Note:** This technique has possibly unexpected behavior when referencing project with executable output type (`<OutputType>Exe</OutputType>`) - in such case the output assembly (`.dll`) is still not copied and referenced (as the metadatum name implies) and hence the types defined within the project cannot be referenced, however other supplementary output (added as `content` or `none`) is copied to the current project output folder (for .NET Core this includes `deps.json`, `runtimeconfig.json` and mainly `<app>.exe`). In that case we can combine (or replace) the `ReferenceOutputAssembly` metadata with `Private` metadata - [as described above](#not-copying-projectreference). More details on this case [here](https://github.com/dotnet/msbuild/issues/4795#issuecomment-1442390297)
 
 ## Forcing TargetFramework of a referenced multitargeted project
 
-Consider agaoin our previous [Onion architecture example](#OnionArchSample), but now the individual projects will be [multitargeted](https://learn.microsoft.com/en-us/nuget/create-packages/multiple-target-frameworks-project-file). 
+Consider agaoin our previous [Onion architecture example](#OnionArchSample), but now the individual projects will be [multitargeted](https://learn.microsoft.com/nuget/create-packages/multiple-target-frameworks-project-file). 
 
 Repository Layer:
 
@@ -234,6 +240,8 @@ Would we want to reference the netstandard version of the Repository Layer in ou
 
 **Notes:** 
 
-This will properly enforce the framework for the dependency chain. The output folder will contain proper version of the direct dependency - Repository Layer. The transitive dependencies might overbuild, and output folder of current project (Service Layer) might contain both versions of the transitive project dependency (Domain-net48.dll and Domain-netstd20.dll). This limitation can be workarounded by switching of the transitive project dependencies via `DisableTransitiveProjectReferences` (same as shown in [Access to transitive project references](#access-to-transitive-project-references))
+`SetTargetFramework` is currently not honored by the NuGet client([nuget issue #12436](https://github.com/NuGet/Home/issues/12436)), so the output folder will contain binaries from nuget packages as if this metadata was not used. To workaround this the apropriate nuget needs to be directly referenced from the project enforcing reference framework via `SetTargetFramework`, or copied to output/publish folder via different means.
 
-`SetTargetFramework` is currently not honored by the nuget client([nuget issue #12436](https://github.com/NuGet/Home/issues/12436)), so the output folder will contain binaries from nuget packages as if this metadata was not used. To workaround this the apropriate nuget needs to be directly referenced from the project enforcing reference framework via `SetTargetFramework`, or copied to output/publish folder via different means.
+
+`SetTargetFramework` will properly enforce the framework for the `ProjectReference` chain. Once the `TargetFramework` overriding is encountered it is passed down the reference chain and the `ProjectReference`s respect it during the `TargetFramework` resolution. Due to the nature of handling of [transitive references in .NET-SDK style projects](#net-sdk-projects-and-access-to-transitive-references) and the fact that NuGet client doesn't honor `SetTargetFramework`, the transitive references can get resolved and built for multiple `TargetFramework`s. This means the output folder will contain proper version of the direct dependency - Repository Layer. The transitive references might overbuild, and output folder of current project (Service Layer) might contain both versions of the transitive project dependency (Domain-net48.dll and Domain-netstd20.dll). This limitation can be workarounded by switching of the transitive project references via `DisableTransitiveProjectReferences` (same as shown in [Access to transitive project references](#access-to-transitive-project-references))
+

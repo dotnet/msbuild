@@ -39,7 +39,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 ### Problems?
 
 * [Rebuilding when nothing changed](wiki/Rebuilding-when-nothing-changed.md)
-* [Controling Dependencies Behavior](wiki/Controlling-Dependencies-Behavior.md)
+* [Controling References Behavior](wiki/Controlling-Dependencies-Behavior.md)
 * [Something's wrong in my build](wiki/Something's-wrong-in-my-build.md)
 * [Some gotchas around the Microsoft.Build.Framework project/assembly](wiki/Microsoft.Build.Framework.md)
 * [GAC and MSBuild](wiki/UnGAC.md)
