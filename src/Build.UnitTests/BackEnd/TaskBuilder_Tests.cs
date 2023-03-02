@@ -16,6 +16,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -82,6 +83,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             logger.AssertLogContains("MSB4036");
             logger.AssertLogDoesntContain("Made it");
+        }
+
+        [Fact]
+        public void TasksOnlyLogStartedEventOnceEach()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+            @"<Project>
+              <Target Name='t'>
+                  <Message Text='Made it'/>
+              </Target>
+            </Project>");
+
+            TransientTestFile projectFile = env.CreateFile("myProj.proj", projectFileContents);
+            env.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", @"C:\Users\namytelk\Desktop");
+
+            string results = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:diag", out bool success);
+
+            int count = 0;
+            for (int index = results.IndexOf("Task \"Message\""); index >= 0; index = results.IndexOf("Task \"Message\"", index))
+            {
+                count++;
+                index += 14; // Skip to the end of this string
+            }
+
+            count.ShouldBe(1);
         }
 
         /// <summary>
