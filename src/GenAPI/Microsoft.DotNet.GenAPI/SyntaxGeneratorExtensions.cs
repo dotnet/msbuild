@@ -60,8 +60,16 @@ namespace Microsoft.DotNet.GenAPI
 
                             if (baseTypeConstructors.Any())
                             {
+                                IMethodSymbol constructor = baseTypeConstructors.First();
+
                                 ConstructorDeclarationSyntax declaration = (ConstructorDeclarationSyntax)syntaxGenerator.Declaration(method);
-                                return declaration.WithInitializer(baseTypeConstructors.First().GenerateBaseConstructorInitializer());
+                                if (!declaration.Modifiers.Any(m => m.RawKind == (int)SyntaxKind.UnsafeKeyword) &&
+                                    // if at least one parameter of a base constructor is raw pointer type
+                                    constructor.Parameters.Any(p => p.Type.TypeKind == TypeKind.Pointer))
+                                {
+                                    declaration = declaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.UnsafeKeyword));
+                                }
+                                return declaration.WithInitializer(constructor.GenerateBaseConstructorInitializer());
                             }
                         }
                     }

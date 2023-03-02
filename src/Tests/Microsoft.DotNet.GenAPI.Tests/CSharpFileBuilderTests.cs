@@ -1566,6 +1566,76 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
+        public void TestUnsafeConstructorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public unsafe Bar(char* f) { }
+                        }
+
+                        public class Foo : Bar
+                        {
+                            public unsafe Foo(char* f) : base(f) { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public unsafe Bar(char* f) { }
+                        }
+                    
+                        public partial class Foo : Bar
+                        {
+                            public unsafe Foo(char* f) : base(default) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false,
+                allowUnsafe: true);
+        }
+
+        [Fact]
+        public void TestUnsafeBaseConstructorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public unsafe Bar(char* f) { }
+                        }
+
+                        public class Foo : Bar
+                        {
+                            public unsafe Foo() : base(default) { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public unsafe Bar(char* f) { }
+                        }
+
+                        public partial class Foo : Bar
+                        {
+                            public unsafe Foo() : base(default) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false,
+                allowUnsafe: true);
+        }
+
+        [Fact]
         public void TestInternalDefaultConstructorGeneration()
         {
             RunTest(original: """
