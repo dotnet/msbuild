@@ -317,13 +317,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 SdkResultFactory resultFactory = new SdkResultFactory(sdk);
 
-                SdkResult result;
+                SdkResult result = null;
 
                 try
                 {
                     MSBuildEventSource.Log.SdkResolverResolveSdkStart();
                     result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
-                    MSBuildEventSource.Log.SdkResolverResolveSdkStop(sdkResolver.Name, sdk.Name, solutionPath, projectPath, result?.Path, result?.Success ?? false);
                 }
                 catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
@@ -338,6 +337,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     // The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}": {2}
                     throw new SdkResolverException("SDKResolverFailed", sdkResolver, sdk, e, sdkResolver.Name, sdk.ToString(), e.ToString());
+                }
+                finally
+                {
+                    MSBuildEventSource.Log.SdkResolverResolveSdkStop(sdkResolver.Name, sdk.Name, solutionPath, projectPath, result?.Path, result?.Success ?? false);
                 }
 
                 SetResolverState(submissionId, sdkResolver, context.State);
