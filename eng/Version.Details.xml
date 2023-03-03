@@ -207,10 +207,6 @@
       <Uri>https://github.com/dotnet/razor</Uri>
       <Sha>0591c7026e0972ff2f2da0be7caf26f1590e73f6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="7.0.0-preview.23151.4">
-      <Uri>https://github.com/dotnet/razor</Uri>
-      <Sha>0591c7026e0972ff2f2da0be7caf26f1590e73f6</Sha>
-    </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.23151.4">
       <Uri>https://github.com/dotnet/razor</Uri>
       <Sha>0591c7026e0972ff2f2da0be7caf26f1590e73f6</Sha>
