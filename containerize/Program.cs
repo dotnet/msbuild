@@ -6,7 +6,7 @@ using Microsoft.NET.Build.Containers;
 using System.CommandLine.Parsing;
 using System.Text;
 
-#pragma warning disable CA1852 
+#pragma warning disable CA1852
 
 var publishDirectoryArg = new Argument<DirectoryInfo>(
     name: "PublishDirectory",
@@ -164,6 +164,8 @@ var ridOpt = new Option<string>(name: "--rid", description: "Runtime Identifier 
 
 var ridGraphPathOpt = new Option<string>(name: "--ridgraphpath", description: "Path to the RID graph file.");
 
+var containerUserOpt = new Option<string>(name: "--container-user", description: "User to run the container as.");
+
 RootCommand root = new RootCommand("Containerize an application without Docker.")
 {
     publishDirectoryArg,
@@ -181,27 +183,29 @@ RootCommand root = new RootCommand("Containerize an application without Docker."
     envVarsOpt,
     ridOpt,
     ridGraphPathOpt,
-    localContainerDaemonOpt
+    localContainerDaemonOpt,
+    containerUserOpt
 };
 
 root.SetHandler(async (context) =>
 {
     DirectoryInfo _publishDir = context.ParseResult.GetValueForArgument(publishDirectoryArg);
-    string _baseReg = context.ParseResult.GetValueForOption(baseRegistryOpt) ?? "";
-    string _baseName = context.ParseResult.GetValueForOption(baseImageNameOpt) ?? "";
-    string _baseTag = context.ParseResult.GetValueForOption(baseImageTagOpt) ?? "";
+    string _baseReg = context.ParseResult.GetValueForOption(baseRegistryOpt)!;
+    string _baseName = context.ParseResult.GetValueForOption(baseImageNameOpt)!;
+    string _baseTag = context.ParseResult.GetValueForOption(baseImageTagOpt)!;
     string? _outputReg = context.ParseResult.GetValueForOption(outputRegistryOpt);
-    string _name = context.ParseResult.GetValueForOption(imageNameOpt) ?? "";
-    string[] _tags = context.ParseResult.GetValueForOption(imageTagsOpt) ?? Array.Empty<string>();
-    string _workingDir = context.ParseResult.GetValueForOption(workingDirectoryOpt) ?? "";
-    string[] _entrypoint = context.ParseResult.GetValueForOption(entrypointOpt) ?? Array.Empty<string>();
-    string[] _entrypointArgs = context.ParseResult.GetValueForOption(entrypointArgsOpt) ?? Array.Empty<string>();
-    string[] _labels = context.ParseResult.GetValueForOption(labelsOpt) ?? Array.Empty<string>();
-    Port[] _ports = context.ParseResult.GetValueForOption(portsOpt) ?? Array.Empty<Port>();
-    string[] _envVars = context.ParseResult.GetValueForOption(envVarsOpt) ?? Array.Empty<string>();
-    string _rid = context.ParseResult.GetValueForOption(ridOpt) ?? "";
-    string _ridGraphPath = context.ParseResult.GetValueForOption(ridGraphPathOpt) ?? "";
-    string _localContainerDaemon = context.ParseResult.GetValueForOption(localContainerDaemonOpt) ?? "";
+    string _name = context.ParseResult.GetValueForOption(imageNameOpt)!;
+    string[] _tags = context.ParseResult.GetValueForOption(imageTagsOpt)!;
+    string _workingDir = context.ParseResult.GetValueForOption(workingDirectoryOpt)!;
+    string[] _entrypoint = context.ParseResult.GetValueForOption(entrypointOpt)!;
+    string[]? _entrypointArgs = context.ParseResult.GetValueForOption(entrypointArgsOpt);
+    string[]? _labels = context.ParseResult.GetValueForOption(labelsOpt);
+    Port[]? _ports = context.ParseResult.GetValueForOption(portsOpt);
+    string[]? _envVars = context.ParseResult.GetValueForOption(envVarsOpt);
+    string _rid = context.ParseResult.GetValueForOption(ridOpt)!;
+    string _ridGraphPath = context.ParseResult.GetValueForOption(ridGraphPathOpt)!;
+    string _localContainerDaemon = context.ParseResult.GetValueForOption(localContainerDaemonOpt)!;
+    string? _containerUser = context.ParseResult.GetValueForOption(containerUserOpt);
     await ContainerBuilder.ContainerizeAsync(
         _publishDir,
         _workingDir,
@@ -219,6 +223,7 @@ root.SetHandler(async (context) =>
         _rid,
         _ridGraphPath,
         _localContainerDaemon,
+        _containerUser,
         context.GetCancellationToken()).ConfigureAwait(false);
 });
 

@@ -17,6 +17,7 @@ internal sealed class ImageConfig
     private readonly Dictionary<string, string> _environmentVariables;
     private string? _newWorkingDirectory;
     private (string[] ExecutableArgs, string[]? Args)? _newEntryPoint;
+    private string? _user;
 
     /// <summary>
     /// Models the file system of the image. Typically has a key 'type' with value 'layers' and a key 'diff_ids' with a list of layer digests.
@@ -45,8 +46,10 @@ internal sealed class ImageConfig
         _architecture = GetArchitecture();
         _os = GetOs();
         _history = GetHistory();
+        _user = GetUser();
     }
 
+    private string? GetUser() => _config["config"]?["User"]?.ToString();
     private List<HistoryEntry> GetHistory() => _config["history"]?.AsArray().Select(node => node.Deserialize<HistoryEntry>()!).ToList() ?? new List<HistoryEntry>();
     private string GetOs() => _config["os"]?.ToString() ?? throw new ArgumentException("Base image configuration should contain an 'os' property.");
     private string GetArchitecture() => _config["architecture"]?.ToString() ?? throw new ArgumentException("Base image configuration should contain an 'architecture' property.");
@@ -90,9 +93,14 @@ internal sealed class ImageConfig
             }
         }
 
+        if (_user is not null)
+        {
+            newConfig["User"] = _user;
+        }
+
         // These fields aren't (yet) supported by the task layer, but we should
         // preserve them if they're already set in the base image.
-        foreach (string propertyName in new [] { "User", "Volumes", "StopSignal" })
+        foreach (string propertyName in new [] { "Volumes", "StopSignal" })
         {
             if (_config["config"]?[propertyName] is JsonNode propertyValue)
             {
@@ -185,6 +193,8 @@ internal sealed class ImageConfig
     {
         _rootFsLayers.Add(l.Descriptor.UncompressedDigest!);
     }
+
+    internal void SetUser(string user) => _user = user;
 
     private HashSet<Port> GetExposedPorts()
     {

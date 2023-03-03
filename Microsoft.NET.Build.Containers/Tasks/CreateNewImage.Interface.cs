@@ -114,6 +114,15 @@ partial class CreateNewImage
     [Required]
     public string RuntimeIdentifierGraphPath { get; set; }
 
+    /// <summary>
+    /// The username or UID which is a platform-specific structure that allows specific control over which user the process run as.
+    /// This acts as a default value to use when the value is not specified when creating a container.
+    /// For Linux based systems, all of the following are valid: user, uid, user:group, uid:gid, uid:group, user:gid.
+    /// If group/gid is not specified, the default group and supplementary groups of the given user/uid in /etc/passwd and /etc/group from the container are applied.
+    /// If group/gid is specified, supplementary groups from the container are ignored.
+    /// </summary>
+    public string ContainerUser { get; set; }
+
     [Output]
     public string GeneratedContainerManifest { get; set; }
 
@@ -141,6 +150,7 @@ partial class CreateNewImage
         ContainerRuntimeIdentifier = "";
         RuntimeIdentifierGraphPath = "";
         LocalContainerDaemon = "";
+        ContainerUser = "";
 
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";

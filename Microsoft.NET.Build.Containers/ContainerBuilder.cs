@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
@@ -16,16 +15,17 @@ public static class ContainerBuilder
         string baseName,
         string baseTag,
         string[] entrypoint,
-        string[] entrypointArgs,
+        string[]? entrypointArgs,
         string imageName,
         string[] imageTags,
         string? outputRegistry,
-        string[] labels,
-        Port[] exposedPorts,
-        string[] envVars,
+        string[]? labels,
+        Port[]? exposedPorts,
+        string[]? envVars,
         string containerRuntimeIdentifier,
         string ridGraphPath,
         string localContainerDaemon,
+        string? containerUser,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -57,7 +57,7 @@ public static class ContainerBuilder
 
         imageBuilder.SetEntryPoint(entrypoint, entrypointArgs);
 
-        foreach (string label in labels)
+        foreach (string label in labels ?? Array.Empty<string>())
         {
             string[] labelPieces = label.Split('=');
 
@@ -65,17 +65,22 @@ public static class ContainerBuilder
             imageBuilder.AddLabel(labelPieces[0], TryUnquote(labelPieces[1]));
         }
 
-        foreach (string envVar in envVars)
+        foreach (string envVar in envVars ?? Array.Empty<string>() )
         {
             string[] envPieces = envVar.Split('=', 2);
 
             imageBuilder.AddEnvironmentVariable(envPieces[0], TryUnquote(envPieces[1]));
         }
 
-        foreach ((int number, PortType type) in exposedPorts)
+        foreach ((int number, PortType type) in exposedPorts ?? Array.Empty<Port>())
         {
             // ports are validated by System.CommandLine API
             imageBuilder.ExposePort(number, type);
+        }
+
+        if (containerUser is { } user)
+        {
+            imageBuilder.SetUser(user);
         }
 
         BuiltImage builtImage = imageBuilder.Build();

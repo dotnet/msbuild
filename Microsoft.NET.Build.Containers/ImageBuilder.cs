@@ -83,4 +83,6 @@ internal sealed class ImageBuilder
     /// Sets an entry point for the image.
     /// </summary>
     internal void SetEntryPoint(string[] executableArgs, string[]? args = null) => _baseImageConfig.SetEntryPoint(executableArgs, args);
+
+    internal void SetUser(string user) => _baseImageConfig.SetUser(user);
 }

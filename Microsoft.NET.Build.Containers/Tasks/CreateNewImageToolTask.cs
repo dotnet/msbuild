@@ -113,7 +113,7 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         builder.AppendSwitchIfNotNull("--workingdirectory ", WorkingDirectory);
         ITaskItem[] sanitizedEntryPoints = Entrypoint.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec)).ToArray();
         builder.AppendSwitchIfNotNull("--entrypoint ", sanitizedEntryPoints, delimiter: " ");
- 
+
         //optional options
         if (!string.IsNullOrWhiteSpace(BaseImageTag))
         {
@@ -185,10 +185,17 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         {
             builder.AppendSwitchIfNotNull("--rid ", ContainerRuntimeIdentifier);
         }
+
         if (!string.IsNullOrWhiteSpace(RuntimeIdentifierGraphPath))
         {
             builder.AppendSwitchIfNotNull("--ridgraphpath ", RuntimeIdentifierGraphPath);
         }
+
+        if (!string.IsNullOrWhiteSpace(ContainerUser))
+        {
+            builder.AppendSwitchIfNotNull("--container-user ", ContainerUser);
+        }
+
         return builder.ToString();
     }
 
