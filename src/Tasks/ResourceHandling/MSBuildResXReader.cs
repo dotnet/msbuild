@@ -206,7 +206,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                         resources.Add(new BinaryFormatterByteArrayResource(name, binaryFormatterBytes, resxFilename));
                         return;
                     default:
-                        throw new NotSupportedException($"Resource \"{name}\" in \"{resxFilename}\"uses MIME type \"{mimetype}\", which is not supported by .NET Core MSBuild.");
+                        throw new NotSupportedException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GenerateResource.MimeTypeNotSupportedOnCore", name, resxFilename, mimetype));
                 }
             }
         }
