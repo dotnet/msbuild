@@ -235,7 +235,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     }
                     else if (cleanAllPacks && dependentFeatureBand.CompareTo(_sdkFeatureBand) < 1)
                     {
-                        Log?.LogMessage($"Adding dependent '{dependent}' for removal as part of the dotnet clean --all operation.");
+                        Log?.LogMessage($"Adding dependent '{dependent}' for removal as part as dotnet has been told to clean everything.");
                         UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                     }
                     else if (dependentFeatureBand.Equals(_sdkFeatureBand))
@@ -303,28 +303,28 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void EradicateAllWorkloadInstallationRecords(SdkFeatureBand featureBand)
+        public void EradicateAllWorkloadInstallationRecords(SdkFeatureBand currentFeatureBand)
         {
             var allFeatureBands = RecordRepository.GetFeatureBandsWithInstallationRecords();
 
-            Log?.LogMessage($"Clean --all: Attempting to delete all workload installation records.");
+            Log?.LogMessage($"Attempting to delete all workload msi installation records.");
 
             foreach (SdkFeatureBand potentialBandToClean in allFeatureBands)
             {
-                Log?.LogMessage($"Clean --all: Detected band with installation record: '{potentialBandToClean}'.");
+                Log?.LogMessage($"Detected band with installation record: '{potentialBandToClean}'.");
 
-                if (potentialBandToClean.CompareTo(featureBand) < 1)
+                if (potentialBandToClean.CompareTo(currentFeatureBand) < 1)
                 {
-                    Log?.LogMessage($"Clean --all: '{potentialBandToClean}' is confirmed to be less than or current to the current band.");
+                    Log?.LogMessage($"'{potentialBandToClean}' is confirmed to be less than or current to the current band.");
 
                     var workloadInstallationRecordIds = RecordRepository.GetInstalledWorkloads(potentialBandToClean);
                     foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
                     {
-                        Log?.LogMessage($"Clean --all: Workload {workloadInstallationRecordId} for '{potentialBandToClean}' has been marked for deletion.");
+                        Log?.LogMessage($"Workload {workloadInstallationRecordId} for '{potentialBandToClean}' has been marked for deletion.");
                         RecordRepository.DeleteWorkloadInstallationRecord(workloadInstallationRecordId, potentialBandToClean);
                     }
 
-                    Log?.LogMessage($"Clean --all: No more workloads detected in band: '{potentialBandToClean}'.");
+                    Log?.LogMessage($"No more workloads detected in band: '{potentialBandToClean}'.");
                 }
             }
         }

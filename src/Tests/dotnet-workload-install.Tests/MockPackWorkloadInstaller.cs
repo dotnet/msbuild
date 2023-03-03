@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             GarbageCollectionCalled = true;
         }
 
-        public void EradicateAllWorkloadInstallationRecords(SdkFeatureBand featureBand)
+        public void EradicateAllWorkloadInstallationRecords(SdkFeatureBand currentFeatureBand)
         {
             throw new NotImplementedException();
         }

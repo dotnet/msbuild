@@ -88,37 +88,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             return GetWorkloadInstallationRecordsFromRegistry(wrk);
         }
 
-        public IEnumerable<WorkloadId> GetInstalledWorkloadsForFeatureBandAndBelow(SdkFeatureBand sdkFeatureBand)
-        {
-            using RegistryKey wrk = _baseKey.OpenSubKey(Path.Combine(BasePath, $"{sdkFeatureBand}"));
-            List<WorkloadId> allWorkloads = new();
-            var sdkBands = wrk?.GetSubKeyNames();
-
-            foreach (var band in sdkBands)
-            {
-                Log?.LogMessage($"Clean --all: Obtaining workload installation records for {BasePath} + {band}.");
-                try
-                {
-                    if (new SdkFeatureBand(band).CompareTo(sdkFeatureBand) < 1)
-                    {
-                        var sdkPath = Path.Combine(BasePath, band);
-                        allWorkloads.AddRange(GetWorkloadInstallationRecordsFromRegistry(_baseKey.OpenSubKey(sdkPath)));
-                    }
-                }
-                catch (Exception ex) when (
-                    ex is ArgumentNullException ||
-                    ex is ArgumentOutOfRangeException ||
-                    ex is FormatException
-                    )
-                {
-                    Log?.LogMessage($"The key found: '{band}' is not a valid feature band of the SDK. Skipping workload record analyzing step for clean.");
-                    continue; // key has been added somehow under the SDK that is not a feature band.
-                }
-            }
-
-            return allWorkloads;
-        }
-
         private IEnumerable<WorkloadId> GetWorkloadInstallationRecordsFromRegistry(RegistryKey sdkFeatureBandWorkloadRegistry)
         {
             // ToList() is needed to ensure deferred execution does not reference closed registry keys.
