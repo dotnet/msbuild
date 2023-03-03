@@ -814,7 +814,8 @@ namespace Microsoft.Build.Tasks
                                         StronglyTypedClassName,
                                         PublicClass,
                                         ExtractResWFiles,
-                                        OutputDirectory);
+                                        OutputDirectory,
+                                        WarnOnBinaryFormatterUse);
 
                             this.StronglyTypedClassName = process.StronglyTypedClassName; // in case a default was chosen
                             this.StronglyTypedFileName = process.StronglyTypedFilename;   // in case a default was chosen
@@ -1516,7 +1517,7 @@ namespace Microsoft.Build.Tasks
             ResGenDependencies.ResXFile resxFileInfo;
             try
             {
-                resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources);
+                resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources, Log, WarnOnBinaryFormatterUse);
             }
             catch (Exception e) when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
             {
@@ -1975,11 +1976,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool DetermineWhetherSerializedObjectLoads(string data)
         {
-            if (WarnOnBinaryFormatterUse)
-            {
-                Log.LogWarningWithCodeFromResources("GenerateResource.BinaryFormatterUse");
-            }
-
             byte[] serializedData = ByteArrayFromBase64WrappedString(data);
 
             BinaryFormatter binaryFormatter = new();
@@ -2348,6 +2344,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _useSourcePath = false;
 
+        private bool _logWarningForBinaryFormatter = false;
+
         #endregion
 
         /// <summary>
@@ -2368,7 +2366,8 @@ namespace Microsoft.Build.Tasks
             string classname,
             bool publicClass,
             bool extractingResWFiles,
-            string resWOutputDirectory)
+            string resWOutputDirectory,
+            bool logWarningForBinaryFormatter)
         {
             _logger = log;
             _assemblyFiles = assemblyFilesList;
@@ -2387,6 +2386,7 @@ namespace Microsoft.Build.Tasks
             _resWOutputDirectory = resWOutputDirectory;
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
             _usePreserializedResources = usePreserializedResources;
+            _logWarningForBinaryFormatter = logWarningForBinaryFormatter;
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             // If references were passed in, we will have to give the ResxResourceReader an object
@@ -2991,7 +2991,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath))
+                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath, _logger, _logWarningForBinaryFormatter))
                                 {
                                     AddResource(reader, resource, filename, 0, 0);
                                 }
