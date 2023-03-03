@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Containers.Resources
 
             return resource is null ?
                 $"<{name}>" :
-                string.Format(resource, args);
+                string.Format(CultureInfo.CurrentCulture, resource, args);
         }
     }
 }

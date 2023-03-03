@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.Json.Nodes;
-using Microsoft.NET.Build.Containers;
 using Xunit;
 
-namespace Test.Microsoft.NET.Build.Containers;
+namespace Microsoft.NET.Build.Containers.UnitTests;
 
 public class ImageBuilderTests
 {

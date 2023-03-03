@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Formats.Tar;
+using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
@@ -114,9 +115,9 @@ internal record struct Layer
         var pathBuilder = new StringBuilder();
         for (var i = 0; i < filePathSegments.Count - 1; i++)
         {
-            pathBuilder.Append($"{filePathSegments[i]}/");
+            pathBuilder.Append(CultureInfo.InvariantCulture, $"{filePathSegments[i]}/");
 
-            var fullPath = pathBuilder.ToString(); 
+            var fullPath = pathBuilder.ToString();
             if (!directoryEntries.Contains(fullPath))
             {
                 tar.WriteEntry(new PaxTarEntry(TarEntryType.Directory, fullPath));
