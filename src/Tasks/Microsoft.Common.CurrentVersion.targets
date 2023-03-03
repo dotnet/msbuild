@@ -3283,6 +3283,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
+      <GenerateResourceWarnOnBinaryFormatterUse Condition="'$(GenerateResourceWarnOnBinaryFormatterUse)' == ''">false</GenerateResourceWarnOnBinaryFormatterUse>
       <GenerateResourceMSBuildArchitecture Condition="'$(GenerateResourceMSBuildArchitecture)' == ''">$(PlatformTargetAsMSBuildArchitecture)</GenerateResourceMSBuildArchitecture>
 
       <ResgenToolPath Condition="'$(ResgenToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</ResgenToolPath>
@@ -3329,7 +3330,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ExecuteAsTool="$(ResGenExecuteAsTool)"
         EnvironmentVariables="$(ResGenEnvironment)"
         MSBuildRuntime="$(GenerateResourceMSBuildRuntime)"
-        MSBuildArchitecture="$(GenerateResourceMSBuildArchitecture)">
+        MSBuildArchitecture="$(GenerateResourceMSBuildArchitecture)"
+        WarnOnBinaryFormatterUse="$(GenerateResourceWarnOnBinaryFormatterUse)"
+        >
 
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="StronglyTypedFileName" ItemName="Compile"/>
@@ -3356,6 +3359,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         OutputResources="@(EmbeddedResource->'$(IntermediateOutputPath)%(ManifestResourceName).resources')"
         MSBuildRuntime="$(GenerateResourceMSBuildRuntime)"
         MSBuildArchitecture="$(GenerateResourceMSBuildArchitecture)"
+        WarnOnBinaryFormatterUse="$(GenerateResourceWarnOnBinaryFormatterUse)"
         Condition="'%(EmbeddedResource.Type)' == 'Resx' and '%(EmbeddedResource.GenerateResource)' != 'false' and '$(GenerateResourceMSBuildRuntime)' == 'CLR2'">
 
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>

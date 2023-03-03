@@ -274,6 +274,12 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        // Indicates whether any BinaryFormatter use should lead to a warning.
+        public bool WarnOnBinaryFormatterUse
+        {
+            get; set;
+        }
+
         /// <summary>
         /// Specifies the namespace to use for the generated class source for the
         /// strongly typed resource. If left blank, no namespace is used.
@@ -1969,9 +1975,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool DetermineWhetherSerializedObjectLoads(string data)
         {
+            if (WarnOnBinaryFormatterUse)
+            {
+                Log.LogWarningWithCodeFromResources("GenerateResource.BinaryFormatterUse");
+            }
+
             byte[] serializedData = ByteArrayFromBase64WrappedString(data);
 
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            BinaryFormatter binaryFormatter = new();
 
             using (MemoryStream memoryStream = new MemoryStream(serializedData))
             {
