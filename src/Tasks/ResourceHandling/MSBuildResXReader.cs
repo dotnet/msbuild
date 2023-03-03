@@ -194,10 +194,10 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     case BinSerializedObjectMimeType:
                     case Beta2CompatSerializedObjectMimeType:
                     case CompatBinSerializedObjectMimeType:
-                        // Warn of BinaryFormatter exposure (on by default in .NET 8+)
+                        // Warn of BinaryFormatter exposure (SDK should turn this on by default in .NET 8+)
                         if (logWarningForBinaryFormatter)
                         {
-                            log.LogWarningWithCodeFromResources("GenerateResource.BinaryFormatterUse", name, resxFilename, mimetype);
+                            log?.LogWarningWithCodeFromResources("GenerateResource.BinaryFormatterUse", name, resxFilename, typename);
                         }
 
                         // BinaryFormatter from byte array

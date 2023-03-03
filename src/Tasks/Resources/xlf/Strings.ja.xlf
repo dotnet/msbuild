@@ -1040,8 +1040,10 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: BinaryFormatter is deprecated and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.</source>
-        <target state="new">MSB3825: BinaryFormatter is deprecated and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.</target>
+        <source>MSB3825: Resource "{0}" in "{1}" is of mimetype "{2}", which is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</source>
+        <target state="new">MSB3825: Resource "{0}" in "{1}" is of mimetype "{2}", which is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
