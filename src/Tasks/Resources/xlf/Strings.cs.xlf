@@ -1081,6 +1081,11 @@
         <target state="translated">MSB3821: Nešlo zpracovat soubor {0}, protože je v zóně Internet nebo Omezené nebo má na souboru značku webu. Pokud chcete tyto soubory zpracovat, odeberte značku webu.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
+        <source>Resource \"{0}\" in \"{1}\"uses MIME type \"{2}\", which is not supported by .NET Core MSBuild.</source>
+        <target state="new">Resource \"{0}\" in \"{1}\"uses MIME type \"{2}\", which is not supported by .NET Core MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
         <target state="translated">Výstupní soubor {0} neexistuje.</target>

@@ -1081,6 +1081,11 @@
         <target state="translated">MSB3821: non è stato possibile elaborare il file {0} perché si trova nell'area Internet o Siti con restrizioni o presenta il contrassegno del Web. Rimuovere il contrassegno del Web se si intende elaborare questi file.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
+        <source>Resource \"{0}\" in \"{1}\"uses MIME type \"{2}\", which is not supported by .NET Core MSBuild.</source>
+        <target state="new">Resource \"{0}\" in \"{1}\"uses MIME type \"{2}\", which is not supported by .NET Core MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
         <target state="translated">Il file di output "{0}" non esiste.</target>
