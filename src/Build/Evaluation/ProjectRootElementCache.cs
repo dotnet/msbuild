@@ -148,7 +148,7 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
-            // If the project file is non modifiable lets expect it is up to date and consider cached value valid.
+            // If the project file is non modifiable, assume it is up to date and consider the cached value valid.
             if (!Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck && FileClassifier.Shared.IsNonModifiable(projectFile))
             {
                 return false;
