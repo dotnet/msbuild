@@ -322,7 +322,6 @@ namespace Microsoft.Build.UnitTests
                     }
                 };
 
-#if !MONO // https://github.com/mono/mono/issues/8441
                 yield return new object[]
                 {
                     new GetFilesComplexGlobbingMatchingInfo
@@ -358,7 +357,6 @@ namespace Microsoft.Build.UnitTests
                         ExpectNoMatches = NativeMethodsShared.IsLinux,
                     }
                 };
-#endif
 
                 yield return new object[]
                 {

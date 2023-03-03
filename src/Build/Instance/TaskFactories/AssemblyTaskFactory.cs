@@ -332,9 +332,7 @@ namespace Microsoft.Build.BackEnd
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
                 mergedParameters = MergeTaskFactoryParameterSets(_factoryIdentityParameters, taskIdentityParameters);
-                useTaskFactory = !NativeMethodsShared.IsMono
-                                 && (_taskHostFactoryExplicitlyRequested
-                                     || !TaskHostParametersMatchCurrentProcess(mergedParameters));
+                useTaskFactory = _taskHostFactoryExplicitlyRequested || !TaskHostParametersMatchCurrentProcess(mergedParameters);
             }
             else
             {

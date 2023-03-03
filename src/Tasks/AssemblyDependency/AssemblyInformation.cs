@@ -16,7 +16,7 @@ using System.Text;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_ASSEMBLYLOADCONTEXT || MONO
+#if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
@@ -43,14 +43,11 @@ namespace Microsoft.Build.Tasks
         private readonly string _sourceFile;
         private FrameworkName _frameworkName;
 
-#if FEATURE_ASSEMBLYLOADCONTEXT || MONO
+#if FEATURE_ASSEMBLYLOADCONTEXT
         private bool _metadataRead;
-#endif
-
-#if !FEATURE_ASSEMBLYLOADCONTEXT && !MONO
+#else
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
-#endif
-#if !FEATURE_ASSEMBLYLOADCONTEXT
+
         // Borrowed from genman.
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
@@ -60,7 +57,7 @@ namespace Microsoft.Build.Tasks
         {
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ReflectionOnlyAssemblyResolve;
         }
-#endif // FEATURE_ASSEMBLY_LOADFROM
+#endif // !FEATURE_ASSEMBLYLOADCONTEXT
 
         /// <summary>
         /// Construct an instance for a source file.
@@ -272,45 +269,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private FrameworkName GetFrameworkName()
         {
-            // Disabling use of System.Reflection in case of MONO, because
-            // Assembly.GetCustomAttributes* for an attribute which belongs
-            // to an assembly that mono cannot find, causes a crash!
-            // Instead, opt for using PEReader and friends to get that info
-#if !FEATURE_ASSEMBLYLOADCONTEXT && !MONO
-            if (!NativeMethodsShared.IsWindows)
-            {
-                if (String.Equals(Environment.GetEnvironmentVariable("MONO29679"), "1", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Getting custom attributes in CoreFx contract assemblies is busted
-                    // https://bugzilla.xamarin.com/show_bug.cgi?id=29679
-                    return null;
-                }
-
-                CustomAttributeData attr = null;
-
-                foreach (CustomAttributeData a in _assembly.GetCustomAttributesData())
-                {
-                    try
-                    {
-                        if (a.AttributeType == typeof(TargetFrameworkAttribute))
-                        {
-                            attr = a;
-                            break;
-                        }
-                    }
-                    catch
-                    {
-                    }
-                }
-
-                string name = null;
-                if (attr != null)
-                {
-                    name = (string)attr.ConstructorArguments[0].Value;
-                }
-                return name == null ? null : new FrameworkName(name);
-            }
-
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             FrameworkName frameworkAttribute = null;
             try
             {
@@ -343,7 +302,7 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-#if FEATURE_ASSEMBLYLOADCONTEXT || MONO
+#if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Read everything from the assembly in a single stream.
         /// </summary>
@@ -480,9 +439,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-        // Enabling this for MONO, because it's required by GetFrameworkName.
-        // More details are in the comment for that method
-#if FEATURE_ASSEMBLYLOADCONTEXT || MONO
+#if FEATURE_ASSEMBLYLOADCONTEXT
         // This method copied from DNX source: https://github.com/aspnet/dnx/blob/e0726f769aead073af2d8cd9db47b89e1745d574/src/Microsoft.Dnx.Tooling/Utils/LockFileUtils.cs#L385
         //  System.Reflection.Metadata 1.1 is expected to have an API that helps with this.
         /// <summary>

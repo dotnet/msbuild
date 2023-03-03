@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /nologo switch
         /// </summary>
-        [WindowsOnlyFact("The /nologo switch is not available on Mono.")]
+        [Fact]
         public void NoLogo()
         {
             var t = new ResolveComReference.AxImp();

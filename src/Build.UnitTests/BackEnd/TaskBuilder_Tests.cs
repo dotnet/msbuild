@@ -714,7 +714,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
-        [Trait("Category", "non-mono-tests")]
         public void NullMetadataOnLegacyOutputItems_InlineTask_Diagnostic()
         {
             string projectContents = @"

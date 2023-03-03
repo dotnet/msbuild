@@ -7,7 +7,7 @@ using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
-#if RUNTIME_TYPE_NETCORE || MONO
+#if RUNTIME_TYPE_NETCORE
 using System.IO;
 using System.Diagnostics;
 #endif
@@ -99,7 +99,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         // Copied from NodeProviderOutOfProcBase.cs
-#if RUNTIME_TYPE_NETCORE || MONO
+#if RUNTIME_TYPE_NETCORE
         private static string? CurrentHost;
         private static string GetCurrentHost()
         {

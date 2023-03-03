@@ -558,9 +558,7 @@ BuildEngine5.BuildProjectFilesInParallel(
 
             TransientTestFile CreateTmpFile(TestEnvironment env)
             {
-                return NativeMethodsShared.IsMono && NativeMethodsShared.IsOSX
-                                                ? env.CreateFile(new TransientTestFolder(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N"))))
-                                                : env.CreateFile();
+                return env.CreateFile();
             }
         }
 

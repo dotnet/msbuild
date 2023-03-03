@@ -254,11 +254,9 @@ namespace Microsoft.Build.Tasks
                         case UtilitiesProcessorArchitecture.X86:
                             flags |= TypeLibImporterFlags.ImportAsX86;
                             break;
-#if !MONO
                         case UtilitiesProcessorArchitecture.ARM:
                             flags |= TypeLibImporterFlags.ImportAsArm;
                             break;
-#endif
                         default:
                             // Let the type importer decide.
                             break;
