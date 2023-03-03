@@ -395,22 +395,22 @@
     <Compile Include="FindInList.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="FormatUrl.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FormatVersion.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateApplicationManifest.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="GenerateApplicationManifest.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateDeploymentManifest.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="GenerateDeploymentManifest.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateLauncher.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="GenerateLauncher.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateManifestBase.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="GenerateManifestBase.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GenerateResource.cs">
@@ -457,7 +457,7 @@
     <Compile Include="InvalidParameterValueException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="LC.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="LC.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ListOperators\FindUnderPath.cs">
@@ -470,7 +470,7 @@
     <Compile Include="MakeDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ManifestUtil\*.cs" Exclude="ManifestUtil\CngLightup.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="ManifestUtil\*.cs" Exclude="ManifestUtil\CngLightup.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Message.cs">
@@ -497,7 +497,7 @@
     <Compile Include="ResolveKeySource.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ResolveManifestFiles.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="ResolveManifestFiles.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveNonMSBuildProjectOutput.cs">
@@ -513,10 +513,10 @@
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryTaskInfo.cs" />
     <Compile Include="SdkToolsPathUtility.cs" />
-    <Compile Include="SGen.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="SGen.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="SignFile.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="SignFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="System.Design.cs" />
@@ -604,7 +604,7 @@
     <Compile Include="GenerateBootstrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateTrustInfo.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="GenerateTrustInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GetFrameworkSDKPath.cs">
@@ -627,7 +627,7 @@
     <Compile Include="ResolveComReferenceCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="ResolveNativeReference.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="StrongNameException.cs">
@@ -643,7 +643,7 @@
     <Compile Include="UnregisterAssembly.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="UpdateManifest.cs" Condition="'$(MonoBuild)' != 'true'">
+    <Compile Include="UpdateManifest.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="WinMDExp.cs" />
@@ -1016,9 +1016,6 @@
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net6.0\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <PackageReference Include="System.Reflection.Metadata" />
-  </ItemGroup>
   <ItemGroup>
     <!--
       Content items in this project are used to copy files to the output directory but we don't

@@ -6,7 +6,7 @@
     <TargetVsixContainerName>Microsoft.Build.Arm64.vsix</TargetVsixContainerName>
     <VisualStudioInsertionComponent>Microsoft.Build.Arm64</VisualStudioInsertionComponent>
     <ShouldSkipProject>false</ShouldSkipProject>
-    <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
+    <ShouldSkipProject Condition="'$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
   </PropertyGroup>
 
   <ItemGroup>
