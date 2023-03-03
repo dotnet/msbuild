@@ -95,6 +95,13 @@ There needs to be a way how user specifies which data should be redacted from lo
 
 Only the first presented option is definitely not to be used. All the other options might possibly be used (up to a discussions if appropriate and what should be in scope). 
 
+# Special considerations
+
+* There should be no (or very minimal) performance impact to cases where redacting is not opted-in and/or to cases where there is lower/minimal level of logging. In another words - we should not spend cycles detecting and redacting secrets on log events that are not going to be loged (todo: second case might be more problematic - as loggers can decide their level of logging).
+* Order of processing and imports is important here - if we indicate secret metadata in items, the properties are processed first and hence we can miss preanalyzing (or even redacting) some data. Same applies for order of processing of the properties.
+* There are no global items today - this can be simulated by putting those to directory.props
+* Even seemingly innocent tasks with seemingly innocent logging can spill possibly sensitive data (e.g. think the RAR task, logging all the inputs, while those are just reference related info - those can contain paths that might already by itself be sensitive info). Related: [#8493](https://github.com/dotnet/msbuild/issues/8493) 
+
 # Suggested Implementation
 
 [TBD]
