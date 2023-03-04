@@ -20,6 +20,11 @@ internal sealed class ImageBuilder
     }
 
     /// <summary>
+    /// Gets a value indicating whether the base image is has a Windows operating system.
+    /// </summary>
+    public bool IsWindows => _baseImageConfig.IsWindows;
+
+    /// <summary>
     /// Builds the image configuration <see cref="BuiltImage"/> ready for further processing.
     /// </summary>
     internal BuiltImage Build()

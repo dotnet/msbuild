@@ -70,19 +70,22 @@
       <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
       <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true' and '$(ContainerImageTags)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
 
-      <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
-
       <!-- The Container RID should default to the RID used for the entire build (to ensure things run on the platform they are built for), but the user knows best and so should be able to set it explicitly.
                  For builds that have a RID, we default to that RID. Otherwise, we default to the RID of the currently-executing SDK. -->
       <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' and '$(IsRidAgnostic)' != 'true'">$(RuntimeIdentifier)</ContainerRuntimeIdentifier>
       <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' ">$(NETCoreSdkPortableRuntimeIdentifier)</ContainerRuntimeIdentifier>
+
+      <!-- Set the WorkingDirectory depending on the RID -->
+      <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == '' and !$(ContainerRuntimeIdentifier.StartsWith('win')) ">/app</ContainerWorkingDirectory>
+      <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == '' and $(ContainerRuntimeIdentifier.StartsWith('win')) ">C:\app</ContainerWorkingDirectory>
     </PropertyGroup>
 
     <ItemGroup Label="Entrypoint Assignment">
-      <!-- For non-apphosts, we need to invoke `dotnet` `workingdir/app` as separate args -->
-      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(ContainerWorkingDirectory)/$(TargetFileName)" />
-      <!-- For apphosts, we need to invoke `workingdir/app` as a single arg -->
-      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true'" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
+      <!-- For non-apphosts, we need to invoke `dotnet` `app` as separate args -->
+      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(TargetFileName)" />
+      <!-- For apphosts, we need to invoke `app` as a single arg -->
+      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true' and !$(ContainerRuntimeIdentifier.StartsWith('win'))" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
+      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true' and $(ContainerRuntimeIdentifier.StartsWith('win'))" Include="$(AssemblyName)$(_NativeExecutableExtension)" />
     </ItemGroup>
 
     <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"

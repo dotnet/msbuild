@@ -27,6 +27,11 @@ internal sealed class ImageConfig
     private readonly string _os;
     private readonly List<HistoryEntry> _history;
 
+    /// <summary>
+    /// Gets a value indicating whether the base image is has a Windows operating system.
+    /// </summary>
+    public bool IsWindows => "windows".Equals(_os, StringComparison.OrdinalIgnoreCase);
+
     internal ImageConfig(string imageConfigJson) : this(JsonNode.Parse(imageConfigJson)!)
     {
     }

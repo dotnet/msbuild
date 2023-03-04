@@ -48,7 +48,7 @@ public class EndToEndTests
 
         Assert.NotNull(imageBuilder);
 
-        Layer l = Layer.FromDirectory(publishDirectory, "/app");
+        Layer l = Layer.FromDirectory(publishDirectory, "/app", false);
 
         imageBuilder.AddLayer(l);
 
@@ -90,7 +90,7 @@ public class EndToEndTests
             cancellationToken: default).ConfigureAwait(false);
         Assert.NotNull(imageBuilder);
 
-        Layer l = Layer.FromDirectory(publishDirectory, "/app");
+        Layer l = Layer.FromDirectory(publishDirectory, "/app", false);
 
         imageBuilder.AddLayer(l);
 
@@ -293,7 +293,7 @@ public class EndToEndTests
             cancellationToken: default).ConfigureAwait(false);
         Assert.NotNull(imageBuilder);
 
-        Layer l = Layer.FromDirectory(publishDirectory, "/app");
+        Layer l = Layer.FromDirectory(publishDirectory, "/app", false);
 
         imageBuilder.AddLayer(l);
         imageBuilder.SetWorkingDirectory(workingDir);

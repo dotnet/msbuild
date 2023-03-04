@@ -12,6 +12,24 @@ namespace Microsoft.NET.Build.Containers;
 
 internal record struct Layer
 {
+    // NOTE: The SID string below was created using the following snippet. As the code is Windows only we keep the constant
+    // private static string CreateUserOwnerAndGroupSID()
+    // {
+    //     var descriptor = new RawSecurityDescriptor(
+    //         ControlFlags.SelfRelative,
+    //         new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+    //         new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+    //         null,
+    //         null
+    //     );
+    //
+    //     var raw = new byte[descriptor.BinaryLength];
+    //     descriptor.GetBinaryForm(raw, 0);
+    //     return Convert.ToBase64String(raw);
+    // }
+
+    private const string BuiltinUsersSecurityDescriptor = "AQAAgBQAAAAkAAAAAAAAAAAAAAABAgAAAAAABSAAAAAhAgAAAQIAAAAAAAUgAAAAIQIAAA==";
+
     public Descriptor Descriptor { get; private set; }
 
     public string BackingFile { get; private set; }
@@ -25,7 +43,7 @@ internal record struct Layer
         };
     }
 
-    public static Layer FromDirectory(string directory, string containerPath)
+    public static Layer FromDirectory(string directory, string containerPath, bool isWindowsLayer)
     {
         var fileList =
             new DirectoryInfo(directory)
@@ -35,16 +53,75 @@ internal record struct Layer
                         string destinationPath = Path.Join(containerPath, Path.GetRelativePath(directory, fsi.FullName)).Replace(Path.DirectorySeparatorChar, '/');
                         return (fsi.FullName, destinationPath);
                     });
-        return FromFiles(fileList);
+        return FromFiles(fileList, isWindowsLayer);
     }
 
-    public static Layer FromFiles(IEnumerable<(string path, string containerPath)> fileList)
+    public static Layer FromFiles(IEnumerable<(string path, string containerPath)> fileList, bool isWindowsLayer)
     {
         long fileSize;
         Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
         Span<byte> uncompressedHash = stackalloc byte[SHA256.HashSizeInBytes];
 
+        // this factory helps us creating the Tar entries with the right attributes
+        PaxTarEntry CreateTarEntry(TarEntryType entryType, string containerPath)
+        {
+            var extendedAttributes = new Dictionary<string, string>();
+            if (isWindowsLayer)
+            {
+                // We grant all users access to the application directory
+                // https://github.com/buildpacks/rfcs/blob/main/text/0076-windows-security-identifiers.md
+                extendedAttributes["MSWINDOWS.rawsd"] = BuiltinUsersSecurityDescriptor;
+                return new PaxTarEntry(entryType, containerPath, extendedAttributes);
+            }
+
+            var entry = new PaxTarEntry(entryType, containerPath, extendedAttributes)
+            {
+                Mode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                       UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
+                       UnixFileMode.OtherRead | UnixFileMode.OtherExecute
+            };
+            return entry;
+        }
+
+        string SanitizeContainerPath(string containerPath)
+        {
+            // no leading slashes
+            containerPath = containerPath.TrimStart(PathSeparators);
+
+            // For Windows layers we need to put files into a "Files" directory without drive letter.
+            if (isWindowsLayer)
+            {
+                // Cut of drive letter:  /* C:\ */
+                if (containerPath[1] == ':')
+                {
+                    containerPath = containerPath[3..];
+                }
+
+                containerPath = "Files/" + containerPath;
+            }
+
+            return containerPath;
+        }
+
+        // Ensures that all directory entries for the given segments are created within the tar.
         var directoryEntries = new HashSet<string>();
+        void EnsureDirectoryEntries(TarWriter tar,
+            IReadOnlyList<string> filePathSegments)
+        {
+            var pathBuilder = new StringBuilder();
+            for (int i = 0; i < filePathSegments.Count - 1; i++)
+            {
+                pathBuilder.Append(CultureInfo.InvariantCulture, $"{filePathSegments[i]}/");
+
+                string fullPath = pathBuilder.ToString();
+                if (!directoryEntries.Contains(fullPath))
+                {
+                    tar.WriteEntry(CreateTarEntry(TarEntryType.Directory, fullPath));
+                    directoryEntries.Add(fullPath);
+                }
+            }
+        }
+
 
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
@@ -57,12 +134,24 @@ internal record struct Layer
                     {
                         // Docker treats a COPY instruction that copies to a path like `/app` by
                         // including `app/` as a directory, with no leading slash. Emulate that here.
-                        string containerPath = item.containerPath.TrimStart(PathSeparators);
+                        string containerPath = SanitizeContainerPath(item.containerPath);
 
-                        EnsureDirectoryEntries(writer, directoryEntries, containerPath.Split(PathSeparators));
+                        EnsureDirectoryEntries(writer, containerPath.Split(PathSeparators));
 
-                        writer.WriteEntry(item.path, containerPath);
+                        using var fileStream = File.OpenRead(item.path);
+                        var entry = CreateTarEntry(TarEntryType.RegularFile, containerPath);
+                        entry.DataStream = fileStream;
+
+                        writer.WriteEntry(entry);
                     }
+
+                    // Windows layers need a Hives folder, we do not need to create any Registry Hive deltas inside
+                    if (isWindowsLayer)
+                    {
+                        var entry = CreateTarEntry(TarEntryType.Directory, "Hives/");
+                        writer.WriteEntry(entry);
+                    }
+
                 } // Dispose of the TarWriter before getting the hash so the final data get written to the tar stream
 
                 int bytesWritten = gz.GetCurrentUncompressedHash(uncompressedHash);
@@ -103,28 +192,6 @@ internal record struct Layer
     }
 
     private readonly static char[] PathSeparators = new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
-
-    /// <summary>
-    /// Ensures that all directory entries for the given segments are created within the tar.
-    /// </summary>
-    /// <param name="tar">The tar into which to add the directory entries.</param>
-    /// <param name="directoryEntries">The lookup of all known directory entries. </param>
-    /// <param name="filePathSegments">The segments of the file within the tar for which to create the folders</param>
-    private static void EnsureDirectoryEntries(TarWriter tar, HashSet<string> directoryEntries, IReadOnlyList<string> filePathSegments)
-    {
-        var pathBuilder = new StringBuilder();
-        for (var i = 0; i < filePathSegments.Count - 1; i++)
-        {
-            pathBuilder.Append(CultureInfo.InvariantCulture, $"{filePathSegments[i]}/");
-
-            var fullPath = pathBuilder.ToString();
-            if (!directoryEntries.Contains(fullPath))
-            {
-                tar.WriteEntry(new PaxTarEntry(TarEntryType.Directory, fullPath));
-                directoryEntries.Add(fullPath);
-            }
-        }
-    }
 
     /// <summary>
     /// A stream capable of computing the hash digest of raw uncompressed data while also compressing it.

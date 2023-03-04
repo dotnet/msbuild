@@ -51,7 +51,7 @@ public static class ContainerBuilder
             WriteIndented = true,
         };
 
-        Layer l = Layer.FromDirectory(folder.FullName, workingDir);
+        Layer l = Layer.FromDirectory(folder.FullName, workingDir, imageBuilder.IsWindows);
 
         imageBuilder.AddLayer(l);
 
