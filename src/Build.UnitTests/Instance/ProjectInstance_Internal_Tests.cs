@@ -12,6 +12,7 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
@@ -862,6 +863,62 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             finally
             {
                 ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when calling <see cref="ProjectInstance.FromFile(string, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <c>true</c>, the built-in &quot;MSBuildInteractive&quot; property is set to <c>true</c>, otherwise the property is <see cref="string.Empty" />.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProjectInstanceFromFileInteractive(bool interactive)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(projectCollection);
+
+                projectRootElement.Save(testEnvironment.CreateFile().Path);
+
+                ProjectInstance projectInstance = ProjectInstance.FromFile(
+                    projectRootElement.FullPath,
+                    new ProjectOptions
+                    {
+                        Interactive = interactive,
+                        ProjectCollection = projectCollection,
+                    });
+
+                Assert.Equal(interactive ? bool.TrueString : string.Empty, projectInstance.GetPropertyValue(ReservedPropertyNames.interactive), ignoreCase: true);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when calling <see cref="ProjectInstance.FromProjectRootElement(ProjectRootElement, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <c>true</c>, the built-in &quot;MSBuildInteractive&quot; property is set to <c>true</c>, otherwise the property is <see cref="string.Empty" />.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProjectInstanceFromProjectRootElementInteractive(bool interactive)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(projectCollection);
+
+                projectRootElement.Save(testEnvironment.CreateFile().Path);
+
+                ProjectInstance projectInstance = ProjectInstance.FromProjectRootElement(
+                    projectRootElement,
+                    new ProjectOptions
+                    {
+                        Interactive = interactive,
+                        ProjectCollection = projectCollection,
+                    });
+
+                Assert.Equal(interactive ? bool.TrueString : string.Empty, projectInstance.GetPropertyValue(ReservedPropertyNames.interactive), ignoreCase: true);
             }
         }
 
