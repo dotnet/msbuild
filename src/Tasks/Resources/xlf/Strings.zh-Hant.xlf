@@ -1040,9 +1040,9 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: Resource "{0}" in "{1}" is of mimetype "{2}", which is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+        <source>MSB3825: Resource "{0}" of type "{2}" is of mimetype "{3}", which is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</source>
-        <target state="new">MSB3825: Resource "{0}" in "{1}" is of mimetype "{2}", which is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+        <target state="new">MSB3825: Resource "{0}" of type "{2}" is of mimetype "{3}", which is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
