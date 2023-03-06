@@ -97,8 +97,8 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             // Test
             InstallWorkload(userProfileDir, dotnetRoot, testDirectory, workloadResolver, nugetDownloader);
 
-            var extraAbovePackRecordPath = MakePackRecord(installRoot, aboveSdkFeatureBand);
-            var extraBelowPackRecordPath = MakePackRecord(installRoot, belowSdkFeatureBand);
+            var extraAboveBandPackRecordPath = MakePackRecord(installRoot, aboveSdkFeatureBand);
+            var extraBelowBandPackRecordPath = MakePackRecord(installRoot, belowSdkFeatureBand);
             var extraPackPath = MakePack(installRoot);
             var workloadInstallationRecordDirectory = Path.Combine(installRoot, "metadata", "workloads", _sdkFeatureVersion, "InstalledWorkloads");
             var oldWorkloadInstallationRecordDirectory = workloadInstallationRecordDirectory.Replace(_sdkFeatureVersion, belowSdkFeatureBand);
@@ -107,11 +107,11 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             var cleanCommand = GenerateWorkloadCleanAllCommand(workloadResolver, userProfileDir, dotnetRoot);
             cleanCommand.Execute();
 
-            AssertExtraneousPacksAreRemoved(extraPackPath, extraBelowPackRecordPath, true);
-            AssertExtraneousPacksAreNotRemoved(extraPackPath, extraAbovePackRecordPath);
+            AssertExtraneousPacksAreRemoved(extraPackPath, extraBelowBandPackRecordPath, true);
+            AssertExtraneousPacksAreRemoved(extraPackPath, extraAboveBandPackRecordPath);
             AssertWorkloadInstallationRecordIsRemoved(workloadInstallationRecordDirectory);
             AssertWorkloadInstallationRecordIsRemoved(oldWorkloadInstallationRecordDirectory);
-            AssertValidPackCountsMatchExpected(installRoot, expectedPackCount: 1, expectedPackRecordCount: 1);
+            AssertValidPackCountsMatchExpected(installRoot, expectedPackCount: 0, expectedPackRecordCount: 0);
         }
 
         private void InstallWorkload(string userProfileDir, string dotnetRoot, string testDirectory, WorkloadResolver workloadResolver, MockNuGetPackageDownloader nugetDownloader, string sdkBand = null)
@@ -174,13 +174,6 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
                 Directory.Exists(Path.GetDirectoryName(Path.GetDirectoryName(extraPackRecordPath))).Should().BeFalse();
                 Directory.Exists(extraPackPath).Should().BeFalse();
             }
-        }
-
-        private void AssertExtraneousPacksAreNotRemoved(string extraPackPath, string extraPackRecordPath)
-        {
-            File.Exists(extraPackRecordPath).Should().BeTrue();
-            Directory.Exists(Path.GetDirectoryName(Path.GetDirectoryName(extraPackRecordPath))).Should().BeTrue();
-            Directory.Exists(extraPackPath).Should().BeTrue();
         }
 
         private void AssertWorkloadInstallationRecordIsRemoved(string workloadInstallationRecordDirectory)
