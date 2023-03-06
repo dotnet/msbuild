@@ -868,7 +868,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Verifies that when calling <see cref="ProjectInstance.FromFile(string, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <c>true</c>, the built-in &quot;MSBuildInteractive&quot; property is set to <c>true</c>, otherwise the property is <see cref="string.Empty" />.
+        /// Verifies that when calling <see cref="ProjectInstance.FromFile(string, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
         /// </summary>
         [Theory]
         [InlineData(true)]
@@ -896,7 +896,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Verifies that when calling <see cref="ProjectInstance.FromProjectRootElement(ProjectRootElement, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <c>true</c>, the built-in &quot;MSBuildInteractive&quot; property is set to <c>true</c>, otherwise the property is <see cref="string.Empty" />.
+        /// Verifies that when calling <see cref="ProjectInstance.FromProjectRootElement(ProjectRootElement, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
         /// </summary>
         [Theory]
         [InlineData(true)]
