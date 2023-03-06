@@ -3,12 +3,10 @@
 
 using System;
 using System.Runtime.InteropServices.ComTypes;
-
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
 using COMException = System.Runtime.InteropServices.COMException;
+using Marshal = System.Runtime.InteropServices.Marshal;
 
 #nullable disable
 

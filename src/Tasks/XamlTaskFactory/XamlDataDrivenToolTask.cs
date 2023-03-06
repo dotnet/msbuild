@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
+using System.Globalization;
 using System.Resources;
-
+using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 

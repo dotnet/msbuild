@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.BackEnd.Logging;
 using System.Globalization;
+using Microsoft.Build.BackEnd.Logging;
 using Xunit;
 
 #nullable disable

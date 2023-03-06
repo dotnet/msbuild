@@ -421,7 +421,7 @@ namespace Microsoft.Build.UnitTests
     /// Custom implementation of ITaskItem for unit testing
     /// Just TaskItem would work fine, but why not test a custom type as well
     /// </summary>
-    internal class MyTaskItem : ITaskItem
+    internal sealed class MyTaskItem : ITaskItem
     {
         #region ITaskItem Members
 

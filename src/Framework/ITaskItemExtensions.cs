@@ -57,8 +57,7 @@ namespace Microsoft.Build.Framework
                     Debug.Fail(e.ToString());
                 }
 
-                list[i] = new KeyValuePair<string, string>(metadataName, valueOrError);
-                i += 1;
+                list[i++] = new KeyValuePair<string, string>(metadataName, valueOrError);
             }
 
             return list;

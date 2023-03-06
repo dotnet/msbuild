@@ -3,24 +3,23 @@
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
-using System.IO;
-using System.Text;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
-using VisualStudioConstants = Microsoft.Build.Shared.VisualStudioConstants;
-using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
-using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
-using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
-using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
-using System.Collections.ObjectModel;
+using System.Xml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
+using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
+using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
+using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
+using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
+using VisualStudioConstants = Microsoft.Build.Shared.VisualStudioConstants;
 
 #nullable disable
 

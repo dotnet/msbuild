@@ -3,9 +3,9 @@
 
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.NetCore.Extensions;
 

@@ -3,15 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Reflection;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Construction;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Xunit;
 using Shouldly;
+using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 

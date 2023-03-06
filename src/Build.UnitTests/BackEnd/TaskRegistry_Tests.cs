@@ -16,11 +16,11 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -2259,7 +2259,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Create a custom class derived from ITaskItem to test input and output parameters work using this item.
         /// </summary>
-        internal class DerivedFromITaskItem : ITaskItem
+        internal sealed class DerivedFromITaskItem : ITaskItem
         {
             /// <summary>
             /// The ItemSpec of the item

@@ -13,13 +13,13 @@ namespace Microsoft.Build.Tasks
 {
 #if FEATURE_XAMLTASKFACTORY
 
-    using Microsoft.Build.Tasks.Xaml;
-    using System.CodeDom.Compiler;
     using System.CodeDom;
+    using System.CodeDom.Compiler;
     using System.IO;
     using System.Reflection;
     using System.Text;
     using System.Threading;
+    using Microsoft.Build.Tasks.Xaml;
 
     /// <summary>
     /// The task factory provider for XAML tasks.

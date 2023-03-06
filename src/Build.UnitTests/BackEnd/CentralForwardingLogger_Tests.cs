@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// us to check to see if the forwarding logger is
         /// sending us the events we send in.
         /// </summary>
-        private class TestEventRedirector : IEventRedirector
+        private sealed class TestEventRedirector : IEventRedirector
         {
             #region Data
 

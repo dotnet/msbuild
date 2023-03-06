@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
-
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using Microsoft.Build.Shared;
+using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 #nullable disable
 

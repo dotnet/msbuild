@@ -5,15 +5,15 @@
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-    using System.Collections.Generic;
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Text;
     using System.Xml;
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectRootElementLinkRemoter : MockProjectElementContainerLinkRemoter
+    internal sealed class MockProjectRootElementLinkRemoter : MockProjectElementContainerLinkRemoter
     {
         private ProjectRootElement ProjectXml => (ProjectRootElement)Source;
 
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     }
 
 
-    internal class MockProjectRootElementLink : ProjectRootElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
+    internal sealed class MockProjectRootElementLink : ProjectRootElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
     {
         public MockProjectRootElementLink(MockProjectRootElementLinkRemoter proxy, IImportHolder holder)
         {

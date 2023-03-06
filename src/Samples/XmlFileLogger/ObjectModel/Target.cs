@@ -12,7 +12,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     /// <summary>
     /// Class representation of an MSBuild target execution.
     /// </summary>
-    internal class Target : LogProcessNode
+    internal sealed class Target : LogProcessNode
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Target"/> class.

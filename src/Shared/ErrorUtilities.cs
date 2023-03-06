@@ -3,11 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Threading;
-
 using Microsoft.Build.Framework;
 
 #nullable disable

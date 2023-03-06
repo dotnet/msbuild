@@ -10,7 +10,7 @@ using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    internal class MockRunningObjectTable : IRunningObjectTableWrapper
+    internal sealed class MockRunningObjectTable : IRunningObjectTableWrapper
     {
         private readonly Dictionary<string, object> _dictionary = new Dictionary<string, object>();
 
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return new MockRegisterHandle();
         }
 
-        private class MockRegisterHandle : IDisposable
+        private sealed class MockRegisterHandle : IDisposable
         {
             public void Dispose()
             {

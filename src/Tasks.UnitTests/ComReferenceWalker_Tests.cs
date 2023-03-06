@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Tasks;
 using System.Runtime.InteropServices.ComTypes;
-using COMException = System.Runtime.InteropServices.COMException;
+using Microsoft.Build.Tasks;
 using Xunit;
+using COMException = System.Runtime.InteropServices.COMException;
 
 #nullable disable
 

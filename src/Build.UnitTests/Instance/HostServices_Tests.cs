@@ -516,7 +516,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// A dummy host object class.
         /// </summary>
-        private class TestHostObject : ITaskHost
+        private sealed class TestHostObject : ITaskHost
         {
             /// <summary>
             /// Constructor.

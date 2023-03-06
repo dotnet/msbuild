@@ -8,6 +8,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Xunit;
 
@@ -19,7 +20,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     {
         private delegate void EndpointOperationDelegate(NodeEndpointInProc endpoint);
 
-        private class MockHost : IBuildComponentHost, INodePacketFactory
+        private sealed class MockHost : IBuildComponentHost, INodePacketFactory
         {
             private DataReceivedContext _dataReceivedContext;
             private AutoResetEvent _dataReceivedEvent;
@@ -121,7 +122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             #endregion
         }
-        private class TestPacket : INodePacket
+        private sealed class TestPacket : INodePacket
         {
             #region INodePacket Members
 

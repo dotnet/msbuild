@@ -4,12 +4,11 @@
 #if FEATURE_FILE_TRACKER
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -885,11 +884,12 @@ namespace Microsoft.Build.Utilities
                 {
                     if (!_maintainCompositeRootingMarkers)
                     {
-                        foreach (string primaryFile in DependencyTable.Keys)
+                        foreach (KeyValuePair<string, Dictionary<string, string>> dependency in DependencyTable)
                         {
+                            string primaryFile = dependency.Key;
                             if (!primaryFile.Contains("|")) // composite roots are not needed
                             {
-                                Dictionary<string, string> dependencies = DependencyTable[primaryFile];
+                                Dictionary<string, string> dependencies = dependency.Value;
                                 inputs.WriteLine("^" + primaryFile);
                                 foreach (string file in dependencies.Keys)
                                 {
@@ -907,10 +907,10 @@ namespace Microsoft.Build.Utilities
                     {
                         // Just output the rooting markers and their dependencies -- we don't want to
                         // compact out the composite ones.
-                        foreach (string rootingMarker in DependencyTable.Keys)
+                        foreach (KeyValuePair<string, Dictionary<string, string>> dependency in DependencyTable)
                         {
-                            Dictionary<string, string> dependencies = DependencyTable[rootingMarker];
-                            inputs.WriteLine("^" + rootingMarker);
+                            Dictionary<string, string> dependencies = dependency.Value;
+                            inputs.WriteLine("^" + dependency.Key);
                             foreach (string file in dependencies.Keys)
                             {
                                 // Give the task a chance to filter dependencies out of the written TLog
@@ -1061,8 +1061,9 @@ namespace Microsoft.Build.Utilities
                 var dependenciesWithoutMissingFiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 int keyIndex = 0;
 
-                foreach (string file in dependencies.Keys)
+                foreach (KeyValuePair<string, string> kvp in dependencies)
                 {
+                    string file = kvp.Key;
                     if (keyIndex++ > 0)
                     {
                         // Record whether or not each file exists and cache it.
@@ -1079,7 +1080,7 @@ namespace Microsoft.Build.Utilities
                         // Does the cached file exist?
                         if (fileExists)
                         {
-                            dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
+                            dependenciesWithoutMissingFiles.Add(file, kvp.Value);
                         }
                     }
                     else

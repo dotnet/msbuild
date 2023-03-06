@@ -1,10 +1,10 @@
 # Summary
 
-Project cache is a new assembly-based plugin extension point in MSBuild which determines whether a build request (a project) can be skipped during build. The main expected benefit is reduced build times via [caching and/or distribution](https://github.com/dotnet/msbuild/blob/master/documentation/specs/static-graph.md#weakness-of-the-old-model-caching-and-distributability).
+Project cache is a new assembly-based plugin extension point in MSBuild which determines whether a build request (a project) can be skipped during build. The main expected benefit is reduced build times via [caching and/or distribution](https://github.com/dotnet/msbuild/blob/main/documentation/specs/static-graph.md#weakness-of-the-old-model-caching-and-distributability).
 
 # Motivation
 
-As the introduction to [static graph](https://github.com/dotnet/msbuild/blob/master/documentation/specs/static-graph.md#what-is-static-graph-for) suggests, large and complex repos expose the weaknesses in MSBuild's scheduling and incrementality models as build times elongate. This project cache plugin lets MSBuild natively communicate with existing tools that enable build caching and/or distribution, enabling true scalability.
+As the introduction to [static graph](https://github.com/dotnet/msbuild/blob/main/documentation/specs/static-graph.md#what-is-static-graph-for) suggests, large and complex repos expose the weaknesses in MSBuild's scheduling and incrementality models as build times elongate. This project cache plugin lets MSBuild natively communicate with existing tools that enable build caching and/or distribution, enabling true scalability.
 
 Visual Studio is one beneficiary. This plugin inverts dependencies among build systems: instead of higher level build engines ([Cloudbuild](https://www.microsoft.com/research/publication/cloudbuild-microsofts-distributed-and-caching-build-service/), [Anybuild](https://github.com/AnyBuild/AnyBuild), [BuildXL](https://github.com/microsoft/BuildXL), etc) calling into MSBuild, MSBuild calls into them, keeping MSBuild's external APIs and command line arguments largely unchanged and thus reusable by Visual Studio.
 
@@ -78,7 +78,7 @@ This change also simplifies and unifies user experiences. MSBuild works the same
   - On cache hits, MSBuild skips the project, but needs a BuildResult with target results to send back to the [Scheduler](https://github.com/dotnet/msbuild/blob/d39f2e4f5f3d461bc456f9abed9adec4a2f0f542/src/Build/BackEnd/Components/Scheduler/Scheduler.cs#L25).
   - Plugins have three options:
     - Worst: plugins fake the build results for each target. We consider this brittle since the plugins will have to be updated whenever the build logic changes.
-    - Better: plugins tell MSBuild to run a proxy target as a replacement for the expensive target (e.g. it tells MSBuild to run `GetTargetPath` and use those results for the Build target). See the [ProjectReference protocol](https://github.com/dotnet/msbuild/blob/master/documentation/ProjectReference-Protocol.md) for more details.
+    - Better: plugins tell MSBuild to run a proxy target as a replacement for the expensive target (e.g. it tells MSBuild to run `GetTargetPath` and use those results for the Build target). See the [ProjectReference protocol](https://github.com/dotnet/msbuild/blob/main/documentation/ProjectReference-Protocol.md) for more details.
       - Proxy target assumptions:
         - They are very fast and only retrieve items and properties from the evaluated state (like `GetTargetPath`).
         - They do not mutate state (file system, environment variables, etc).
@@ -105,7 +105,7 @@ This change also simplifies and unifies user experiences. MSBuild works the same
   - Absolute paths will likely break the build, since they'd be captured on the machine that writes to the cache.
 - Slow connections. In a coffee shop it might be faster to build everything instead of downloading from the cache. Consider racing plugin checks and building: if the bottom up build traversal reaches a node that's still querying the cache, cancel the cache query and build the node instead.
 - Inferring what targets to run on each node when using /graph
-  - Msbuild /graph requires that the [target inference protocol](https://github.com/dotnet/msbuild/blob/master/documentation/specs/static-graph.md#inferring-which-targets-to-run-for-a-project-within-the-graph) is good enough.
+  - Msbuild /graph requires that the [target inference protocol](https://github.com/dotnet/msbuild/blob/main/documentation/specs/static-graph.md#inferring-which-targets-to-run-for-a-project-within-the-graph) is good enough.
 - Small repos will probably be slower with plugin implementations that access the network. Remote distribution and caching will only be worth it for repos that are large enough.
 
 # Future work

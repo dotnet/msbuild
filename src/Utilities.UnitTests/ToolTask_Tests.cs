@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
             _output = testOutput;
         }
 
-        private class MyTool : ToolTask, IDisposable
+        private sealed class MyTool : ToolTask, IDisposable
         {
             private string _fullToolName;
             private string _responseFileCommands = string.Empty;

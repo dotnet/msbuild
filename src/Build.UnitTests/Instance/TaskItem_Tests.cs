@@ -2,20 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.Build.UnitTests.BackEnd;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using System.Xml;
-using Microsoft.Build.Framework;
 using System.IO;
 using System.Linq;
-using Xunit;
+using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
+using Xunit;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 

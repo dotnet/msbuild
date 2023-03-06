@@ -21,7 +21,7 @@ using Shouldly;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
-    internal class SolutionFileBuilder
+    internal sealed class SolutionFileBuilder
     {
         public static readonly IReadOnlyCollection<SolutionConfigurationInSolution> SolutionConfigurationPlatformsDefaults = new[]
         {

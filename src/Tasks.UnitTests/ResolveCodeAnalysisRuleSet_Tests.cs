@@ -3,8 +3,8 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Xunit;
 
 #nullable disable
@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnitTests
 {
     public class ResolveAnalyzerRuleSet_Tests
     {
-        private class TemporaryFile : IDisposable
+        private sealed class TemporaryFile : IDisposable
         {
             private readonly string _fullPath;
 
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private class TemporaryDirectory : IDisposable
+        private sealed class TemporaryDirectory : IDisposable
         {
             private readonly string _path;
 

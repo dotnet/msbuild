@@ -1788,7 +1788,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
     }
 #endif
 
-    internal class EscapingInProjectsHelper
+    internal sealed class EscapingInProjectsHelper
     {
         /// <summary>
         /// Deletes all *.weirdo files from the temp path, and dumps 3 files there --

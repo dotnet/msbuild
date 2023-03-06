@@ -3,9 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
 using Xunit;
+using Marshal = System.Runtime.InteropServices.Marshal;
 
 #nullable disable
 

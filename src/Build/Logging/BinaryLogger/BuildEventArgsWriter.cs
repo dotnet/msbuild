@@ -438,6 +438,7 @@ namespace Microsoft.Build.Logging
                 case EnvironmentVariableReadEventArgs environmentVariableRead: Write(environmentVariableRead); break;
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: Write(propertyInitialValueSet); break;
                 case CriticalBuildMessageEventArgs criticalBuildMessage: Write(criticalBuildMessage); break;
+                case AssemblyLoadBuildEventArgs assemblyLoad: Write(assemblyLoad); break;
                 default: // actual BuildMessageEventArgs
                     Write(BinaryLogRecordKind.Message);
                     WriteMessageFields(e, writeImportance: true);
@@ -467,6 +468,18 @@ namespace Microsoft.Build.Logging
             Write((int)e.BuildReason);
             Write((int)e.SkipReason);
             binaryWriter.WriteOptionalBuildEventContext(e.OriginalBuildEventContext);
+        }
+
+        private void Write(AssemblyLoadBuildEventArgs e)
+        {
+            Write(BinaryLogRecordKind.AssemblyLoad);
+            WriteMessageFields(e, writeMessage: false, writeImportance: false);
+            Write((int)e.LoadingContext);
+            WriteDeduplicatedString(e.LoadingInitiator);
+            WriteDeduplicatedString(e.AssemblyName);
+            WriteDeduplicatedString(e.AssemblyPath);
+            Write(e.MVID);
+            WriteDeduplicatedString(e.AppDomainDescriptor);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)
@@ -1086,6 +1099,15 @@ namespace Microsoft.Build.Logging
         private void Write(bool boolean)
         {
             binaryWriter.Write(boolean);
+        }
+
+        private unsafe void Write(Guid guid)
+        {
+            byte* ptr = (byte*)&guid;
+            for (int i = 0; i < sizeof(Guid); i++, ptr++)
+            {
+                binaryWriter.Write(*ptr);
+            }
         }
 
         private void WriteDeduplicatedString(string text)

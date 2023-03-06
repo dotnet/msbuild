@@ -20,7 +20,7 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 namespace Microsoft.Build.BackEnd
 {
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-
+    using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
     // ItemVectorPartitionCollection is designed to contains a set of project items which have possibly undergone transforms.
     // The outer dictionary it usually keyed by item type, so if items originally came from 
     // an expression like @(Foo), the outer dictionary would have a key of "Foo" in it.
@@ -29,7 +29,6 @@ namespace Microsoft.Build.BackEnd
     // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be 
     // contained a list of the items which were created/transformed using that pattern.    
     using ItemVectorPartitionCollection = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>>;
-    using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
 
     /// <summary>
     /// Enumeration of the results of target dependency analysis.
@@ -201,7 +200,7 @@ namespace Microsoft.Build.BackEnd
                          * 
                          */
                         ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
-                        ErrorUtilities.VerifyThrow(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs).Count > 0, "The target must have inputs.");
+                        ErrorUtilities.VerifyThrow(!IsItemVectorEmpty(itemVectorsInTargetInputs), "The target must have inputs.");
 
                         result = PerformDependencyAnalysisIfDiscreteInputs(itemVectorsInTargetInputs,
                                     itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs, itemVectorsReferencedOnlyInTargetInputs,
@@ -511,7 +510,7 @@ namespace Microsoft.Build.BackEnd
             // cannot correlate them to any output item
             foreach (string itemVectorType in itemVectorsReferencedOnlyInTargetInputs)
             {
-                discreteTargetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, itemVectorType));
+                discreteTargetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, itemVectorType, itemVectorsInTargetInputs[itemVectorType]));
             }
 
             // if there are any discrete input items, we can treat them as "meta" inputs, because:
@@ -841,6 +840,19 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private static bool IsItemVectorEmpty(ItemVectorPartitionCollection itemVectors)
+        {
+            foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
+            {
+                if (GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value).Any())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Retrieves the item-specs of all items in the given item vector collection.
         /// </summary>
@@ -848,11 +860,11 @@ namespace Microsoft.Build.BackEnd
         /// <returns>list of item-specs</returns>
         private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors)
         {
-            List<string> itemSpecs = new List<string>();
+            List<string> itemSpecs = new();
 
-            foreach (string itemType in itemVectors.Keys)
+            foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
             {
-                itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, itemType));
+                itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value));
             }
 
             return itemSpecs;
@@ -863,13 +875,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="itemVectors"></param>
         /// <param name="itemType"></param>
+        /// <param name="itemVectorPartition"></param>
         /// <returns>list of item-specs</returns>
-        private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, string itemType)
+        private static IEnumerable<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, string itemType, ItemVectorPartition itemVectorPartition)
         {
-            List<string> itemSpecs = new List<string>();
-
-            ItemVectorPartition itemVectorPartition = itemVectors[itemType];
-
             if (itemVectorPartition != null)
             {
                 foreach (IList<ProjectItemInstance> items in itemVectorPartition.Values)
@@ -879,12 +888,10 @@ namespace Microsoft.Build.BackEnd
                         // The item can be null in the case of an item transform.
                         // eg., @(Compile->'%(NonExistentMetadata)')
                         // Nevertheless, include these, so that correlation can still occur.
-                        itemSpecs.Add((item == null) ? null : ((IItem)item).EvaluatedIncludeEscaped);
+                        yield return item == null ? null : ((IItem)item).EvaluatedIncludeEscaped;
                     }
                 }
             }
-
-            return itemSpecs;
         }
 
         /// <summary>

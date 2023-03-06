@@ -3535,7 +3535,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         }
     }
 
-    internal class MockTask : Task
+    internal sealed class MockTask : Task
     {
         public MockTask(ResourceManager resourceManager)
             : base(resourceManager)
@@ -3547,7 +3547,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         public override bool Execute() => true;
     }
 
-    internal class DependencyTestHelper
+    internal sealed class DependencyTestHelper
     {
         public static ITaskItem[] ItemArray(ITaskItem item)
         {

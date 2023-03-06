@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectTaskElementLinkRemoter : MockProjectElementContainerLinkRemoter
+    internal sealed class MockProjectTaskElementLinkRemoter : MockProjectElementContainerLinkRemoter
     {
         public ProjectTaskElement TaskXml => (ProjectTaskElement)Source;
 
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public void RemoveAllParameters() { this.TaskXml.RemoveAllParameters(); }
     }
 
-    internal class MockProjectTaskElementLink : ProjectTaskElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
+    internal sealed class MockProjectTaskElementLink : ProjectTaskElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
     {
         public MockProjectTaskElementLink(MockProjectTaskElementLinkRemoter proxy, IImportHolder holder)
         {

@@ -4,13 +4,13 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Shared;
+using System.Linq;
 using System.Reflection;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using System.Linq;
 
 #nullable disable
 

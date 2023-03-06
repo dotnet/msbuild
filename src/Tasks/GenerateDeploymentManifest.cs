@@ -4,8 +4,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using System.Runtime.Versioning;
+using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 
 #nullable disable
 

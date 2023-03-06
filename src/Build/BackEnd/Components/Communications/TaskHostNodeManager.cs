@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 #nullable disable
 

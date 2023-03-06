@@ -8,7 +8,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     /// <summary>
     /// Class representation of a task input parameter.
     /// </summary>
-    internal class InputParameter : TaskParameter
+    internal sealed class InputParameter : TaskParameter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InputParameter"/> class.

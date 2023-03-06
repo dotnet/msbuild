@@ -10,29 +10,23 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
-
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
-
-
-
-using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
-
-using Xunit;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
+using Xunit;
 using Xunit.NetCore.Extensions;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
+using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 

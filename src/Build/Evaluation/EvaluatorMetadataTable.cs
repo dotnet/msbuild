@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
-
+using Microsoft.Build.Construction;
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
 
 #nullable disable

@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class PrintLineDebugger_Tests
     {
-        private class MockWriter
+        private sealed class MockWriter
         {
             public readonly List<string> Logs = new List<string>();
 

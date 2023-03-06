@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    internal class EmptyLogger : Logger
+    internal sealed class EmptyLogger : Logger
     {
         /// <summary>
         /// Create a logger instance with a specific verbosity.

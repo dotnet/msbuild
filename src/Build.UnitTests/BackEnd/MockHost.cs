@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Mock host which is used during tests which need a host object
     /// </summary>
-    internal class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+    internal sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
     {
         /// <summary>
         /// Configuration cache
