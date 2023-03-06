@@ -321,11 +321,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
                     if (
                         bandRecordPaths.Contains(currentBandRecordPath) && // A pack for this band exists.
-                        ( !currentBandInstallRecords.Contains(currentBandRecordPath) || cleanAllPacks ) // The pack has no workload record for it or we want to clean all.
+                        (!currentBandInstallRecords.Contains(currentBandRecordPath) || cleanAllPacks) // The pack has no workload record for it or we want to clean all.
                        )
                     {
                         unneededBandRecordPaths = unneededBandRecordPaths.Append(currentBandRecordPath);
-                    } 
+                    }
 
                     if (!unneededBandRecordPaths.Any())
                     {
@@ -349,10 +349,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             deletablePack = JsonSerializer.Deserialize(jsonPackInfo, typeof(PackInfo)) as PackInfo;
                         }
                         DeletePack(deletablePack);
-                        foreach (string packRecordToDeletePath in unneededBandRecordPaths)
-                        {
-                            DeletePackInstallationRecord(deletablePack, new SdkFeatureBand(Path.GetFileName(packRecordToDeletePath)));
-                        }
                     }
                 }
 
