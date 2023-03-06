@@ -10,13 +10,13 @@ Paths searched: '{1}', '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
-        <source>Clean up and uninstall all CLI workloads for every SDK feature band (version) that is less than or equal to the current running SDK.</source>
-        <target state="new">Clean up and uninstall all CLI workloads for every SDK feature band (version) that is less than or equal to the current running SDK.</target>
+        <source>Causes clean to remove and uninstall all workload components from all SDK versions.</source>
+        <target state="new">Causes clean to remove and uninstall all workload components from all SDK versions.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Remove orphaned workload components that may be on the machine.</source>
-        <target state="new">Remove orphaned workload components that may be on the machine.</target>
+        <source>Removes workload components from this SDK feature band that may have been left behind from previous updates and uninstallations.</source>
+        <target state="new">Removes workload components from this SDK feature band that may have been left behind from previous updates and uninstallations.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">
