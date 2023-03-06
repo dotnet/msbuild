@@ -475,7 +475,7 @@ internal sealed class Registry
         client.DefaultRequestHeaders.Accept.Add(new(DockerManifestV2));
         client.DefaultRequestHeaders.Accept.Add(new(DockerContainerV1));
 
-        client.DefaultRequestHeaders.Add("User-Agent", $".NET Container Library, version {Constants.Version}");
+        client.DefaultRequestHeaders.Add("User-Agent", $".NET Container Library v{Constants.Version}");
 
         return client;
     }
