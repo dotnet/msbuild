@@ -1713,7 +1713,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Look at UI language overrides that can be set by known external invokers. (DOTNET_CLI_UI_LANGUAGE and VSLANG).
         /// Does NOT check System Locale or OS Display Language.
-        /// Ported from the .NET SDK: https://github.com/dotnet/sdk/src/Cli/Microsoft.DotNet.Cli.Utils/UILanguageOverride.cs.
+        /// Ported from the .NET SDK: https://github.com/dotnet/sdk/blob/4846f59fe168a343acfb84841f323fd47dd0e72c/src/Cli/Microsoft.DotNet.Cli.Utils/UILanguageOverride.cs#L53.
         /// </summary>
         /// <returns>The custom language that was set by the user for an 'external' tool besides MSBuild.
         /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns null if none are set.</returns>

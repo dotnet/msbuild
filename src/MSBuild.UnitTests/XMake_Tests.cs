@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
@@ -647,28 +648,34 @@ namespace Microsoft.Build.UnitTests
         public void ConsoleUIRespectsSDKLanguage()
         {
             const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
-
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
             // Save the current environment info so it can be restored.
             var originalUILanguage = Environment.GetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE);
+
             Encoding originalOutputEncoding = Console.OutputEncoding;
             Encoding originalInputEncoding = Console.InputEncoding;
             Thread thisThread = Thread.CurrentThread;
             CultureInfo originalUICulture = thisThread.CurrentUICulture;
 
-            // Set the UI language based on the SDK environment var.
-            Environment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // japanese chose arbitrarily.
+            try
+            {
+                // Set the UI language based on the SDK environment var.
+                testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // japanese chose arbitrarily.
 
-            MSBuildApp.SetConsoleUI();
+                MSBuildApp.SetConsoleUI();
 
-            Assert.Equal(thisThread.CurrentUICulture, new CultureInfo("ja"));
-            Assert.Equal(65001, System.Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
+                Assert.Equal(thisThread.CurrentUICulture, new CultureInfo("ja"));
+                Assert.Equal(65001, Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
+            }
+            finally
+            {
+                // Restore the current UI culture back to the way it was at the beginning of this unit test.
+                thisThread.CurrentUICulture = originalUICulture;
 
-            // Restore the current UI culture back to the way it was at the beginning of this unit test.
-            thisThread.CurrentUICulture = originalUICulture;
-            Environment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, originalUILanguage);
-            // MSbuild should also restore the encoding upon exit, but we don't create that context here.
-            Console.OutputEncoding = originalOutputEncoding;
-            Console.InputEncoding = originalInputEncoding;
+                // MSbuild should also restore the encoding upon exit, but we don't create that context here.
+                Console.OutputEncoding = originalOutputEncoding;
+                Console.InputEncoding = originalInputEncoding;
+            }
         }
 
 #if FEATURE_SYSTEM_CONFIGURATION
