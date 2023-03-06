@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {

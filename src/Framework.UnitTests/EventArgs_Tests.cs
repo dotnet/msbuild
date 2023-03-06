@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A generic buildEvent arg to test the equals method
         /// </summary>
-        internal class GenericBuildEventArgs : BuildEventArgs
+        internal sealed class GenericBuildEventArgs : BuildEventArgs
         {
             /// <summary>
             /// Default constructor

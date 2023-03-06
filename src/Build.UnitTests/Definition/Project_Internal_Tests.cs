@@ -3,13 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.IO;
+using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Shouldly;
-using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
+using InternalUtilities = Microsoft.Build.Internal.Utilities;
 
 #nullable disable
 

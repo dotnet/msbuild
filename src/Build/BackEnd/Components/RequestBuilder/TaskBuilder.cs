@@ -13,6 +13,7 @@ using System.Runtime.ExceptionServices;
 #endif
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -390,12 +391,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-            if (MSBuildEventSource.Log.IsEnabled())
-            {
-                TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
-                MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-            }
-
             // If this is an Intrinsic task, it gets handled in a special fashion.
             if (_taskNode == null)
             {
@@ -432,6 +427,7 @@ namespace Microsoft.Build.BackEnd
                     if (requirements != null)
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
                         try
@@ -486,6 +482,8 @@ namespace Microsoft.Build.BackEnd
                                 // We coerce the failing result to a successful result.
                                 taskResult = new WorkUnitResult(WorkUnitResultCode.Success, taskResult.ActionCode, taskResult.Exception);
                             }
+
+                            MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         }
                     }
                 }
@@ -511,13 +509,6 @@ namespace Microsoft.Build.BackEnd
 
                     taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
                 }
-            }
-
-            // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-            if (MSBuildEventSource.Log.IsEnabled())
-            {
-                TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
-                MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
             }
 
             return taskResult;
@@ -660,6 +651,8 @@ namespace Microsoft.Build.BackEnd
             {
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
+
+            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, (_taskExecutionHost as TaskExecutionHost)?.TaskInstance?.GetType());
 
             try
             {

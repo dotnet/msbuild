@@ -4,9 +4,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
 using Xunit;
 
 #nullable disable

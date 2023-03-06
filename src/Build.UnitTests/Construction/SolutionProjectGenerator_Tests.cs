@@ -6,29 +6,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
-
-using Project = Microsoft.Build.Evaluation.Project;
-using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-using Toolset = Microsoft.Build.Evaluation.Toolset;
-
-using InternalUtilities = Microsoft.Build.Internal.Utilities;
-
-using XMakeElements = Microsoft.Build.Shared.XMakeElements;
-using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
+using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using Microsoft.Build.UnitTests.Shared;
+using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
+using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
+using Project = Microsoft.Build.Evaluation.Project;
+using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
+using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
+using Toolset = Microsoft.Build.Evaluation.Toolset;
+using XMakeElements = Microsoft.Build.Shared.XMakeElements;
 
 #nullable disable
 

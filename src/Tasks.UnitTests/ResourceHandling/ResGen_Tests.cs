@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-
-using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 using Xunit;
+using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 
 #nullable disable
 

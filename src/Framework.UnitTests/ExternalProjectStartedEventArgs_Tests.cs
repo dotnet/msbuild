@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
         /// Create a derived class so that we can test the default constructor in order to increase code coverage and 
         /// verify this code path does not cause any exceptions.
         /// </summary>
-        private class ExternalProjectStartedEventArgs2 : ExternalProjectStartedEventArgs
+        private sealed class ExternalProjectStartedEventArgs2 : ExternalProjectStartedEventArgs
         {
             /// <summary>
             /// Default constructor

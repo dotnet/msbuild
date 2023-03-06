@@ -2,19 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Build.Framework;
-using System.IO;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using Microsoft.CSharp;
-using System.Reflection;
-using Microsoft.Build.Shared;
+using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Build.Tasks.Xaml;
+using System.IO;
+using System.Reflection;
 using System.Xaml;
-using Xunit;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.Xaml;
+using Microsoft.CSharp;
 using Shouldly;
+using Xunit;
 
 #nullable disable
 

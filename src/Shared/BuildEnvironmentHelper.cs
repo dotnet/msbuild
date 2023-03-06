@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -15,7 +14,7 @@ using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
-    internal class BuildEnvironmentHelper
+    internal sealed class BuildEnvironmentHelper
     {
         // Since this class is added as 'link' to shared source in multiple projects,
         // MSBuildConstants.CurrentVisualStudioVersion is not available in all of them.
@@ -526,7 +525,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// Defines the current environment for build tools.
     /// </summary>
-    internal class BuildEnvironment
+    internal sealed class BuildEnvironment
     {
         public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInVisualStudio, string visualStudioPath)
         {
@@ -600,7 +599,13 @@ namespace Microsoft.Build.Shared
 
                 MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
                 MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : CurrentMSBuildToolsDirectory;
+#if RUNTIME_TYPE_NETCORE
+                // Fall back to "current" for any architecture since .NET SDK doesn't
+                // support cross-arch task invocations.
+                MSBuildToolsDirectoryArm64 = existsCheck(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : CurrentMSBuildToolsDirectory;
+#else
                 MSBuildToolsDirectoryArm64 = existsCheck(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : null;
+#endif
             }
 
             MSBuildExtensionsPath = mode == BuildEnvironmentMode.VisualStudio

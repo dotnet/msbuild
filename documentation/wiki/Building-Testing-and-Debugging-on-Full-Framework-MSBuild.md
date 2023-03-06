@@ -1,6 +1,6 @@
 # Building MSBuild for the .NET Framework
 
-These instructions refer to working with the `master` branch.
+These instructions refer to working with the `main` branch.
 
 ## Required Software
 

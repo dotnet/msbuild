@@ -12,11 +12,11 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_CODETASKFACTORY
-    using System.CodeDom.Compiler;
     using System.CodeDom;
+    using System.CodeDom.Compiler;
     using System.Collections.Concurrent;
-    using System.Diagnostics.CodeAnalysis;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Reflection;

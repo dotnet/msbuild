@@ -4,11 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
-
+using Xunit;
+using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
 using Marshal = System.Runtime.InteropServices.Marshal;
 using VarEnum = System.Runtime.InteropServices.VarEnum;
-using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
-using Xunit;
 
 #nullable disable
 

@@ -452,7 +452,7 @@ namespace Microsoft.Build.Engine.UnitTests
             return null;
         }
 
-        private class EmptyVSEnviroment : EmptyStandaloneEnviroment
+        private sealed class EmptyVSEnviroment : EmptyStandaloneEnviroment
         {
             public string DevEnvPath { get; }
 

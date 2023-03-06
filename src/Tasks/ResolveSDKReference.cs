@@ -1037,11 +1037,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if (_sdkManifest.FrameworkIdentities != null)
                     {
-                        foreach (string key in _sdkManifest.FrameworkIdentities.Keys)
+                        foreach (KeyValuePair<string, string> kvp in _sdkManifest.FrameworkIdentities)
                         {
-                            if (!FrameworkIdentitiesFromManifest.ContainsKey(key))
+                            if (!FrameworkIdentitiesFromManifest.ContainsKey(kvp.Key))
                             {
-                                FrameworkIdentitiesFromManifest.Add(key, _sdkManifest.FrameworkIdentities[key]);
+                                FrameworkIdentitiesFromManifest.Add(kvp.Key, kvp.Value);
                             }
                         }
                     }
@@ -1054,11 +1054,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if (_sdkManifest.AppxLocations != null)
                     {
-                        foreach (string key in _sdkManifest.AppxLocations.Keys)
+                        foreach (KeyValuePair<string, string> kvp in _sdkManifest.AppxLocations)
                         {
-                            if (!AppxLocationsFromManifest.ContainsKey(key))
+                            if (!AppxLocationsFromManifest.ContainsKey(kvp.Key))
                             {
-                                AppxLocationsFromManifest.Add(key, _sdkManifest.AppxLocations[key]);
+                                AppxLocationsFromManifest.Add(kvp.Key, kvp.Value);
                             }
                         }
                     }

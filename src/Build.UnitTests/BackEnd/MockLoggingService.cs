@@ -4,12 +4,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 

@@ -23,7 +23,7 @@ We also want to load groups of tasks which belong together into the same ALC (fo
 
 # Task dependency resolution
 ## Problem definition
-Tasks with complex and specifically platform specific dependencies don't work out of the box. For example if a task uses [`LibGit2Sharp`](https://www.nuget.org/packages/LibGit2Sharp) package it will not work as is. `LibGit2Sharp` has native dependencies which are platform specific. While the package carries all of them, there's no built in support for the task to load the right ones. For example [source link](https://github.com/dotnet/sourcelink/blob/master/src/Microsoft.Build.Tasks.Git/GitLoaderContext.cs) runs into this problem.
+Tasks with complex and specifically platform specific dependencies don't work out of the box. For example if a task uses [`LibGit2Sharp`](https://www.nuget.org/packages/LibGit2Sharp) package it will not work as is. `LibGit2Sharp` has native dependencies which are platform specific. While the package carries all of them, there's no built in support for the task to load the right ones. For example [source link](https://github.com/dotnet/sourcelink/blob/29b3197e824c05d03427c05d56700e4c704233e4/src/Microsoft.Build.Tasks.Git/GitLoaderContext.cs) runs into this problem.
 
 ## Solution
 .NET Core uses `.deps.json` files to describe dependencies of components. It would be natural to treat task assemblies as components and use associated .deps.json file to determine their dependencies. This would make the system work nicely end to end with the .NET Core CLI/SDK and VS integration.

@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectMetadataLinkRemoter : MockLinkRemoter<ProjectMetadata>
+    internal sealed class MockProjectMetadataLinkRemoter : MockLinkRemoter<ProjectMetadata>
     {
         public override ProjectMetadata CreateLinkedObject(IImportHolder holder)
         {
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public MockProjectMetadataLinkRemoter Predecessor => this.OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.Predecessor);
     }
 
-    internal class MockProjectMetadataLink : ProjectMetadataLink, ILinkMock
+    internal sealed class MockProjectMetadataLink : ProjectMetadataLink, ILinkMock
     {
         public MockProjectMetadataLink(MockProjectMetadataLinkRemoter proxy, IImportHolder holder)
         {

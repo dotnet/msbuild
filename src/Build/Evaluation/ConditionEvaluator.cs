@@ -11,13 +11,13 @@ using System.Threading;
 
 namespace Microsoft.Build.Evaluation
 {
-    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-    using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
-    using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-    using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+    using Microsoft.Build.BackEnd.Logging;
     using Microsoft.Build.Shared;
     using Microsoft.Build.Shared.FileSystem;
-    using Microsoft.Build.BackEnd.Logging;
+    using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
+    using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+    using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
     internal static class ConditionEvaluator
     {

@@ -7,9 +7,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
-
-using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable

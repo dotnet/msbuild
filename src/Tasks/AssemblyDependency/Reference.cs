@@ -7,8 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 

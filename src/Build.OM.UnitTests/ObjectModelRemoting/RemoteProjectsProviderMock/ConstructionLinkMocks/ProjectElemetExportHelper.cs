@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     internal static class ProjectElemetExportHelper
     {
         private delegate MockProjectElementLinkRemoter ExporterFactory(ProjectCollectionLinker exporter, ProjectElement xml);
-        private class ElementInfo
+        private sealed class ElementInfo
         {
             public static ElementInfo New<T, RMock>()
                 where RMock : MockProjectElementLinkRemoter, new()

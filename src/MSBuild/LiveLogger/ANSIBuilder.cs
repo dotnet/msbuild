@@ -201,11 +201,6 @@ namespace Microsoft.Build.Logging.LiveLogger
                 return String.Format("\x1b[21m{0}\x1b[24m", text);
             }
 
-            public static string Blinking(string text)
-            {
-                return String.Format("\x1b[5m{0}\x1b[25m", text);
-            }
-
             public static string Inverse(string text)
             {
                 return String.Format("\x1b[7m{0}\x1b[27m", text);
@@ -427,16 +422,7 @@ namespace Microsoft.Build.Logging.LiveLogger
 
             public static string ProgressBar(float percentage, int width = 10, char completedChar = '█', char remainingChar = '░')
             {
-                string result = String.Empty;
-                for (int i = 0; i < (int)Math.Floor(width * percentage); i++)
-                {
-                    result += completedChar;
-                }
-                for (int i = (int)Math.Floor(width * percentage); i < width; i++)
-                {
-                    result += remainingChar;
-                }
-                return result;
+                return new string(completedChar, (int)Math.Floor(width * percentage)) + new string(remainingChar, width - (int)Math.Floor(width * percentage));
             }
 
             public static string Bell()

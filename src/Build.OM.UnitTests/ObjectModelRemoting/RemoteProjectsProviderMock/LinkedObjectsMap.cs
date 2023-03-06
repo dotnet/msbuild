@@ -8,7 +8,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System;
     using System.Collections.Generic;
 
-    internal class LinkedObjectsMap<KeyType> : IDisposable
+    internal sealed class LinkedObjectsMap<KeyType> : IDisposable
     {
         private static object Lock { get; } = new object();
         private static UInt32 nextCollectionId = 0;
@@ -269,7 +269,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             public virtual bool IsNull => false;
         }
 
-        private class WeakHolder
+        private sealed class WeakHolder
         {
             public WeakHolder(LinkedObject ro)
             {

@@ -13,7 +13,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     /// <summary>
     /// Class representation of an MSBuild overall build execution.
     /// </summary>
-    internal class Build : LogProcessNode
+    internal sealed class Build : LogProcessNode
     {
         /// <summary>
         /// A lookup table mapping of project identifiers to project nodes (which can be nested multiple layers). 

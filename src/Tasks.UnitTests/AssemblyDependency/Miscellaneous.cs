@@ -11,14 +11,14 @@ using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
-using Xunit;
-using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
-using Xunit.Abstractions;
 using Shouldly;
-using Microsoft.Build.UnitTests.Shared;
+using Xunit;
+using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
+using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable
 

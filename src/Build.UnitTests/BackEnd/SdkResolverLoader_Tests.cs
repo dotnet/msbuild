@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Shouldly;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +13,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Exception = System.Exception;
@@ -401,7 +401,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverThatDoesNotLoad : SdkResolverBase
+        private sealed class MockSdkResolverThatDoesNotLoad : SdkResolverBase
         {
             public const string ExpectedMessage = "A8BB8B3131D3475D881ACD3AF8D75BD6";
 
@@ -420,7 +420,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverNoPublicConstructor : SdkResolverBase
+        private sealed class MockSdkResolverNoPublicConstructor : SdkResolverBase
         {
             private MockSdkResolverNoPublicConstructor()
             {
@@ -436,7 +436,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverWithAssemblyPath : SdkResolverBase
+        private sealed class MockSdkResolverWithAssemblyPath : SdkResolverBase
         {
             public string AssemblyPath;
 
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverLoader : SdkResolverLoader
+        private sealed class MockSdkResolverLoader : SdkResolverLoader
         {
             public Func<string, LoggingContext, ElementLocation, Assembly> LoadResolverAssemblyFunc { get; set; }
 

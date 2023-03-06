@@ -5,12 +5,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
-using System.Diagnostics.CodeAnalysis;
 using System.Security;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 /*
     ==================================================================================================================

@@ -3,9 +3,9 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 

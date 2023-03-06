@@ -4,10 +4,9 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-
 using Microsoft.Build.Framework;
-using Xunit;
 using Shouldly;
+using Xunit;
 
 #nullable disable
 

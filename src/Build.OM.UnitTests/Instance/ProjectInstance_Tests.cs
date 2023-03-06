@@ -9,12 +9,11 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
 using Microsoft.Build.Framework;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
+using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
 #nullable disable
 

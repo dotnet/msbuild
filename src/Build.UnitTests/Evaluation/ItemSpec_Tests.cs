@@ -10,10 +10,10 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
-using ProjectInstanceItemSpec =
-    Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance>;
 using ProjectInstanceExpander =
     Microsoft.Build.Evaluation.Expander<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance>;
+using ProjectInstanceItemSpec =
+    Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance>;
 
 
 #nullable disable

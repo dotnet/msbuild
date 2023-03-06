@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using System.Text;
 
 #nullable disable
 

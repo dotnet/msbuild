@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Xunit;
 using Xunit.NetCore.Extensions;
 

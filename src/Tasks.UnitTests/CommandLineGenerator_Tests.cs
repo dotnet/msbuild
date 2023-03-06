@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests
 #endif
         }
 
-        private class TaskItem : ITaskItem
+        private sealed class TaskItem : ITaskItem
         {
             public TaskItem(string itemSpec)
             {

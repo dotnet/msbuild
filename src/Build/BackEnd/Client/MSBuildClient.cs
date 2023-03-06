@@ -174,9 +174,9 @@ namespace Microsoft.Build.Experimental
             try
             {
                 bool serverIsAlreadyRunning = ServerIsRunning();
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
+                    KnownTelemetry.PartialBuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
                 }
                 if (!serverIsAlreadyRunning)
                 {
@@ -553,14 +553,14 @@ namespace Microsoft.Build.Experimental
             // We remove env variable used to invoke MSBuild server as that might be equal to 1, so we do not get an infinite recursion here. 
             envVars.Remove(Traits.UseMSBuildServerEnvVarName);
 
-            Debug.Assert(KnownTelemetry.BuildTelemetry == null || KnownTelemetry.BuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");
+            Debug.Assert(KnownTelemetry.PartialBuildTelemetry == null || KnownTelemetry.PartialBuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");
 
-            PartialBuildTelemetry? partialBuildTelemetry = KnownTelemetry.BuildTelemetry == null
+            PartialBuildTelemetry? partialBuildTelemetry = KnownTelemetry.PartialBuildTelemetry == null
                 ? null
                 : new PartialBuildTelemetry(
-                    startedAt: KnownTelemetry.BuildTelemetry.StartAt.GetValueOrDefault(),
-                    initialServerState: KnownTelemetry.BuildTelemetry.InitialServerState,
-                    serverFallbackReason: KnownTelemetry.BuildTelemetry.ServerFallbackReason);
+                    startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
+                    initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialServerState,
+                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
 
             return new ServerNodeBuildCommand(
                         _commandLine,

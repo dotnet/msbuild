@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 using System.Reflection;
-using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 #nullable disable
 

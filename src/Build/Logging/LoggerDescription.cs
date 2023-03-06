@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
 using System.IO;
-
+using System.Reflection;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
-
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 
 #nullable disable

@@ -3,10 +3,10 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
-using Microsoft.Build.Shared;
 
 #nullable disable
 

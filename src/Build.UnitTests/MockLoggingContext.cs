@@ -11,7 +11,7 @@ namespace Microsoft.Build.Engine.UnitTests
     /// <summary>
     /// Logging context and helpers for evaluation logging
     /// </summary>
-    internal class MockLoggingContext : LoggingContext
+    internal sealed class MockLoggingContext : LoggingContext
     {
         public MockLoggingContext(ILoggingService loggingService, BuildEventContext eventContext) : base(loggingService, eventContext)
         {

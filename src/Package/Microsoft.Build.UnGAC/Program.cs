@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnGAC
     /// It runs at VS install-time as well as repair-time.
     /// It is intended to run as best effort. Meaning that if it fails, we avoid throwing and instead log it.
     /// </summary>
-    internal class Program
+    internal sealed class Program
     {
         private static void Main(string[] args)
         {

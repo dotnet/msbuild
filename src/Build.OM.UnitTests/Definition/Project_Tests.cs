@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
@@ -16,17 +15,16 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
-
-using Task = System.Threading.Tasks.Task;
-// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
-using ProvenanceResultTupleList = System.Collections.Generic.List<(string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int)>;
-using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
-using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
+using ProvenanceResultTupleList = System.Collections.Generic.List<(string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int)>;
+using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
+using Task = System.Threading.Tasks.Task;
+using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 
 #nullable disable
 

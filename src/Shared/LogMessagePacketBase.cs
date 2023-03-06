@@ -139,7 +139,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Event is a ResponseFileUsedEventArgs
         /// </summary>
-        ResponseFileUsedEvent = 20
+        ResponseFileUsedEvent = 20,
+
+        /// <summary>
+        /// Event is an AssemblyLoadBuildEventArgs
+        /// </summary>
+        AssemblyLoadEvent = 21,
     }
     #endregion
 
@@ -332,9 +337,9 @@ namespace Microsoft.Build.Shared
                 bool eventCanSerializeItself = methodInfo != null;
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
-                if (_buildEvent is ProjectEvaluationStartedEventArgs ||
-                    _buildEvent is ProjectEvaluationFinishedEventArgs ||
-                    _buildEvent is EnvironmentVariableReadEventArgs)
+                if (_buildEvent is ProjectEvaluationStartedEventArgs
+                    or ProjectEvaluationFinishedEventArgs
+                    or EnvironmentVariableReadEventArgs)
                 {
                     // switch to serialization methods that we provide in this file
                     // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
@@ -524,6 +529,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
                 LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
+                LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
                 LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
                 LoggingEventType.ProjectEvaluationFinishedEvent => new ProjectEvaluationFinishedEventArgs(),
@@ -587,6 +593,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(TelemetryEventArgs))
             {
                 return LoggingEventType.Telemetry;
+            }
+            else if (eventType == typeof(AssemblyLoadBuildEventArgs))
+            {
+                return LoggingEventType.AssemblyLoadEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))

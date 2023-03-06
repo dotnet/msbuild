@@ -1,10 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
 using System;
 using System.IO;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Xunit;
 
 #nullable disable
