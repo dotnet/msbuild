@@ -233,9 +233,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         Log?.LogMessage($"Removing dependent '{dependent}' from provider key '{depProvider.ProviderKeyName}' because its SDK feature band does not match any installed feature bands.");
                         UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                     }
-                    else if (cleanAllPacks && dependentFeatureBand.CompareTo(_sdkFeatureBand) < 1)
+                    else if (cleanAllPacks)
                     {
                         Log?.LogMessage($"Adding dependent '{dependent}' for removal as part as dotnet has been told to clean everything.");
+                        // VS will manage its own MSI packs, so no need to worry about decrementing too much here.
                         UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                     }
                     else if (dependentFeatureBand.Equals(_sdkFeatureBand))
