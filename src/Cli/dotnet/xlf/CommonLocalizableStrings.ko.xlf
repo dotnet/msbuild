@@ -125,14 +125,14 @@ export PATH="$PATH:{0}"
         <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 프로젝트를 지정하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
         <source>The target operating system.</source>
         <target state="translated">대상 운영 체제입니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OsArgumentName">
-        <source>OS</source>
-        <target state="new">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">

@@ -125,14 +125,14 @@ export PATH="$PATH:{0}"
         <target state="translated">在 `{0}` 中找到多個專案。請指定要使用的專案。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
         <source>The target operating system.</source>
         <target state="translated">目標作業系統。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OsArgumentName">
-        <source>OS</source>
-        <target state="new">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">

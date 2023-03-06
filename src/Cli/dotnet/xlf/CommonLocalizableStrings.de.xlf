@@ -125,14 +125,14 @@ export PATH="$PATH:{0}"
         <target state="translated">In "{0}" wurden mehrere Projekte gefunden. Geben Sie an, welches davon verwendet werden soll.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
         <source>The target operating system.</source>
         <target state="translated">Das Zielbetriebssystem.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OsArgumentName">
-        <source>OS</source>
-        <target state="new">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
