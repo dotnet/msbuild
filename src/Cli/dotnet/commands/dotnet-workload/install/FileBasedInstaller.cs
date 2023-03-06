@@ -308,13 +308,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     var bandRecordPaths = Directory.GetFileSystemEntries(packVersionDir);
 
-                    // Mark packs for GC from versions / feature bands of the SDK that are not present on the machine and lower or equal to the current sdk.
+                    // Mark packs for GC from versions / feature bands of the SDK that are not present on the machine.
                     var unneededBandRecordPaths = bandRecordPaths
                         .Where(recordPath =>
                             {
                                 var featureBand = new SdkFeatureBand(Path.GetFileName(recordPath));
-                                return featureBand.CompareTo(_sdkFeatureBand) < 1 &&
-                                    (!installedSdkFeatureBands.Contains(featureBand) || cleanAllPacks );
+                                return !installedSdkFeatureBands.Contains(featureBand) || cleanAllPacks;
                             }
                     );
 
@@ -322,7 +321,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
                     if (
                         bandRecordPaths.Contains(currentBandRecordPath) && // A pack for this band exists.
-                        new SdkFeatureBand(Path.GetFileName(currentBandRecordPath)).CompareTo(_sdkFeatureBand) < 1 && // We can parse the format of that band (its older than our band or current.)
                         ( !currentBandInstallRecords.Contains(currentBandRecordPath) || cleanAllPacks ) // The pack has no workload record for it or we want to clean all.
                        )
                     {
@@ -377,13 +375,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             foreach (SdkFeatureBand potentialBandToClean in allFeatureBands)
             {
-                if (potentialBandToClean.CompareTo(currentFeatureBand) < 1)
+                var workloadInstallationRecordIds = workloadRecordRepository.GetInstalledWorkloads(potentialBandToClean);
+                foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
                 {
-                    var workloadInstallationRecordIds = workloadRecordRepository.GetInstalledWorkloads(potentialBandToClean);
-                    foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
-                    {
-                        workloadRecordRepository.DeleteWorkloadInstallationRecord(workloadInstallationRecordId, potentialBandToClean);
-                    }
+                    workloadRecordRepository.DeleteWorkloadInstallationRecord(workloadInstallationRecordId, potentialBandToClean);
                 }
             }
         }
