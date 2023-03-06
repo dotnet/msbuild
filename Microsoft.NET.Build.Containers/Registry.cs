@@ -19,13 +19,33 @@ internal sealed class Registry
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
-
-    private string RegistryName => BaseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+    /// <summary>
+    /// The name of the registry, which is the host name, optionally followed by a colon and the port number.
+    /// This is used in user-facing error messages, and it should match what the user would manually enter as
+    /// part of Docker commands like `docker login`.
+    /// </summary>
+    private string RegistryName { get; init; }
 
     public Registry(Uri baseUri)
     {
         BaseUri = baseUri;
+        RegistryName = DeriveRegistryName(baseUri);
         _client = CreateClient();
+    }
+
+    private static string DeriveRegistryName(Uri baseUri)
+    {
+        var port = baseUri.Port == -1 ? string.Empty : $":{baseUri.Port}";
+        if (baseUri.OriginalString.EndsWith(port, ignoreCase: true, culture: null))
+        {
+            // the port was part of the original assignment, so it's ok to consider it part of the 'name
+            return baseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+        }
+        else
+        {
+            // the port was not part of the original assignment, so it's not part of the 'name'
+            return baseUri.GetComponents(UriComponents.Host, UriFormat.Unescaped);
+        }
     }
 
     public Uri BaseUri { get; }
