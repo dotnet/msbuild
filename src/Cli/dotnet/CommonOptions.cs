@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Cli
                 "--os",
                 CommonLocalizableStrings.OperatingSystemOptionDescription)
             {
-                ArgumentHelpName = CommonLocalizableStrings.OsArgumentName
+                ArgumentHelpName = CommonLocalizableStrings.OSArgumentName
             }.SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
 
         public static Option<bool> DebugOption = new Option<bool>("--debug");
