@@ -27,9 +27,8 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             if (
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && // Encoding is only an issue on Windows
                 !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase) &&
-                CurrentWindowsVersionOfficiallySupportsUTF8Encoding()
+                CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
                 )
             {
                 Console.OutputEncoding = DefaultMultilingualEncoding;
@@ -100,13 +99,13 @@ namespace Microsoft.DotNet.Cli.Utils
             SetIfNotAlreadySet(environmentVariableName, value.ToString());
         }
 
-        private static bool CurrentWindowsVersionOfficiallySupportsUTF8Encoding()
+        private static bool CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version.Major >= 10) // UTF-8 is only officially supported on 10+.
             {
                 try
                 {
-                    RegistryKey windowsVersionRegistry = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+                    using RegistryKey windowsVersionRegistry = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
                     var buildNumber = windowsVersionRegistry.GetValue("CurrentBuildNumber").ToString();
                     const int buildNumberThatOfficialySupportsUTF8 = 18363;
                     return int.Parse(buildNumber) >= buildNumberThatOfficialySupportsUTF8 || ForceUniversalEncodingOptInEnabled();
