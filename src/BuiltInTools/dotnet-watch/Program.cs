@@ -242,19 +242,6 @@ Examples:
                 return 1;
             }
 
-            var args = options.RemainingArguments;
-
-            var isDefaultRunCommand = false;
-            if (args.Count == 1 && args[0] == "run")
-            {
-                isDefaultRunCommand = true;
-            }
-            else if (args.Count == 0)
-            {
-                isDefaultRunCommand = true;
-                args = new[] { "run" };
-            }
-
             var watchOptions = DotNetWatchOptions.Default;
             watchOptions.NonInteractive = options.NonInteractive;
 
@@ -266,51 +253,79 @@ Examples:
                 waitOnError: true,
                 trace: false);
 
-            var processInfo = new ProcessSpec
-            {
-                Executable = _muxerPath,
-                WorkingDirectory = Path.GetDirectoryName(projectFile),
-                Arguments = args,
-                EnvironmentVariables =
-                {
-                    ["DOTNET_WATCH"] = "1"
-                },
-            };
-
             if (CommandLineOptions.IsPollingEnabled)
             {
                 _reporter.Output("Polling file watcher is enabled");
             }
 
-            var launchProfile = LaunchSettingsProfile.ReadLaunchProfile(processInfo.WorkingDirectory, options.LaunchProfile, _reporter) ?? new();
+            var workingDirectory = Path.GetDirectoryName(projectFile);
+            var launchProfile = LaunchSettingsProfile.ReadLaunchProfile(workingDirectory, options.LaunchProfile, _reporter) ?? new();
+            var projectGraph = TryReadProject(projectFile);
+
+            bool enableHotReload;
+            if (options.NoHotReload)
+            {
+                _reporter.Verbose("Hot Reload disabled by command line switch.");
+                enableHotReload = false;
+            }
+            else if (options.RemainingArguments is not ([] or ["run", ..]))
+            {
+                _reporter.Error("Only 'run' command supports Hot Reload");
+                enableHotReload = false;
+            }
+            else if (projectGraph is null || !IsHotReloadSupported(projectGraph))
+            {
+                _reporter.Verbose("Project does not support Hot Reload.");
+                enableHotReload = false;
+            }
+            else
+            {
+                _reporter.Verbose("Watching with Hot Reload.");
+                enableHotReload = true;
+            }
+
+            var args = options.RemainingArguments;
+            if (enableHotReload)
+            {
+                // Arguments are passed directly to the application .exe, so we need to make sure they do NOT start with the "run" command name.
+                if (args is not [])
+                {
+                    Debug.Assert(args is ["run", ..]);
+                    args = args.Skip(1).ToArray();
+                }
+            }
+            else if (args is [])
+            {
+                // Arguments are passed to dotnet and the first argument is interpreted as a command.
+                // If there is none, add "run".
+                args = new[] { "run" };
+            }
 
             var context = new DotNetWatchContext
             {
-                ProcessSpec = processInfo,
+                HotReloadEnabled = enableHotReload,
+                ProcessSpec = new ProcessSpec
+                {
+                    WorkingDirectory = workingDirectory,
+                    Arguments = args,
+                    EnvironmentVariables =
+                    {
+                        ["DOTNET_WATCH"] = "1"
+                    },
+                },
+                ProjectGraph = projectGraph,
                 Reporter = _reporter,
                 SuppressMSBuildIncrementalism = watchOptions.SuppressMSBuildIncrementalism,
                 LaunchSettingsProfile = launchProfile,
             };
 
-            context.ProjectGraph = TryReadProject(projectFile);
-
-            if (!options.NoHotReload && isDefaultRunCommand && context.ProjectGraph is not null && IsHotReloadSupported(context.ProjectGraph))
+            if (enableHotReload)
             {
-                _reporter.Verbose($"Project supports hot reload and was configured to run with the default run-command. Watching with hot-reload");
-
-                // Use hot-reload based watching if
-                // a) watch was invoked with no args or with exactly one arg - the run command e.g. `dotnet watch` or `dotnet watch run`
-                // b) The launch profile supports hot-reload based watching.
-                // The watcher will complain if users configure this for runtimes that would not support it.
                 await using var watcher = new HotReloadDotNetWatcher(_reporter, _requester, fileSetFactory, watchOptions, _console, _workingDirectory, _muxerPath);
                 await watcher.WatchAsync(context, cancellationToken);
             }
             else
             {
-                _reporter.Verbose("Did not find a HotReloadProfile or running a non-default command. Watching with legacy behavior.");
-
-                // We'll use the presence of a profile to decide if we're going to use the hot-reload based watching.
-                // The watcher will complain if users configure this for runtimes that would not support it.
                 await using var watcher = new DotNetWatcher(_reporter, fileSetFactory, watchOptions, _muxerPath);
                 await watcher.WatchAsync(context, cancellationToken);
             }

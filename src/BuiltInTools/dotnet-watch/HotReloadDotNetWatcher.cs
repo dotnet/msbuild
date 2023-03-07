@@ -125,12 +125,11 @@ namespace Microsoft.DotNet.Watcher
 
                 try
                 {
-                    using var hotReload = new HotReload(_processRunner, _reporter);
+                    using var hotReload = new HotReload(_reporter);
                     await hotReload.InitializeAsync(context, cancellationToken);
 
+                    _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: '{string.Join(" ", processSpec.Arguments)}'");
                     var processTask = _processRunner.RunAsync(processSpec, combinedCancellationSource.Token);
-                    var args = string.Join(" ", processSpec.Arguments);
-                    _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: {args}");
 
                     _reporter.Output("Started", emoji: "🚀");
 

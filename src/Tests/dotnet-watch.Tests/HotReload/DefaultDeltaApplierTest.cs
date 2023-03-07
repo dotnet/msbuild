@@ -20,7 +20,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 new FileItem {  FilePath = "Test.cs" },
             });
-            var context = new DotNetWatchContext { ProcessSpec = process, FileSet = fileSet, Iteration = 0 };
+
+            var context = new DotNetWatchContext
+            {
+                HotReloadEnabled = true,
+                ProcessSpec = process,
+                FileSet = fileSet,
+                Iteration = 0
+            };
 
             // Act
             await applier.InitializeAsync(context, default);

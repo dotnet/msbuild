@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public ValueTask ProcessAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            Debug.Assert(!context.HotReloadEnabled);
+
             if (context.SuppressMSBuildIncrementalism)
             {
                 return default;
