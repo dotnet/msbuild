@@ -411,13 +411,36 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-                _strongCache = new LinkedList<ProjectRootElement>();
-
-                foreach (ProjectRootElement projectRootElement in oldStrongCache)
+                if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
                 {
-                    RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
+                    LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
+                    _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+                    _strongCache = new LinkedList<ProjectRootElement>();
+
+                    foreach (ProjectRootElement projectRootElement in oldStrongCache)
+                    {
+                        RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
+                    }
+                }
+                else
+                {
+                    // Manually iterate through LinkedList so we can remove items during this iteration
+                    for (var listNode = _strongCache.First; listNode != null;)
+                    {
+                        var nextNode = listNode.Next;
+
+                        ProjectRootElement projectRootElement = listNode.Value;
+                        // Do not remove cache of files from immutable locations.
+                        // Those are mostly SDK project files and will be most probably needed in next builds.
+                        if (!FileClassifier.Shared.IsNonModifiable(projectRootElement.FullPath))
+                        {
+                            _weakCache.Remove(projectRootElement.FullPath);
+                            _strongCache.Remove(listNode);
+                            RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
+                        }
+
+                        listNode = nextNode;
+                    }
                 }
             }
         }
