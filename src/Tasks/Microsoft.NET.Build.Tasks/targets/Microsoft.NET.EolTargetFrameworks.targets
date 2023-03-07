@@ -12,7 +12,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <!-- Default the check to true, but allow developers to turn the warning off. -->
-    <CheckEolTargetFramework Condition="'$(CheckEolTargetFramework)' == ''">true</CheckEolTargetFramework>
+    <CheckEolTargetFramework Condition="'$(CheckEolTargetFramework)' == '' and '$(OutputType)' != 'Library'">true</CheckEolTargetFramework>
   </PropertyGroup>
 
   <!--

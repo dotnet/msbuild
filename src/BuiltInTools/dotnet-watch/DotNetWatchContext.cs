@@ -10,6 +10,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class DotNetWatchContext
     {
+        public required bool HotReloadEnabled { get; init; }
+
         public IReporter Reporter { get; init; } = NullReporter.Singleton;
 
         public ProcessSpec ProcessSpec { get; init; } = default!;

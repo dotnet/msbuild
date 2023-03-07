@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Pack;
 using LocalizableStrings = Microsoft.DotNet.Tools.Pack.LocalizableStrings;
@@ -24,7 +22,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDirDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdOutputDir
-        }.ForwardAsOutputPath("PackageOutputPath");
+        }.ForwardAsSingle(o => $"-property:PackageOutputPath={CommandDirectoryContext.GetFullPath(o)}");
 
         public static readonly Option<bool> NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.CmdNoBuildOptionDescription)
             .ForwardAs("-property:NoBuild=true");
@@ -68,6 +66,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.VersionSuffixOption);
             command.AddOption(ConfigurationOption);
+            command.AddOption(CommonOptions.DisableBuildServersOption);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: true, includeNoDependenciesOption: true);
 
             command.SetHandler(PackCommand.Run);

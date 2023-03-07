@@ -24,8 +24,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         [Theory]
         [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-o", "<packageoutputpath>" }, "-property:PackageOutputPath=<cwd><packageoutputpath> -property:_CommandLineDefinedOutputPath=true")]
-        [InlineData(new string[] { "--output", "<packageoutputpath>" }, "-property:PackageOutputPath=<cwd><packageoutputpath> -property:_CommandLineDefinedOutputPath=true")]
+        [InlineData(new string[] { "-o", "<packageoutputpath>" }, "-property:PackageOutputPath=<cwd><packageoutputpath>")]
+        [InlineData(new string[] { "--output", "<packageoutputpath>" }, "-property:PackageOutputPath=<cwd><packageoutputpath>")]
         [InlineData(new string[] { "--no-build" }, "-property:NoBuild=true")]
         [InlineData(new string[] { "--include-symbols" }, "-property:IncludeSymbols=true")]
         [InlineData(new string[] { "--include-source" }, "-property:IncludeSource=true")]
@@ -37,6 +37,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "<project>" }, "<project>")]
+        [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false")]
+
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>

@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly ScopedCssFileHandler _scopedCssFileHandler;
         private readonly CompilationHandler _compilationHandler;
 
-        public HotReload(ProcessRunner processRunner, IReporter reporter)
+        public HotReload(IReporter reporter)
         {
             _staticFileHandler = new StaticFileHandler(reporter);
             _scopedCssFileHandler = new ScopedCssFileHandler(reporter);
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             for (var i = files.Length - 1; i >= 0; i--)
             {
                 var file = files[i];
-                if (await _staticFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
+                if (await _staticFileHandler.TryHandleFileChange(context.BrowserRefreshServer, file, cancellationToken) ||
                     await _scopedCssFileHandler.TryHandleFileChange(context, file, cancellationToken))
                 {
                     fileHandlerResult = true;

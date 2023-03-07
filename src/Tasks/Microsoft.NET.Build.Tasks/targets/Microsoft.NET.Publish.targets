@@ -77,7 +77,14 @@ Copyright (c) .NET Foundation. All rights reserved.
          the published assets were copied. -->
     <Message Importance="High" Text="$(MSBuildProjectName) -> $([System.IO.Path]::GetFullPath('$(PublishDir)'))" />
 
-    <AllowEmptyTelemetry EventName="PublishProperties" EventData="PublishReadyToRun=$(PublishReadyToRun);PublishTrimmed=$(PublishTrimmed);PublishSingleFile=$(PublishSingleFile);PublishAot=$(PublishAot);PublishProtocol=$(PublishProtocol)" />
+    <ItemGroup>
+      <PublishTelemetry Include="PublishReadyToRun" Value="$(PublishReadyToRun)" />
+      <PublishTelemetry Include="PublishTrimmed" Value="$(PublishTrimmed)" />
+      <PublishTelemetry Include="PublishSingleFile" Value="$(PublishSingleFile)" />
+      <PublishTelemetry Include="PublishAot" Value="$(PublishAot)" />
+      <PublishTelemetry Include="PublishProtocol" Value="$(PublishProtocol)" />
+    </ItemGroup>
+    <AllowEmptyTelemetry EventName="PublishProperties" EventData="@(PublishTelemetry)" />
   </Target>
 
   <!-- Don't let project reference resolution build project references in NoBuild case. -->

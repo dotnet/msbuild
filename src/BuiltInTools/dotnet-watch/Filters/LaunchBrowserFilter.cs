@@ -14,8 +14,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     internal sealed class LaunchBrowserFilter : IWatchFilter, IAsyncDisposable
     {
         private static readonly Regex NowListeningRegex = new Regex(@"Now listening on: (?<url>.*)\s*$", RegexOptions.None | RegexOptions.Compiled, TimeSpan.FromSeconds(10));
-        private readonly bool _runningInTest;
-        private readonly bool _suppressLaunchBrowser;
+        private readonly DotNetWatchOptions _options;
         private readonly string _browserPath;
         private bool _attemptedBrowserLaunch;
         private Process _browserProcess;
@@ -24,16 +23,15 @@ namespace Microsoft.DotNet.Watcher.Tools
         private CancellationToken _cancellationToken;
         private DotNetWatchContext _watchContext;
 
-        public LaunchBrowserFilter(DotNetWatchOptions dotNetWatchOptions, bool allowBrowserRefreshWithoutLaunchBrowser = false)
+        public LaunchBrowserFilter(DotNetWatchOptions dotNetWatchOptions)
         {
-            _suppressLaunchBrowser = dotNetWatchOptions.SuppressLaunchBrowser;
-            _runningInTest = dotNetWatchOptions.RunningAsTest;
+            _options = dotNetWatchOptions;
             _browserPath = Environment.GetEnvironmentVariable("DOTNET_WATCH_BROWSER_PATH");
         }
 
         public ValueTask ProcessAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
-            if (_suppressLaunchBrowser)
+            if (_options.SuppressLaunchBrowser)
             {
                 return default;
             }
@@ -53,6 +51,10 @@ namespace Microsoft.DotNet.Watcher.Tools
                     // We've redirected the output, but want to ensure that it continues to appear in the user's console.
                     context.ProcessSpec.OnOutput += (_, eventArgs) => Console.WriteLine(eventArgs.Data);
                     context.ProcessSpec.OnOutput += OnOutput;
+                }
+                else if (_options.TestFlags.HasFlag(TestFlags.BrowserRequired))
+                {
+                    _reporter.Error("Test requires browser to launch");
                 }
             }
 
@@ -118,7 +120,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 fileName = _browserPath;
             }
 
-            if (_runningInTest)
+            if (_options.TestFlags != TestFlags.None)
             {
                 _reporter.Output($"Launching browser: {fileName} {args}");
                 return;
@@ -144,11 +146,14 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            var dotnetCommand = context.ProcessSpec.Arguments.FirstOrDefault();
-            if (!string.Equals(dotnetCommand, "run", StringComparison.Ordinal))
+            if (!context.HotReloadEnabled)
             {
-                reporter.Verbose("Browser refresh is only supported for run commands.");
-                return false;
+                var dotnetCommand = context.ProcessSpec.Arguments.FirstOrDefault();
+                if (!string.Equals(dotnetCommand, "run", StringComparison.Ordinal))
+                {
+                    reporter.Verbose("Browser refresh is only supported for run commands.");
+                    return false;
+                }
             }
 
             if (context.LaunchSettingsProfile is not { LaunchBrowser: true })

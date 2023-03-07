@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Microsoft.DotNet.GenAPI.Filtering;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.GenAPI.Tests
 {
@@ -34,7 +35,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
             string expected,
             bool includeInternalSymbols = true,
             bool includeEffectivelyPrivateSymbols = true,
-            bool includeExplicitInterfaceImplementationSymbols = true)
+            bool includeExplicitInterfaceImplementationSymbols = true,
+            bool allowUnsafe = false)
         {
             StringWriter stringWriter = new();
 
@@ -42,9 +44,10 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 .Add<ImplicitSymbolFilter>()
                 .Add(new AccessibilitySymbolFilter(includeInternalSymbols,
                     includeEffectivelyPrivateSymbols, includeExplicitInterfaceImplementationSymbols));
-            IAssemblySymbolWriter csharpFileBuilder = new CSharpFileBuilder(compositeFilter, stringWriter, null, MetadataReferences);
+            IAssemblySymbolWriter csharpFileBuilder = new CSharpFileBuilder(new ConsoleLog(MessageImportance.Low),
+                compositeFilter, stringWriter, null, false, MetadataReferences);
 
-            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true);
+            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true, allowUnsafe: allowUnsafe);
             csharpFileBuilder.WriteAssembly(assemblySymbol);
 
             StringBuilder stringBuilder = stringWriter.GetStringBuilder();
@@ -436,7 +439,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
                     public class Events
                     {
-                        public event System.EventHandler<string> OnNewMessage { add { } remove {} }
+                        public event System.EventHandler<string> OnNewMessage { add { } remove { } }
                     }
                 }
                 """,
@@ -445,13 +448,12 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public abstract partial class AbstractEvents
                     {
-                        public event System.EventHandler<bool> TextChanged;
+                        public abstract event System.EventHandler<bool> TextChanged;
                     }
 
                     public partial class Events
                     {
-                        /// add & remove accessors have a default implementation.
-                        public event System.EventHandler<string> OnNewMessage;
+                        public event System.EventHandler<string> OnNewMessage { add { } remove { } }
                     }
                 }
                 """);
@@ -757,6 +759,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public readonly partial struct Digit
                     {
+                        private readonly int _dummyPrimitive;
+
                         public Digit(byte digit) { }
                         public static explicit operator Digit(byte b) { throw null; }
 
@@ -967,6 +971,167 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """
             );
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsForValueTypes()
+        {
+            RunTest(original: """
+                using System;
+
+                namespace Foo
+                {
+                    public struct Bar
+                    {
+                        #pragma warning disable 0169
+                        private IntPtr intPtr;
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial struct Bar
+                    {
+                        private int _dummyPrimitive;
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsForReferenceTypes()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public struct Bar
+                    {
+                        #pragma warning disable 0169
+                        private object field;
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial struct Bar
+                    {
+                        private object _dummy;
+                        private int _dummyPrimitive;
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsForGenericTypes()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    public struct Bar<T>
+                    {
+                        #pragma warning disable 0169
+                        private T _field;
+                    }
+                }
+                """,
+            expected: """
+                namespace Foo
+                {
+                    public partial struct Bar<T>
+                    {
+                        private T _field;
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsForNestedGenericTypes()
+        {
+            RunTest(original: """
+                using System.Collections.Generic;
+
+                namespace Foo
+                {
+                    public struct Bar<T> where T : notnull
+                    {
+                        #pragma warning disable 0169
+                        private Dictionary<int, List<T>> _field;
+                    }
+                }
+                """,
+            expected: """
+                namespace Foo
+                {
+                    public partial struct Bar<T>
+                    {
+                        private System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<T>> _field;
+                        private object _dummy;
+                        private int _dummyPrimitive;
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsAngleBrackets()
+        {
+            RunTest(original: """
+                using System.Collections.Generic;
+
+                namespace Foo
+                {
+                    public readonly struct Bar<T> where T : notnull
+                    {
+                        public List<Bar<T>> Baz { get; }
+                    }
+                }
+                """,
+            expected: """
+                namespace Foo
+                {
+                    public readonly partial struct Bar<T>
+                    {
+                        private readonly System.Collections.Generic.List<Bar<T>> _Baz_k__BackingField;
+                        private readonly object _dummy;
+                        private readonly int _dummyPrimitive;
+                        public System.Collections.Generic.List<Bar<T>> Baz { get { throw null; } }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        void TestSynthesizePrivateFieldsForInaccessibleNestedGenericTypes()
+        {
+            RunTest(original: """
+                namespace A
+                {
+                    internal class Bar<T> {}
+
+                    public struct Foo<T>
+                    {
+                        #pragma warning disable 0169
+                        // as the includeInternalSymbols field is set to false and the Bar<> class is internal -
+                        //   we must skip generation of the `_field` private field.
+                        private Bar<T> _field;
+                    }
+                }
+                """,
+            expected: """
+                namespace A
+                {
+                    public partial struct Foo<T>
+                    {
+                        private object _dummy;
+                        private int _dummyPrimitive;
+                    }
+                }
+                """,
+                includeInternalSymbols: false);
         }
 
         [Fact]
@@ -1259,5 +1424,420 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     """,
                 includeInternalSymbols: false);
         }
+
+        [Fact]
+        public void TestMethodsWithReferenceParameterGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class foo
+                        {
+                            public void Execute(out int i) { i = 1; }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class foo
+                        {
+                            public void Execute(out int i) { throw null; }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact (Skip="https://github.com/dotnet/roslyn/issues/67019")]
+        public void TestInterfaceWithOperatorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public interface IntType
+                        {
+                            public static IntType operator +(IntType left, IntType right) => left + right;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial interface IntType
+                        {
+                            public static IntType operator +(IntType left, IntType right) => left + right;
+                        }
+                    }
+                    """,
+                 includeInternalSymbols: false);
+        }
+
+        [Fact(Skip = "https://github.com/dotnet/roslyn/issues/67019")]
+        public void TestInterfaceWithCheckedOperatorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public interface IAdditionOperators<TSelf, TOther, TResult>
+                            where TSelf : IAdditionOperators<TSelf, TOther, TResult>?
+                        {
+                            static abstract TResult operator +(TSelf left, TOther right);
+                            static virtual TResult operator checked +(TSelf left, TOther right) => left + right;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public interface IAdditionOperators<TSelf, TOther, TResult>
+                            where TSelf : IAdditionOperators<TSelf, TOther, TResult>?
+                        {
+                            static abstract TResult operator +(TSelf left, TOther right);
+                            static virtual TResult operator checked +(TSelf left, TOther right) { throw null; }
+                        }
+                    }
+                    """,
+                 includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestUnsafeFieldGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public struct Node
+                        {
+                            public unsafe Node* Left;
+                            public unsafe Node* Right;
+                            public int Value;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial struct Node
+                        {
+                            public unsafe Node* Left;
+                            public unsafe Node* Right;
+                            public int Value;
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false,
+                allowUnsafe: true);
+        }
+
+        [Fact]
+        public void TestUnsafeMethodGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public unsafe class A
+                        {
+                            public virtual void F(char* p) {}
+                        }
+
+                        public class B: A
+                        {
+                            public unsafe override void F(char* p) {}
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class A
+                        {
+                            public virtual unsafe void F(char* p) { }
+                        }
+
+                        public partial class B : A
+                        {
+                            public override unsafe void F(char* p) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false,
+                allowUnsafe: true);
+        }
+
+        [Fact]
+        public void TestUnsafeConstructorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public unsafe Bar(char* f) { }
+                        }
+
+                        public class Foo : Bar
+                        {
+                            public unsafe Foo(char* f) : base(f) { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public unsafe Bar(char* f) { }
+                        }
+                    
+                        public partial class Foo : Bar
+                        {
+                            public unsafe Foo(char* f) : base(default) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false,
+                allowUnsafe: true);
+        }
+
+        [Fact]
+        public void TestUnsafeBaseConstructorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public unsafe Bar(char* f) { }
+                        }
+
+                        public class Foo : Bar
+                        {
+                            public unsafe Foo() : base(default) { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public unsafe Bar(char* f) { }
+                        }
+
+                        public partial class Foo : Bar
+                        {
+                            public unsafe Foo() : base(default) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false,
+                allowUnsafe: true);
+        }
+
+        [Fact]
+        public void TestInternalDefaultConstructorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public Bar(int a) { }
+                        }
+
+                        public class Foo : Bar
+                        {
+                            internal Foo() : base(1) { }
+                        }
+                    }
+                    namespace B
+                    {
+                        public class Bar
+                        {
+                            public Bar(int a) { }
+                        }
+                    
+                        public class Foo : Bar
+                        {
+                            private Foo() : base(1) { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public Bar(int a) { }
+                        }
+
+                        public partial class Foo : Bar
+                        {
+                            internal Foo() : base(default) { }
+                        }
+                    }
+                    namespace B
+                    {
+                        public partial class Bar
+                        {
+                            public Bar(int a) { }
+                        }
+                    
+                        public partial class Foo : Bar
+                        {
+                            internal Foo() : base(default) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestPrivateDefaultConstructorGeneration()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public Bar(int a) { }
+                        }
+
+                        public class Foo : Bar
+                        {
+                            private Foo() : base(1) { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public Bar(int a) { }
+                        }
+
+                        public partial class Foo : Bar
+                        {
+                            private Foo() : base(default) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: true,
+                includeEffectivelyPrivateSymbols: true);
+        }
+
+        [Fact]
+        public void TestInternalDefaultConstructorGenerationForGenericType()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public Bar(int a) { }
+                        }
+
+                        public class Foo<T> : Bar
+                        {
+                            internal Foo() : base(1) { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public Bar(int a) { }
+                        }
+
+                        public partial class Foo<T> : Bar
+                        {
+                            internal Foo() : base(default) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestBaseClassWithExplicitDefaultConstructor()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public Bar() { }
+                        }
+
+                        public class Foo : Bar
+                        {
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public Bar() { }
+                        }
+
+                        public partial class Foo : Bar
+                        {
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestGenericBaseInterfaceWithInaccessibleTypeArguments()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        internal class IOption2
+                        {
+                        }
+
+                        public interface IOption
+                        {
+                        }
+
+                        public interface AreEqual<T>
+                        {
+                            bool Compare(T other);
+                        }
+
+                        public class PerLanguageOption : AreEqual<IOption2>, IOption
+                        {
+                            bool AreEqual<IOption2>.Compare(IOption2 other) => false;
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial interface AreEqual<T>
+                        {
+                            bool Compare(T other);
+                        }
+
+                        public partial interface IOption
+                        {
+                        }
+                    
+                        public partial class PerLanguageOption : IOption
+                        {
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
     }
 }
+

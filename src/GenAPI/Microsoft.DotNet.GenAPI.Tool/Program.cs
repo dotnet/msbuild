@@ -32,6 +32,13 @@ namespace Microsoft.DotNet.GenAPI.Tool
                 Arity = ArgumentArity.ZeroOrMore
             };
 
+            Option<string[]?> excludeApiFilesOption = new("--exclude-api-file",
+                description: "The path to one or more api exclusion files with types in DocId format.",
+                parseArgument: ParseAssemblyArgument)
+            {
+                Arity = ArgumentArity.ZeroOrMore
+            };
+
             Option<string[]?> excludeAttributesFilesOption = new("--exclude-attributes-file",
                 description: "The path to one or more attribute exclusion files with types in DocId format.",
                 parseArgument: ParseAssemblyArgument)
@@ -52,17 +59,22 @@ namespace Microsoft.DotNet.GenAPI.Tool
             Option<bool> includeVisibleOutsideOfAssemblyOption = new("--include-visible-outside",
                 "Include internal API's. Default is false.");
 
+            Option<bool> includeAssemblyAttributesOption = new("--include-assembly-attributes",
+                "Includes assembly attributes which are values that provide information about an assembly. Default is false.");
+
             RootCommand rootCommand = new("Microsoft.DotNet.GenAPI")
             {
                 TreatUnmatchedTokensAsErrors = true
             };
             rootCommand.AddGlobalOption(assembliesOption);
             rootCommand.AddGlobalOption(assemblyReferencesOption);
+            rootCommand.AddGlobalOption(excludeApiFilesOption);
             rootCommand.AddGlobalOption(excludeAttributesFilesOption);
             rootCommand.AddGlobalOption(outputPathOption);
             rootCommand.AddGlobalOption(headerFileOption);
             rootCommand.AddGlobalOption(exceptionMessageOption);
             rootCommand.AddGlobalOption(includeVisibleOutsideOfAssemblyOption);
+            rootCommand.AddGlobalOption(includeAssemblyAttributesOption);
 
             rootCommand.SetHandler((InvocationContext context) =>
             {
@@ -72,8 +84,10 @@ namespace Microsoft.DotNet.GenAPI.Tool
                     context.ParseResult.GetValue(outputPathOption),
                     context.ParseResult.GetValue(headerFileOption),
                     context.ParseResult.GetValue(exceptionMessageOption),
+                    context.ParseResult.GetValue(excludeApiFilesOption),
                     context.ParseResult.GetValue(excludeAttributesFilesOption),
-                    context.ParseResult.GetValue(includeVisibleOutsideOfAssemblyOption)
+                    context.ParseResult.GetValue(includeVisibleOutsideOfAssemblyOption),
+                    context.ParseResult.GetValue(includeAssemblyAttributesOption)
                 ));
             });
 

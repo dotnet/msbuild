@@ -32,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption().WithDescription(SymbolStrings.Option_Install_Force);
 
-        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
+        internal virtual Option<bool> InteractiveOption { get; } = SharedOptions.InteractiveOption;
 
         internal virtual Option<string[]> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
 

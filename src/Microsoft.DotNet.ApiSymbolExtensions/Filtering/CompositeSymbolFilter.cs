@@ -13,14 +13,19 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
     /// </summary>
     public class CompositeSymbolFilter : ISymbolFilter
     {
-        private readonly List<ISymbolFilter> _innerFilters = new();
+        public CompositeSymbolFilter() => Filters = new();
+
+        /// <summary>
+        /// List on inner filters.
+        /// </summary>
+        public List<ISymbolFilter> Filters { get; }
 
         /// <summary>
         /// Determines whether the <see cref="ISymbol"/> should be included.
         /// </summary>
         /// <param name="symbol"><see cref="ISymbol"/> to evaluate.</param>
         /// <returns>True to include the <paramref name="symbol"/> or false to filter it out.</returns>
-        public bool Include(ISymbol symbol) => _innerFilters.All(f => f.Include(symbol));
+        public bool Include(ISymbol symbol) => Filters.All(f => f.Include(symbol));
 
         /// <summary>
         /// Construct and add a new filter object to a list of filters.
@@ -29,7 +34,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
         /// <returns>Returns the current instance of the class.</returns>
         public CompositeSymbolFilter Add<T>() where T : ISymbolFilter, new()
         {
-            _innerFilters.Add(new T());
+            Filters.Add(new T());
             return this;
         }
 
@@ -40,7 +45,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
         /// <returns>Returns the current instance of the class.</returns>
         public CompositeSymbolFilter Add(ISymbolFilter filter)
         {
-            _innerFilters.Add(filter);
+            Filters.Add(filter);
             return this;
         }
     }

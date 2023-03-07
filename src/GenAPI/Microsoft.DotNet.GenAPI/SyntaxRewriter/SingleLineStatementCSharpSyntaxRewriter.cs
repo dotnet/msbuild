@@ -54,6 +54,12 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             return VisitBasePropertyDeclarationSyntax(node);
         }
 
+        /// <inheritdoc />
+        public override SyntaxNode? VisitEventDeclaration(EventDeclarationSyntax node)
+        {
+            return VisitBasePropertyDeclarationSyntax(node);
+        }
+
         private static SyntaxNode? VisitBaseMethodDeclarationSyntax(BaseMethodDeclarationSyntax node)
         {
             BlockSyntax? body = node.Body;

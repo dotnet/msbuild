@@ -120,8 +120,7 @@ namespace Microsoft.DotNet.Watcher.Tests
                .WithSource()
                .Path;
 
-            App.Prepare(testAsset);
-            App.Start(new[] { "--list" }, workingDirectory: testAsset);
+            App.Start(testAsset, new[] { "--list" });
             var lines = await App.Process.GetAllOutputLinesAsync(CancellationToken.None);
             var files = lines.Where(l => !l.StartsWith("watch :"));
 

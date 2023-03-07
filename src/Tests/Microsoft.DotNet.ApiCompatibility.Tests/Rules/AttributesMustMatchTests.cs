@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
          */
 
         private static ISymbolFilter GetAccessibilityAndAttributeSymbolFiltersAsComposite(params string[] excludeAttributeFiles) =>
-            new CompositeSymbolFilter().Add(new AccessibilitySymbolFilter(false)).Add(new AttributeSymbolFilter(excludeAttributeFiles));
+            new CompositeSymbolFilter().Add(new AccessibilitySymbolFilter(false)).Add(new DocIdSymbolFilter(excludeAttributeFiles));
 
         public static TheoryData<string, string, CompatDifference[]> TypesCases => new()
         {

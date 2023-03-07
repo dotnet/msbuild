@@ -25,9 +25,21 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
         /// <inheritdoc />
         public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
-            node = node.WithBody(GetEmptyBody())
-                       .WithParameterList(node.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
-            return base.VisitConstructorDeclaration(node);
+            // visit subtree first to normalize type names.
+            ConstructorDeclarationSyntax? rs = (ConstructorDeclarationSyntax?)base.VisitConstructorDeclaration(node);
+            if (rs is null) return rs;
+
+            // if there is at least one reference parameter - generate non empty body.
+            if (node.ParameterList.Parameters.Any(p => p.Modifiers.Any(m => m.IsKind(SyntaxKind.OutKeyword))))
+            {
+                rs = rs.WithBody(GetThrowNullBody());
+            }
+            else
+            {
+                rs = rs.WithBody(GetEmptyBody());
+            }
+
+            return rs;
         }
 
         /// <inheritdoc />
@@ -47,8 +59,9 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
                 rs = rs.WithExpressionBody(null);
             }
 
-            string returnType = rs.ReturnType.ToString();
-            if (returnType != "void" && returnType != "System.Void")
+            if (!(rs.ReturnType is PredefinedTypeSyntax predefined && predefined.Keyword.IsKind(SyntaxKind.VoidKeyword)) ||
+                // if there is at least one reference parameter - generate non empty body.
+                node.ParameterList.Parameters.Any(p => p.Modifiers.Any(m => m.IsKind(SyntaxKind.OutKeyword))))
             {
                 rs = rs.WithBody(GetThrowNullBody());
             }

@@ -59,8 +59,9 @@ namespace Microsoft.NET.Sdk.Web.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
             testProject.AdditionalProperties["PublishAOT"] = "true";
-            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
             testProject.PropertiesToRecord.Add("PublishTrimmed");
             testProject.PropertiesToRecord.Add("TrimMode");
             testProject.PropertiesToRecord.Add("PublishIISAssets");
@@ -73,8 +74,9 @@ namespace Microsoft.NET.Sdk.Web.Tests
             buildProperties["PublishTrimmed"].Should().Be("true");
             buildProperties["TrimMode"].Should().Be("");
             buildProperties["PublishIISAssets"].Should().Be("false");
+            var ucrRid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
 
-            string outputDirectory = publishCommand.GetIntermediateDirectory(targetFramework, runtimeIdentifier: rid).FullName;
+            string outputDirectory = publishCommand.GetIntermediateDirectory(targetFramework, runtimeIdentifier: ucrRid).FullName;
             string responseFile = Path.Combine(outputDirectory, "native", $"{projectName}.ilc.rsp");
             var responseFileContents = File.ReadLines(responseFile);
 

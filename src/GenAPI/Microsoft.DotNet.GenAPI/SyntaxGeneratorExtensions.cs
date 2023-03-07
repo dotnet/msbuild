@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
+using System.Security.AccessControl;
+using Microsoft.VisualBasic;
 
 namespace Microsoft.DotNet.GenAPI
 {
@@ -58,11 +60,37 @@ namespace Microsoft.DotNet.GenAPI
 
                             if (baseTypeConstructors.Any())
                             {
+                                IMethodSymbol constructor = baseTypeConstructors.First();
+
                                 ConstructorDeclarationSyntax declaration = (ConstructorDeclarationSyntax)syntaxGenerator.Declaration(method);
-                                return declaration.WithInitializer(GenerateBaseConstructorInitializer(baseTypeConstructors.First()));
+                                if (!declaration.Modifiers.Any(m => m.RawKind == (int)SyntaxKind.UnsafeKeyword) &&
+                                    // if at least one parameter of a base constructor is raw pointer type
+                                    constructor.Parameters.Any(p => p.Type.TypeKind == TypeKind.Pointer))
+                                {
+                                    declaration = declaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.UnsafeKeyword));
+                                }
+                                return declaration.WithInitializer(constructor.GenerateBaseConstructorInitializer());
                             }
                         }
                     }
+                }
+            }
+
+            if (symbol is IEventSymbol eventSymbol)
+            {
+                if (eventSymbol.IsAbstract)
+                {
+                    // TODO: remove a work around solution after the Roslyn issue https://github.com/dotnet/roslyn/issues/66966 is fixed
+                    EventFieldDeclarationSyntax eventDeclaration = (EventFieldDeclarationSyntax)syntaxGenerator.Declaration(symbol);
+                    return eventDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.AbstractKeyword));
+                }
+                else
+                {
+                    // adds generation of add & remove accessors for the non abstract events.
+                    return syntaxGenerator.CustomEventDeclaration(eventSymbol.Name,
+                        syntaxGenerator.TypeExpression(eventSymbol.Type),
+                        eventSymbol.DeclaredAccessibility,
+                        DeclarationModifiers.From(eventSymbol));
                 }
             }
 
@@ -77,25 +105,6 @@ namespace Microsoft.DotNet.GenAPI
             }
         }
 
-        private static ConstructorInitializerSyntax GenerateBaseConstructorInitializer(IMethodSymbol baseTypeConstructor)
-        {
-            ConstructorInitializerSyntax constructorInitializer = SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer);
-
-            foreach (IParameterSymbol parameter in baseTypeConstructor.Parameters)
-            {
-                IdentifierNameSyntax identifier;
-                // If the parameter's type is known to be a value type or has top-level nullability annotation
-                if (parameter.Type.IsValueType || parameter.NullableAnnotation == NullableAnnotation.Annotated)
-                    identifier = SyntaxFactory.IdentifierName("default");
-                else
-                    identifier = SyntaxFactory.IdentifierName("default!");
-
-                constructorInitializer = constructorInitializer.AddArgumentListArguments(SyntaxFactory.Argument(identifier));
-            }
-
-            return constructorInitializer;
-        }
-
         // Gets the list of base class and interfaces for a given symbol <see cref="INamedTypeSymbol"/>.
         private static BaseListSyntax? GetBaseTypeList(this SyntaxGenerator syntaxGenerator,
             INamedTypeSymbol type,
@@ -108,8 +117,10 @@ namespace Microsoft.DotNet.GenAPI
                 baseTypes.Add(SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(type.BaseType)));
             }
 
-            // includes only interfaces that were not filtered out by the given <see cref="ISymbolFilter"/>.
-            baseTypes.AddRange(type.Interfaces.Where(symbolFilter.Include).Select(i => SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(i))));
+            // includes only interfaces that were not filtered out by the given <see cref="ISymbolFilter"/> or none of TypeParameters were filtered out.
+            baseTypes.AddRange(type.Interfaces
+                .Where(i => symbolFilter.Include(i) && !i.HasInaccessibleTypeArgument(symbolFilter))
+                .Select(i => SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(i))));
             return baseTypes.Count > 0 ?
                 SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(baseTypes)) :
                 null;

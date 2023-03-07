@@ -186,8 +186,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android"});
 
-            IWorkloadInfoHelper workloadInfoHelper = new WorkloadInfoHelper(workloadResolver: workloadResolver);
-            WorkloadCommandParser.ShowWorkloadsInfo(workloadInfoHelper: workloadInfoHelper, reporter:_reporter);
+            IWorkloadInfoHelper workloadInfoHelper = new WorkloadInfoHelper(isInteractive: false, workloadResolver: workloadResolver);
+            WorkloadCommandParser.ShowWorkloadsInfo(parseResult, workloadInfoHelper: workloadInfoHelper, reporter:_reporter);
             _reporter.Lines.Should().Contain("There are no installed workloads to display.");
         }
 

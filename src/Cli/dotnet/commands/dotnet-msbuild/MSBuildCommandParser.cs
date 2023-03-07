@@ -29,7 +29,9 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 Arguments
             };
 
-            command.SetHandler((ParseResult parseResult) => MSBuildCommand.Run(parseResult.GetValue(Arguments)));
+            command.AddOption(CommonOptions.DisableBuildServersOption);
+
+            command.SetHandler(MSBuildCommand.Run);
 
             return command;
         }

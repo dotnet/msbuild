@@ -26,14 +26,14 @@ namespace dotnet.Tests
         }
 
         [Theory]
-        [InlineData("build")]
-        [InlineData("clean")]
-        [InlineData("pack")]
-        [InlineData("publish")]
-        [InlineData("test")]
-        public void OutputOptionGeneratesErrorsWithSolutionFiles(string command)
+        [InlineData("build", true)]
+        [InlineData("clean", true)]
+        [InlineData("pack", false)]
+        [InlineData("publish", true)]
+        [InlineData("test", true)]
+        public void OutputOptionGeneratesWarningsWithSolutionFiles(string command, bool shouldWarn)
         {
-            TestOutputWithSolution(command, true);
+            TestOutputWithSolution(command, useOption: true, shouldWarn: shouldWarn);
         }
 
         [Theory]
@@ -42,12 +42,12 @@ namespace dotnet.Tests
         [InlineData("pack")]
         [InlineData("publish")]
         [InlineData("test")]
-        public void OutputPathPropertyDoesNotGenerateErrorsWithSolutionFiles(string command)
+        public void OutputPathPropertyDoesNotGenerateWarningsWithSolutionFiles(string command)
         {
-            TestOutputWithSolution(command, false);
+            TestOutputWithSolution(command, useOption: false, shouldWarn: false);
         }
 
-        void TestOutputWithSolution(string command, bool useOption, [CallerMemberName] string callingMethod = "")
+        void TestOutputWithSolution(string command, bool useOption, bool shouldWarn, [CallerMemberName] string callingMethod = "")
         {
             var testProject = new TestProject()
             {
@@ -73,24 +73,27 @@ namespace dotnet.Tests
                 .Should().Pass();
 
             string outputDirectory = Path.Combine(slnDirectory, "bin");
-
+            Microsoft.DotNet.Cli.Utils.CommandResult commandResult;
             if (useOption)
             {
-                new DotnetCommand(Log)
+                commandResult = new DotnetCommand(Log)
                     .WithWorkingDirectory(slnDirectory)
-                    .Execute(command, "--output", outputDirectory)
-                    .Should()
-                    .Fail()
-                    .And
-                    .HaveStdOutContaining("NETSDK1194");
+                    .Execute(command, "--output", outputDirectory);
             }
             else
             {
-                new DotnetCommand(Log)
+                commandResult = new DotnetCommand(Log)
                     .WithWorkingDirectory(slnDirectory)
-                    .Execute(command, $"--property:OutputPath={outputDirectory}")
-                    .Should()
-                    .Pass();
+                    .Execute(command, $"--property:OutputPath={outputDirectory}");
+            }
+            commandResult.Should().Pass();
+            if (shouldWarn)
+            {
+                commandResult.Should().HaveStdOutContaining("NETSDK1194");
+            }
+            else
+            {
+                commandResult.Should().NotHaveStdOutContaining("NETSDK1194");
             }
         }
     }

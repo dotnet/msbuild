@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Theory]
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-r", "<rid>" }, "-property:RuntimeIdentifier=<rid> -property:_CommandLineDefinedRuntimeIdentifier=true")]
+        [InlineData(new string[] { "-r", "linux-amd64" }, "-property:RuntimeIdentifier=linux-x64 -property:_CommandLineDefinedRuntimeIdentifier=true")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "-property:RuntimeIdentifier=<rid> -property:_CommandLineDefinedRuntimeIdentifier=true")]
         [InlineData(new string[] { "--use-current-runtime" }, "-property:UseCurrentRuntimeIdentifier=True")]
         [InlineData(new string[] { "--ucr" }, "-property:UseCurrentRuntimeIdentifier=True")]

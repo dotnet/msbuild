@@ -708,4 +708,7 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="CorruptSolutionProjectFolderStructure" xml:space="preserve">
     <value>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</value>
   </data>
+  <data name="MSBuildAdditionalOptionTitle" xml:space="preserve">
+    <value>.NET Cli Options:</value>
+  </data>
 </root>

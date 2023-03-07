@@ -367,7 +367,7 @@ $@"<ItemGroup>
         }
 
         private static DotNetWatchOptions GetWatchOptions() => 
-            new DotNetWatchOptions(false, false, false, false, false, false);
+            new DotNetWatchOptions(false, false, false, false, false, TestFlags.None);
 
         private static string GetTestProjectPath(TestAsset target) => Path.Combine(GetTestProjectDirectory(target), target.TestProject.Name + ".csproj");
 

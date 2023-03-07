@@ -19,23 +19,21 @@ namespace Microsoft.DotNet.Watcher.Tests
         [Fact]
         public async Task LaunchesBrowserOnStart()
         {
-            var expected = "dotnet watch ⌚ Launching browser: https://localhost:5001/";
             var testAsset = TestAssets.CopyTestAsset(AppName)
                 .WithSource()
                 .Path;
 
             App.DotnetWatchArgs.Add("--verbose");
 
-            await App.StartWatcherAsync(testAsset);
+            await App.StartWatcherAsync(testAsset, testFlags: TestFlags.BrowserRequired);
 
             // Verify we launched the browser.
-            await App.AssertOutputLineStartsWith(expected);
+            await App.AssertOutputLineStartsWith("dotnet watch ⌚ Launching browser: https://localhost:5001/");
         }
 
         [Fact]
         public async Task UsesBrowserSpecifiedInEnvironment()
         {
-            var launchBrowserMessage = "dotnet watch ⌚ Launching browser: mycustombrowser.bat https://localhost:5001/";
             var testAsset = TestAssets.CopyTestAsset(AppName)
                 .WithSource()
                 .Path;
@@ -44,10 +42,10 @@ namespace Microsoft.DotNet.Watcher.Tests
 
             App.DotnetWatchArgs.Add("--verbose");
 
-            await App.StartWatcherAsync(testAsset);
+            await App.StartWatcherAsync(testAsset, testFlags: TestFlags.BrowserRequired);
 
             // Verify we launched the browser.
-            await App.AssertOutputLineStartsWith(launchBrowserMessage);
+            await App.AssertOutputLineStartsWith("dotnet watch ⌚ Launching browser: mycustombrowser.bat https://localhost:5001/");
         }
     }
 }
