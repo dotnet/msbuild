@@ -41,7 +41,9 @@ namespace Microsoft.DotNet.Cli.New.Tests
                 .Returns((IEnumerable<WorkloadId> workloadIds) => workloadIds.Select(w =>
                     new WorkloadResolver.WorkloadInfo(w, $"Description: {w.ToString()}")));
 
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet" });
             IWorkloadsRepositoryEnumerator workloadsEnumerator = new WorkloadInfoHelper(
+                isInteractive: false,
                 currentSdkVersion: "1.2.3",
                 workloadRecordRepo: repoMock.Object,
                 workloadResolver: resolverMock.Object);

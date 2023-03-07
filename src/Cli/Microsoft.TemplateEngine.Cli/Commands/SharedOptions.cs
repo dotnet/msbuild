@@ -17,6 +17,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", SymbolStrings.Option_ProjectPath).AcceptExistingOnly();
 
+        public static Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
+
         internal static Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption();
 
         internal static Option<string> NameOption { get; } = new Option<string>(new string[] { "-n", "--name" })

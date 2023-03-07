@@ -46,7 +46,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         private bool _verifySignatures;
 
-        public NuGetPackageDownloader(DirectoryPath packageInstallDir,
+        public NuGetPackageDownloader(
+            DirectoryPath packageInstallDir,
             IFilePermissionSetter filePermissionSetter = null,
             IFirstPartyNuGetPackageSigningVerifier firstPartyNuGetPackageSigningVerifier = null,
             ILogger verboseLogger = null,
