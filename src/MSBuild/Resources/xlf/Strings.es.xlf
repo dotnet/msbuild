@@ -150,16 +150,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="needs-review-translation">  -isolateProjects[:True|False]
-                     Hace que MSBuild compile cada proyecto en aislamiento.
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     Este es un modo de MSBuild más restrictivo ya que requiere
-                     que el grafo de proyecto se pueda detectar estáticamente en el
-                     momento de evaluación, pero puede mejorar la programación y reducir
-                     la sobrecarga de memoria al compilar un gran conjunto de proyectos.
-                     (Forma corta: -isolate)
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
-                     Este indicador es experimental y puede que no funcione como se espera.
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -660,11 +669,10 @@
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="needs-review-translation">  -inputResultsCaches:&lt;archivoCaché&gt;...
-                     Lista de archivos de caché de entrada, separados por punto y coma, de la que MSBuild
-                     leerá los resultados de la compilación.
-                     Si se establece esta opción, se activan también las compilaciones aisladas (-isolate).
-                     (Forma corta: -irc)
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -678,13 +686,11 @@
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="needs-review-translation">  -outputResultsCache:[archivo-de-caché]
-                     Archivo de caché de salida donde MSBuild escribe
-                     el contenido de las memorias caché de resultados
-                     de compilación cuando esta acaba.
-                     Si se establece esta opción, se activan también las
-                     compilaciones aisladas (-isolate).
-                     (Forma corta: -orc)
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
+                     (short form: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -756,8 +762,8 @@
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;extensiones&gt;
-                     Lista de extensiones que se omiten al determinar el
-                     archivo del proyecto que se va a compilar. Use el carácter de
+                     Lista de extensiones que se omiten al determinar el 
+                     archivo del proyecto que se va a compilar. Use el carácter de 
                      punto y coma o coma para separar varias extensiones.
                     (Forma corta: -ignore)
                      Ejemplo:
@@ -908,9 +914,9 @@
                             sobrescribirá el archivo de registro. Si se establece el
                             modificador, se adjunta el registro de compilación al archivo de registro;
                             Si no se especifica el modificador, se sobrescribe
-                            el contenido del archivo de registro existente.
+                            el contenido del archivo de registro existente. 
                             El valor predeterminado es adjuntar el archivo de registro.
-                        Encoding: especifica la codificación del archivo,
+                        Encoding: especifica la codificación del archivo, 
                             por ejemplo, UTF-8, Unicode o ASCII
                      El nivel de detalle predeterminado es Detailed.
                      Ejemplos:
@@ -1041,7 +1047,7 @@
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1056: El valor de los proyectos aislados no es válido. {0}.</target>
+        <target state="translated">MSBUILD : error MSB1056: El valor de los proyectos aislados no es válido. {0}.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

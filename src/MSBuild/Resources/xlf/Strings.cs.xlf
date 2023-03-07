@@ -150,16 +150,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="needs-review-translation">  -isolateProjects[:True|False]
-                     Způsobí, že MSBuild sestaví jednotlivé projekty izolovaně.
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     Jde o omezenější režim nástroje MSBuild, protože vyžaduje,
-                     aby byl graf projektu staticky zjistitelný v okamžiku
-                     vyhodnocení, může ale vylepšit plánování a snížit
-                     režii paměti při sestavování velké sady projektů.
-                     (Krátký tvar: -isolate)
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
-                     Tento příznak je experimentální a nemusí fungovat tak, jak byl zamýšlen.
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -345,9 +354,9 @@
         <target state="translated">  @&lt;soubor&gt;            Vložení nastavení příkazového řádku z textového souboru. Chcete-li zadat
                      více souborů odpovědí, uveďte každý soubor
                      odpovědí zvlášť.
-
-                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp
-                     nacházející se v následujících umístěních:
+                     
+                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp 
+                     nacházející se v následujících umístěních: 
                      (1) adresář nástroje msbuild.exe
                      (2) adresář prvního sestaveného projektu nebo řešení
 </target>
@@ -408,7 +417,7 @@
 </source>
         <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Nastavení nebo potlačení daných vlastností na úrovni
                      projektu. &lt;n&gt; je název vlastnosti a &lt;v&gt; je její hodnota. Více
-                     vlastností oddělte středníkem či čárkou nebo zadejte
+                     vlastností oddělte středníkem či čárkou nebo zadejte 
                      každou vlastnost zvlášť. (Krátký tvar: -p)
                      Příklad:
                        -property:WarningLevel=2;OutDir=bin\Debug\
@@ -449,7 +458,7 @@
                      Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
                         {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
+                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
                      protokolovacímu nástroji přesně v tom tvaru, v jakém
                      byly zadány. (Krátký tvar: -l)
                      Příklady:
@@ -596,10 +605,10 @@
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu.
+        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu. 
                      (Krátký tvar: -val)
 
-  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu.
+  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu. 
                      (Krátký tvar: -val)
                      Příklad:
                        -validate:MyExtendedBuildSchema.xsd
@@ -659,11 +668,10 @@
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="needs-review-translation">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Seznam středníkem oddělených vstupních souborů mezipaměti, ze kterých
-                     MSBuild přečte výsledky sestavení.
-                     Nastavení tohoto atributu zároveň zapne izolované buildy (-isolate).
-                     (Krátký tvar: -irc)
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -677,11 +685,11 @@
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="needs-review-translation">  -outputResultsCache:[souborMezipaměti]...
-                     Výstupní soubor mezipaměti, do něhož bude MSBuild
-                     zapisovat obsah svých mezipamětí výsledků sestavení.
-                     Nastavením této možnosti zapnete také izolované buildy (-isolate).
-                     (krátký tvar: -orc)
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
+                     (short form: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -713,11 +721,11 @@
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;
+        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
                      Použít zadaný protokolovací nástroj pro protokolování událostí
-                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci
-                     protokolovacího nástroje. Chcete-li zadat více
-                     protokolovacích nástrojů, uveďte je jednotlivě.
+                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
+                     protokolovacího nástroje. Chcete-li zadat více 
+                     protokolovacích nástrojů, uveďte je jednotlivě. 
                      (Krátký tvar: -dl)
                      Syntaxe hodnoty &lt;protok_nást&gt;:
                         [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
@@ -781,7 +789,7 @@
         <target state="translated">  -toolsversion:&lt;verze&gt;
                      Verze sady nástrojů MSBuild (úloh, cílů apod.), která má být
                      použita při sestavení. Tato verze má přednost před verzemi
-                     uvedenými v jednotlivých projektech.
+                     uvedenými v jednotlivých projektech. 
                      (Krátký tvar: -tv)
                      Příklad:
                        -toolsversion:3.5
@@ -899,25 +907,25 @@
                      popis přepínače -distributedFileLogger.
                      (Krátký tvar: -flp[n])
                      K dispozici jsou stejné parametry jako ty,
-                     které jsou uvedeny u protokolovacího nástroje
+                     které jsou uvedeny u protokolovacího nástroje 
                      konzoly. Některé další dostupné parametry:
                        LogFile – cesta k souboru protokolu, do nějž bude zapsán
-                                  protokol sestavení
+                                  protokol sestavení 
                        Append  – určuje, zda bude protokol sestavení připojen
-                                  k souboru protokolu, nebo jej přepíše. Při nastavení
+                                  k souboru protokolu, nebo jej přepíše. Při nastavení 
                                   přepínače bude protokol sestavení připojen k souboru
-                                  protokolu. Není-li přepínač nastaven, bude obsah
-                                  existujícího souboru protokolu přepsán.
+                                  protokolu. Není-li přepínač nastaven, bude obsah 
+                                  existujícího souboru protokolu přepsán. 
                                   Podle výchozího nastavení je soubor protokolu přepsán.
-                       Encoding – určuje kódování souboru, například
+                       Encoding – určuje kódování souboru, například 
                      UTF-8, Unicode nebo ASCII.
                        Výchozí úroveň podrobností je Detailed.
                      Příklady:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                              Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1040,7 +1048,7 @@
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1056: Hodnota izolace projektů není platná. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: Hodnota izolace projektů není platná. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
