@@ -231,7 +231,11 @@ namespace Microsoft.DotNet.Watcher
                 }
                 catch (Exception e)
                 {
-                    _reporter.Verbose($"Caught top-level exception from hot reload: {e}");
+                    if (e is not OperationCanceledException)
+                    {
+                        _reporter.Verbose($"Caught top-level exception from hot reload: {e}");
+                    }
+
                     if (!currentRunCancellationSource.IsCancellationRequested)
                     {
                         currentRunCancellationSource.Cancel();
