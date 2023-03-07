@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -441,6 +442,14 @@ namespace Microsoft.Build.Evaluation
 
                         listNode = nextNode;
                     }
+
+                    // From weak list remove all which is not in strong list anymore
+                    IList<string> toBeRemovedFromWeakRefs = _weakCache.Keys.Except(_strongCache.Select(i => i.FullPath)).ToList();
+                    foreach (string victim in toBeRemovedFromWeakRefs)
+                    {
+                        _weakCache.Remove(victim);
+                    }
+                    _weakCache.Scavenge();
                 }
             }
         }
