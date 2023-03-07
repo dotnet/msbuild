@@ -15,8 +15,8 @@ Paths searched: '{1}', '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Removes workload components from this SDK feature band that may have been left behind from previous updates and uninstallations.</source>
-        <target state="new">Removes workload components from this SDK feature band that may have been left behind from previous updates and uninstallations.</target>
+        <source>Removes workload components that may have been left behind from previous updates and uninstallations.</source>
+        <target state="new">Removes workload components that may have been left behind from previous updates and uninstallations.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">

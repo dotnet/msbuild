@@ -121,7 +121,7 @@
     <value>Causes clean to remove and uninstall all workload components from all SDK versions.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Removes workload components from this SDK feature band that may have been left behind from previous updates and uninstallations.</value>
+    <value>Removes workload components that may have been left behind from previous updates and uninstallations.</value>
   </data>
   <data name="VSWorkloadNotRemoved" xml:space="preserve">
     <value>Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</value>

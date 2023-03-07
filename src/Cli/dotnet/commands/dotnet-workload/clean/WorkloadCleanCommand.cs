@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), _userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
             _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, _workloadResolver, Verbosity, _userProfileDir, VerifySignatures, PackageDownloader, _dotnetPath);
-            
+
         }
 
         public override int Execute()
@@ -66,15 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
 
         private void ExecuteGarbageCollection()
         {
-            if (_cleanAll)
-            {
-                _workloadInstaller.GarbageCollectInstalledWorkloadPacks(cleanAllPacks: true);
-            }
-            else
-            {
-                _workloadInstaller.GarbageCollectInstalledWorkloadPacks();
-            }
-
+            _workloadInstaller.GarbageCollectInstalledWorkloadPacks(cleanAllPacks: _cleanAll);
             DisplayUninstallableVSWorkloads();
         }
 
@@ -100,7 +92,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
                         // We don't know if the dotnet installation for the other bands is in a different directory than the current dotnet; check the default directory if it isn't.
                         var bandedDotnetPath = Path.Exists(Path.Combine(_dotnetPath, "sdk", sdkVersion)) ? _dotnetPath : defaultDotnetWinPath;
 
-                        if(!Path.Exists(bandedDotnetPath))
+                        if (!Path.Exists(bandedDotnetPath))
                         {
                             Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, sdkVersion, _dotnetPath, defaultDotnetWinPath)));
                             continue;
@@ -126,7 +118,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
                     }
                 }
 
-                foreach(string warning in vsWorkloadUninstallWarnings)
+                foreach (string warning in vsWorkloadUninstallWarnings)
                 {
                     Reporter.WriteLine(warning.Yellow());
                 }

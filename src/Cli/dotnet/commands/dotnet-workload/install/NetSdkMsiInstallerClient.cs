@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 if (cleanAllPacks)
                 {
-                    EradicateAllWorkloadInstallationRecords(_sdkFeatureBand);
+                    DeleteAllWorkloadInstallationRecords();
                 }
             }
             catch (Exception e)
@@ -304,7 +304,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void EradicateAllWorkloadInstallationRecords(SdkFeatureBand currentFeatureBand)
+        /// <summary>
+        /// Remove all workload installation records that aren't from Visual Studio.
+        /// </summary>
+        private void DeleteAllWorkloadInstallationRecords()
         {
             var allFeatureBands = RecordRepository.GetFeatureBandsWithInstallationRecords();
 
@@ -313,8 +316,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             foreach (SdkFeatureBand potentialBandToClean in allFeatureBands)
             {
                 Log?.LogMessage($"Detected band with installation record: '{potentialBandToClean}'.");
-
-                Log?.LogMessage($"'{potentialBandToClean}' is confirmed to be less than or current to the current band.");
 
                 var workloadInstallationRecordIds = RecordRepository.GetInstalledWorkloads(potentialBandToClean);
                 foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
