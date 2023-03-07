@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 while (!progressCancellationSource.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(_options.RunningAsTest ? TimeSpan.MaxValue : TimeSpan.FromSeconds(5), progressCancellationSource.Token);
+                    await Task.Delay(_options.TestFlags != TestFlags.None ? TimeSpan.MaxValue : TimeSpan.FromSeconds(5), progressCancellationSource.Token);
                     _reporter.Warn("Connecting to the browser is taking longer than expected ...");
                 }
             }, progressCancellationSource.Token);
