@@ -29,16 +29,9 @@ namespace Microsoft.DotNet.Cli
             return Command;
         }
 
-        internal static void ShowWorkloadsInfo(ParseResult parseResult = null, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null)
+        internal static void ShowWorkloadsInfo(ParseResult parseResult, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null)
         {
-            if(workloadInfoHelper != null)
-            {
-                workloadInfoHelper ??= new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption));
-            }
-            else
-            {
-                workloadInfoHelper ??= new WorkloadInfoHelper(false);
-            }
+            workloadInfoHelper ??= new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption));
             IEnumerable<WorkloadId> installedList = workloadInfoHelper.InstalledSdkWorkloadIds;
             InstalledWorkloadsCollection installedWorkloads = workloadInfoHelper.AddInstalledVsWorkloads(installedList);
             reporter ??= Cli.Utils.Reporter.Output;

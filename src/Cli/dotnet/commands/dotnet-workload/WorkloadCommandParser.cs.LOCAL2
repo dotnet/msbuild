@@ -29,16 +29,9 @@ namespace Microsoft.DotNet.Cli
             return Command;
         }
 
-        internal static void ShowWorkloadsInfo(ParseResult parseResult = null, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null)
+        internal static void ShowWorkloadsInfo(ParseResult parseResult, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null)
         {
-            if(workloadInfoHelper != null)
-            {
-                workloadInfoHelper ??= new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption));
-            }
-            else
-            {
-                workloadInfoHelper ??= new WorkloadInfoHelper(false);
-            }
+            workloadInfoHelper ??= new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption));
             IEnumerable<WorkloadId> installedList = workloadInfoHelper.InstalledSdkWorkloadIds;
             InstalledWorkloadsCollection installedWorkloads = workloadInfoHelper.AddInstalledVsWorkloads(installedList);
             reporter ??= Cli.Utils.Reporter.Output;
@@ -83,9 +76,6 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.HasOption(InfoOption) && parseResult.RootSubCommandResult() == "workload")
             {
                 ShowWorkloadsInfo(parseResult);
-                IReporter reporter = null;
-                reporter ??= Cli.Utils.Reporter.Output;
-                reporter.WriteLine("");
                 return 0;
             }
             return parseResult.HandleMissingCommand();
