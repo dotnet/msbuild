@@ -1,7 +1,7 @@
 ﻿const Microsoft.NET.Build.Containers.KnownDaemonTypes.Docker = "Docker" -> string!
 Microsoft.NET.Build.Containers.BaseImageNotFoundException
 Microsoft.NET.Build.Containers.Constants
-static Microsoft.NET.Build.Containers.ContainerBuilder.ContainerizeAsync(System.IO.DirectoryInfo! folder, string! workingDir, string! registryName, string! baseName, string! baseTag, string![]! entrypoint, string![]? entrypointArgs, string! imageName, string![]! imageTags, string? outputRegistry, string![]? labels, Microsoft.NET.Build.Containers.Port[]? exposedPorts, string![]? envVars, string! containerRuntimeIdentifier, string! ridGraphPath, string! localContainerDaemon, string? containerUser, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+static Microsoft.NET.Build.Containers.ContainerBuilder.ContainerizeAsync(System.IO.DirectoryInfo! folder, string! workingDir, string! registryName, string! baseName, string! baseTag, string![]! entrypoint, string![]? entrypointArgs, string! imageName, string![]! imageTags, string? outputRegistry, System.Collections.Generic.Dictionary<string!, string!>! labels, Microsoft.NET.Build.Containers.Port[]? exposedPorts, System.Collections.Generic.Dictionary<string!, string!>! envVars, string! containerRuntimeIdentifier, string! ridGraphPath, string! localContainerDaemon, string? containerUser, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 static readonly Microsoft.NET.Build.Containers.Constants.Version -> string!
 Microsoft.NET.Build.Containers.ContainerBuilder
 Microsoft.NET.Build.Containers.ContainerHelpers

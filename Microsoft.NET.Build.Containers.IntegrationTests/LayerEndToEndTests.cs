@@ -145,7 +145,7 @@ public sealed class LayerEndToEndTests : IDisposable
     }
     
     
-    private static IDictionary<string, TarEntry> LoadAllTarEntries(string file)
+    private static Dictionary<string, TarEntry> LoadAllTarEntries(string file)
     {
         using var gzip = new GZipStream(File.OpenRead(file), CompressionMode.Decompress);
         using var tar = new TarReader(gzip);

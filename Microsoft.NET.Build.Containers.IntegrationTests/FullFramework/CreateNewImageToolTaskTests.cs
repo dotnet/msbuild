@@ -228,6 +228,14 @@ public class CreateNewImageToolTaskTests
                                       --labels "NoValue=\"\"" "Valid1=\"Val1\"" "Valid12=\"Val2\"" "Valid12=\"\""
                                       """, args);
         Assert.Equal("Items 'Labels' contain empty item(s) which will be ignored.", Assert.Single(warnings));
+
+        string workDir = GetPathToContainerize();
+
+        new BasicCommand(_testOutput, "dotnet", args)
+            .WithRawArguments()
+            .WithWorkingDirectory(workDir)
+            .Execute().Should().Fail()
+            .And.NotHaveStdOutContaining("Description:"); //standard help output for parse error
     }
 
     [Fact]
@@ -264,6 +272,14 @@ public class CreateNewImageToolTaskTests
                                       --environmentvariables "NoValue=\"\"" "Valid1=\"Val1\"" "Valid12=\"Val2\"" "Valid12=\"\""
                                       """, args);
         Assert.Equal("Items 'ContainerEnvironmentVariables' contain empty item(s) which will be ignored.", Assert.Single(warnings));
+
+        string workDir = GetPathToContainerize();
+
+        new BasicCommand(_testOutput, "dotnet", args)
+            .WithRawArguments()
+            .WithWorkingDirectory(workDir)
+            .Execute().Should().Fail()
+            .And.NotHaveStdOutContaining("Description:"); //standard help output for parse error
     }
 
 
@@ -301,6 +317,14 @@ public class CreateNewImageToolTaskTests
                                       --entrypointargs Valid1 Valid2 "Quoted item"
                                       """, args);
         Assert.Equal("Items 'EntrypointArgs' contain empty item(s) which will be ignored.", Assert.Single(warnings));
+
+        string workDir = GetPathToContainerize();
+
+        new BasicCommand(_testOutput, "dotnet", args)
+            .WithRawArguments()
+            .WithWorkingDirectory(workDir)
+            .Execute().Should().Fail()
+            .And.NotHaveStdOutContaining("Description:"); //standard help output for parse error
     }
 
     [Fact]
@@ -330,6 +354,14 @@ public class CreateNewImageToolTaskTests
                                       --imagetags Valid1 "To be quoted"
                                       """, actualString: args);
         Assert.Equal("Property 'ImageTags' is empty or contains whitespace and will be ignored.", Assert.Single(warnings));
+
+        string workDir = GetPathToContainerize();
+
+        new BasicCommand(_testOutput, "dotnet", args)
+            .WithRawArguments()
+            .WithWorkingDirectory(workDir)
+            .Execute().Should().Fail()
+            .And.NotHaveStdOutContaining("Description:"); //standard help output for parse error
     }
 
     [Fact]
@@ -356,17 +388,25 @@ public class CreateNewImageToolTaskTests
             new TaskItem("1500"),
             new TaskItem(" "),
             new TaskItem("1501", new Dictionary<string, string>() {{ "Type", "udp" }}),
+            new TaskItem("1501", new Dictionary<string, string>() {{ "Type", "tcp" }}),
             new TaskItem("1502", new Dictionary<string, string>() {{ "Type", "tcp" }}),
-            new TaskItem("1503", new Dictionary<string, string>() {{ "Type", "" }}),
-            new TaskItem("1504", new Dictionary<string, string>() {{ "Type", "smth-else" }}),
+            new TaskItem("1503", new Dictionary<string, string>() {{ "Type", "" }})
         };
 
         string args = task.GenerateCommandLineCommandsInt();
 
         Assert.Contains("""
-                                      --ports 1500 1501/udp 1502/tcp 1503 1504/smth-else
+                                      --ports 1500 1501/udp 1501/tcp 1502/tcp 1503
                                       """, args);
         Assert.Equal("Items 'ExposedPorts' contain empty item(s) which will be ignored.", Assert.Single(warnings));
+
+        string workDir = GetPathToContainerize();
+
+        new BasicCommand(_testOutput, "dotnet", args)
+            .WithRawArguments()
+            .WithWorkingDirectory(workDir)
+            .Execute().Should().Fail()
+            .And.NotHaveStdOutContaining("Description:"); //standard help output for parse error
     }
 
     private static string GetPathToContainerize()
