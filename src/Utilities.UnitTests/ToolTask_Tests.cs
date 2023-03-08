@@ -834,9 +834,9 @@ namespace Microsoft.Build.UnitTests
         /// <param name="followupDelay">Delay to generate on follow-up execution in milliseconds.</param>
         /// <param name="timeout">Task timeout in milliseconds.</param>
         /// <remarks>
-        /// These tests execute the same task instance multiple times, which will in turn run  a PowerShell command to
-        /// sleep predefined amount of time. The first execution may time out, but all following ones won't. It is
-        /// expected that all following executions return success.
+        /// These tests execute the same task instance multiple times, which will in turn run a shell command to sleep
+        /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
+        /// that all following executions return success.
         /// </remarks>
         [Theory]
         [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
@@ -847,7 +847,7 @@ namespace Microsoft.Build.UnitTests
             using var env = TestEnvironment.Create(_output);
 
             // Task under test:
-            var task = new ToolTaskThatRetry
+            var task = new ToolTaskThatSleeps
             {
                 BuildEngine = new MockEngine(),
                 InitialDelay = initialDelay,
@@ -873,23 +873,28 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A simple implementation of <see cref="ToolTask"/> to run PowerShell to generate programmable delay.
+        /// A simple implementation of <see cref="ToolTask"/> to sleep for a while.
         /// </summary>
         /// <remarks>
-        /// This task to run PowerShell "Start-Sleep" command to delay for predefined, variable amount of time based on
-        /// how many times the instance has been executed.
+        /// This task runs shell command to sleep for predefined, variable amount of time based on how many times the
+        /// instance has been executed.
         /// </remarks>
-        private sealed class ToolTaskThatRetry : ToolTask
+        private sealed class ToolTaskThatSleeps : ToolTask
         {
-            // Test with PowerShell to generate a programmable delay:
-            private readonly string _powerShell = "PowerShell.exe";
-
             // PowerShell command to sleep:
-            private readonly string _sleepCommand = "-ExecutionPolicy RemoteSigned -Command \"Start-Sleep -Milliseconds {0}\"";
+            private readonly string _powerShellSleep = "-ExecutionPolicy RemoteSigned -Command \"Start-Sleep -Milliseconds {0}\"";
 
-            public ToolTaskThatRetry()
+            // UNIX command to sleep:
+            private readonly string _unixSleep = "-c \"sleep {0}\"";
+
+            // Full path to shell:
+            private readonly string _pathToShell;
+
+            public ToolTaskThatSleeps()
                 : base()
             {
+                // Determines shell to use: PowerShell for Windows, sh for UNIX-like systems:
+                _pathToShell = NativeMethodsShared.IsUnixLike ? "/bin/sh" : FindOnPath("PowerShell.exe");
             }
 
             /// <summary>
@@ -909,29 +914,28 @@ namespace Microsoft.Build.UnitTests
             public Int32 FollowupDelay { get; set; } = 1;
 
             /// <summary>
-            /// Int32 output parameter for the execution repeat counter for test purpose.
+            /// Int32 output parameter for the repeat counter for test purpose.
             /// </summary>
             [Output]
             public Int32 RepeatCount { get; private set; } = 0;
 
             /// <summary>
-            /// Gets the tool name (PowerShell).
+            /// Gets the tool name (shell).
             /// </summary>
-            protected override string ToolName => _powerShell;
+            protected override string ToolName => Path.GetFileName(_pathToShell);
 
             /// <summary>
-            /// Search path for PowerShell.
+            /// Gets the full path to shell.
             /// </summary>
-            /// <remarks>
-            /// This only works on Windows.
-            /// </remarks>
-            protected override string GenerateFullPathToTool() => FindOnPath(_powerShell);
+            protected override string GenerateFullPathToTool() => _pathToShell;
 
             /// <summary>
-            /// Generate a PowerShell command to sleep different amount of time based on execution counter.
+            /// Generates a shell command to sleep different amount of time based on repeat counter.
             /// </summary>
             protected override string GenerateCommandLineCommands() =>
-                string.Format(_sleepCommand, RepeatCount < 2 ? InitialDelay : FollowupDelay);
+                NativeMethodsShared.IsUnixLike ?
+                string.Format(_unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
+                string.Format(_powerShellSleep, RepeatCount < 2 ? InitialDelay : FollowupDelay);
 
             /// <summary>
             /// Ensures that test parameters make sense.
@@ -940,7 +944,7 @@ namespace Microsoft.Build.UnitTests
                 (InitialDelay > 0) && (FollowupDelay > 0) && base.ValidateParameters();
 
             /// <summary>
-            /// Runs external command (PowerShell) to generate programmable delay.
+            /// Runs shell command to sleep for a while.
             /// </summary>
             /// <returns>
             /// true if the task runs successfully; false otherwise.
