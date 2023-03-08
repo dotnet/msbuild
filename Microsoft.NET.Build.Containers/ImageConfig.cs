@@ -26,6 +26,7 @@ internal sealed class ImageConfig
     private readonly string _architecture;
     private readonly string _os;
     private readonly List<HistoryEntry> _history;
+    private bool _omitHistory;
 
     /// <summary>
     /// Gets a value indicating whether the base image is has a Windows operating system.
@@ -134,6 +135,11 @@ internal sealed class ImageConfig
             ["history"] = new JsonArray(_history.Select(CreateHistory).ToArray()),
         };
 
+        if (_omitHistory)
+        {
+            configContainer.Remove("history");
+        }
+
         return configContainer.ToJsonString();
 
         static JsonArray ToJsonArray(IEnumerable<string> items) => new(items.Where(s => !string.IsNullOrEmpty(s)).Select(s => JsonValue.Create(s)).ToArray());
@@ -200,6 +206,12 @@ internal sealed class ImageConfig
     }
 
     internal void SetUser(string user) => _user = user;
+
+
+    public void SetOmitHistory(bool omitHistory)
+    {
+        _omitHistory = omitHistory;
+    }
 
     private HashSet<Port> GetExposedPorts()
     {

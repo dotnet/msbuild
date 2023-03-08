@@ -32,6 +32,8 @@ Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerRuntimeIdentifier.g
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerRuntimeIdentifier.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerUser.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerUser.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerOmitHistory.get -> bool
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerOmitHistory.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.CreateNewImage() -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Entrypoint.get -> Microsoft.Build.Framework.ITaskItem![]!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Entrypoint.set -> void

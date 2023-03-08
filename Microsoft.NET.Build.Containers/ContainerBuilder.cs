@@ -26,6 +26,7 @@ public static class ContainerBuilder
         string ridGraphPath,
         string localContainerDaemon,
         string? containerUser,
+        bool containerOmitHistory,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -82,6 +83,8 @@ public static class ContainerBuilder
         {
             imageBuilder.SetUser(user);
         }
+
+        imageBuilder.SetOmitHistory(containerOmitHistory);
 
         BuiltImage builtImage = imageBuilder.Build();
 

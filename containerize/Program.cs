@@ -164,7 +164,10 @@ var ridOpt = new Option<string>(name: "--rid", description: "Runtime Identifier 
 
 var ridGraphPathOpt = new Option<string>(name: "--ridgraphpath", description: "Path to the RID graph file.");
 
-var containerUserOpt = new Option<string>(name: "--container-user", description: "User to run the container as.");
+var containerUserOpt = new Option<string>(name: "--container-user", description: "Whether to omit the history from the container configuration.");
+var containerOmitHistoryOpt = new Option<bool>(name: "--container-omit-history",
+    description: "Whether to omit the history from the container configuration.",
+    getDefaultValue: () => false);
 
 RootCommand root = new RootCommand("Containerize an application without Docker.")
 {
@@ -206,6 +209,7 @@ root.SetHandler(async (context) =>
     string _ridGraphPath = context.ParseResult.GetValueForOption(ridGraphPathOpt)!;
     string _localContainerDaemon = context.ParseResult.GetValueForOption(localContainerDaemonOpt)!;
     string? _containerUser = context.ParseResult.GetValueForOption(containerUserOpt);
+    bool _containerOmitHistory = context.ParseResult.GetValueForOption(containerOmitHistoryOpt);
     await ContainerBuilder.ContainerizeAsync(
         _publishDir,
         _workingDir,
@@ -224,6 +228,7 @@ root.SetHandler(async (context) =>
         _ridGraphPath,
         _localContainerDaemon,
         _containerUser,
+        _containerOmitHistory,
         context.GetCancellationToken()).ConfigureAwait(false);
 });
 

@@ -123,6 +123,13 @@ partial class CreateNewImage
     /// </summary>
     public string ContainerUser { get; set; }
 
+    /// <summary>
+    /// Whether to omit the history from the container configuration which might be required for
+    /// registry compatibility as the default generated history is not a fully valid one to create
+    /// reproducible builds.
+    /// </summary>
+    public bool ContainerOmitHistory { get; set; }
+
     [Output]
     public string GeneratedContainerManifest { get; set; }
 
@@ -151,6 +158,7 @@ partial class CreateNewImage
         RuntimeIdentifierGraphPath = "";
         LocalContainerDaemon = "";
         ContainerUser = "";
+        ContainerOmitHistory = false;
 
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";
