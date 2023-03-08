@@ -83,9 +83,7 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.HasOption(InfoOption) && parseResult.RootSubCommandResult() == "workload")
             {
                 ShowWorkloadsInfo(parseResult);
-                IReporter reporter = null;
-                reporter ??= Cli.Utils.Reporter.Output;
-                reporter.WriteLine("");
+                Cli.Utils.Reporter.Output.WriteLine("");
                 return 0;
             }
             return parseResult.HandleMissingCommand();
