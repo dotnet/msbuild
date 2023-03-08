@@ -60,7 +60,7 @@ namespace Microsoft.NET.Publish.Tests
             }
 
             testProject.ReferencedProjects.Add(testLibraryProject);
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "9.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("System.Data.SqlClient", "4.4.3"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework + withoutCopyingRefs);
@@ -335,6 +335,9 @@ System.Collections.Immutable.dll
 System.ComponentModel.dll
 System.ComponentModel.Annotations.dll
 System.Console.dll
+System.Collections.NonGeneric.dll
+System.ComponentModel.Primitives.dll
+System.ComponentModel.TypeConverter.dll
 System.Data.Common.dll
 System.Data.SqlClient.dll
 System.Diagnostics.Debug.dll
@@ -382,6 +385,7 @@ System.Runtime.InteropServices.dll
 System.Runtime.InteropServices.RuntimeInformation.dll
 System.Runtime.Numerics.dll
 System.Runtime.Serialization.Primitives.dll
+System.Runtime.Serialization.Formatters.dll
 System.Security.Cryptography.Algorithms.dll
 System.Security.Cryptography.Encoding.dll
 System.Security.Cryptography.OpenSsl.dll
@@ -401,6 +405,7 @@ System.Threading.ThreadPool.dll
 System.Threading.Timer.dll
 System.Xml.ReaderWriter.dll
 System.Xml.XDocument.dll
+System.Xml.XmlDocument.dll
 TestLibrary.dll"
             },
             {
