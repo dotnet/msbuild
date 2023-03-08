@@ -326,8 +326,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 }
 
                                 // Mark the pack record for garbage collection if the pack has no corresponding workload installation record and has the current SDK feature band.
-                                var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
-                                if (thisRecordFeatureBand.Equals(_sdkFeatureBand) && !currentBandInstallRecords.Contains(currentBandRecordPath))
+                                if (thisRecordFeatureBand.Equals(_sdkFeatureBand) && !currentBandInstallRecords.Contains(recordPath))
                                 {
                                     return true;
                                 }

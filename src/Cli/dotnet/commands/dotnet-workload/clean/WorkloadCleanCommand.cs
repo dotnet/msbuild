@@ -76,6 +76,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
         private void DisplayUninstallableVSWorkloads()
         {
 #if !DOT_NET_BUILD_FROM_SOURCE
+            // We don't want to print MSI related content in a file-based installation.
+            if (!(_workloadInstaller.GetType() == typeof(NetSdkMsiInstallerClient)))
+            {
+                return;
+            }
+
             if (OperatingSystem.IsWindows())
             {
                 // All VS Workloads should have a corresponding MSI based SDK. This means we can pull all of the VS SDK feature bands using MSI/VS related registry keys.
