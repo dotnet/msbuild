@@ -121,4 +121,28 @@ public class TargetsTests
         };
     }
 
+    [InlineData("7.0.100", "7.0", "7.0")]
+    [InlineData("7.0.100-preview.7", "7.0", "7.0")]
+    [InlineData("7.0.100-rc.1", "7.0", "7.0")]
+    [InlineData("8.0.100", "8.0", "8.0")]
+    [InlineData("8.0.100", "7.0", "7.0")]
+    [InlineData("8.0.100-preview.7", "8.0", "8.0-preview.7")]
+    [InlineData("8.0.100-rc.1", "8.0", "8.0-rc.1")]
+    [InlineData("8.0.100-rc.1", "7.0", "7.0")]
+    [InlineData("6.0.100", "6.0", "6.0")]
+    [InlineData("6.0.100-preview.1", "6.0", "6.0")]
+    [Theory]
+    public void CanComputeTagsForSupportedSDKVersions(string sdkVersion, string tfm, string expectedTag)
+    {
+        var (project, logger) = ProjectInitializer.InitProject(new()
+        {
+            ["NETCoreSdkVersion"] = sdkVersion,
+            ["_TargetFrameworkVersionWithoutV"] = tfm,
+            ["PublishProfile"] = "DefaultContainer"
+        }, projectName: $"{nameof(CanComputeTagsForSupportedSDKVersions)}_{sdkVersion}_{tfm}_{expectedTag}");
+        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        instance.Build(new[]{"_ComputeContainerBaseImageTag"}, null, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
+        var computedTag = instance.GetProperty("_ContainerBaseImageTag").EvaluatedValue;
+        computedTag.Should().Be(expectedTag);
+    }
 }
