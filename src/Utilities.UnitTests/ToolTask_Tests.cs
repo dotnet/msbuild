@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
                 StartInfo = GetProcessStartInfo(GenerateFullPathToTool(), NativeMethodsShared.IsWindows ? "/x" : string.Empty, null);
                 return result;
             }
-        };
+        }
 
         [Fact]
         public void Regress_Mutation_UserSuppliedToolPathIsLogged()
@@ -823,6 +823,132 @@ namespace Microsoft.Build.UnitTests
             protected override string GenerateCommandLineCommands()
             {
                 return $"echo łoł > {OutputPath}";
+            }
+        }
+
+        /// <summary>
+        /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
+        /// </summary>
+        /// <param name="repeats">Specifies the number of repeats for external command execution.</param>
+        /// <param name="initialDelay">Delay to generate on the first execution in milliseconds.</param>
+        /// <param name="followupDelay">Delay to generate on follow-up execution in milliseconds.</param>
+        /// <param name="timeout">Task timeout in milliseconds.</param>
+        /// <remarks>
+        /// These tests execute the same task instance multiple times, which will in turn run  a PowerShell command to
+        /// sleep predefined amount of time. The first execution may time out, but all following ones won't. It is
+        /// expected that all following executions return success.
+        /// </remarks>
+        [Theory]
+        [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
+        [InlineData(3, 1, 1, -1)] // Repeat without timeout.
+        [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
+        public void ToolTaskThatTimeoutAndRetry(int repeats, int initialDelay, int followupDelay, int timeout)
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            // Task under test:
+            var task = new ToolTaskThatRetry
+            {
+                BuildEngine = new MockEngine(),
+                InitialDelay = initialDelay,
+                FollowupDelay = followupDelay,
+                Timeout = timeout
+            };
+
+            // Execute the same task instance multiple times. The index is one-based.
+            bool result;
+            for (int i = 1; i <= repeats; i++)
+            {
+                // Execute the task:
+                result = task.Execute();
+                task.RepeatCount.ShouldBe(i);
+
+                // The first execution may fail (timeout), but all following ones should succeed:
+                if (i > 1)
+                {
+                    result.ShouldBeTrue();
+                    task.ExitCode.ShouldBe(0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// A simple implementation of <see cref="ToolTask"/> to run PowerShell to generate programmable delay.
+        /// </summary>
+        /// <remarks>
+        /// This task to run PowerShell "Start-Sleep" command to delay for predefined, variable amount of time based on
+        /// how many times the instance has been executed.
+        /// </remarks>
+        private sealed class ToolTaskThatRetry : ToolTask
+        {
+            // Test with PowerShell to generate a programmable delay:
+            private readonly string _powerShell = "PowerShell.exe";
+
+            // PowerShell command to sleep:
+            private readonly string _sleepCommand = "-ExecutionPolicy RemoteSigned -Command \"Start-Sleep -Milliseconds {0}\"";
+
+            public ToolTaskThatRetry()
+                : base()
+            {
+            }
+
+            /// <summary>
+            /// Gets or sets the delay for the first execution.
+            /// </summary>
+            /// <remarks>
+            /// Defaults to 10 seconds.
+            /// </remarks>
+            public Int32 InitialDelay { get; set; } = 10000;
+
+            /// <summary>
+            /// Gets or sets the delay for the follow-up executions.
+            /// </summary>
+            /// <remarks>
+            /// Defaults to 1 milliseconds.
+            /// </remarks>
+            public Int32 FollowupDelay { get; set; } = 1;
+
+            /// <summary>
+            /// Int32 output parameter for the execution repeat counter for test purpose.
+            /// </summary>
+            [Output]
+            public Int32 RepeatCount { get; private set; } = 0;
+
+            /// <summary>
+            /// Gets the tool name (PowerShell).
+            /// </summary>
+            protected override string ToolName => _powerShell;
+
+            /// <summary>
+            /// Search path for PowerShell.
+            /// </summary>
+            /// <remarks>
+            /// This only works on Windows.
+            /// </remarks>
+            protected override string GenerateFullPathToTool() => FindOnPath(_powerShell);
+
+            /// <summary>
+            /// Generate a PowerShell command to sleep different amount of time based on execution counter.
+            /// </summary>
+            protected override string GenerateCommandLineCommands() =>
+                string.Format(_sleepCommand, RepeatCount < 2 ? InitialDelay : FollowupDelay);
+
+            /// <summary>
+            /// Ensures that test parameters make sense.
+            /// </summary>
+            protected internal override bool ValidateParameters() =>
+                (InitialDelay > 0) && (FollowupDelay > 0) && base.ValidateParameters();
+
+            /// <summary>
+            /// Runs external command (PowerShell) to generate programmable delay.
+            /// </summary>
+            /// <returns>
+            /// true if the task runs successfully; false otherwise.
+            /// </returns>
+            public override bool Execute()
+            {
+                RepeatCount++;
+                return base.Execute();
             }
         }
     }
