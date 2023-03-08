@@ -47,6 +47,10 @@ Please see the [Pull Request Timeline Guide](documentation/project-docs/SDK-PR-g
 
 With the SDK repository being the home for many different areas, we've started trying to label incoming issues for the area they are related to using `Area-` labels.  Then we rely on the [codeowners](https://github.com/dotnet/sdk/blob/main/CODEOWNERS) to manage and triages issues in their areas. Feel free to contact the owners listed in that file if you're not getting a response on a particular issue or PR. Please try to label new issues as that'll help us route them faster.
 
+For issues related to the central SDK team, typically they are assigned out to a team member in the first half of each week. Then each member is asked to review and mark those needing further discussion as "needs team triage" and otherwise setting a milestone for the issue. Backlog means we will consider it in the future if there is more feedback. Discussion means we have asked for more information from the filer. All other milestones indicate our best estimate for when a fix will be targeted for noting that not all issues will get fixed. If you are not getting a quick response on an issue assigned to a team member, please ping them.
+
+The example query used for triage of .NET SDK issues can be viewed [here](https://github.com/dotnet/sdk/issues?q=is%3Aissue+is%3Aopen+-label%3AArea-NuGet+-label%3AArea-format+-label%3AArea-implicitusings+-label%3AArea-SourceBuild+-label%3AArea-Host+-label%3AArea-NativeAOT+-label%3AArea-readytorun+-label%3AArea-websdk+-label%3AArea-watch+-label%3AArea-illink+-label%3AArea-aspnetcore+-label%3AArea-compatibility+-label%3A%22Area-dotnet+test%22+-label%3AArea-FSharp+-label%3AArea-GenAPI+-label%3AArea-ApiCompat+label%3Auntriaged+no%3Amilestone+no%3Aassignee+)
+
 For PRs, we assign a reviewer once a week on Wednesday, looking only at PRs that are green in the build.  If you are contributing:
 
 * Get the PR green.
