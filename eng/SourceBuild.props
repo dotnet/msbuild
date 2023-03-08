@@ -3,7 +3,9 @@
   <PropertyGroup>
     <GitHubRepositoryName>sdk</GitHubRepositoryName>
     <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
+    <SourceBuildTrimNetFrameworkTargets>true</SourceBuildTrimNetFrameworkTargets>
   </PropertyGroup>
+
   <Target Name="ConfigureInnerBuildArg" BeforeTargets="GetSourceBuildCommandConfiguration">
     <PropertyGroup>
       <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)\source-build.slnf"</InnerBuildArgs>
