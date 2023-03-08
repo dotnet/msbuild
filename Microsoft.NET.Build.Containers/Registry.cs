@@ -157,7 +157,9 @@ internal sealed class Registry
     {
         cancellationToken.ThrowIfCancellationRequested();
         var client = GetClient();
-        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{repositoryName}/manifests/{reference}"), cancellationToken).ConfigureAwait(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(BaseUri, $"/v2/{repositoryName}/manifests/{reference}"));
+        AddDockerFormatsAcceptHeader(request);
+        var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         return response;
     }
@@ -166,7 +168,10 @@ internal sealed class Registry
     {
         cancellationToken.ThrowIfCancellationRequested();
         var client = GetClient();
-        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{repositoryName}/blobs/{digest}"), cancellationToken).ConfigureAwait(false);
+        using var request =
+            new HttpRequestMessage(HttpMethod.Get, new Uri(BaseUri, $"/v2/{repositoryName}/blobs/{digest}"));
+        AddDockerFormatsAcceptHeader(request);
+        var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         return response;
     }
@@ -251,8 +256,11 @@ internal sealed class Registry
 
         HttpClient client = GetClient();
 
-        var response = await client.GetAsync(
-            new Uri(BaseUri, $"/v2/{repository}/blobs/{descriptor.Digest}"),
+        using var request = new HttpRequestMessage(HttpMethod.Get,
+            new Uri(BaseUri, $"/v2/{repository}/blobs/{descriptor.Digest}"));
+        AddDockerFormatsAcceptHeader(request);
+        var response = await client.SendAsync(
+            request,
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken).ConfigureAwait(false);
 
@@ -356,7 +364,7 @@ internal sealed class Registry
         cancellationToken.ThrowIfCancellationRequested();
         if (patchResponse.StatusCode != HttpStatusCode.Accepted)
         {
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), uploadUri, patchResponse.StatusCode, await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false)); 
+            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), uploadUri, patchResponse.StatusCode, await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
             throw new ApplicationException(errorMessage);
         }
         return GetNextLocation(patchResponse);
@@ -461,15 +469,18 @@ internal sealed class Registry
 
         HttpClient client = new(clientHandler);
 
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(new("application/json"));
-        client.DefaultRequestHeaders.Accept.Add(new(DockerManifestListV2));
-        client.DefaultRequestHeaders.Accept.Add(new(DockerManifestV2));
-        client.DefaultRequestHeaders.Accept.Add(new(DockerContainerV1));
-
         client.DefaultRequestHeaders.Add("User-Agent", ".NET Container Library");
 
         return client;
+    }
+
+    private static void AddDockerFormatsAcceptHeader(HttpRequestMessage request)
+    {
+        request.Headers.Accept.Clear();
+        request.Headers.Accept.Add(new("application/json"));
+        request.Headers.Accept.Add(new(DockerManifestListV2));
+        request.Headers.Accept.Add(new(DockerManifestV2));
+        request.Headers.Accept.Add(new(DockerContainerV1));
     }
 
     public async Task PushAsync(BuiltImage builtImage, ImageReference source, ImageReference destination, Action<string> logProgressMessage, CancellationToken cancellationToken)
