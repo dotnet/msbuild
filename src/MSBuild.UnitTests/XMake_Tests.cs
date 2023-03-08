@@ -9,8 +9,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -652,8 +652,8 @@ namespace Microsoft.Build.UnitTests
             // Save the current environment info so it can be restored.
             var originalUILanguage = Environment.GetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE);
 
-            Encoding originalOutputEncoding = Console.OutputEncoding;
-            Encoding originalInputEncoding = Console.InputEncoding;
+            var originalOutputEncoding = Console.OutputEncoding;
+            var originalInputEncoding = Console.InputEncoding;
             Thread thisThread = Thread.CurrentThread;
             CultureInfo originalUICulture = thisThread.CurrentUICulture;
 

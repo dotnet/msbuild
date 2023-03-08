@@ -41,6 +41,8 @@ using System.Runtime.CompilerServices;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging.LiveLogger;
 using System.Runtime.InteropServices;
+using Microsoft.Win32;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -666,8 +668,7 @@ namespace Microsoft.Build.CommandLine
                 VerifyThrowSupportedOS();
 
                 // Setup the console UI.
-                Encoding originalOutputEncoding = Console.OutputEncoding;
-                Encoding originalInputEncoding = Console.InputEncoding;
+                using AutomaticEncodingRestorer _ = new();
                 CultureInfo originalThreadCulture = Thread.CurrentThread.CurrentUICulture;
                 SetConsoleUI();
 
@@ -838,8 +839,8 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // The encoding may be changed to support non-en characters for environment variables set by external tools. We don't want to impact other programs on the console.
-                Console.OutputEncoding = originalOutputEncoding;
-                Console.InputEncoding = originalInputEncoding;
+                //Console.OutputEncoding = originalOutputEncoding;
+                //Console.InputEncoding = originalInputEncoding;
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks below! Exceptions should be caught as close to their point of origin as
@@ -1691,9 +1692,8 @@ namespace Microsoft.Build.CommandLine
             if (externalLanguageSetting != null)
             {
                 if (
-                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && // Encoding is only an issue on Windows
                     !externalLanguageSetting.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase) &&
-                    Environment.OSVersion.Version.Major >= 10 // UTF-8 is only officially supported on 10+.
+                    CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
                     )
                 {
                     // Setting both encodings causes a change in the CHCP, making it so we dont need to P-Invoke ourselves.
@@ -1710,10 +1710,36 @@ namespace Microsoft.Build.CommandLine
             return null;
         }
 
+        private static bool CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version.Major >= 10) // UTF-8 is only officially supported on 10+.
+            {
+                try
+                {
+                    using RegistryKey windowsVersionRegistry = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+                    var buildNumber = windowsVersionRegistry.GetValue("CurrentBuildNumber").ToString();
+                    const int buildNumberThatOfficialySupportsUTF8 = 18363;
+                    return int.Parse(buildNumber) >= buildNumberThatOfficialySupportsUTF8 || ForceUniversalEncodingOptInEnabled();
+                }
+                catch (Exception ex) when (ex is SecurityException || ex is ObjectDisposedException)
+                {
+                    // We don't want to break those in VS on older versions of Windows with a non-en language.
+                    // Allow those without registry permissions to force the encoding, however.
+                    return ForceUniversalEncodingOptInEnabled();
+                }
+            }
+            return false;
+        }
+
+        private static bool ForceUniversalEncodingOptInEnabled()
+        {
+            return String.Equals(Environment.GetEnvironmentVariable("DOTNET_CLI_FORCE_UTF8_ENCODING"), "true", StringComparison.OrdinalIgnoreCase);
+        }
+
         /// <summary>
         /// Look at UI language overrides that can be set by known external invokers. (DOTNET_CLI_UI_LANGUAGE and VSLANG).
         /// Does NOT check System Locale or OS Display Language.
-        /// Ported from the .NET SDK: https://github.com/dotnet/sdk/blob/4846f59fe168a343acfb84841f323fd47dd0e72c/src/Cli/Microsoft.DotNet.Cli.Utils/UILanguageOverride.cs#L53.
+        /// Ported from the .NET SDK: https://github.com/dotnet/sdk/blob/bcea1face15458814b8e53e8785b52ba464f6538/src/Cli/Microsoft.DotNet.Cli.Utils/UILanguageOverride.cs
         /// </summary>
         /// <returns>The custom language that was set by the user for an 'external' tool besides MSBuild.
         /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns null if none are set.</returns>
