@@ -60,6 +60,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Setting ArtifactsPath automatically opts in to the artifacts output format -->
   <PropertyGroup Condition="'$(ArtifactsPath)' != ''">
     <UseArtifactsOutput Condition="'$(UseArtifactsOutput)' == ''">true</UseArtifactsOutput>
+    <IncludeProjectNameInArtifactsPaths Condition="'$(IncludeProjectNameInArtifactsPaths)' == ''">true</IncludeProjectNameInArtifactsPaths>
   </PropertyGroup>
 
   <!-- Set up base output folders if UseArtifactsOutput is set -->

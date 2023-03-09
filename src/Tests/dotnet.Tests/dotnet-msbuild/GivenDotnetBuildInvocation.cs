@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-o", "foo" }, "-property:OutputPath=<cwd>foo -property:_CommandLineDefinedOutputPath=true")]
         [InlineData(new string[] { "-property:Verbosity=diag" }, "--property:Verbosity=diag")]
         [InlineData(new string[] { "--output", "foo" }, "-property:OutputPath=<cwd>foo -property:_CommandLineDefinedOutputPath=true")]
+        [InlineData(new string[] { "--artifacts-path", "foo" }, "-property:ArtifactsPath=<cwd>foo")]
         [InlineData(new string[] { "-o", "foo1 foo2" }, "\"-property:OutputPath=<cwd>foo1 foo2\" -property:_CommandLineDefinedOutputPath=true")]
         [InlineData(new string[] { "--no-incremental" }, "-target:Rebuild")]
         [InlineData(new string[] { "-r", "rid" }, "-property:RuntimeIdentifier=rid -property:_CommandLineDefinedRuntimeIdentifier=true")]

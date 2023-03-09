@@ -132,7 +132,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ItUsesRootOutputPathForPack(bool useDirectoryBuildProps)
+        public void ItUseArtifactstOutputPathForPack(bool useDirectoryBuildProps)
         {
             var (testProjects, testAsset) = GetTestProjects(useDirectoryBuildProps);
 
@@ -188,7 +188,281 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        
+        [Fact]
+        public void ProjectsCanSwitchOutputFormats()
+        {
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            //  Build without artifacts format
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DirectoryInfo(OutputPathCalculator.FromProject(testAsset.Path, testProject).GetOutputDirectory())
+                .Should()
+                .Exist();
+
+            //  Now build as if UseArtifactsOutput was set in project file
+            new BuildCommand(testAsset)
+                .Execute("/p:UseArtifactsOutput=true", "/p:ImportDirectoryBuildProps=false")
+                .Should()
+                .Pass();
+
+            new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, ".artifacts", "bin", "debug"))
+                .Should()
+                .Exist();
+
+            //  Now add a Directory.Build.props file setting UseArtifactsOutput to true
+            File.WriteAllText(Path.Combine(testAsset.Path, "Directory.Build.props"), """
+                <Project>
+                  <PropertyGroup>
+                    <UseArtifactsOutput>true</UseArtifactsOutput>
+                  </PropertyGroup>
+                </Project>
+                """);
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DirectoryInfo(OutputPathCalculator.FromProject(testAsset.Path, testProject).GetOutputDirectory())
+                .Should()
+                .Exist();
+
+            //  Now go back to not using artifacts output format
+            File.Delete(Path.Combine(testAsset.Path, "Directory.Build.props"));
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+        }
+
+        [Fact]
+        public void ProjectsCanCustomizeOutputPathBasedOnTargetFramework()
+        {
+            var testProject = new TestProject("CustomizeArtifactsPath")
+            {
+                IsExe = true,
+                TargetFrameworks = "net7.0;net8.0;netstandard2.0"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            File.WriteAllText(Path.Combine(testAsset.Path, "Directory.Build.props"), """
+                <Project>
+                  <PropertyGroup>
+                    <UseArtifactsOutput>true</UseArtifactsOutput>
+                    <AfterTargetFrameworkInferenceTargets>$(MSBuildThisFileDirectory)\Directory.AfterTargetFrameworkInference.targets</AfterTargetFrameworkInferenceTargets>
+                  </PropertyGroup>
+                </Project>
+                """);
+
+            File.WriteAllText(Path.Combine(testAsset.Path, "Directory.AfterTargetFrameworkInference.targets"), """
+                <Project>
+                  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+                    <ArtifactsPivots Condition="'$(_TargetFrameworkVersionWithoutV)' == '8.0'">NET8_$(Configuration)</ArtifactsPivots>
+                    <ArtifactsPivots Condition="'$(_TargetFrameworkVersionWithoutV)' == '7.0'">NET7_$(Configuration)</ArtifactsPivots>
+                  </PropertyGroup>
+                </Project>
+                """);
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "bin", testProject.Name, "NET8_Debug")).Should().Exist();
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "bin", testProject.Name, "NET7_Debug")).Should().Exist();
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "bin", testProject.Name, "debug_netstandard2.0")).Should().Exist();
+
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "bin", testProject.Name, "debug_net8.0")).Should().NotExist();
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "bin", testProject.Name, "debug_net7.0")).Should().NotExist();
+
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "obj", testProject.Name, "NET8_Debug")).Should().Exist();
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "obj", testProject.Name, "NET7_Debug")).Should().Exist();
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "obj", testProject.Name, "debug_netstandard2.0")).Should().Exist();
+
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "obj", testProject.Name, "debug_net8.0")).Should().NotExist();
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "obj", testProject.Name, "debug_net7.0")).Should().NotExist();
+
+            foreach (var targetFramework in testProject.TargetFrameworks.Split(';'))
+            {
+                new DotnetPublishCommand(Log, "-f", targetFramework)
+                    .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
+                    .Execute()
+                    .Should()
+                    .Pass();
+            }
+
+            //  Note that publish defaults to release configuration for .NET 8 but not prior TargetFrameworks
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "publish", testProject.Name, "NET8_Release")).Should().Exist();
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "publish", testProject.Name, "NET7_Debug")).Should().Exist();
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "publish", testProject.Name, "debug_netstandard2.0")).Should().Exist();
+
+            new DotnetPackCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DirectoryInfo(Path.Combine(testAsset.Path, ".artifacts", "package", "release")).Should().Exist();
+            new FileInfo(Path.Combine(testAsset.Path, ".artifacts", "package", "release", testProject.Name + ".1.0.0.nupkg")).Should().Exist();
+        }
+
+        TestAsset CreateCustomizedTestProject(bool useDirectoryBuildProps, string propertyName, string propertyValue, [CallerMemberName] string callingMethod = "")
+        {
+            var testProject = new TestProject("App")
+            {
+                IsExe = true
+            };
+
+            testProject.UseArtifactsOutput = true;
+            testProject.UseDirectoryBuildPropsForArtifactsOutput = useDirectoryBuildProps;
+
+            if (!useDirectoryBuildProps)
+            {
+                testProject.AdditionalProperties[propertyName] = propertyValue;
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProjects(new[] { testProject }, callingMethod: callingMethod, identifier: useDirectoryBuildProps.ToString());
+
+            if (useDirectoryBuildProps)
+            {
+                File.WriteAllText(Path.Combine(testAsset.Path, "Directory.Build.props"),
+                   $"""
+                    <Project>
+                        <PropertyGroup>
+                            <UseArtifactsOutput>true</UseArtifactsOutput>
+                            <{propertyName}>{propertyValue}</{propertyName}>
+                        </PropertyGroup>
+                    </Project>
+                    """);
+            }
+
+            return testAsset;
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BinOutputNameCanBeSet(bool useDirectoryBuildProps)
+        {
+            var testAsset = CreateCustomizedTestProject(useDirectoryBuildProps, "ArtifactsBinOutputName", "binaries");
+
+            new DotnetBuildCommand(testAsset)
+                .SetEnvironmentVariables(useDirectoryBuildProps)
+                .Execute()
+                .Should()
+                .Pass();
+
+            if (useDirectoryBuildProps)
+            {
+                new FileInfo(Path.Combine(testAsset.Path, ".artifacts", "binaries", "App", "debug", "App.dll"))
+                    .Should()
+                    .Exist();
+            }
+            else
+            {
+                new FileInfo(Path.Combine(testAsset.Path, "App", ".artifacts", "binaries", "debug", "App.dll"))
+                    .Should()
+                    .Exist();
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void PublishOutputNameCanBeSet(bool useDirectoryBuildProps)
+        {
+            var testAsset = CreateCustomizedTestProject(useDirectoryBuildProps, "ArtifactsPublishOutputName", "published_app");
+
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(testAsset.Path)
+                .SetEnvironmentVariables(useDirectoryBuildProps)
+                .Execute()
+                .Should()
+                .Pass();
+
+            if (useDirectoryBuildProps)
+            {
+                new FileInfo(Path.Combine(testAsset.Path, ".artifacts", "published_app", "App", "release", "App.dll"))
+                    .Should()
+                    .Exist();
+            }
+            else
+            {
+                new FileInfo(Path.Combine(testAsset.Path, "App", ".artifacts", "published_app", "release", "App.dll"))
+                    .Should()
+                    .Exist();
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void PackageOutputNameCanBeSet(bool useDirectoryBuildProps)
+        {
+            var testAsset = CreateCustomizedTestProject(useDirectoryBuildProps, "ArtifactsPackageOutputName", "package_output");
+
+            new DotnetPackCommand(Log)
+                .WithWorkingDirectory(testAsset.Path)
+                .SetEnvironmentVariables(useDirectoryBuildProps)
+                .Execute()
+                .Should()
+                .Pass();
+
+            if (useDirectoryBuildProps)
+            {
+                new FileInfo(Path.Combine(testAsset.Path, ".artifacts", "package_output", "release", "App.1.0.0.nupkg"))
+                    .Should()
+                    .Exist();
+            }
+            else
+            {
+                new FileInfo(Path.Combine(testAsset.Path, "App", ".artifacts", "package_output", "release", "App.1.0.0.nupkg"))
+                    .Should()
+                    .Exist();
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProjectNameCanBeSet(bool useDirectoryBuildProps)
+        {
+            var testAsset = CreateCustomizedTestProject(useDirectoryBuildProps, "ArtifactsProjectName", "Apps\\MyApp");
+
+            new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(testAsset.Path)
+                .SetEnvironmentVariables(useDirectoryBuildProps)
+                .Execute()
+                .Should()
+                .Pass();
+
+            if (useDirectoryBuildProps)
+            {
+                new FileInfo(Path.Combine(testAsset.Path, ".artifacts", "bin", "Apps", "MyApp", "debug", "App.dll"))
+                    .Should()
+                    .Exist();
+            }
+            else
+            {
+                //  Note that customized ArtifactsProjectName doesn't have an impact here when the artifacts folder is already inside the project folder
+                new FileInfo(Path.Combine(testAsset.Path, "App", ".artifacts", "bin", "debug", "App.dll"))
+                    .Should()
+                    .Exist();
+            }
+        }
+
 
     }
 

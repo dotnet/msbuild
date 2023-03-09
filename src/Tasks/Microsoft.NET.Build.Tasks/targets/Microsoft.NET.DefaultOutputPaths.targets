@@ -61,8 +61,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ArtifactsBinOutputName Condition="'$(ArtifactsBinOutputName)' == ''">bin</ArtifactsBinOutputName>
     <ArtifactsPublishOutputName Condition="'$(ArtifactsPublishOutputName)' == ''">publish</ArtifactsPublishOutputName>
     <ArtifactsPackageOutputName Condition="'$(ArtifactsPackageOutputName)' == ''">package</ArtifactsPackageOutputName>
+  </PropertyGroup>
 
-    <!-- ArtifactsPivots instead? -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(ArtifactsPivots)' == ''">
     <ArtifactsPivots>$(Configuration.ToLowerInvariant())</ArtifactsPivots>
 
     <!-- Include the TargetFramework in the pivots if the project is multi-targeted (ie TargetFrameworks) is defined -->
@@ -73,11 +74,10 @@ Copyright (c) .NET Foundation. All rights reserved.
          RuntimeIdentifier in the path if it was explicitly specified, not if it was inferred.  This is the
          behavior we want.
 
-         The BlazorWebAssembly .props file sets the RuntimeIdentifier to blazor-wasm, so treat that as a special case.
+         The BlazorWebAssembly .props file sets the RuntimeIdentifier to browser-wasm, so treat that as a special case.
          -->
     <ArtifactsPivots Condition="'$(RuntimeIdentifier)' != '' And !('$(RuntimeIdentifier)' == 'browser-wasm' And '$(AppendRuntimeIdentifierToOutputPath)' == 'false')"
                      >$(ArtifactsPivots)_$(RuntimeIdentifier.ToLowerInvariant())</ArtifactsPivots>
-
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(IncludeProjectNameInArtifactsPaths)' == 'true'">
@@ -136,6 +136,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
     <DefaultItemExcludes>$(DefaultItemExcludes);$(ArtifactsPath)/**</DefaultItemExcludes>
+    <!-- Exclude bin and obj folders to avoid issues with projects that switch to using artifacts output format -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin/**;obj/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <!--

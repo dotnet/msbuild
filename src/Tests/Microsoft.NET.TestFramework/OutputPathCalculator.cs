@@ -36,9 +36,27 @@ namespace Microsoft.NET.TestFramework
 
         public static OutputPathCalculator FromProject(string projectPath, TestProject testProject = null)
         {
+            string originalProjectPath = projectPath;
+
             if (!File.Exists(projectPath) && Directory.Exists(projectPath))
             {
                 projectPath = Directory.GetFiles(projectPath, "*.*proj").FirstOrDefault();
+            }
+
+            //  Support passing in the root test path and looking in subfolder specified by testProject
+            if (projectPath == null && testProject != null)
+            {
+                projectPath = Path.Combine(originalProjectPath, testProject.Name);
+
+                if (!File.Exists(projectPath) && Directory.Exists(projectPath))
+                {
+                    projectPath = Directory.GetFiles(projectPath, "*.*proj").FirstOrDefault();
+                }
+            }
+
+            if (projectPath == null)
+            {
+                throw new ArgumentException($"Test project not found under {projectPath}");
             }
 
             var calculator = new OutputPathCalculator()

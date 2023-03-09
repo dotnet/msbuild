@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-o", "<packageoutputpath>" }, "-property:PackageOutputPath=<cwd><packageoutputpath>")]
         [InlineData(new string[] { "--output", "<packageoutputpath>" }, "-property:PackageOutputPath=<cwd><packageoutputpath>")]
+        [InlineData(new string[] { "--artifacts-path", "foo" }, "-property:ArtifactsPath=<cwd>foo")]
         [InlineData(new string[] { "--no-build" }, "-property:NoBuild=true")]
         [InlineData(new string[] { "--include-symbols" }, "-property:IncludeSymbols=true")]
         [InlineData(new string[] { "--include-source" }, "-property:IncludeSource=true")]
