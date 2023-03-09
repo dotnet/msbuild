@@ -666,7 +666,7 @@ namespace Microsoft.Build.CommandLine
                 VerifyThrowSupportedOS();
 
                 // Setup the console UI.
-                using AutomaticEncodingRestorer _ = new();
+                using AutomaticEncodingRestorer discardedEncodingRestorer = new();
                 CultureInfo originalThreadCulture = Thread.CurrentThread.CurrentUICulture;
                 SetConsoleUI();
 
