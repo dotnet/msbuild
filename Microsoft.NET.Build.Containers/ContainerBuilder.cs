@@ -19,9 +19,9 @@ public static class ContainerBuilder
         string imageName,
         string[] imageTags,
         string? outputRegistry,
-        string[]? labels,
+        Dictionary<string, string> labels,
         Port[]? exposedPorts,
-        string[]? envVars,
+        Dictionary<string, string> envVars,
         string containerRuntimeIdentifier,
         string ridGraphPath,
         string localContainerDaemon,
@@ -57,19 +57,15 @@ public static class ContainerBuilder
 
         imageBuilder.SetEntryPoint(entrypoint, entrypointArgs);
 
-        foreach (string label in labels ?? Array.Empty<string>())
+        foreach (KeyValuePair<string, string> label in labels)
         {
-            string[] labelPieces = label.Split('=');
-
             // labels are validated by System.CommandLine API
-            imageBuilder.AddLabel(labelPieces[0], TryUnquote(labelPieces[1]));
+            imageBuilder.AddLabel(label.Key, label.Value);
         }
 
-        foreach (string envVar in envVars ?? Array.Empty<string>() )
+        foreach (KeyValuePair<string, string> envVar in envVars)
         {
-            string[] envPieces = envVar.Split('=', 2);
-
-            imageBuilder.AddEnvironmentVariable(envPieces[0], TryUnquote(envPieces[1]));
+            imageBuilder.AddEnvironmentVariable(envVar.Key, envVar.Value);
         }
 
         foreach ((int number, PortType type) in exposedPorts ?? Array.Empty<Port>())
@@ -139,20 +135,5 @@ public static class ContainerBuilder
             _ => throw new ArgumentException($"Unknown local container daemon type '{localDaemonType}'. Valid local container daemon types are {String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)}", nameof(localDaemonType))
         };
         return daemon;
-    }
-
-    private static string TryUnquote(string path)
-    {
-        if (string.IsNullOrEmpty(path) || path.Length < 2)
-        {
-            return path;
-        }
-        if ((path[0] == '\"' && path[path.Length - 1] == '\"'))
-        {
-            return path.Substring(1, path.Length - 2);
-        }
-
-        //not quoted
-        return path;
     }
 }
