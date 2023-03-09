@@ -41,7 +41,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging.LiveLogger;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 
