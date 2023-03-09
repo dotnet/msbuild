@@ -31,7 +31,7 @@ namespace Microsoft.Build.CommandLine
 #if NET7_0_OR_GREATER
                         !OperatingSystem.IsIOS() && !OperatingSystem.IsAndroid() && !OperatingSystem.IsTvOS()) // Output + Input Encoding are unavailable on these platforms per docs.
 #else
-                        IsWindowsOS()) // Windows is the only platform where we need to change the encoding as other platforms are UTF 8 by default.
+                        IsWindowsOS()) // Windows is the only platform where we need to change the encoding as other platforms are UTF 8 by default, so for now its the only one required to restore.
 #endif
                 {
                     _originalOutputEncoding = Console.OutputEncoding;
@@ -74,18 +74,14 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Return whether the running OS is windows for net472.
         /// RuntimeInformation.IsOSPlatform(OSPlatform.Windows) is supposed to be available in net472 but apparently it isnt part of full framework so we can't use it.
         /// </summary>
         /// <returns></returns>
         private bool IsWindowsOS()
         {
-            string windir = Environment.GetEnvironmentVariable("windir");
-            if (!string.IsNullOrEmpty(windir) && windir.Contains(@"\") && Directory.Exists(windir))
-            {
-                return true;
-            }
-            return false;
+            string? windir = Environment.GetEnvironmentVariable("windir");
+            return !string.IsNullOrEmpty(windir) && windir.Contains(@"\") && Directory.Exists(windir);
         }
-
     }
 }
