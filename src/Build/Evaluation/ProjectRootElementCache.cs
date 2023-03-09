@@ -9,6 +9,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
@@ -140,45 +141,57 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private bool IsInvalidEntry(string projectFile, ProjectRootElement projectRootElement)
         {
-            if (projectRootElement != null && _autoReloadFromDisk)
+            // When we do not _autoReloadFromDisk we expect that cached value is always valid.
+            // Usually lifespan of cache is expected to be build duration (process will terminate after build).
+            if (projectRootElement == null || !_autoReloadFromDisk)
             {
-                FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(projectFile);
+                return false;
+            }
 
-                // If the file doesn't exist on disk, go ahead and use the cached version.
-                // It's an in-memory project that hasn't been saved yet.
-                if (fileInfo != null)
+            // If the project file is non modifiable, assume it is up to date and consider the cached value valid.
+            if (!Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck && FileClassifier.Shared.IsNonModifiable(projectFile))
+            {
+                return false;
+            }
+
+            FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(projectFile);
+
+            // If the file doesn't exist on disk, go ahead and use the cached version.
+            // It's an in-memory project that hasn't been saved yet.
+            if (fileInfo == null)
+            {
+                return false;
+            }
+
+            if (fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead)
+            {
+                // File was changed on disk by external means. Cached version is no longer valid.
+                // We could throw here or ignore the problem, but it is a common and reasonable pattern to change a file
+                // externally and load a new project over it to see the new content. So we dump it from the cache
+                // to force a load from disk. There might then exist more than one ProjectRootElement with the same path,
+                // but clients ought not get themselves into such a state - and unless they save them to disk,
+                // it may not be a problem.
+                return true;
+            }
+            else if (s_сheckFileContent)
+            {
+                // QA tests run too fast for the timestamp check to work. This environment variable is for their
+                // use: it checks the file content as well as the timestamp. That's better than completely disabling
+                // the cache as we get test coverage of the rest of the cache code.
+                XmlDocument document = new XmlDocument();
+                document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
+
+                using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath, projectRootElement.ProjectRootElementCache.LoadProjectsReadOnly))
                 {
-                    if (fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead)
-                    {
-                        // File was changed on disk by external means. Cached version is no longer valid.
-                        // We could throw here or ignore the problem, but it is a common and reasonable pattern to change a file
-                        // externally and load a new project over it to see the new content. So we dump it from the cache
-                        // to force a load from disk. There might then exist more than one ProjectRootElement with the same path,
-                        // but clients ought not get themselves into such a state - and unless they save them to disk,
-                        // it may not be a problem.
-                        return true;
-                    }
-                    else if (s_сheckFileContent)
-                    {
-                        // QA tests run too fast for the timestamp check to work. This environment variable is for their
-                        // use: it checks the file content as well as the timestamp. That's better than completely disabling
-                        // the cache as we get test coverage of the rest of the cache code.
-                        XmlDocument document = new XmlDocument();
-                        document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
+                    document.Load(xtr.Reader);
+                }
 
-                        using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath, projectRootElement.ProjectRootElementCache.LoadProjectsReadOnly))
-                        {
-                            document.Load(xtr.Reader);
-                        }
+                string diskContent = document.OuterXml;
+                string cacheContent = projectRootElement.XmlDocument.OuterXml;
 
-                        string diskContent = document.OuterXml;
-                        string cacheContent = projectRootElement.XmlDocument.OuterXml;
-
-                        if (diskContent != cacheContent)
-                        {
-                            return true;
-                        }
-                    }
+                if (diskContent != cacheContent)
+                {
+                    return true;
                 }
             }
 
