@@ -459,19 +459,6 @@
               "parameters": {
                 "branchName": "vs*"
               }
-            },
-            {
-              "operator": "not",
-              "operands": [
-                {
-                  "name": "prModifiesFiles",
-                  "parameters": {
-                    "pathFilters": [
-                      "eng/Versions.props"
-                    ]
-                  }
-                }
-              ]
             }
           ]
         },
@@ -489,10 +476,7 @@
               "comment": "Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version."
             }
           }
-        ],
-        "dangerZone": {
-          "respondToBotActions": false
-        }
+        ]
       }
     }
   ],
