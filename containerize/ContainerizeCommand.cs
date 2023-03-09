@@ -244,23 +244,8 @@ internal class ContainerizeCommand : RootCommand
         foreach (string token in tokens)
         {
             string[] pair = token.Split('=', StringSplitOptions.TrimEntries);
-            parsed[pair[0]] = TryUnquote(pair[1]);
+            parsed[pair[0]] = pair[1];
         }
         return parsed;
-    }
-
-    private static string TryUnquote(string path)
-    {
-        if (string.IsNullOrEmpty(path) || path.Length < 2)
-        {
-            return path;
-        }
-        if ((path[0] == '\"' && path[path.Length - 1] == '\"'))
-        {
-            return path.Substring(1, path.Length - 2);
-        }
-
-        //not quoted
-        return path;
     }
 }

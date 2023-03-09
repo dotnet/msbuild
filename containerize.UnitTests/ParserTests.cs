@@ -31,11 +31,10 @@ public class ParserTests
         };
 
         baseArgs.Add(command.LabelsOption.Aliases.First());
-        baseArgs.Add("NoValue=\"\"");
-        baseArgs.Add("NoValue2=");
-        baseArgs.Add("Valid2=\"Val2\"");
-        baseArgs.Add("Valid3=\"Val 3\"");
-        baseArgs.Add("Valid4=Val4");
+        baseArgs.Add("NoValue=");
+        baseArgs.Add("Valid2=Val2");
+        baseArgs.Add("Valid3=Val 3");
+        baseArgs.Add("Valid4=\"Val4\"");
         baseArgs.Add("Unbalanced1=\"Un1");
         baseArgs.Add("Unbalanced2=Un2\"");
 
@@ -45,14 +44,47 @@ public class ParserTests
         Dictionary<string, string>? labels = parseResult.GetValueForOption(command.LabelsOption);
 
         Assert.NotNull(labels);
-        Assert.Equal(7, labels.Count);
+        Assert.Equal(6, labels.Count);
         Assert.Empty(labels["NoValue"]);
-        Assert.Empty(labels["NoValue2"]);
         Assert.Equal("Val2", labels["Valid2"]);
         Assert.Equal("Val 3", labels["Valid3"]);
-        Assert.Equal("Val4", labels["Valid4"]);
+        Assert.Equal("\"Val4\"", labels["Valid4"]);
         Assert.Equal("\"Un1", labels["Unbalanced1"]);
         Assert.Equal("Un2\"", labels["Unbalanced2"]);
+    }
+
+    [Fact]
+    public void CanParseLabels2()
+    {
+        ContainerizeCommand command = new();
+        DirectoryInfo publishDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), DateTime.Now.ToString("yyyyMMddHHmmssfff"), nameof(CanParseLabels)));
+        List<string> baseArgs = new()
+        {
+            publishDir.FullName,
+            command.BaseRegistryOption.Aliases.First(),
+            "MyBaseRegistry",
+            command.BaseImageNameOption.Aliases.First(),
+            "MyBaseImageName",
+            command.ImageNameOption.Aliases.First(),
+            "MyImageName",
+            command.WorkingDirectoryOption.Aliases.First(),
+            "MyWorkingDirectory",
+            command.EntrypointOption.Aliases.First(),
+            "MyEntryPoint"
+        };
+
+        baseArgs.Add(command.LabelsOption.Aliases.First());
+        baseArgs.Add("NoValue=");
+        baseArgs.Add("Valid2=Val2");
+
+        ParseResult parseResult = command.Parse(string.Join(" ", baseArgs));
+
+        Dictionary<string, string>? labels = parseResult.GetValueForOption(command.LabelsOption);
+
+        Assert.NotNull(labels);
+        Assert.Equal(2, labels.Count);
+        Assert.Empty(labels["NoValue"]);
+        Assert.Equal("Val2", labels["Valid2"]);
     }
 
     [Theory]
@@ -110,10 +142,10 @@ public class ParserTests
         };
 
         baseArgs.Add(command.EnvVarsOption.Aliases.First());
-        baseArgs.Add("NoValue=\"\"");
-        baseArgs.Add("Valid2=\"Val2\"");
-        baseArgs.Add("Valid3=\"Val 3\"");
-        baseArgs.Add("Valid4=Val4");
+        baseArgs.Add("NoValue=");
+        baseArgs.Add("Valid2=Val2");
+        baseArgs.Add("Valid3=Val 3");
+        baseArgs.Add("Valid4=\"Val4\"");
         baseArgs.Add("Unbalanced1=\"Un1");
         baseArgs.Add("Unbalanced2=Un2\"");
 
@@ -128,7 +160,7 @@ public class ParserTests
         Assert.Empty(envVars["NoValue"]);
         Assert.Equal("Val2", envVars["Valid2"]);
         Assert.Equal("Val 3", envVars["Valid3"]);
-        Assert.Equal("Val4", envVars["Valid4"]);
+        Assert.Equal("\"Val4\"", envVars["Valid4"]);
         Assert.Equal("\"Un1", envVars["Unbalanced1"]);
         Assert.Equal("Un2\"", envVars["Unbalanced2"]);
     }

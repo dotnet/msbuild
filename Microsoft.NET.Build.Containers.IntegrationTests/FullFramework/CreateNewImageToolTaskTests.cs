@@ -219,13 +219,15 @@ public class CreateNewImageToolTaskTests
             new TaskItem(" "),
             new TaskItem("Valid1", new Dictionary<string, string>() {{ "Value", "Val1" }}),
             new TaskItem("Valid12", new Dictionary<string, string>() {{ "Value", "Val2" }}),
-            new TaskItem("Valid12", new Dictionary<string, string>() {{ "Value", "" }})
+            new TaskItem("Valid12", new Dictionary<string, string>() {{ "Value", "" }}),
+            new TaskItem("Valid3", new Dictionary<string, string>() {{ "Value", "has space" }}),
+            new TaskItem("Valid4", new Dictionary<string, string>() {{ "Value", "has\"quotes\"" }})
         };
 
         string args = task.GenerateCommandLineCommandsInt();
 
         Assert.Contains("""
-                                      --labels "NoValue=\"\"" "Valid1=\"Val1\"" "Valid12=\"Val2\"" "Valid12=\"\""
+                                      --labels NoValue= Valid1=Val1 Valid12=Val2 Valid12= "Valid3=has space" "Valid4=has\"quotes\""
                                       """, args);
         Assert.Equal("Items 'Labels' contain empty item(s) which will be ignored.", Assert.Single(warnings));
 
@@ -263,13 +265,15 @@ public class CreateNewImageToolTaskTests
             new TaskItem(" "),
             new TaskItem("Valid1", new Dictionary<string, string>() {{ "Value", "Val1" }}),
             new TaskItem("Valid12", new Dictionary<string, string>() {{ "Value", "Val2" }}),
-            new TaskItem("Valid12", new Dictionary<string, string>() {{ "Value", "" }})
+            new TaskItem("Valid12", new Dictionary<string, string>() {{ "Value", "" }}),
+            new TaskItem("Valid3", new Dictionary<string, string>() {{ "Value", "has space" }}),
+            new TaskItem("Valid4", new Dictionary<string, string>() {{ "Value", "has\"quotes\"" }})
         };
 
         string args = task.GenerateCommandLineCommandsInt();
 
         Assert.Contains("""
-                                      --environmentvariables "NoValue=\"\"" "Valid1=\"Val1\"" "Valid12=\"Val2\"" "Valid12=\"\""
+                                      --environmentvariables NoValue= Valid1=Val1 Valid12=Val2 Valid12= "Valid3=has space" "Valid4=has\"quotes\""
                                       """, args);
         Assert.Equal("Items 'ContainerEnvironmentVariables' contain empty item(s) which will be ignored.", Assert.Single(warnings));
 

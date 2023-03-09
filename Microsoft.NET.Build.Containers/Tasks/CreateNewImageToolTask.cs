@@ -34,7 +34,7 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         }
     }
 
-    protected override string GenerateFullPathToTool() => Quote(Path.Combine(DotNetPath, ToolExe));
+    protected override string GenerateFullPathToTool() => Path.Combine(DotNetPath, ToolExe);
 
     /// <summary>
     /// Workaround to avoid storing user/pass into the EnvironmentVariables property, which gets logged by the task.
@@ -146,7 +146,7 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
             sanitizedLabels = sanitizedLabels.Where(i => i.GetMetadata("Value") is not null);
         }
 
-        string[] readyLabels = sanitizedLabels.Select(i => i.ItemSpec + "=" + Quote(i.GetMetadata("Value"))).ToArray();
+        string[] readyLabels = sanitizedLabels.Select(i => i.ItemSpec + "=" + i.GetMetadata("Value")).ToArray();
         builder.AppendSwitchIfNotNull("--labels ", readyLabels, delimiter: " ");
 
         if (ImageTags.Any(string.IsNullOrWhiteSpace))
@@ -178,7 +178,7 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
             Log.LogWarning($"Item '{nameof(ContainerEnvironmentVariables)}' contains items without metadata 'Value', and they will be ignored.");
             sanitizedEnvVariables = sanitizedEnvVariables.Where(i => i.GetMetadata("Value") is not null);
         }
-        string[] readyEnvVariables = sanitizedEnvVariables.Select(i => i.ItemSpec + "=" + Quote(i.GetMetadata("Value"))).ToArray();
+        string[] readyEnvVariables = sanitizedEnvVariables.Select(i => i.ItemSpec + "=" + i.GetMetadata("Value")).ToArray();
         builder.AppendSwitchIfNotNull("--environmentvariables ", readyEnvVariables, delimiter: " ");
 
         if (!string.IsNullOrWhiteSpace(ContainerRuntimeIdentifier))
@@ -198,14 +198,5 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
 
         return builder.ToString();
     }
-
-    private static string Quote(string path)
-    {
-        if (path.Length >= 2 && (path[0] == '\"' && path[path.Length - 1] == '\"'))
-        {
-            // it's already quoted
-            return path;
-        }
-        return $"\"{path}\"";
-    }
 }
+
