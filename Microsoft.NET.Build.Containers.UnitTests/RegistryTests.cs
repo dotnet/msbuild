@@ -21,5 +21,14 @@ namespace Microsoft.NET.Build.Containers.UnitTests
             Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(registryName));
             Assert.Equal(isECR, registry.IsAmazonECRRegistry);
         }
+
+        [InlineData("us-south1-docker.pkg.dev", true)]
+        [InlineData("us.gcr.io", false)]
+        [Theory]
+        public void CheckIfGoogleArtifactRegistry(string registryName, bool isECR)
+        {
+            Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(registryName));
+            Assert.Equal(isECR, registry.IsGoogleArtifactRegistry);
+        }
     }
 }

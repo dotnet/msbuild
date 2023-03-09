@@ -19,13 +19,33 @@ internal sealed class Registry
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
-
-    private string RegistryName => BaseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+    /// <summary>
+    /// The name of the registry, which is the host name, optionally followed by a colon and the port number.
+    /// This is used in user-facing error messages, and it should match what the user would manually enter as
+    /// part of Docker commands like `docker login`.
+    /// </summary>
+    private string RegistryName { get; init; }
 
     public Registry(Uri baseUri)
     {
         BaseUri = baseUri;
+        RegistryName = DeriveRegistryName(baseUri);
         _client = CreateClient();
+    }
+
+    private static string DeriveRegistryName(Uri baseUri)
+    {
+        var port = baseUri.Port == -1 ? string.Empty : $":{baseUri.Port}";
+        if (baseUri.OriginalString.EndsWith(port, ignoreCase: true, culture: null))
+        {
+            // the port was part of the original assignment, so it's ok to consider it part of the 'name
+            return baseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+        }
+        else
+        {
+            // the port was not part of the original assignment, so it's not part of the 'name'
+            return baseUri.GetComponents(UriComponents.Host, UriFormat.Unescaped);
+        }
     }
 
     public Uri BaseUri { get; }
@@ -318,7 +338,9 @@ internal sealed class Registry
             // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
             if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
             {
-                string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), patchUri, patchResponse.StatusCode, await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+                var headers = patchResponse.Headers.ToString();
+                var detail = await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"Chunked PATCH {patchUri}", patchResponse.StatusCode, headers + Environment.NewLine + detail);
                 throw new ApplicationException(errorMessage);
             }
 
@@ -356,7 +378,9 @@ internal sealed class Registry
         cancellationToken.ThrowIfCancellationRequested();
         if (patchResponse.StatusCode != HttpStatusCode.Accepted)
         {
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), uploadUri, patchResponse.StatusCode, await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false)); 
+            var headers = patchResponse.Headers.ToString();
+            var detail = await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"Whole PATCH {uploadUri}", patchResponse.StatusCode, headers + Environment.NewLine + detail);
             throw new ApplicationException(errorMessage);
         }
         return GetNextLocation(patchResponse);
@@ -371,7 +395,9 @@ internal sealed class Registry
 
         if (pushResponse.StatusCode != HttpStatusCode.Accepted)
         {
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), startUploadUri, pushResponse.StatusCode, await pushResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            var headers = pushResponse.Headers.ToString();
+            var detail = await pushResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"POST {startUploadUri}", pushResponse.StatusCode, headers + Environment.NewLine + detail);
             throw new ApplicationException(errorMessage);
         }
         cancellationToken.ThrowIfCancellationRequested();
@@ -406,7 +432,9 @@ internal sealed class Registry
 
         if (finalizeResponse.StatusCode != HttpStatusCode.Created)
         {
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), putUri, finalizeResponse.StatusCode, await finalizeResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            var headers = finalizeResponse.Headers.ToString();
+            var detail = await finalizeResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"PUT {putUri}", finalizeResponse.StatusCode, headers + Environment.NewLine + detail);
             throw new ApplicationException(errorMessage);
         }
     }
@@ -467,7 +495,7 @@ internal sealed class Registry
         client.DefaultRequestHeaders.Accept.Add(new(DockerManifestV2));
         client.DefaultRequestHeaders.Accept.Add(new(DockerContainerV1));
 
-        client.DefaultRequestHeaders.Add("User-Agent", ".NET Container Library");
+        client.DefaultRequestHeaders.Add("User-Agent", $".NET Container Library v{Constants.Version}");
 
         return client;
     }
