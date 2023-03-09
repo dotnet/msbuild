@@ -2100,11 +2100,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// An existing link source should not be modified.
         /// </summary>
+        /// <remarks>
+        /// Related to issue [#8273](https://github.com/dotnet/msbuild/issues/8273)
+        /// </remarks>
         [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]
-        public void Issue8273_DonotCorruptSourceOfLink(bool useHardLink, bool useSymbolicLink)
+        public void DoNotCorruptSourceOfLink(bool useHardLink, bool useSymbolicLink)
         {
             string sourceFile1 = FileUtilities.GetTemporaryFile();
             string sourceFile2 = FileUtilities.GetTemporaryFile();
