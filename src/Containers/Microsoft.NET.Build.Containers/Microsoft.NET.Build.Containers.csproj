@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net472</TargetFrameworks>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
     <ImplicitUsings Condition="'$(TargetFramework)' != 'net472'">enable</ImplicitUsings>
 
     <TargetsForTfmSpecificBuildOutput>
@@ -16,16 +16,20 @@
 
     <!-- While in prerelease, ship the symbols to everyone all the time. -->
     <DebugType>embedded</DebugType>
+    <Nullable>enable</Nullable>
+    <NoWarn>($NoWarn);CS8002</NoWarn>
+    <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers">
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" >
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Nuget.Packaging" />
-    <PackageReference Include="Valleysoft.DockerCredsProvider" />
+    <PackageReference Include="Nuget.Packaging" Version="$(NuGetPackagingPackageVersion)" />
+    <PackageReference Include="Valleysoft.DockerCredsProvider" Version="2.1.0"/>
   </ItemGroup>
 
   <!-- net472 builds manually import files to compile -->

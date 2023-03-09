@@ -322,7 +322,7 @@ public class EndToEndTests
             .Should()
             .Pass();
 
-        string[] DecideEntrypoint(string rid, string appName, string workingDir)
+        static string[] DecideEntrypoint(string rid, string appName, string workingDir)
         {
             var binary = rid.StartsWith("win", StringComparison.Ordinal) ? $"{appName}.exe" : appName;
             return new[] { $"{workingDir}/{binary}" };

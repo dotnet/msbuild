@@ -3,18 +3,23 @@
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using containerize;
 
-#pragma warning disable CA1852
+namespace containerize;
 
-try
+internal class Program
 {
-    return await new ContainerizeCommand().InvokeAsync(args).ConfigureAwait(false);
-}
-catch (Exception e)
-{
-    string message = !e.Message.StartsWith("CONTAINER", StringComparison.OrdinalIgnoreCase) ? $"CONTAINER9000: " + e.ToString() : e.ToString();
-    Console.WriteLine($"Containerize: error {message}");
+    private static Task<int> Main(string[] args)
+    {
+        try
+        {
+            return new ContainerizeCommand().InvokeAsync(args);
+        }
+        catch (Exception e)
+        {
+            string message = !e.Message.StartsWith("CONTAINER", StringComparison.OrdinalIgnoreCase) ? $"CONTAINER9000: " + e.ToString() : e.ToString();
+            Console.WriteLine($"Containerize: error {message}");
 
-    return 1;
+            return Task.FromResult(1);
+        }
+    }
 }

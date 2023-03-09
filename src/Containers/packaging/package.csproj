@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.Build.NoTargets/3.7.0">
+﻿<Project Sdk="Microsoft.Build.NoTargets/3.7.0">
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>$(SdkTargetFramework)</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IsPackable>true</IsPackable>
+        <IsShipping>true</IsShipping>
         <NoWarn>NU5100;NU5128</NoWarn>
         <VSCompatTargetFramework>net472</VSCompatTargetFramework>
 
@@ -31,7 +32,7 @@
                           OutputItemType="ContainerLibraryOutputNet472"/>
 
         <ProjectReference Include="../containerize/containerize.csproj" PrivateAssets="all" IncludeAssets="runtime" ReferenceOutputAssembly="true" />
-        <PackageReference Include="System.CommandLine" PrivateAssets="all" IncludeAssets="runtime"/>
+        <PackageReference Include="System.CommandLine" PrivateAssets="all" IncludeAssets="runtime" Version="$(SystemCommandLineVersion)"/>
     </ItemGroup>
 
     <Target Name="PreparePackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec">
@@ -58,9 +59,9 @@
             <!-- tasks folder -->
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
             <Content Include="@(ContainerLibraryOutputNet472)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" />
-            <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
+            <Content Include="../../../artifacts/bin/Microsoft.NET.Build.Containers/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
-            <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(VSCompatTargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)" />
+            <Content Include="../../../artifacts/bin/Microsoft.NET.Build.Containers/$(Configuration)/$(VSCompatTargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)" />
 
             <!-- build folder -->
             <Content Include="build/**" Pack="true" PackagePath="build/" />
@@ -69,7 +70,7 @@
 
     <!-- Hacky workaround for the fact that we don't publish the package yet. -->
     <Target Name="CopyNupkgToCustomFolder" AfterTargets="Pack">
-        <Copy SourceFiles="$(OutDir)../Microsoft.NET.Build.Containers.$(Version).nupkg"
-            DestinationFiles="../Microsoft.NET.Build.Containers.IntegrationTests/package/Microsoft.NET.Build.Containers.$(Version).nupkg" />
+        <Copy SourceFiles="../../../artifacts/packages/$(Configuration)/NonShipping/Microsoft.NET.Build.Containers.$(Version).nupkg"
+            DestinationFiles="../../../artifacts/bin/Microsoft.NET.Build.Containers.IntegrationTests/$(Configuration)/package/Microsoft.NET.Build.Containers.$(Version).nupkg" />
     </Target>
 </Project>
