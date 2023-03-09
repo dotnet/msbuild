@@ -37,7 +37,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public string ProjectSdk { get; set; }
 
-        //  Applies to SDK Projects
+        /// <summary>
+        /// Applies to SDK-style projects. If the value has only one target framework (ie no semicolons), the value will be used
+        /// for the MSBuild TargetFramework (singular) property.  Otherwise, the value will be used for the TargetFrameworks property.
+        /// </summary>
         public string TargetFrameworks { get; set; } = ToolsetInfo.CurrentTargetFramework;
 
         public string RuntimeFrameworkVersion { get; set; }

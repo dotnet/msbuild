@@ -53,6 +53,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)'))</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)', 2))</TargetFrameworkVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion.TrimStart('vV'))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
 

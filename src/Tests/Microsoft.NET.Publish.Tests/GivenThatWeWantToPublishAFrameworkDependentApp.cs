@@ -49,7 +49,6 @@ namespace Microsoft.NET.Publish.Tests
                 $"/p:RuntimeIdentifier={runtimeIdentifier}",
                 $"/p:TestRuntimeIdentifier={runtimeIdentifier}",
                 "/p:SelfContained=false",
-                //$"/p:TargetFramework={targetFramework}"
             };
 
             if (useAppHost != null)

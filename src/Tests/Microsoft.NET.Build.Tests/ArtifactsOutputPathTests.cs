@@ -243,7 +243,6 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Pass();
-
         }
 
         [Fact]
@@ -349,6 +348,35 @@ namespace Microsoft.NET.Build.Tests
             }
 
             return testAsset;
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ArtifactsPathCanBeSet(bool useDirectoryBuildProps)
+        {
+            var artifactsFolder = _testAssetsManager.CreateTestDirectory(identifier: "ArtifactsPath").Path;
+
+            var testAsset = CreateCustomizedTestProject(useDirectoryBuildProps, "ArtifactsPath", artifactsFolder);
+
+            new DotnetBuildCommand(testAsset)
+                .SetEnvironmentVariables(useDirectoryBuildProps)
+                .Execute()
+                .Should()
+                .Pass();
+
+            if (useDirectoryBuildProps)
+            {
+                new FileInfo(Path.Combine(artifactsFolder, "bin", "App", "debug", "App.dll"))
+                    .Should()
+                    .Exist();
+            }
+            else
+            {
+                new FileInfo(Path.Combine(artifactsFolder, "bin", "debug", "App.dll"))
+                    .Should()
+                    .Exist();
+            }
         }
 
         [Theory]
@@ -462,8 +490,6 @@ namespace Microsoft.NET.Build.Tests
                     .Exist();
             }
         }
-
-
     }
 
     namespace ArtifactsTestExtensions

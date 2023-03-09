@@ -117,7 +117,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
 
             File.WriteAllText(injectTargetPath, injectTargetContents);
 
-            var outputDirectory = GetValuesDirectory(_targetFramework);
+            var outputDirectory = GetValuesOutputDirectory(_targetFramework);
             outputDirectory.Create();
 
             return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(TargetName, newArgs);
@@ -131,7 +131,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
         public List<(string value, Dictionary<string, string> metadata)> GetValuesWithMetadata()
         {
             string outputFilename = $"{_valueName}Values.txt";
-            var outputDirectory = GetValuesDirectory(_targetFramework, Configuration ?? "Debug");
+            var outputDirectory = GetValuesOutputDirectory(_targetFramework, Configuration ?? "Debug");
             string fullFileName = Path.Combine(outputDirectory.FullName, outputFilename);
 
             if (File.Exists(fullFileName))
@@ -165,7 +165,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
             }
         }
 
-        DirectoryInfo GetValuesDirectory(string targetFramework = "", string configuration = "Debug")
+        DirectoryInfo GetValuesOutputDirectory(string targetFramework = "", string configuration = "Debug")
         {
             //  Use a consistent directory format to put the values text file in, so we don't have to worry about
             //  whether the project uses the standard output path format or not
