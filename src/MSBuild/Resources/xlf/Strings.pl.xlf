@@ -122,7 +122,7 @@
                      interakcyjność nie jest oczekiwana.
                      Podanie parametru -interactive jest równoznaczne
                      z podaniem parametru -interactive:true. Użyj tego
-                     parametru, aby przesłonić wartość pochodzącą z pliku
+                     parametru, aby przesłonić wartość pochodzącą z pliku 
                      odpowiedzi.
     </target>
         <note>
@@ -151,19 +151,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="needs-review-translation">  -isolateProjects[:True|False]
-                     Powoduje, że program MSBuild kompiluje każdy projekt
-                     w sposób izolowany.
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     Jest to bardziej restrykcyjny tryb programu MSBuild, ponieważ
-                     wymaga, aby graf projektu był statycznie wykrywalny podczas
-                     oceny, ale może usprawnić planowanie i zmniejszyć
-                     obciążenie pamięci podczas kompilowania dużego zestawu
-                     projektów.
-                     (Krótka wersja: -isolate)
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
-                     Ta flaga jest eksperymentalna i może nie działać w oczekiwany
-                     sposób.
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -184,7 +190,7 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -graphBuild[:True|False]
-                     Powoduje, że program MSBuild tworzy i kompiluje graf
+                     Powoduje, że program MSBuild tworzy i kompiluje graf                 
                      projektu.
 
                      Tworzenie grafu obejmuje identyfikowanie odwołań do
@@ -284,7 +290,7 @@
     </source>
         <target state="translated">
  -warnNotAsError[:code[;code2]]
- Lista kodów ostrzeżeń, które mają być traktowane jako błędy.
+ Lista kodów ostrzeżeń, które mają być traktowane jako błędy. 
  Rozdziel średnik lub przecinek
  wiele kodów ostrzeżeń. Nie ma żadnego efektu, jeśli przełącznik -warnaserror
                      switch is not set.
@@ -354,7 +360,7 @@
                      osobno.
 
                      Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie
-                     wykorzystywane z następujących lokalizacji:
+                     wykorzystywane z następujących lokalizacji: 
                      (1) katalog programu msbuild.exe
                      (2) katalog pierwszej kompilacji projektu lub rozwiązania
 </target>
@@ -666,11 +672,10 @@
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="needs-review-translation">  -inputResultsCaches:&lt;plik pamięci podręcznej&gt;...
-                     Rozdzielana średnikami lista wejściowych plików pamięci podręcznej, z których program MSBuild
-                     będzie odczytywać wyniki kompilacji.
-                     Ustawienie tej opcji włącza też kompilacje izolowane (-isolate).
-                     (Krótka wersja: -irc)
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -684,11 +689,11 @@
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="needs-review-translation">  -outputResultsCache:[plik pamięci podręcznej]
-                     Plik pamięci podręcznej, w którym program MSBuild zapisze zawartość
-                     swoich pamięci podręcznych wyników kompilacji po zakończeniu kompilacji.
-                     Ustawienie tej opcji włącza też kompilacje izolowane (-isolate).
-                     (Krótka wersja: -orc)
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
+                     (short form: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -906,7 +911,7 @@
                      Dostępne są parametry takie same, jak podane dla rejestratora
                      konsoli. Dostępne są również dodatkowe parametry:
                        LogFile — ścieżka do pliku dziennika, w którym będzie
-                                 zapisywany dziennik kompilacji.
+                                 zapisywany dziennik kompilacji. 
                        Append — określa, czy plik dziennika kompilacji zostanie
                                 dołączony do pliku dziennika, czy go zastąpi.
                                 Ustawienie tego przełącznika powoduje dołączenie dziennika kompilacji
@@ -920,8 +925,8 @@
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1044,7 +1049,7 @@
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1056: Wartość projektów izolacji jest nieprawidłowa. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: Wartość projektów izolacji jest nieprawidłowa. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1713,10 +1718,10 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
     </source>
         <target state="translated">  -restore[:True|False]
                      Uruchamia element docelowy o nazwie Restore przed skompilowaniem
-                     innych elementów docelowych i zapewnia, że kompilacja tych
-                     elementów docelowych korzysta z najnowszej logiki przywróconej
-                     kompilacji. Jest to przydatne, gdy drzewo projektu wymaga
-                     przywrócenia pakietów przed ich skompilowaniem. Podanie parametru
+                     innych elementów docelowych i zapewnia, że kompilacja tych 
+                     elementów docelowych korzysta z najnowszej logiki przywróconej 
+                     kompilacji. Jest to przydatne, gdy drzewo projektu wymaga 
+                     przywrócenia pakietów przed ich skompilowaniem. Podanie parametru 
                      -restore jest równoznaczne z podaniem parametru -restore:True.
                      Za pomocą tego parametru można przesłonić wartość pochodzącą
                      z pliku odpowiedzi.

@@ -151,16 +151,25 @@ arquivo de resposta.
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="needs-review-translation">  -isolateProjects[:True|False]
-                     Faz o MSBuild compilar cada projeto
-isoladamente.
-                     Esse é um modo mais restritivo do MSBuild, pois requer
-                     que o gráfico do projeto seja estatisticamente detectável no
-                     tempo de avaliação, mas pode melhorar o agendamento e reduzir
-                     a sobrecarga de memória ao compilar um grande conjunto de projetos.
-                     (Forma abreviada: -isolate)
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     Esse sinalizador é experimental e pode não funcionar como pretendido.
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
+
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -618,10 +627,10 @@ isoladamente.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: -m[:n])
       </source>
-        <target state="translated">  -maxCpuCount[:n] Especifica o número máximo de processos simultâneos a serem
+        <target state="translated">  -maxCpuCount[:n] Especifica o número máximo de processos simultâneos a serem 
                      compilados. Se a opção não for usada, o valor padrão
                      usado será 1. Se a opção for usada sem um valor, o
-                     MSBuild usará o número de processadores do
+                     MSBuild usará o número de processadores do 
                      computador. (Forma abreviada: -m[:n])
       </target>
         <note>
@@ -639,7 +648,7 @@ isoladamente.
         <target state="translated">Exemplos:
 
         MSBuild MyApp.sln -t:Rebuild -p:Configuration=Release
-        MSBuild MyApp.csproj -t:Clean
+        MSBuild MyApp.csproj -t:Clean 
                              -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
@@ -657,11 +666,10 @@ isoladamente.
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="needs-review-translation">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Lista separada por ponto e vírgula de arquivos de cache de entrada dos quais o MSBuild
-                     lerá os resultados do build.
-                     A definição dessa opção também habilita os builds isolados (-isolate).
-                     (forma abreviada: -irc)
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -675,11 +683,11 @@ isoladamente.
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="needs-review-translation">  -outputResultsCache:[cacheFile]
-                     Arquivo de cache de saída no qual o MSBuild gravará o conteúdo
-                     dos caches de resultado do build no final do build.
-                     A configuração dessa opção também habilita builds isolado (-isolate).
-                     (forma abreviada: -orc)
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
+                     (short form: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -801,12 +809,12 @@ isoladamente.
                      10 file loggers to be attached. (Short form: -fl[n])
     </source>
         <target state="translated">  -fileLogger[n] Registra a saída do build em um arquivo. Por padrão,
-                     o arquivo está no diretório atual e tem o nome
+                     o arquivo está no diretório atual e tem o nome 
                      "msbuild[n].log". Os eventos de todos os nós são combinados em
                      um único log. A localização do arquivo e outros
-                     parâmetros do fileLogger pode ser especificada por meio
+                     parâmetros do fileLogger pode ser especificada por meio 
                      do acréscimo da opção "-fileLoggerParameters[n]".
-                     "n", se presente, pode ser um dígito de 1 a 9, permitindo que até
+                     "n", se presente, pode ser um dígito de 1 a 9, permitindo que até 
                      10 agentes de arquivo sejam anexados. (Forma abreviada: -fl[n])
     </target>
         <note>
@@ -959,14 +967,14 @@ isoladamente.
                      Example:
                        -pp:out.txt
     </source>
-        <target state="translated">  -preprocess[:arquivo]
+        <target state="translated">  -preprocess[:arquivo] 
                      Cria um arquivo de projeto único e agregado
                      embutindo todos os arquivos que poderiam ser importados durante um
                      build, com seus limites marcados. Isso pode ser
                      útil para descobrir quais arquivos são importados,
                      de qual localização e como contribuirão para
                      o build. Por padrão, a saída é gravada na
-                     janela do console. Se o caminho de um arquivo de saída
+                     janela do console. Se o caminho de um arquivo de saída 
                      for fornecido, ele será usado.
                      (Forma abreviada: -pp)
                      Exemplo:
@@ -1033,7 +1041,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1056: O valor de projetos isolados não é válido. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: O valor de projetos isolados não é válido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1547,7 +1555,7 @@ isoladamente.
                        -warnAsError:MSB4130
 
                      Quando um aviso for tratado como um erro, o destino continuará
-                     a ser executado como se ele fosse um aviso, mas o
+                     a ser executado como se ele fosse um aviso, mas o 
                      build geral falhará.
     </target>
         <note>

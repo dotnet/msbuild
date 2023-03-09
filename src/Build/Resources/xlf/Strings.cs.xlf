@@ -1851,7 +1851,7 @@
       </trans-unit>
       <trans-unit id="UnrecognizedChildElement">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized.</source>
-        <target state="needs-review-translation">MSB4067: Element &lt;{0}&gt; pod elementem &lt;{1}&gt; nebyl rozpoznán.</target>
+        <target state="translated">MSB4067: Element &lt;{0}&gt; pod elementem &lt;{1}&gt; nebyl rozpoznán.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="InvalidChildElementDueToDuplication">
