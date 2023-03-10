@@ -41,6 +41,26 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
+            VerifyRequestDelegateGeneratorIsUsed(asset, isEnabled);
+        }
+
+        [Fact]
+        public void It_enables_requestdelegategenerator_for_PublishAot()
+        {
+            var asset = _testAssetsManager
+                .CopyTestAsset("WebApp")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    project.Root.Add(new XElement(ns + "PropertyGroup", new XElement("PublishAot", "true")));
+                });
+
+            VerifyRequestDelegateGeneratorIsUsed(asset, expectEnabled: true);
+        }
+
+        private void VerifyRequestDelegateGeneratorIsUsed(TestAsset asset, bool? expectEnabled)
+        {
             var command = new GetValuesCommand(
                 Log,
                 asset.Path,
@@ -55,7 +75,7 @@ namespace Microsoft.NET.Build.Tests
 
             var analyzers = command.GetValues();
 
-            Assert.Equal(isEnabled ?? false, analyzers.Any(analyzer => analyzer.Contains("Microsoft.AspNetCore.Http.Generators.dll")));
+            Assert.Equal(expectEnabled ?? false, analyzers.Any(analyzer => analyzer.Contains("Microsoft.AspNetCore.Http.Generators.dll")));
         }
 
         [Theory]

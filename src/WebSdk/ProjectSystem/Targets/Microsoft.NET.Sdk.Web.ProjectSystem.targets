@@ -46,10 +46,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableUnsafeBinaryFormatterSerialization Condition="'$(EnableUnsafeBinaryFormatterSerialization)' == ''">false</EnableUnsafeBinaryFormatterSerialization>
   </PropertyGroup>
 
-
   <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' Or '$(PublishAot)' == 'true'">
     <!-- Runtime feature defaults to trim unnecessary code -->
     <EnsureAspNetCoreJsonTrimmability Condition="'$(EnsureAspNetCoreJsonTrimmability)' == ''">true</EnsureAspNetCoreJsonTrimmability>
+  </PropertyGroup>
+
+  <!--
+    Enable the RequestDelegateGenerator by default for NativeAot apps.
+    This will be enabled for all PublishTrimmed apps once the RequestDelegateGenerator supports all MinimalApi features.
+   -->
+  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <EnableRequestDelegateGenerator Condition="'$(EnableRequestDelegateGenerator)' == ''">true</EnableRequestDelegateGenerator>
   </PropertyGroup>
 
   <!--
