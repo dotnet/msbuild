@@ -196,8 +196,6 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
             builder.AppendSwitchIfNotNull("--container-user ", ContainerUser);
         }
 
-        builder.AppendSwitchIfNotNull("--container-omit-history", ContainerOmitHistory.ToString().ToLowerInvariant());
-
         return builder.ToString();
     }
 

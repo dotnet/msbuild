@@ -291,11 +291,13 @@ public class ImageBuilderTests
         Assert.NotNull(resultPorts["6200/tcp"] as JsonObject);
     }
 
-    [InlineData(true)]
-    [InlineData(false)]
-    [Theory]
-    public void CanOmitAndKeepHistory(bool omitHistory)
+    [Fact]
+    public void HistoryEntriesMatchNonEmptyLayers()
     {
+        // Note how the base image config is alredy "corrupt" by having
+        // only 5 layers with only 2 history entries. We expect the
+        // final config to also have 5 (non empty) history entries.
+
         string simpleImageConfig =
             """
                 {
@@ -356,22 +358,21 @@ public class ImageBuilderTests
         JsonNode? node = JsonNode.Parse(simpleImageConfig);
         Assert.NotNull(node);
 
-        ImageConfig baseConfig = new ImageConfig(node);
-
-        baseConfig.SetOmitHistory(omitHistory);
+        ImageConfig baseConfig = new(node);
 
         string readyImage = baseConfig.BuildConfig();
 
         JsonNode? result = JsonNode.Parse(readyImage);
 
         var historyNode = result?["history"];
-        if (omitHistory)
-        {
-            Assert.Null(historyNode);
-        }
-        else
-        {
-            Assert.NotNull(historyNode);
-        }
+        Assert.NotNull(historyNode);
+
+        var layerDiffsNode = result?["rootfs"]?["diff_ids"];
+        Assert.NotNull(layerDiffsNode);
+
+        int nonEmptyHistoryNodes = historyNode.AsArray()
+            .Count(h => h?.AsObject()["empty_layer"]?.GetValue<bool>() is null or false);
+        int layerCount = layerDiffsNode.AsArray().Count;
+        Assert.Equal(nonEmptyHistoryNodes, layerCount);
     }
 }

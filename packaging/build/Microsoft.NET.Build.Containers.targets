@@ -60,8 +60,6 @@
       <!-- An empty ContainerRegistry implies pushing to the local daemon, putting this here for documentation purposes -->
       <!-- <ContainerRegistry></ContainerRegistry> -->
 
-      <ContainerOmitHistory Condition=" '$(ContainerOmitHistory)' == '' ">false</ContainerOmitHistory>
-
       <!-- Set which local container daemon to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
       <LocalContainerDaemon Condition="'$(LocalContainerDaemon)' == ''">Docker</LocalContainerDaemon>
 
@@ -191,7 +189,6 @@
                     ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)"
                     ContainerRuntimeIdentifier="$(ContainerRuntimeIdentifier)"
                     ContainerUser="$(ContainerUser)"
-                    ContainerOmitHistory="$(ContainerOmitHistory)"
                     RuntimeIdentifierGraphPath="$(RuntimeIdentifierGraphPath)"> <!-- The RID graph path is provided as a property by the SDK. -->
 
       <Output TaskParameter="GeneratedContainerManifest" PropertyName="GeneratedContainerManifest" />

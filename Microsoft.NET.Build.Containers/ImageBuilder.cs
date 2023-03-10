@@ -90,15 +90,4 @@ internal sealed class ImageBuilder
     internal void SetEntryPoint(string[] executableArgs, string[]? args = null) => _baseImageConfig.SetEntryPoint(executableArgs, args);
 
     internal void SetUser(string user) => _baseImageConfig.SetUser(user);
-
-    /// <summary>
-    /// Sets whether the history should be omitted from the final configuration.
-    /// </summary>
-    /// <param name="omitHistory">true if the hihstory should be omitted, otherwise false</param>
-    /// <remarks>
-    /// Some registries like JFROG Artifactory, have problems with handling the history, this option allowes
-    /// compatibility with them.
-    /// </remarks>
-    internal void SetOmitHistory(bool omitHistory) => _baseImageConfig.SetOmitHistory(omitHistory);
-
 }

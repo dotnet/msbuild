@@ -69,7 +69,6 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory, imageBuilder.IsWindows);
         imageBuilder.AddLayer(newLayer);
         imageBuilder.SetWorkingDirectory(WorkingDirectory);
-        imageBuilder.SetOmitHistory(ContainerOmitHistory);
         imageBuilder.SetEntryPoint(Entrypoint.Select(i => i.ItemSpec).ToArray(), EntrypointArgs.Select(i => i.ItemSpec).ToArray());
 
         foreach (ITaskItem label in Labels)

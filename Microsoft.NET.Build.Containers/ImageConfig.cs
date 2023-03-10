@@ -26,7 +26,6 @@ internal sealed class ImageConfig
     private readonly string _architecture;
     private readonly string _os;
     private readonly List<HistoryEntry> _history;
-    private bool _omitHistory;
 
     /// <summary>
     /// Gets a value indicating whether the base image is has a Windows operating system.
@@ -117,8 +116,18 @@ internal sealed class ImageConfig
             }
         }
 
-        // add a history entry for ourselves so folks can map generated layers to the Dockerfile commands
-        _history.Add(new HistoryEntry(created: DateTime.UtcNow, author: ".NET SDK", created_by: $".NET SDK Container Tooling, version {Constants.Version}"));
+        // Add history entries for ourselves so folks can map generated layers to the Dockerfile commands.
+        // The number of (non empty) history items must match the number of layers in the image.
+        // Some registries like JFrog Artifactory have there a strict validation rule (see sdk-container-builds#382).
+        int numberOfLayers = _rootFsLayers.Count;
+        int numberOfNonEmptyLayerHistoryEntries = _history.Count(h =>h.empty_layer is null or false);
+        int missingHistoryEntries = numberOfLayers - numberOfNonEmptyLayerHistoryEntries;
+        HistoryEntry customHistoryEntry = new(created: DateTime.UtcNow, author: ".NET SDK",
+            created_by: $".NET SDK Container Tooling, version {Constants.Version}");
+        for (int i = 0; i < missingHistoryEntries; i++)
+        {
+            _history.Add(customHistoryEntry);
+        }
 
         var configContainer = new JsonObject()
         {
@@ -132,17 +141,12 @@ internal sealed class ImageConfig
             },
             ["architecture"] = _architecture,
             ["os"] = _os,
-            ["history"] = new JsonArray(_history.Select(CreateHistory).ToArray()),
+            ["history"] = new JsonArray(_history.Select(CreateHistory).ToArray<JsonNode>())
         };
-
-        if (_omitHistory)
-        {
-            configContainer.Remove("history");
-        }
 
         return configContainer.ToJsonString();
 
-        static JsonArray ToJsonArray(IEnumerable<string> items) => new(items.Where(s => !string.IsNullOrEmpty(s)).Select(s => JsonValue.Create(s)).ToArray());
+        static JsonArray ToJsonArray(IEnumerable<string> items) => new(items.Where(s => !string.IsNullOrEmpty(s)).Select(s => JsonValue.Create(s)).ToArray<JsonNode?>());
     }
 
     private JsonObject CreateHistory(HistoryEntry h)
@@ -206,12 +210,6 @@ internal sealed class ImageConfig
     }
 
     internal void SetUser(string user) => _user = user;
-
-
-    public void SetOmitHistory(bool omitHistory)
-    {
-        _omitHistory = omitHistory;
-    }
 
     private HashSet<Port> GetExposedPorts()
     {
