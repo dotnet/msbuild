@@ -154,16 +154,15 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
-            FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(projectFile);
+            DateTime modifiedTime = NativeMethodsShared.GetLastWriteFileUtcTime(projectFile);
 
             // If the file doesn't exist on disk, go ahead and use the cached version.
             // It's an in-memory project that hasn't been saved yet.
-            if (fileInfo == null)
+            if (modifiedTime == DateTime.MinValue)
             {
                 return false;
             }
-
-            if (fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead)
+            else if (modifiedTime != projectRootElement.LastWriteTimeWhenRead.ToUniversalTime())
             {
                 // File was changed on disk by external means. Cached version is no longer valid.
                 // We could throw here or ignore the problem, but it is a common and reasonable pattern to change a file
@@ -239,9 +238,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectRootElement projectRootElement;
                 lock (_locker)
                 {
-                    _weakCache.TryGetValue(projectFile, out projectRootElement);
-
-                    if (projectRootElement != null)
+                    if (_weakCache.TryGetValue(projectFile, out projectRootElement))
                     {
                         BoostEntryInStrongCache(projectRootElement);
 
@@ -250,16 +247,16 @@ namespace Microsoft.Build.Evaluation
                         {
                             projectRootElement.MarkAsExplicitlyLoaded();
                         }
+
+                        if (preserveFormatting != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                        {
+                            // Cached project doesn't match preserveFormatting setting, so reload it
+                            projectRootElement.Reload(true, preserveFormatting);
+                        }
                     }
                     else
                     {
                         DebugTraceCache("Not found in cache: ", projectFile);
-                    }
-
-                    if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
-                    {
-                        // Cached project doesn't match preserveFormatting setting, so reload it
-                        projectRootElement.Reload(true, preserveFormatting);
                     }
                 }
 
@@ -367,13 +364,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override ProjectRootElement TryGet(string projectFile, bool? preserveFormatting)
         {
-            ProjectRootElement result = Get(
+            return Get(
                 projectFile,
                 loadProjectRootElement: null, // no delegate to load it
                 isExplicitlyLoaded: false, // Since we are not creating a PRE this can be true or false
                 preserveFormatting: preserveFormatting);
-
-            return result;
         }
 
         /// <summary>
@@ -445,9 +440,7 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (string projectPath in oldWeakCache.Keys)
                 {
-                    ProjectRootElement rootElement;
-
-                    if (oldWeakCache.TryGetValue(projectPath, out rootElement))
+                    if (oldWeakCache.TryGetValue(projectPath, out ProjectRootElement rootElement))
                     {
                         if (rootElement.IsExplicitlyLoaded)
                         {
@@ -484,7 +477,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
 
             // A PRE may be unnamed if it was only used in memory.
-            if (projectRootElement.FullPath != null)
+            if (projectRootElement.FullPath != null && _weakCache.Contains(projectRootElement.FullPath))
             {
                 lock (_locker)
                 {
@@ -521,10 +514,8 @@ namespace Microsoft.Build.Evaluation
             // but clients ought not get themselves into such a state - and unless they save them to disk,
             // it may not be a problem. Replacing also doesn't cause a problem for the strong cache,
             // as it is never consulted by us, but it is reasonable for us to remove the old entry in that case.
-            ProjectRootElement existingWeakEntry;
-            _weakCache.TryGetValue(projectRootElement.FullPath, out existingWeakEntry);
-
-            if (existingWeakEntry != null && !Object.ReferenceEquals(existingWeakEntry, projectRootElement))
+            if (_weakCache.TryGetValue(projectRootElement.FullPath, out ProjectRootElement existingWeakEntry) &&
+                !ReferenceEquals(existingWeakEntry, projectRootElement))
             {
                 _strongCache.Remove(existingWeakEntry);
                 RaiseProjectRootElementRemovedFromStrongCache(existingWeakEntry);
@@ -553,7 +544,7 @@ namespace Microsoft.Build.Evaluation
 
             while (node != null)
             {
-                if (Object.ReferenceEquals(node.Value, projectRootElement))
+                if (ReferenceEquals(node.Value, projectRootElement))
                 {
                     // DebugTraceCache("Boosting: ", projectRootElement.FullPath);
                     _strongCache.Remove(node);
@@ -572,7 +563,7 @@ namespace Microsoft.Build.Evaluation
                 node = _strongCache.Last;
 
                 DebugTraceCache("Shedding: ", node.Value.FullPath);
-                _strongCache.Remove(node);
+                _strongCache.RemoveLast();
                 RaiseProjectRootElementRemovedFromStrongCache(node.Value);
             }
         }
@@ -589,11 +580,9 @@ namespace Microsoft.Build.Evaluation
 
             _weakCache.Remove(projectRootElement.FullPath);
 
-            LinkedListNode<ProjectRootElement> strongCacheEntry = _strongCache.Find(projectRootElement);
-            if (strongCacheEntry != null)
+            if (_strongCache.Remove(projectRootElement))
             {
-                _strongCache.Remove(strongCacheEntry);
-                RaiseProjectRootElementRemovedFromStrongCache(strongCacheEntry.Value);
+                RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
             }
 
             DebugTraceCache("Out of date dropped from XML cache: ", projectRootElement.FullPath);
