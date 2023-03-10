@@ -446,16 +446,18 @@ namespace Microsoft.Build.Evaluation
                         {
                             _weakCache[projectPath] = rootElement;
                         }
+                    }
+                }
 
-                        if (rootElement.IsExplicitlyLoaded && oldStrongCache.Contains(rootElement))
-                        {
-                            _strongCache.AddFirst(rootElement);
-                        }
-                        else
-                        {
-                            _strongCache.Remove(rootElement);
-                            RaiseProjectRootElementRemovedFromStrongCache(rootElement);
-                        }
+                for (LinkedListNode<ProjectRootElement> node = oldStrongCache.First; node is not null; node = node.Next)
+                {
+                    if (node.Value.IsExplicitlyLoaded)
+                    {
+                        _strongCache.AddFirst(node);
+                    }
+                    else
+                    {
+                        RaiseProjectRootElementRemovedFromStrongCache(node.Value);
                     }
                 }
             }
