@@ -24,7 +24,7 @@ RAR issues a warning and otherwise ignores the assembly. This may lead to the ou
 
 ### Inputs
 
-In a typical modern build, RAR inputs come from three sources.
+In a typical build targeting modern .NET (*not* .NET Framework), RAR inputs come from three sources.
 
 1. SDK reference assemblies. These are full paths to assemblies distributed with the SDK. The SDK may get the list of assemblies for example by parsing the
 corresponding `FrameworkList.xml`. Reference assemblies are passed to RAR with the `ExternallyResolved` metadatum set, which means that they are
@@ -167,12 +167,11 @@ This is assuming we trust the SDK that it passes correct data and we trust the u
 valid, the mitigation would be to store and check the timestamp of each individual file. We would still benefit from smaller on disk caches, being able to store only
 the timestamp and not assembly name for intact SDK references, but the hot scenario wouldn't get any faster than today.
 
-### Treat NuGet references as immutable
+### Treat NuGet references as immutable [shelved]
 
 NuGet references live in the NuGet cache which is conceptually immutable. If RAR takes advantage of this, it can eliminate timestamp checks for NuGet references as
 well. The risk is higher than for SDK references because overwriting files in the NuGet cache is commonly used as a cut-the-corner workaround. The benefit is smaller
-because the number of NuGet references is typically lower. The proposal is to use the immutability assumption by default, and provide an opt-out mechanism, likely in
-the form of a new `PackageReference` metadatum for the user to indicate that they plan to update references in the package.
+because the number of NuGet references is typically lower. The proposal is to shelve this opportunity for now due to the unfavorable risk-benefit ratio.
 
 ### Don't load the per project disk cache when not needed
 
@@ -180,10 +179,18 @@ As described above, the on disk cache is not adding any value in the hot scenari
 load it lazily only when (and if) RAR runs into an assembly that does not have a record in the in-memory cache. In developer inner loop, when the same solution is
 built over and over again, the cache would typically not be loaded at all, unless the developer makes a change that actually changes the dependency graph.
 
-As for saving the per-project cache, the logic would stay the same as it is today. If the in-memory cache is marked _dirty_ because it's not identical to what had
-been read from the cache, it would be written back to disk. As a special case, the cache would be considered dirty if the file does not exist at all. This is to
-support scenarios like rebuilding a project by a _hot_ RAR. RAR would be able to satisfy everything from memory, but because rebuild has cleaned the intermediate
-directory, the state would not otherwise be persisted.
+### Save only relevant data to the per project disk cache
+
+As for saving the per-project cache, we would guarantee that after RAR is done, the cache contains exactly the data needed for this specific project. This would
+be done by keeping track of the items used during RAR execution, and writing those and only those to the cache. Having a cache that's guaranteed to have certain
+well-defined content after each build is a very good property to have. For instance, in dev box scenarios it would otherwise be hard to reliably "prime" a repo
+enlistment - the system may prime by building the full solution and then the developer uses the box to build a specific project that happens to have an incomplete
+cache and get sub-optimal first-time build performance.
+
+Saving of the per-project disk cache may be further optimized by
+- Keeping the timestamp of the cache file in memory and skipping the save if the relevant cache items haven't become dirty (i.e. the dependencies have not changed)
+*and* the timestamp of the cache file hasn't changed since the last save. In hot inner loop scenarios this would reduce the save to a timestamp check.
+- Saving the file asynchronously, i.e. not blocking the build on completing the save operation.
 
 ### Don't use the SDK disk pre-cache
 
