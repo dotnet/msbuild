@@ -28,22 +28,21 @@
     <MicrosoftApplicationInsightsPackageVersion>2.19.0</MicrosoftApplicationInsightsPackageVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
-    <NewtonsoftJsonVersion>$(NewtonsoftJsonPackageVersion)</NewtonsoftJsonVersion>
     <StyleCopAnalyzersPackageVersion>1.2.0-beta.435</StyleCopAnalyzersPackageVersion>
-    <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
+    <SystemCollectionsImmutableVersion>7.0.0</SystemCollectionsImmutableVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
-    <SystemReflectionMetadataVersion>6.0.0</SystemReflectionMetadataVersion>
+    <SystemReflectionMetadataVersion>7.0.0</SystemReflectionMetadataVersion>
     <MicrosoftDotNetSignToolVersion>8.0.0-beta.23120.1</MicrosoftDotNetSignToolVersion>
     <MicrosoftWebXdtPackageVersion>7.0.0-preview.22423.2</MicrosoftWebXdtPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>8.0.0-preview.3.23160.2</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
     <WebDeploymentPackageVersion>4.0.5</WebDeploymentPackageVersion>
-    <SystemTextJsonVersion>6.0.0</SystemTextJsonVersion>
+    <SystemTextJsonVersion>7.0.2</SystemTextJsonVersion>
     <SystemReflectionMetadataLoadContextVersion>8.0.0-preview.3.23160.2</SystemReflectionMetadataLoadContextVersion>
     <SystemManagementPackageVersion>4.6.0</SystemManagementPackageVersion>
     <SystemCommandLineVersion>2.0.0-beta4.22564.1</SystemCommandLineVersion>
-    <MicrosoftDeploymentDotNetReleasesVersion>1.0.0-preview5.1.22263.1</MicrosoftDeploymentDotNetReleasesVersion>
+    <MicrosoftDeploymentDotNetReleasesVersion>1.0.0-preview6.1.23159.4</MicrosoftDeploymentDotNetReleasesVersion>
     <MicrosoftVisualStudioSetupConfigurationInteropVersion>3.0.4496</MicrosoftVisualStudioSetupConfigurationInteropVersion>
   </PropertyGroup>
   <PropertyGroup>

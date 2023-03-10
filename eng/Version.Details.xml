@@ -255,6 +255,17 @@
       <Sha>7bf6cff81d0dd42b12f6d1a9b29f00607bfb47b4</Sha>
       <SourceBuild RepoName="source-build-externals" ManagedOnly="true" />
     </Dependency>
+    <Dependency Name="Microsoft.Deployment.DotNet.Releases" Version="1.0.0-preview6.1.23159.4">
+      <Uri>https://github.com/dotnet/deployment-tools</Uri>
+      <Sha>b60c95e1ce736630d17e16626c59e3dd85ebae2b</Sha>
+    </Dependency>
+    <!-- Explicit dependency because Microsoft.Deployment.DotNet.Releases has different versioning
+         than the SB intermediate -->
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.deployment-tools" Version="8.0.0-preview.1.23159.4">
+      <Uri>https://github.com/dotnet/deployment-tools</Uri>
+      <Sha>b60c95e1ce736630d17e16626c59e3dd85ebae2b</Sha>
+      <SourceBuild RepoName="deployment-tools" ManagedOnly="true" />
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.23120.1">
