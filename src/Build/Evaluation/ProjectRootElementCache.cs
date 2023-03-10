@@ -5,13 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
@@ -248,7 +246,7 @@ namespace Microsoft.Build.Evaluation
                             projectRootElement.MarkAsExplicitlyLoaded();
                         }
 
-                        if (preserveFormatting != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                        if (projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
                         {
                             // Cached project doesn't match preserveFormatting setting, so reload it
                             projectRootElement.Reload(true, preserveFormatting);
@@ -479,7 +477,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
 
             // A PRE may be unnamed if it was only used in memory.
-            if (projectRootElement.FullPath != null && _weakCache.Contains(projectRootElement.FullPath))
+            if (projectRootElement.FullPath != null)
             {
                 lock (_locker)
                 {
