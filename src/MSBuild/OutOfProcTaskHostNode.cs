@@ -982,16 +982,16 @@ namespace Microsoft.Build.CommandLine
 
             if (_updateEnvironment)
             {
-                foreach (string variable in s_mismatchedEnvironmentValues.Keys)
+                foreach (KeyValuePair<string, KeyValuePair<string, string>> variable in s_mismatchedEnvironmentValues)
                 {
-                    string oldValue = s_mismatchedEnvironmentValues[variable].Key;
-                    string newValue = s_mismatchedEnvironmentValues[variable].Value;
+                    string oldValue = variable.Value.Key;
+                    string newValue = variable.Value.Value;
 
                     // We don't check the return value, because having the variable not exist == be
                     // null is perfectly valid, and mismatchedEnvironmentValues stores those values
                     // as null as well, so the String.Equals should still return that they are equal.
                     string environmentValue = null;
-                    environment.TryGetValue(variable, out environmentValue);
+                    environment.TryGetValue(variable.Key, out environmentValue);
 
                     if (String.Equals(environmentValue, oldValue, StringComparison.OrdinalIgnoreCase))
                     {
@@ -1009,14 +1009,14 @@ namespace Microsoft.Build.CommandLine
                         {
                             if (_updateEnvironmentAndLog)
                             {
-                                LogMessageFromResource(MessageImportance.Low, "ModifyingTaskHostEnvironmentVariable", variable, newValue, environmentValue ?? String.Empty);
+                                LogMessageFromResource(MessageImportance.Low, "ModifyingTaskHostEnvironmentVariable", variable.Key, newValue, environmentValue ?? String.Empty);
                             }
 
-                            updatedEnvironment[variable] = newValue;
+                            updatedEnvironment[variable.Key] = newValue;
                         }
                         else
                         {
-                            updatedEnvironment.Remove(variable);
+                            updatedEnvironment.Remove(variable.Key);
                         }
                     }
                 }
@@ -1045,35 +1045,32 @@ namespace Microsoft.Build.CommandLine
 
             if (_updateEnvironment)
             {
-                foreach (string variable in s_mismatchedEnvironmentValues.Keys)
+                foreach (KeyValuePair<string, KeyValuePair<string, string>> variable in s_mismatchedEnvironmentValues)
                 {
                     // Since this is munging the property list for returning to the parent process,
                     // then the value we wish to replace is the one that is in this process, and the
                     // replacement value is the one that originally came from the parent process,
                     // instead of the other way around.
-                    string oldValue = s_mismatchedEnvironmentValues[variable].Value;
-                    string newValue = s_mismatchedEnvironmentValues[variable].Key;
+                    string oldValue = variable.Value.Value;
+                    string newValue = variable.Value.Key;
 
                     // We don't check the return value, because having the variable not exist == be
                     // null is perfectly valid, and mismatchedEnvironmentValues stores those values
                     // as null as well, so the String.Equals should still return that they are equal.
                     string environmentValue = null;
-                    environment.TryGetValue(variable, out environmentValue);
+                    environment.TryGetValue(variable.Key, out environmentValue);
 
                     if (String.Equals(environmentValue, oldValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (updatedEnvironment == null)
-                        {
-                            updatedEnvironment = new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase);
-                        }
+                        updatedEnvironment ??= new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase);
 
                         if (newValue != null)
                         {
-                            updatedEnvironment[variable] = newValue;
+                            updatedEnvironment[variable.Key] = newValue;
                         }
                         else
                         {
-                            updatedEnvironment.Remove(variable);
+                            updatedEnvironment.Remove(variable.Key);
                         }
                     }
                 }
@@ -1106,36 +1103,36 @@ namespace Microsoft.Build.CommandLine
                 // after the node is launched.
                 s_mismatchedEnvironmentValues = new Dictionary<string, KeyValuePair<string, string>>(StringComparer.OrdinalIgnoreCase);
 
-                foreach (string variable in _savedEnvironment.Keys)
+                foreach (KeyValuePair<string, string> variable in _savedEnvironment)
                 {
-                    string oldValue = _savedEnvironment[variable];
+                    string oldValue = variable.Value;
                     string newValue;
-                    if (!environment.TryGetValue(variable, out newValue))
+                    if (!environment.TryGetValue(variable.Key, out newValue))
                     {
-                        s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(null, oldValue);
+                        s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(null, oldValue);
                     }
                     else
                     {
                         if (!String.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
                         {
-                            s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(newValue, oldValue);
+                            s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, oldValue);
                         }
                     }
                 }
 
-                foreach (string variable in environment.Keys)
+                foreach (KeyValuePair<string, string> variable in environment)
                 {
-                    string newValue = environment[variable];
+                    string newValue = variable.Value;
                     string oldValue;
-                    if (!_savedEnvironment.TryGetValue(variable, out oldValue))
+                    if (!_savedEnvironment.TryGetValue(variable.Key, out oldValue))
                     {
-                        s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(newValue, null);
+                        s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, null);
                     }
                     else
                     {
                         if (!String.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
                         {
-                            s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(newValue, oldValue);
+                            s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, oldValue);
                         }
                     }
                 }

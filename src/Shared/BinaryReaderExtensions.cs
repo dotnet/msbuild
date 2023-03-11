@@ -75,5 +75,11 @@ namespace Microsoft.Build.Shared
             var buildEventContext = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
             return buildEventContext;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe Guid ReadGuid(this BinaryReader reader)
+        {
+            return new Guid(reader.ReadBytes(sizeof(Guid)));
+        }
     }
 }

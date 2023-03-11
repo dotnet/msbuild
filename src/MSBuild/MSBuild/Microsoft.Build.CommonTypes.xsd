@@ -6173,5 +6173,11 @@ elementFormDefault="qualified">
       </xs:complexContent>
     </xs:complexType>
   </xs:element>
+  
+  <xs:element name="InvariantGlobalization" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:annotation>
+      <xs:documentation><!-- _locID_text="InvariantGlobalization" _locComment="" -->Indicates whether an app runs in globalization-invariant mode without access to culture-specific data and behavior.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
 
 </xs:schema>

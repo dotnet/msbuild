@@ -59,7 +59,7 @@ namespace Microsoft.Build.Logging.LiveLogger
         public string ToANSIString()
         {
             ANSIBuilder.Formatting.ForegroundColor color = ANSIBuilder.Formatting.ForegroundColor.Default;
-            string icon = ANSIBuilder.Formatting.Blinking(ANSIBuilder.Graphics.Spinner()) + " ";
+            string icon = ANSIBuilder.Graphics.Spinner() + " ";
 
             if (Finished && WarningCount + ErrorCount == 0)
             {

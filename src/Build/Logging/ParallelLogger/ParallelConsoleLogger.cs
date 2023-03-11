@@ -1124,6 +1124,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 return;
             }
 
+            if (e.BuildEventContext == null && e is AssemblyLoadBuildEventArgs)
+            {
+                return;
+            }
+
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
             bool print = false;
             bool lightenText = false;

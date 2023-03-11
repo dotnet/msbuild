@@ -189,6 +189,55 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void AssemblyLoadsDuringTaskRunLogged()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                string contents = $"""
+                    <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Hello">
+                      <!-- This simple inline task displays "Hello, world!" -->
+                      <UsingTask
+                        TaskName="HelloWorld"
+                        TaskFactory="RoslynCodeTaskFactory"
+                        AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+                        <ParameterGroup />
+                        <Task> 
+                          <Using Namespace="System"/>
+                          <Using Namespace="System.IO"/>
+                          <Using Namespace="System.Reflection"/>
+                          <Code Type="Fragment" Language="cs">
+                    <![CDATA[
+                        // Display "Hello, world!"
+                        Log.LogMessage("Hello, world!");
+                    	//load assembly
+                    	var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                    	var diagAssembly = Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(assemblies[0].Location), "System.Diagnostics.Debug.dll"));
+                    	Log.LogMessage("Loaded: " + diagAssembly);
+                    ]]>
+                          </Code>
+                        </Task>
+                      </UsingTask>
+
+                    <Target Name="Hello">
+                      <HelloWorld />
+                    </Target>
+                    </Project>
+                    """;
+                TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
+                TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
+                BinaryLogger logger = new();
+                logger.Parameters = _logFile;
+                env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{logger.Parameters}", out bool success);
+                success.ShouldBeTrue();
+                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
+                success.ShouldBeTrue();
+                string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
+                text.ShouldContain("Assembly loaded during TaskRun (InlineCode.HelloWorld): System.Diagnostics.Debug");
+            }
+        }
+
+        [Fact]
         public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
         {
             using var buildManager = new BuildManager();

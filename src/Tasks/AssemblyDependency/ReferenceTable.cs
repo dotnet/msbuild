@@ -1331,9 +1331,10 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Go through each of the references, we go through this table because in general it will be considerably smaller than the blacklist. (10's of references vs 100's of black list items)
-                foreach (AssemblyNameExtension assemblyName in References.Keys)
+                foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
                 {
-                    Reference assemblyReference = References[assemblyName];
+                    AssemblyNameExtension assemblyName = assembly.Key;
+                    Reference assemblyReference = assembly.Value;
 
                     AddToDependencyGraph(dependencyGraph, assemblyName, assemblyReference);
 
@@ -1495,12 +1496,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal AssemblyNameExtension GetReferenceFromItemSpec(string itemSpec)
         {
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
-                Reference assemblyReference = References[assemblyName];
+                Reference assemblyReference = assembly.Value;
                 if (assemblyReference.IsPrimary && assemblyReference.PrimarySourceItem.ItemSpec.Equals(itemSpec, StringComparison.OrdinalIgnoreCase))
                 {
-                    return assemblyName;
+                    return assembly.Key;
                 }
             }
 
@@ -1731,14 +1732,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ResolveAssemblyFilenames()
         {
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
-                Reference reference = GetReference(assemblyName);
+                Reference reference = assembly.Value;
 
                 // Has this reference been resolved to a file name?
                 if (!reference.IsResolved && !reference.IsUnresolvable)
                 {
-                    ResolveReference(assemblyName, null, reference);
+                    ResolveReference(assembly.Key, null, reference);
                 }
             }
         }
@@ -2153,15 +2154,18 @@ namespace Microsoft.Build.Tasks
         private static void RemoveReferencesWithoutConflicts(
             Dictionary<string, List<AssemblyNameReference>> baseNameToReferences)
         {
-            string[] baseNames = new string[baseNameToReferences.Count];
-            baseNameToReferences.Keys.CopyTo(baseNames, 0);
-
-            foreach (string baseName in baseNames)
+            List<string> toRemove = new(baseNameToReferences.Count);
+            foreach (KeyValuePair<string, List<AssemblyNameReference>> kvp in baseNameToReferences)
             {
-                if (baseNameToReferences[baseName].Count == 1)
+                if (kvp.Value.Count == 1)
                 {
-                    baseNameToReferences.Remove(baseName);
+                    toRemove.Add(kvp.Key);
                 }
+            }
+
+            foreach (string key in toRemove)
+            {
+                baseNameToReferences.Remove(key);
             }
         }
 
@@ -3095,10 +3099,11 @@ namespace Microsoft.Build.Tasks
             bool anyMarkedReference = false;
             ListOfExcludedAssemblies = new List<string>();
 
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
+                AssemblyNameExtension assemblyName = assembly.Key;
+                Reference reference = assembly.Value;
                 string assemblyFullName = assemblyName.FullName;
-                Reference reference = GetReference(assemblyName);
                 reference.ReferenceVersion = assemblyName.Version;
 
                 MarkReferenceWithHighestVersionInCurrentRedistList(assemblyName, reference);

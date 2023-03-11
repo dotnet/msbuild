@@ -2,9 +2,13 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
 
+<!-- Commented out as a temporary fix for the msbuild CI.
+Waiting for https://github.com/NuGet/NuGet.Client/pull/5010 fix to flow to CI machines. -->
+<!--
   <PropertyGroup>
     <RestoreUseStaticGraphEvaluation Condition="'$(DotNetBuildFromSource)' != 'true'">true</RestoreUseStaticGraphEvaluation>
   </PropertyGroup>
+-->
 
   <ItemGroup>
 	<!-- Remove all sln files globbed by arcade so far and add only MSBuild.sln to the build.

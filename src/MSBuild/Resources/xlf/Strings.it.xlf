@@ -151,19 +151,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="needs-review-translation">  -isolateProjects[:True|False]
-                     Fa in modo che MSBuild compili ogni progetto in modalità
-                     isolamento.
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     Si tratta di una modalità più restrittiva di
-                     MSBuild perché richiede che il grafico del progetto sia
-                     rilevabile staticamente in fase di valutazione, ma può
-                     migliorare la pianificazione e ridurre il sovraccarico
-                     della memoria quando si compila un set esteso di progetti.
-                     Forma breve: -isolate.
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
-                     Questo flag è sperimentale e potrebbe non funzionare come
-                     previsto.
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -357,7 +363,7 @@ Esempio:
                      separatamente.
 
                      Qualsiasi file di risposta denominato "msbuild.rsp" viene usato
-                     automaticamente dai percorsi seguenti:
+                     automaticamente dai percorsi seguenti: 
                      (1) la directory di msbuild.exe
                      (2) la directory della prima compilazione di soluzione o progetto
 </target>
@@ -666,11 +672,10 @@ Esempio:
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="needs-review-translation">  -inputResultsCaches:&lt;fileCache&gt;...
-                     Elenco di file di cache di input delimitati da punto e virgola da cui MSBuild
-                     leggerà i risultati della compilazione.
-                     Se si imposta questa opzione, si attivano anche le compilazioni isolate (-isolate).
-                     Forma breve: -irc
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -684,11 +689,11 @@ Esempio:
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="needs-review-translation">  -outputResultsCache:[fileCache]
-                     File di cache di output in cui MSBuild scriverà il contenuto delle
-                     cache dei risultati della compilazione al termine della compilazione.
-                     Se si imposta questa opzione, si attivano anche le compilazioni isolate (-isolate).
-                     Forma breve: -orc
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
+                     (short form: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -1046,7 +1051,7 @@ Esempio:
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1056: il valore di isolateProjects non è valido. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: il valore di isolateProjects non è valido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
