@@ -108,7 +108,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (OutputDirectory != null && !Path.IsPathRooted(OutputFile?.ItemSpec))
                 {
-                    _ = Directory.CreateDirectory(OutputDirectory.ItemSpec);
+                    FileUtilities.EnsureDirectoryExists(OutputDirectory.ItemSpec);
                 }
 
                 if (OutputFile != null && OutputDirectory != null && !Path.IsPathRooted(OutputFile.ItemSpec))
