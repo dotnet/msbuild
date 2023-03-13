@@ -63,8 +63,12 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
         // and that SDK version may be a prerelease, so we need to handle
         var baseImageTag = (version) switch
         {
+            // all stable versions or prereleases with majors before the switch get major/minor tags
             { IsPrerelease: false } or { Major: < FirstVersionWithNewTaggingScheme } => $"{version.Major}.{version.Minor}",
-            { Major: >= FirstVersionWithNewTaggingScheme } => DetermineLabelBasedOnChannel(version.Major, version.Minor, version.ReleaseLabels.ToArray())
+            // prereleases after the switch for the first SDK version get major/minor-channel.bump tags
+            { IsPrerelease: true, Major: >= FirstVersionWithNewTaggingScheme, Patch: 100 } => DetermineLabelBasedOnChannel(version.Major, version.Minor, version.ReleaseLabels.ToArray()),
+            // prereleases of subsequent SDK versions still get to use the stable tags
+            { IsPrerelease: true, Major: >= FirstVersionWithNewTaggingScheme } => $"{version.Major}.{version.Minor}",
         };
         return baseImageTag;
     }
