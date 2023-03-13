@@ -118,6 +118,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Combine file and directory where the directory does not already exist
+        /// </summary>
+        [Fact]
+        public void FileWithPathAndDirectoryDoesNotExist()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem file = new TaskItem(Path.Combine(env.CreateFolder(folderPath: null, createFolder: false).Path, "File.tmp"));
+
+            WriteCodeFragment task = CreateTask("c#", null, file, new TaskItem[] { new TaskItem("aa") });
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            bool result = task.Execute();
+
+            Assert.True(result);
+            Assert.Equal(file.ItemSpec, task.OutputFile.ItemSpec);
+            Assert.True(File.Exists(task.OutputFile.ItemSpec));
+        }
+
+        /// <summary>
         /// Ignore directory if file is rooted
         /// </summary>
         [Fact]
@@ -201,7 +221,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Bad file path
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidFilePath()
         {
             WriteCodeFragment task = new WriteCodeFragment();

@@ -106,17 +106,14 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (OutputDirectory != null && !Path.IsPathRooted(OutputFile?.ItemSpec))
-                {
-                    FileUtilities.EnsureDirectoryExists(OutputDirectory.ItemSpec);
-                }
-
                 if (OutputFile != null && OutputDirectory != null && !Path.IsPathRooted(OutputFile.ItemSpec))
                 {
                     OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, OutputFile.ItemSpec));
                 }
 
                 OutputFile ??= new TaskItem(FileUtilities.GetTemporaryFile(OutputDirectory.ItemSpec, null, extension));
+
+                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(OutputFile.ItemSpec));
 
                 File.WriteAllText(OutputFile.ItemSpec, code); // Overwrites file if it already exists (and can be overwritten)
             }
