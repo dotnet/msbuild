@@ -20,6 +20,15 @@ internal sealed class Registry
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
     /// <summary>
+    /// Whether we should upload blobs via chunked upload (disabled by default).
+    /// </summary>
+    /// <remarks>
+    /// Relates to https://github.com/dotnet/sdk-container-builds/pull/383#issuecomment-1466408853
+    /// </remarks>
+    private static readonly bool s_chunkedUploadEnabled = bool.TrueString.Equals(
+        Environment.GetEnvironmentVariable(ContainerHelpers.ChunkedUploadEnabled), StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
     /// The name of the registry, which is the host name, optionally followed by a colon and the port number.
     /// This is used in user-facing error messages, and it should match what the user would manually enter as
     /// part of Docker commands like `docker login`.
@@ -415,7 +424,7 @@ internal sealed class Registry
     private Task<UriBuilder> UploadBlobContentsAsync(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (SupportsChunkedUpload)
+        if (SupportsChunkedUpload && s_chunkedUploadEnabled)
         {
             return UploadBlobChunkedAsync(repository, digest, contents, client, uploadUri, cancellationToken);
         }
