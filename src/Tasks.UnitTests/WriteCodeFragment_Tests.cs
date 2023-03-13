@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
             do
             {
                 folder = new TaskItem(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + Path.DirectorySeparatorChar));
-            } while (Path.Exists(folder.ItemSpec));
+            } while (Directory.Exists(folder.ItemSpec));
             TaskItem file = new TaskItem("CombineFileDirectory.tmp");
             string expectedFile = Path.Combine(folder.ItemSpec, file.ItemSpec);
             WriteCodeFragment task = CreateTask("c#", folder, file, new TaskItem[] { new TaskItem("aa") });
@@ -354,7 +354,7 @@ namespace Microsoft.Build.UnitTests
             do
             {
                 folder = new TaskItem(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + Path.DirectorySeparatorChar));
-            } while (Path.Exists(folder.ItemSpec));
+            } while (Directory.Exists(folder.ItemSpec));
             WriteCodeFragment task = CreateTask("c#", folder, null, new TaskItem[] { new TaskItem("System.AssemblyTrademarkAttribute") });
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
