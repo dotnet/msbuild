@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                         new Dictionary<string, string>
                         {
                             { "verb", topLevelCommandName},
-                            { option.Name, Stringify(parseResult.GetValueForOption(option)) }
+                            { option.Name, Stringify(parseResult.GetValue(option)) }
                         },
                         measurements));
                 }
