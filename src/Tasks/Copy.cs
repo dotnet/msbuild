@@ -272,7 +272,7 @@ namespace Microsoft.Build.Tasks
             // If the destination file is a hard or symbolic link, File.Copy would overwrite the source.
             // To prevent this, we need to delete the existing entry before we Copy or create a link.
             // We could try to figure out if the file is a link, but I can't think of a reason to not simply delete it always.
-            if (destinationFileState.FileExists && !destinationFileState.IsReadOnly)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && destinationFileState.FileExists && !destinationFileState.IsReadOnly)
             {
                 FileUtilities.DeleteNoThrow(destinationFileState.Name);
             }
