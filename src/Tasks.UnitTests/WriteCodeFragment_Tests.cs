@@ -100,8 +100,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CombineFileDirectoryAndDirectoryDoesNotExist()
         {
-            // ToDo: Replace "foo" with random unique directory name.
-            TaskItem folder = new TaskItem(Path.Combine(Path.GetTempPath(), "foo" + Path.DirectorySeparatorChar));
+            // TODO: Replace folder name with a random unique directory name.
+            TaskItem folder = new TaskItem(Path.Combine(Path.GetTempPath(), "fred" + Path.DirectorySeparatorChar));
             TaskItem file = new TaskItem("CombineFileDirectory.tmp");
             string expectedFile = Path.Combine(folder.ItemSpec, file.ItemSpec);
             WriteCodeFragment task = CreateTask("c#", folder, file, new TaskItem[] { new TaskItem("aa") });
@@ -347,8 +347,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ToDirectoryAndDirectoryDoesNotExist()
         {
-            // ToDo: Replace "foo" with random unique directory name.
-            TaskItem folder = new TaskItem(Path.Combine(Path.GetTempPath(), "foo" + Path.DirectorySeparatorChar));
+            // TODO: Replace folder name with random unique directory name.
+            TaskItem folder = new TaskItem(Path.Combine(Path.GetTempPath(), "bob" + Path.DirectorySeparatorChar));
             WriteCodeFragment task = CreateTask("c#", folder, null, new TaskItem[] { new TaskItem("System.AssemblyTrademarkAttribute") });
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
