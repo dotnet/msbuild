@@ -27,7 +27,17 @@
     <Error Condition="'$(_IsSDKContainerAllowedVersion)' != 'true'" Code="CONTAINER002" Text="The current .NET SDK ($(NETCoreSdkVersion)) doesn't support containerization. Please use version 7.0.100 or higher to enable containerization." />
   </Target>
 
-  <Target Name="ComputeContainerBaseImage" Returns="$(ContainerBaseImage)">
+  <Target Name="_ComputeContainerBaseImageTag" Returns="$(_ContainerBaseImageTag)">
+    <ComputeDotnetBaseImageTag
+      SdkVersion="$(NetCoreSdkVersion)"
+      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV).0">
+        <Output TaskParameter="ComputedBaseImageTag" PropertyName="_ContainerBaseImageTag" />
+    </ComputeDotnetBaseImageTag>
+  </Target>
+
+  <Target Name="ComputeContainerBaseImage"
+    Returns="$(ContainerBaseImage)"
+    DependsOnTargets="_ComputeContainerBaseImageTag">
     <PropertyGroup>
       <!-- Reference data about this project -->
       <_IsSelfContained Condition="'$(SelfContained)' == 'true' or '$(PublishSelfContained)' == 'true'">true</_IsSelfContained>
@@ -38,7 +48,6 @@
       <_ContainerBaseImageName Condition="'$(_IsSelfContained)' == 'true'">dotnet/runtime-deps</_ContainerBaseImageName>
       <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == '' and '$(_IsAspNet)' == 'true'">dotnet/aspnet</_ContainerBaseImageName>
       <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == ''">dotnet/runtime</_ContainerBaseImageName>
-      <_ContainerBaseImageTag>$(_TargetFrameworkVersionWithoutV)</_ContainerBaseImageTag>
 
       <!-- Compute base runtime image -->
       <ContainerBaseImage Condition="'$(ContainerBaseImage)' == ''">$(_ContainerBaseRegistry)/$(_ContainerBaseImageName):$(_ContainerBaseImageTag)</ContainerBaseImage>
