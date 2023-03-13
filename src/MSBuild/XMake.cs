@@ -1678,13 +1678,15 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// The .NET SDK and Visual Studio both have environment variables that set a custom language. MSBuild should respect those variables.
+        /// The .NET SDK and Visual Studio both have environment variables that set a custom language. MSBuild should respect the SDK variable.
         /// To use the correspoding UI culture, in certain cases the console encoding must be changed. This function will change the encoding in these cases.
         /// This code introduces a breaking change due to the encoding of the console being changed.
         /// If the environment variables are undefined, this function should be a no-op.
         /// </summary>
-        /// <returns>The custom language that was set by the user for an 'external' tool besides MSBuild.
-        /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns <see langword="null"/> if none are set.</returns>
+        /// <returns>
+        /// The custom language that was set by the user for an 'external' tool besides MSBuild.
+        /// Returns <see langword="null"/> if none are set.
+        /// </returns>
         private static CultureInfo GetExternalOverridenUILanguageIfSupportableWithEncoding()
         {
             CultureInfo externalLanguageSetting = GetExternalOverriddenUILanguage();
@@ -1736,12 +1738,12 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Look at UI language overrides that can be set by known external invokers. (DOTNET_CLI_UI_LANGUAGE and VSLANG).
+        /// Look at UI language overrides that can be set by known external invokers. (DOTNET_CLI_UI_LANGUAGE.)
         /// Does NOT check System Locale or OS Display Language.
         /// Ported from the .NET SDK: https://github.com/dotnet/sdk/blob/bcea1face15458814b8e53e8785b52ba464f6538/src/Cli/Microsoft.DotNet.Cli.Utils/UILanguageOverride.cs
         /// </summary>
         /// <returns>The custom language that was set by the user for an 'external' tool besides MSBuild.
-        /// DOTNET_CLI_UI_LANGUAGE > VSLANG. Returns null if none are set.</returns>
+        /// Returns null if none are set.</returns>
         private static CultureInfo GetExternalOverriddenUILanguage()
         {
             // DOTNET_CLI_UI_LANGUAGE=<culture name> is the main way for users to customize the CLI's UI language via the .NET SDK.
@@ -1752,18 +1754,6 @@ namespace Microsoft.Build.CommandLine
                 {
                     return new CultureInfo(dotnetCliLanguage);
                 }
-                catch (CultureNotFoundException) { }
-            }
-
-            // VSLANG=<lcid> is set by Visual Studio.
-            string vsLang = Environment.GetEnvironmentVariable("VSLANG");
-            if (vsLang != null && int.TryParse(vsLang, out int vsLcid))
-            {
-                try
-                {
-                    return new CultureInfo(vsLcid);
-                }
-                catch (ArgumentOutOfRangeException) { }
                 catch (CultureNotFoundException) { }
             }
 
