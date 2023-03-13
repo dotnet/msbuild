@@ -67,7 +67,7 @@ namespace Microsoft.Build.Tasks
         /// The path to the file that was generated.
         /// If this is set, and a file name, the destination folder will be prepended.
         /// If this is set, and is rooted, the destination folder will be ignored.
-        /// If this is not set, the destination folder will be used, an arbitrary file name will be used, and 
+        /// If this is not set, the destination folder will be used, an arbitrary file name will be used, and
         /// the default extension for the language selected.
         /// </summary>
         [Output]
@@ -106,6 +106,11 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                if (OutputDirectory != null && !Path.IsPathRooted(OutputFile?.ItemSpec))
+                {
+                    _ = Directory.CreateDirectory(OutputDirectory.ItemSpec);
+                }
+
                 if (OutputFile != null && OutputDirectory != null && !Path.IsPathRooted(OutputFile.ItemSpec))
                 {
                     OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, OutputFile.ItemSpec));
@@ -481,7 +486,7 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources("WriteCodeFragment.MultipleConstructorsFound");
 
                     // Before parameter types could be specified, all parameter values were
-                    // treated as strings. To be backward-compatible, we need to prefer 
+                    // treated as strings. To be backward-compatible, we need to prefer
                     // the constructor that has all string parameters, if it exists.
                     var allStringParameters = candidates.FirstOrDefault(c => c.All(t => t == typeof(string)));
 
@@ -551,7 +556,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private CodeExpression ConvertParameterValueToInferredType(Type inferredType, string rawValue, string parameterName)
         {
-            // If we don't know what type the parameter should be, then we 
+            // If we don't know what type the parameter should be, then we
             // can't convert the type. We'll just treat is as a string.
             if (inferredType is null)
             {
