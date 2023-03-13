@@ -1709,7 +1709,7 @@ namespace Microsoft.Build.CommandLine
             return null;
         }
 
-        private static bool CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
+        public static bool CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version.Major >= 10) // UTF-8 is only officially supported on 10+.
             {

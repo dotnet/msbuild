@@ -20,6 +20,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using System.Runtime.InteropServices;
 
 #nullable disable
 
@@ -664,8 +665,11 @@ namespace Microsoft.Build.UnitTests
 
                 MSBuildApp.SetConsoleUI();
 
-                Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
-                Assert.Equal(65001, Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || MSBuildApp.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+                {
+                    Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
+                    Assert.Equal(65001, Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
+                }
             }
             finally
             {
