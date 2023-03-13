@@ -664,7 +664,7 @@ namespace Microsoft.Build.UnitTests
 
                 MSBuildApp.SetConsoleUI();
 
-                Assert.Equal(thisThread.CurrentUICulture, new CultureInfo("ja"));
+                Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
                 Assert.Equal(65001, Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
             }
             finally

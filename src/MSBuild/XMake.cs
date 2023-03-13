@@ -1638,19 +1638,19 @@ namespace Microsoft.Build.CommandLine
             Thread thisThread = Thread.CurrentThread;
 
             // Eliminate the complex script cultures from the language selection.
-            thisThread.CurrentUICulture = GetExternalOverridenUILanguageIfSupportableWithEncoding() ?? CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture();
+            var desiredCulture = GetExternalOverridenUILanguageIfSupportableWithEncoding() ?? CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture();
+            thisThread.CurrentUICulture = desiredCulture;
             // For full framework, both the above and below must be set. This is not true in core, but it is a no op in core.
-            // // https://learn.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture?redirectedfrom=MSDN&view=net-7.0#remarks
-            CultureInfo.CurrentCulture = thisThread.CurrentUICulture;
-            CultureInfo.CurrentUICulture = thisThread.CurrentUICulture;
-            CultureInfo.DefaultThreadCurrentUICulture = thisThread.CurrentUICulture;
+            // https://learn.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture?redirectedfrom=MSDN&view=net-7.0#remarks
+            CultureInfo.CurrentUICulture = desiredCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
             // Determine if the language can be displayed in the current console codepage, otherwise set to US English
             int codepage;
 
             try
             {
-                codepage = System.Console.OutputEncoding.CodePage;
+                codepage = Console.OutputEncoding.CodePage;
             }
             catch (NotSupportedException)
             {
