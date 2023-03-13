@@ -100,12 +100,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CombineFileDirectoryAndDirectoryDoesNotExist()
         {
-            TaskItem folder;
-            do
-            {
-                folder = new TaskItem(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + Path.DirectorySeparatorChar));
-            } while (Directory.Exists(folder.ItemSpec));
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem folder = new TaskItem(env.CreateFolder(folderPath: null, createFolder: false).Path);
+
             TaskItem file = new TaskItem("CombineFileDirectory.tmp");
+
             string expectedFile = Path.Combine(folder.ItemSpec, file.ItemSpec);
             WriteCodeFragment task = CreateTask("c#", folder, file, new TaskItem[] { new TaskItem("aa") });
             MockEngine engine = new MockEngine(true);
@@ -115,8 +115,6 @@ namespace Microsoft.Build.UnitTests
             Assert.True(result);
             Assert.Equal(expectedFile, task.OutputFile.ItemSpec);
             Assert.True(File.Exists(expectedFile));
-
-            FileUtilities.DeleteWithoutTrailingBackslash(folder.ItemSpec, true);
         }
 
         /// <summary>
@@ -350,11 +348,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ToDirectoryAndDirectoryDoesNotExist()
         {
-            TaskItem folder;
-            do
-            {
-                folder = new TaskItem(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + Path.DirectorySeparatorChar));
-            } while (Directory.Exists(folder.ItemSpec));
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem folder = new TaskItem(env.CreateFolder(folderPath: null, createFolder: false).Path);
+
             WriteCodeFragment task = CreateTask("c#", folder, null, new TaskItem[] { new TaskItem("System.AssemblyTrademarkAttribute") });
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -364,8 +361,6 @@ namespace Microsoft.Build.UnitTests
             Assert.True(File.Exists(task.OutputFile.ItemSpec));
             Assert.Equal(folder.ItemSpec, task.OutputFile.ItemSpec.Substring(0, folder.ItemSpec.Length));
             Assert.Equal(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
-
-            FileUtilities.DeleteWithoutTrailingBackslash(folder.ItemSpec, true);
         }
 
         /// <summary>
