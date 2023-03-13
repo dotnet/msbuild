@@ -131,7 +131,7 @@ namespace Microsoft.Build.Tasks
                         while (excep.InnerException != null)
                         {
                             excep = excep.InnerException;
-                            flattenedMessage.Append("--->").Append(excep.Message);
+                            flattenedMessage.Append(" ---> ").Append(excep.Message);
                         }
                         Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage.ToString());
                         Log.LogMessage(MessageImportance.Low, actualException.ToString());
