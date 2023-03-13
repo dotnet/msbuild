@@ -4,6 +4,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IsPackable>true</IsPackable>
         <IsShipping>true</IsShipping>
+        <IsShippingPackage>true</IsShippingPackage>
         <NoWarn>NU5100;NU5128</NoWarn>
         <VSCompatTargetFramework>net472</VSCompatTargetFramework>
 
@@ -70,7 +71,7 @@
 
     <!-- Hacky workaround for the fact that we don't publish the package yet. -->
     <Target Name="CopyNupkgToCustomFolder" AfterTargets="Pack">
-        <Copy SourceFiles="../../../artifacts/packages/$(Configuration)/NonShipping/Microsoft.NET.Build.Containers.$(Version).nupkg"
+        <Copy SourceFiles="../../../artifacts/packages/$(Configuration)/Shipping/Microsoft.NET.Build.Containers.$(Version).nupkg"
             DestinationFiles="../../../artifacts/bin/Microsoft.NET.Build.Containers.IntegrationTests/$(Configuration)/package/Microsoft.NET.Build.Containers.$(Version).nupkg" />
     </Target>
 </Project>
