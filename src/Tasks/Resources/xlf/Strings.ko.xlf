@@ -2353,6 +2353,11 @@
         <target state="translated">MSB3326: 키 파일 {0}을(를) 가져올 수 없습니다. 해당 키 파일이 암호로 보호되어 있을 수 있습니다. 이 문제를 해결하려면 인증서를 다시 가져오거나 현재 사용자의 개인 인증서 저장소로 인증서를 직접 가져오세요.</target>
         <note>{StrBegin="MSB3326: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveKeySource.PfxUnsupported">
+        <source>PFX signing not supported on .NET Core.</source>
+        <target state="new">PFX signing not supported on .NET Core.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveKeySource.ResolvedThumbprintEmpty">
         <source>MSB3327: Unable to find code signing certificate in the current user’s Windows certificate store. To correct this, either disable signing of the ClickOnce manifest or install the certificate into the certificate store.</source>
         <target state="translated">MSB3327: 현재 사용자의 Windows 인증서 저장소에서 코드 서명 인증서를 찾을 수 없습니다. 이 문제를 해결하려면 ClickOnce 매니페스트를 사용하지 않도록 설정하거나 인증서를 인증서 저장소에 설치하세요.</target>

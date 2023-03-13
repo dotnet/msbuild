@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks
                             fs?.Close();
                         }
 #else
-                        Log.LogError("PFX signing not supported on .NET Core");
+                        Log.LogErrorWithCodeFromResources("ResolveKeySource.PfxUnsupported");
                         pfxSuccess = false;
 #endif
                     }
@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 #else
-                Log.LogError("Certificate signing not supported on .NET Core");
+                Log.LogErrorWithCodeFromResources("ResolveKeySource.PfxUnsupported");
 #endif
             }
             else if (!certInStore && !string.IsNullOrEmpty(CertificateFile) && !string.IsNullOrEmpty(CertificateThumbprint))
