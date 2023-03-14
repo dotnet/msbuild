@@ -54,6 +54,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         /// Gets or sets the <see cref="ICUDataMode"/> that determines how icu files are loaded.
         /// </summary>
         public ICUDataMode icuDataMode { get; set; }
+
+        /// <summary>
+        /// Gets a value that determines if the caching startup memory is enabled.
+        /// </summary>
+        public bool startupMemoryCache { get; set; }
+
+        /// <summary>
+        /// Gets a value that determines if the jiterpreter is enabled.
+        /// </summary>
+        public bool jiterpreter { get; set; }
     }
 
     public class ResourcesData

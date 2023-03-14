@@ -40,6 +40,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         public ITaskItem[] ConfigurationFiles { get; set; }
 
+        public bool StartupMemoryCache { get; set; }
+
+        public bool Jiterpreter { get; set; }
+
         [Required]
         public string OutputPath { get; set; }
 
@@ -85,6 +89,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 resources = new ResourcesData(),
                 config = new List<string>(),
                 icuDataMode = icuDataMode,
+                startupMemoryCache = StartupMemoryCache,
+                jiterpreter = Jiterpreter,
             };
 
             // Build a two-level dictionary of the form:
