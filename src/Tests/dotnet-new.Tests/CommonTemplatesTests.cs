@@ -338,6 +338,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 DoNotAppendTemplateArgsToScenarioName = true,
                 ScenarioName =
                     $"Nullable-{supportsNullable}#TopLevel-{supportsTopLevel}#ImplicitUsings-{supportsImplicitUsings}#FileScopedNs-{supportsFileScopedNs}"
+                    + (string.IsNullOrEmpty(framework) ? string.Empty : $"#Framework-{framework}")
                     + '#' + (language == null ? "cs" : language.Replace('#', 's').ToLower())
                     + (langVersion == null ? "#NoLangVer" : (langVersionUnsupported ? "#UnsuportedLangVer" : null)),
                 VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },
