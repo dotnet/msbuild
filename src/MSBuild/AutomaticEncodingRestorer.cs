@@ -75,9 +75,11 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Return whether the running OS is windows for net472.
-        /// RuntimeInformation.IsOSPlatform(OSPlatform.Windows) is supposed to be available in net472 but apparently it isnt part of full framework so we can't use it.
+        /// RuntimeInformation.IsOSPlatform(OSPlatform.Windows) is sometimes available in net472 but in this context it's an unavailable API, so this function is needed.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A boolean of 'true' iff the current machine os is windows.
+        /// </returns>
         private bool IsWindowsOS()
         {
             string? windir = Environment.GetEnvironmentVariable("windir");

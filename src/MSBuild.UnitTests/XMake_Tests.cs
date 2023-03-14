@@ -9,8 +9,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
-using Newtonsoft.Json.Linq;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -20,7 +20,6 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Runtime.InteropServices;
 
 #nullable disable
 
@@ -648,6 +647,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ConsoleUIRespectsSDKLanguage()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !MSBuildApp.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+            {
+                return; // The feature to detect .NET SDK Languages is not enabled on this machine, so don't test it.
+            }
+
             const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             // Save the current environment info so it can be restored.
@@ -665,16 +669,16 @@ namespace Microsoft.Build.UnitTests
 
                 MSBuildApp.SetConsoleUI();
 
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || MSBuildApp.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
-                {
-                    Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
-                    Assert.Equal(65001, Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
-                }
+                Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
+                Assert.Equal(65001, Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
             }
             finally
             {
                 // Restore the current UI culture back to the way it was at the beginning of this unit test.
                 thisThread.CurrentUICulture = originalUICulture;
+                // Restore for full framework
+                CultureInfo.CurrentCulture = originalUICulture;
+                CultureInfo.DefaultThreadCurrentUICulture = originalUICulture;
 
                 // MSbuild should also restore the encoding upon exit, but we don't create that context here.
                 Console.OutputEncoding = originalOutputEncoding;
@@ -840,6 +844,7 @@ namespace Microsoft.Build.UnitTests
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             testEnvironment.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en"); // build machines may have other values.
+            CultureInfo.CurrentUICulture = new CultureInfo("en"); // Validate that the thread will produce an english log regardless of the machine OS language
 
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             string projectString =
@@ -876,6 +881,8 @@ namespace Microsoft.Build.UnitTests
                 File.Exists(logFile).ShouldBeTrue();
 
                 var logFileContents = File.ReadAllText(logFile);
+
+                Assert.Equal(new CultureInfo("en"), Thread.CurrentThread.CurrentUICulture);
 
                 logFileContents.ShouldContain("Process = ");
                 logFileContents.ShouldContain("MSBuild executable path = ");
