@@ -133,9 +133,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_BlazorWebAssemblyLoadAllGlobalizationData>$(BlazorWebAssemblyLoadAllGlobalizationData)</_BlazorWebAssemblyLoadAllGlobalizationData>
       <_BlazorWebAssemblyLoadAllGlobalizationData Condition="'$(_BlazorWebAssemblyLoadAllGlobalizationData)' == ''">false</_BlazorWebAssemblyLoadAllGlobalizationData>
       <_BlazorWebAssemblyStartupMemoryCache>$(BlazorWebAssemblyStartupMemoryCache)</_BlazorWebAssemblyStartupMemoryCache>
-      <_BlazorWebAssemblyStartupMemoryCache Condition="'$(_BlazorWebAssemblyStartupMemoryCache)' == ''">true</_BlazorWebAssemblyStartupMemoryCache>
       <_BlazorWebAssemblyJiterpreter>$(BlazorWebAssemblyJiterpreter)</_BlazorWebAssemblyJiterpreter>
-      <_BlazorWebAssemblyJiterpreter Condition="'$(_BlazorWebAssemblyJiterpreter)' == ''">true</_BlazorWebAssemblyJiterpreter>
 
       <!-- Workaround for https://github.com/dotnet/sdk/issues/12114-->
       <PublishDir Condition="'$(AppendRuntimeIdentifierToOutputPath)' != 'true' AND '$(PublishDir)' == '$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\'">$(OutputPath)$(PublishDirName)\</PublishDir>

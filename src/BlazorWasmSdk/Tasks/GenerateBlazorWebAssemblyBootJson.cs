@@ -40,9 +40,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         public ITaskItem[] ConfigurationFiles { get; set; }
 
-        public bool StartupMemoryCache { get; set; }
+        public bool? StartupMemoryCache { get; set; }
 
-        public bool Jiterpreter { get; set; }
+        public bool? Jiterpreter { get; set; }
 
         [Required]
         public string OutputPath { get; set; }

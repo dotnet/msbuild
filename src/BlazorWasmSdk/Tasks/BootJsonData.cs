@@ -58,12 +58,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         /// <summary>
         /// Gets a value that determines if the caching startup memory is enabled.
         /// </summary>
-        public bool startupMemoryCache { get; set; }
+        public bool? startupMemoryCache { get; set; }
 
         /// <summary>
         /// Gets a value that determines if the jiterpreter is enabled.
         /// </summary>
-        public bool jiterpreter { get; set; }
+        public bool? jiterpreter { get; set; }
     }
 
     public class ResourcesData
