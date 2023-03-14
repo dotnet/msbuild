@@ -50,7 +50,7 @@
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>f6fdcf537aded4f49ebedfcb800e2a3c1483fddc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.5.1-preview-23163-01">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.5.1-preview-23163-04">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>f6fdcf537aded4f49ebedfcb800e2a3c1483fddc</Sha>
     </Dependency>
