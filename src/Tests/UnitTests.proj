@@ -90,6 +90,7 @@
     <PropertyGroup>
       <HelixPreCommands Condition="!$(IsPosixShell)">call %HELIX_CORRELATION_PAYLOAD%\t\RunTestsOnHelix.cmd $(TestFullMSBuild);$(HelixPreCommands)</HelixPreCommands>
       <HelixPreCommands Condition="$(IsPosixShell)">. $HELIX_CORRELATION_PAYLOAD/t/RunTestsOnHelix.sh;$(HelixPreCommands)</HelixPreCommands>
+      <HelixPostCommands Condition="!$(IsPosixShell)">PowerShell -ExecutionPolicy ByPass "dotnet nuget locals all -l | ForEach-Object { $_.Split(' ')[1]} | Where-Object{$_ -like '*cache'} | Get-ChildItem -Recurse -File -Filter '*.dat' | Measure";$(HelixPostCommands)</HelixPostCommands>
       <TestDotnetRoot>$(RepoRoot)artifacts\bin\redist\$(Configuration)\dotnet</TestDotnetRoot>
       <TestDotnetVersion>$(Version)</TestDotnetVersion>
       <MSBuildSdkResolverDir>$(RepoRoot)artifacts\bin\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverDir>
@@ -128,16 +129,16 @@
         <Destination>r</Destination>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Include="SDKTestPackages.System.zip">
+      <HelixCorrelationPayload Include="SDKTestRunPackages.zip">
         <PayloadDirectory>$(TestDotnetRoot)</PayloadDirectory>
         <Destination>d/.nuget</Destination>
-        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestPackages.System.zip</Uri>
+        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestRunPackages.zip</Uri>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Include="SDKTestPackages.Runtime.zip">
+      <HelixCorrelationPayload Include="SDKTestRunPackages2.zip">
         <PayloadDirectory>$(TestDotnetRoot)</PayloadDirectory>
         <Destination>d/.nuget</Destination>
-        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestPackages.Runtime.zip</Uri>
+        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestRunPackages2.zip</Uri>
       </HelixCorrelationPayload>
     </ItemGroup>
   </Target>
