@@ -209,7 +209,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 var (clientSocket, _) = _clientSockets[i];
 
-                if (clientSocket.State is not WebSocketState.Open)
+                if (clientSocket.State != WebSocketState.Open)
                 {
                     continue;
                 }
@@ -217,6 +217,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 try
                 {
                     var result = await clientSocket.ReceiveAsync(buffer, cancellationToken);
+
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        continue;
+                    }
+
                     return result;
                 }
                 catch (Exception ex)
