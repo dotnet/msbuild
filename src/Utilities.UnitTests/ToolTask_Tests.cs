@@ -827,6 +827,41 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies the validation of the <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+        /// </summary>
+        /// <param name="timeout">New value for <see cref="ToolTask.TaskProcessTerminationTimeout" />.</param>
+        /// <param name="expectException">Is an exception expected or not.</param>
+        [Theory]
+        [InlineData(int.MaxValue, false)]
+        [InlineData(97, false)]
+        [InlineData(0, false)]
+        [InlineData(-1, false)]
+        [InlineData(-2, true)]
+        [InlineData(-101, true)]
+        [InlineData(int.MinValue, true)]
+        public void SetsTerminationTimeoutCorrectly(int timeout, bool expectException)
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            // Task under test:
+            var task = new ToolTaskSetsTerminationTimeout
+            {
+                BuildEngine = new MockEngine()
+            };
+
+            if (expectException)
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => task.TerminationTimeout = timeout);
+                task.TerminationTimeout.ShouldBe(5000);
+            }
+            else
+            {
+                task.TerminationTimeout = timeout;
+                task.TerminationTimeout.ShouldBe(timeout);
+            }
+        }
+		
+		/// <summary>
         /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
         /// </summary>
         /// <param name="repeats">Specifies the number of repeats for external command execution.</param>
@@ -959,6 +994,50 @@ namespace Microsoft.Build.UnitTests
                 RepeatCount++;
                 return base.Execute();
             }
+        }
+
+        /// <summary>
+        /// A simple implementation of <see cref="ToolTask"/> to excercise <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+        /// </summary>
+        private sealed class ToolTaskSetsTerminationTimeout : ToolTask
+        {
+            public ToolTaskSetsTerminationTimeout()
+                : base()
+            {
+            }
+
+            /// <summary>
+            /// Gets or sets <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+            /// </summary>
+            /// <remarks>
+            /// This is just a proxy property to access <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+            /// </remarks>
+            public int TerminationTimeout
+            {
+                get => TaskProcessTerminationTimeout;
+                set => TaskProcessTerminationTimeout = value;
+            }
+
+            /// <summary>
+            /// Gets the tool name (dummy).
+            /// </summary>
+            protected override string ToolName => string.Empty;
+
+            /// <summary>
+            /// Gets the full path to tool (dummy).
+            /// </summary>
+            protected override string GenerateFullPathToTool() => string.Empty;
+
+            /// <summary>
+            /// Does nothing.
+            /// </summary>
+            /// <returns>
+            /// Always returns true.
+            /// </returns>
+            /// <remarks>
+            /// This dummy tool task is not meant to run anything.
+            /// </remarks>
+            public override bool Execute() => true;
         }
     }
 }
