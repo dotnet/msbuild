@@ -9,9 +9,10 @@ namespace Microsoft.Build.Framework.Telemetry;
 internal static class KnownTelemetry
 {
     /// <summary>
-    /// Telemetry for build.
-    /// If null Telemetry is not supposed to be emitted.
-    /// After telemetry is emitted, sender shall null it.
+    /// Partial Telemetry for build.
+    /// This could be optionally initialized with some values from early in call stack, for example in Main method.
+    /// After this instance is acquired by a particular build, this is set to null.
+    /// Null means there are no prior collected build telemetry data, new clean instance shall be created for particular build.
     /// </summary>
-    public static BuildTelemetry? BuildTelemetry { get; set; }
+    public static BuildTelemetry? PartialBuildTelemetry { get; set; }
 }
