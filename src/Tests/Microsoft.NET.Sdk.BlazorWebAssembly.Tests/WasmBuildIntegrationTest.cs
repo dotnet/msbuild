@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -617,6 +618,48 @@ public class TestReference
             // Make sure it's a the correct copy.
             fileInWwwroot.Length.Should().Be(referenceAssemblyPath.Length);
             Assert.Equal(File.ReadAllBytes(referenceAssemblyPath.FullName), File.ReadAllBytes(fileInWwwroot.FullName));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(null)]
+        public void Build_WithStartupMemoryCache(bool? value)
+            => TestBootConfigPropertyPropagation("BlazorWebAssemblyStartupMemoryCache", value, b => b.startupMemoryCache);
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(null)]
+        public void Build_WithJiterpreter(bool? value)
+            => TestBootConfigPropertyPropagation("BlazorWebAssemblyJiterpreter", value, b => b.jiterpreter);
+
+        private void TestBootConfigPropertyPropagation(string propertyName, bool? propertyValue, Func<BootJsonData, bool?> bootGetter)
+        {
+            var testAppName = "BlazorWasmMinimal";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+
+            if (propertyValue != null) 
+            {
+                testInstance.WithProjectChanges((project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "PropertyGroup");
+                    itemGroup.Add(new XElement(propertyName, propertyValue));
+                    project.Root.Add(itemGroup);
+                });
+            }
+
+            var buildCommand = new BuildCommand(testInstance);
+            buildCommand.Execute()
+                .Should().Pass();
+
+            var buildOutputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
+            var bootJsonData = ReadBootJsonData(bootJsonPath);
+
+            bootGetter(bootJsonData).Should().Be(propertyValue);
         }
 
         private static BootJsonData ReadBootJsonData(string path)

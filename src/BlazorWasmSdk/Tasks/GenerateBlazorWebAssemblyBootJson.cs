@@ -40,9 +40,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         public ITaskItem[] ConfigurationFiles { get; set; }
 
-        public bool? StartupMemoryCache { get; set; }
+        public string StartupMemoryCache { get; set; }
 
-        public bool? Jiterpreter { get; set; }
+        public string Jiterpreter { get; set; }
 
         [Required]
         public string OutputPath { get; set; }
@@ -89,8 +89,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 resources = new ResourcesData(),
                 config = new List<string>(),
                 icuDataMode = icuDataMode,
-                startupMemoryCache = StartupMemoryCache,
-                jiterpreter = Jiterpreter,
+                startupMemoryCache = ParseOptionalBool(StartupMemoryCache),
+                jiterpreter = ParseOptionalBool(Jiterpreter),
             };
 
             // Build a two-level dictionary of the form:
@@ -257,6 +257,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     resourceList.Add(resourceKey, $"sha256-{resource.GetMetadata("FileHash")}");
                 }
             }
+        }
+
+        private bool? ParseOptionalBool(string value) 
+        {
+            if (String.IsNullOrEmpty(value) || !bool.TryParse(value, out var boolValue))
+                return null;
+
+            return boolValue;
         }
 
         private void AddToAdditionalResources(ITaskItem resource, Dictionary<string, AdditionalAsset> additionalResources, string resourceName, string behavior)
