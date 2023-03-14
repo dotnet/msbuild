@@ -234,6 +234,10 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(true /* initialize only */);
             }
 
+            // Setup the console UI.
+            using AutomaticEncodingRestorer _ = new();
+            SetConsoleUI();
+
             int exitCode;
             if (
                 ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) &&
@@ -664,11 +668,6 @@ namespace Microsoft.Build.CommandLine
 
                 // check the operating system the code is running on
                 VerifyThrowSupportedOS();
-
-                // Setup the console UI.
-                using AutomaticEncodingRestorer discardedEncodingRestorer = new();
-                CultureInfo originalThreadCulture = Thread.CurrentThread.CurrentUICulture;
-                SetConsoleUI();
 
                 // reset the application state for this new build
                 ResetBuildState();
