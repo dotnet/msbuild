@@ -637,7 +637,7 @@ public class TestReference
         private void TestBootConfigPropertyPropagation(string propertyName, bool? propertyValue, Func<BootJsonData, bool?> bootGetter)
         {
             var testAppName = "BlazorWasmMinimal";
-            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName, identifier: propertyName + propertyValue?.ToString() ?? "null");
 
             if (propertyValue != null) 
             {
