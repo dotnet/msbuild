@@ -1449,7 +1449,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 includeInternalSymbols: false);
         }
 
-        [Fact (Skip="https://github.com/dotnet/roslyn/issues/67019")]
+        [Fact(Skip = "https://github.com/dotnet/roslyn/issues/67019")]
         public void TestInterfaceWithOperatorGeneration()
         {
             RunTest(original: """
@@ -1837,6 +1837,145 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     }
                     """,
                 includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void NewKeywordWhenBaseMethodIsHidden()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        using System;
+                        public partial class C : IFun, IExplicit, IExplicit2 {
+                            public int Foo;
+                            public const int Bar = 29;
+                            public int Baz { get; }
+                            #pragma warning disable 8618
+                            public event EventHandler MyEvent;
+                            void IExplicit.Explicit() {}
+                            #pragma warning disable 8625
+                            public void Do() => MyEvent(default(object), default(EventArgs));
+                            public void Do(float f) {}
+                            public static void DoStatic() {}
+                            public void Explicit2() {}
+                            public void Fun() {}
+                            public void Gen<T>() {}
+                            public void Zoo() {}
+                            public class MyNestedClass {}
+                            public struct MyNestedStruct {}
+                            public class MyNestedGenericClass<T> {}
+                            public struct MyNestedGenericStruct<T> {}
+                            public C this[int i]
+                            {
+                              get => default(C)!;
+                              set {}
+                            }
+                        }
+                        public class D : C, IExplicit, IExplicit2 {
+                            public new int Foo;
+                            public new const int Bar = 30;
+                            public new int Baz { get; set; }
+                            public new event EventHandler MyEvent;
+                            void IExplicit2.Explicit2() {}
+                            public new void Do() => MyEvent(default(object), default(EventArgs));
+                            public void Do(int i) {}
+                            public new static void DoStatic() {}
+                            public void Explicit() {}
+                            public new void Fun() {}
+                            public new void Gen<T>() where T : IComparable {}
+                            public new class MyNestedClass {}
+                            public new struct MyNestedStruct {}
+                            public new class MyNestedGenericClass<T> {}
+                            public new struct MyNestedGenericStruct<T> {}
+                            public new D this[int i]
+                            {
+                              get => default(D)!;
+                              set {}
+                            }
+                        }
+                        public class E : C {
+                            public new int Bar;
+                            public new const int Do = 30;
+                            public new int Foo { get; set; }
+                            public new event EventHandler MyNestedClass;
+                            public new void Baz() => MyNestedClass(default(object), default(EventArgs));
+                            public new void MyNestedStruct(double d) {}
+                            public new void Zoo() {}
+                        }
+                        public interface IExplicit {
+                            void Explicit();
+                        }
+                        public interface IExplicit2 {
+                            void Explicit2();
+                        }
+                        public interface IFun {
+                            void Fun();
+                        }
+                    }
+                    """,
+                    expected: """
+                    namespace A
+                    {
+                        public partial class C : IFun, IExplicit, IExplicit2
+                        {
+                            public const int Bar = 29;
+                            public int Foo;
+                            public int Baz { get { throw null; } }
+                            public C this[int i] { get { throw null; } set {} }
+                            public event System.EventHandler MyEvent { add {} remove {} }
+                            void IExplicit.Explicit() {}
+                            public void Do() {}
+                            public void Do(float f) {}
+                            public static void DoStatic() {}
+                            public void Explicit2() {}
+                            public void Fun() {}
+                            public void Gen<T>() {}
+                            public void Zoo() {}
+                            public partial class MyNestedClass {}
+                            public partial class MyNestedGenericClass<T> {}
+                            public partial struct MyNestedGenericStruct<T> {}
+                            public partial struct MyNestedStruct {}
+                        }
+                        public partial class D : C, IExplicit, IExplicit2
+                        {
+                            public new const int Bar = 30;
+                            public new int Foo;
+                            public new int Baz { get { throw null; } set {} }
+                            public new D this[int i] { get { throw null; } set {} }
+                            public new event System.EventHandler MyEvent { add {} remove {} }
+                            void IExplicit2.Explicit2() {}
+                            public new void Do() {}
+                            public void Do(int i) {}
+                            public new static void DoStatic() {}
+                            public void Explicit() {}
+                            public new void Fun() {}
+                            public new void Gen<T>() where T : System.IComparable {}
+                            public new partial class MyNestedClass {}
+                            public new partial class MyNestedGenericClass<T> {}
+                            public new partial struct MyNestedGenericStruct<T> {}
+                            public new partial struct MyNestedStruct {}
+                        }
+                        public partial class E : C
+                        {
+                            public new int Bar;
+                            public new const int Do = 30;
+                            public new int Foo { get { throw null; } set {} }
+                            public new event System.EventHandler MyNestedClass { add {} remove {} }
+                            public new void Baz() {}
+                            public new void MyNestedStruct(double d) {}
+                            public new void Zoo() {}
+                        }
+                        public partial interface IExplicit {
+                            void Explicit();
+                        }
+                        public partial interface IExplicit2 {
+                            void Explicit2();
+                        }
+                        public partial interface IFun {
+                            void Fun();
+                        }
+                    }
+                    """);
         }
 
         [Theory]

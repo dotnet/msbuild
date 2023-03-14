@@ -59,7 +59,8 @@ namespace Microsoft.DotNet.GenAPI
 
             IEnumerable<AttributeListSyntax?> asNodes = syntaxNodes.Select(sn =>
             {
-                if (sn is AttributeSyntax atSyntax) {
+                if (sn is AttributeSyntax atSyntax)
+                {
                     SeparatedSyntaxList<AttributeSyntax> singletonList = SyntaxFactory.SingletonSeparatedList<AttributeSyntax>(atSyntax);
                     AttributeListSyntax alSyntax = SyntaxFactory.AttributeList(singletonList);
                     return alSyntax;

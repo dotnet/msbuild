@@ -120,6 +120,91 @@ namespace Microsoft.DotNet.GenAPI
             return namespaceNode;
         }
 
+        // Compare the equality of two method signatures for the purpose of emitting a "new"
+        // keyword on a method's return type. This is *not* meant to be complete implementation,
+        // but rather a heuristic to check that one method may hide another.
+        private static bool SignatureEquals(IMethodSymbol? method, IMethodSymbol? baseMethod)
+        {
+            if (method is null || baseMethod is null)
+            {
+                return false;
+            }
+
+            if (method.Equals(baseMethod, SymbolEqualityComparer.Default))
+            {
+                return true;
+            }
+
+            if (method.Name != baseMethod.Name)
+            {
+                return false;
+            }
+
+            if (method.Arity != baseMethod.Arity || method.Parameters.Length != baseMethod.Parameters.Length)
+            {
+                return false;
+            }
+
+            // compare parameter types
+            for (int i = 0; i < method.Parameters.Length; i++)
+            {
+                if (!method.Parameters[i].Type.Equals(baseMethod.Parameters[i].Type, SymbolEqualityComparer.Default))
+                {
+                    return false;
+                }
+            }
+
+            // TODO: GenAPI does not currently preserve __arglist as a parameter.
+            // Add test case for this branch when that is fixed.
+            if (method.IsVararg != baseMethod.IsVararg)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        // Name hiding through inheritance occurs when classes or structs redeclare names that were inherited from base classes.This type of name hiding takes one of the following forms:
+        // - A constant, field, property, event, or type introduced in a class or struct hides all base class members with the same name.
+        // - A method introduced in a class or struct hides all non-method base class members with the same name, and all base class methods with the same signature(§7.6).
+        // - An indexer introduced in a class or struct hides all base class indexers with the same signature(§7.6) .
+        private bool HidesBaseMember(ISymbol member)
+        {
+            if (member.IsOverride)
+            {
+                return false;
+            }
+
+            if (member.ContainingType.BaseType is not INamedTypeSymbol baseType)
+            {
+                return false;
+            }
+
+            if (member is IMethodSymbol method)
+            {
+                // If they're methods, compare their names and signatures.
+                return baseType.GetMembers(member.Name)
+                    .Any(baseMember => _symbolFilter.Include(baseMember) &&
+                         (baseMember.Kind != SymbolKind.Method ||
+                          SignatureEquals(method, (IMethodSymbol)baseMember)));
+            }
+            else if (member is IPropertySymbol prop && prop.IsIndexer)
+            {
+                // If they're indexers, compare their signatures.
+                return baseType.GetMembers(member.Name)
+                    .Any(baseMember => baseMember is IPropertySymbol baseProperty &&
+                         _symbolFilter.Include(baseMember) &&
+                         (SignatureEquals(prop.GetMethod, baseProperty.GetMethod) ||
+                          SignatureEquals(prop.SetMethod, baseProperty.SetMethod)));
+            }
+            else
+            {
+                // For all other kinds of members, compare their names.
+                return baseType.GetMembers(member.Name)
+                    .Any(_symbolFilter.Include);
+            }
+        }
+
         private SyntaxNode Visit(SyntaxNode namedTypeNode, INamedTypeSymbol namedType)
         {
             IEnumerable<ISymbol> members = namedType.GetMembers().Where(_symbolFilter.Include);
@@ -156,6 +241,12 @@ namespace Microsoft.DotNet.GenAPI
                 if (member is INamedTypeSymbol nestedTypeSymbol)
                 {
                     memberDeclaration = Visit(memberDeclaration, nestedTypeSymbol);
+                }
+
+                if (HidesBaseMember(member))
+                {
+                    DeclarationModifiers mods = _syntaxGenerator.GetModifiers(memberDeclaration);
+                    memberDeclaration = _syntaxGenerator.WithModifiers(memberDeclaration, mods.WithIsNew(isNew: true));
                 }
 
                 try
