@@ -14,15 +14,12 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class LaunchSettingsProfile
     {
-        public string? ApplicationUrl { get; set; }
-
-        public string? CommandName { get; set; }
-
-        public bool LaunchBrowser { get; set; }
-
-        public string? LaunchUrl { get; set; }
-
-        public IDictionary<string, string>? EnvironmentVariables { get; set; }
+        public string? ApplicationUrl { get; init; }
+        public string? CommandName { get; init; }
+        public bool LaunchBrowser { get; init; }
+        public string? LaunchUrl { get; init; }
+        public string? CommandLineArgs { get; init; }
+        public IReadOnlyDictionary<string, string>? EnvironmentVariables { get; init; }
 
         internal static LaunchSettingsProfile? ReadLaunchProfile(string projectDirectory, string? launchProfileName, IReporter reporter)
         {

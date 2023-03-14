@@ -17,7 +17,8 @@ Console.WriteLine($"Process identifier = {Process.GetCurrentProcess().Id}, {Proc
 Console.WriteLine($"DOTNET_WATCH = {Environment.GetEnvironmentVariable("DOTNET_WATCH")}");
 Console.WriteLine($"DOTNET_WATCH_ITERATION = {Environment.GetEnvironmentVariable("DOTNET_WATCH_ITERATION")}");
 Console.WriteLine($"Arguments = {string.Join(",", args)}");
-Console.WriteLine($"Version = {assembly.GetCustomAttributes<AssemblyVersionAttribute>().FirstOrDefault()?.Version ?? "<unspecified>"}");
+Console.WriteLine($"AssemblyName = {assembly.GetName()}");
+Console.WriteLine($"AssemblyTitle = '{assembly.GetCustomAttributes<AssemblyTitleAttribute>().FirstOrDefault()?.Title ?? "<unspecified>"}'");
 Console.WriteLine($"TFM = {assembly.GetCustomAttributes<TargetFrameworkAttribute>().FirstOrDefault()?.FrameworkName ?? "<unspecified>"}");
 Console.WriteLine($"Configuration = {assembly.GetCustomAttributes<AssemblyConfigurationAttribute>().FirstOrDefault()?.Configuration ?? "<unspecified>"}");
 

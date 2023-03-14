@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.Marshalling;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,9 +31,27 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var arguments = context.Iteration == 0 || (context.ChangedFile?.FilePath is string changedFile && changedFile.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)) ?
-                   new[] { "msbuild", "/t:Build", "/restore", "/nologo" } :
-                   new[] { "msbuild", "/t:Build", "/nologo" };
+                var arguments = new List<string>()
+                {
+                    "msbuild",
+                    "/nologo",
+                    "/t:Build"
+                };
+
+                if (context.TargetFramework != null)
+                {
+                    arguments.Add($"/p:TargetFramework={context.TargetFramework}");
+                }
+
+                if (context.BuildProperties != null)
+                {
+                    arguments.AddRange(context.BuildProperties.Select(p => $"/p:{p.name}={p.value}"));
+                }
+
+                if (context.Iteration == 0 || (context.ChangedFile?.FilePath is string changedFile && changedFile.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)))
+                {
+                    arguments.Add("/restore");
+                }
 
                 var processSpec = new ProcessSpec
                 {

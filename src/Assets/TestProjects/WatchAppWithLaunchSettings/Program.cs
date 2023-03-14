@@ -1,5 +1,6 @@
 ﻿Console.WriteLine("Started");
 Console.WriteLine($"Environment: {Environment.GetEnvironmentVariable("EnvironmentFromProfile")}");
+Console.WriteLine($"Arguments: {string.Join(",", args)}");
 
 if (Environment.GetEnvironmentVariable("READ_INPUT") != null)
 {
