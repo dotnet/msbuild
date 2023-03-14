@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.NET.TestFramework;
 using Xunit;
 using Xunit.Abstractions;

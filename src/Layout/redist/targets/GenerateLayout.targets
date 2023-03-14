@@ -18,7 +18,7 @@
 		  then need the version file there as well. -->
     <Copy SourceFiles="$(OutputPath)/.version" DestinationFiles="$(BaseOutputPath)$(Configuration)/.version" SkipUnchangedFiles="true" />
 
-    
+
   </Target>
 
   <Target Name="PublishRoslyn"
@@ -56,7 +56,7 @@
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props" />
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets" />
       <AnalyzerConfig Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/buildTransitive/config/**/*" />
-      
+
       <ILLinkAnalyzersTargets Include="$(PkgMicrosoft_NET_ILLink_Tasks)/build/Microsoft.NET.ILLink.Analyzers.props" />
       <ILLinkAnalyzersAssemblies Include="$(PkgMicrosoft_NET_ILLink_Tasks)/analyzers/dotnet/cs/**/*.dll" />
 
@@ -136,6 +136,7 @@
       <NETSdkWorkerSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Worker</NETSdkWorkerSourceRoot>
       <NETSdkBlazorWasmSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly</NETSdkBlazorWasmSourceRoot>
       <NETSdkRazorSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor</NETSdkRazorSourceRoot>
+      <NETSdkStaticWebAssetsSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.StaticWebAssets</NETSdkStaticWebAssetsSourceRoot>
     </PropertyGroup>
     <ItemGroup>
       <NETSdksContent Include="$(NETSdkSourceRoot)\**\*.*"
@@ -152,6 +153,8 @@
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.BlazorWebAssembly"/>
       <NETSdksContent Include="$(NETSdkRazorSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Razor"/>
+      <NETSdksContent Include="$(NETSdkStaticWebAssetsSourceRoot)\**\*.*"
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.StaticWebAssets"/>
     </ItemGroup>
     <Copy SourceFiles="@(NETSdksContent)"
       DestinationFiles="@(NETSdksContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />

@@ -12,6 +12,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project ToolsVersion="14.0">
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" Condition="'$(_RazorSdkImportsMicrosoftNetSdk)' == 'true'" />
+  <Import Sdk="Microsoft.NET.Sdk.StaticWebAssets" Project="Sdk.targets" Condition="'$(_RazorSdkImportsMicrosoftNetSdkStaticWebAssets)' == 'true'" />
 
   <PropertyGroup Condition="'$(RazorSdkCurrentVersionTargets)' == ''">
     <RazorSdkCurrentVersionTargets>$(MSBuildThisFileDirectory)..\targets\Sdk.Razor.CurrentVersion.targets</RazorSdkCurrentVersionTargets>

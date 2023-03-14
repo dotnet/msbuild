@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Principal;
 using System.Text.Json;
 using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.NET.TestFramework;
 using Moq;
 using Xunit;
