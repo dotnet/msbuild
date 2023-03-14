@@ -27,8 +27,10 @@ namespace Microsoft.DotNet.Cli
 
         public static int Main(string[] args)
         {
-            //setting output encoding is not available on those platforms
-            if (!OperatingSystem.IsIOS() && !OperatingSystem.IsAndroid() && !OperatingSystem.IsTvOS())
+            using AutomaticEncodingRestorer _ = new();
+
+            // Setting output encoding is not available on those platforms
+            if (!OperatingSystem.IsIOS() && !OperatingSystem.IsAndroid() && !OperatingSystem.IsTvOS() && !OperatingSystem.IsBrowser())
             {
                 //if output is redirected, force encoding to utf-8;
                 //otherwise the caller may not decode it correctly
@@ -105,19 +107,19 @@ namespace Microsoft.DotNet.Cli
             }
             finally
             {
-                if(perLogEventListener != null)
+                if (perLogEventListener != null)
                 {
                     perLogEventListener.Dispose();
                 }
             }
         }
 
-        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null )
+        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
         {
             return ProcessArgs(args, new TimeSpan(0), telemetryClient);
         }
 
-        internal static int ProcessArgs(string[] args, TimeSpan startupTime, ITelemetry telemetryClient = null )
+        internal static int ProcessArgs(string[] args, TimeSpan startupTime, ITelemetry telemetryClient = null)
         {
             Dictionary<string, double> performanceData = new Dictionary<string, double>();
 
