@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
         public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
             // visit subtree first to normalize type names.
-            ConstructorDeclarationSyntax? rs = (ConstructorDeclarationSyntax?)base.VisitConstructorDeclaration(node);
-            if (rs is null) return rs;
+            if (base.VisitConstructorDeclaration(node) is not ConstructorDeclarationSyntax rs)
+                return null;
 
             // if there is at least one reference parameter - generate non empty body.
             if (node.ParameterList.Parameters.Any(p => p.Modifiers.Any(m => m.IsKind(SyntaxKind.OutKeyword))))
@@ -46,15 +46,15 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
             // visit subtree first to normalize type names.
-            MethodDeclarationSyntax? rs = (MethodDeclarationSyntax?)base.VisitMethodDeclaration(node);
-            if (rs is null) return rs;
+            if (base.VisitMethodDeclaration(node) is not MethodDeclarationSyntax rs)
+                return null;
 
-            if (rs.Modifiers.Where(token => token.IsKind(SyntaxKind.AbstractKeyword)).Any() || rs.Body is null)
+            if (rs.Modifiers.Any(token => token.IsKind(SyntaxKind.AbstractKeyword)) || rs.Body is null)
             {
                 return rs;
             }
 
-            if (rs.ExpressionBody != null)
+            if (rs.ExpressionBody is not null)
             {
                 rs = rs.WithExpressionBody(null);
             }
@@ -77,19 +77,17 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
         public override SyntaxNode? VisitOperatorDeclaration(OperatorDeclarationSyntax node)
         {
             // visit subtree first to normalize type names.
-            OperatorDeclarationSyntax? rs = base.VisitOperatorDeclaration(node) as OperatorDeclarationSyntax;
-            return rs?
-                .WithBody(GetThrowNullBody())
-                .WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
+            return base.VisitOperatorDeclaration(node) is OperatorDeclarationSyntax rs ?
+                rs.WithBody(GetThrowNullBody()).WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space)) :
+                null;
         }
 
         /// <inheritdoc />
         public override SyntaxNode? VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
         {
-            ConversionOperatorDeclarationSyntax? rs = base.VisitConversionOperatorDeclaration(node) as ConversionOperatorDeclarationSyntax;
-            return rs?
-                .WithBody(GetThrowNullBody())
-                .WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
+            return base.VisitConversionOperatorDeclaration(node) is ConversionOperatorDeclarationSyntax rs ?
+                rs.WithBody(GetThrowNullBody()).WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space)) :
+                null; 
         }
 
         /// <inheritdoc />
@@ -107,7 +105,7 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
                         {
                             var typeDeclarationSyntax = (TypeDeclarationSyntax?)indexerDeclarationSyntax.Parent;
 
-                            if (indexerDeclarationSyntax.Modifiers.Where(token => token.IsKind(SyntaxKind.AbstractKeyword)).Any() ||
+                            if (indexerDeclarationSyntax.Modifiers.Any(token => token.IsKind(SyntaxKind.AbstractKeyword)) ||
                                 (typeDeclarationSyntax != null && typeDeclarationSyntax.Keyword.IsKind(SyntaxKind.InterfaceKeyword)))
                             {
                                 return node.WithSemicolonToken(node.SemicolonToken);
@@ -119,7 +117,7 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
                         {
                             var typeDeclarationSyntax = (TypeDeclarationSyntax?)propertyDeclarationSyntax.Parent;
 
-                            if (propertyDeclarationSyntax.Modifiers.Where(token => token.IsKind(SyntaxKind.AbstractKeyword)).Any() ||
+                            if (propertyDeclarationSyntax.Modifiers.Any(token => token.IsKind(SyntaxKind.AbstractKeyword)) ||
                                 (typeDeclarationSyntax != null && typeDeclarationSyntax.Keyword.IsKind(SyntaxKind.InterfaceKeyword)))
                             {
                                 return node.WithSemicolonToken(node.SemicolonToken);
@@ -130,23 +128,20 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
                     }
                     break;
             }
+
             return base.VisitAccessorDeclaration(node);
         }
 
-        private BlockSyntax GetEmptyBody()
+        private static BlockSyntax GetEmptyBody()
         {
             BlockSyntax node = GetMethodBodyFromText(SyntaxFactory.Space.ToString());
             return node.WithOpenBraceToken(node.OpenBraceToken.WithTrailingTrivia(SyntaxFactory.Space));
         }
 
-        private BlockSyntax GetThrowNullBody()
-        {
-            if (_exceptionMessage is not null)
-            {
-                return GetMethodBodyFromText($"throw new PlatformNotSupportedException(\"{_exceptionMessage}\");");
-            }
-            return GetMethodBodyFromText("throw null;");
-        }
+        private BlockSyntax GetThrowNullBody() =>
+            _exceptionMessage is not null ?
+                GetMethodBodyFromText($"throw new PlatformNotSupportedException(\"{_exceptionMessage}\");") :
+                GetMethodBodyFromText("throw null;");
 
         private SyntaxNode? ProcessPropertyDeclarationSyntax(AccessorDeclarationSyntax node)
         {
@@ -158,10 +153,12 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             {
                 node = node.WithBody(GetEmptyBody());
             }
-            return node.WithSemicolonToken(default).WithKeyword(node.Keyword.WithTrailingTrivia(SyntaxFactory.Space));
+
+            return node.WithSemicolonToken(default)
+                .WithKeyword(node.Keyword.WithTrailingTrivia(SyntaxFactory.Space));
         }
 
-        private BlockSyntax GetMethodBodyFromText(string text) =>
+        private static BlockSyntax GetMethodBodyFromText(string text) =>
             SyntaxFactory.Block(SyntaxFactory.ParseStatement(text))
                 .WithTrailingTrivia(SyntaxFactory.Space);
     }

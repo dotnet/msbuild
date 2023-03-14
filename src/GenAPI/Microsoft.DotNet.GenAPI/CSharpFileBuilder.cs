@@ -10,10 +10,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
-using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Simplification;
+using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 using Microsoft.DotNet.GenAPI.SyntaxRewriter;
@@ -23,21 +23,18 @@ namespace Microsoft.DotNet.GenAPI
     /// <summary>
     /// Processes assembly symbols to build corresponding structures in C# language.
     /// </summary>
-    public class CSharpFileBuilder : IAssemblySymbolWriter, IDisposable
+    public sealed class CSharpFileBuilder : IAssemblySymbolWriter, IDisposable
     {
-        ILog _logger;
+        private readonly ILog _logger;
         private readonly TextWriter _textWriter;
         private readonly ISymbolFilter _symbolFilter;
         private readonly string? _exceptionMessage;
         private readonly bool _includeAssemblyAttributes;
-
         private readonly AdhocWorkspace _adhocWorkspace;
         private readonly SyntaxGenerator _syntaxGenerator;
-
         private readonly IEnumerable<MetadataReference> _metadataReferences;
 
-        public CSharpFileBuilder(
-            ILog logger,
+        public CSharpFileBuilder(ILog logger,
             ISymbolFilter symbolFilter,
             TextWriter textWriter,
             string? exceptionMessage,
@@ -49,26 +46,22 @@ namespace Microsoft.DotNet.GenAPI
             _symbolFilter = symbolFilter;
             _exceptionMessage = exceptionMessage;
             _includeAssemblyAttributes = includeAssemblyAttributes;
-
             _adhocWorkspace = new AdhocWorkspace();
             _syntaxGenerator = SyntaxGenerator.GetGenerator(_adhocWorkspace, LanguageNames.CSharp);
-
             _metadataReferences = metadataReferences;
         }
 
         /// <inheritdoc />
-        public void WriteAssembly(IAssemblySymbol assembly) => Visit(assembly);
-
-        private void Visit(IAssemblySymbol assembly)
+        public void WriteAssembly(IAssemblySymbol assemblySymbol)
         {
             CSharpCompilationOptions compilationOptions = new(OutputKind.DynamicallyLinkedLibrary,
                     nullableContextOptions: NullableContextOptions.Enable);
             Project project = _adhocWorkspace.AddProject(ProjectInfo.Create(
-                ProjectId.CreateNewId(), VersionStamp.Create(), assembly.Name, assembly.Name, LanguageNames.CSharp,
+                ProjectId.CreateNewId(), VersionStamp.Create(), assemblySymbol.Name, assemblySymbol.Name, LanguageNames.CSharp,
                 compilationOptions: compilationOptions));
             project = project.AddMetadataReferences(_metadataReferences);
 
-            IEnumerable<INamespaceSymbol> namespaceSymbols = EnumerateNamespaces(assembly).Where(_symbolFilter.Include);
+            IEnumerable<INamespaceSymbol> namespaceSymbols = EnumerateNamespaces(assemblySymbol).Where(_symbolFilter.Include);
             List<SyntaxNode> namespaceSyntaxNodes = new();
 
             foreach (INamespaceSymbol namespaceSymbol in namespaceSymbols.Order())
@@ -89,13 +82,12 @@ namespace Microsoft.DotNet.GenAPI
 
             if (_includeAssemblyAttributes)
             {
-                compilationUnit = GenerateAssemblyAttributes(assembly, compilationUnit);
+                compilationUnit = GenerateAssemblyAttributes(assemblySymbol, compilationUnit);
             }
 
-            compilationUnit = GenerateForwardedTypeAssemblyAttributes(assembly, compilationUnit);
+            compilationUnit = GenerateForwardedTypeAssemblyAttributes(assemblySymbol, compilationUnit);
 
-            Document document = project.AddDocument(assembly.Name, compilationUnit);
-
+            Document document = project.AddDocument(assemblySymbol.Name, compilationUnit);
             document = Simplifier.ReduceAsync(document).Result;
             document = Formatter.FormatAsync(document, DefineFormattingOptions()).Result;
 
@@ -174,7 +166,7 @@ namespace Microsoft.DotNet.GenAPI
                 {
                     // re-throw the InvalidOperationException with the symbol that caused it.
                     throw new InvalidOperationException($"Adding member {member.ToDisplayString()} to the " +
-                        $"named type {namedTypeNode.ToString()} failed with an exception {e.Message}");
+                        $"named type {namedTypeNode} failed with an exception {e.Message}");
                 }
             }
 
@@ -183,8 +175,7 @@ namespace Microsoft.DotNet.GenAPI
 
         private SyntaxNode GenerateAssemblyAttributes(IAssemblySymbol assembly, SyntaxNode compilationUnit)
         {
-            foreach (var attribute in assembly.GetAttributes()
-                .Where(a => a.AttributeClass != null && _symbolFilter.Include(a.AttributeClass)))
+            foreach (AttributeData? attribute in assembly.GetAttributes().ExcludeNonVisibleOutsideOfAssembly(_symbolFilter))
             {
                 compilationUnit = _syntaxGenerator.AddAttributes(compilationUnit, _syntaxGenerator.Attribute(attribute)
                     .WithTrailingTrivia(SyntaxFactory.LineFeed));
