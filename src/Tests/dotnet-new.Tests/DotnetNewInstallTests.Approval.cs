@@ -242,5 +242,28 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .AddScrubber(output => output.ScrubAndReplace(templateToInstall, "%TEMPLATE FOLDER%"));
         }
 
+        [Fact]
+        public Task CanShowError_WhenGlobalSettingsFileIsCorrupted()
+        {
+            string homeDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithRequiredParameters", _log, homeDirectory);
+
+            var globalSettingsFile = Path.Combine(homeDirectory, "packages.json");
+            File.WriteAllText(globalSettingsFile, string.Empty);
+
+            string templateToInstall = GetTestTemplateLocation("TemplateWithTags");
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", templateToInstall)
+                .WithCustomHive(homeDirectory)
+                .Execute();
+
+            return Verify(commandResult.StdOut)
+                .AddScrubber(
+                output =>
+                {
+                    output.ScrubAndReplace(templateToInstall, "%TEMPLATE FOLDER%");
+                    output.ScrubAndReplace(globalSettingsFile, "%GLOBAL SETTINGS FILE%");
+                }
+                );
+        }
     }
 }
