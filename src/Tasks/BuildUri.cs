@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -58,25 +59,65 @@ namespace Microsoft.Build.Tasks
         {
             if (InputUri.Length == 0)
             {
-                // For an empty set of input uris, create a single item from the provided parameters.
-                OutputUri = new ITaskItem[] { CreateUriTaskItem(new TaskItem()) };
+                if (HasUriParameter())
+                {
+                    // Special case for the InputUri empty set when there are uri parameters.
+                    // Create a single item from the provided parameters.
+                    OutputUri = new ITaskItem[] { CreateUriTaskItem(new UriBuilder()) };
+                }
             }
             else
             {
-                OutputUri = new ITaskItem[InputUri.Length];
-                for (int idx = 0; idx < InputUri.Length; ++idx)
+                List<ITaskItem> uris = new();
+                foreach (var item in InputUri)
                 {
-                    OutputUri[idx] = CreateUriTaskItem(InputUri[idx]);
+                    if (!string.IsNullOrWhiteSpace(item.ItemSpec))
+                    {
+                        UriBuilder? builder = CreateUriBuilder(item.ItemSpec);
+                        if (builder != null)
+                        {
+                            uris.Add(CreateUriTaskItem(builder, item));
+                        }
+                    }
                 }
+
+                OutputUri = uris.ToArray();
             }
-            return true;
+
+            return !Log.HasLoggedErrors;
         }
 
-        private ITaskItem CreateUriTaskItem(ITaskItem item)
+        private bool HasUriParameter()
         {
-            // Create a UriBuilder.
-            // UriBuilder ctor can throw ArgumentNullException and UriFormatException.
-            var builder = string.IsNullOrEmpty(item.ItemSpec) ? new UriBuilder() : new UriBuilder(item.ItemSpec);
+            return
+                !string.IsNullOrEmpty(UriScheme) ||
+                !string.IsNullOrEmpty(UriUserName) ||
+                !string.IsNullOrEmpty(UriPassword) ||
+                !string.IsNullOrEmpty(UriHost) ||
+                UriPort != UseDefaultPortForScheme ||
+                !string.IsNullOrEmpty(UriPath) ||
+                !string.IsNullOrEmpty(UriQuery) ||
+                !string.IsNullOrEmpty(UriFragment);
+        }
+
+        private UriBuilder? CreateUriBuilder(string uri)
+        {
+            try
+            {
+                return new UriBuilder(uri);
+            }
+            catch (UriFormatException)
+            {
+                return null;
+            }
+            catch (ArgumentNullException)
+            {
+                return null;
+            }
+        }
+
+        private ITaskItem CreateUriTaskItem(UriBuilder builder, ITaskItem? item = null)
+        {
             // Scheme
             if (!string.IsNullOrEmpty(UriScheme))
             {
@@ -89,21 +130,25 @@ namespace Microsoft.Build.Tasks
                     builder.Port = UseDefaultPortForScheme;
                 }
             }
+
             // UserName
             if (!string.IsNullOrEmpty(UriUserName))
             {
                 builder.UserName = UriUserName;
             }
+
             // Password
             if (!string.IsNullOrEmpty(UriPassword))
             {
                 builder.Password = UriPassword;
             }
+
             // Host
             if (!string.IsNullOrEmpty(UriHost))
             {
                 builder.Host = UriHost;
             }
+
             // Port
             // If a scheme was provided and a port was not, then UriPort and builder.Port will both be -1.
             if (UriPort != builder.Port)
@@ -111,16 +156,19 @@ namespace Microsoft.Build.Tasks
                 // The Port property setter throws an ArgumentOutOfRangeException for a port number less than -1 or greater than 65,535.
                 builder.Port = UriPort;
             }
+
             // Path
             if (!string.IsNullOrEmpty(UriPath))
             {
                 builder.Path = UriPath;
             }
+
             // Query
             if (!string.IsNullOrEmpty(UriQuery))
             {
                 builder.Query = UriQuery;
             }
+
             // Fragment
             if (!string.IsNullOrEmpty(UriFragment))
             {
@@ -128,7 +176,9 @@ namespace Microsoft.Build.Tasks
             }
 
             // Create a TaskItem from the UriBuilder and set custom metadata.
-            var uri = new TaskItem(item) { ItemSpec = builder.Uri.AbsoluteUri };
+            TaskItem uri = (item != null) ?
+                new TaskItem(item) { ItemSpec = builder.Uri.AbsoluteUri } :
+                new TaskItem(builder.Uri.AbsoluteUri);
             uri.SetMetadata("UriScheme", builder.Scheme);
             uri.SetMetadata("UriUserName", builder.UserName);
             uri.SetMetadata("UriPassword", builder.Password);
