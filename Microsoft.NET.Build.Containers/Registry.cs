@@ -20,6 +20,15 @@ internal sealed class Registry
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
     /// <summary>
+    /// Whether we should upload blobs via chunked upload (disabled by default).
+    /// </summary>
+    /// <remarks>
+    /// Relates to https://github.com/dotnet/sdk-container-builds/pull/383#issuecomment-1466408853
+    /// </remarks>
+    private static readonly bool s_chunkedUploadEnabled = bool.TrueString.Equals(
+        Environment.GetEnvironmentVariable(ContainerHelpers.ChunkedUploadEnabled), StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
     /// The name of the registry, which is the host name, optionally followed by a colon and the port number.
     /// This is used in user-facing error messages, and it should match what the user would manually enter as
     /// part of Docker commands like `docker login`.
@@ -177,7 +186,9 @@ internal sealed class Registry
     {
         cancellationToken.ThrowIfCancellationRequested();
         var client = GetClient();
-        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{repositoryName}/manifests/{reference}"), cancellationToken).ConfigureAwait(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(BaseUri, $"/v2/{repositoryName}/manifests/{reference}"));
+        AddDockerFormatsAcceptHeader(request);
+        var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         return response;
     }
@@ -186,7 +197,10 @@ internal sealed class Registry
     {
         cancellationToken.ThrowIfCancellationRequested();
         var client = GetClient();
-        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{repositoryName}/blobs/{digest}"), cancellationToken).ConfigureAwait(false);
+        using var request =
+            new HttpRequestMessage(HttpMethod.Get, new Uri(BaseUri, $"/v2/{repositoryName}/blobs/{digest}"));
+        AddDockerFormatsAcceptHeader(request);
+        var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         return response;
     }
@@ -271,8 +285,11 @@ internal sealed class Registry
 
         HttpClient client = GetClient();
 
-        var response = await client.GetAsync(
-            new Uri(BaseUri, $"/v2/{repository}/blobs/{descriptor.Digest}"),
+        using var request = new HttpRequestMessage(HttpMethod.Get,
+            new Uri(BaseUri, $"/v2/{repository}/blobs/{descriptor.Digest}"));
+        AddDockerFormatsAcceptHeader(request);
+        var response = await client.SendAsync(
+            request,
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken).ConfigureAwait(false);
 
@@ -407,7 +424,7 @@ internal sealed class Registry
     private Task<UriBuilder> UploadBlobContentsAsync(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (SupportsChunkedUpload)
+        if (SupportsChunkedUpload && s_chunkedUploadEnabled)
         {
             return UploadBlobChunkedAsync(repository, digest, contents, client, uploadUri, cancellationToken);
         }
@@ -489,15 +506,18 @@ internal sealed class Registry
 
         HttpClient client = new(clientHandler);
 
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(new("application/json"));
-        client.DefaultRequestHeaders.Accept.Add(new(DockerManifestListV2));
-        client.DefaultRequestHeaders.Accept.Add(new(DockerManifestV2));
-        client.DefaultRequestHeaders.Accept.Add(new(DockerContainerV1));
-
         client.DefaultRequestHeaders.Add("User-Agent", $".NET Container Library v{Constants.Version}");
 
         return client;
+    }
+
+    private static void AddDockerFormatsAcceptHeader(HttpRequestMessage request)
+    {
+        request.Headers.Accept.Clear();
+        request.Headers.Accept.Add(new("application/json"));
+        request.Headers.Accept.Add(new(DockerManifestListV2));
+        request.Headers.Accept.Add(new(DockerManifestV2));
+        request.Headers.Accept.Add(new(DockerContainerV1));
     }
 
     public async Task PushAsync(BuiltImage builtImage, ImageReference source, ImageReference destination, Action<string> logProgressMessage, CancellationToken cancellationToken)
