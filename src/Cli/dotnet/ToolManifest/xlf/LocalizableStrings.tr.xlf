@@ -21,6 +21,19 @@ Aranan konumların bir listesi için aracın adından önce "-d" seçeneğini be
 {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFileContent">
+        <source>{
+  "version": 1,
+  "isRoot": true,
+  "tools": {}
+}</source>
+        <target state="new">{
+  "version": 1,
+  "isRoot": true,
+  "tools": {}
+}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
         <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
         <target state="translated">{0} adlı dosya başka bir bilgisayardan geldiğinden bilgisayarı korumaya yardımcı olmak için engellenmiş olabilir. Engellemenin nasıl kaldırılacağı da dahil olmak üzere daha fazla bilgi için bkz. https://aka.ms/motw</target>

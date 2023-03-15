@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Packaging;
 
 namespace Microsoft.DotNet.ToolManifest
 {
@@ -153,7 +155,7 @@ namespace Microsoft.DotNet.ToolManifest
             }
         }
 
-        public FilePath FindFirst()
+        public FilePath FindFirst(bool createManifestFileOption = false)
         {
             foreach ((FilePath possibleManifest, DirectoryPath _) in EnumerateDefaultAllPossibleManifests())
             {
@@ -162,12 +164,48 @@ namespace Microsoft.DotNet.ToolManifest
                     return possibleManifest;
                 }
             }
-
+            if (createManifestFileOption)
+            {
+                DirectoryPath manifestInsertFolder = GetInsertManifestFilePath();
+                if (manifestInsertFolder.Value != null)
+                {
+                    return new FilePath(WriteManifestFile(manifestInsertFolder));
+                }
+            }
             throw new ToolManifestCannotBeFoundException(
-                LocalizableStrings.CannotFindAManifestFile,
-                string.Format(LocalizableStrings.ListOfSearched,
-                    string.Join(Environment.NewLine,
-                        EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
+                    LocalizableStrings.CannotFindAManifestFile,
+                    string.Format(LocalizableStrings.ListOfSearched,
+                        string.Join(Environment.NewLine,
+                            EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
+        }
+
+        private DirectoryPath GetInsertManifestFilePath()
+        {
+            DirectoryPath? currentSearchDirectory = _probeStart;
+            while (currentSearchDirectory.HasValue)
+            {
+                var currentSearchGitDirectory = currentSearchDirectory.Value.WithSubDirectories(Constants.GitDirectoryName);
+                if (Directory.Exists(currentSearchGitDirectory.Value))
+                {
+                    return currentSearchDirectory.Value;
+                }
+                if (Directory.GetFiles(currentSearchDirectory.Value.Value, "*.sln").Any() || Directory.GetFiles(currentSearchDirectory.Value.Value, "*.git").Any())
+                {
+                    return currentSearchDirectory.Value;
+                }
+                currentSearchDirectory = currentSearchDirectory.Value.GetParentPathNullable();
+            }
+            return _probeStart;
+        }
+
+        private string WriteManifestFile(DirectoryPath folderPath)
+        { 
+            var manifestFileContent = LocalizableStrings.ManifestFileContent;
+            Directory.CreateDirectory(folderPath.Value + "/" + Constants.DotConfigDirectoryName);
+            string manifestFileLocation = folderPath.Value + "/" + Constants.DotConfigDirectoryName + "/" + Constants.ManifestFileName;
+            File.WriteAllText(manifestFileLocation, manifestFileContent);
+
+            return manifestFileLocation;
         }
 
         /// <summary>

@@ -21,6 +21,19 @@ Pour obtenir une liste des emplacements de recherche, spécifiez l'option "-d" a
 {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFileContent">
+        <source>{
+  "version": 1,
+  "isRoot": true,
+  "tools": {}
+}</source>
+        <target state="new">{
+  "version": 1,
+  "isRoot": true,
+  "tools": {}
+}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
         <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
         <target state="translated">Le fichier {0} provient d'un autre ordinateur et a éventuellement été bloqué pour protéger cet ordinateur. Pour plus d'informations, notamment sur le déblocage, consultez https://aka.ms/motw</target>

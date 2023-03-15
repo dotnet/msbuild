@@ -169,4 +169,11 @@ For a list of locations searched, specify the "-d" option before the tool name.<
   <data name="MultipleSamePackageId" xml:space="preserve">
     <value>More than one entry exists for package(s): {0}.</value>
   </data>
+  <data name="ManifestFileContent" xml:space="preserve">
+    <value>{
+  "version": 1,
+  "isRoot": true,
+  "tools": {}
+}</value>
+  </data>
 </root>
