@@ -3404,6 +3404,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
             result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::BitwiseNot(-43))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal((~-43).ToString(), result);
+
+            result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::LeftShift(1, 2))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal((1 << 2).ToString(), result);
+
+            result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::RightShift(-8, 2))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal((-8 >> 2).ToString(), result);
+
+            result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::RightShiftUnsigned(-8, 2))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal((-8 >>> 2).ToString(), result);
         }
 
         /// <summary>
