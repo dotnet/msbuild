@@ -90,6 +90,51 @@ namespace Microsoft.Build.UnitTests
             string file = Path.Combine(Path.GetTempPath(), "CombineFileDirectory.tmp");
             Assert.Equal(file, task.OutputFile.ItemSpec);
             Assert.True(File.Exists(file));
+
+            File.Delete(task.OutputFile.ItemSpec);
+        }
+
+        /// <summary>
+        /// Combine file and directory where the directory does not already exist
+        /// </summary>
+        [Fact]
+        public void CombineFileDirectoryAndDirectoryDoesNotExist()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem folder = new TaskItem(env.CreateFolder(folderPath: null, createFolder: false).Path);
+
+            TaskItem file = new TaskItem("CombineFileDirectory.tmp");
+
+            string expectedFile = Path.Combine(folder.ItemSpec, file.ItemSpec);
+            WriteCodeFragment task = CreateTask("c#", folder, file, new TaskItem[] { new TaskItem("aa") });
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            bool result = task.Execute();
+
+            Assert.True(result);
+            Assert.Equal(expectedFile, task.OutputFile.ItemSpec);
+            Assert.True(File.Exists(expectedFile));
+        }
+
+        /// <summary>
+        /// Combine file and directory where the directory does not already exist
+        /// </summary>
+        [Fact]
+        public void FileWithPathAndDirectoryDoesNotExist()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem file = new TaskItem(Path.Combine(env.CreateFolder(folderPath: null, createFolder: false).Path, "File.tmp"));
+
+            WriteCodeFragment task = CreateTask("c#", null, file, new TaskItem[] { new TaskItem("aa") });
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            bool result = task.Execute();
+
+            Assert.True(result);
+            Assert.Equal(file.ItemSpec, task.OutputFile.ItemSpec);
+            Assert.True(File.Exists(task.OutputFile.ItemSpec));
         }
 
         /// <summary>
@@ -176,7 +221,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Bad file path
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidFilePath()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -315,6 +360,27 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
 
             File.Delete(task.OutputFile.ItemSpec);
+        }
+
+        /// <summary>
+        /// Specify directory where the directory does not already exist
+        /// </summary>
+        [Fact]
+        public void ToDirectoryAndDirectoryDoesNotExist()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem folder = new TaskItem(env.CreateFolder(folderPath: null, createFolder: false).Path);
+
+            WriteCodeFragment task = CreateTask("c#", folder, null, new TaskItem[] { new TaskItem("System.AssemblyTrademarkAttribute") });
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            bool result = task.Execute();
+
+            Assert.True(result);
+            Assert.True(File.Exists(task.OutputFile.ItemSpec));
+            Assert.Equal(folder.ItemSpec, task.OutputFile.ItemSpec.Substring(0, folder.ItemSpec.Length));
+            Assert.Equal(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
         }
 
         /// <summary>
@@ -874,7 +940,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// For backward-compatibility, if multiple constructors are found with the same number 
+        /// For backward-compatibility, if multiple constructors are found with the same number
         /// of position arguments that was specified in the metadata, then the constructor that
         /// has strings for every parameter should be used.
         /// </summary>
@@ -985,11 +1051,18 @@ namespace Microsoft.Build.UnitTests
 
         private WriteCodeFragment CreateTask(string language, params TaskItem[] attributes)
         {
-            WriteCodeFragment task = new();
-            task.Language = language;
-            task.OutputDirectory = new TaskItem(Path.GetTempPath());
-            task.AssemblyAttributes = attributes;
-            return task;
+            return CreateTask(language, new TaskItem(Path.GetTempPath()), null, attributes);
+        }
+
+        private WriteCodeFragment CreateTask(string language, TaskItem outputDirectory, TaskItem outputFile, params TaskItem[] attributes)
+        {
+            return new WriteCodeFragment()
+            {
+                Language = language,
+                OutputDirectory = outputDirectory,
+                OutputFile = outputFile,
+                AssemblyAttributes = attributes
+            };
         }
 
         private void ExecuteAndVerifySuccess(WriteCodeFragment task, params string[] expectedAttributes)
