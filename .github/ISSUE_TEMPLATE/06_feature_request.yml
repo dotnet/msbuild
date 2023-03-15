@@ -1,12 +1,12 @@
 name: 💡 Feature  Request
-description: Submit a new feature to help us improve MSBuild.
+description: Suggest an idea for this project.
 title: "[Feature Request]: "
 labels: ["Feature Request"]
 body:
   - type: textarea
     attributes:
       label: Issue Description
-      description: Please include a clear and concise description of the new feature.
+      description: Please include a clear and concise description of the feature request.
     validations:
       required: true
   - type: textarea
