@@ -20,33 +20,25 @@ namespace Microsoft.Build.CommandLine
         private Encoding? _originalOutputEncoding = null;
         private Encoding? _originalInputEncoding = null;
 
-        private bool outputEncodingAccessible = false;
-        private bool inputEncodingAccessible = false;
-
         public AutomaticEncodingRestorer()
         {
             try
             {
-                if (
 #if NET7_0_OR_GREATER
-                        !OperatingSystem.IsIOS() && !OperatingSystem.IsAndroid() && !OperatingSystem.IsTvOS()) // Output + Input Encoding are unavailable on these platforms per docs.
-#else
-                        IsWindowsOS()) // Windows is the only platform where we need to change the encoding as other platforms are UTF 8 by default, so for now its the only one required to restore.
-#endif
+                if (OperatingSystem.IsIOS() || OperatingSystem.IsAndroid() || OperatingSystem.IsTvOS()) // Output + Input Encoding are unavailable on these platforms per docs, and they're only available past net 5.
                 {
-                    _originalOutputEncoding = Console.OutputEncoding;
-                    outputEncodingAccessible = true;
-                    if (
-#if NET7_0_OR_GREATER
-                        !OperatingSystem.IsBrowser()) // Input Encoding is also unavailable in this platform.
-#else
-                        IsWindowsOS())
-#endif
-                    {
-                        _originalInputEncoding = Console.InputEncoding;
-                        inputEncodingAccessible = true;
-                    }
+                    return;
                 }
+#endif
+                _originalOutputEncoding = Console.OutputEncoding;
+
+#if NET7_0_OR_GREATER
+                if (OperatingSystem.IsBrowser()) // Input Encoding is also unavailable in this platform. (No concern for net472 as browser is unavailable.)
+                {
+                    return;
+                }
+#endif
+                _originalInputEncoding = Console.InputEncoding;
             }
             catch (Exception ex) when (ex is IOException || ex is SecurityException)
             {
@@ -58,11 +50,11 @@ namespace Microsoft.Build.CommandLine
         {
             try
             {
-                if (outputEncodingAccessible && _originalOutputEncoding != null)
+                if (_originalOutputEncoding != null)
                 {
                     Console.OutputEncoding = _originalOutputEncoding;
                 }
-                if (inputEncodingAccessible && _originalInputEncoding != null)
+                if (_originalInputEncoding != null)
                 {
                     Console.InputEncoding = _originalInputEncoding;
                 }
@@ -71,19 +63,6 @@ namespace Microsoft.Build.CommandLine
             {
                 // The encoding is unavailable. Do nothing.
             }
-        }
-
-        /// <summary>
-        /// Return whether the running OS is windows for net472.
-        /// RuntimeInformation.IsOSPlatform(OSPlatform.Windows) is sometimes available in net472 but in this context it's an unavailable API, so this function is needed.
-        /// </summary>
-        /// <returns>
-        /// A boolean of 'true' iff the current machine os is windows.
-        /// </returns>
-        private bool IsWindowsOS()
-        {
-            string? windir = Environment.GetEnvironmentVariable("windir");
-            return !string.IsNullOrEmpty(windir) && windir.Contains(@"\") && Directory.Exists(windir);
         }
     }
 }
