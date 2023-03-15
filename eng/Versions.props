@@ -153,11 +153,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.5-servicing.23163.9</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion>7.0.5-servicing.23163.9</MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.5-servicing.23163.9</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.5-servicing.23163.9</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.5-servicing.23163.9</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.5-servicing.23164.16</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion>7.0.5-servicing.23164.16</MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.5-servicing.23164.16</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.5-servicing.23164.16</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.5-servicing.23164.16</MicrosoftAspNetCoreAnalyzersPackageVersion>
     <MicrosoftAspNetCoreTestHostPackageVersion>7.0.5</MicrosoftAspNetCoreTestHostPackageVersion>
   </PropertyGroup>
   <!-- Dependencies from https://github.com/dotnet/razor -->
