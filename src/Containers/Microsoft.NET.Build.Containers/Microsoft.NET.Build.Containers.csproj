@@ -23,13 +23,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" >
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Nuget.Packaging" Version="$(NuGetPackagingPackageVersion)" />
-    <PackageReference Include="Valleysoft.DockerCredsProvider" Version="2.1.0"/>
+    <PackageReference Include="Valleysoft.DockerCredsProvider" Version="2.1.0" />
   </ItemGroup>
 
   <!-- net472 builds manually import files to compile -->

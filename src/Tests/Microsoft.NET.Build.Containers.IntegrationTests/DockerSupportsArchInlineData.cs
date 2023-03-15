@@ -63,7 +63,7 @@ public class DockerSupportsArchInlineData : DataAttribute
     {
         // the config json has an OSType property that is either "linux" or "windows" -
         // we can't use this for linux arch detection because that isn't enough information.
-        var config = LocalDocker.GetConfigAsync(sync: true, cancellationToken: CancellationToken.None).GetAwaiter().GetResult();
+        var config = LocalDocker.GetConfig();
         if (config.RootElement.TryGetProperty("OSType", out JsonElement osTypeProperty))
         {
             return osTypeProperty.GetString() == "windows";

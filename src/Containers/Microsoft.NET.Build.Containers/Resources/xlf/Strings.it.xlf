@@ -47,6 +47,11 @@
         <target state="new">CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</target>
         <note>{StrBegin="CONTAINER3002: "}</note>
       </trans-unit>
+      <trans-unit id="DockerInfoFailedEx">
+        <source>CONTAINER3002: Failed to get docker info: {0}</source>
+        <target state="new">CONTAINER3002: Failed to get docker info: {0}</target>
+        <note>{StrBegin="CONTAINER3002: "}</note>
+      </trans-unit>
       <trans-unit id="DockerProcessCreationFailed">
         <source>CONTAINER3001: Failed creating docker process.</source>
         <target state="new">CONTAINER3001: Failed creating docker process.</target>

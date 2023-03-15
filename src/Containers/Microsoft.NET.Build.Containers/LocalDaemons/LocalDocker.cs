@@ -7,6 +7,7 @@ using System.Formats.Tar;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
@@ -57,22 +58,15 @@ internal sealed class LocalDocker : ILocalDaemon
 
     public Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
-        return IsAvailableIntAsync(sync: false, cancellationToken);
+        return Task.FromResult(IsAvailable());
     }
 
     ///<inheritdoc/>
     public bool IsAvailable()
     {
-        //it is safe to call Task.Result here, as when sync is true, the method is fully synchronous
-        return IsAvailableIntAsync(sync: true, cancellationToken: default).Result;
-    }
-
-    private async Task<bool> IsAvailableIntAsync(bool sync, CancellationToken cancellationToken)
-    {
         try
         {
-            //it is safe to call Task.Result here, as when sync is true, the method is fully synchronous
-            JsonDocument config = sync ? GetConfigAsync(sync: true, cancellationToken).Result : await GetConfigAsync(sync: false, cancellationToken).ConfigureAwait(false);
+            JsonDocument config = GetConfig();
 
             if (!config.RootElement.TryGetProperty("ServerErrors", out JsonElement errorProperty))
             {
@@ -101,72 +95,38 @@ internal sealed class LocalDocker : ILocalDaemon
     /// Gets docker configuration.
     /// </summary>
     /// <param name="sync">when <see langword="true"/>, the method is executed synchronously.</param>
-    /// <param name="cancellationToken"></param>
     /// <exception cref="DockerLoadException">when failed to retrieve docker configuration.</exception>
-    internal static async Task<JsonDocument> GetConfigAsync(bool sync, CancellationToken cancellationToken)
+    internal static JsonDocument GetConfig()
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        using MemoryStream stdOutStream = new MemoryStream(8192);
-        using StreamWriter stdWriter = new StreamWriter(stdOutStream);
-        DataReceivedEventHandler stdOutHandlerHandler = (sender, args) =>
-        {
-            stdWriter.Write(args.Data);
-            stdWriter.Flush();
-        };
-
-        Process process = new()
+        Process proc = new()
         {
             StartInfo = new ProcessStartInfo("docker", "info --format=\"{{json .}}\"")
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            }
         };
 
-        process.OutputDataReceived += stdOutHandlerHandler;
-        
         try
         {
-            process.Start();
-            process.BeginOutputReadLine();
+            Command dockerCommand = new(proc);
+            dockerCommand.CaptureStdOut();
+            dockerCommand.CaptureStdErr();
+            CommandResult dockerCommandResult = dockerCommand.Execute();
 
-            if (!sync)
+
+            if (dockerCommandResult.ExitCode != 0)
             {
-                await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+                throw new DockerLoadException(Resource.FormatString(
+                    nameof(Strings.DockerInfoFailed),
+                    dockerCommandResult.ExitCode,
+                    dockerCommandResult.StdOut,
+                    dockerCommandResult.StdErr));
             }
-            else
-            {
-                process.WaitForExit();
-            }
-        }
-        finally
-        {
-            process.OutputDataReceived -= stdOutHandlerHandler;
-            stdOutStream.Position = 0;
-        }
 
-        cancellationToken.ThrowIfCancellationRequested();
+            return JsonDocument.Parse(dockerCommandResult.StdOut);
 
-        if (process.ExitCode != 0)
-        {
-            using StreamReader reader = new StreamReader(stdOutStream);
-            string stdOut = reader.ReadToEnd();
 
-            throw new DockerLoadException(Resource.FormatString(
-                nameof(Strings.DockerInfoFailed),
-                process.ExitCode,
-                stdOut));
         }
-
-        if (!sync)
+        catch (Exception e) when (e is not DockerLoadException)
         {
-            return await JsonDocument.ParseAsync(stdOutStream, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-        else
-        {
-            return JsonDocument.Parse(stdOutStream);
+            throw new DockerLoadException(Resource.FormatString(nameof(Strings.DockerInfoFailedEx), e.Message));
         }
     }
 
