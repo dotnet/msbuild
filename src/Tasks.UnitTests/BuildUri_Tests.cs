@@ -29,6 +29,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoInputUriWithParams()
         {
+            // When there is no InputUri, build a new Uri from the parameters.
             var task = new BuildUri
             {
                 BuildEngine = new MockEngine(true),
@@ -39,6 +40,8 @@ namespace Microsoft.Build.UnitTests
             task.OutputUri.ShouldNotBeNull();
             task.OutputUri.Length.ShouldBe(1);
             task.OutputUri[0].ItemSpec.ShouldBe(@"https://localhost/test");
+
+            output.WriteLine(task.OutputUri[0].ItemSpec);
         }
 
         [Fact]
@@ -70,12 +73,31 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void InputUriNoParams()
+        public void BadInputUriNoParams()
         {
+            // Inputs that fail to parse are dropped from the output.
             var task = new BuildUri
             {
                 BuildEngine = new MockEngine(true),
-                InputUri = new[] { new TaskItem(@"https://example.com/test") },
+                InputUri = new[] {
+                    new TaskItem(@"''"),
+                    new TaskItem(@"http:\\\host/path/file"),
+                },
+            };
+            task.Execute().ShouldBeTrue();
+            task.OutputUri.ShouldNotBeNull();
+            task.OutputUri.Length.ShouldBe(0);
+        }
+
+        [Fact]
+        public void InputUriNoParams()
+        {
+            // Metadata is added for the 'parts' of the Uri.
+            var inputItem = new TaskItem(@"https://example.com/test");
+            var task = new BuildUri
+            {
+                BuildEngine = new MockEngine(true),
+                InputUri = new[] { inputItem },
             };
             task.Execute().ShouldBeTrue();
             task.OutputUri.ShouldNotBeNull();
@@ -92,6 +114,30 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadata("UriPassword").ShouldBe(string.Empty);
             item.GetMetadata("UriQuery").ShouldBe(string.Empty);
             item.GetMetadata("UriFragment").ShouldBe(string.Empty);
+
+            item.ShouldNotBeSameAs(inputItem);
+        }
+
+        [Fact]
+        public void InputUriMetadata()
+        {
+            // Non-conflicting metadata on the input item should be on the output item.
+            var inputItem = new TaskItem(@"https://example.com/test");
+            inputItem.SetMetadata("Foo", "Bar");
+            inputItem.SetMetadata("UriPath", "willBeOverwritten");
+            var task = new BuildUri
+            {
+                BuildEngine = new MockEngine(true),
+                InputUri = new[] { inputItem },
+            };
+            task.Execute().ShouldBeTrue();
+            task.OutputUri.ShouldNotBeNull();
+            task.OutputUri.Length.ShouldBe(1);
+
+            task.OutputUri[0].GetMetadata("Foo").ShouldBe("Bar");
+            task.OutputUri[0].GetMetadata("UriPath").ShouldBe(@"/test");
+
+            task.OutputUri[0].ShouldNotBeSameAs(inputItem);
         }
 
         private readonly ITestOutputHelper output;
