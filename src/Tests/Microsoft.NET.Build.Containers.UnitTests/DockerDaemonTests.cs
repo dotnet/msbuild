@@ -5,6 +5,12 @@ using Xunit;
 
 namespace Microsoft.NET.Build.Containers.UnitTests;
 
+[CollectionDefinition("Daemon Tests")]
+public class DaemonTestsCollection
+{ 
+}
+
+[Collection("Daemon Tests")]
 public class DockerDaemonTests
 {
     [DockerDaemonAvailableFact]

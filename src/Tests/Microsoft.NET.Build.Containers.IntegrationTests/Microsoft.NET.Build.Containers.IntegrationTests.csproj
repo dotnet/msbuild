@@ -9,6 +9,7 @@
     <Nullable>enable</Nullable>
     <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
     <OutputType Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'">Exe</OutputType>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
