@@ -27,39 +27,39 @@ public class CreateNewImageToolTaskTests
         CreateNewImage task = new();
 
         Exception e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("Required property 'PublishDirectory' was not set or empty.", e.Message);
+        Assert.Equal("CONTAINER4001: Required property 'PublishDirectory' was not set or empty.", e.Message);
 
         DirectoryInfo publishDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), DateTime.Now.ToString("yyyyMMddHHmmssfff")));
 
         task.PublishDirectory = publishDir.FullName;
 
         e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("Required property 'BaseRegistry' was not set or empty.", e.Message);
+        Assert.Equal("CONTAINER4001: Required property 'BaseRegistry' was not set or empty.", e.Message);
 
         task.BaseRegistry = "MyBaseRegistry";
 
         e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("Required property 'BaseImageName' was not set or empty.", e.Message);
+        Assert.Equal("CONTAINER4001: Required property 'BaseImageName' was not set or empty.", e.Message);
 
         task.BaseImageName = "MyBaseImageName";
 
         e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("Required property 'ImageName' was not set or empty.", e.Message);
+        Assert.Equal("CONTAINER4001: Required property 'ImageName' was not set or empty.", e.Message);
 
         task.ImageName = "MyImageName";
 
         e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("Required property 'WorkingDirectory' was not set or empty.", e.Message);
+        Assert.Equal("CONTAINER4001: Required property 'WorkingDirectory' was not set or empty.", e.Message);
 
         task.WorkingDirectory = "MyWorkingDirectory";
 
         e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("Required 'Entrypoint' items were not set.", e.Message);
+        Assert.Equal("CONTAINER4002: Required 'Entrypoint' items were not set.", e.Message);
 
         task.Entrypoint = new[] { new TaskItem("") }; 
 
         e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("Required 'Entrypoint' items contain empty items.", e.Message);
+        Assert.Equal("CONTAINER4003: Required 'Entrypoint' items contain empty items.", e.Message);
 
         task.Entrypoint = new[] { new TaskItem("MyEntryPoint") };
 
