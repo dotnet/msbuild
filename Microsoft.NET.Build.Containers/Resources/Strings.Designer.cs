@@ -10,8 +10,8 @@
 
 namespace Microsoft.NET.Build.Containers.Resources {
     using System;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,15 +23,15 @@ namespace Microsoft.NET.Build.Containers.Resources {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Strings {
-
+        
         private static global::System.Resources.ResourceManager resourceMan;
-
+        
         private static global::System.Globalization.CultureInfo resourceCulture;
-
+        
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Strings() {
         }
-
+        
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -59,7 +59,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER0000: Value for unit test {0}.
         /// </summary>
@@ -68,7 +68,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("_Test", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry..
         /// </summary>
@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("AmazonRegistryFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2008: Both {0} and {1} were provided, but only one or the other is allowed..
         /// </summary>
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("BlobUploadFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER1007: Could not deserialize token from JSON..
         /// </summary>
@@ -131,7 +131,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("CouldntDeserializeJsonToken", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2012: Could not recognize registry &apos;{0}&apos;..
         /// </summary>
@@ -149,7 +149,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("DockerInfoFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER3001: Failed creating docker process..
         /// </summary>
@@ -158,7 +158,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("DockerProcessCreationFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER1010: Don&apos;t know how to pull images from local daemons at the moment..
         /// </summary>
@@ -167,7 +167,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("DontKnowHowToPullImages", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER4006: Property &apos;{0}&apos; is empty or contains whitespace and will be ignored..
         /// </summary>
@@ -194,7 +194,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("FailedRetrievingCredentials", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to No host object detected..
         /// </summary>
@@ -212,7 +212,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("ImageLoadFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2014: Invalid {0}: {1}..
         /// </summary>
@@ -239,25 +239,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("InvalidImageName", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2007: Invalid SDK semantic version '{0}'..
-        /// </summary>
-        internal static string InvalidSdkVersion {
-            get {
-                return ResourceManager.GetString("InvalidSdkVersion", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2008: Invalid SDK prerelease version '{0}' - only 'rc' and 'preview' are supported..
-        /// </summary>
-        internal static string InvalidSdkPrereleaseVersion {
-            get {
-                return ResourceManager.GetString("InvalidSdkPrereleaseVersion", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2017: A ContainerPort item was provided with an invalid port number &apos;{0}&apos;. ContainerPort items must have an Include value that is an integer, and a Type value that is either &apos;tcp&apos; or &apos;udp&apos;..
         /// </summary>
@@ -282,6 +264,24 @@ namespace Microsoft.NET.Build.Containers.Resources {
         internal static string InvalidPort_Type {
             get {
                 return ResourceManager.GetString("InvalidPort_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2018: Invalid SDK prerelease version &apos;{0}&apos; - only &apos;rc&apos; and &apos;preview&apos; are supported..
+        /// </summary>
+        internal static string InvalidSdkPrereleaseVersion {
+            get {
+                return ResourceManager.GetString("InvalidSdkPrereleaseVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2019: Invalid SDK semantic version &apos;{0}&apos;..
+        /// </summary>
+        internal static string InvalidSdkVersion {
+            get {
+                return ResourceManager.GetString("InvalidSdkVersion", resourceCulture);
             }
         }
         
@@ -311,7 +311,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("InvalidTokenResponse", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER4005: Item &apos;{0}&apos; contains items without metadata &apos;Value&apos;, and they will be ignored..
         /// </summary>
@@ -338,7 +338,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("MissingLayerNode", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2004: Unable to download layer with descriptor &apos;{0}&apos; from registry &apos;{1}&apos; because it does not exist..
         /// </summary>
@@ -347,7 +347,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("MissingLinkToRegistry", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2016: ContainerPort item &apos;{0}&apos; does not specify the port number. Please ensure the item&apos;s Include is a port number, for example &apos;&lt;ContainerPort Include=&quot;80&quot; /&gt;&apos;.
         /// </summary>
@@ -365,7 +365,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("NoRequestUriSpecified", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; was not a valid container image name, it was normalized to &apos;{1}&apos;.
         /// </summary>
@@ -401,7 +401,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("RegistryPushFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER4003: Required &apos;{0}&apos; items contain empty items..
         /// </summary>
@@ -437,7 +437,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("TooManyRetries", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2002: Unknown local container daemon type &apos;{0}&apos;. Valid local container daemon types are {1}..
         /// </summary>
@@ -446,7 +446,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("UnknownDaemonType", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message..
         /// </summary>
@@ -455,7 +455,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("UnknownMediaType", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2001: Unrecognized mediaType &apos;{0}&apos;..
         /// </summary>
