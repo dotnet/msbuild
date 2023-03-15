@@ -17,6 +17,7 @@ namespace Microsoft.NET.Build.Containers.Resources
     /// CONTAINER2xxx: Invalid/missing data related failures
     /// CONTAINER3xxx: Docker process related failures
     /// CONTAINER4xxx: Invalid command line parameters
+    /// CONTAINER9000: Unhanled exception
     /// </remarks>
     internal static class Resource
     {

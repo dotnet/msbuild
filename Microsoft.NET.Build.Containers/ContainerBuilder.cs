@@ -4,8 +4,6 @@
 using System.Text.Json;
 using Microsoft.NET.Build.Containers.Resources;
 
-using static Microsoft.NET.Build.Containers.KnownStrings;
-
 namespace Microsoft.NET.Build.Containers;
 
 public static class ContainerBuilder
@@ -101,7 +99,7 @@ public static class ContainerBuilder
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(DiagnosticMessage.Error(ErrorCodes.CONTAINER1011, $"Failed to push to output registry: {e.Message}"));
+                    Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), e.Message));
                     Environment.ExitCode = 1;
                 }
             }
@@ -111,7 +109,7 @@ public static class ContainerBuilder
                 var localDaemon = GetLocalDaemon(localContainerDaemon, Console.WriteLine);
                 if (!(await localDaemon.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
-                    Console.WriteLine(DiagnosticMessage.Error(ErrorCodes.CONTAINER1012, "The Docker daemon is not available, but pushing to a local daemon was requested. Please start Docker and try again."));
+                    Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalDaemondNotAvailable)));
                     Environment.ExitCode = 7;
                     return;
                 }
@@ -122,7 +120,7 @@ public static class ContainerBuilder
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(DiagnosticMessage.Error(ErrorCodes.CONTAINER1013, $"Failed to push to local docker registry: {e.Message}"));
+                    Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), e.Message));
                     Environment.ExitCode = 1;
                 }
             }
@@ -134,7 +132,7 @@ public static class ContainerBuilder
         var daemon = localDaemonType switch
         {
             KnownDaemonTypes.Docker => new LocalDocker(logger),
-            _ => throw new ArgumentException($"Unknown local container daemon type '{localDaemonType}'. Valid local container daemon types are {String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)}", nameof(localDaemonType))
+            _ => throw new ArgumentException(Resource.FormatString(nameof(Strings.UnknownDaemonType), localDaemonType, String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)), nameof(localDaemonType))
         };
         return daemon;
     }

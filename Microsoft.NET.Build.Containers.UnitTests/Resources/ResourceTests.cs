@@ -11,13 +11,13 @@ namespace Microsoft.NET.Build.Containers.UnitTests.Resources
         [Fact]
         public void GetString_ReturnsValueFromResources()
         {
-            Assert.Equal("Value for unit test {0}", Resource.GetString(nameof(Strings._Test)));
+            Assert.Equal("CONTAINER0000: Value for unit test {0}", Resource.GetString(nameof(Strings._Test)));
         }
 
         [Fact]
         public void FormatString_ReturnsValueFromResources()
         {
-            Assert.Equal("Value for unit test 1", Resource.FormatString(nameof(Strings._Test), 1));
+            Assert.Equal("CONTAINER0000: Value for unit test 1", Resource.FormatString(nameof(Strings._Test), 1));
         }
     }
 }

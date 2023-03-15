@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
-using static Microsoft.NET.Build.Containers.KnownStrings;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
@@ -85,7 +85,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
         string[] validTags;
         if (!String.IsNullOrEmpty(ContainerImageTag) && ContainerImageTags.Length >= 1)
         {
-            Log.LogError(null, ErrorCodes.CONTAINER2008, "Container.AmbiguousTags", null, 0, 0, 0, 0, $"Both {nameof(ContainerImageTag)} and {nameof(ContainerImageTags)} were provided, but only one or the other is allowed.");
+            Log.LogErrorWithCodeFromResources(nameof(Strings.AmbiguousTags), nameof(ContainerImageTag), nameof(ContainerImageTags));
             return !Log.HasLoggedErrors;
         }
 
@@ -98,7 +98,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             else
             {
                 validTags = Array.Empty<string>();
-                Log.LogError(null, ErrorCodes.CONTAINER2007, "Container.InvalidTag", null, 0, 0, 0, 0, "Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period.", nameof(ContainerImageTag), ContainerImageTag);
+                Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidTag), nameof(ContainerImageTag), ContainerImageTag);
             }
         }
         else if (ContainerImageTags.Length != 0 && TryValidateTags(ContainerImageTags, out var valids, out var invalids))
@@ -106,7 +106,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             validTags = valids;
             if (invalids.Any())
             {
-                Log.LogError(null, ErrorCodes.CONTAINER2007, "Container.InvalidTag", null, 0, 0, 0, 0, "Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", nameof(ContainerImageTags), String.Join(",", invalids));
+                Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidTags), nameof(ContainerImageTags), String.Join(",", invalids));
                 return !Log.HasLoggedErrors;
             }
         }
@@ -117,7 +117,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
 
         if (!String.IsNullOrEmpty(ContainerRegistry) && !ContainerHelpers.IsValidRegistry(ContainerRegistry))
         {
-            Log.LogError("Could not recognize registry '{0}'.", ContainerRegistry);
+            Log.LogErrorWithCodeFromResources(nameof(Strings.CouldntRecognizeRegistry), ContainerRegistry);
             return !Log.HasLoggedErrors;
         }
 
@@ -125,7 +125,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
 
         if (FullyQualifiedBaseImageName.Contains(' ') && BuildEngine != null)
         {
-            Log.LogWarning($"{nameof(FullyQualifiedBaseImageName)} had spaces in it, replacing with dashes.");
+            Log.LogWarningWithCodeFromResources(nameof(Strings.BaseImageNameWithSpaces), nameof(FullyQualifiedBaseImageName));
         }
         FullyQualifiedBaseImageName = FullyQualifiedBaseImageName.Replace(' ', '-');
 
@@ -135,7 +135,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
                                                                   out string? outputTag,
                                                                   out string? _outputDigest))
         {
-            Log.LogError($"Could not parse {nameof(FullyQualifiedBaseImageName)}: {{0}}", FullyQualifiedBaseImageName);
+            Log.LogErrorWithCodeFromResources(nameof(Strings.BaseImageNameParsingFailed), nameof(FullyQualifiedBaseImageName), FullyQualifiedBaseImageName);
             return !Log.HasLoggedErrors;
         }
 
@@ -143,7 +143,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
         {
             if (!ContainerHelpers.NormalizeImageName(ContainerImageName, out var normalizedImageName))
             {
-                Log.LogMessage(null, ErrorCodes.CONTAINER2009, "Container.InvalidImageName", null, 0, 0, 0, 0, MessageImportance.High, "'{0}' was not a valid container image name, it was normalized to '{1}'", nameof(ContainerImageName), normalizedImageName);
+                Log.LogMessageFromResources(nameof(Strings.NormalizedContainerName), nameof(ContainerImageName), normalizedImageName);
                 NewContainerImageName = normalizedImageName!; // known to be not null due to output of NormalizeImageName
             }
             else
@@ -154,7 +154,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
         }
         catch (ArgumentException)
         {
-            Log.LogError($"Invalid {nameof(ContainerImageName)}: {{0}}", ContainerImageName);
+            Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidContainerImageName), nameof(ContainerImageName), ContainerImageName);
             return !Log.HasLoggedErrors;
         }
 
@@ -186,7 +186,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
         {
             if (BuildEngine != null)
             {
-                Log.LogWarning($"{nameof(ContainerEnvironmentVariables)}: '{badEnvVar.ItemSpec}' was not a valid Environment Variable. Ignoring.");
+                Log.LogWarningWithCodeFromResources(nameof(Strings.InvalidEnvVar), nameof(ContainerEnvironmentVariables), badEnvVar.ItemSpec);
             }
         }
 

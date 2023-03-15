@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Value for unit test {0}.
+        ///   Looks up a localized string similar to CONTAINER0000: Value for unit test {0}.
         /// </summary>
         internal static string _Test {
             get {
@@ -78,6 +78,42 @@ namespace Microsoft.NET.Build.Containers.Resources {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2008: Both {0} and {1} were provided, but only one or the other is allowed..
+        /// </summary>
+        internal static string AmbiguousTags {
+            get {
+                return ResourceManager.GetString("AmbiguousTags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2009: Could not parse {0}: {1}.
+        /// </summary>
+        internal static string BaseImageNameParsingFailed {
+            get {
+                return ResourceManager.GetString("BaseImageNameParsingFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2013: {0} had spaces in it, replacing with dashes..
+        /// </summary>
+        internal static string BaseImageNameWithSpaces {
+            get {
+                return ResourceManager.GetString("BaseImageNameWithSpaces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER1011: Couldn&apos;t find matching base image for {0} that matches RuntimeIdentifier {1}..
+        /// </summary>
+        internal static string BaseImageNotFound {
+            get {
+                return ResourceManager.GetString("BaseImageNotFound", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER1001: Failed to upload blob to {0}; received {1} with detail {2}..
         /// </summary>
@@ -96,6 +132,15 @@ namespace Microsoft.NET.Build.Containers.Resources {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2012: Could not recognize registry &apos;{0}&apos;..
+        /// </summary>
+        internal static string CouldntRecognizeRegistry {
+            get {
+                return ResourceManager.GetString("CouldntRecognizeRegistry", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}.
         /// </summary>
@@ -124,6 +169,24 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to CONTAINER4006: Property &apos;{0}&apos; is empty or contains whitespace and will be ignored..
+        /// </summary>
+        internal static string EmptyOrWhitespacePropertyIgnored {
+            get {
+                return ResourceManager.GetString("EmptyOrWhitespacePropertyIgnored", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER4004: Items &apos;{0}&apos; contain empty item(s) which will be ignored..
+        /// </summary>
+        internal static string EmptyValuesIgnored {
+            get {
+                return ResourceManager.GetString("EmptyValuesIgnored", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER1008: Failed retrieving credentials for &quot;{0}&quot;: {1}.
         /// </summary>
         internal static string FailedRetrievingCredentials {
@@ -133,6 +196,15 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to No host object detected..
+        /// </summary>
+        internal static string HostObjectNotDetected {
+            get {
+                return ResourceManager.GetString("HostObjectNotDetected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER1009: Failed to load image to local Docker daemon. stdout: {0}.
         /// </summary>
         internal static string ImageLoadFailed {
@@ -141,6 +213,24 @@ namespace Microsoft.NET.Build.Containers.Resources {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2014: Invalid {0}: {1}..
+        /// </summary>
+        internal static string InvalidContainerImageName {
+            get {
+                return ResourceManager.GetString("InvalidContainerImageName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2015: {0}: &apos;{1}&apos; was not a valid Environment Variable. Ignoring..
+        /// </summary>
+        internal static string InvalidEnvVar {
+            get {
+                return ResourceManager.GetString("InvalidEnvVar", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2005: The first character of the image name must be a lowercase letter or a digit..
         /// </summary>
@@ -169,6 +259,51 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2017: A ContainerPort item was provided with an invalid port number &apos;{0}&apos;. ContainerPort items must have an Include value that is an integer, and a Type value that is either &apos;tcp&apos; or &apos;udp&apos;..
+        /// </summary>
+        internal static string InvalidPort_Number {
+            get {
+                return ResourceManager.GetString("InvalidPort_Number", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2017: A ContainerPort item was provided with an invalid port number &apos;{0}&apos; and an invalid port type &apos;{1}&apos;. ContainerPort items must have an Include value that is an integer, and a Type value that is either &apos;tcp&apos; or &apos;udp&apos;..
+        /// </summary>
+        internal static string InvalidPort_NumberAndType {
+            get {
+                return ResourceManager.GetString("InvalidPort_NumberAndType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2017: A ContainerPort item was provided with an invalid port type &apos;{0}&apos;. ContainerPort items must have an Include value that is an integer, and a Type value that is either &apos;tcp&apos; or &apos;udp&apos;..
+        /// </summary>
+        internal static string InvalidPort_Type {
+            get {
+                return ResourceManager.GetString("InvalidPort_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2007: Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period..
+        /// </summary>
+        internal static string InvalidTag {
+            get {
+                return ResourceManager.GetString("InvalidTag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2010: Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period..
+        /// </summary>
+        internal static string InvalidTags {
+            get {
+                return ResourceManager.GetString("InvalidTags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER1003: Token response had neither token nor access_token..
         /// </summary>
         internal static string InvalidTokenResponse {
@@ -177,6 +312,24 @@ namespace Microsoft.NET.Build.Containers.Resources {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER4005: Item &apos;{0}&apos; contains items without metadata &apos;Value&apos;, and they will be ignored..
+        /// </summary>
+        internal static string ItemsWithoutMetadata {
+            get {
+                return ResourceManager.GetString("ItemsWithoutMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER1012: The local daemon is not available, but pushing to a local daemon was requested. Please start the daemon and try again..
+        /// </summary>
+        internal static string LocalDaemondNotAvailable {
+            get {
+                return ResourceManager.GetString("LocalDaemondNotAvailable", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2006: Tried to get layer information but there is no layer node?.
         /// </summary>
@@ -196,6 +349,15 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2016: ContainerPort item &apos;{0}&apos; does not specify the port number. Please ensure the item&apos;s Include is a port number, for example &apos;&lt;ContainerPort Include=&quot;80&quot; /&gt;&apos;.
+        /// </summary>
+        internal static string MissingPortNumber {
+            get {
+                return ResourceManager.GetString("MissingPortNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER1004: No RequestUri specified..
         /// </summary>
         internal static string NoRequestUriSpecified {
@@ -205,6 +367,33 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; was not a valid container image name, it was normalized to &apos;{1}&apos;.
+        /// </summary>
+        internal static string NormalizedContainerName {
+            get {
+                return ResourceManager.GetString("NormalizedContainerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2011: {0} &apos;{1}&apos; does not exist.
+        /// </summary>
+        internal static string PublishDirectoryDoesntExist {
+            get {
+                return ResourceManager.GetString("PublishDirectoryDoesntExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER1013: Failed to push to the output registry: {0}.
+        /// </summary>
+        internal static string RegistryOutputPushFailed {
+            get {
+                return ResourceManager.GetString("RegistryOutputPushFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER1005: Registry push failed..
         /// </summary>
         internal static string RegistryPushFailed {
@@ -213,6 +402,33 @@ namespace Microsoft.NET.Build.Containers.Resources {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER4003: Required &apos;{0}&apos; items contain empty items..
+        /// </summary>
+        internal static string RequiredItemsContainsEmptyItems {
+            get {
+                return ResourceManager.GetString("RequiredItemsContainsEmptyItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER4002: Required &apos;{0}&apos; items were not set..
+        /// </summary>
+        internal static string RequiredItemsNotSet {
+            get {
+                return ResourceManager.GetString("RequiredItemsNotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER4001: Required property &apos;{0}&apos; was not set or empty..
+        /// </summary>
+        internal static string RequiredPropertyNotSetOrEmpty {
+            get {
+                return ResourceManager.GetString("RequiredPropertyNotSetOrEmpty", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER1006: Too many retries, stopping..
         /// </summary>
