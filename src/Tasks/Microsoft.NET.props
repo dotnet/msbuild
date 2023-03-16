@@ -16,6 +16,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
+                                        Reference Assemblies
+    Enable the production of a reference assembly by all .NET projects, by default.
+    ============================================================
+  -->
+  <PropertyGroup>
+    <ProduceReferenceAssembly Condition=" '$(ProduceReferenceAssembly)' == '' ">true</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <!--
+    ============================================================
                                         GetToolPaths
     Get the paths for the .NET Framework and .NET Core tools and sdk tools directories.
     This does not need to be a target since all of the values are availiable at project evaluation time.
