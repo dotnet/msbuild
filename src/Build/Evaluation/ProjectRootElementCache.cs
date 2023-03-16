@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Threading;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -252,7 +251,7 @@ namespace Microsoft.Build.Evaluation
 
             // Verify that we never call this with _locker held, as that would create a lock ordering inversion with the per-file lock.
             ErrorUtilities.VerifyThrow(
-                !Monitor.IsEntered(_locker),
+                !System.Threading.Monitor.IsEntered(_locker),
                 "Detected lock ordering inversion in ProjectRootElementCache.");
 #endif
             // Should already have been canonicalized
@@ -263,14 +262,15 @@ namespace Microsoft.Build.Evaluation
 
             if (projectRootElement != null || loadProjectRootElement == null)
             {
-                // If we found it or not load callback was specified, we are done.
+                // If we found it or no load callback was specified, we are done.
                 return projectRootElement;
             }
 
             try
             {
                 // We are about to load. Take a per-file lock to prevent multiple threads from duplicating the work multiple times.
-                lock (_fileLoadLocks.GetOrAdd(projectFile, () => new object()))
+                object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, () => new object());
+                lock (perFileLock)
                 {
                     // Call GetOrLoad again, this time with the OpenProjectRootElement callback.
                     return GetOrLoad(projectFile, loadProjectRootElement, isExplicitlyLoaded, preserveFormatting);
@@ -279,13 +279,16 @@ namespace Microsoft.Build.Evaluation
             finally
             {
                 // Remove the lock object as we have otherwise no good way of preventing _fileLoadLocks from growing unboundedly.
-                // If another thread is inside the lock, we effectively create a race condition where yet another thread may enter.
-                // This is OK because the locking is just a perf optimization and we have either loaded the ProjectRootElement and
-                // it will be fetched from cache, or it is an error condition and we don't care about perf that much.
+                // If another thread is inside the lock, we effectively create a race condition where someone else may enter GetOrAdd.
+                // This is OK because this fine-grained locking is just a perf optimization, and we have either loaded the
+                // ProjectRootElement by now, or it is an error condition where perf is not critical.
                 _fileLoadLocks.TryRemove(projectFile, out _);
             }
         }
 
+        /// <summary>
+        /// A helper used by <see cref="Get"/>.
+        /// </summary>
         private ProjectRootElement GetOrLoad(string projectFile, OpenProjectRootElement loadProjectRootElement, bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
