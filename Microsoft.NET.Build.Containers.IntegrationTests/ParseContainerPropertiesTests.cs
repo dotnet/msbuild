@@ -62,7 +62,7 @@ public class ParseContainerPropertiesTests
 
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
-        Assert.Contains(logs.Messages, m => m.Code == ErrorCodes.CONTAINER2007 && m.Importance == global::Microsoft.Build.Framework.MessageImportance.High);
+        Assert.Contains(logs.Messages, m => m.Message?.Contains("'ContainerImageName' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
     }
 
     [DockerDaemonAvailableFact]
