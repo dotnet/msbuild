@@ -37,7 +37,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         cancellationToken.ThrowIfCancellationRequested();
         if (!Directory.Exists(PublishDirectory))
         {
-            Log.LogError("{0} '{1}' does not exist", nameof(PublishDirectory), PublishDirectory);
+            Log.LogErrorWithCodeFromResources(nameof(Strings.PublishDirectoryDoesntExist), nameof(PublishDirectory), PublishDirectory);
             return !Log.HasLoggedErrors;
         }
         ImageReference sourceImageReference = new(SourceRegistry.Value, BaseImageName, BaseImageTag);
@@ -55,12 +55,12 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
         else
         {
-            throw new NotSupportedException("Don't know how to pull images from local daemons at the moment");
+            throw new NotSupportedException(Resource.GetString(nameof(Strings.DontKnowHowToPullImages)));
         }
 
         if (imageBuilder is null)
         {
-            Log.LogError($"Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}", sourceImageReference.RepositoryAndTag, ContainerRuntimeIdentifier);
+            Log.LogErrorWithCodeFromResources(nameof(Strings.BaseImageNotFound), sourceImageReference.RepositoryAndTag, ContainerRuntimeIdentifier);
             return !Log.HasLoggedErrors;
         }
 
@@ -100,7 +100,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 LocalDocker localDaemon = GetLocalDaemon(msg => Log.LogMessage(msg));
                 if (!(await localDaemon.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
-                    Log.LogError("The local daemon is not available, but pushing to a local daemon was requested. Please start the daemon and try again.");
+                    Log.LogErrorWithCodeFromResources(nameof(Strings.LocalDaemondNotAvailable));
                     return false;
                 }
                 try
@@ -139,7 +139,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 {
                     if (BuildEngine != null)
                     {
-                        Log.LogError("Failed to push to the output registry: {0}", e);
+                        Log.LogErrorWithCodeFromResources(nameof(Strings.RegistryOutputPushFailed), e);
                     }
                 }
             }
@@ -161,34 +161,25 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             else
             {
                 ContainerHelpers.ParsePortError parsedErrors = (ContainerHelpers.ParsePortError)errors!;
-                var portString = portType == null ? portNo : $"{portNo}/{portType}";
+                
                 if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.MissingPortNumber))
                 {
-                    Log.LogError("ContainerPort item '{0}' does not specify the port number. Please ensure the item's Include is a port number, for example '<ContainerPort Include=\"80\" />'", port.ItemSpec);
+                    Log.LogErrorWithCodeFromResources(nameof(Strings.MissingPortNumber), port.ItemSpec);
                 }
                 else
                 {
-                    var message = "A ContainerPort item was provided with ";
-                    var arguments = new List<string>(2);
-                    if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber) && parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber))
+                    if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber) && parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortType))
                     {
-                        message += "an invalid port number '{0}' and an invalid port type '{1}'";
-                        arguments.Add(portNo);
-                        arguments.Add(portType!);
+                        Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidPort_NumberAndType), portNo, portType);
                     }
                     else if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber))
                     {
-                        message += "an invalid port number '{0}'";
-                        arguments.Add(portNo);
+                        Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidPort_Number), portNo);
                     }
-                    else if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber))
+                    else if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortType))
                     {
-                        message += "an invalid port type '{0}'";
-                        arguments.Add(portType!);
+                        Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidPort_Type), portType);
                     }
-                    message += ". ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'";
-
-                    Log.LogError(message, arguments);
                 }
             }
         }

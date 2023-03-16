@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
+using System.Reflection;
+using System.Resources;
 using Microsoft.Build.Framework;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
@@ -154,5 +156,7 @@ partial class CreateNewImage
 
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";
+
+        TaskResources = Resource.Manager;
     }
 }

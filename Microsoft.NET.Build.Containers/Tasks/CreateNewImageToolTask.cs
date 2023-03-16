@@ -7,6 +7,7 @@ using System.Linq;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
@@ -52,7 +53,7 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         }
         else
         {
-            Log.LogMessage(MessageImportance.Low, "No host object detected.");
+            Log.LogMessage(MessageImportance.Low, Resource.GetString(nameof(Strings.HostObjectNotDetected)));
         }
 
         ProcessStartInfo startInfo = base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch)!;
@@ -75,31 +76,31 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
     {
         if (string.IsNullOrWhiteSpace(PublishDirectory))
         {
-            throw new InvalidOperationException($"Required property '{nameof(PublishDirectory)}' was not set or empty.");
+            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(PublishDirectory)));
         }
         if (string.IsNullOrWhiteSpace(BaseRegistry))
         {
-            throw new InvalidOperationException($"Required property '{nameof(BaseRegistry)}' was not set or empty.");
+            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(BaseRegistry)));
         }
         if (string.IsNullOrWhiteSpace(BaseImageName))
         {
-            throw new InvalidOperationException($"Required property '{nameof(BaseImageName)}' was not set or empty.");
+            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(BaseImageName)));
         }
         if (string.IsNullOrWhiteSpace(ImageName))
         {
-            throw new InvalidOperationException($"Required property '{nameof(ImageName)}' was not set or empty.");
+            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(ImageName)));
         }
         if (string.IsNullOrWhiteSpace(WorkingDirectory))
         {
-            throw new InvalidOperationException($"Required property '{nameof(WorkingDirectory)}' was not set or empty.");
+            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(WorkingDirectory)));
         }
         if (Entrypoint.Length == 0)
         {
-            throw new InvalidOperationException($"Required '{nameof(Entrypoint)}' items were not set.");
+            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredItemsNotSet), nameof(Entrypoint)));
         }
         if (Entrypoint.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
         {
-            throw new InvalidOperationException($"Required '{nameof(Entrypoint)}' items contain empty items.");
+            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredItemsContainsEmptyItems), nameof(Entrypoint)));
         }
 
         CommandLineBuilder builder = new();
@@ -130,19 +131,19 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
 
         if (EntrypointArgs.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
         {
-            Log.LogWarning($"Items '{nameof(EntrypointArgs)}' contain empty item(s) which will be ignored.");
+            Log.LogWarningWithCodeFromResources(nameof(Strings.EmptyValuesIgnored), nameof(EntrypointArgs));
         }
         ITaskItem[] sanitizedEntryPointArgs = EntrypointArgs.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec)).ToArray();
         builder.AppendSwitchIfNotNull("--entrypointargs ", sanitizedEntryPointArgs, delimiter: " ");
 
         if (Labels.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
         {
-            Log.LogWarning($"Items '{nameof(Labels)}' contain empty item(s) which will be ignored.");
+            Log.LogWarningWithCodeFromResources(nameof(Strings.EmptyValuesIgnored), nameof(Labels));
         }
         var sanitizedLabels = Labels.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec));
         if (sanitizedLabels.Any(i => i.GetMetadata("Value") is null))
         {
-            Log.LogWarning($"Item '{nameof(Labels)}' contains items without metadata 'Value', and they will be ignored.");
+            Log.LogWarningWithCodeFromResources(nameof(Strings.ItemsWithoutMetadata), nameof(Labels));
             sanitizedLabels = sanitizedLabels.Where(i => i.GetMetadata("Value") is not null);
         }
 
@@ -151,14 +152,14 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
 
         if (ImageTags.Any(string.IsNullOrWhiteSpace))
         {
-            Log.LogWarning($"Property '{nameof(ImageTags)}' is empty or contains whitespace and will be ignored.");
+            Log.LogWarningWithCodeFromResources(nameof(Strings.EmptyOrWhitespacePropertyIgnored), nameof(ImageTags));
         }
         string[] sanitizedImageTags = ImageTags.Where(i => !string.IsNullOrWhiteSpace(i)).ToArray();
         builder.AppendSwitchIfNotNull("--imagetags ", sanitizedImageTags, delimiter: " ");
 
         if (ExposedPorts.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
         {
-            Log.LogWarning($"Items '{nameof(ExposedPorts)}' contain empty item(s) which will be ignored.");
+            Log.LogWarningWithCodeFromResources(nameof(Strings.EmptyValuesIgnored), nameof(ExposedPorts));
         }
         var sanitizedPorts = ExposedPorts.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec));
         string[] readyPorts =
@@ -170,12 +171,12 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
 
         if (ContainerEnvironmentVariables.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
         {
-            Log.LogWarning($"Items '{nameof(ContainerEnvironmentVariables)}' contain empty item(s) which will be ignored.");
+            Log.LogWarningWithCodeFromResources(nameof(Strings.EmptyValuesIgnored), nameof(ContainerEnvironmentVariables));
         }
         var sanitizedEnvVariables = ContainerEnvironmentVariables.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec));
         if (sanitizedEnvVariables.Any(i => i.GetMetadata("Value") is null))
         {
-            Log.LogWarning($"Item '{nameof(ContainerEnvironmentVariables)}' contains items without metadata 'Value', and they will be ignored.");
+            Log.LogWarningWithCodeFromResources(nameof(Strings.ItemsWithoutMetadata), nameof(ContainerEnvironmentVariables));
             sanitizedEnvVariables = sanitizedEnvVariables.Where(i => i.GetMetadata("Value") is not null);
         }
         string[] readyEnvVariables = sanitizedEnvVariables.Select(i => i.ItemSpec + "=" + i.GetMetadata("Value")).ToArray();

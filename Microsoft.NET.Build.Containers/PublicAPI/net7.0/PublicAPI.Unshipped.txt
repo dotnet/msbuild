@@ -29,9 +29,6 @@ Microsoft.NET.Build.Containers.Descriptor.UncompressedDigest.init -> void
 Microsoft.NET.Build.Containers.Descriptor.Urls.get -> string![]?
 Microsoft.NET.Build.Containers.Descriptor.Urls.init -> void
 Microsoft.NET.Build.Containers.KnownDaemonTypes
-Microsoft.NET.Build.Containers.KnownStrings
-Microsoft.NET.Build.Containers.KnownStrings.ErrorCodes
-Microsoft.NET.Build.Containers.KnownStrings.Properties
 Microsoft.NET.Build.Containers.ManifestConfig
 Microsoft.NET.Build.Containers.ManifestConfig.digest.get -> string!
 Microsoft.NET.Build.Containers.ManifestConfig.digest.set -> void
@@ -187,24 +184,3 @@ override Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.Execute()
 static Microsoft.NET.Build.Containers.ContainerHelpers.TryParsePort(string! input, out Microsoft.NET.Build.Containers.Port? port, out Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError? error) -> bool
 static Microsoft.NET.Build.Containers.ContainerHelpers.TryParsePort(string? portNumber, string? portType, out Microsoft.NET.Build.Containers.Port? port, out Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError? error) -> bool
 static readonly Microsoft.NET.Build.Containers.KnownDaemonTypes.SupportedLocalDaemonTypes -> string![]!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.ErrorCodes.CONTAINER001 -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.ErrorCodes.CONTAINER004 -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.ErrorCodes.CONTAINER005 -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.AssemblyName -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ComputeContainerConfig -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerBaseImage -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerBaseName -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerBaseRegistry -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerBaseTag -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerEntrypoint -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerEnvironmentVariable -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerGenerateLabels -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerImageName -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerImageTag -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerImageTags -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerLabel -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerPort -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerRegistry -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.ContainerWorkingDirectory -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.SelfContained -> string!
-static readonly Microsoft.NET.Build.Containers.KnownStrings.Properties.UseAppHost -> string!

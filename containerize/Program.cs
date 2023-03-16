@@ -7,4 +7,14 @@ using containerize;
 
 #pragma warning disable CA1852
 
-return await new ContainerizeCommand().InvokeAsync(args).ConfigureAwait(false);
+try
+{
+    return await new ContainerizeCommand().InvokeAsync(args).ConfigureAwait(false);
+}
+catch (Exception e)
+{
+    string message = !e.Message.StartsWith("CONTAINER", StringComparison.OrdinalIgnoreCase) ? $"CONTAINER9000: " + e.ToString() : e.ToString();
+    Console.WriteLine($"Containerize: error {message}");
+
+    return 1;
+}
