@@ -161,14 +161,14 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             else
             {
                 ContainerHelpers.ParsePortError parsedErrors = (ContainerHelpers.ParsePortError)errors!;
-                var portString = portType == null ? portNo : $"{portNo}/{portType}";
+                
                 if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.MissingPortNumber))
                 {
                     Log.LogErrorWithCodeFromResources(nameof(Strings.MissingPortNumber), port.ItemSpec);
                 }
                 else
                 {
-                    if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber) && parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber))
+                    if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber) && parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortType))
                     {
                         Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidPort_NumberAndType), portNo, portType);
                     }
@@ -176,7 +176,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                     {
                         Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidPort_Number), portNo);
                     }
-                    else if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber))
+                    else if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortType))
                     {
                         Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidPort_Type), portType);
                     }
