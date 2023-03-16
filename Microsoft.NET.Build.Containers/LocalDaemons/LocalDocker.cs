@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using System.Formats.Tar;
 using System.Text;
@@ -105,52 +106,71 @@ internal sealed class LocalDocker : ILocalDaemon
     internal static async Task<JsonDocument> GetConfigAsync(bool sync, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var psi = new ProcessStartInfo("docker", "info --format=\"{{json .}}\"")
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-        };
-        Process proc = Process.Start(psi) ?? throw new DockerLoadException(Resource.GetString(nameof(Strings.DockerProcessCreationFailed)));
 
-        if (!sync)
+        using MemoryStream stdOutStream = new MemoryStream(8192);
+        using StreamWriter stdWriter = new StreamWriter(stdOutStream);
+        DataReceivedEventHandler stdOutHandlerHandler = (sender, args) =>
         {
-            await proc.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            stdWriter.Write(args.Data);
+            stdWriter.Flush();
+        };
+
+        Process process = new()
+        {
+            StartInfo = new ProcessStartInfo("docker", "info --format=\"{{json .}}\"")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
+            }
+        };
+
+        process.OutputDataReceived += stdOutHandlerHandler;
+        
+        try
+        {
+            process.Start();
+            process.BeginOutputReadLine();
+
+            if (!sync)
+            {
+                await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                process.WaitForExit();
+            }
         }
-        else
+        finally
         {
-            proc.WaitForExit();
+            process.OutputDataReceived -= stdOutHandlerHandler;
+            stdOutStream.Position = 0;
         }
 
         cancellationToken.ThrowIfCancellationRequested();
 
-
-        if (proc.ExitCode != 0)
+        if (process.ExitCode != 0)
         {
-            if (!sync)
-            {
-                throw new DockerLoadException(Resource.FormatString(
-                    nameof(Strings.DockerInfoFailed),
-                    proc.ExitCode,
-                    await proc.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false)));
-            }
-            else
-            {
-            	throw new DockerLoadException(Resource.FormatString(
-                    nameof(Strings.DockerInfoFailed),
-                    proc.ExitCode,
-                    proc.StandardOutput.ReadToEnd()));
-            }
+            using StreamReader reader = new StreamReader(stdOutStream);
+            string stdOut = reader.ReadToEnd();
+
+            throw new DockerLoadException(Resource.FormatString(
+                nameof(Strings.DockerInfoFailed),
+                process.ExitCode,
+                stdOut));
         }
 
         if (!sync)
         {
-            return await JsonDocument.ParseAsync(proc.StandardOutput.BaseStream, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await JsonDocument.ParseAsync(stdOutStream, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         else
         {
-            return JsonDocument.Parse(proc.StandardOutput.BaseStream);
+            return JsonDocument.Parse(stdOutStream);
         }
     }
+
+    private static void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e) => throw new NotImplementedException();
 
     private static async Task WriteImageToStreamAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
     {
@@ -166,7 +186,7 @@ internal sealed class LocalDocker : ILocalDaemon
             if (sourceReference.Registry is { } registry)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                string localPath = await registry.DownloadBlobAsync(sourceReference.Repository, d, cancellationToken).ConfigureAwait(false);;
+                string localPath = await registry.DownloadBlobAsync(sourceReference.Repository, d, cancellationToken).ConfigureAwait(false); ;
 
                 // Stuff that (uncompressed) tarball into the image tar stream
                 // TODO uncompress!!

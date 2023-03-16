@@ -78,6 +78,8 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
         NewContainerImageName = "";
         NewContainerTags = Array.Empty<string>();
         NewContainerEnvironmentVariables = Array.Empty<ITaskItem>();
+
+        TaskResources = Resource.Manager;
     }
 
     public override bool Execute()

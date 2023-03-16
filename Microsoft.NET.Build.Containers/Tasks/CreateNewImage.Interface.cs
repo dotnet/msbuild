@@ -157,6 +157,6 @@ partial class CreateNewImage
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";
 
-        TaskResources = new ResourceManager(typeof(Strings).FullName!, typeof(Resource).GetTypeInfo().Assembly);
+        TaskResources = Resource.Manager;
     }
 }

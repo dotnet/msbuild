@@ -79,7 +79,7 @@ public class ParseContainerPropertiesTests
         Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
 
         Assert.True(logs.Errors.Count > 0);
-        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2008);
+        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2007);
     }
 
     [DockerDaemonAvailableFact]
@@ -97,6 +97,6 @@ public class ParseContainerPropertiesTests
         Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
 
         Assert.True(logs.Errors.Count > 0);
-        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2009);
+        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2008);
     }
 }

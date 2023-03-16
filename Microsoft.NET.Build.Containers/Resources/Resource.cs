@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Containers.Resources
     /// </remarks>
     internal static class Resource
     {
-        private static readonly ResourceManager resourceManager = new ResourceManager(typeof(Strings).FullName!, typeof(Resource).GetTypeInfo().Assembly);
+        internal static readonly ResourceManager Manager = new ResourceManager(typeof(Strings).FullName!, typeof(Resource).GetTypeInfo().Assembly);
 
         /// <summary>
         /// Looks up a resource value for a particular name. Looks in the CurrentUICulture, and if not found, all parent CultureInfos.
@@ -30,7 +30,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         /// <returns>Localized string or resource name if the resource isn't found.</returns>
         public static string GetString(string name)
         {
-            string? resource = resourceManager.GetString(name, CultureInfo.CurrentUICulture);
+            string? resource = Manager.GetString(name, CultureInfo.CurrentUICulture);
 
             Debug.Assert(resource != null, $"Resource with name {name} was not found");
 
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         /// <returns>Localized formatted string or resource name if the resource isn't found.</returns>
         public static string FormatString(string name, params object?[] args)
         {
-            string? resource = resourceManager.GetString(name, CultureInfo.CurrentUICulture);
+            string? resource = Manager.GetString(name, CultureInfo.CurrentUICulture);
 
             Debug.Assert(resource != null, $"Resource with name {name} was not found");
 
