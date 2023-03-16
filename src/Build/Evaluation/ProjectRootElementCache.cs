@@ -89,6 +89,9 @@ namespace Microsoft.Build.Evaluation
         private static bool s_сheckFileContent = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
 
 #if DEBUG
+        /// <summary>
+        /// A simple IDisposable struct implementing the holder/guard pattern over the Get reentrancy counter.
+        /// </summary>
         private struct ReentrancyGuard : IDisposable
         {
             /// <summary>
@@ -279,9 +282,9 @@ namespace Microsoft.Build.Evaluation
             finally
             {
                 // Remove the lock object as we have otherwise no good way of preventing _fileLoadLocks from growing unboundedly.
-                // If another thread is inside the lock, we effectively create a race condition where someone else may enter GetOrAdd.
-                // This is OK because this fine-grained locking is just a perf optimization, and we have either loaded the
-                // ProjectRootElement by now, or it is an error condition where perf is not critical.
+                // If another thread is inside the lock, we effectively create a race condition where someone else may enter
+                // GetOrLoad. This is OK because this fine-grained locking is just a perf optimization, and we have either loaded
+                // the ProjectRootElement by now, or it is an error condition where perf is not critical.
                 _fileLoadLocks.TryRemove(projectFile, out _);
             }
         }
