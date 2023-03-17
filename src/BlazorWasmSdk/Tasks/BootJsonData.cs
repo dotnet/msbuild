@@ -56,14 +56,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         public ICUDataMode icuDataMode { get; set; }
 
         /// <summary>
-        /// Gets a value that determines if the caching startup memory is enabled.
+        /// Gets or sets a value that determines if the caching startup memory is enabled.
         /// </summary>
         public bool? startupMemoryCache { get; set; }
 
         /// <summary>
-        /// Gets a value that determines if the jiterpreter is enabled.
+        /// Gets a value for mono runtime options.
         /// </summary>
-        public bool? jiterpreter { get; set; }
+        public string[] runtimeOptions { get; set; }
     }
 
     public class ResourcesData

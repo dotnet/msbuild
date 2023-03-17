@@ -134,6 +134,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_BlazorWebAssemblyLoadAllGlobalizationData Condition="'$(_BlazorWebAssemblyLoadAllGlobalizationData)' == ''">false</_BlazorWebAssemblyLoadAllGlobalizationData>
       <_BlazorWebAssemblyStartupMemoryCache>$(BlazorWebAssemblyStartupMemoryCache)</_BlazorWebAssemblyStartupMemoryCache>
       <_BlazorWebAssemblyJiterpreter>$(BlazorWebAssemblyJiterpreter)</_BlazorWebAssemblyJiterpreter>
+      <_BlazorWebAssemblyRuntimeOptions>$(BlazorWebAssemblyRuntimeOptions)</_BlazorWebAssemblyRuntimeOptions>
 
       <!-- Workaround for https://github.com/dotnet/sdk/issues/12114-->
       <PublishDir Condition="'$(AppendRuntimeIdentifierToOutputPath)' != 'true' AND '$(PublishDir)' == '$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\'">$(OutputPath)$(PublishDirName)\</PublishDir>
@@ -330,7 +331,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       InvariantGlobalization="$(InvariantGlobalization)"
       LoadAllICUData="$(_BlazorWebAssemblyLoadAllGlobalizationData)"
       StartupMemoryCache="$(_BlazorWebAssemblyStartupMemoryCache)"
-      Jiterpreter="$(_BlazorWebAssemblyJiterpreter)" />
+      Jiterpreter="$(_BlazorWebAssemblyJiterpreter)"
+      RuntimeOptions="$(_BlazorWebAssemblyRuntimeOptions)" />
 
     <ItemGroup>
       <FileWrites Include="$(_BlazorBuildBootJsonPath)" />
@@ -543,7 +545,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       ConfigurationFiles="@(_BlazorPublishConfigFile)"
       LazyLoadedAssemblies="@(BlazorWebAssemblyLazyLoad)"
       InvariantGlobalization="$(InvariantGlobalization)"
-      LoadAllICUData="$(_BlazorWebAssemblyLoadAllGlobalizationData)" />
+      LoadAllICUData="$(_BlazorWebAssemblyLoadAllGlobalizationData)"
+      StartupMemoryCache="$(_BlazorWebAssemblyStartupMemoryCache)"
+      Jiterpreter="$(_BlazorWebAssemblyJiterpreter)"
+      RuntimeOptions="$(_BlazorWebAssemblyRuntimeOptions)" />
 
     <ItemGroup>
       <FileWrites Include="$(IntermediateOutputPath)blazor.publish.boot.json" />

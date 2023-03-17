@@ -625,16 +625,20 @@ public class TestReference
         [InlineData(false)]
         [InlineData(null)]
         public void Build_WithStartupMemoryCache(bool? value)
-            => TestBootConfigPropertyPropagation("BlazorWebAssemblyStartupMemoryCache", value, b => b.startupMemoryCache);
+            => BuildWasmMinimalAndValidateBootConfig("BlazorWebAssemblyStartupMemoryCache", value, b => b.startupMemoryCache.Should().Be(value));
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
         [InlineData(null)]
         public void Build_WithJiterpreter(bool? value)
-            => TestBootConfigPropertyPropagation("BlazorWebAssemblyJiterpreter", value, b => b.jiterpreter);
+            => BuildWasmMinimalAndValidateBootConfig("BlazorWebAssemblyJiterpreter", value, b =>
+            {
+                b.runtimeOptions.Should().NotBeNull();
+                b.runtimeOptions.Length.Should().Be(3);
+            });
 
-        private void TestBootConfigPropertyPropagation(string propertyName, bool? propertyValue, Func<BootJsonData, bool?> bootGetter)
+        private void BuildWasmMinimalAndValidateBootConfig(string propertyName, bool? propertyValue, Action<BootJsonData> validateBootConfig)
         {
             var testAppName = "BlazorWasmMinimal";
             var testInstance = CreateAspNetSdkTestAsset(testAppName, identifier: propertyName + propertyValue?.ToString() ?? "null");
@@ -659,7 +663,7 @@ public class TestReference
             var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            bootGetter(bootJsonData).Should().Be(propertyValue);
+            validateBootConfig(bootJsonData);
         }
 
         private static BootJsonData ReadBootJsonData(string path)

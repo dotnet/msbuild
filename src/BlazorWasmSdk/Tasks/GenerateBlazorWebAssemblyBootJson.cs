@@ -44,6 +44,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         public string Jiterpreter { get; set; }
 
+        public string RuntimeOptions { get; set; }
+
         [Required]
         public string OutputPath { get; set; }
 
@@ -90,8 +92,28 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 config = new List<string>(),
                 icuDataMode = icuDataMode,
                 startupMemoryCache = ParseOptionalBool(StartupMemoryCache),
-                jiterpreter = ParseOptionalBool(Jiterpreter),
             };
+
+            if (!String.IsNullOrEmpty(RuntimeOptions))
+            {
+                string[] runtimeOptions = RuntimeOptions.Split(' ');
+                result.runtimeOptions = runtimeOptions;
+            }
+
+            if (ParseOptionalBool(Jiterpreter) == false) 
+            {
+                var runtimeOptions = result.runtimeOptions?.ToHashSet() ?? new HashSet<string>(3);
+                if (!runtimeOptions.Contains("--jiterpreter-traces-enabled")) 
+                    runtimeOptions.Add("--no-jiterpreter-traces-enabled");
+
+                if (!runtimeOptions.Contains("--jiterpreter-interp-entry-enabled"))
+                    runtimeOptions.Add("--no-jiterpreter-interp-entry-enabled");
+
+                if (!runtimeOptions.Contains("--jiterpreter-jit-call-enabled"))
+                    runtimeOptions.Add("--no-jiterpreter-jit-call-enabled");
+
+                result.runtimeOptions = runtimeOptions.ToArray();
+            }
 
             // Build a two-level dictionary of the form:
             // - assembly:
