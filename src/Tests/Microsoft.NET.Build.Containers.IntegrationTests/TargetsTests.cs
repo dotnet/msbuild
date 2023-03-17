@@ -155,4 +155,25 @@ public class TargetsTests
         var computedTag = instance.GetProperty("_ContainerBaseImageTag").EvaluatedValue;
         computedTag.Should().Be(expectedTag);
     }
+
+    [InlineData("v8.0", "linux-x64", "64198")]
+    [InlineData("v8.0", "win-x64", "ContainerUser")]
+    [InlineData("v7.0", "linux-x64", null)]
+    [InlineData("v7.0", "win-x64", null)]
+    [InlineData("v9.0", "linux-x64", "64198")]
+    [InlineData("v9.0", "win-x64", "ContainerUser")]
+    [Theory]
+    public void CanComputeContainerUser(string tfm, string rid, string expectedUser)
+    {
+        var (project, logger, d) = ProjectInitializer.InitProject(new()
+        {
+            ["TargetFrameworkVersion"] = tfm,
+            ["ContainerRuntimeIdentifier"] = rid
+        }, projectName: $"{nameof(CanComputeTagsForSupportedSDKVersions)}_{tfm}_{rid}_{expectedUser}");
+        using var _ = d;
+        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        instance.Build(new[]{ComputeContainerConfig}, null, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
+        var computedTag = instance.GetProperty("ContainerUser")?.EvaluatedValue;
+        computedTag.Should().Be(expectedUser);
+    }
 }
