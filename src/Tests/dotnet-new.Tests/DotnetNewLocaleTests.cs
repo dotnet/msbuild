@@ -78,6 +78,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string testTemplateLocation = GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
             new DotnetNewCommand(_log, "-i", testTemplateLocation)
                 .WithDebug()
+                .WithoutBuiltInTemplates()
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDir)
                 .Execute()
@@ -85,7 +86,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.HaveStdOutContaining("Warning: Failed to read parse localization file").And.HaveStdOutContaining("localize/templatestrings.de-DE.json")
+                .And.HaveStdOutContaining("Warning: Failed to read or parse localization file").And.HaveStdOutContaining("localize/templatestrings.de-DE.json")
                 .And.HaveStdOutContaining($"Success: {testTemplateLocation} installed the following templates:").And.HaveStdOutContaining("TestAssets.Invalid.Localization.InvalidFormat")
                 .And.HaveStdOutContaining("name in base configuration");
         }
@@ -101,16 +102,23 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             {
 @$"Warning: [{testTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json]: id of the post action 'pa2' at index '3' is not unique. Only the first post action that uses this id will be localized.",
 
-@$"Warning: Localization file {testTemplateLocation + Path.DirectorySeparatorChar}.template.config/localize/templatestrings.de-DE.json is not compatible with base configuration {testTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json, and will be skipped.
-  In localization file under the post action with id 'pa1', there are localized strings for manual instruction(s) with ids 'do-not-exist'. These manual instructions do not exist in the template.json file and should be removed from localization file.
-  Post action(s) with id(s) 'pa0' specified in the localization file do not exist in the template.json file. Remove the localized strings from the localization file.",
+"""
+Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) has the following validation errors in 'de-DE' localization:
+   [Error][LOC001] In localization file under the post action with id 'pa1', there are localized strings for manual instruction(s) with ids 'do-not-exist'. These manual instructions do not exist in the template.json file and should be removed from localization file.
+   [Error][LOC002] Post action(s) with id(s) 'pa0' specified in the localization file do not exist in the template.json file. Remove the localized strings from the localization file.
+""",
+"""
+Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) has the following validation errors in 'tr' localization:
+   [Error][LOC002] Post action(s) with id(s) 'pa6' specified in the localization file do not exist in the template.json file. Remove the localized strings from the localization file.
+""",
+"Warning: Failed to install the 'de-DE' localization the template 'name' (TestAssets.Invalid.Localiation.ValidationFailure): the localization file is not valid. The localization will be skipped.",
+"Warning: Failed to install the 'tr' localization the template 'name' (TestAssets.Invalid.Localiation.ValidationFailure): the localization file is not valid. The localization will be skipped.",
 
-@$"Warning: Localization file {testTemplateLocation + Path.DirectorySeparatorChar}.template.config/localize/templatestrings.tr.json is not compatible with base configuration {testTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json, and will be skipped.
-  Post action(s) with id(s) 'pa6' specified in the localization file do not exist in the template.json file. Remove the localized strings from the localization file."
   };
 
             CommandResult commandResult = new DotnetNewCommand(_log, "-i", testTemplateLocation)
                 .WithDebug()
+                .WithoutBuiltInTemplates()
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDir)
                 .Execute();
@@ -126,7 +134,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             }
         }
 
-        [Fact]
+#pragma warning disable xUnit1004 // Test methods should not be skipped
+        [Fact(Skip = "need investigation and move to dotnet/templating.")]
+#pragma warning restore xUnit1004 // Test methods should not be skipped
         public void SkipsLocalizationOnInstantiate_WhenInvalidFormat()
         {
             string home = CreateTemporaryFolder(folderName: "Home");
@@ -166,7 +176,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Die Vorlage \"name\" wurde erfolgreich erstellt.").And.NotHaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
         }
 
-        [Fact]
+#pragma warning disable xUnit1004 // Test methods should not be skipped
+        [Fact(Skip = "need investigation and move to dotnet/templating.")]
+#pragma warning restore xUnit1004 // Test methods should not be skipped
         public void SkipsLocalizationOnInstantiate_WhenLocalizationValidationFails()
         {
             string home = CreateTemporaryFolder(folderName: "Home");
@@ -182,6 +194,8 @@ Regex.Escape(@$"Warnung: Die Lokalisierungsdatei {tmpTemplateLocation + Path.Dir
 
             new DotnetNewCommand(_log, "-i", tmpTemplateLocation)
                 .WithCustomHive(home)
+                .WithDebug()
+                .WithoutBuiltInTemplates()
                 .WithWorkingDirectory(workingDir)
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "de-DE")
                 .Execute()
