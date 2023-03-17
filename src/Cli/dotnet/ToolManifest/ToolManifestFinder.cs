@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.ToolManifest
                 {
                     return currentSearchDirectory.Value;
                 }
-                if (Directory.GetFiles(currentSearchDirectory.Value.Value, "*.sln").Any() || Directory.GetFiles(currentSearchDirectory.Value.Value, "*.git").Any())
+                if (Directory.GetFiles(currentSearchDirectory.Value.Value, "*.sln").Any() || File.Exists(currentSearchDirectory.Value.WithFile(".git").Value))
                 {
                     return currentSearchDirectory.Value;
                 }
