@@ -6,6 +6,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.DotNet.CommandUtils;
 using Microsoft.NET.Build.Containers.Tasks;
+using Microsoft.NET.TestFramework;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
@@ -415,14 +416,6 @@ public class CreateNewImageToolTaskTests
 
     private static string GetPathToContainerize()
     {
-#if DEBUG
-        string configuration = "Debug";
-#elif RELEASE
-        string configuration = "Release";
-#else
-        throw new NotSupportedException("The configuration is not supported");
-#endif
-
-        return Path.GetFullPath(Path.Combine(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath, $"../../../../../containerize/bin/{configuration}/net7.0"));
+        return Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "containerize");
     }
 }

@@ -4,6 +4,7 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
@@ -14,8 +15,8 @@ public sealed class ProjectInitializer
 
     static ProjectInitializer()
     {
-        var relativePath = Path.Combine("..", "packaging", "build", "Microsoft.NET.Build.Containers.targets");
-        var targetsFile = CurrentFile.Relative(relativePath);
+        var artifactPackagingDirectory = Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "packaging");
+        var targetsFile = Path.Combine(artifactPackagingDirectory, "Microsoft.NET.Build.Containers.targets");
         var propsFile = Path.ChangeExtension(targetsFile, ".props");
         _combinedTargetsLocation = CombineFiles(propsFile, targetsFile);
     }

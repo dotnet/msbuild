@@ -154,10 +154,9 @@ public class EndToEndTests
 
         newProjectDir.Create();
         privateNuGetAssets.Create();
-        var repoGlobalJson = Path.Combine("..", "..", "..", "..", "global.json");
-        File.Copy(repoGlobalJson, Path.Combine(newProjectDir.FullName, "global.json"));
 
-        var packagedir = new DirectoryInfo(CurrentFile.Relative("./package"));
+        var packageDirPath = Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "package");
+        var packagedir = new DirectoryInfo(packageDirPath);
 
         // do not pollute the primary/global NuGet package store with the private package(s)
         var env = new (string, string)[] { new("NUGET_PACKAGES", privateNuGetAssets.FullName) };
