@@ -16,12 +16,13 @@ public class ParseContainerPropertiesTests
     [DockerDaemonAvailableFact]
     public void Baseline()
     {
-        var (project, _) = ProjectInitializer.InitProject(new () {
+        var (project, _, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
             [ContainerImageName] = "dotnet/testimage",
             [ContainerImageTags] = "7.0;latest"
         });
+        using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, null, null, out var outputs));
 
@@ -37,11 +38,11 @@ public class ParseContainerPropertiesTests
     [DockerDaemonAvailableFact]
     public void SpacesGetReplacedWithDashes()
     {
-         var (project, _) = ProjectInitializer.InitProject(new () {
+         var (project, _, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr microsoft com/dotnet runtime:7.0",
             [ContainerRegistry] = "localhost:5010"
         });
-
+        using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, null, null, out var outputs));
 
@@ -53,13 +54,13 @@ public class ParseContainerPropertiesTests
     [DockerDaemonAvailableFact]
     public void RegexCatchesInvalidContainerNames()
     {
-         var (project, logs) = ProjectInitializer.InitProject(new () {
+         var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
             [ContainerImageName] = "dotnet testimage",
             [ContainerImageTag] = "5.0"
         });
-
+        using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
         Assert.Contains(logs.Messages, m => m.Message?.Contains("'ContainerImageName' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
@@ -68,13 +69,13 @@ public class ParseContainerPropertiesTests
     [DockerDaemonAvailableFact]
     public void RegexCatchesInvalidContainerTags()
     {
-        var (project, logs) = ProjectInitializer.InitProject(new () {
+        var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
             [ContainerImageName] = "dotnet/testimage",
             [ContainerImageTag] = "5 0"
         });
-
+        using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
 
@@ -85,14 +86,14 @@ public class ParseContainerPropertiesTests
     [DockerDaemonAvailableFact]
     public void CanOnlySupplyOneOfTagAndTags()
     {
-        var (project, logs) = ProjectInitializer.InitProject(new () {
+        var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
             [ContainerImageName] = "dotnet/testimage",
             [ContainerImageTag] = "5.0",
             [ContainerImageTags] = "latest;oldest"
         });
-
+        using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
 

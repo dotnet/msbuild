@@ -36,17 +36,17 @@ public sealed class ProjectInitializer
         return tempTargetLocation;
     }
 
-    public static (Project, CapturingLogger) InitProject(Dictionary<string, string> bonusProps, [CallerMemberName]string projectName = "")
+    public static (Project, CapturingLogger, IDisposable) InitProject(Dictionary<string, string> bonusProps, [CallerMemberName]string projectName = "")
     {
         var props = new Dictionary<string, string>();
         // required parameters
         props["TargetFileName"] = "foo.dll";
         props["AssemblyName"] = "foo";
-        props["_TargetFrameworkVersionWithoutV"] = "7.0";
+        props["TargetFrameworkVersion"] = "v7.0";
         props["_NativeExecutableExtension"] = ".exe"; //TODO: windows/unix split here
         props["Version"] = "1.0.0"; // TODO: need to test non-compliant version strings here
         props["NetCoreSdkVersion"] = "7.0.100"; // TODO: float this to current SDK?
-        // test setup parameters so that we can load the props/targets/tasks 
+        // test setup parameters so that we can load the props/targets/tasks
         props["ContainerCustomTasksAssembly"] = Path.GetFullPath(Path.Combine(".", "Microsoft.NET.Build.Containers.dll"));
         props["_IsTest"] = "true";
 
@@ -64,6 +64,8 @@ public sealed class ProjectInitializer
         {
             props[kvp.Key] = kvp.Value;
         }
-        return (collection.LoadProject(_combinedTargetsLocation, props, null), logs);
+        // derived properties, since these might be set by bonusProps
+        props["_TargetFrameworkVersionWithoutV"] = props["TargetFrameworkVersion"].TrimStart('v');
+        return (collection.LoadProject(_combinedTargetsLocation, props, null), logs, collection);
     }
 }

@@ -19,6 +19,8 @@ public class CapturingLogger : ILogger
     private List<BuildErrorEventArgs> _errors = new();
     public IReadOnlyList<BuildErrorEventArgs> Errors {get  { return _errors; } }
 
+    public List<string> AllMessages => Errors.Select(e => e.Message!).Concat(Warnings.Select(w => w.Message!)).Concat(Messages.Select(m => m.Message!)).ToList();
+
     public void Initialize(IEventSource eventSource)
     {
         eventSource.MessageRaised += (o, e) => _messages.Add(e);
