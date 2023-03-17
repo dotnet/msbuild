@@ -21,19 +21,6 @@ Aby uzyskać listę przeszukiwanych lokalizacji, określ opcję „-d” przed n
 {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ManifestFileContent">
-        <source>{
-  "version": 1,
-  "isRoot": true,
-  "tools": {}
-}</source>
-        <target state="new">{
-  "version": 1,
-  "isRoot": true,
-  "tools": {}
-}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
         <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
         <target state="translated">Plik {0} pochodzi z innego komputera i może zostać zablokowany, aby pomóc chronić ten komputer. Aby uzyskać więcej informacji, w tym o sposobie odblokowywania, zobacz https://aka.ms/motw</target>

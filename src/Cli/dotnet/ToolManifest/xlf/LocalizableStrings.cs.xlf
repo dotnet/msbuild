@@ -21,19 +21,6 @@ Pokud si chcete zobrazit seznam prohledaných umístění, zadejte před název 
 {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ManifestFileContent">
-        <source>{
-  "version": 1,
-  "isRoot": true,
-  "tools": {}
-}</source>
-        <target state="new">{
-  "version": 1,
-  "isRoot": true,
-  "tools": {}
-}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
         <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
         <target state="translated">Soubor {0} pochází z jiného počítače a je možné, že se zablokoval, aby se ochránil tento počítač. Další informace včetně toho, jak soubor odblokovat, najdete na adrese https://aka.ms/motw.</target>

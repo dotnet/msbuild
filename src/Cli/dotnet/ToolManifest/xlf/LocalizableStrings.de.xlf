@@ -21,19 +21,6 @@ Eine Liste der durchsuchten Speicherorte erhalten Sie, indem Sie vor dem Toolnam
 {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ManifestFileContent">
-        <source>{
-  "version": 1,
-  "isRoot": true,
-  "tools": {}
-}</source>
-        <target state="new">{
-  "version": 1,
-  "isRoot": true,
-  "tools": {}
-}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
         <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
         <target state="translated">Die Datei "{0}" stammt von einem anderen Computer und wurde möglicherweise zum Schutz dieses Computers blockiert. Weitere Informationen zum Aufheben der Sperre und zu anderen Aktionen finden Sie unter https://aka.ms/motw.</target>

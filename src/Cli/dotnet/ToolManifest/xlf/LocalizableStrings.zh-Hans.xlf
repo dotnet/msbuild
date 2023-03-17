@@ -21,19 +21,6 @@ For a list of locations searched, specify the "-d" option before the tool name.<
 {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ManifestFileContent">
-        <source>{
-  "version": 1,
-  "isRoot": true,
-  "tools": {}
-}</source>
-        <target state="new">{
-  "version": 1,
-  "isRoot": true,
-  "tools": {}
-}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ManifestHasMarkOfTheWeb">
         <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
         <target state="translated">文件 {0} 来自另一台计算机，而且可能会被阻止以帮助保护此计算机。有关详细信息(包括如何解除阻止)，请参阅 https://aka.ms/motw</target>

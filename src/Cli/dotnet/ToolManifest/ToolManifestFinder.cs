@@ -164,9 +164,9 @@ namespace Microsoft.DotNet.ToolManifest
                     return possibleManifest;
                 }
             }
-            if (createManifestFileOption)
+            if (createIfNotFound)
             {
-                DirectoryPath manifestInsertFolder = GetInsertManifestFilePath();
+                DirectoryPath manifestInsertFolder = GetDirectoryToCreateToolManifest();
                 if (manifestInsertFolder.Value != null)
                 {
                     return new FilePath(WriteManifestFile(manifestInsertFolder));
@@ -199,10 +199,10 @@ namespace Microsoft.DotNet.ToolManifest
         }
 
         private string WriteManifestFile(DirectoryPath folderPath)
-        { 
-            var manifestFileContent = LocalizableStrings.ManifestFileContent;
+        {
+            var manifestFileContent = "{\r\n  \"version\": 1,\r\n  \"isRoot\": true,\r\n  \"tools\": {}\r\n}";
             Directory.CreateDirectory(Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName));
-            string manifestFileLocation = Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName, Constants.ManifestFileName);
+            string manifestFileLocation = Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName, Constants.ToolManifestFileName);
             File.WriteAllText(manifestFileLocation, manifestFileContent);
 
             return manifestFileLocation;
