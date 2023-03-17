@@ -109,9 +109,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 foreach (var jiterpreterOption in jiterpreterOptions)
                 {
                     if (jiterpreter == true)
-                        runtimeOptions.Add($"--{jiterpreterOption}");
-                    else if (!runtimeOptions.Contains($"--{jiterpreterOption}"))
-                        runtimeOptions.Add($"--no-{jiterpreterOption}");
+                    {
+                        if (!runtimeOptions.Contains($"--no-{jiterpreterOption}"))
+                            runtimeOptions.Add($"--{jiterpreterOption}");
+                    }
+                    else
+                    {
+                        if (!runtimeOptions.Contains($"--{jiterpreterOption}"))
+                            runtimeOptions.Add($"--no-{jiterpreterOption}");
+                    }
                 }
 
                 result.runtimeOptions = runtimeOptions.ToArray();
