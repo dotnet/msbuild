@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.ToolManifest
                             EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
         }
 
-        private DirectoryPath GetInsertManifestFilePath()
+        private DirectoryPath GetDirectoryToCreateToolManifest()
         {
             DirectoryPath? currentSearchDirectory = _probeStart;
             while (currentSearchDirectory.HasValue)
