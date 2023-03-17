@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 using RuntimeEnvironment = Microsoft.DotNet.Cli.Utils.RuntimeEnvironment;
+using WorkloadCommandParser = Microsoft.DotNet.Cli.WorkloadCommandParser;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -30,6 +31,15 @@ namespace Microsoft.DotNet.Cli
             Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
             Reporter.Output.WriteLine($" RID:         {GetDisplayRid(versionFile)}");
             Reporter.Output.WriteLine($" Base Path:   {AppContext.BaseDirectory}");
+            PrintWorkloadsInfo();
+
+        }
+
+        private static void PrintWorkloadsInfo()
+        {
+            Reporter.Output.WriteLine();
+            Reporter.Output.WriteLine($"{LocalizableStrings.DotnetWorkloadInfoLabel}");
+            WorkloadCommandParser.ShowWorkloadsInfo();
         }
 
         private static string GetDisplayRid(DotnetVersionFile versionFile)

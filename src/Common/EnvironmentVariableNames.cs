@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly string WORKLOAD_DISABLE_PACK_GROUPS = "DOTNET_CLI_WORKLOAD_DISABLE_PACK_GROUPS";
         public static readonly string DISABLE_PUBLISH_AND_PACK_RELEASE = "DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE";
         public static readonly string DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS = "DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS";
+        public static readonly string DOTNET_CLI_FORCE_UTF8_ENCODING = nameof(DOTNET_CLI_FORCE_UTF8_ENCODING);
         public static readonly string TELEMETRY_OPTOUT = "DOTNET_CLI_TELEMETRY_OPTOUT";
         public static readonly string DOTNET_ROOT = "DOTNET_ROOT";
 

@@ -8,15 +8,17 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
+using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.GenAPI
 {
     internal static class INamedTypeSymbolExtension
     {
-        public static bool HasIndexer(this INamedTypeSymbol type)
-        {
-            return type.GetMembers().Any(member => member is IPropertySymbol propertySymbol && propertySymbol.IsIndexer);
-        }
+        /// <summary>
+        /// Checks if any of the type's members is a property with an indexer.
+        /// </summary>
+        public static bool HasIndexer(this INamedTypeSymbol type) =>
+            type.GetMembers().Any(member => member is IPropertySymbol propertySymbol && propertySymbol.IsIndexer);
 
         // Visit a type and all its members, checking for cycles. Return true if the visitor returns true.
         private static bool WalkTypeSymbol(ITypeSymbol ty, HashSet<ITypeSymbol> visited, Func<ITypeSymbol, bool> f)
@@ -57,7 +59,8 @@ namespace Microsoft.DotNet.GenAPI
 
             IEnumerable<AttributeListSyntax?> asNodes = syntaxNodes.Select(sn =>
             {
-                if (sn is AttributeSyntax atSyntax) {
+                if (sn is AttributeSyntax atSyntax)
+                {
                     SeparatedSyntaxList<AttributeSyntax> singletonList = SyntaxFactory.SingletonSeparatedList<AttributeSyntax>(atSyntax);
                     AttributeListSyntax alSyntax = SyntaxFactory.AttributeList(singletonList);
                     return alSyntax;
@@ -73,7 +76,7 @@ namespace Microsoft.DotNet.GenAPI
         // Build dummy field from a type, field name, and attribute list.
         private static SyntaxNode CreateDummyField(string typ, string fieldName, SyntaxList<AttributeListSyntax> attrs, bool isReadonly)
         {
-            List<SyntaxToken> modifiers = new List<SyntaxToken> { SyntaxFactory.Token(SyntaxKind.PrivateKeyword) };
+            List<SyntaxToken> modifiers = new() { SyntaxFactory.Token(SyntaxKind.PrivateKeyword) };
             if (isReadonly)
                 modifiers.Add(SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
             SyntaxNode declaration = SyntaxFactory.FieldDeclaration(
@@ -88,16 +91,13 @@ namespace Microsoft.DotNet.GenAPI
             return declaration;
         }
 
-        // Sometimes the metadata can contain names that are not valid C# identifiers. For example,
-        // to express a set of type parameters, they can be prefixed with angle brackets.
-        // Normalize them by replacing these special characters with '_'.
-        private static string NormalizeIdentifier(string s) => s.Replace('<', '_').Replace('>', '_');
-
-        // SynthesizeDummyFields yields private fields for the namedType, because they can be part of the API contract.
-        // - A struct containing a field that is a reference type cannot be used as a reference.
-        // - A struct containing nonempty fields needs to be fully initialized. (See "definite assignment" rules)
-        //   - "non-empty" means either unmanaged types like ints and enums, or reference types that are not the root.
-        // - A struct containing generic fields cannot have struct layout cycles.
+        /// <summary>
+        /// SynthesizeDummyFields yields private fields for the namedType, because they can be part of the API contract.
+        /// - A struct containing a field that is a reference type cannot be used as a reference.
+        /// - A struct containing nonempty fields needs to be fully initialized. (See "definite assignment" rules)
+        ///   "non-empty" means either unmanaged types like ints and enums, or reference types that are not the root.
+        /// - A struct containing generic fields cannot have struct layout cycles.
+        /// </summary>
         public static IEnumerable<SyntaxNode> SynthesizeDummyFields(this INamedTypeSymbol namedType, ISymbolFilter symbolFilter)
         {
             // Collect all excluded fields
@@ -108,20 +108,25 @@ namespace Microsoft.DotNet.GenAPI
             if (excludedFields.Any())
             {
                 // Collect generic excluded fields
-                IEnumerable<IFieldSymbol> genericTypedFields = excludedFields.Where(f => {
+                IEnumerable<IFieldSymbol> genericTypedFields = excludedFields.Where(f =>
+                {
                     if (f.Type is INamedTypeSymbol ty) {
                         return !ty.IsBoundGenericType() && symbolFilter.Include(ty);
                     }
                     return f.Type is ITypeParameterSymbol;
                 });
 
+                // Sometimes the metadata can contain names that are not valid C# identifiers. For example,
+                // to express a set of type parameters, they can be prefixed with angle brackets.
+                // Normalize them by replacing these special characters with '_'.
+                static string NormalizeIdentifier(string s) => s.Replace('<', '_').Replace('>', '_');
+
                 // Add a dummy field for each generic excluded field
                 foreach (IFieldSymbol genericField in genericTypedFields)
                 {
-                    yield return CreateDummyField(
-                        genericField.Type.ToDisplayString(),
+                    yield return CreateDummyField(genericField.Type.ToDisplayString(),
                         NormalizeIdentifier(genericField.Name),
-                        FromAttributeData(genericField.GetAttributes()),
+                        FromAttributeData(genericField.GetAttributes().ExcludeNonVisibleOutsideOfAssembly(symbolFilter)),
                         namedType.IsReadOnly);
                 }
 
@@ -143,22 +148,22 @@ namespace Microsoft.DotNet.GenAPI
             }
         }
 
-        // Check that the named type is fully bound in all its type arguments.
+        /// <summary>
+        /// Check that the named type is fully bound in all its type arguments.
+        /// </summary>
+        /// <returns></returns>
         public static bool IsBoundGenericType(this INamedTypeSymbol namedType)
         {
-            foreach (var arg in namedType.TypeArguments)
+            foreach (ITypeSymbol arg in namedType.TypeArguments)
             {
                 if (arg is ITypeParameterSymbol)
                 {
                     return false;
                 }
 
-                if (arg is INamedTypeSymbol nt)
+                if (arg is INamedTypeSymbol nt && !nt.IsBoundGenericType())
                 {
-                    if (!nt.IsBoundGenericType())
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
@@ -188,13 +193,13 @@ namespace Microsoft.DotNet.GenAPI
                 {
                     SyntaxKind visibility = SyntaxKind.InternalKeyword;
 
-                    Func<ISymbolFilter, bool> includeInternalSymbols = filter =>
+                    static bool IncludeInternalSymbols(ISymbolFilter filter) =>
                         filter is AccessibilitySymbolFilter accessibilityFilter && accessibilityFilter.IncludeInternalSymbols;
 
                     // Use the `Private` visibility if internal symbols are not filtered out.
-                    if (includeInternalSymbols(symbolFilter) ||
+                    if (IncludeInternalSymbols(symbolFilter) ||
                         (symbolFilter is CompositeSymbolFilter compositeSymbolFilter &&
-                            compositeSymbolFilter.Filters.Any(filter => includeInternalSymbols(filter))))
+                            compositeSymbolFilter.Filters.Any(filter => IncludeInternalSymbols(filter))))
                     {
                         visibility = SyntaxKind.PrivateKeyword;
                     }

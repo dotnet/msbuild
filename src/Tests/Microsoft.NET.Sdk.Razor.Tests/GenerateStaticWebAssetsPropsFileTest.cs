@@ -6,9 +6,9 @@ using System.IO;
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.AspNetCore.Razor.Tasks;
 using Moq;
 using Xunit;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 
 namespace Microsoft.NET.Sdk.Razor.Test
 {

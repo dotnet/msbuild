@@ -13,9 +13,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <!-- Determines if the Razor Sdk is responsible for importing Microsoft.NET.Sdk. Microsoft.NET.Sdk.Web may have previously imported this. -->
     <_RazorSdkImportsMicrosoftNetSdk Condition="'$(UsingMicrosoftNETSdk)' != 'true'">true</_RazorSdkImportsMicrosoftNetSdk>
+    <_RazorSdkImportsMicrosoftNetSdkStaticWebAssets Condition="'$(UsingMicrosoftNETSdkStaticWebAssets)' != 'true'">true</_RazorSdkImportsMicrosoftNetSdkStaticWebAssets>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" Condition="'$(_RazorSdkImportsMicrosoftNetSdk)' == 'true'" />
+  <Import Sdk="Microsoft.NET.Sdk.StaticWebAssets" Project="Sdk.props" Condition="'$(_RazorSdkImportsMicrosoftNetSdkStaticWebAssets)' == 'true'" />
 
   <PropertyGroup>
     <RazorSdkCurrentVersionProps Condition="'$(RazorSdkCurrentVersionProps)' == ''">$(MSBuildThisFileDirectory)..\targets\Sdk.Razor.CurrentVersion.props</RazorSdkCurrentVersionProps>

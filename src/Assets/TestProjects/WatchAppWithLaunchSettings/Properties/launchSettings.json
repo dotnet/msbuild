@@ -5,6 +5,18 @@
         "environmentVariables": {
           "EnvironmentFromProfile": "Development"
         }
+      },
+      "P1": {
+        "commandName": "Project",
+        "commandLineArgs": "argP1"
+      },
+      "P2": {
+        "commandName": "Project",
+        "commandLineArgs": "argP2"
+      },
+      "P and Q and \"R\"": {
+        "commandName": "Project",
+        "commandLineArgs": "argPQR"
       }
     }
   }

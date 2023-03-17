@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
 
