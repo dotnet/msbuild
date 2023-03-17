@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="8.0.100-preview.3.23166.2">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="8.0.100-preview.3.23167.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>131200a33917e752b660d20b49e18f426887452d</Sha>
+      <Sha>3fa6d3fc357b2cbd85cadf05f4f4b0dc623c124e</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="8.0.0-preview.3.23167.2">
