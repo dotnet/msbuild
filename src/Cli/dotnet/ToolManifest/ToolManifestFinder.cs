@@ -201,8 +201,8 @@ namespace Microsoft.DotNet.ToolManifest
         private string WriteManifestFile(DirectoryPath folderPath)
         { 
             var manifestFileContent = LocalizableStrings.ManifestFileContent;
-            Directory.CreateDirectory(folderPath.Value + "/" + Constants.DotConfigDirectoryName);
-            string manifestFileLocation = folderPath.Value + "/" + Constants.DotConfigDirectoryName + "/" + Constants.ManifestFileName;
+            Directory.CreateDirectory(Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName));
+            string manifestFileLocation = Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName, Constants.ManifestFileName);
             File.WriteAllText(manifestFileLocation, manifestFileContent);
 
             return manifestFileLocation;
