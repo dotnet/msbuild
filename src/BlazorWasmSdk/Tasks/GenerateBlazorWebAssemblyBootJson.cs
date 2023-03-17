@@ -19,6 +19,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
     public class GenerateBlazorWebAssemblyBootJson : Task
     {
+        private static readonly string[] jiterpreterOptions = new[] { "jiterpreter-traces-enabled", "jiterpreter-interp-entry-enabled", "jiterpreter-jit-call-enabled" };
+
         [Required]
         public string AssemblyPath { get; set; }
 
@@ -100,17 +102,17 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 result.runtimeOptions = runtimeOptions;
             }
 
-            if (ParseOptionalBool(Jiterpreter) == false) 
+            bool? jiterpreter = ParseOptionalBool(Jiterpreter);
+            if (jiterpreter != null) 
             {
                 var runtimeOptions = result.runtimeOptions?.ToHashSet() ?? new HashSet<string>(3);
-                if (!runtimeOptions.Contains("--jiterpreter-traces-enabled")) 
-                    runtimeOptions.Add("--no-jiterpreter-traces-enabled");
-
-                if (!runtimeOptions.Contains("--jiterpreter-interp-entry-enabled"))
-                    runtimeOptions.Add("--no-jiterpreter-interp-entry-enabled");
-
-                if (!runtimeOptions.Contains("--jiterpreter-jit-call-enabled"))
-                    runtimeOptions.Add("--no-jiterpreter-jit-call-enabled");
+                foreach (var jiterpreterOption in jiterpreterOptions)
+                {
+                    if (jiterpreter == true)
+                        runtimeOptions.Add($"--{jiterpreterOption}");
+                    else if (!runtimeOptions.Contains($"--{jiterpreterOption}"))
+                        runtimeOptions.Add($"--no-{jiterpreterOption}");
+                }
 
                 result.runtimeOptions = runtimeOptions.ToArray();
             }
