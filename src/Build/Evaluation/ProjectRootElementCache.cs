@@ -460,7 +460,6 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
-                            _strongCache.Remove(rootElement);
                             RaiseProjectRootElementRemovedFromStrongCache(rootElement);
                         }
                     }
