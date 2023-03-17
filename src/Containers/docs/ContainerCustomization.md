@@ -207,6 +207,27 @@ ContainerEntrypointArg items have one property:
 </ItemGroup>
 ```
 
+## ContainerUser
+
+This item controls the default user that the container will run as. This is often used to run the container as a non-root user, which is a best practice for security. There are a few constraints to know about this field:
+
+* It can take a variety of forms - user name, linux user ids, group name, linux group id, `username:groupname`, id variants of the above
+* There is no verification that the user or group specified exists on the image
+* Changing the user can alter the behavior of the application, especially in regards to things like File System permissions
+
+The default value of this field varies by project TFM and target operating system:
+
+* if you are targeting .NET 8 or higher and using the Microsoft runtime images, then
+  * on Linux the rootless user `app` will be used (though it will be referenced by its user id)
+  * on Windows the rootless user `ContainerUser` will be used
+* otherwise no default `ContainerUser` will be used
+
+```xml
+<PropertyGroup>
+    <ContainerUser>my-existing-app-user</ContainerUser>
+</PropertyGroup>
+```
+
 ## Default container labels
 
 Labels are often used to provide consistent metadata on container images. This package provides some default labels to encourage better maintainability of the generated images, drawn from the set defined as part of the [OCI Image specification](https://github.com/opencontainers/image-spec/blob/main/annotations.md). Where possible, we use the values of common [NuGet Project Properties](https://learn.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target) as defaults for these annotations, though we also provide more specific properties for each of these labels.
