@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public const string DefaultConfiguration = "Debug";
 
         public static readonly string ProjectFileName = "project.json";
-        public static readonly string ManifestFileName = "dotnet-tools.json";
+        public static readonly string ToolManifestFileName = "dotnet-tools.json";
         public static readonly string DotConfigDirectoryName = ".config";
         public static readonly string ExeSuffix =
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
