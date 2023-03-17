@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.ToolManifest
             }
         }
 
-        public FilePath FindFirst(bool createManifestFileOption = false)
+        public FilePath FindFirst(bool createIfNotFound = false)
         {
             foreach ((FilePath possibleManifest, DirectoryPath _) in EnumerateDefaultAllPossibleManifests())
             {
