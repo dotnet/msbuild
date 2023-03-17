@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">$(SdkTargetFramework)</TargetFrameworks>
     <ImplicitUsings Condition="'$(TargetFramework)' != 'net472'">enable</ImplicitUsings>
 
     <TargetsForTfmSpecificBuildOutput>
