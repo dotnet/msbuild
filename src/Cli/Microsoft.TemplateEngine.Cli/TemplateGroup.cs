@@ -26,7 +26,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// </summary>
         /// <param name="templates">the templates of the template group.</param>
         /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateInfo.GroupIdentity"/> defined.</exception>
+        /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateMetadata.GroupIdentity"/> defined.</exception>
         internal TemplateGroup(IEnumerable<CliTemplateInfo> templates)
         {
             _ = templates ?? throw new ArgumentNullException(paramName: nameof(templates));

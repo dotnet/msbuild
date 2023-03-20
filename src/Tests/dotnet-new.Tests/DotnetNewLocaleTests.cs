@@ -111,8 +111,8 @@ Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) ha
 Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) has the following validation errors in 'tr' localization:
    [Error][LOC002] Post action(s) with id(s) 'pa6' specified in the localization file do not exist in the template.json file. Remove the localized strings from the localization file.
 """,
-"Warning: Failed to install the 'de-DE' localization the template 'name' (TestAssets.Invalid.Localiation.ValidationFailure): the localization file is not valid. The localization will be skipped.",
-"Warning: Failed to install the 'tr' localization the template 'name' (TestAssets.Invalid.Localiation.ValidationFailure): the localization file is not valid. The localization will be skipped.",
+"Warning: Failed to load the 'de-DE' localization the template 'name' (TestAssets.Invalid.Localiation.ValidationFailure): the localization file is not valid. The localization will be skipped.",
+"Warning: Failed to load the 'tr' localization the template 'name' (TestAssets.Invalid.Localiation.ValidationFailure): the localization file is not valid. The localization will be skipped.",
 
   };
 
@@ -134,9 +134,7 @@ Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) ha
             }
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "need investigation and move to dotnet/templating.")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void SkipsLocalizationOnInstantiate_WhenInvalidFormat()
         {
             string home = CreateTemporaryFolder(folderName: "Home");
@@ -155,7 +153,8 @@ Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) ha
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.NotHaveStdOutContaining("Warnung: Fehler beim Lesen der Analyselokalisierungsdatei").And.NotHaveStdOutContaining("localize/templatestrings.de-DE.json")
+                //TODO: replace with de-DE translation when translation is ready
+                .And.NotHaveStdOutContaining("Warnung: Failed to read or parse localization file ").And.NotHaveStdOutContaining("localize/templatestrings.de-DE.json")
                 .And.HaveStdOutContaining($"Erfolg: {tmpTemplateLocation} installierte die folgenden Vorlagen:").And.HaveStdOutContaining("TemplateWithLocalization")
                 .And.HaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
 
@@ -172,13 +171,12 @@ Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) ha
                 .Execute()
                 .Should()
                 .ExitWith(0)
-                .And.HaveStdOutContaining("Warnung: Fehler beim Lesen der Analyselokalisierungsdatei").And.HaveStdOutContaining("localize/templatestrings.de-DE.json")
+                //TODO: replace with de-DE translation when translation is ready
+                .And.HaveStdOutContaining("Warnung: Failed to read or parse localization file ").And.HaveStdOutContaining("localize/templatestrings.de-DE.json")
                 .And.HaveStdOutContaining("Die Vorlage \"name\" wurde erfolgreich erstellt.").And.NotHaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "need investigation and move to dotnet/templating.")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void SkipsLocalizationOnInstantiate_WhenLocalizationValidationFails()
         {
             string home = CreateTemporaryFolder(folderName: "Home");
@@ -188,23 +186,37 @@ Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) ha
             string tmpTemplateLocation = CreateTemporaryFolder();
             TestUtils.DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
 
-            string expectedErrors =
-Regex.Escape(@$"Warnung: Die Lokalisierungsdatei {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/localize/templatestrings.de-DE.json ist nicht mit der Basiskonfiguration {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json kompatibel und wird übersprungen.
-  In der Lokalisierungsdatei unter der POST-Aktion mit der ID „pa1“ befinden sich lokalisierte Zeichenfolgen für manuelle Anweisungen mit den IDs „do-not-exist“. Diese manuellen Anweisungen sind in der Datei „template.json“ nicht vorhanden und sollten aus der Lokalisierungsdatei entfernt werden.").Replace('„', '.').Replace('“', '.');
+            //TODO: replace with de-DE translation when translation is ready
+            string[] expectedErrors = new[]
+                            {
+                    """
+                    The template 'name' (TestAssets.TemplateWithLocalization) has the following validation errors in 'de-DE' localization:
+                       [Error][LOC001] In der Lokalisierungsdatei unter der POST-Aktion mit der ID „pa1“ befinden sich lokalisierte Zeichenfolgen für manuelle Anweisungen mit den IDs „do-not-exist“. Diese manuellen Anweisungen sind in der Datei „template.json“ nicht vorhanden und sollten aus der Lokalisierungsdatei entfernt werden.
+        
+                    """,
+                    "Failed to load the 'de-DE' localization the template 'name' (TestAssets.TemplateWithLocalization): the localization file is not valid. The localization will be skipped."
+                };
 
-            new DotnetNewCommand(_log, "-i", tmpTemplateLocation)
+            CommandResult result = new DotnetNewCommand(_log, "-i", tmpTemplateLocation)
                 .WithCustomHive(home)
                 .WithDebug()
                 .WithoutBuiltInTemplates()
                 .WithWorkingDirectory(workingDir)
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "de-DE")
-                .Execute()
+                .Execute();
+
+            result
                 .Should()
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.NotHaveStdOutContaining(expectedErrors)
-                .And.HaveStdOutContaining($"Erfolg: {tmpTemplateLocation} installierte die folgenden Vorlagen:").And.HaveStdOutContaining("TemplateWithLocalization").And.HaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
+                .And.HaveStdOutContaining($"Erfolg: {tmpTemplateLocation} installierte die folgenden Vorlagen:").And.HaveStdOutContaining("TemplateWithLocalization")
+                .And.HaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
+
+            foreach (string error in expectedErrors)
+            {
+                result.Should().NotHaveStdOutContaining(error);
+            }
 
             //replace localization with bad file
             File.Copy(
@@ -212,15 +224,21 @@ Regex.Escape(@$"Warnung: Die Lokalisierungsdatei {tmpTemplateLocation + Path.Dir
                 Path.Combine(tmpTemplateLocation, ".template.config", "localize", "templatestrings.de-DE.json"),
                 overwrite: true);
 
-            new DotnetNewCommand(_log, "TestAssets.TemplateWithLocalization")
+            result = new DotnetNewCommand(_log, "TestAssets.TemplateWithLocalization")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDir)
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "de-DE")
-                .Execute()
+                .Execute();
+
+            result
                 .Should()
                 .ExitWith(0)
-                .And.HaveStdOutMatching(expectedErrors)
                 .And.HaveStdOutContaining("Die Vorlage \"name\" wurde erfolgreich erstellt.").And.NotHaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
+
+            foreach (string error in expectedErrors)
+            {
+                result.Should().HaveStdOutContaining(error);
+            }
         }
     }
 }
