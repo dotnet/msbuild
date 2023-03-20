@@ -4108,6 +4108,62 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.BitwiseOr), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out int arg0, out int arg1))
+                            {
+                                returnVal = IntrinsicFunctions.BitwiseOr(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.BitwiseAnd), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out int arg0, out int arg1))
+                            {
+                                returnVal = IntrinsicFunctions.BitwiseAnd(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.BitwiseXor), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out int arg0, out int arg1))
+                            {
+                                returnVal = IntrinsicFunctions.BitwiseXor(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.BitwiseNot), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out int arg0))
+                            {
+                                returnVal = IntrinsicFunctions.BitwiseNot(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.LeftShift), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out int arg0, out int arg1))
+                            {
+                                returnVal = IntrinsicFunctions.LeftShift(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RightShift), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out int arg0, out int arg1))
+                            {
+                                returnVal = IntrinsicFunctions.RightShift(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RightShiftUnsigned), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out int arg0, out int arg1))
+                            {
+                                returnVal = IntrinsicFunctions.RightShiftUnsigned(arg0, arg1);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Path))
                     {
@@ -4482,6 +4538,18 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return Enum.TryParse(comparisonTypeName, out arg1);
+            }
+
+            private static bool TryGetArgs(object[] args, out int arg0)
+            {
+                arg0 = 0;
+
+                if (args.Length != 1)
+                {
+                    return false;
+                }
+
+                return TryConvertToInt(args[0], out arg0);
             }
 
             private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
