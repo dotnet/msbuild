@@ -60,7 +60,6 @@ namespace Microsoft.DotNet.Cli
             }
             return new string[] { $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
         }
-        private static Func<CompletionContext, IEnumerable<CompletionItem>> RuntimeCompletions = Complete.RunTimesFromProjectFile;
 
         public static Option<string> RuntimeOption =
             new ForwardedOption<string>(
