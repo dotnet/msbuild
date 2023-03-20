@@ -30,7 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <KnownFrameworkReference Remove="Microsoft.Windows.SDK.NET.Ref" />
     </ItemGroup>
-    
+
     <!-- Generate KnownFrameworkReference items for the Windows SDK pack -->
     <CreateWindowsSdkKnownFrameworkReferences
       UseWindowsSDKPreview="$(UseWindowsSDKPreview)"
@@ -42,7 +42,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       WindowsSdkSupportedTargetPlatformVersions="@(WindowsSdkSupportedTargetPlatformVersion)">
 
       <Output TaskParameter="KnownFrameworkReferences" ItemName="KnownFrameworkReference" />
-      
+
     </CreateWindowsSdkKnownFrameworkReferences>
   </Target>
 
@@ -415,6 +415,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <RuntimeFramework Remove="@(RuntimeFramework)" />
       <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveOffByDefaultAnalyzers" AfterTargets="ResolveTargetingPackAssets"
+          Condition="'@(FrameworkReference)' != ''">
+    <ItemGroup>
+      <OffByDefaultAnalyzer Include="Microsoft.AspNetCore.Http.Generators"
+                            IsEnabled="$(EnableRequestDelegateGenerator)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <AnalyzerToRemove Include="@(OffByDefaultAnalyzer)"
+                        Path="%(Analyzer.Identity)"
+                        Condition="'%(Analyzer.Filename)' == '@(OffByDefaultAnalyzer)'" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Analyzer Remove="%(AnalyzerToRemove.Path)" Condition="'%(AnalyzerToRemove.IsEnabled)' != 'true'"/>
     </ItemGroup>
   </Target>
 
