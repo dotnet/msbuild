@@ -52,6 +52,7 @@ namespace Microsoft.DotNet.Cli
             .AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
         private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
+        private static CompletionDelegate RuntimeCompletions = Complete.RunTimesFromProjectFile;
         public static IEnumerable<string> RuntimeArgFunc(string rid)
         {
             if (GetArchFromRid(rid) == "amd64")
@@ -60,8 +61,6 @@ namespace Microsoft.DotNet.Cli
             }
             return new string[] { $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
         }
-        private static Func<CompletionContext, IEnumerable<CompletionItem>> RuntimeCompletions = Complete.RunTimesFromProjectFile;
-
         public static Option<string> RuntimeOption =
             new ForwardedOption<string>(
                 new string[] { "-r", "--runtime" })
