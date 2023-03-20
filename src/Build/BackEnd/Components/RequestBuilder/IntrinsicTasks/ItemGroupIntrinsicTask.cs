@@ -184,7 +184,16 @@ namespace Microsoft.Build.BackEnd
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location, loggingContext);
+                    ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
+                    ElementLocation location = metadataInstance.Location;
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && bucket.BucketSequenceNumber == 0)
+                    {
+                        expanderOptions |= ExpanderOptions.WarnOnItemMetadataSelfReference;
+                        // Temporary workaround of unavailability of full Location info on metadata: https://github.com/dotnet/msbuild/issues/8579
+                        location = child.Location;
+                    }
+
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, location, loggingContext);
 
                     // This both stores the metadata so we can add it to all the items we just created later, and 
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
@@ -612,7 +621,7 @@ namespace Microsoft.Build.BackEnd
         /// 1. The metadata table created for the bucket, may be null.
         /// 2. The metadata table derived from the item definition group, may be null.
         /// </summary>
-        private class NestedMetadataTable : IMetadataTable
+        private class NestedMetadataTable : IMetadataTable, IItemMetadata
         {
             /// <summary>
             /// The table for all metadata added during expansion
@@ -722,6 +731,8 @@ namespace Microsoft.Build.BackEnd
             {
                 _addTable[name] = value;
             }
+
+            string IItemMetadata.ItemType => _itemType;
         }
     }
 }

@@ -89,6 +89,13 @@ namespace Microsoft.Build.Evaluation
         Truncate = 0x40,
 
         /// <summary>
+        /// Issues warning if item references unqualified or qualified metadata odf self - as this can lead to unintended expansion and
+        ///  cross-combination of other items.
+        /// TODO: add ms learn link (once the appropriate text is added there)
+        /// </summary>
+        WarnOnItemMetadataSelfReference = 0x80,
+
+        /// <summary>
         /// Expand only properties and then item lists
         /// </summary>
         ExpandPropertiesAndItems = ExpandProperties | ExpandItems,
@@ -441,7 +448,7 @@ namespace Microsoft.Build.Evaluation
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
-            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
+            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem, loggingContext);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
@@ -863,6 +870,11 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private static class MetadataExpander
         {
+            //internal static bool HasUnqualifiedOrSelfQualifiedMetadataRef(string itemName, string expression)
+            //{
+
+            //}
+
             /// <summary>
             /// Expands all embedded item metadata in the given string, using the bucketed items.
             /// Metadata may be qualified, like %(Compile.WarningLevel), or unqualified, like %(Compile).
@@ -872,7 +884,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="options">Used to specify what to expand.</param>
             /// <param name="elementLocation">The location information for error reporting purposes.</param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
-            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation)
+            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
             {
                 try
                 {
@@ -896,7 +908,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // if there are no item vectors in the string
                         // run a simpler Regex to find item metadata references
-                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
+                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
                         result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
                     }
                     else
@@ -915,7 +927,7 @@ namespace Microsoft.Build.Evaluation
                         using SpanBasedStringBuilder finalResultBuilder = Strings.GetSpanBasedStringBuilder();
 
                         int start = 0;
-                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
+                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
 
                         if (itemVectorExpressions != null)
                         {
@@ -993,13 +1005,23 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private ExpanderOptions _options;
 
+                private IElementLocation _elementLocation;
+
+                private LoggingContext _loggingContext;
+
                 /// <summary>
                 /// Constructor taking a source of metadata.
                 /// </summary>
-                internal MetadataMatchEvaluator(IMetadataTable metadata, ExpanderOptions options)
+                internal MetadataMatchEvaluator(
+                    IMetadataTable metadata,
+                    ExpanderOptions options,
+                    IElementLocation elementLocation,
+                    LoggingContext loggingContext)
                 {
                     _metadata = metadata;
-                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate);
+                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate | ExpanderOptions.WarnOnItemMetadataSelfReference);
+                    _elementLocation = elementLocation;
+                    _loggingContext = loggingContext;
 
                     ErrorUtilities.VerifyThrow(options != ExpanderOptions.Invalid, "Must be expanding metadata of some kind");
                 }
@@ -1030,6 +1052,17 @@ namespace Microsoft.Build.Evaluation
                        (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0)))
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
+
+                        if ((_options & ExpanderOptions.WarnOnItemMetadataSelfReference) != 0 &&
+                            _loggingContext != null &&
+                            !string.IsNullOrEmpty(metadataName) &&
+                            _metadata is IItemMetadata itemMetadata &&
+                            (string.IsNullOrEmpty(itemType) || string.Equals(itemType, itemMetadata.ItemType, StringComparison.Ordinal)))
+                        {
+                            _loggingContext.LogWarning(null, new BuildEventFileInfo(_elementLocation),
+                                "ItemReferencingSelfInTarget", itemMetadata.ItemType, metadataName);
+                        }
+
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
                         {
                             metadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion - 3) + "...";

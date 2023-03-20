@@ -154,6 +154,11 @@
         <target state="translated">Obiekty EvaluationContext utworzone za pomocą elementu SharingPolicy.Isolated nie obsługują przekazywania za pomocą systemu plików MSBuildFileSystemBase.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ItemReferencingSelfInTarget">
+        <source>&lt;TODO: Warn code&gt; Item '{0}' definition within target is referencing self via metadata '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: &lt;TODO: add MS learn link once documented&gt;</source>
+        <target state="new">&lt;TODO: Warn code&gt; Item '{0}' definition within target is referencing self via metadata '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: &lt;TODO: add MS learn link once documented&gt;</target>
+        <note />
+      </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
         <target state="translated">Kasowanie procesu z identyfikatorem pid = {0}.</target>

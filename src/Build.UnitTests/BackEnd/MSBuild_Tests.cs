@@ -773,6 +773,90 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Referring to an item outside of target leads to 'naturally expected' reference to the item being processed.
+        ///  No expansion occurs.
+        /// </summary>
+        [Fact]
+        public void ItemsRecursionOutsideTarget()
+        {
+            string projectFile = null;
+
+            try
+            {
+                projectFile = ObjectModelHelpers.CreateTempFileOnDisk("""
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                     <ItemGroup>
+                        <iout1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='c\d.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='g\h.foo' TargetPath='%(Filename)%(Extension)' />
+                      </ItemGroup>
+                      <Target Name='a'>
+                        <Message Text="iout1=[@(iout1)]" Importance='High' />
+                        <Message Text="iout1-target-paths=[@(iout1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """);
+
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile, logger);
+
+                Console.WriteLine(logger.FullLog);
+
+                logger.AssertLogContains("iout1=[a/b.foo;c\\d.foo;g\\h.foo]");
+                logger.AssertLogContains("iout1-target-paths=[b.foo;d.foo;h.foo]");
+            }
+            finally
+            {
+                File.Delete(projectFile);
+            }
+        }
+
+        /// <summary>
+        /// Referring to an item within target leads to item expansion which might be unintended behavior - hence warning.
+        /// </summary>
+        [Fact]
+        public void ItemsRecursionWithinTarget()
+        {
+            string projectFile = null;
+
+            try
+            {
+                // TargetPath="@(iin1->'%(Filename)')" is intentionally allowed - as it explicitly indicates expansion
+                projectFile = ObjectModelHelpers.CreateTempFileOnDisk("""
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='c\d.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='g\h.foo' TargetPath='%(Filename)%(Extension)' />
+                        </ItemGroup>
+                        <Message Text="iin1=[@(iin1)]" Importance='High' />
+                        <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """);
+
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile, logger);
+
+                Console.WriteLine(logger.FullLog);
+
+                logger.AssertLogDoesntContain("iin1=[a/b.foo;c\\d.foo;g\\h.foo]");
+                logger.AssertLogDoesntContain("iin1-target-paths=[b.foo;d.foo;h.foo]");
+                logger.AssertLogContains("iin1=[a/b.foo;c\\d.foo;g\\h.foo;g\\h.foo]");
+                logger.AssertLogContains("iin1-target-paths=[;b.foo;b.foo;d.foo]");
+
+                logger.AssertLogContains("Item 'iin1' definition within target is referencing self via metadata 'Extension'. This can lead to unintended expansion and cross-applying of pre-existing items");
+                Assert.Equal(6, logger.WarningCount);
+                Assert.Equal(0, logger.ErrorCount);
+            }
+            finally
+            {
+                File.Delete(projectFile);
+            }
+        }
+
+        /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
