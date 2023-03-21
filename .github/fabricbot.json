@@ -468,6 +468,12 @@
                   "parameters": {
                     "action": "reopened"
                   }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Servicing-consider"
+                  }
                 }
               ]
             },
