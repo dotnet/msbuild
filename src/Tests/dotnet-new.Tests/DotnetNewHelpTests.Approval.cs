@@ -4,6 +4,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 
@@ -248,7 +249,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--help", "--framework", "net7.0")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--help", "--framework", ToolsetInfo.CurrentTargetFramework)
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
