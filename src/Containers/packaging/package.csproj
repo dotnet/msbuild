@@ -30,7 +30,7 @@
 
         <ProjectReference Include="../Microsoft.NET.Build.Containers/Microsoft.NET.Build.Containers.csproj"
                           SetTargetFramework="TargetFramework=$(VSCompatTargetFramework)"
-                          OutputItemType="ContainerLibraryOutputNet472"/>
+                          OutputItemType="ContainerLibraryOutputNet472" Condition="'$(DotNetBuildFromSource)' != 'true'" />
 
         <ProjectReference Include="../containerize/containerize.csproj" PrivateAssets="all" IncludeAssets="runtime" ReferenceOutputAssembly="true" />
         <PackageReference Include="System.CommandLine" PrivateAssets="all" IncludeAssets="runtime" Version="$(SystemCommandLineVersion)"/>
@@ -59,10 +59,10 @@
 
             <!-- tasks folder -->
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
-            <Content Include="@(ContainerLibraryOutputNet472)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" />
+            <Content Include="@(ContainerLibraryOutputNet472)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" Condition="'$(DotNetBuildFromSource)' != 'true'" />
             <Content Include="../../../artifacts/bin/Microsoft.NET.Build.Containers/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
-            <Content Include="../../../artifacts/bin/Microsoft.NET.Build.Containers/$(Configuration)/$(VSCompatTargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)" />
+            <Content Include="../../../artifacts/bin/Microsoft.NET.Build.Containers/$(Configuration)/$(VSCompatTargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)" Condition="'$(DotNetBuildFromSource)' != 'true'" />
 
             <!-- build folder -->
             <Content Include="build/**" Pack="true" PackagePath="build/" />
