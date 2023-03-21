@@ -857,6 +857,53 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Referring to an unrelated item within target leads to expected expansion.
+        /// </summary>
+        [Fact]
+        public void UnrelatedItemsRecursionWithinTarget()
+        {
+            string projectFile = null;
+
+            try
+            {
+                // TargetPath="@(iin1->'%(Filename)')" is intentionally allowed - as it explicitly indicates expansion
+                projectFile = ObjectModelHelpers.CreateTempFileOnDisk("""
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <ItemGroup>
+                        <iout1 Include='a/b.foo'/>
+                        <iout1 Include='c\d.foo'/>
+                        <iout1 Include='g\h.foo'/>
+                      </ItemGroup>
+
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='@(iout1)' TargetPath='%(Filename)%(Extension)' />
+                        </ItemGroup>
+                        <Message Text="iin1=[@(iin1)]" Importance='High' />
+                        <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """);
+
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile, logger);
+
+                Console.WriteLine(logger.FullLog);
+
+                logger.AssertLogContains("iin1=[a/b.foo;c\\d.foo;g\\h.foo]");
+                logger.AssertLogContains("iin1-target-paths=[b.foo;d.foo;h.foo]");
+
+                logger.AssertLogDoesntContain("MSB4120");
+                Assert.Equal(0, logger.WarningCount);
+                Assert.Equal(0, logger.ErrorCount);
+            }
+            finally
+            {
+                File.Delete(projectFile);
+            }
+        }
+
+        /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]

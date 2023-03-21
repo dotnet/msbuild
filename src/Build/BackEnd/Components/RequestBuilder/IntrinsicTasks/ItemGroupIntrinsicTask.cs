@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -186,7 +187,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
                     ElementLocation location = metadataInstance.Location;
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && bucket.BucketSequenceNumber == 0)
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) &&
+                        // If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
+                        bucket.BucketSequenceNumber == 0 &&
+                        // Referring to unqualified metadata of other item (transform) is fine.
+                        child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)
                     {
                         expanderOptions |= ExpanderOptions.WarnOnItemMetadataSelfReference;
                         // Temporary workaround of unavailability of full Location info on metadata: https://github.com/dotnet/msbuild/issues/8579
