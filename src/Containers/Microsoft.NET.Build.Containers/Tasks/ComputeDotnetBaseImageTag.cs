@@ -3,6 +3,9 @@
 
 using Microsoft.Build.Framework;
 using NuGet.Versioning;
+#if NETFRAMEWORK
+using System.Linq;
+#endif
 
 namespace Microsoft.NET.Build.Containers.Tasks;
 
@@ -73,19 +76,32 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
         return baseImageTag;
     }
 
-    private string? DetermineLabelBasedOnChannel(int major, int minor, string[] releaseLabels) =>
-        (releaseLabels) switch
+     private string? DetermineLabelBasedOnChannel(int major, int minor, string[] releaseLabels) {
+      // this would be a switch, but we have to support net47s where Range and Index aren't available
+        if (releaseLabels.Length == 0)
         {
-            [var channel, var bump, ..] when channel is ("rc" or "preview") => $"{major}.{minor}-{channel}.{bump}",
-            [var channel, ..] => LogInvalidPrereleaseError(channel),
-            [] => $"{major}.{minor}"
-        };
-
-    private string? LogInvalidPrereleaseError(string channel)
-    {
-        Log.LogError(Resources.Strings.InvalidSdkPrereleaseVersion, channel);
-        return null;
-    }
-
-
+            return $"{major}.{minor}";
+        }
+        else
+        {
+            var channel = releaseLabels[0];
+            if (channel == "rc" || channel == "preview")
+            {
+                if (releaseLabels.Length > 1)
+                {
+                    return $"{major}.{minor}-{channel}.{releaseLabels[1]}";
+                }
+                else
+                {
+                    Log.LogError(Resources.Strings.InvalidSdkPrereleaseVersion, channel);
+                    return null;
+                }
+            }
+            else
+            {
+                Log.LogError(Resources.Strings.InvalidSdkPrereleaseVersion, channel);
+                return null;
+            }
+        }
+     }
 }

@@ -45,6 +45,7 @@
     <Compile Include="Tasks/ParseContainerProperties.cs" />
     <Compile Include="Tasks/CreateNewImage.Interface.cs" />
     <Compile Include="Tasks/CreateNewImageToolTask.cs" />
+    <Compile Include="Tasks/ComputeDotnetBaseImageTag.cs" />
     <Compile Include="ContainerHelpers.cs" />
     <Compile Include="net472Definitions.cs" />
     <Compile Include="VSHostObject.cs" />

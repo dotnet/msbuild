@@ -20,13 +20,14 @@ internal sealed class Registry
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
     /// <summary>
-    /// Whether we should upload blobs via chunked upload (disabled by default).
+    /// Whether we should upload blobs via chunked upload (enabled by default, but disabled for certain registries in conjunction with the explicit support check below).
     /// </summary>
     /// <remarks>
     /// Relates to https://github.com/dotnet/sdk-container-builds/pull/383#issuecomment-1466408853
     /// </remarks>
     private static readonly bool s_chunkedUploadEnabled = bool.TrueString.Equals(
-        Environment.GetEnvironmentVariable(ContainerHelpers.ChunkedUploadEnabled), StringComparison.OrdinalIgnoreCase);
+        Environment.GetEnvironmentVariable(ContainerHelpers.ChunkedUploadEnabled) ?? "true", // we want to default this to 'on'
+        StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// The name of the registry, which is the host name, optionally followed by a colon and the port number.
@@ -93,6 +94,16 @@ internal sealed class Registry
     }
 
     /// <summary>
+    /// Check to see if the registry is GitHub Packages, which always uses ghcr.io.
+    /// </summary>
+    public bool IsGithubPackageRegistry => RegistryName.StartsWith("ghcr.io", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Check to see if the registry is Docker Hub, which uses two well-known domains.
+    /// </summary>
+    public bool IsDockerHub => RegistryName.Equals("registry-1.docker.io", StringComparison.Ordinal) || RegistryName.Equals("registry.hub.docker.com", StringComparison.Ordinal);
+
+    /// <summary>
     /// Check to see if the registry is for Google Artifact Registry.
     /// </summary>
     /// <remarks>
@@ -103,9 +114,9 @@ internal sealed class Registry
     }
 
     /// <summary>
-    /// Google Artifact Registry doesn't support chunked upload, but we want the capability check to be agnostic to the target.
+    /// Google Artifact Registry doesn't support chunked upload, but Amazon ECR, GitHub Packages, and DockerHub do. We want the capability check to be agnostic to the target.
     /// </summary>
-    private bool SupportsChunkedUpload => !IsGoogleArtifactRegistry;
+    private bool SupportsChunkedUpload => !IsGoogleArtifactRegistry || IsAmazonECRRegistry || IsGithubPackageRegistry || IsDockerHub;
 
     /// <summary>
     /// Pushing to ECR uses a much larger chunk size. To avoid getting too many socket disconnects trying to do too many

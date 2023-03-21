@@ -14,6 +14,13 @@ Microsoft.NET.Build.Containers.Port.Type.set -> void
 Microsoft.NET.Build.Containers.PortType
 Microsoft.NET.Build.Containers.PortType.tcp = 0 -> Microsoft.NET.Build.Containers.PortType
 Microsoft.NET.Build.Containers.PortType.udp = 1 -> Microsoft.NET.Build.Containers.PortType
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ComputedBaseImageTag.get -> string?
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ComputeDotnetBaseImageTag() -> void
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.SdkVersion.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.SdkVersion.set -> void
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.TargetFrameworkVersion.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.TargetFrameworkVersion.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseImageName.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseImageName.set -> void
@@ -56,6 +63,7 @@ Microsoft.NET.Build.Containers.Tasks.CreateNewImage.RuntimeIdentifierGraphPath.g
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.RuntimeIdentifierGraphPath.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.WorkingDirectory.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.WorkingDirectory.set -> void
+override Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.Execute() -> bool
 override Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ToolName.get -> string!
 override Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GenerateCommandLineCommands() -> string!
 override Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GenerateFullPathToTool() -> string!
