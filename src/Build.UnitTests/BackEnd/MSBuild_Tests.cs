@@ -787,8 +787,8 @@ namespace Microsoft.Build.UnitTests
                     <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                      <ItemGroup>
                         <iout1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
-                        <iout1 Include='c\d.foo' TargetPath='%(Filename)%(Extension)' />
-                        <iout1 Include='g\h.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='c/d.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='g/h.foo' TargetPath='%(Filename)%(Extension)' />
                       </ItemGroup>
                       <Target Name='a'>
                         <Message Text="iout1=[@(iout1)]" Importance='High' />
@@ -802,7 +802,7 @@ namespace Microsoft.Build.UnitTests
 
                 Console.WriteLine(logger.FullLog);
 
-                logger.AssertLogContains("iout1=[a/b.foo;c\\d.foo;g\\h.foo]");
+                logger.AssertLogContains("iout1=[a/b.foo;c/d.foo;g/h.foo]");
                 logger.AssertLogContains("iout1-target-paths=[b.foo;d.foo;h.foo]");
             }
             finally
@@ -827,8 +827,8 @@ namespace Microsoft.Build.UnitTests
                       <Target Name='a'>
                         <ItemGroup>
                           <iin1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
-                          <iin1 Include='c\d.foo' TargetPath='%(Filename)%(Extension)' />
-                          <iin1 Include='g\h.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='c/d.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='g/h.foo' TargetPath='%(Filename)%(Extension)' />
                         </ItemGroup>
                         <Message Text="iin1=[@(iin1)]" Importance='High' />
                         <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
@@ -841,9 +841,9 @@ namespace Microsoft.Build.UnitTests
 
                 Console.WriteLine(logger.FullLog);
 
-                logger.AssertLogDoesntContain("iin1=[a/b.foo;c\\d.foo;g\\h.foo]");
+                logger.AssertLogDoesntContain("iin1=[a/b.foo;c/d.foo;g/h.foo]");
                 logger.AssertLogDoesntContain("iin1-target-paths=[b.foo;d.foo;h.foo]");
-                logger.AssertLogContains("iin1=[a/b.foo;c\\d.foo;g\\h.foo;g\\h.foo]");
+                logger.AssertLogContains("iin1=[a/b.foo;c/d.foo;g/h.foo;g/h.foo]");
                 logger.AssertLogContains("iin1-target-paths=[;b.foo;b.foo;d.foo]");
 
                 logger.AssertLogContains("MSB4120: Item 'iin1' definition within target is referencing self via metadata 'Extension' (qualified or unqualified). This can lead to unintended expansion and cross-applying of pre-existing items");
@@ -871,8 +871,8 @@ namespace Microsoft.Build.UnitTests
                     <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <ItemGroup>
                         <iout1 Include='a/b.foo'/>
-                        <iout1 Include='c\d.foo'/>
-                        <iout1 Include='g\h.foo'/>
+                        <iout1 Include='c/d.foo'/>
+                        <iout1 Include='g/h.foo'/>
                       </ItemGroup>
 
                       <Target Name='a'>
@@ -890,7 +890,7 @@ namespace Microsoft.Build.UnitTests
 
                 Console.WriteLine(logger.FullLog);
 
-                logger.AssertLogContains("iin1=[a/b.foo;c\\d.foo;g\\h.foo]");
+                logger.AssertLogContains("iin1=[a/b.foo;c/d.foo;g/h.foo]");
                 logger.AssertLogContains("iin1-target-paths=[b.foo;d.foo;h.foo]");
 
                 logger.AssertLogDoesntContain("MSB4120");
