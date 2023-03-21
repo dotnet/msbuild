@@ -10,12 +10,11 @@ using Microsoft.NET.Build.Containers.UnitTests;
 
 namespace Microsoft.NET.Build.Containers.Targets.IntegrationTests;
 
-[Collection("Docker tests")]
 public class TargetsTests
 {
     [InlineData(true, "/app/foo.exe")]
     [InlineData(false, "dotnet", "/app/foo.dll")]
-    [DockerDaemonAvailableTheory]
+    [Theory]
     public void CanSetEntrypointArgsToUseAppHost(bool useAppHost, params string[] entrypointArgs)
     {
         var (project, _) = ProjectInitializer.InitProject(new()
@@ -35,7 +34,7 @@ public class TargetsTests
     [InlineData("*friendly-suspicious-alligator", "", false)]
     [InlineData("web/app2+7", "web/app2-7", true)]
     [InlineData("Microsoft.Apps.Demo.ContosoWeb", "microsoft-apps-demo-contosoweb", true)]
-    [DockerDaemonAvailableTheory]
+    [Theory]
     public void CanNormalizeInputContainerNames(string projectName, string expectedContainerImageName, bool shouldPass)
     {
         var (project, _) = ProjectInitializer.InitProject(new()
@@ -53,7 +52,7 @@ public class TargetsTests
     [InlineData("7.0.100-rc.1", true)]
     [InlineData("6.0.100", false)]
     [InlineData("7.0.100-preview.1", false)]
-    [DockerDaemonAvailableTheory]
+    [Theory]
     public void CanWarnOnInvalidSDKVersions(string sdkVersion, bool isAllowed)
     {
         var (project, _) = ProjectInitializer.InitProject(new()
@@ -69,7 +68,7 @@ public class TargetsTests
 
     [InlineData(true)]
     [InlineData(false)]
-    [DockerDaemonAvailableTheory]
+    [Theory]
     public void GetsConventionalLabelsByDefault(bool shouldEvaluateLabels)
     {
         var (project, _) = ProjectInitializer.InitProject(new()
@@ -92,7 +91,7 @@ public class TargetsTests
 
     [InlineData(true)]
     [InlineData(false)]
-    [DockerDaemonAvailableTheory]
+    [Theory]
     public void ShouldNotIncludeSourceControlLabelsUnlessUserOptsIn(bool includeSourceControl)
     {
         var commitHash = "abcdef";
