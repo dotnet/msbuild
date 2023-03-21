@@ -457,7 +457,7 @@
             {
               "name": "prTargetsBranch",
               "parameters": {
-                "branchName": "vs*"
+                "branchName": "vs17.4"
               }
             }
           ]
