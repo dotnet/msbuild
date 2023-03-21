@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -89,11 +90,30 @@ namespace Microsoft.Build.Evaluation
 
 #if DEBUG
         /// <summary>
-        /// Number of entries into Get function of the ProjectRootElementCache.
-        /// Shall be always 0 or 1. Reentrance to the Get function (value > 1) could lead to race condition.
+        /// A simple IDisposable struct implementing the holder/guard pattern over the Get reentrancy counter.
         /// </summary>
-        [ThreadStatic]
-        private static int s_getEntriesNumber = 0;
+        private struct ReentrancyGuard : IDisposable
+        {
+            /// <summary>
+            /// Number of entries into Get function of the ProjectRootElementCache.
+            /// Shall be always 0 or 1. Reentrance to the Get function (value > 1) could lead to race condition.
+            /// </summary>
+            [ThreadStatic]
+            private static int s_getEntriesNumber = 0;
+
+            public ReentrancyGuard()
+            {
+                s_getEntriesNumber++;
+                ErrorUtilities.VerifyThrow(
+                    s_getEntriesNumber == 1,
+                    "Reentrance to the ProjectRootElementCache.Get function detected.");
+            }
+
+            public void Dispose()
+            {
+                s_getEntriesNumber--;
+            }
+        }
 #endif
 
         /// <summary>
@@ -104,6 +124,11 @@ namespace Microsoft.Build.Evaluation
         /// behavior will ensue.
         /// </remarks>
         private WeakValueDictionary<string, ProjectRootElement> _weakCache;
+
+        /// <summary>
+        /// Lock objects keyed by project file path.
+        /// </summary>
+        private ConcurrentDictionary<string, object> _fileLoadLocks;
 
         /// <summary>
         /// The list of strongly-held ProjectRootElement's
@@ -120,7 +145,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Locking object for this shared cache
         /// </summary>
-        private Object _locker = new Object();
+        private object _locker = new object();
 
         /// <summary>
         /// Creates an empty cache.
@@ -131,6 +156,7 @@ namespace Microsoft.Build.Evaluation
 
             _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
             _strongCache = new LinkedList<ProjectRootElement>();
+            _fileLoadLocks = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             _autoReloadFromDisk = autoReloadFromDisk;
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
@@ -224,106 +250,127 @@ namespace Microsoft.Build.Evaluation
         {
 #if DEBUG
             // Verify that loadProjectRootElement delegate does not call ProjectRootElementCache.Get().
-            s_getEntriesNumber++;
+            using var reentrancyGuard = new ReentrancyGuard();
+
+            // Verify that we never call this with _locker held, as that would create a lock ordering inversion with the per-file lock.
             ErrorUtilities.VerifyThrow(
-                s_getEntriesNumber == 1,
-                "Reentrance to the ProjectRootElementCache.Get function detected.");
+                !System.Threading.Monitor.IsEntered(_locker),
+                "Detected lock ordering inversion in ProjectRootElementCache.");
+#endif
+            // Should already have been canonicalized
+            ErrorUtilities.VerifyThrowInternalRooted(projectFile);
+
+            // First try getting the ProjectRootElement from the cache.
+            ProjectRootElement projectRootElement = GetOrLoad(projectFile, loadProjectRootElement: null, isExplicitlyLoaded, preserveFormatting);
+
+            if (projectRootElement != null || loadProjectRootElement == null)
+            {
+                // If we found it or no load callback was specified, we are done.
+                return projectRootElement;
+            }
 
             try
             {
-#endif
-#pragma warning disable format // the release configuration fails as try-catch block is conditioned only for Debug; making the formatting in correct in Release.
-                // Should already have been canonicalized
-                ErrorUtilities.VerifyThrowInternalRooted(projectFile);
-
-                ProjectRootElement projectRootElement;
-                lock (_locker)
+                // We are about to load. Take a per-file lock to prevent multiple threads from duplicating the work multiple times.
+                object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, () => new object());
+                lock (perFileLock)
                 {
-                    _weakCache.TryGetValue(projectFile, out projectRootElement);
-
-                    if (projectRootElement != null)
-                    {
-                        BoostEntryInStrongCache(projectRootElement);
-
-                        // An implicit load will never reset the explicit flag.
-                        if (isExplicitlyLoaded)
-                        {
-                            projectRootElement.MarkAsExplicitlyLoaded();
-                        }
-                    }
-                    else
-                    {
-                        DebugTraceCache("Not found in cache: ", projectFile);
-                    }
-
-                    if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
-                    {
-                        // Cached project doesn't match preserveFormatting setting, so reload it
-                        projectRootElement.Reload(true, preserveFormatting);
-                    }
+                    // Call GetOrLoad again, this time with the OpenProjectRootElement callback.
+                    return GetOrLoad(projectFile, loadProjectRootElement, isExplicitlyLoaded, preserveFormatting);
                 }
+            }
+            finally
+            {
+                // Remove the lock object as we have otherwise no good way of preventing _fileLoadLocks from growing unboundedly.
+                // If another thread is inside the lock, we effectively create a race condition where someone else may enter
+                // GetOrLoad. This is OK because this fine-grained locking is just a perf optimization, and we have either loaded
+                // the ProjectRootElement by now, or it is an error condition where perf is not critical.
+                _fileLoadLocks.TryRemove(projectFile, out _);
+            }
+        }
 
-                bool projectRootElementIsInvalid = IsInvalidEntry(projectFile, projectRootElement);
-                if (projectRootElementIsInvalid)
+        /// <summary>
+        /// A helper used by <see cref="Get"/>.
+        /// </summary>
+        private ProjectRootElement GetOrLoad(string projectFile, OpenProjectRootElement loadProjectRootElement, bool isExplicitlyLoaded,
+            bool? preserveFormatting)
+        {
+            ProjectRootElement projectRootElement;
+            lock (_locker)
+            {
+                _weakCache.TryGetValue(projectFile, out projectRootElement);
+
+                if (projectRootElement != null)
                 {
-                    DebugTraceCache("Not satisfied from cache: ", projectFile);
-                    ForgetEntryIfExists(projectRootElement);
-                }
-
-                if (loadProjectRootElement == null)
-                {
-                    if (projectRootElement == null || projectRootElementIsInvalid)
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                        DebugTraceCache("Satisfied from XML cache: ", projectFile);
-                        return projectRootElement;
-                    }
-                }
-
-                // Use openProjectRootElement to reload the element if the cache element does not exist or need to be reloaded.
-                if (projectRootElement == null || projectRootElementIsInvalid)
-                {
-                    // We do not lock loading with common _locker of the cache, to avoid lock contention.
-                    // Decided also not to lock this section with the key specific locker to avoid the overhead and code overcomplication, as
-                    // it is not likely that two threads would use Get function for the same project simultaneously and it is not a big deal if in some cases we load the same project twice.
-
-                    projectRootElement = loadProjectRootElement(projectFile, this);
-                    ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
-                    ErrorUtilities.VerifyThrow(
-                        projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
-                        "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
-                        projectFile,
-                        projectRootElement.FullPath);
+                    BoostEntryInStrongCache(projectRootElement);
 
                     // An implicit load will never reset the explicit flag.
                     if (isExplicitlyLoaded)
                     {
                         projectRootElement.MarkAsExplicitlyLoaded();
                     }
+                }
+                else
+                {
+                    DebugTraceCache("Not found in cache: ", projectFile);
+                }
 
-                    // Update cache element.
-                    // It is unlikely, but it might be that while without the lock, the projectRootElement in cache was updated by another thread.
-                    // And here its entry will be replaced with the loaded projectRootElement. This is fine:
-                    // if loaded projectRootElement is out of date (so, it changed since the time we loaded it), it will be updated the next time some thread calls Get function.
-                    AddEntry(projectRootElement);
+                if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                {
+                    // Cached project doesn't match preserveFormatting setting, so reload it
+                    projectRootElement.Reload(true, preserveFormatting);
+                }
+            }
+
+            bool projectRootElementIsInvalid = IsInvalidEntry(projectFile, projectRootElement);
+            if (projectRootElementIsInvalid)
+            {
+                DebugTraceCache("Not satisfied from cache: ", projectFile);
+                ForgetEntryIfExists(projectRootElement);
+            }
+
+            if (loadProjectRootElement == null)
+            {
+                if (projectRootElement == null || projectRootElementIsInvalid)
+                {
+                    return null;
                 }
                 else
                 {
                     DebugTraceCache("Satisfied from XML cache: ", projectFile);
+                    return projectRootElement;
+                }
+            }
+
+            // Use openProjectRootElement to reload the element if the cache element does not exist or need to be reloaded.
+            if (projectRootElement == null || projectRootElementIsInvalid)
+            {
+                projectRootElement = loadProjectRootElement(projectFile, this);
+                ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
+                ErrorUtilities.VerifyThrow(
+                    projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
+                    "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
+                    projectFile,
+                    projectRootElement.FullPath);
+
+                // An implicit load will never reset the explicit flag.
+                if (isExplicitlyLoaded)
+                {
+                    projectRootElement.MarkAsExplicitlyLoaded();
                 }
 
-                return projectRootElement;
-#pragma warning restore format
-#if DEBUG
+                // Update cache element.
+                // It is unlikely, but it might be that while without the lock, the projectRootElement in cache was updated by another thread.
+                // And here its entry will be replaced with the loaded projectRootElement. This is fine:
+                // if loaded projectRootElement is out of date (so, it changed since the time we loaded it), it will be updated the next time some thread calls Get function.
+                AddEntry(projectRootElement);
             }
-            finally
+            else
             {
-                s_getEntriesNumber--;
+                DebugTraceCache("Satisfied from XML cache: ", projectFile);
             }
-#endif
+
+            return projectRootElement;
         }
 
         /// <summary>
@@ -524,7 +571,7 @@ namespace Microsoft.Build.Evaluation
             ProjectRootElement existingWeakEntry;
             _weakCache.TryGetValue(projectRootElement.FullPath, out existingWeakEntry);
 
-            if (existingWeakEntry != null && !Object.ReferenceEquals(existingWeakEntry, projectRootElement))
+            if (existingWeakEntry != null && !object.ReferenceEquals(existingWeakEntry, projectRootElement))
             {
                 _strongCache.Remove(existingWeakEntry);
                 RaiseProjectRootElementRemovedFromStrongCache(existingWeakEntry);
