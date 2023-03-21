@@ -443,24 +443,22 @@ namespace Microsoft.Build.Evaluation
                 LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
                 _strongCache = new LinkedList<ProjectRootElement>();
 
-                foreach (string projectPath in oldWeakCache.Keys)
+                foreach (KeyValuePair<string, ProjectRootElement> kvp in oldWeakCache)
                 {
-                    ProjectRootElement rootElement;
-
-                    if (oldWeakCache.TryGetValue(projectPath, out rootElement))
+                    if (kvp.Value.IsExplicitlyLoaded)
                     {
-                        if (rootElement.IsExplicitlyLoaded)
-                        {
-                            _weakCache[projectPath] = rootElement;
-                        }
+                        _weakCache[kvp.Key] = kvp.Value;
+                    }
 
-                        if (rootElement.IsExplicitlyLoaded && oldStrongCache.Contains(rootElement))
+                    if (oldStrongCache.Contains(kvp.Value))
+                    {
+                        if (kvp.Value.IsExplicitlyLoaded)
                         {
-                            _strongCache.AddFirst(rootElement);
+                            _strongCache.AddFirst(kvp.Value);
                         }
                         else
                         {
-                            RaiseProjectRootElementRemovedFromStrongCache(rootElement);
+                            RaiseProjectRootElementRemovedFromStrongCache(kvp.Value);
                         }
                     }
                 }
