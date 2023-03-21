@@ -47,7 +47,7 @@
         <target state="new">CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</target>
         <note>{StrBegin="CONTAINER3002: "}</note>
       </trans-unit>
-      <trans-unit id="DockerInfoFailedEx">
+      <trans-unit id="DockerInfoFailed_Ex">
         <source>CONTAINER3002: Failed to get docker info: {0}</source>
         <target state="new">CONTAINER3002: Failed to get docker info: {0}</target>
         <note>{StrBegin="CONTAINER3002: "}</note>

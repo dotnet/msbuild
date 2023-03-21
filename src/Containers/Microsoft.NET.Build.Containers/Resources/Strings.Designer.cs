@@ -153,9 +153,9 @@ namespace Microsoft.NET.Build.Containers.Resources {
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER3002: Failed to get docker info: {0}.
         /// </summary>
-        internal static string DockerInfoFailedEx {
+        internal static string DockerInfoFailed_Ex {
             get {
-                return ResourceManager.GetString("DockerInfoFailedEx", resourceCulture);
+                return ResourceManager.GetString("DockerInfoFailed_Ex", resourceCulture);
             }
         }
         

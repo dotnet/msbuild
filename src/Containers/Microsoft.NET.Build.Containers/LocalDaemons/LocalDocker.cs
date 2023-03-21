@@ -126,7 +126,7 @@ internal sealed class LocalDocker : ILocalDaemon
         }
         catch (Exception e) when (e is not DockerLoadException)
         {
-            throw new DockerLoadException(Resource.FormatString(nameof(Strings.DockerInfoFailedEx), e.Message));
+            throw new DockerLoadException(Resource.FormatString(nameof(Strings.DockerInfoFailed_Ex), e.Message));
         }
     }
 
