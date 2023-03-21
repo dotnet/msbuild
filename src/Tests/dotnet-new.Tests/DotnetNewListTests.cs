@@ -542,6 +542,34 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Theory]
+        [InlineData("author", "Author", "Microsoft")]
+        [InlineData("type", "Type", "")]
+        [InlineData("tags", "Tags", "Solution")]
+        [InlineData("language", "Language", "")]
+        public void TemplateWithSpecifiedColumnOutput(string columnName, string columnHeader, string columnValue)
+        {
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "--install", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+                  .WithCustomHive(home)
+                  .WithWorkingDirectory(workingDirectory)
+                  .Execute()
+                  .Should()
+                  .ExitWith(0);
+
+            new DotnetNewCommand(_log, "list", "--columns", columnName)
+                .WithCustomHive(home)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching($"Template Name\\s+Short Name\\s+{columnHeader}")
+                .And.HaveStdOutMatching($"Solution File\\s+sln,solution\\s+{columnValue}");
+        }
+
+        [Theory]
         [InlineData("c --list", "--list c")]
         [InlineData("c --list --language F#", "--list c --language F#")]
         [InlineData("c --list --columns-all", "--list c --columns-all")]
