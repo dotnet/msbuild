@@ -57,7 +57,7 @@ namespace BinaryFormatterTests
 }";
 
         [Theory]
-        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        [InlineData("netcoreapp3.1")]
         [InlineData("netstandard2.0")]
         [InlineData("net472")]
         public void It_does_not_warn_when_targeting_downlevel_frameworks(string targetFramework)
