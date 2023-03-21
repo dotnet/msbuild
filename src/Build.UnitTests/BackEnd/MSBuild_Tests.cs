@@ -846,7 +846,7 @@ namespace Microsoft.Build.UnitTests
                 logger.AssertLogContains("iin1=[a/b.foo;c\\d.foo;g\\h.foo;g\\h.foo]");
                 logger.AssertLogContains("iin1-target-paths=[;b.foo;b.foo;d.foo]");
 
-                logger.AssertLogContains("Item 'iin1' definition within target is referencing self via metadata 'Extension'. This can lead to unintended expansion and cross-applying of pre-existing items");
+                logger.AssertLogContains("MSB4120: Item 'iin1' definition within target is referencing self via metadata 'Extension' (qualified or unqualified). This can lead to unintended expansion and cross-applying of pre-existing items");
                 Assert.Equal(6, logger.WarningCount);
                 Assert.Equal(0, logger.ErrorCount);
             }

@@ -155,9 +155,9 @@
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
-        <source>&lt;TODO: Warn code&gt; Item '{0}' definition within target is referencing self via metadata '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: &lt;TODO: add MS learn link once documented&gt;</source>
-        <target state="new">&lt;TODO: Warn code&gt; Item '{0}' definition within target is referencing self via metadata '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: &lt;TODO: add MS learn link once documented&gt;</target>
-        <note />
+        <source>MSB4120: Item '{0}' definition within target is referencing self via metadata '{1}' (qualified or unqualified). This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-batching#item-batching-on-self-referencing-metadata</source>
+        <target state="new">MSB4120: Item '{0}' definition within target is referencing self via metadata '{1}' (qualified or unqualified). This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-batching#item-batching-on-self-referencing-metadata</target>
+        <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>

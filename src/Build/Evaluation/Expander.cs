@@ -91,7 +91,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Issues warning if item references unqualified or qualified metadata odf self - as this can lead to unintended expansion and
         ///  cross-combination of other items.
-        /// TODO: add ms learn link (once the appropriate text is added there)
+        /// More info: https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-batching#item-batching-on-self-referencing-metadata
         /// </summary>
         WarnOnItemMetadataSelfReference = 0x80,
 
@@ -870,11 +870,6 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private static class MetadataExpander
         {
-            //internal static bool HasUnqualifiedOrSelfQualifiedMetadataRef(string itemName, string expression)
-            //{
-
-            //}
-
             /// <summary>
             /// Expands all embedded item metadata in the given string, using the bucketed items.
             /// Metadata may be qualified, like %(Compile.WarningLevel), or unqualified, like %(Compile).
@@ -883,6 +878,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="metadata">The metadata to be expanded.</param>
             /// <param name="options">Used to specify what to expand.</param>
             /// <param name="elementLocation">The location information for error reporting purposes.</param>
+            /// <param name="loggingContext">The logging context for this operation.</param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
             internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
             {
