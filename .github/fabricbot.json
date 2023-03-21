@@ -527,6 +527,18 @@
                   "parameters": {
                     "branchName": "vs17.10"
                   }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs16.11"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs15.9"
+                  }
                 }
               ]
             }
