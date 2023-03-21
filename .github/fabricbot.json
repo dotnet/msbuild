@@ -455,7 +455,6 @@
           "operator": "and",
           "operands": [
             {
-              }
               "operator": "or",
               "operands": [
                 {
