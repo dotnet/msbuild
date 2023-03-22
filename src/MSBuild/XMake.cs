@@ -963,6 +963,8 @@ namespace Microsoft.Build.CommandLine
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
 
+                NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode);
+
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
 #else
@@ -1088,7 +1090,12 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// List of messages to be sent to the logger when it is attached
         /// </summary>
-        private static List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
+        private static readonly List<BuildManager.DeferredBuildMessage> s_globalMessagesToLogInBuildLoggers = new();
+
+        /// <summary>
+        /// The original console output mode if we changed it as part of initialization.
+        /// </summary>
+        private static uint? s_originalConsoleMode = null;
 
         /// <summary>
         /// Initializes the build engine, and starts the project building.
@@ -1321,7 +1328,7 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    // List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+                    List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
@@ -1502,7 +1509,7 @@ namespace Microsoft.Build.CommandLine
 
         private static List<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
-            List<BuildManager.DeferredBuildMessage> messages = new()
+            List<BuildManager.DeferredBuildMessage> messages = new(s_globalMessagesToLogInBuildLoggers)
             {
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -3256,8 +3263,7 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
-            if (
-                (liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true" || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
+            if ((liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
                 && DoesEnvironmentSupportLiveLogger())
             {
                 ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
@@ -3270,9 +3276,6 @@ namespace Microsoft.Build.CommandLine
             ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
 
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
-
-            // TOOD: Review
-            // ProcessLiveLogger(noConsoleLogger, loggers);
 
             verbosity = outVerbosity;
 
@@ -3441,19 +3444,19 @@ namespace Microsoft.Build.CommandLine
 
         private static bool DoesEnvironmentSupportLiveLogger()
         {
-            // If output is redirected
-            if (Console.IsOutputRedirected)
+            (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+            if (!outputIsScreen)
             {
-                messagesToLogInBuildLoggers.Add(
+                s_globalMessagesToLogInBuildLoggers.Add(
                     new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
                 return false;
             }
-            // If terminal is dumb
-            if (
-                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WT_SESSION")))
-                || Environment.GetEnvironmentVariable("TERM") == "dumb")
+
+            // LiveLogger is not used if the terminal does not support ANSI/VT100 escape sequences.
+            if (!acceptAnsiColorCodes)
             {
-                messagesToLogInBuildLoggers.Add(
+                s_globalMessagesToLogInBuildLoggers.Add(
                     new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low));
                 return false;
             }

@@ -1480,6 +1480,69 @@ internal static class NativeMethods
         }
     }
 
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes()
+    {
+        bool acceptAnsiColorCodes = false;
+        bool outputIsScreen = false;
+        uint? originalConsoleMode = null;
+
+        if (!Console.IsOutputRedirected)
+        {
+            if (IsWindows)
+            {
+                try
+                {
+                    IntPtr stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+                    if (GetConsoleMode(stdOut, out uint consoleMode))
+                    {
+                        bool success;
+                        if ((consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+                        {
+                            // Console is already in required state.
+                            success = true;
+                        }
+                        else
+                        {
+                            originalConsoleMode = consoleMode;
+                            consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                            success = SetConsoleMode(stdOut, consoleMode);
+                        }
+
+                        if (success)
+                        {
+                            acceptAnsiColorCodes = true;
+                        }
+
+                        uint fileType = GetFileType(stdOut);
+                        // The std out is a char type (LPT or Console).
+                        outputIsScreen = fileType == FILE_TYPE_CHAR;
+                        acceptAnsiColorCodes &= outputIsScreen;
+                    }
+                }
+                catch
+                {
+                    // In the unlikely case that the above fails we just ignore and continue.
+                }
+            }
+            else
+            {
+                // On posix OSes we expect console always supports VT100 coloring unless it is explicitly marked as "dumb".
+                acceptAnsiColorCodes = Environment.GetEnvironmentVariable("TERM") != "dumb";
+            }
+        }
+        return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
+    }
+
+    internal static void RestoreConsoleMode(uint? originalConsoleMode)
+    {
+        if (IsWindows && originalConsoleMode is not null)
+        {
+            IntPtr stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+            _ = SetConsoleMode(stdOut, originalConsoleMode.Value);
+        }
+    }
+
+
     #endregion
 
     #region PInvoke
