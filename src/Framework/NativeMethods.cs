@@ -1480,6 +1480,7 @@ internal static class NativeMethods
         }
     }
 
+#if !CLR2COMPATIBILITY
     internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes()
     {
         bool acceptAnsiColorCodes = false;
@@ -1541,7 +1542,7 @@ internal static class NativeMethods
             _ = SetConsoleMode(stdOut, originalConsoleMode.Value);
         }
     }
-
+#endif // !CLR2COMPATIBILITY
 
     #endregion
 

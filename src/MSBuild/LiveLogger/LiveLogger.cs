@@ -9,8 +9,9 @@ using Microsoft.Build.Framework;
 
 #nullable disable
 
-namespace tortillachip;
-public class Logger : INodeLogger
+namespace Microsoft.Build.Logging.LiveLogger;
+
+internal sealed class LiveLogger : INodeLogger
 {
     private readonly object _lock = new();
 
@@ -30,8 +31,28 @@ public class Logger : INodeLogger
 
     private ProjectContext _restoreContext;
 
-    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set => value = LoggerVerbosity.Minimal; }
-    public string Parameters { get => ""; set => value = ""; }
+    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
+    public string Parameters { get => ""; set { } }
+
+    /// <summary>
+    /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
+    /// </summary>
+    /// <remarks>
+    /// If LiveLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+    /// </remarks>
+    public static readonly string[] ConfigurableForwardingLoggerParameters =
+    {
+            "BUILDSTARTEDEVENT",
+            "BUILDFINISHEDEVENT",
+            "PROJECTSTARTEDEVENT",
+            "PROJECTFINISHEDEVENT",
+            "TARGETSTARTEDEVENT",
+            "TARGETFINISHEDEVENT",
+            "TASKSTARTEDEVENT",
+            "HIGHMESSAGEEVENT",
+            "WARNINGEVENT",
+            "ERROREVENT"
+    };
 
     public void Initialize(IEventSource eventSource, int nodeCount)
     {

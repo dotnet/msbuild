@@ -34,14 +34,11 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
+using LiveLogger = Microsoft.Build.Logging.LiveLogger.LiveLogger;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
-#if LIVELOGGER
-using Microsoft.Build.Logging.LiveLogger;
-#endif
-using System.Runtime.InteropServices;
 
 #nullable disable
 
@@ -1328,7 +1325,7 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+                    List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
@@ -3469,7 +3466,6 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             List<ILogger> loggers)
         {
-#if LIVELOGGER
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
@@ -3488,7 +3484,6 @@ namespace Microsoft.Build.CommandLine
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }
-#endif
         }
 
         /// <summary>

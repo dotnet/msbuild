@@ -3,7 +3,7 @@
 
 using System.Diagnostics;
 
-namespace tortillachip;
+namespace Microsoft.Build.Logging.LiveLogger;
 
 internal class Project
 {
