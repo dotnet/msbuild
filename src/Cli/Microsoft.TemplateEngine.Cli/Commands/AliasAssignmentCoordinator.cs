@@ -119,7 +119,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     continue;
                 }
 
-                // if paramater name is taken
+                // if parameter name is taken
                 optionName = "--param:" + longName;
                 if (!isAliasTaken(optionName))
                 {
