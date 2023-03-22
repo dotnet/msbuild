@@ -367,7 +367,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "NoAppHost",
-                TargetFrameworks = "netcoreapp3.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 //  Use "any" as RID so that it will fail to find AppHost
                 RuntimeIdentifier = "any",
                 IsExe = true,

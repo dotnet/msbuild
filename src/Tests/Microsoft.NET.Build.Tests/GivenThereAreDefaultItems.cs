@@ -595,7 +595,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "OverrideImplicitFrameworkReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -765,7 +765,7 @@ public class Class1
             var testProject = new TestProject()
             {
                 Name = "DontIncludeSourceFilesInNone",
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -818,7 +818,7 @@ public class Class1
             var testProject = new TestProject()
             {
                 Name = "DontIncludeSourceFilesInNone",
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 

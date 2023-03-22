@@ -617,7 +617,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "UserSecretTest",
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             testProject.AdditionalProperties["UserSecretsId"] = "SecretsIdValue";
@@ -761,7 +761,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.1", ".NET Core 3.1")]
         [InlineData("netcoreapp2.1", ".NET Core 2.1")]
         [InlineData("netstandard2.1", ".NET Standard 2.1")]
-        [InlineData("net5.0", ".NET 5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, $".NET {ToolsetInfo.CurrentTargetFrameworkVersion}")]
         public void CheckTargetFrameworkDisplayName(string targetFrameworkVersion, string expectedFrameworkDisplayName)
         {
             TestProject libraryProject = new TestProject()
