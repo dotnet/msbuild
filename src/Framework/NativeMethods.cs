@@ -1496,22 +1496,21 @@ internal static class NativeMethods
                     IntPtr stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
                     if (GetConsoleMode(stdOut, out uint consoleMode))
                     {
-                        bool success;
                         if ((consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING)
                         {
                             // Console is already in required state.
-                            success = true;
+                            acceptAnsiColorCodes = true;
                         }
                         else
                         {
                             originalConsoleMode = consoleMode;
                             consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-                            success = SetConsoleMode(stdOut, consoleMode);
-                        }
-
-                        if (success)
-                        {
-                            acceptAnsiColorCodes = true;
+                            if (SetConsoleMode(stdOut, consoleMode) && GetConsoleMode(stdOut, out consoleMode))
+                            {
+                                // We only know if vt100 is supported if the previous call actually set the new flag, older
+                                // systems ignore the setting.
+                                acceptAnsiColorCodes = (consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                            }
                         }
 
                         uint fileType = GetFileType(stdOut);
