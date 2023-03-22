@@ -99,8 +99,10 @@ Only the first presented option is definitely not to be used. All the other opti
 
 * There should be no (or very minimal) performance impact to cases where redacting is not opted-in and/or to cases where there is lower/minimal level of logging. In another words - we should not spend cycles detecting and redacting secrets on log events that are not going to be loged (todo: second case might be more problematic - as loggers can decide their level of logging).
 * Order of processing and imports is important here - if we indicate secret metadata in items, the properties are processed first and hence we can miss preanalyzing (or even redacting) some data. Same applies for order of processing of the properties.
+* Considering above two facts - we need a opt-in commandline switch or environemnt variable (or combination) to indicate that secrets metadata might be used - in which case we'll need to buffer build/log events before we have processed all the metadata indicating what needs to be redacted.
 * There are no global items today - this can be simulated by putting those to directory.props
 * Even seemingly innocent tasks with seemingly innocent logging can spill possibly sensitive data (e.g. think the RAR task, logging all the inputs, while those are just reference related info - those can contain paths that might already by itself be sensitive info). Related: [#8493](https://github.com/dotnet/msbuild/issues/8493) 
+* `MSBuild` task can pose a boundary for some context passing (e.g. properties/items).
 
 # Suggested Implementation
 
@@ -133,6 +135,7 @@ Should we redact all occurences of value of `MySecret` from the task result? We 
 # Open questions
  * What to use as a replacement of the data to be redacted? (Randomized hash, fixed token, etc.) 
  * Do we want to allow to supply custom replacement value for injectable redaction functionality? There would need to be very strong compeling reason, as this is easily suspectible to [log forging attack](https://owasp.org/www-community/attacks/Log_Injection)
+ * Balancing performance and accuracy - can we afford to not support arbitrary output of tasks? Otherwise we'd need to process all log events (similar experiments indicate 4 times slowdown of the build of mid-size project (Orchard)). On the other with explicit 'secret metadata' feature users might expect 100% correctness. Should we make this configurable as well (input data only vs all log entries)? Plus this might be suspectible to false positives (see above).
 
 
 # Links
