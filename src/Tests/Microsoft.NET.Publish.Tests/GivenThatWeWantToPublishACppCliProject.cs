@@ -30,7 +30,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
 
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "CSConsoleApp"))
-                .Execute(new string[] { "-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true })
+                .Execute(new string[] { "-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true" })
                 .Should()
                 .Pass();
 
