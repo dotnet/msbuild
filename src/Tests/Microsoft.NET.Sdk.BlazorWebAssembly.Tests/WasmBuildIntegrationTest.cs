@@ -13,6 +13,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
+using static NuGet.Client.ManagedCodeConventions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
@@ -625,14 +626,14 @@ public class TestReference
         [InlineData(false)]
         [InlineData(null)]
         public void Build_WithStartupMemoryCache(bool? value)
-            => BuildWasmMinimalAndValidateBootConfig("BlazorWebAssemblyStartupMemoryCache", value, b => b.startupMemoryCache.Should().Be(value));
+            => BuildWasmMinimalAndValidateBootConfig(new[] { ("BlazorWebAssemblyStartupMemoryCache", value?.ToString()) }, b => b.startupMemoryCache.Should().Be(value));
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
         [InlineData(null)]
         public void Build_WithJiterpreter(bool? value)
-            => BuildWasmMinimalAndValidateBootConfig("BlazorWebAssemblyJiterpreter", value, b =>
+            => BuildWasmMinimalAndValidateBootConfig(new[] { ("BlazorWebAssemblyJiterpreter", value?.ToString())}, b =>
             {
                 if (value != null)
                 {
@@ -645,20 +646,35 @@ public class TestReference
                 }
             });
 
-        private void BuildWasmMinimalAndValidateBootConfig(string propertyName, bool? propertyValue, Action<BootJsonData> validateBootConfig)
+        [Fact]
+        public void Build_WithJiterpreter_Advanced()
+            => BuildWasmMinimalAndValidateBootConfig(new[] { ("BlazorWebAssemblyJiterpreter", "true"), ("BlazorWebAssemblyRuntimeOptions", "--no-jiterpreter-interp-entry-enabled") }, b =>
+            {
+                b.runtimeOptions.Should().NotBeNull();
+                b.runtimeOptions.Length.Should().Be(3);
+                b.runtimeOptions.Should().Contain("--no-jiterpreter-interp-entry-enabled");
+                b.runtimeOptions.Should().NotContain("--jiterpreter-interp-entry-enabled");
+                b.runtimeOptions.Should().Contain("--jiterpreter-traces-enabled");
+                b.runtimeOptions.Should().Contain("--jiterpreter-jit-call-enabled");
+            });
+
+        private void BuildWasmMinimalAndValidateBootConfig((string name, string value)[] properties, Action<BootJsonData> validateBootConfig)
         {
             var testAppName = "BlazorWasmMinimal";
-            var testInstance = CreateAspNetSdkTestAsset(testAppName, identifier: propertyName + propertyValue?.ToString() ?? "null");
+            var testInstance = CreateAspNetSdkTestAsset(testAppName, identifier: String.Join("-", properties.Select(p => p.name + p.value ?? "null")));
 
-            if (propertyValue != null) 
+            foreach (var property in properties)
             {
-                testInstance.WithProjectChanges((project) =>
+                if (property.value != null)
                 {
-                    var ns = project.Root.Name.Namespace;
-                    var itemGroup = new XElement(ns + "PropertyGroup");
-                    itemGroup.Add(new XElement(propertyName, propertyValue));
-                    project.Root.Add(itemGroup);
-                });
+                    testInstance.WithProjectChanges((project) =>
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var itemGroup = new XElement(ns + "PropertyGroup");
+                        itemGroup.Add(new XElement(property.name, property.value));
+                        project.Root.Add(itemGroup);
+                    });
+                }
             }
 
             var buildCommand = new BuildCommand(testInstance);
