@@ -31,6 +31,8 @@ internal sealed class LiveLogger : INodeLogger
 
     private ProjectContext _restoreContext;
 
+    private Thread _refresher;
+
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
     public string Parameters { get => ""; set { } }
 
@@ -77,8 +79,8 @@ internal sealed class LiveLogger : INodeLogger
         eventSource.WarningRaised += new BuildWarningEventHandler(WarningRaised);
         eventSource.ErrorRaised += new BuildErrorEventHandler(ErrorRaised);
 
-        Thread refresher = new(ThreadProc);
-        refresher.Start();
+        _refresher = new(ThreadProc);
+        _refresher.Start();
     }
 
     private void ThreadProc()
@@ -261,6 +263,7 @@ internal sealed class LiveLogger : INodeLogger
     public void Shutdown()
     {
         _cts.Cancel();
+        _refresher?.Join();
     }
 }
 
