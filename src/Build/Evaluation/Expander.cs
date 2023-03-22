@@ -3894,7 +3894,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (TryGetArgs(args, out double arg0, out double arg1))
                             {
-                                returnVal = arg0 + arg1;
+                                returnVal = IntrinsicFunctions.Add(arg0, arg1);
                                 return true;
                             }
                         }
@@ -3902,7 +3902,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (TryGetArgs(args, out double arg0, out double arg1))
                             {
-                                returnVal = arg0 - arg1;
+                                returnVal = IntrinsicFunctions.Subtract(arg0, arg1);
                                 return true;
                             }
                         }
@@ -3910,7 +3910,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (TryGetArgs(args, out double arg0, out double arg1))
                             {
-                                returnVal = arg0 * arg1;
+                                returnVal = IntrinsicFunctions.Multiply(arg0, arg1);
                                 return true;
                             }
                         }
@@ -3918,7 +3918,15 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (TryGetArgs(args, out double arg0, out double arg1))
                             {
-                                returnVal = arg0 / arg1;
+                                returnVal = IntrinsicFunctions.Divide(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Modulo), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            {
+                                returnVal = IntrinsicFunctions.Modulo(arg0, arg1);
                                 return true;
                             }
                         }
