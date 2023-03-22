@@ -3,8 +3,10 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
@@ -14,14 +16,16 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         public int UpdateAdvertisingManifestsCallCount = 0;
         public int CalculateManifestUpdatesCallCount = 0;
-        public int DownloadManifestPackagesCallCount = 0;
-        public int ExtractManifestPackagesToTempDirCallCount = 0;
-        private IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> _manifestUpdates;
+        public int GetManifestPackageDownloadsCallCount = 0;
+        private IEnumerable<(ManifestVersionUpdate manifestUpdate,
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> _manifestUpdates;
         private string _tempDirManifestPath;
 
-        public MockWorkloadManifestUpdater(IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null, string tempDirManifestPath = null)
+        public MockWorkloadManifestUpdater(IEnumerable<(ManifestVersionUpdate manifestUpdate,
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null, string tempDirManifestPath = null)
         {
-            _manifestUpdates = manifestUpdates ?? new List<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)>();
+            _manifestUpdates = manifestUpdates ?? new List<(ManifestVersionUpdate manifestUpdate,
+                Dictionary<WorkloadId, WorkloadDefinition> Workloads)>();
             _tempDirManifestPath = tempDirManifestPath;
         }
 
@@ -32,39 +36,28 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         public IEnumerable<(
-            ManifestId manifestId,
-            ManifestVersion existingVersion,
-            ManifestVersion newVersion,
+            ManifestVersionUpdate manifestUpdate,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
         {
             CalculateManifestUpdatesCallCount++;
             return _manifestUpdates;
         }
 
-        public Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath)
+        public Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews, SdkFeatureBand providedSdkFeatureBand, SdkFeatureBand installedSdkFeatureBand)
         {
-            DownloadManifestPackagesCallCount++;
-            return Task.FromResult(new List<string>() { "fake pack path" } as IEnumerable<string>);
-        }
-
-        public Task ExtractManifestPackagesToTempDirAsync(IEnumerable<string> manifestPackages, DirectoryPath tempDir)
-        {
-            ExtractManifestPackagesToTempDirCallCount++;
-            if (!string.IsNullOrEmpty(_tempDirManifestPath))
+            GetManifestPackageDownloadsCallCount++;
+            return Task.FromResult<IEnumerable<WorkloadDownload>>(new List<WorkloadDownload>()
             {
-                Directory.CreateDirectory(Path.Combine(tempDir.Value, "SampleManifest"));
-                File.Copy(_tempDirManifestPath, Path.Combine(tempDir.Value, "SampleManifest", "WorkloadManifest.json"));
-            }
-            return Task.CompletedTask;
+                new WorkloadDownload("mock-manifest", "mock-manifest-package", "1.0.5")
+            });
         }
 
-        public IEnumerable<string> GetManifestPackageUrls(bool includePreviews)
+        public IEnumerable<ManifestVersionUpdate> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
         {
-            return new string[] { "mock-manifest-url" };
+            return _manifestUpdates.Select(t => t.manifestUpdate);
         }
 
         public Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync() => throw new System.NotImplementedException();
-        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestRollbacks(string rollbackDefinitionFilePath) => throw new System.NotImplementedException();
         public IEnumerable<WorkloadId> GetUpdatableWorkloadsToAdvertise(IEnumerable<WorkloadId> installedWorkloads) => throw new System.NotImplementedException();
         public void DeleteUpdatableWorkloadsFile() { }
     }

@@ -91,8 +91,8 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "netstandard2.0")]
-        [InlineData("netcoreapp2.0", "netcoreapp2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFramework)]
         public void ItRunsAppsDirectlyReferencingAssembliesWithSatellites(
             string referencerTarget,
             string dependencyTarget)
@@ -297,8 +297,8 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "netstandard2.0")]
-        [InlineData("netcoreapp2.0", "netcoreapp2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFramework)]
         public void ItRunsAppsDirectlyReferencingAssembliesWhichReferenceAssembliesWithSatellites(
             string referencerTarget,
             string dllDependencyTarget)
@@ -521,8 +521,8 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "netstandard2.0", "netstandard2.0")]
-        [InlineData("netcoreapp2.0", "netstandard2.0", "netcoreapp2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0", "netstandard2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0", ToolsetInfo.CurrentTargetFramework)]
         public void ItRunsAppsReferencingAProjectDirectlyReferencingAssembliesWithSatellites(
             string referencerTarget,
             string dependencyTarget,
@@ -763,8 +763,8 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "netstandard2.0", "netstandard2.0")]
-        [InlineData("netcoreapp2.0", "netstandard2.0", "netcoreapp2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0", "netstandard2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0", ToolsetInfo.CurrentTargetFramework)]
         public void ItRunsAppsReferencingAProjectDirectlyReferencingAssembliesWhichReferenceAssembliesWithSatellites(
             string referencerTarget,
             string dependencyTarget,

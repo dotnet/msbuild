@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NET.Sdk.FrameworkReferenceResolution.targets
 
@@ -30,7 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <KnownFrameworkReference Remove="Microsoft.Windows.SDK.NET.Ref" />
     </ItemGroup>
-    
+
     <!-- Generate KnownFrameworkReference items for the Windows SDK pack -->
     <CreateWindowsSdkKnownFrameworkReferences
       UseWindowsSDKPreview="$(UseWindowsSDKPreview)"
@@ -42,7 +42,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       WindowsSdkSupportedTargetPlatformVersions="@(WindowsSdkSupportedTargetPlatformVersion)">
 
       <Output TaskParameter="KnownFrameworkReferences" ItemName="KnownFrameworkReference" />
-      
+
     </CreateWindowsSdkKnownFrameworkReferences>
   </Target>
 
@@ -99,6 +99,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 SelfContained="$(SelfContained)"
                                 ReadyToRunEnabled="$(PublishReadyToRun)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                TrimmingEnabled="$(_IsTrimmingEnabled)"
+                                AotEnabled="$(PublishAot)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
@@ -106,7 +108,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetLatestRuntimePatchIsDefault="$(_TargetLatestRuntimePatchIsDefault)"
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)"
                                 EnableRuntimePackDownload="$(EnableRuntimePackDownload)"
+                                EnableWindowsTargeting="$(EnableWindowsTargeting)"
+                                DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
+                                KnownILCompilerPacks="@(KnownILCompilerPack)"
+                                KnownILLinkPacks="@(KnownILLinkPack)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 NetCoreRoot="$(NetCoreRoot)"
                                 NETCoreSdkVersion="$(NETCoreSdkVersion)">
@@ -116,7 +122,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
       <Output TaskParameter="Crossgen2Packs" ItemName="Crossgen2Pack" />
+      <Output TaskParameter="HostILCompilerPacks" ItemName="HostILCompilerPack" />
+      <Output TaskParameter="TargetILCompilerPacks" ItemName="TargetILCompilerPack" />
       <Output TaskParameter="UnavailableRuntimePacks" ItemName="UnavailableRuntimePack" />
+      <Output TaskParameter="ImplicitPackageReferences" ItemName="_ImplicitPackageReference" />
 
     </ProcessFrameworkReferences>
 
@@ -140,6 +149,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                      KnownAppHostPacks="@(KnownAppHostPack)"
                      NuGetRestoreSupported="$(_NuGetRestoreSupported)"
+                     EnableAppHostPackDownload="$(EnableAppHostPackDownload)"
                      NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
@@ -168,6 +178,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                         IsImplicitlyDefined="true"
                         PrivateAssets="all"
                         ExcludeAssets="all" />
+    </ItemGroup>
+
+    <!-- Add implicit package references that don't already exist in PackageReference. -->
+    <ItemGroup>
+      <_ImplicitPackageReference Remove="@(PackageReference)" />
+      <PackageReference Include="@(_ImplicitPackageReference)"
+                        IsImplicitlyDefined="true"
+                        PrivateAssets="all" />
     </ItemGroup>
   </Target>
 
@@ -244,6 +262,20 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="Output" ItemName="ResolvedCrossgen2Pack" />
 
+    </GetPackageDirectory>
+
+    <GetPackageDirectory
+      Items="@(HostILCompilerPack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedILCompilerPack" />
+    </GetPackageDirectory>
+
+    <GetPackageDirectory
+      Items="@(TargetILCompilerPack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedTargetILCompilerPack" />
     </GetPackageDirectory>
 
     <GetPackageDirectory
@@ -359,6 +391,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 RuntimeFrameworks="@(RuntimeFramework)"
                                 GenerateErrorForMissingTargetingPacks="$(GenerateErrorForMissingTargetingPacks)"
                                 NuGetRestoreSupported="$(_NuGetRestoreSupported)"
+                                DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)"
                                 NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
       <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
       <Output TaskParameter="AnalyzersToAdd" ItemName="Analyzer" />
@@ -382,6 +415,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <RuntimeFramework Remove="@(RuntimeFramework)" />
       <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveOffByDefaultAnalyzers" AfterTargets="ResolveTargetingPackAssets"
+          Condition="'@(FrameworkReference)' != ''">
+    <ItemGroup>
+      <OffByDefaultAnalyzer Include="Microsoft.AspNetCore.Http.Generators"
+                            IsEnabled="$(EnableRequestDelegateGenerator)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <AnalyzerToRemove Include="@(OffByDefaultAnalyzer)"
+                        Path="%(Analyzer.Identity)"
+                        Condition="'%(Analyzer.Filename)' == '@(OffByDefaultAnalyzer)'" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Analyzer Remove="%(AnalyzerToRemove.Path)" Condition="'%(AnalyzerToRemove.IsEnabled)' != 'true'"/>
     </ItemGroup>
   </Target>
 
@@ -428,7 +479,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                               ResolvedRuntimePacks="@(ResolvedRuntimePack)"
                               UnavailableRuntimePacks="@(UnavailableRuntimePack)"
                               SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
-                              DesignTimeBuild="$(DesignTimeBuild)">
+                              DesignTimeBuild="$(DesignTimeBuild)"
+                              DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)">
       <Output TaskParameter="RuntimePackAssets" ItemName="RuntimePackAsset" />
     </ResolveRuntimePackAssets>
 

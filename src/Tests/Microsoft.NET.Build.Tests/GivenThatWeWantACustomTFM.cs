@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_imports_custom_parsing_targets()
         {
-            var targetFramework = "netcoreapp3.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = "osx-x64";
             TestProject testProject = new TestProject()
             {
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 { "TargetFramework", targetFramework },
                 { "TargetFrameworkIdentifier", ".NETCoreApp" },
-                { "TargetFrameworkVersion", "v3.0" },
+                { "TargetFrameworkVersion", $"v{ToolsetInfo.CurrentTargetFrameworkVersion}" },
                 { "RuntimeIdentifier", runtimeIdentifier }
             };
 

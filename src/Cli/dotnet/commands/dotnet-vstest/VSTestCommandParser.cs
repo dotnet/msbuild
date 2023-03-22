@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.TestFrameworkOption);
             command.AddOption(CommonOptions.TestLoggerOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>(VSTestCommand.Run);
+            command.SetHandler(VSTestCommand.Run);
 
             return command;
         }

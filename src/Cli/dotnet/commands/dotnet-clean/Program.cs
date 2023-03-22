@@ -6,6 +6,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
 using System;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Tools.Clean
@@ -34,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Clean
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            msbuildArgs.AddRange(result.GetValueForArgument(CleanCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.GetValue(CleanCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             msbuildArgs.Add("-target:Clean");
 

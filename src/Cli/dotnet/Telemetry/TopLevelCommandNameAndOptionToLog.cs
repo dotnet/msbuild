@@ -28,19 +28,43 @@ namespace Microsoft.DotNet.Cli.Telemetry
             foreach (var option in _optionsToLog)
             {
                 if (_topLevelCommandName.Contains(topLevelCommandName)
-                    && parseResult.HasOption(option))
+                    && parseResult.SafelyGetValueForOption(option) is string optionValue)
                 {
                     result.Add(new ApplicationInsightsEntryFormat(
                         "sublevelparser/command",
                         new Dictionary<string, string>
                         {
                             { "verb", topLevelCommandName},
-                            { option.Name, parseResult.GetValueForOption<string>(option) }
+                            { option.Name, Stringify(parseResult.GetValue(option)) }
                         },
                         measurements));
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// We're dealing with untyped payloads here, so we need to handle arrays vs non-array values
+        /// </summary>
+        private static string Stringify(object value)
+        {
+            if (value is null)
+            {
+                return null;
+            }
+            if (value is IEnumerable<string> enumerable)
+            {
+                return string.Join(";", enumerable);
+            }
+            if (value is IEnumerable<object> enumerableOfObjects)
+            {
+                return string.Join(";", enumerableOfObjects);
+            }
+            if (value is object[] arr)
+            {
+                return string.Join(";", arr);
+            }
+            return value.ToString();
         }
     }
 }

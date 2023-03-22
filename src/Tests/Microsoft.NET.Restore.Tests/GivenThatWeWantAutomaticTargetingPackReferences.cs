@@ -22,10 +22,9 @@ namespace Microsoft.NET.Restore.Tests
         }
 
         [Theory]
-        [InlineData("3.5")]
         [InlineData("4.7.1")]
         [InlineData("4.7.2")]
-        [InlineData("4.5.1")]
+        [InlineData("4.5.2")]
         [InlineData("4.8")]
         public void It_restores_net_framework_project_successfully(string version)
         {
@@ -71,7 +70,7 @@ namespace Microsoft.NET.Restore.Tests
             var testProject = new TestProject()
             {
                 Name = "ProjectWithoutTargetingPackRef",
-                TargetFrameworks = "net471;net472;netcoreapp3.0",
+                TargetFrameworks = $"net471;net472;{ToolsetInfo.CurrentTargetFramework}",
             };
 
             TestAsset testAsset = null;
@@ -150,7 +149,7 @@ namespace Microsoft.NET.Restore.Tests
                 var itemGroup = project.Root.Elements(ns + "ItemGroup").FirstOrDefault();
                 itemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"Newtonsoft.Json"),
-                    new XAttribute("Version", $"11.0.2")));
+                    new XAttribute("Version", $"13.0.1")));
                 itemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"sqlite"),
                     new XAttribute("Version", $"3.13.0")));

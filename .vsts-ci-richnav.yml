@@ -10,16 +10,9 @@ pr: none
 variables:
   - name: teamName
     value: Roslyn-Project-System
-  - name: _DotNetPublishToBlobFeed
-    value: false
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: _DotNetValidationArtifactsCategory
-    value: .NETCore
-  - name: _PublishToAzure
-    value: false
   - name: PostBuildSign
     value: true
+  - template: /eng/common/templates/variables/pool-providers.yml
 
 stages:
 - stage: build
@@ -32,8 +25,8 @@ stages:
         richCodeNavigationLanguage: 'csharp'
         richCodeNavigationEnvironment: 'production'
         pool:
-            name: NetCore1ESPool-Public
-            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open  
+            name: $(DncEngPublicBuildPool)
+            demands: ImageOverride -equals windows.vs2019.amd64.open   
         timeoutInMinutes: 180
         strategy:
           matrix:
@@ -52,7 +45,12 @@ stages:
           - _SignArgs: ''
           - _InternalRuntimeDownloadArgs: ''
         steps:
-        - script: eng\CIBuild.cmd
+        - powershell: eng\common\build.ps1
+                    -restore
+                    -ci
+                    -build
+                    -pack
+                    -sign
                     -configuration $(_BuildConfig)
                     $(_PublishArgs)
                     $(_SignArgs)

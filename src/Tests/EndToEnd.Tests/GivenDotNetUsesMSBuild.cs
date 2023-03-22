@@ -26,8 +26,9 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
             string projectDirectory = _testAssetsManager.CreateTestDirectory().Path;
 
-            string [] newArgs = new[] { "console", "--debug:ephemeral-hive", "--no-restore" };
-            new DotnetCommand(Log, "new")
+            string [] newArgs = new[] { "console", "--no-restore" };
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(projectDirectory)
                 .Execute(newArgs)
                 .Should().Pass();

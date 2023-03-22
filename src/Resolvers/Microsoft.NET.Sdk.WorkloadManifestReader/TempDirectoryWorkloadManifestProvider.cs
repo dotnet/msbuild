@@ -13,17 +13,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string _manifestsPath;
         private readonly string _sdkVersionBand;
 
-        /// <param name="manifestsPath">
-        ///     Result of directly extract manifest NuGet Packages. Should contain folders like
-        ///     microsoft.net.workload.emscripten.manifest-6.0.100.6.0.0-preview.7.21377.2
-        /// </param>
-        public TempDirectoryWorkloadManifestProvider(string manifestsPath, string sdkVersion)
+        public TempDirectoryWorkloadManifestProvider(string manifestsPath, string sdkFeatureBand)
         {
             _manifestsPath = manifestsPath;
-            _sdkVersionBand = sdkVersion;
+            _sdkVersionBand = sdkFeatureBand;
         }
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)>
+        public IEnumerable<ReadableWorkloadManifest>
             GetManifests()
         {
             foreach (var workloadManifestDirectory in GetManifestDirectories())
@@ -37,7 +33,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     manifestId = manifestId.Substring(0, index);
                 }
 
-                yield return (
+                yield return new(
                     manifestId,
                     workloadManifestPath,
                     () => File.OpenRead(workloadManifestPath),

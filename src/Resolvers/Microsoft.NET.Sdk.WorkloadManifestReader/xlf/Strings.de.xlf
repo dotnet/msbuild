@@ -57,6 +57,11 @@
         <target state="translated">Dokument ist unvollständig.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Ungültige Version: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">Die Workloadmanifestabhängigkeit „{0}“, die vom Manifest „{1}“ [{2}] benötigt wird, wurde nicht gefunden.</target>

@@ -29,16 +29,16 @@ namespace Microsoft.DotNet.Cli.Clean.Tests
                 .WithSource();
 
             new DotnetBuildCommand(Log, testInstance.Path)
-                .Execute("-r", "win7-x64")
+                .Execute("-r", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputFolder = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "win7-x64"));
+            var outputFolder = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64"));
 
             outputFolder.Should().NotBeEmpty();
 
             new DotnetCommand(Log, "clean", testInstance.Path)
-                .Execute("-r", "win7-x64")
+                .Execute("-r", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64")
                 .Should().Pass();
 
             outputFolder.Should().BeEmpty();

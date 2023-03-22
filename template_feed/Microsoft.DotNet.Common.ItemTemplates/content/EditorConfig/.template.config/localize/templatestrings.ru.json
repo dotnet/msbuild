@@ -1,0 +1,7 @@
+﻿{
+  "author": "Майкрософт",
+  "name": "Файл EditorConfig",
+  "description": "Создание файла .editorconfig для настройки параметров стиля кода.",
+  "symbols/Empty/displayName": "Пусто",
+  "symbols/Empty/description": "Создание пустого .editorconfig вместо значений умолчанию для .NET."
+}

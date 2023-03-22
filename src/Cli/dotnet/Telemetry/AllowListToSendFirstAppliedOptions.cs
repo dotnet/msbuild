@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -25,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             if (_topLevelCommandNameAllowList.Contains(topLevelCommandNameFromParse))
             {
                 var firstOption = parseResult.RootCommandResult.Children
-                    .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?
+                    .FirstOrDefault(c => c.Token() != default && c.Token().Type.Equals(TokenType.Command))?
                     .Children.FirstOrDefault(c => c is System.CommandLine.Parsing.CommandResult)?.Symbol.Name ?? null;
                 if (firstOption != null)
                 {

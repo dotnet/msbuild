@@ -7,6 +7,7 @@ using System.Security.Principal;
 using System.Threading;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Installer.Windows
 {
@@ -54,16 +55,19 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// Queries the Windows Update Agent API to determine if there is a pending reboot.
+        /// Queries the Windows Update Agent, Component Based Servicing (CBS), and pending file rename registry keys to determine if there is a pending reboot.
         /// </summary>
         /// <returns><see langword="true"/> if there is a pending reboot; <see langword="false"> otherwise.</see></returns>
-        /// <remarks>
-        /// See <see href="https://docs.microsoft.com/en-us/windows/win32/api/wuapi/nf-wuapi-isysteminformation-get_rebootrequired">this</see>
-        /// for more information.
-        /// </remarks>
         public static bool RebootRequired()
         {
-            return new SystemInformationClass().RebootRequired;
+            using RegistryKey localMachineKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            using RegistryKey auKey = localMachineKey?.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired");
+            using RegistryKey cbsKey = localMachineKey?.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending");
+            using RegistryKey sessionKey = localMachineKey?.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Session Manager");
+
+            string[] pendingFileRenameOperations = (string[])sessionKey?.GetValue("PendingFileRenameOperations") ?? new string[0];
+
+            return (auKey != null || cbsKey != null || pendingFileRenameOperations.Length > 0);
         }
     }
 }

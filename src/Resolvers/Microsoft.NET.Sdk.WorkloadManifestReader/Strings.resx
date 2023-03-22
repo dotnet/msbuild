@@ -186,4 +186,7 @@
   <data name="CyclicWorkloadRedirect" xml:space="preserve">
     <value>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</value>
   </data>
+  <data name="InvalidManifestVersion" xml:space="preserve">
+    <value>Invalid version: {0}</value>
+  </data>
 </root>

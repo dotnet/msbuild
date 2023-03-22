@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
             command.AddOption(VerbosityOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolUpdateCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ToolUpdateCommand(parseResult).Execute());
 
             return command;
         }

@@ -84,5 +84,58 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StartInfo.EnvironmentVariables.ContainsKey(dotnetRoot).Should().BeTrue($"because {dotnetRoot} should be set");
             result.StartInfo.EnvironmentVariables[dotnetRoot].Should().Be(Path.GetDirectoryName(dotnet));
         }
+
+        [Fact]
+        public void TestsFromAGivenContainerAndArchSwitchShouldFlowToVsTestConsole()
+        {
+            var testAppName = "VSTestCore";
+            var testAsset = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
+                .WithVersionVariables();
+
+            var testRoot = testAsset.Path;
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should().Pass();
+
+            var outputDll = Path.Combine(testRoot, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{testAppName}.dll");
+
+            // Call vstest
+            var result = new DotnetTestCommand(Log)
+                .Execute(outputDll, "--arch", "wrongArchitecture");
+            if (!TestContext.IsLocalized())
+            {
+                result.StdErr.Should().StartWith("Invalid platform type: wrongArchitecture. Valid platform types are ");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
+
+        [Theory]
+        [InlineData("-e:foo=bardll")]
+        [InlineData("-e:foo=barexe")]
+        public void MissingOutputDllAndArgumentsEndWithDllOrExeShouldFailInMSBuild(string arg)
+        {
+            var testAppName = "VSTestCore";
+            var testAsset = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
+                .WithVersionVariables();
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should().Pass();
+
+            var result = new DotnetTestCommand(Log)
+                .Execute(arg);
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("MSBUILD : error MSB1003: Specify a project or solution file. The current working directory does not contain a project or solution file.");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
     }
 }

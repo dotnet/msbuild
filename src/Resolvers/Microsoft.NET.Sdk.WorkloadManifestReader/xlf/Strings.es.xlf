@@ -57,6 +57,11 @@
         <target state="translated">El documento finalizó antes de tiempo</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Versión no válida: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">No se ha encontrado la dependencia del manifiesto de carga de trabajo '{0}' requerida por el manifiesto '{1}' [{2}]</target>

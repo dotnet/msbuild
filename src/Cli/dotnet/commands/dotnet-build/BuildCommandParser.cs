@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Build;
 using LocalizableStrings = Microsoft.DotNet.Tools.Build.LocalizableStrings;
@@ -24,7 +22,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
             ArgumentHelpName = LocalizableStrings.OutputOptionName
-        }.ForwardAsSingle(arg => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(arg)}");
+        }.ForwardAsOutputPath("OutputPath");
 
         public static readonly Option<bool> NoIncrementalOption = new Option<bool>("--no-incremental", LocalizableStrings.NoIncrementalOptionDescription);
 
@@ -77,7 +75,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.OperatingSystemOption);
             command.AddOption(CommonOptions.DisableBuildServersOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>(BuildCommand.Run);
+            command.SetHandler(BuildCommand.Run);
 
             return command;
         }

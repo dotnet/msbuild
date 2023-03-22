@@ -14,6 +14,6 @@
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
 
     <!-- We have some test projects in the test assets that need this property set for them. They don't need to match arcade's version as we are actually testing the dotnet test command, so hard coding this version here. -->
-    <XUnitVersion>2.4.1-pre.build.4059</XUnitVersion>
+    <XUnitVersion>2.4.2</XUnitVersion>
   </PropertyGroup>
 </Project>

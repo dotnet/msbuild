@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli
         {
             ArgumentHelpName = Tools.Add.PackageReference.LocalizableStrings.CmdFramework
                 
-        }.AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
+        }.AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
         public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveOption;
 
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(FrameworkOption);
             command.AddOption(InteractiveOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new AddProjectToProjectReferenceCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new AddProjectToProjectReferenceCommand(parseResult).Execute());
 
             return command;
         }

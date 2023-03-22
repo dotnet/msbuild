@@ -15,6 +15,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GetFrameworkPaths" />
 
   <PropertyGroup>
+    <TargetFrameworkMonikerDisplayName Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 1.0)) and $([MSBuild]::VersionLessThanOrEquals($(TargetFrameworkVersion), 2.1))">.NET Standard $(_TargetFrameworkVersionWithoutV)</TargetFrameworkMonikerDisplayName>
+    <TargetFrameworkMonikerDisplayName Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 1.0)) and $([MSBuild]::VersionLessThanOrEquals($(TargetFrameworkVersion), 3.1))">.NET Core $(_TargetFrameworkVersionWithoutV)</TargetFrameworkMonikerDisplayName>
+    <TargetFrameworkMonikerDisplayName Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">.NET $(_TargetFrameworkVersionWithoutV)</TargetFrameworkMonikerDisplayName>
     <_TargetFrameworkDirectories />
     <FrameworkPathOverride />
     <TargetFrameworkDirectory />

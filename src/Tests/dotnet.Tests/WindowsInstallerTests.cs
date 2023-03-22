@@ -11,6 +11,7 @@ using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Installer.Windows;
 using Microsoft.DotNet.Installer.Windows.Security;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.TestFramework;
 using Xunit;
 
@@ -139,6 +140,8 @@ namespace Microsoft.DotNet.Tests
         [WindowsOnlyTheory]
         [InlineData("tampered.msi", false, "The digital signature of the object did not verify.")]
         [InlineData("dual_signed.dll", true, "")]
+        [InlineData("dotnet_realsigned.exe", true, "")]
+        [InlineData("dotnet_fakesigned.exe", false, "A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider.")]
         public void AuthentiCodeSignaturesCanBeVerified(string file, bool shouldBeSigned, string expectedError)
         {
             bool isSigned = AuthentiCode.IsSigned(Path.Combine(s_testDataPath, file));
@@ -149,6 +152,14 @@ namespace Microsoft.DotNet.Tests
             {
                 Assert.Equal(expectedError, new Win32Exception(Marshal.GetLastWin32Error()).Message);
             }
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("dotnet_realsigned.exe")]
+        [InlineData("dotnet_fakesigned.exe")]
+        public void IsSignedByTrustedOrganizationOnlyVerifiesTheSubjectOrganization(string file)
+        {
+            Assert.True(AuthentiCode.IsSignedByTrustedOrganization(Path.Combine(s_testDataPath, file), AuthentiCode.TrustedOrganizations));
         }
 
         [WindowsOnlyFact]

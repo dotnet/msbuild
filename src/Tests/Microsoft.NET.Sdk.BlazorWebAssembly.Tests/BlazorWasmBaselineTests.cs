@@ -17,37 +17,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
     {
         public BlazorWasmBaselineTests(ITestOutputHelper log, bool generateBaselines) : base(log, generateBaselines)
         {
-            PathTemplatizer = TemplatizeCompressedAssets;
-        }
-
-        private string TemplatizeCompressedAssets(StaticWebAsset asset, string originalValue, StaticWebAsset relatedAsset)
-        {
-            if (!asset.IsAlternativeAsset() && Path.GetExtension(asset.Identity) != ".gz")
-            {
-                return null;
-            }
-
-            if (asset.RelatedAsset == originalValue)
-            {
-                return null;
-            }
-
-            if (originalValue.Replace("[[CustomPackageVersion]]", "__CustomVersion__").Replace("[[hash]]", "__Hash__").Contains("[["))
-            {
-                return null;
-            }
-
-            var result = asset.Identity.Contains("[[") ? asset.Identity : Path.Combine(Path.GetDirectoryName(asset.Identity), "[[" + asset.RelativePath + "]]");
-
-            if (GenerateBaselines)
-            {
-                result = Regex.Replace(result, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
-                return result.Replace(RuntimeVersion, "${RuntimeVersion}").Replace(DefaultPackageVersion, "${PackageVersion}");
-            }
-            else
-            {
-                return result.Replace("${RuntimeVersion}", RuntimeVersion).Replace("${PackageVersion}", DefaultPackageVersion);
-            }
         }
 
         protected override string EmbeddedResourcePrefix => string.Join('.', "Microsoft.NET.Sdk.BlazorWebAssembly.Tests", "StaticWebAssetsBaselines");

@@ -1,0 +1,1 @@
+﻿The template "Console Sample 05" was created successfully.

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Tools.Internal
@@ -12,12 +13,13 @@ namespace Microsoft.Extensions.Tools.Internal
     /// This API supports infrastructure and is not intended to be used
     /// directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class PhysicalConsole : IConsole
+    internal sealed class PhysicalConsole : IConsole
     {
         private readonly List<Action<ConsoleKeyInfo>> _keyPressedListeners = new();
 
         private PhysicalConsole()
         {
+            Console.OutputEncoding = Encoding.UTF8;
             Console.CancelKeyPress += (o, e) =>
             {
                 CancelKeyPress?.Invoke(o, e);

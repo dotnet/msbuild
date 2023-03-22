@@ -20,7 +20,7 @@
             "latest-sdk": "3.1.404",
             "product": ".NET Core",
             "support-phase": "lts",
-            "eol-date": "2022-12-03",
+            "eol-date": null,
             "releases.json": "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/3.1/releases.json"
         },
         {

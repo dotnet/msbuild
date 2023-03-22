@@ -19,6 +19,7 @@ using System.Runtime.InteropServices;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 using System.Text.Json;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
@@ -212,7 +213,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => toolInstallGlobalOrToolPathCommand.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                     ErrorMessage +
                     Environment.NewLine +
@@ -235,7 +236,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => toolInstallGlobalOrToolPathCommand.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(string.Format(
                     CommonLocalizableStrings.ShellShimConflict,
                     ToolCommandName));
@@ -259,7 +260,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => toolInstallGlobalOrToolPathCommand.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                     string.Format(
                         LocalizableStrings.InvalidToolConfiguration,
@@ -306,7 +307,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             Action action = () => toolInstallGlobalOrToolPathCommand.Execute();
 
             action
-                .ShouldThrow<GracefulException>()
+                .Should().Throw<GracefulException>()
                 .WithMessage(string.Format(
                     LocalizableStrings.InvalidNuGetVersionRange,
                     invalidVersion));
@@ -401,7 +402,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 _reporter);
 
             Action a = () => toolInstallGlobalOrToolPathCommand.Execute();
-            a.ShouldThrow<GracefulException>();
+            a.Should().Throw<GracefulException>();
         }
 
         private IToolPackageInstaller GetToolToolPackageInstallerWithPreviewInFeed()
@@ -446,7 +447,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => toolInstallGlobalOrToolPathCommand.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                     LocalizableStrings.ToolInstallationRestoreFailed +
                     Environment.NewLine + string.Format(LocalizableStrings.ToolInstallationFailedWithRestoreGuidance, PackageId));

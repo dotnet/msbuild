@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
             command.AddOption(ToolManifestOption.WithHelpDescription(command, LocalizableStrings.ManifestPathOptionDescription));
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolUninstallCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ToolUninstallCommand(parseResult).Execute());
 
             return command;
         }

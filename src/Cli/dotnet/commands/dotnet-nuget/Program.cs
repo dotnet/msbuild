@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
@@ -28,7 +29,12 @@ namespace Microsoft.DotNet.Tools.NuGet
             {
                 throw new ArgumentNullException(nameof(nugetCommandRunner));
             }
-
+            // replace -? with --help for NuGet CLI
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "-?")
+                    args[i] = "--help";
+            }
             return nugetCommandRunner.Run(args);
         }
 

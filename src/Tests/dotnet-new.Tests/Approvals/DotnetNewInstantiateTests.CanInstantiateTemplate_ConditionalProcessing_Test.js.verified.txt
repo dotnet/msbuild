@@ -1,0 +1,14 @@
+﻿function DefaultTrueIncluded() { }
+
+//#if defaultTrue
+function InsideUnknownDirectiveNoEmit() { }
+//#endif
+
+function DefaultFalseIncluded() { }
+
+// Without noEmit the following line will be emitted
+//-:cnd
+//#if defaultFalse
+function InsideUnknownDirectiveEmit() { }
+//#endif
+//+:cnd

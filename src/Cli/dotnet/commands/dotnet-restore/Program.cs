@@ -7,6 +7,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Tools.Restore
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Restore
 
             msbuildArgs.AddRange(result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(result.GetValueForArgument(RestoreCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.GetValue(RestoreCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             return new RestoreCommand(msbuildArgs, msbuildPath);
         }

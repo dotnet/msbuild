@@ -1,0 +1,54 @@
+﻿{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "ConfigurationKitchenSink",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.ConfigurationKitchenSink",
+  "precedence": "100",
+  "identity": "TestAssets.ConfigurationKitchenSink",
+  "shortName": "TestAssets.ConfigurationKitchenSink",
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "rename": {
+            "RenameBattery/C.txt": "RenameBattery/D.txt"
+          }
+        }
+      ],
+      "rename": {
+        "RenameBattery/A.txt": "RenameBattery/B.txt"
+      }
+    }
+  ],
+  "symbols": {
+    "defaultFalse": {
+      "type": "parameter",
+      "dataType": "boolean",
+      "defaultValue": "false"
+    },
+    "defaultTrue": {
+      "type": "parameter",
+      "dataType": "boolean",
+      "defaultValue": "true"
+    },
+    "replaceThings": {
+      "type": "parameter",
+      "dataType": "string",
+      "replaces": "Things",
+      "defaultValue": "Things"
+    },
+    "replaceThere": {
+      "type": "parameter",
+      "dataType": "string",
+      "replaces": "There",
+      "onlyIf": [
+        {
+          "after": "Hello ",
+          "before": "!"
+        }
+      ],
+      "defaultValue": "Things"
+    }
+  }
+}

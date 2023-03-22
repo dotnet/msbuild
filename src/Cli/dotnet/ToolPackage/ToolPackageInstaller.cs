@@ -11,7 +11,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.ProjectModel;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
@@ -46,17 +45,18 @@ namespace Microsoft.DotNet.ToolPackage
             string rollbackDirectory = null;
 
             return TransactionalAction.Run<IToolPackage>(
-                action: () => {
+                action: () =>
+                {
                     try
                     {
                         var stageDirectory = _store.GetRandomStagingDirectory();
                         Directory.CreateDirectory(stageDirectory.Value);
                         rollbackDirectory = stageDirectory.Value;
 
-                        var tempProject = CreateTempProject(
+                        string tempProject = CreateDirectoryWithTempProject(
                             packageId: packageId,
                             versionRange: versionRange,
-                            targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() :  targetFramework,
+                            targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() : targetFramework,
                             restoreDirectory: stageDirectory,
                             assetJsonOutputDirectory: stageDirectory,
                             rootConfigDirectory: packageLocation.RootConfigDirectory,
@@ -65,13 +65,13 @@ namespace Microsoft.DotNet.ToolPackage
                         try
                         {
                             _projectRestorer.Restore(
-                                tempProject,
+                                new FilePath(tempProject),
                                 packageLocation,
                                 verbosity: verbosity);
                         }
                         finally
                         {
-                            File.Delete(tempProject.Value);
+                            File.Delete(tempProject);
                         }
 
                         var version = _store.GetStagedPackageVersion(stageDirectory, packageId);
@@ -104,7 +104,8 @@ namespace Microsoft.DotNet.ToolPackage
                             ex);
                     }
                 },
-                rollback: () => {
+                rollback: () =>
+                {
                     if (!string.IsNullOrEmpty(rollbackDirectory) && Directory.Exists(rollbackDirectory))
                     {
                         Directory.Delete(rollbackDirectory, true);
@@ -126,16 +127,13 @@ namespace Microsoft.DotNet.ToolPackage
             string targetFramework = null,
             string verbosity = null)
         {
-            var tempDirectoryForAssetJson = new DirectoryPath(Path.GetTempPath())
-                .WithSubDirectories(Path.GetRandomFileName());
+            var tempDirectoryForAssetJson = PathUtilities.CreateTempSubdirectory();
 
-            Directory.CreateDirectory(tempDirectoryForAssetJson.Value);
-
-            var tempProject = CreateTempProject(
+            string tempProject = CreateDirectoryWithTempProject(
                 packageId: packageId,
                 versionRange: versionRange,
                 targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() : targetFramework,
-                assetJsonOutputDirectory: tempDirectoryForAssetJson,
+                assetJsonOutputDirectory: new DirectoryPath(tempDirectoryForAssetJson),
                 restoreDirectory: null,
                 rootConfigDirectory: packageLocation.RootConfigDirectory,
                 additionalFeeds: packageLocation.AdditionalFeeds);
@@ -143,19 +141,19 @@ namespace Microsoft.DotNet.ToolPackage
             try
             {
                 _projectRestorer.Restore(
-                    tempProject,
+                    new FilePath(tempProject),
                     packageLocation,
                     verbosity: verbosity);
             }
             finally
             {
-                File.Delete(tempProject.Value);
+                File.Delete(tempProject);
             }
 
-            return ToolPackageInstance.CreateFromAssetFile(packageId, tempDirectoryForAssetJson);
+            return ToolPackageInstance.CreateFromAssetFile(packageId, new DirectoryPath(tempDirectoryForAssetJson));
         }
 
-        private FilePath CreateTempProject(
+        private string CreateDirectoryWithTempProject(
             PackageId packageId,
             VersionRange versionRange,
             string targetFramework,
@@ -164,16 +162,14 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath? rootConfigDirectory,
             string[] additionalFeeds)
         {
-            var tempProject = _tempProject ?? new DirectoryPath(Path.GetTempPath())
-                .WithSubDirectories(Path.GetRandomFileName())
-                .WithFile("restore.csproj");
-
-            if (Path.GetExtension(tempProject.Value) != "csproj")
+            string tempProject;
+            if (_tempProject != null && _tempProject.HasValue)
             {
-                tempProject = new FilePath(Path.ChangeExtension(tempProject.Value, "csproj"));
+                tempProject = _tempProject.Value.Value;
+                Directory.CreateDirectory(Path.GetDirectoryName(tempProject));
             }
-
-            Directory.CreateDirectory(tempProject.GetDirectoryPath().Value);
+            else
+                tempProject = Path.Combine(PathUtilities.CreateTempSubdirectory(), "restore.csproj");
 
             var tempProjectContent = new XDocument(
                 new XElement("Project",
@@ -203,7 +199,7 @@ namespace Microsoft.DotNet.ToolPackage
                         new XAttribute("Project", "Sdk.targets"),
                         new XAttribute("Sdk", "Microsoft.NET.Sdk"))));
 
-            File.WriteAllText(tempProject.Value, tempProjectContent.ToString());
+            File.WriteAllText(tempProject, tempProjectContent.ToString());
             return tempProject;
         }
 

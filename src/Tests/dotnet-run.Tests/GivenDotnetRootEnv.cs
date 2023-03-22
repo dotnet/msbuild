@@ -21,9 +21,9 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         {
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void ItShouldSetDotnetRootToDirectoryOfMuxer(string targetFramework)
         {
             string expectDotnetRoot = TestContext.Current.ToolsetUnderTest.DotNetRoot;
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             string expectDotnetRoot = "OVERRIDE VALUE";
 
             var projectRoot = SetupDotnetRootEchoProject();
-
+            var processArchitecture = RuntimeInformation.ProcessArchitecture.ToString().ToUpperInvariant();
             var runCommand = new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(projectRoot);
 
@@ -63,6 +63,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 runCommand.EnvironmentToRemove.Add("DOTNET_ROOT");
             }
 
+            runCommand.EnvironmentToRemove.Add($"DOTNET_ROOT_{processArchitecture}");
             runCommand
                 .Execute("--no-build")
                 .Should().Pass()

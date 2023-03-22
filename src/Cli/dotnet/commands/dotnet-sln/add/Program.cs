@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -22,10 +23,10 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         public AddProjectToSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.GetValueForArgument(SlnCommandParser.SlnArgument);
+            _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
 
-            _inRoot = parseResult.GetValueForOption(SlnAddParser.InRootOption);
-            string relativeRoot = parseResult.GetValueForOption(SlnAddParser.SolutionFolderOption);
+            _inRoot = parseResult.GetValue(SlnAddParser.InRootOption);
+            string relativeRoot = parseResult.GetValue(SlnAddParser.SolutionFolderOption);
             bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
             
             if (_inRoot && hasRelativeRoot)
@@ -49,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         {
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
-            var arguments = (_parseResult.GetValueForArgument<IEnumerable<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
+            var arguments = (_parseResult.GetValue<IEnumerable<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
             if (arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);

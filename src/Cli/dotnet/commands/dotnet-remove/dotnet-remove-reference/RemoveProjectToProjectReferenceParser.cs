@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli
         {
             Description = LocalizableStrings.ProjectPathArgumentDescription,
             Arity = ArgumentArity.OneOrMore,
-        }.AddSuggestions(Suggest.ProjectReferencesFromProjectFile());
+        }.AddCompletions(Complete.ProjectReferencesFromProjectFile);
 
         public static readonly Option<string> FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
         {
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(ProjectPathArgument);
             command.AddOption(FrameworkOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemoveProjectToProjectReferenceCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new RemoveProjectToProjectReferenceCommand(parseResult).Execute());
 
             return command;
         }

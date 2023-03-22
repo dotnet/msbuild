@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VerbosityOption);
             command.AddOption(ArchitectureOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolInstallCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ToolInstallCommand(parseResult).Execute());
 
             return command;
         }

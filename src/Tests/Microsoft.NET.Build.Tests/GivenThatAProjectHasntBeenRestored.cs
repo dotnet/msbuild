@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("TestLibrary", null)]
         [InlineData("TestApp", null)]
         [InlineData("TestApp", "netcoreapp2.1")]
-        [InlineData("TestApp", "netcoreapp3.0")]
+        [InlineData("TestApp", ToolsetInfo.CurrentTargetFramework)]
         public void The_build_fails_if_nuget_restore_has_not_occurred(string relativeProjectPath, string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "App",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 

@@ -1,0 +1,4 @@
+﻿The template "TemplateWithSourceName" was created successfully.
+
+To instantiate the template with short name 'create', run:
+   dotnet new create create

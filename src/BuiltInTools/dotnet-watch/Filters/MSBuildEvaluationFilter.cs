@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class MSBuildEvaluationFilter : IWatchFilter
+    internal class MSBuildEvaluationFilter : IWatchFilter
     {
         // File types that require an MSBuild re-evaluation
         private static readonly string[] _msBuildFileExtensions = new[]
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             return msbuildFiles;
         }
 
-        protected virtual DateTime GetLastWriteTimeUtcSafely(string file)
+        private protected virtual DateTime GetLastWriteTimeUtcSafely(string file)
         {
             try
             {

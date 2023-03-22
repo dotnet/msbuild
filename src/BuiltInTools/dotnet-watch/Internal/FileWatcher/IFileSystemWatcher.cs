@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public interface IFileSystemWatcher : IDisposable
+    internal interface IFileSystemWatcher : IDisposable
     {
         event EventHandler<(string filePath, bool newFile)> OnFileChange;
 

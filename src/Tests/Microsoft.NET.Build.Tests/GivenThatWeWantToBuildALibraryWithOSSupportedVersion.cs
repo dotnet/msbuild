@@ -96,8 +96,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("net6.0-windows", "Windows7.0")]
-        [InlineData("net6.0-windows10.0.19041", "Windows10.0.19041.0")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows", "Windows7.0")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041", "Windows10.0.19041.0")]
         public void WhenUsingTargetPlatformInTargetFrameworkItCanGenerateSupportedOSPlatformAttribute(string targetFramework, string expectedAttribute)
         {
             TestProject testProject = SetUpProject(targetFramework);
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void WhenUsingZeroedSupportedOSPlatformVersionItCanGenerateSupportedOSPlatformAttribute()
         {
-            TestProject testProject = SetUpProject("net6.0-windows");
+            TestProject testProject = SetUpProject($"{ToolsetInfo.CurrentTargetFramework}-windows");
             testProject.AdditionalProperties["SupportedOSPlatformVersion"] = "0.0";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -153,7 +153,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void WhenTargetPlatformMinVersionIsSetForWindowsItIsUsedForTheSupportedOSPlatformAttribute()
         {
-            TestProject testProject = SetUpProject("net6.0-windows10.0.19041");
+            TestProject testProject = SetUpProject($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041");
             testProject.AdditionalProperties["TargetPlatformMinVersion"] = "10.0.18362.0";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -170,7 +170,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void WhenTargetingWindowsSupportedOSVersionPropertySetsTargetPlatformMinVersion()
         {
-            TestProject testProject = SetUpProject("net6.0-windows10.0.19041");
+            TestProject testProject = SetUpProject($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041");
             testProject.AdditionalProperties["SupportedOSPlatformVersion"] = "10.0.18362.0";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -196,7 +196,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void WhenTargetingWindowsSupportedOSPlatformVersionPropertyIsPreferredOverTargetPlatformMinVersion()
         {
-            TestProject testProject = SetUpProject("net6.0-windows10.0.19041");
+            TestProject testProject = SetUpProject($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041");
             testProject.AdditionalProperties["TargetPlatformMinVersion"] = "10.0.18362.0";
             testProject.AdditionalProperties["SupportedOSPlatformVersion"] = "10.0.17663.0";
 
@@ -276,7 +276,7 @@ namespace Microsoft.NET.Build.Tests
             return expected;
         }
 
-        private static TestProject SetUpProject(string targetFramework = "net6.0")
+        private static TestProject SetUpProject(string targetFramework = ToolsetInfo.CurrentTargetFramework)
         {
             TestProject testProject = new TestProject()
             {

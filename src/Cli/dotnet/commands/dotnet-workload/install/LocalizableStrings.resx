@@ -169,7 +169,7 @@
     <value>Download of workload packs to offline cache failed: {0}</value>
   </data>
   <data name="WorkloadAlreadyInstalled" xml:space="preserve">
-    <value>Workload '{0}' is already installed.</value>
+    <value>Workload(s) '{0}' are already installed.</value>
   </data>
   <data name="InvalidNuGetVersionRange" xml:space="preserve">
     <value>Specified version '{0}' isn't a valid NuGet version range.</value>
@@ -235,7 +235,7 @@
     <value>Failed to update the advertising manifest {0}: {1}.</value>
   </data>
   <data name="AdManifestPackageDoesNotExist" xml:space="preserve">
-    <value>Failed to update advertising manifest. Manifest package {0} doesn't exist.</value>
+    <value>Advertising manifest not updated. Manifest package for {0} doesn't exist.</value>
   </data>
   <data name="ManifestDoesNotExist" xml:space="preserve">
     <value>No manifest with ID {0} exists.</value>
@@ -255,8 +255,8 @@
   <data name="FailedToDownloadPackageManifest" xml:space="preserve">
     <value>Failed to download manifest package {0}.</value>
   </data>
-  <data name="FailedToGetPackageManifestUrl" xml:space="preserve">
-    <value>Failed to resolve manifest package URL {0}.</value>
+  <data name="ManifestPackageUrlNotResolved" xml:space="preserve">
+    <value>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</value>
   </data>
   <data name="OSDoesNotSupportMsi" xml:space="preserve">
     <value>MSI installations are only supported on Windows.</value>
@@ -320,5 +320,26 @@
   </data>
   <data name="DownloadToCacheOptionArgumentName" xml:space="preserve">
     <value>DIRECTORY</value>
+  </data>
+  <data name="CannotCombineSkipManifestAndRollback" xml:space="preserve">
+    <value>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</value>
+  </data>
+  <data name="SkipSignCheckOptionDescription" xml:space="preserve">
+    <value>Skip signature verification of workload packages and installers.</value>
+  </data>
+  <data name="CheckForUpdatedWorkloadManifests" xml:space="preserve">
+    <value>Checking for updated workload manifests.</value>
+  </data>
+  <data name="InvalidVersionForWorkload" xml:space="preserve">
+    <value>Error parsing version '{1}' for workload manifest ID '{0}'</value>
+  </data>
+  <data name="ExpectedSingleManifest" xml:space="preserve">
+    <value>Expected single manifest feature band and manifest folder in MSI from package {0}</value>
+  </data>
+  <data name="FailedToExtractMsi" xml:space="preserve">
+    <value>Failed to extract information from MSI: {0}</value>
+  </data>
+  <data name="ManifestMsiNotFoundInNuGetPackage" xml:space="preserve">
+    <value>Manifest MSI not found in NuGet package {0}</value>
   </data>
 </root>

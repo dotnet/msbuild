@@ -45,7 +45,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             var publishDirectory =
-                command.GetOutputDirectory(targetFramework: "net5.0", configuration: "Release");
+                command.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework, configuration: "Release");
 
             publishDirectory.Should().NotHaveSubDirectories();
             publishDirectory.Should().HaveFiles(new[] {
@@ -167,7 +167,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(true, true)]
         public void PublishWebAppWithPublishProfile(bool? selfContained, bool? useAppHost)
         {
-            var tfm = "netcoreapp2.2";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
 
             var testProject = new TestProject()
@@ -211,8 +211,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.dll",
                 $"{testProject.Name}.pdb",
                 $"{testProject.Name}.deps.json",
-                $"{testProject.Name}.runtimeconfig.json",
-                "web.config",
+                $"{testProject.Name}.runtimeconfig.json"
             });
 
             if (selfContained ?? true)

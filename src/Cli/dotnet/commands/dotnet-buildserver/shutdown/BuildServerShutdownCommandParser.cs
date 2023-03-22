@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VbcsOption);
             command.AddOption(RazorOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new BuildServerShutdownCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new BuildServerShutdownCommand(parseResult).Execute());
 
             return command;
         }

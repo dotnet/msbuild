@@ -38,4 +38,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup Condition="'$(SupportsHotReload)' != 'false' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
     <ProjectCapability Include="SupportsHotReload" />
   </ItemGroup>
+
+  <!--
+    BinaryFormatter infrastructure is obsolete as error in 7.0+.
+    When https://github.com/Microsoft/visualfsharp/issues/3207 is fixed,
+    remove the block below and move it into the shared .targets file.
+  -->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '7.0'))">
+    <WarningsAsErrors Condition="'$(EnableUnsafeBinaryFormatterSerialization)' != 'true'">$(WarningsAsErrors);SYSLIB0011</WarningsAsErrors>
+  </PropertyGroup>
 </Project>

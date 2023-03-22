@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(RestoreCommandParser.SlnOrProjectArgument);
             WorkloadInstallCommandParser.AddWorkloadInstallCommandOptions(command);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadRestoreCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadRestoreCommand(parseResult).Execute());
 
             return command;
         }

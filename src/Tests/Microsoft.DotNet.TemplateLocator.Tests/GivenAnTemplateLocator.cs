@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
 
         public GivenAnTemplateLocator(ITestOutputHelper logger) : base(logger)
         {
-            _resolver = new TemplateLocator(Environment.GetEnvironmentVariable, VSSettings.Ambient, null, null);
+            _resolver = new TemplateLocator(Environment.GetEnvironmentVariable, null, VSSettings.Ambient, null, null);
             _fakeDotnetRootDirectory =
                 Path.Combine(TestContext.Current.TestExecutionDirectory, Path.GetRandomFileName());
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -61,9 +62,9 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
 
-            _configFilePath = result.GetValueForOption(ToolRestoreCommandParser.ConfigOption);
-            _sources = result.GetValueForOption(ToolRestoreCommandParser.AddSourceOption);
-            _verbosity = Enum.GetName(result.GetValueForOption(ToolRestoreCommandParser.VerbosityOption));
+            _configFilePath = result.GetValue(ToolRestoreCommandParser.ConfigOption);
+            _sources = result.GetValue(ToolRestoreCommandParser.AddSourceOption);
+            _verbosity = Enum.GetName(result.GetValue(ToolRestoreCommandParser.VerbosityOption));
         }
 
         public override int Execute()
@@ -83,7 +84,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             }
             catch (ToolManifestCannotBeFoundException e)
             {
-                if (CommandContext.IsVerbose())
+                if (CommandLoggingContext.IsVerbose)
                 {
                     _reporter.WriteLine(string.Join(Environment.NewLine, e.VerboseMessage).Yellow());
                 }
@@ -244,7 +245,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
 
         private FilePath? GetCustomManifestFileLocation()
         {
-            string customFile = _parseResult.GetValueForOption(ToolRestoreCommandParser.ToolManifestOption);
+            string customFile = _parseResult.GetValue(ToolRestoreCommandParser.ToolManifestOption);
             FilePath? customManifestFileLocation;
             if (!string.IsNullOrEmpty(customFile))
             {

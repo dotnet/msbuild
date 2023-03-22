@@ -57,6 +57,11 @@
         <target state="translated">문서가 중간에 끝났습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">잘못된 버전: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">매니페스트 '{1}' [{2}]에 필요한 워크로드 매니페스트 종속성 '{0}'을(를) 찾지 못했습니다</target>

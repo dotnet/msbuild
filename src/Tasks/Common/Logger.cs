@@ -1,6 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+//Microsoft.NET.Build.Extensions.Tasks (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
+#nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
+
 using System;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
@@ -127,11 +132,14 @@ namespace Microsoft.NET.Build.Tasks
                     break;
 
                 default:
+
                     if (code != null)
                     {
-                       throw new ArgumentException(
-                           "Message is prefixed with NETSDK error, but error codes should not be used for informational messages: "
-                           + $"{code}:{message}");
+                        //  Previously we would throw an error here, but that makes it hard to allow errors to be turned off but still displayed as messages
+                        //  (which ResolveApppHosts does).  So let's just let messages have NETSDK error codes if they want to also.
+                        //throw new ArgumentException(
+                        //    "Message is prefixed with NETSDK error, but error codes should not be used for informational messages: "
+                        //    + $"{code}:{message}");
                     }
                     break;
             }

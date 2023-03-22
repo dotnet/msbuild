@@ -7,25 +7,15 @@
         <target state="translated">Wyświetl listę dostępnych obciążeń.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="translated">Zainstalowane identyfikatory obciążenia</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
         <target state="translated">Użyj polecenia „dotnet workload search”, aby znaleźć dodatkowe obciążenia do zainstalowania.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">To polecenie wyświetla listę tylko obciążeń zainstalowanych przy użyciu polecenia „dotnet workload install” w tej wersji zestawu SDK, a nie tych, które zostały zainstalowane za pomocą programu Visual Studio.</target>
-        <note />
+        <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
-        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="translated">Aktualizacje są dostępne dla następujących obciążeń: {0}. Uruchom polecenie „dotnet workload update”, aby uzyskać najnowszą wersję.</target>
-        <note />
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">Aktualizacje są dostępne dla następujących obciążeń: {0}. Uruchom polecenie `dotnet workload update`, aby uzyskać najnowszą wersję.</target>
+        <note>{Locked="dotnet workload update"}</note>
       </trans-unit>
     </body>
   </file>

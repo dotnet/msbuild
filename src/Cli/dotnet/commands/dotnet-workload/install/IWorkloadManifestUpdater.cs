@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
@@ -15,19 +16,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync();
 
         IEnumerable<(
-            ManifestId manifestId, 
-            ManifestVersion existingVersion, 
-            ManifestVersion newVersion,
-            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates();
+            ManifestVersionUpdate manifestUpdate,
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads
+            )> CalculateManifestUpdates();
 
-        IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)>
+        IEnumerable<ManifestVersionUpdate>
             CalculateManifestRollbacks(string rollbackDefinitionFilePath);
 
-        Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath);
-
-        Task ExtractManifestPackagesToTempDirAsync(IEnumerable<string> manifestPackages, DirectoryPath tempDir);
-
-        IEnumerable<string> GetManifestPackageUrls(bool includePreviews);
+        Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews, SdkFeatureBand providedSdkFeatureBand, SdkFeatureBand installedSdkFeatureBand);
 
         IEnumerable<WorkloadId> GetUpdatableWorkloadsToAdvertise(IEnumerable<WorkloadId> installedWorkloads);
 

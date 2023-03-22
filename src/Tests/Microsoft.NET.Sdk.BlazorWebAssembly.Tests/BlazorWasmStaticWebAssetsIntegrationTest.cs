@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
@@ -18,12 +15,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
     public class BlazorWasmStaticWebAssetsIntegrationTest : BlazorWasmBaselineTests
     {
-        private static readonly string DotNet5JSRegexPattern = "dotnet\\.5\\.[0-9]+\\.[0-9]+\\.js";
-        private readonly string DotNet5JSTemplate;
-
         public BlazorWasmStaticWebAssetsIntegrationTest(ITestOutputHelper log) : base(log, GenerateBaselines)
         {
-            DotNet5JSTemplate = $"dotnet.{RuntimeVersion}.js";
         }
 
         [Fact]
@@ -55,7 +48,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(finalPath).Should().Exist();
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -85,7 +78,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             AssertManifest(manifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -116,7 +109,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(finalPath).Should().Exist();
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -147,7 +140,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             AssertManifest(manifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -178,12 +171,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             AssertManifest(manifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 publishPath,
                 intermediateOutputPath);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29111 https://github.com/dotnet/sdk/issues/28429")]
         public void StaticWebAssets_HostedApp_ReferencingNetStandardLibrary_Works()
         {
             // Arrange
@@ -221,24 +214,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(path).Should().Exist();
             var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path));
 
-            // We have to special case this test given we are forcing `blazorwasm` to be a `net5` project above.
-            // Given this, the `dotnet.*.js` file produced will be a dotnet.5.*.*.js file in line with the TFM and not the SDK (which is .NET 6 or beyond).
-            // This conflicts with our assumptions throughout the rest of the test suite that the SDK version matches the TFM.
-            // To minimize special casing throughout the entire test suite, we just update this particular test's assets to reflect the SDK version.
-            var numFilesUpdated = 0;
-            foreach (var f in manifest.Assets)
-            {
-                if (Regex.Match(f.RelativePath, DotNet5JSRegexPattern).Success)
-                {
-                    f.Identity = Regex.Replace(f.Identity, DotNet5JSRegexPattern, DotNet5JSTemplate);
-                    f.RelativePath = Regex.Replace(f.RelativePath, DotNet5JSRegexPattern, DotNet5JSTemplate);
-                    f.OriginalItemSpec = Regex.Replace(f.OriginalItemSpec, DotNet5JSRegexPattern, DotNet5JSTemplate);
-
-                    numFilesUpdated++;
-                }
-            }
-            Assert.Equal(2, numFilesUpdated);
-
             AssertManifest(manifest, LoadBuildManifest());
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
@@ -246,7 +221,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(finalPath).Should().Exist();
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -293,27 +268,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(path).Should().Exist();
             var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path));
 
-            // We have to special case this test given we are forcing `blazorwasm` to be a `net5` project above.
-            // Given this, the `dotnet.*.js` file produced will be a dotnet.5.*.*.js file in line with the TFM and not the SDK (which is .NET 6 or beyond).
-            // This conflicts with our assumptions throughout the rest of the test suite that the SDK version matches the TFM.
-            // To minimize special casing throughout the entire test suite, we just update this particular test's assets to reflect the SDK version.
-            var numFilesUpdated = 0;
-            var frameworkFolder = Path.Combine(publishPath, "wwwroot", "_framework");
-            var frameworkFolderFiles = Directory.GetFiles(frameworkFolder, "*", new EnumerationOptions { RecurseSubdirectories = false });
-            foreach (var f in frameworkFolderFiles)
-            {
-                if (Regex.Match(f, DotNet5JSRegexPattern).Success)
-                {
-                    File.Move(f, Regex.Replace(f, DotNet5JSRegexPattern, DotNet5JSTemplate));
-                    numFilesUpdated++;
-                }
-            }
-            Assert.Equal(3, numFilesUpdated);
-
             AssertManifest(manifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 publishPath,
                 intermediateOutputPath);
         }

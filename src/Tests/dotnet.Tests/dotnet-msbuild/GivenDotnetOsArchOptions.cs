@@ -145,34 +145,15 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Fact]
-        public void ItUsesImplicitRidWhenNoneIsSpecifiedForSelfContained()
+        public void ArchOptionsAMD64toX64()
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
                 var msbuildPath = "<msbuildpath>";
-                var currentRid = CommonOptions.GetCurrentRuntimeId();
-                var command = BuildCommand.FromArgs(new string[] { "--self-contained" }, msbuildPath);
+                var command = BuildCommand.FromArgs(new string[] { "--arch", "amd64", "--os", "os" }, msbuildPath);
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary " +
-                    $"-property:SelfContained=True -property:_CommandLineDefinedSelfContained=true " +
-                    $"-property:RuntimeIdentifier={currentRid} -property:_CommandLineDefinedRuntimeIdentifier=true");
-            });
-        }
-
-        [Fact]
-        public void ItDoesNotUseImplicitRidWhenOneIsSpecifiedForSelfContained()
-        {
-            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
-            {
-                var msbuildPath = "<msbuildpath>";
-                var currentRid = CommonOptions.GetCurrentRuntimeId();
-                var command = BuildCommand.FromArgs(new string[] { "--self-contained", "--runtime", "fake-rid" }, msbuildPath);
-                command.GetArgumentsToMSBuild()
-                    .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary " +
-                    $"-property:RuntimeIdentifier=fake-rid -property:_CommandLineDefinedRuntimeIdentifier=true " +
-                    $"-property:SelfContained=True -property:_CommandLineDefinedSelfContained=true");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-x64 -property:SelfContained=false");
             });
         }
     }

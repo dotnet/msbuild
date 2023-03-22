@@ -7,6 +7,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Workloads.Workload.List;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.NET.TestFramework.Utilities;
 using System.Collections.Generic;
@@ -68,6 +69,26 @@ namespace Microsoft.DotNet.Cli.Workload.Restore.Tests
 
             result.Should().Contain(f => Path.GetFileName(f) == "First.csproj");
             result.Should().Contain(f => Path.GetFileName(f) == "Second.csproj");
+        }
+
+        [Fact]
+        public void WhenCallWithSlnContainingSolutionFolderItExcludesFolderProjectsFromSolution()
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndSolutionFolders")
+                .WithSource()
+                .Path;
+
+            var result =
+                WorkloadRestoreCommand.DiscoverAllProjects("",
+                    new[]
+                    {
+                        Path.Combine(projectDirectory, "App.sln"),
+                    });
+
+            // 'src' solution folder is filtered out
+            result.Should().Contain(f => Path.GetFileName(f) == "App.csproj", "from checking the sln file");
+            result.Count.Should().Be(1);
         }
     }
 }

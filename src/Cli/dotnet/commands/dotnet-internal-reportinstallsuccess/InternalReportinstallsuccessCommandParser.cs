@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(Argument);
 
-            command.Handler = CommandHandler.Create<ParseResult>(InternalReportinstallsuccess.Run);
+            command.SetHandler(InternalReportinstallsuccess.Run);
 
             return command;
         }

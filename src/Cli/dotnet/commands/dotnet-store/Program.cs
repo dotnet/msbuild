@@ -6,6 +6,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Store
 
             msbuildArgs.AddRange(result.OptionValuesToBeForwarded(StoreCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(result.GetValueForArgument(StoreCommandParser.Argument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.GetValue(StoreCommandParser.Argument) ?? Array.Empty<string>());
 
             return new StoreCommand(msbuildArgs, msbuildPath);
         }

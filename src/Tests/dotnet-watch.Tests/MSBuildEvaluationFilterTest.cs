@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var filter = new MSBuildEvaluationFilter(_fileSetFactory);
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
             };
 
@@ -45,6 +46,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var filter = new MSBuildEvaluationFilter(_fileSetFactory);
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
             };
 
@@ -69,6 +71,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var filter = new MSBuildEvaluationFilter(_fileSetFactory);
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 SuppressMSBuildIncrementalism = true,
             };
@@ -107,6 +110,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             };
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
             };
 
@@ -123,7 +127,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.True(context.RequiresMSBuildRevaluation);
         }
 
-        public class TestableMSBuildEvaluationFilter : MSBuildEvaluationFilter
+        private class TestableMSBuildEvaluationFilter : MSBuildEvaluationFilter
         {
             public TestableMSBuildEvaluationFilter(IFileSetFactory factory)
                 : base(factory)
@@ -132,7 +136,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             public Dictionary<string, DateTime> Timestamps { get; } = new Dictionary<string, DateTime>();
 
-            protected override DateTime GetLastWriteTimeUtcSafely(string file) => Timestamps[file];
+            private protected override DateTime GetLastWriteTimeUtcSafely(string file) => Timestamps[file];
         }
     }
 }

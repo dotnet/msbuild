@@ -19,7 +19,7 @@ setTimeout(async function () {
     }
   }
   if (!connection) {
-    console.debug('Unable to establish a conection to the browser refresh server.');
+    console.debug('Unable to establish a connection to the browser refresh server.');
     return;
   }
 
@@ -65,7 +65,7 @@ setTimeout(async function () {
     if (path && path.endsWith('.css')) {
       updateCssByPath(path);
     } else {
-      console.debug(`File change detected to css file ${path}. Reloading page...`);
+      console.debug(`File change detected to file ${path}. Reloading page...`);
       location.reload();
       return;
     }
@@ -133,7 +133,7 @@ setTimeout(async function () {
     let applyFailed = false;
     deltas.forEach(d => {
       try {
-        window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta)
+        window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta, d.pdbDelta)
       } catch (error) {
         console.warn(error);
         applyFailed = true;

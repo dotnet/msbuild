@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -20,9 +21,8 @@ using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.Uninstall
 {
-    internal class WorkloadUninstallCommand : CommandBase
+    internal class WorkloadUninstallCommand : WorkloadCommandBase
     {
-        private readonly IReporter _reporter;
         private readonly IReadOnlyCollection<WorkloadId> _workloadIds;
         private readonly IInstaller _workloadInstaller;
         private readonly ReleaseVersion _sdkVersion;
@@ -35,27 +35,26 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             string dotnetDir = null,
             string version = null,
             string userProfileDir = null)
-            : base(parseResult)
+            : base(parseResult, reporter: reporter, nugetPackageDownloader: nugetPackageDownloader)
         {
-            _reporter = reporter ?? Reporter.Output;
-            _workloadIds = parseResult.GetValueForArgument(WorkloadUninstallCommandParser.WorkloadIdArgument)
+            _workloadIds = parseResult.GetValue(WorkloadUninstallCommandParser.WorkloadIdArgument)
                 .Select(workloadId => new WorkloadId(workloadId)).ToList().AsReadOnly();
             var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir);
-            var verbosity = parseResult.GetValueForOption(WorkloadUninstallCommandParser.VerbosityOption);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir, true);
+
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
-            nugetPackageDownloader ??= new NuGetPackageDownloader(new DirectoryPath(Path.GetTempPath()), filePermissionSetter: null, verboseLogger: new NullLogger());
+
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, workloadResolver, verbosity, userProfileDir, nugetPackageDownloader, dotnetPath);
+            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, workloadResolver, Verbosity, userProfileDir, VerifySignatures, PackageDownloader, dotnetPath);
         }
 
         public override int Execute()
         {
             try
             {
-                _reporter.WriteLine();
+                Reporter.WriteLine();
 
                 var featureBand = new SdkFeatureBand(_sdkVersion);
                 var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
@@ -67,29 +66,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
 
                 foreach (var workloadId in _workloadIds)
                 {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.RemovingWorkloadInstallationRecord, workloadId));
+                    Reporter.WriteLine(string.Format(LocalizableStrings.RemovingWorkloadInstallationRecord, workloadId));
                     _workloadInstaller.GetWorkloadInstallationRecordRepository()
                         .DeleteWorkloadInstallationRecord(workloadId, featureBand);
                 }
 
-                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
-                {
-                    var installer = _workloadInstaller.GetPackInstaller();
+                _workloadInstaller.GarbageCollectInstalledWorkloadPacks();
 
-                    installer.GarbageCollectInstalledWorkloadPacks();
-                }
-                else
-                {
-                    var installer = _workloadInstaller.GetWorkloadInstaller();
-                    foreach (var workloadId in _workloadIds)
-                    {
-                        installer.UninstallWorkload(workloadId);
-                    }
-                }
-
-                _reporter.WriteLine();
-                _reporter.WriteLine(string.Format(LocalizableStrings.UninstallSucceeded, string.Join(" ", _workloadIds)));
-                _reporter.WriteLine();
+                Reporter.WriteLine();
+                Reporter.WriteLine(string.Format(LocalizableStrings.UninstallSucceeded, string.Join(" ", _workloadIds)));
+                Reporter.WriteLine();
             }
             catch (Exception e)
             {

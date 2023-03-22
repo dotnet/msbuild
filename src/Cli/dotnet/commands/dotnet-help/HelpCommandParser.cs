@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Help
 
             command.AddArgument(Argument);
 
-            command.Handler = CommandHandler.Create<ParseResult>(HelpCommand.Run);
+            command.SetHandler(HelpCommand.Run);
 
             return command;
         }

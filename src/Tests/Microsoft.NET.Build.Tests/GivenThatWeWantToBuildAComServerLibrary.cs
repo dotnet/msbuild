@@ -82,8 +82,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("win-x64")]
-        [InlineData("win-x86")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86")]
         public void It_embeds_the_clsidmap_in_the_comhost_when_rid_specified(string rid)
         {
             var testAsset = _testAssetsManager
@@ -157,8 +157,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [PlatformSpecificTheory(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
-        [InlineData("win-x64")]
-        [InlineData("win-x86")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86")]
         public void It_fails_to_embed_clsid_when_not_on_windows(string rid)
         {
             var testAsset = _testAssetsManager

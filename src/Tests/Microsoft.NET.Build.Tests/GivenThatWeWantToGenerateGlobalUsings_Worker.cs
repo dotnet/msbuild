@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_generates_worker_implicit_usings_and_builds_successfully()
         {
-            var tfm = "net6.0";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["ImplicitUsings"] = "enable";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -55,7 +55,7 @@ global using global::System.Threading.Tasks;
         [Fact]
         public void It_can_disable_worker_usings()
         {
-            var tfm = "net6.0";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["ImplicitUsings"] = "disable";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

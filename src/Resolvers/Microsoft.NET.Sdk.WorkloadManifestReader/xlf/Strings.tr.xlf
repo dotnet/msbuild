@@ -57,6 +57,11 @@
         <target state="translated">Belge zamanından önce sonlandırıldı</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Geçersiz sürüm: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">{1}' [{2}] bildirimi için gereken '{0}' iş yükü bildirimi bağımlılığı bulunamadı</target>

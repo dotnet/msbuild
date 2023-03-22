@@ -23,9 +23,10 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.0" DisplayName=".NET Core 3.0" Alias="netcoreapp3.0" />
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.1" DisplayName=".NET Core 3.1" Alias="netcoreapp3.1" />
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v5.0" DisplayName=".NET 5.0" Alias="net5.0" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v6.0" DisplayName=".NET 6.0" Alias="net6.0"
-                                            Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.0'))"/>
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v7.0" DisplayName=".NET 7.0" Alias="net7.0" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v6.0" DisplayName=".NET 6.0" Alias="net6.0" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v7.0" DisplayName=".NET 7.0" Alias="net7.0"
+                                            Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.4.0'))"/>
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v8.0" DisplayName=".NET 8.0" Alias="net8.0" />
     </ItemGroup>
 
     <!-- .NET Standard -->
@@ -57,6 +58,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.1" DisplayName=".NET Framework 4.7.1" Alias="net471" />
         <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.2" DisplayName=".NET Framework 4.7.2" Alias="net472" />
         <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.8"   DisplayName=".NET Framework 4.8" Alias="net48" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.8.1"   DisplayName=".NET Framework 4.8.1" Alias="net481" />
     </ItemGroup>
 
     <!-- All supported target frameworks -->

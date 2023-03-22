@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Principal;
 using System.Text.Json;
 using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.NET.TestFramework;
 using Moq;
 using Xunit;
@@ -148,21 +146,21 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             task.DiscoveryPatterns.Should().BeEmpty();
             task.Assets.Length.Should().Be(1);
             var asset = task.Assets[0];
-            asset.GetMetadata(nameof(StaticWebAsset.Identity)).ShouldBeEquivalentTo($"{identity}");
-            asset.GetMetadata(nameof(StaticWebAsset.SourceId)).ShouldBeEquivalentTo("ComponentApp");
-            asset.GetMetadata(nameof(StaticWebAsset.SourceType)).ShouldBeEquivalentTo("Computed");
-            asset.GetMetadata(nameof(StaticWebAsset.ContentRoot)).ShouldBeEquivalentTo($"{contentRoot}");
-            asset.GetMetadata(nameof(StaticWebAsset.BasePath)).ShouldBeEquivalentTo("_content/ComponentApp");
-            asset.GetMetadata(nameof(StaticWebAsset.RelativePath)).ShouldBeEquivalentTo("ComponentApp.styles.css");
-            asset.GetMetadata(nameof(StaticWebAsset.AssetKind)).ShouldBeEquivalentTo("All");
-            asset.GetMetadata(nameof(StaticWebAsset.AssetMode)).ShouldBeEquivalentTo("CurrentProject");
-            asset.GetMetadata(nameof(StaticWebAsset.AssetRole)).ShouldBeEquivalentTo("Primary");
-            asset.GetMetadata(nameof(StaticWebAsset.RelatedAsset)).ShouldBeEquivalentTo("");
-            asset.GetMetadata(nameof(StaticWebAsset.AssetTraitName)).ShouldBeEquivalentTo("ScopedCss");
-            asset.GetMetadata(nameof(StaticWebAsset.AssetTraitValue)).ShouldBeEquivalentTo("ApplicationBundle");
-            asset.GetMetadata(nameof(StaticWebAsset.CopyToOutputDirectory)).ShouldBeEquivalentTo("Never");
-            asset.GetMetadata(nameof(StaticWebAsset.CopyToPublishDirectory)).ShouldBeEquivalentTo("PreserveNewest");
-            asset.GetMetadata(nameof(StaticWebAsset.OriginalItemSpec)).ShouldBeEquivalentTo($"{identity}");
+            asset.GetMetadata(nameof(StaticWebAsset.Identity)).Should().BeEquivalentTo($"{identity}");
+            asset.GetMetadata(nameof(StaticWebAsset.SourceId)).Should().BeEquivalentTo("ComponentApp");
+            asset.GetMetadata(nameof(StaticWebAsset.SourceType)).Should().BeEquivalentTo("Computed");
+            asset.GetMetadata(nameof(StaticWebAsset.ContentRoot)).Should().BeEquivalentTo($"{contentRoot}");
+            asset.GetMetadata(nameof(StaticWebAsset.BasePath)).Should().BeEquivalentTo("_content/ComponentApp");
+            asset.GetMetadata(nameof(StaticWebAsset.RelativePath)).Should().BeEquivalentTo("ComponentApp.styles.css");
+            asset.GetMetadata(nameof(StaticWebAsset.AssetKind)).Should().BeEquivalentTo("All");
+            asset.GetMetadata(nameof(StaticWebAsset.AssetMode)).Should().BeEquivalentTo("CurrentProject");
+            asset.GetMetadata(nameof(StaticWebAsset.AssetRole)).Should().BeEquivalentTo("Primary");
+            asset.GetMetadata(nameof(StaticWebAsset.RelatedAsset)).Should().BeEquivalentTo("");
+            asset.GetMetadata(nameof(StaticWebAsset.AssetTraitName)).Should().BeEquivalentTo("ScopedCss");
+            asset.GetMetadata(nameof(StaticWebAsset.AssetTraitValue)).Should().BeEquivalentTo("ApplicationBundle");
+            asset.GetMetadata(nameof(StaticWebAsset.CopyToOutputDirectory)).Should().BeEquivalentTo("Never");
+            asset.GetMetadata(nameof(StaticWebAsset.CopyToPublishDirectory)).Should().BeEquivalentTo("PreserveNewest");
+            asset.GetMetadata(nameof(StaticWebAsset.OriginalItemSpec)).Should().BeEquivalentTo($"{identity}");
         }
 
         [Fact]
@@ -216,15 +214,15 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             task.Assets.Should().BeEmpty();
             task.DiscoveryPatterns.Should().BeEmpty();
             var projectConfiguration = task.ReferencedProjectsConfiguration[0];
-            projectConfiguration.ItemSpec.ShouldBeEquivalentTo(identity);
-            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.Version)).ShouldBeEquivalentTo(2);
-            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.Source)).ShouldBeEquivalentTo("AnotherClassLib");
-            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.GetPublishAssetsTargets)).ShouldBeEquivalentTo("ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems");
-            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.AdditionalPublishProperties)).ShouldBeEquivalentTo(";");
-            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.AdditionalPublishPropertiesToRemove)).ShouldBeEquivalentTo(";WebPublishProfileFile");
-            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.GetBuildAssetsTargets)).ShouldBeEquivalentTo("GetCurrentProjectBuildStaticWebAssetItems");
-            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.AdditionalBuildProperties)).ShouldBeEquivalentTo(";");
-            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.AdditionalBuildPropertiesToRemove)).ShouldBeEquivalentTo(";WebPublishProfileFile");
+            projectConfiguration.ItemSpec.Should().BeEquivalentTo(identity);
+            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.Version)).Should().BeEquivalentTo("2");
+            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.Source)).Should().BeEquivalentTo("AnotherClassLib");
+            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.GetPublishAssetsTargets)).Should().BeEquivalentTo("ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems");
+            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.AdditionalPublishProperties)).Should().BeEquivalentTo(";");
+            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.AdditionalPublishPropertiesToRemove)).Should().BeEquivalentTo(";WebPublishProfileFile");
+            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.GetBuildAssetsTargets)).Should().BeEquivalentTo("GetCurrentProjectBuildStaticWebAssetItems");
+            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.AdditionalBuildProperties)).Should().BeEquivalentTo(";");
+            projectConfiguration.GetMetadata(nameof(StaticWebAssetsManifest.ReferencedProjectConfiguration.AdditionalBuildPropertiesToRemove)).Should().BeEquivalentTo(";WebPublishProfileFile");
         }
 
         [Fact]
@@ -274,11 +272,11 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             task.Assets.Should().BeEmpty();
             var discoveryPattern = task.DiscoveryPatterns[0];
 
-            discoveryPattern.ItemSpec.ShouldBeEquivalentTo(Path.Combine("AnotherClassLib", "wwwroot"));
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Source)).ShouldBeEquivalentTo("AnotherClassLib");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.ContentRoot)).ShouldBeEquivalentTo($"{contentRoot}");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.BasePath)).ShouldBeEquivalentTo("_content/AnotherClassLib");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Pattern)).ShouldBeEquivalentTo("**");
+            discoveryPattern.ItemSpec.Should().BeEquivalentTo(Path.Combine("AnotherClassLib", "wwwroot"));
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Source)).Should().BeEquivalentTo("AnotherClassLib");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.ContentRoot)).Should().BeEquivalentTo($"{contentRoot}");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.BasePath)).Should().BeEquivalentTo("_content/AnotherClassLib");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Pattern)).Should().BeEquivalentTo("**");
         }
 
         [Fact]

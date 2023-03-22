@@ -5,6 +5,9 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
+//  Work around https://github.com/dotnet/roslyn-analyzers/issues/6094
+#pragma warning disable CA1420
+
 namespace Microsoft.Win32.Msi
 {
     /// <summary>

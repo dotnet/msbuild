@@ -80,7 +80,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", "win7-x86");
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             publishDirectory.Should().HaveFiles(new[]
             {
@@ -149,9 +149,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var runtimeConfig = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.runtimeconfig.json"));
             runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be(targetFramework);
-
             var depsJson = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.deps.json"));
-            depsJson["libraries"]["Newtonsoft.Json/9.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
+            depsJson["libraries"]["Newtonsoft.Json/13.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
 
             // The end-to-end test of running the published app happens in the dotnet/cli repo.
             // See https://github.com/dotnet/cli/blob/358568b07f16749108dd33e7fea2f2c84ccf4563/test/dotnet-store.Tests/GivenDotnetStoresAndPublishesProjects.cs
@@ -265,7 +264,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestApp",
                 IsExe = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 References = { publishedLibPath }
             };
 
@@ -277,7 +276,7 @@ namespace Microsoft.NET.Publish.Tests
             var appPublishResult = appPublishCommand.Execute("/p:" + property);
             appPublishResult.Should().Pass();
 
-            var appPublishDirectory = appPublishCommand.GetOutputDirectory("netcoreapp2.0");
+            var appPublishDirectory = appPublishCommand.GetOutputDirectory(appProject.TargetFrameworks);
 
             if (expectAssemblyDocumentationFilePublished)
             {

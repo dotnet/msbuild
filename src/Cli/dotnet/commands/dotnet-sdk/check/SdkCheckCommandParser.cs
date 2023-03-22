@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Sdk.Check
 {
@@ -20,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
         {
             var command = new Command("check", LocalizableStrings.AppFullName);
 
-            command.Handler = CommandHandler.Create<ParseResult>(SdkCheckCommand.Run);
+            command.SetHandler(SdkCheckCommand.Run);
 
             return command;
         }

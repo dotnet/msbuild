@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-     <PackageReference Include="NewtonSoft.Json" Version="9.0.1" />
+     <PackageReference Include="NewtonSoft.Json" Version="13.0.1" />
      <PackageReference Include="FluentAssertions" Version="4.12.0" />
   </ItemGroup>
 </Project>

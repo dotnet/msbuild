@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 #nullable enable
@@ -14,7 +14,7 @@ using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class ProcessRunner
+    internal sealed class ProcessRunner
     {
         private static readonly Func<string, string?> _getEnvironmentVariable = static key => Environment.GetEnvironmentVariable(key);
 
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                 process.Start();
 
                 var args = processSpec.EscapedArguments ?? string.Join(" ", processSpec.Arguments);
-                _reporter.Verbose($"Started '{processSpec.Executable}' '{args}' with process id {process.Id}");
+                _reporter.Verbose($"Started '{processSpec.Executable}' '{args}' with process id {process.Id}", emoji: "🚀");
 
                 if (readOutput)
                 {

@@ -173,7 +173,7 @@ The current {1} is '{2}'.</value>
     <value>Arguments passed to the application that is being run.</value>
   </data>
   <data name="RunCommandExceptionCouldNotLocateALaunchSettingsFile" xml:space="preserve">
-    <value>The specified launch profile could not be located.</value>
+    <value>The specified launch profile '{0}' could not be located.</value>
   </data>
   <data name="RunCommandExceptionCouldNotApplyLaunchSettings" xml:space="preserve">
     <value>The launch profile "{0}" could not be applied.
@@ -186,7 +186,7 @@ The current {1} is '{2}'.</value>
     <value>Using launch settings from {0}...</value>
   </data>
   <data name="LaunchProfileIsNotAJsonObject" xml:space="preserve">
-    <value>A profile with the specified name could not be found or is not a valid JSON object.</value>
+    <value>A profile with the specified name isn't a valid JSON object.</value>
   </data>
   <data name="LaunchProfileHandlerCannotBeLocated" xml:space="preserve">
     <value>The launch profile type '{0}' is not supported.</value>
@@ -225,5 +225,13 @@ The current {1} is '{2}'.</value>
   </data>
   <data name="OnlyOneProjectAllowed" xml:space="preserve">
     <value>Only one project can be specified at a time using the `-p` option.</value>
+  </data>
+  <data name="DuplicateCaseInsensitiveLaunchProfileNames" xml:space="preserve">
+    <value>There are several launch profiles with case-sensitive names, which isn't permitted:
+{0}
+Make the profile names distinct.</value>
+  </data>
+  <data name="LaunchProfileDoesNotExist" xml:space="preserve">
+    <value>A launch profile with the name '{0}' doesn't exist.</value>
   </data>
 </root>

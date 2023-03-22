@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(PathArgument);
             command.AddOption(PositionOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>(CompleteCommand.Run);
+            command.SetHandler(CompleteCommand.Run);
 
             return command;
         }

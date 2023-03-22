@@ -1,12 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-
 using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Format
@@ -22,15 +19,12 @@ namespace Microsoft.DotNet.Tools.Format
         private static string GetRuntimeConfigPath()
             => Path.Combine(AppContext.BaseDirectory, "DotnetTools/dotnet-format/dotnet-format.runtimeconfig.json");
 
-        public DotnetFormatForwardingApp(IEnumerable<string> argsToForward) 
+        public DotnetFormatForwardingApp(IEnumerable<string> argsToForward)
             : base(forwardApplicationPath: GetForwardApplicationPath(),
-                  argsToForward: argsToForward,
-                  depsFile: GetDepsFilePath(),
-                  runtimeConfig: GetRuntimeConfigPath())
+                argsToForward: argsToForward,
+                depsFile: GetDepsFilePath(),
+                runtimeConfig: GetRuntimeConfigPath())
         {
-            Arugments = argsToForward.ToArray();
         }
-
-        public string[] Arugments { get; }
     }
 }

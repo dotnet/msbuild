@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, DirectoryPath targetFolder);
 
-        Task<NuGetVersion> GetLatestPackageVerion(PackageId packageId,
+        Task<NuGetVersion> GetLatestPackageVersion(PackageId packageId,
              PackageSourceLocation packageSourceLocation = null,
              bool includePreview = false);
     }

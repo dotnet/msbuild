@@ -1,0 +1,23 @@
+﻿{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateConditionalProcessing",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateConditionalProcessing",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateConditionalProcessing",
+  "shortName": "TestAssets.TemplateConditionalProcessing",
+  "symbols": {
+    "defaultFalse": {
+      "type": "parameter",
+      "dataType": "boolean",
+      "defaultValue": "false"
+    },
+    "defaultTrue": {
+      "type": "parameter",
+      "dataType": "boolean",
+      "defaultValue": "true"
+    }
+  }
+}

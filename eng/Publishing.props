@@ -58,6 +58,26 @@
     </CreateProperty>
   </Target>
 
+  <!-- FSharp needs to push different packages to nuget.org depending on whether the SDK is preview or not,
+       To achieve this, we find the FSharp compiler package, then the stable or non-stable FSharp.Core and Compiler service
+       package contained within, depending on the stability switch of the SDK. The SDK then treats these packages as its own outputs,
+       whch means they get automatically pushed on release day. -->
+  <PropertyGroup>
+    <PublishDependsOnTargets>$(PublishDependsOnTargets);_ResolvePublishFSharpNuGetPackages</PublishDependsOnTargets>
+  </PropertyGroup>
+    
+  <Target Name="_ResolvePublishFSharpNuGetPackages">
+    <PropertyGroup>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'!='release'">Shipping</FSharpCorePath>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'=='release'">Release</FSharpCorePath>
+    </PropertyGroup>
+    <ItemGroup>
+        <FSharpPackagesToPush Include="$(NuGetPackageRoot)\Microsoft.FSharp.Compiler\$(MicrosoftFSharpCompilerPackageVersion)\contentFiles\$(FSharpCorePath)\FSharp.Core.*.nupkg"/>
+        <FSharpPackagesToPush Include="$(NuGetPackageRoot)\Microsoft.FSharp.Compiler\$(MicrosoftFSharpCompilerPackageVersion)\contentFiles\$(FSharpCorePath)\FSharp.Compiler.Service.*.nupkg" />
+        <ItemsToPushToBlobFeed Include="@(FSharpPackagesToPush)" />
+    </ItemGroup>
+  </Target>
+ 
   <!-- We use a separate target to publish this to blob storage so that we can push this to
        a relative path inside the blob storage. -->
   <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish">
@@ -72,6 +92,12 @@
       <ItemsToSignPostBuild Remove="@(ItemsToSignPostBuild)" />
       <ItemsToSignPostBuild Include="@(ToolsetAssetsToPublish->'%(Filename)%(Extension)')" />
     </ItemGroup>
+    
+    <PropertyGroup>
+      <IsStableBuild>false</IsStableBuild>
+      <IsStableBuild Condition="'$(DotNetFinalVersionKind)' == 'release'">true</IsStableBuild>
+    </PropertyGroup>
+    
 
     <MakeDir Directories="$(TempWorkingDirectory)"/>
 
@@ -93,7 +119,8 @@
       PublishFlatContainer="true"
       AssetManifestPath="$(SdkAssetsManifestFilePath)"
       AssetsTemporaryDirectory="$(TempWorkingDirectory)" 
-      PublishingVersion="3"/>
+      PublishingVersion="3"
+      IsStableBuild="$(IsStableBuild)" />
 
     <Copy
       SourceFiles="$(SdkAssetsManifestFilePath)"

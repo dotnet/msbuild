@@ -57,6 +57,11 @@
         <target state="translated">Il documento è stato interrotto prima del completamento</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Versione non valida: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">La dipendenza del manifesto del carico di lavoro '{0}' richiesta dal manifesto '{1}' [{2}] non è stata trovata</target>

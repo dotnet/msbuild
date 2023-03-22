@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli
                 IsHidden = true
             };
 
-            command.Handler = CommandHandler.Create<ParseResult>(ParseCommand.Run);
+            command.SetHandler(ParseCommand.Run);
 
             return command;
         }

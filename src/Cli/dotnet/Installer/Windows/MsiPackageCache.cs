@@ -1,14 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
@@ -28,11 +25,6 @@ namespace Microsoft.DotNet.Installer.Windows
     [SupportedOSPlatform("windows")]
     internal class MsiPackageCache : InstallerBase
     {
-        /// <summary>
-        /// <see langword="true"/> if the executing command has a valid AuthentiCode signature; <see langword="false"/> otherwise.
-        /// </summary>
-        private static readonly bool s_IsDotNetSigned;
-
         /// <summary>
         /// Default inheritance to apply to directory ACLs.
         /// </summary>
@@ -54,7 +46,7 @@ namespace Microsoft.DotNet.Installer.Windows
         private static readonly SecurityIdentifier s_LocalSystemSid = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
 
         /// <summary>
-        /// SID mathcing built-in user accounts.
+        /// SID matching built-in user accounts.
         /// </summary>
         private static readonly SecurityIdentifier s_UsersSid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
 
@@ -88,7 +80,7 @@ namespace Microsoft.DotNet.Installer.Windows
         public readonly string PackageCacheRoot;
 
         public MsiPackageCache(InstallElevationContextBase elevationContext, ISetupLogger logger,
-            string packageCacheRoot = null) : base(elevationContext, logger)
+            bool verifySignatures, string packageCacheRoot = null) : base(elevationContext, logger, verifySignatures)
         {
             PackageCacheRoot = string.IsNullOrWhiteSpace(packageCacheRoot)
                 ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dotnet", "workloads")
@@ -117,10 +109,20 @@ namespace Microsoft.DotNet.Installer.Windows
                 CreateSecureDirectory(Directory.GetParent(path).FullName);
 
                 DirectorySecurity directorySecurity = new();
+
+                // Only set the owner and use its default group. If the machine is domain joined, this should create
+                // a descriptor like O:BAG:DU by selecting SDDL_DOMAIN_USERS. On non-domain joined machines and Windows Sandbox,
+                // the group SID will be different and the descriptor will end up as O:BAG:S-1-5-21-2047949552-857980807-821054962-513.
+                directorySecurity.SetOwner(s_AdministratorsSid);
                 directorySecurity.SetAccessRule(s_AdministratorRule);
-                directorySecurity.SetGroup(s_LocalSystemSid);
+                directorySecurity.SetAccessRule(s_LocalSystemRule);
+                directorySecurity.SetAccessRule(s_UsersRule);
+                directorySecurity.SetAccessRule(s_EveryoneRule);
+
+                // Don't use Directory.CreateDirectory as that can cause problems with inherited ACEs from
+                // the parent folders as access rules become cumulative. The acccess rules for the directory should all have
+                // object and container inheritance set to ensure access rights are inherited when creating files.
                 directorySecurity.CreateDirectory(path);
-                SecureDirectory(path);
             }
         }
 
@@ -163,8 +165,8 @@ namespace Microsoft.DotNet.Installer.Windows
                 string cachedMsiPath = Path.Combine(packageDirectory, Path.GetFileName(msiPath));
                 string cachedManifestPath = Path.Combine(packageDirectory, Path.GetFileName(manifestPath));
 
-                MoveFile(manifestPath, cachedManifestPath);
-                MoveFile(msiPath, cachedMsiPath);
+                MoveAndSecureFile(manifestPath, cachedManifestPath);
+                MoveAndSecureFile(msiPath, cachedMsiPath);
             }
             else if (IsClient)
             {
@@ -184,16 +186,29 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// Moves a file from one location to another if the destination file does not already exist.
+        /// Moves a file from one location to another if the destination file does not already exist and
+        /// configure its permissions.
         /// </summary>
         /// <param name="sourceFile">The source file to move.</param>
         /// <param name="destinationFile">The destination where the source file will be moved.</param>
-        protected void MoveFile(string sourceFile, string destinationFile)
+        private void MoveAndSecureFile(string sourceFile, string destinationFile)
         {
             if (!File.Exists(destinationFile))
             {
+                // See https://github.com/dotnet/sdk/issues/28450
                 FileAccessRetrier.RetryOnMoveAccessFailure(() => File.Move(sourceFile, destinationFile));
                 Log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
+
+                FileInfo fi = new(destinationFile);
+                FileSecurity fs = new();
+
+                // Only set the owner, everything else should be inherited. Assuming the parent folder was not
+                // modified externally, the file's descriptor should either be
+                // O:BAG:DUD:(A;ID;0x1200a9;;;WD)(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU) or
+                // O:BAG:S-1-5-21-2047949552-857980807-821054962-513D:(A;ID;0x1200a9;;;WD)(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU)
+                // Note that all the access entries include the ID flag indicating they were inherited from the container.
+                fs.SetOwner(s_AdministratorsSid);
+                fi.SetAccessControl(fs);
             }
         }
 
@@ -207,8 +222,25 @@ namespace Microsoft.DotNet.Installer.Windows
         public bool TryGetPayloadFromCache(string packageId, string packageVersion, out MsiPayload payload)
         {
             string packageCacheDirectory = GetPackageDirectory(packageId, packageVersion);
-            string manifestPath = Path.Combine(packageCacheDirectory, "msi.json");
             payload = default;
+
+            string msiPath;
+            if (!TryGetMsiPathFromPackageData(packageCacheDirectory, out msiPath, out string manifestPath))
+            {
+                return false;
+            }
+
+            VerifyPackageSignature(msiPath);
+
+            payload = new MsiPayload(manifestPath, msiPath);
+
+            return true;
+        }
+
+        public bool TryGetMsiPathFromPackageData(string packageDataPath, out string msiPath, out string manifestPath)
+        {
+            msiPath = default;
+            manifestPath = Path.Combine(packageDataPath, "msi.json");
 
             // It's possible that the MSI is cached, but without the JSON manifest we cannot
             // trust that the MSI in the cache directory is the correct file.
@@ -221,18 +253,15 @@ namespace Microsoft.DotNet.Installer.Windows
             // The msi.json manifest contains the name of the actual MSI. The filename does not necessarily match the package
             // ID as it may have been shortened to support VS caching.
             MsiManifest msiManifest = JsonConvert.DeserializeObject<MsiManifest>(File.ReadAllText(manifestPath));
-            string msiPath = Path.Combine(Path.GetDirectoryName(manifestPath), msiManifest.Payload);
+            string possibleMsiPath = Path.Combine(Path.GetDirectoryName(manifestPath), msiManifest.Payload);
 
-            if (!File.Exists(msiPath))
+            if (!File.Exists(possibleMsiPath))
             {
-                Log?.LogMessage($"MSI package is not cached, '{msiPath}'");
+                Log?.LogMessage($"MSI package not found, '{possibleMsiPath}'");
                 return false;
             }
 
-            VerifyPackageSignature(msiPath);
-
-            payload = new MsiPayload(manifestPath, msiPath);
-
+            msiPath = possibleMsiPath;
             return true;
         }
 
@@ -240,10 +269,10 @@ namespace Microsoft.DotNet.Installer.Windows
         /// Verifies the AuthentiCode signature of an MSI package if the executing command itself is running
         /// from a signed module.
         /// </summary>
-        /// <param name="msiPath">The pathof the MSI to verify.</param>
+        /// <param name="msiPath">The path of the MSI to verify.</param>
         private void VerifyPackageSignature(string msiPath)
         {
-            if (s_IsDotNetSigned)
+            if (VerifySignatures)
             {
                 bool isAuthentiCodeSigned = AuthentiCode.IsSigned(msiPath);
 
@@ -292,29 +321,8 @@ namespace Microsoft.DotNet.Installer.Windows
             }
             else
             {
-                Log?.LogMessage($"Command is not signed, skipping signature verification for {msiPath}.");
+                Log?.LogMessage($"Skipping signature verification for {msiPath}.");
             }
-        }
-
-        /// <summary>
-        /// Secures the target directory by applying multiple ACLs. Administrators and local SYSTEM
-        /// receive full control. Users and Everyone receive read and execute permissions.
-        /// </summary>
-        /// <param name="path">The directory to secure.</param>
-        private void SecureDirectory(string path)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            DirectorySecurity directorySecurity = directoryInfo.GetAccessControl();
-            directorySecurity.SetAccessRule(s_AdministratorRule);
-            directorySecurity.SetAccessRule(s_EveryoneRule);
-            directorySecurity.SetAccessRule(s_LocalSystemRule);
-            directorySecurity.SetAccessRule(s_UsersRule);
-            directoryInfo.SetAccessControl(directorySecurity);
-        }
-
-        static MsiPackageCache()
-        {
-            s_IsDotNetSigned = AuthentiCode.IsSigned(Assembly.GetExecutingAssembly().Location);
         }
     }
 }

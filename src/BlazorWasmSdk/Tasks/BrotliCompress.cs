@@ -111,10 +111,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 }
 
                 builder.AppendLine("-s");
-                builder.AppendLine(inputFullPath);
+                builder.AppendLine(Quote(inputFullPath));
 
                 builder.AppendLine("-o");
-                builder.AppendLine(outputFullPath);
+                builder.AppendLine(Quote(outputFullPath));
             }
 
             return builder.ToString();

@@ -12,6 +12,11 @@
         <target state="translated">列出已淘汰的套件。無法與 '--vulnerable' 或 '--outdated' 選項一併使用。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="translated">指定清單套件命令的輸出格式類型。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
@@ -25,6 +30,11 @@
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
         <target state="translated">列出有更新版本的套件。無法與 '--deprecated' 或 '--vulnerable' 選項一併使用。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputVersionDescription">
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="translated">指定機器可讀取輸出的版本。需要 '--format json' 選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">

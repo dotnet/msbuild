@@ -57,6 +57,11 @@
         <target state="translated">文件已提前結束</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">無效的版本: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">找不到資訊清單 '{1}' [{2}] 所需的工作負載資訊清單相依性 '{0}'</target>

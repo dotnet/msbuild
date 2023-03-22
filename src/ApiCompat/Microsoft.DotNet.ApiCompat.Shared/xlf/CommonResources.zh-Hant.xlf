@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../CommonResources.resx">
+    <body>
+      <trans-unit id="CreateWorkItemPerAssemblyAssembliesNotEqual">
+        <source>When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</source>
+        <target state="translated">將每個元件加入工作專案佇列時，傳入的左邊元件和右元件數目必須相等。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidRexegStringTransformationPattern">
+        <source>Invalid transformation pattern provided: '{0} - {1}'.</source>
+        <target state="translated">提供的轉換模式無效: '{0} - {1}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoBreakingChangesFound">
+        <source>APICompat ran successfully without finding any breaking changes.</source>
+        <target state="new">APICompat ran successfully without finding any breaking changes.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="translated">必須傳入檔案路徑，才能成功產生相容性歸併檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSdkVersion">
+        <source>The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</source>
+        <target state="translated">Roslyn 所需的最低版本為 '{1}'，而您使用的是 Roslyn 的 '{0}' 版本。您可以更新 SDK 以取得最新版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="translated">已成功將相容性歸併寫入 '{0}'。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             lib.Should().Exist();
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -175,7 +175,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             publishLibrary.GetString().Should().Be(wwwrootPublishLibrary.GetString());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
 
@@ -250,7 +250,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             extension.Should().Exist();
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -316,7 +316,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             extension.Should().Exist();
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }

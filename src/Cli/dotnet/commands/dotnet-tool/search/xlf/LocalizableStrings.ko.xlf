@@ -58,13 +58,13 @@
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
-        <source>determining whether to include pre-release packages.</source>
-        <target state="translated">시험판 패키지를 포함할지 여부를 결정합니다.</target>
+        <source>Include pre-release packages.</source>
+        <target state="needs-review-translation">시험판 패키지를 포함할지 여부를 결정합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
-        <source>Search Term</source>
-        <target state="translated">검색어</target>
+        <source>SEARCH_TERM</source>
+        <target state="needs-review-translation">검색어</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.Build.Evaluation;
@@ -19,7 +20,7 @@ namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
         {
             ShowHelpOrErrorIfAppropriate(parseResult);
 
-            _fileOrDirectory = parseResult.GetValueForArgument(ListCommandParser.SlnOrProjectArgument);
+            _fileOrDirectory = parseResult.GetValue(ListCommandParser.SlnOrProjectArgument);
         }
 
         public override int Execute()

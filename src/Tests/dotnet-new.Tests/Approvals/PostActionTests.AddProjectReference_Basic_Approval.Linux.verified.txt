@@ -1,0 +1,6 @@
+﻿The template "TestAssets.PostActions.AddProjectReference.Basic" was created successfully.
+
+Processing post-creation actions...
+Adding a project reference %working directory%/Project2/Project2.csproj to project file %working directory%/Project1/Project1.csproj:
+%CALLBACK OUTPUT%
+Successfully added a reference to the project file.

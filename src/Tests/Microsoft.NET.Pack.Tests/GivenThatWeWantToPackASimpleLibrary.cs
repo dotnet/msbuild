@@ -16,7 +16,7 @@ namespace Microsoft.NET.Pack.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_packs_successfully()
         {
             var testAsset = _testAssetsManager
@@ -38,7 +38,6 @@ namespace Microsoft.NET.Pack.Tests
                 $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.deps.json",
                 $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.runtimeconfig.json",
                 $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld{EnvironmentInfo.ExecutableExtension}",
-                $"{ToolsetInfo.CurrentTargetFramework}/ref/HelloWorld.dll"
             });
         }
     }

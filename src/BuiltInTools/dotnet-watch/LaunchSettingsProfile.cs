@@ -12,19 +12,16 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class LaunchSettingsProfile
+    internal sealed class LaunchSettingsProfile
     {
-        public string? ApplicationUrl { get; set; }
+        public string? ApplicationUrl { get; init; }
+        public string? CommandName { get; init; }
+        public bool LaunchBrowser { get; init; }
+        public string? LaunchUrl { get; init; }
+        public string? CommandLineArgs { get; init; }
+        public IReadOnlyDictionary<string, string>? EnvironmentVariables { get; init; }
 
-        public string? CommandName { get; set; }
-
-        public bool LaunchBrowser { get; set; }
-
-        public string? LaunchUrl { get; set; }
-
-        public IDictionary<string, string>? EnvironmentVariables { get; set; }
-
-        internal static LaunchSettingsProfile? ReadDefaultProfile(string projectDirectory, IReporter reporter)
+        internal static LaunchSettingsProfile? ReadLaunchProfile(string projectDirectory, string? launchProfileName, IReporter reporter)
         {
             var launchSettingsPath = Path.Combine(projectDirectory, "Properties", "launchSettings.json");
             if (!File.Exists(launchSettingsPath))
@@ -45,11 +42,43 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return null;
             }
 
+            if (string.IsNullOrEmpty(launchProfileName))
+            {
+                // Load the default (first) launch profile
+                return ReadDefaultLaunchProfile(launchSettings, reporter);
+            }
+
+            // Load the specified launch profile
+            var namedProfile = launchSettings?.Profiles?.FirstOrDefault(kvp =>
+                string.Equals(kvp.Key, launchProfileName, StringComparison.Ordinal)).Value;
+
+            if (namedProfile is null)
+            {
+                reporter.Warn($"Unable to find launch profile with name '{launchProfileName}'. Falling back to default profile.");
+
+                // Check if a case-insensitive match exists
+                var caseInsensitiveNamedProfile = launchSettings?.Profiles?.FirstOrDefault(kvp =>
+                    string.Equals(kvp.Key, launchProfileName, StringComparison.OrdinalIgnoreCase)).Key;
+
+                if (caseInsensitiveNamedProfile is not null)
+                {
+                    reporter.Warn($"Note: Launch profile names are case-sensitive. Did you mean '{caseInsensitiveNamedProfile}'?");
+                }
+
+                return ReadDefaultLaunchProfile(launchSettings, reporter);
+            }
+
+            reporter.Verbose($"Found named launch profile '{launchProfileName}'.");
+            return namedProfile;
+        }
+
+        private static LaunchSettingsProfile? ReadDefaultLaunchProfile(LaunchSettingsJson? launchSettings, IReporter reporter)
+        {
             var defaultProfile = launchSettings?.Profiles?.FirstOrDefault(f => f.Value.CommandName == "Project").Value;
+
             if (defaultProfile is null)
             {
-                reporter.Verbose("Unable to find default launchSettings profile.");
-                return null;
+                reporter.Verbose("Unable to find default launch profile.");
             }
 
             return defaultProfile;

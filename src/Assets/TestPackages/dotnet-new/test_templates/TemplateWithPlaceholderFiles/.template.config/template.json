@@ -1,0 +1,17 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithPlaceholderFiles",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithPlaceholderFiles",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithPlaceholderFiles",
+  "shortName": "TestAssets.TemplateWithPlaceholderFiles",
+  "sources": [
+    {
+      "source": "./Src/Path/",
+      "target": "./Target/",
+      "exclude": [ "foo/**" ]
+    }
+  ]
+}

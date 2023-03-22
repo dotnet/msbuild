@@ -93,5 +93,20 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.dll")).Should().Exist();
             new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.pdb")).Should().Exist();
         }
+
+        [CoreMSBuildOnlyFact]
+        public void CshtmlCss_InNET5App_DoesNotProduceErrors()
+        {
+            // Regression test for https://github.com/dotnet/aspnetcore/issues/39526
+            var testAsset = $"Razor{TestProjectName}";
+            var project = CreateAspNetSdkTestAsset(testAsset);
+            var scopedCssPath = Path.Combine(project.Path, "wwwroot", "Views", "Home", "Index.cshtml.css");
+            Directory.CreateDirectory(Path.GetDirectoryName(scopedCssPath));
+            File.WriteAllText(scopedCssPath, "Nothing to see here");
+
+            // Build
+            var build = new BuildCommand(project);
+            build.Execute().Should().Pass();
+        }
     }
 }
