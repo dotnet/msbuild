@@ -1,34 +1,37 @@
-﻿using Microsoft.Build.Framework;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace tortillachip;
 public class Logger : INodeLogger
 {
-    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set => value = LoggerVerbosity.Minimal; }
-    public string Parameters { get => ""; set => value = ""; }
+    private readonly object _lock = new();
 
-    readonly object _lock = new();
+    private readonly CancellationTokenSource _cts = new();
 
-    readonly CancellationTokenSource _cts = new();
+    private NodeStatus[] _nodes;
 
-    NodeStatus[] _nodes;
+    private readonly Dictionary<ProjectContext, Project> _notableProjects = new();
 
-    readonly Dictionary<ProjectContext, Project> _notableProjects = new();
+    private readonly Dictionary<ProjectContext, (bool Notable, string Path, string Targets)> _notabilityByContext = new();
 
-    readonly Dictionary<ProjectContext, (bool Notable, string Path, string Targets)> _notabilityByContext = new();
+    private readonly Dictionary<ProjectInstance, ProjectContext> _relevantContextByInstance = new();
 
-    readonly Dictionary<ProjectInstance, ProjectContext> _relevantContextByInstance = new();
+    private readonly Dictionary<ProjectContext, Stopwatch> _projectTimeCounter = new();
 
-    readonly Dictionary<ProjectContext, Stopwatch> _projectTimeCounter = new();
-
-    int _usedNodes = 0;
+    private int _usedNodes = 0;
 
     private ProjectContext _restoreContext;
+
+    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set => value = LoggerVerbosity.Minimal; }
+    public string Parameters { get => ""; set => value = ""; }
 
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
@@ -39,7 +42,7 @@ public class Logger : INodeLogger
 
     public void Initialize(IEventSource eventSource)
     {
-        //Debugger.Launch();
+        // Debugger.Launch();
 
         eventSource.BuildStarted += new BuildStartedEventHandler(BuildStarted);
         eventSource.BuildFinished += new BuildFinishedEventHandler(BuildFinished);
@@ -179,7 +182,7 @@ public class Logger : INodeLogger
         }
     }
 
-    string FitToWidth(string input)
+    private string FitToWidth(string input)
     {
         return input.Substring(0, Math.Min(input.Length, Console.BufferWidth - 1));
     }
