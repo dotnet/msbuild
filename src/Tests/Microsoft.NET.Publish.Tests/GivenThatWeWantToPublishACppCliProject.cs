@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
@@ -20,22 +21,23 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact]
         public void When_referenced_by_csharp_project_it_publishes_and_runs()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
 
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "CSConsoleApp"))
-                .Execute(new string[] { "-p:Platform=x64" })
+                .Execute(new string[] { "-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true })
                 .Should()
                 .Pass();
 
             var exe = Path.Combine( //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
-                "netcoreapp3.1",
+                ToolsetInfo.CurrentTargetFramework,
                 "publish",
                 "CSConsoleApp.exe");
 
@@ -48,18 +50,31 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("Hello, World!");
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact(Skip = "There is no publish error when using PackageReference support which is required for testing")]
         public void When_not_referenced_by_csharp_project_it_fails_to_publish()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
 
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
-                .Execute(new string[] { "-p:Platform=x64" })
+                .Execute(new string[] { "-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true"})
                 .Should()
                 .Fail()
                 .And.HaveStdOutContaining(Strings.NoSupportCppPublishDotnetCore);
+        }
+
+        private void AddPackageReference(string projectPath, XDocument project, string package, string version)
+        {
+            if (Path.GetExtension(projectPath) == ".vcxproj")
+            {
+                XNamespace ns = project.Root.Name.Namespace;
+                XElement itemGroup = project.Root.Descendants(ns + "ItemGroup").First();
+                itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", package),
+                                                    new XAttribute("Version", version)));
+
+            }
         }
     }
 }
