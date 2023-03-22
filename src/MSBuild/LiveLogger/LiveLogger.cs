@@ -33,6 +33,8 @@ internal sealed class LiveLogger : INodeLogger
 
     private Thread _refresher;
 
+    private List<string> _nodeStringBuffer = new();
+
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
     public string Parameters { get => ""; set { } }
 
@@ -88,10 +90,14 @@ internal sealed class LiveLogger : INodeLogger
         while (!_cts.IsCancellationRequested)
         {
             Thread.Sleep(1_000 / 30); // poor approx of 30Hz
+
             lock (_lock)
             {
-                EraseNodes();
-                DisplayNodes();
+                if (UpdateNodeStringBuffer())
+                {
+                    EraseNodes();
+                    DisplayNodes();
+                }
             }
         }
 
@@ -163,6 +169,7 @@ internal sealed class LiveLogger : INodeLogger
 
                 double duration = _notableProjects[restoreContext].Stopwatch.Elapsed.TotalSeconds;
 
+                UpdateNodeStringBuffer();
                 EraseNodes();
                 Console.WriteLine($"\x1b[{_usedNodes + 1}F");
                 Console.Write($"\x1b[0J");
@@ -176,6 +183,7 @@ internal sealed class LiveLogger : INodeLogger
         {
             lock (_lock)
             {
+                UpdateNodeStringBuffer();
                 EraseNodes();
 
                 double duration = _notableProjects[c].Stopwatch.Elapsed.TotalSeconds;
@@ -186,23 +194,51 @@ internal sealed class LiveLogger : INodeLogger
         }
     }
 
+    private bool UpdateNodeStringBuffer()
+    {
+        bool stringBufferWasUpdated = false;
+
+        int i = 0;
+        foreach (NodeStatus n in _nodes)
+        {
+            if (n is null)
+            {
+                continue;
+            }
+            string str = n.ToString();
+
+            if (i < _nodeStringBuffer.Count)
+            {
+                if (_nodeStringBuffer[i] != str)
+                {
+                    _nodeStringBuffer[i] = str;
+                    stringBufferWasUpdated = true;
+                }
+            }
+            else
+            {
+                _nodeStringBuffer.Add(str);
+                stringBufferWasUpdated = true;
+            }
+            i++;
+        }
+
+        if (i < _nodeStringBuffer.Count)
+        {
+            _nodeStringBuffer.RemoveRange(i, _nodeStringBuffer.Count - i);
+            stringBufferWasUpdated = true;
+        }
+
+        return stringBufferWasUpdated;
+    }
+
     private void DisplayNodes()
     {
-        lock (_lock)
+        foreach (string str in _nodeStringBuffer)
         {
-            int i = 0;
-            foreach (NodeStatus n in _nodes)
-            {
-                if (n is null)
-                {
-                    continue;
-                }
-                Console.WriteLine(FitToWidth(n.ToString()));
-                i++;
-            }
-
-            _usedNodes = i;
+            Console.WriteLine(FitToWidth(str));
         }
+        _usedNodes = _nodeStringBuffer.Count;
     }
 
     private string FitToWidth(string input)
@@ -212,15 +248,12 @@ internal sealed class LiveLogger : INodeLogger
 
     private void EraseNodes()
     {
-        lock (_lock)
+        if (_usedNodes == 0)
         {
-            if (_usedNodes == 0)
-            {
-                return;
-            }
-            Console.WriteLine($"\x1b[{_usedNodes + 1}F");
-            Console.Write($"\x1b[0J");
+            return;
         }
+        Console.WriteLine($"\x1b[{_usedNodes + 1}F");
+        Console.Write($"\x1b[0J");
     }
 
     private void TargetStarted(object sender, TargetStartedEventArgs e)
