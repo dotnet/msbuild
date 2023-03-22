@@ -124,8 +124,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
   <Import Project="Microsoft.NET.Sdk.StaticWebAssets.Pack.CrossTargeting.targets" Condition="'$(IsCrossTargetingBuild)' == 'true'" />
 
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.5_0.targets" Condition="'$(UseStaticWebAssetsV2)' != 'true' And '$(ScopedCssEnabled)' == 'true'" />
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.targets" Condition="'$(UseStaticWebAssetsV2)' == 'true' And '$(ScopedCssEnabled)' == 'true'" />
+  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.5_0.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true' And '$(UseStaticWebAssetsV2)' != 'true' And '$(ScopedCssEnabled)' == 'true'" />
+  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true' And '$(UseStaticWebAssetsV2)' == 'true' And '$(ScopedCssEnabled)' == 'true'" />
 
   <Import Project="Microsoft.NET.Sdk.StaticWebAssets.JSModules.targets" Condition="'$(JSModulesEnabled)' == 'true'" />
 
