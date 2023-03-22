@@ -38,7 +38,9 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
+#if LIVELOGGER
 using Microsoft.Build.Logging.LiveLogger;
+#endif
 using System.Runtime.InteropServices;
 
 #nullable disable
@@ -3464,6 +3466,7 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             List<ILogger> loggers)
         {
+#if LIVELOGGER
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
@@ -3482,6 +3485,7 @@ namespace Microsoft.Build.CommandLine
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }
+#endif
         }
 
         /// <summary>
