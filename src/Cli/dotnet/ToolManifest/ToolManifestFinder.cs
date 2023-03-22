@@ -182,16 +182,22 @@ namespace Microsoft.DotNet.ToolManifest
         private DirectoryPath GetDirectoryToCreateToolManifest()
         {
             DirectoryPath? currentSearchDirectory = _probeStart;
-            while (currentSearchDirectory.HasValue)
+            while (currentSearchDirectory.HasValue && currentSearchDirectory.Value.GetParentPathNullable()!=null)
             {
                 var currentSearchGitDirectory = currentSearchDirectory.Value.WithSubDirectories(Constants.GitDirectoryName);
-                if (Directory.Exists(currentSearchGitDirectory.Value))
+                if (_fileSystem.Directory.Exists(currentSearchGitDirectory.Value))
                 {
                     return currentSearchDirectory.Value;
                 }
-                if (Directory.GetFiles(currentSearchDirectory.Value.Value, "*.sln").Any() || File.Exists(currentSearchDirectory.Value.WithFile(".git").Value))
+                if (currentSearchDirectory.Value.Value != null)
                 {
-                    return currentSearchDirectory.Value;
+                    if (_fileSystem.Directory.EnumerateFiles(currentSearchDirectory.Value.Value)
+                        .Any(filename => Path.GetExtension(filename).Equals(".sln", StringComparison.OrdinalIgnoreCase))
+                        || _fileSystem.File.Exists(currentSearchDirectory.Value.WithFile(".git").Value))
+
+                    {
+                        return currentSearchDirectory.Value;
+                    }
                 }
                 currentSearchDirectory = currentSearchDirectory.Value.GetParentPathNullable();
             }
@@ -201,9 +207,9 @@ namespace Microsoft.DotNet.ToolManifest
         private string WriteManifestFile(DirectoryPath folderPath)
         {
             var manifestFileContent = "{\r\n  \"version\": 1,\r\n  \"isRoot\": true,\r\n  \"tools\": {}\r\n}";
-            Directory.CreateDirectory(Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName));
+            _fileSystem.Directory.CreateDirectory(Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName));
             string manifestFileLocation = Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName, Constants.ToolManifestFileName);
-            File.WriteAllText(manifestFileLocation, manifestFileContent);
+            _fileSystem.File.WriteAllText(manifestFileLocation, manifestFileContent);
 
             return manifestFileLocation;
         }
