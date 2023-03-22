@@ -634,8 +634,15 @@ public class TestReference
         public void Build_WithJiterpreter(bool? value)
             => BuildWasmMinimalAndValidateBootConfig("BlazorWebAssemblyJiterpreter", value, b =>
             {
-                b.runtimeOptions.Should().NotBeNull();
-                b.runtimeOptions.Length.Should().Be(3);
+                if (value != null)
+                {
+                    b.runtimeOptions.Should().NotBeNull();
+                    b.runtimeOptions.Length.Should().Be(3);
+                }
+                else
+                {
+                    b.runtimeOptions.Should().BeNull();
+                }
             });
 
         private void BuildWasmMinimalAndValidateBootConfig(string propertyName, bool? propertyValue, Action<BootJsonData> validateBootConfig)
