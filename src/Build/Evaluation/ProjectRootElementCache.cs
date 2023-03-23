@@ -445,6 +445,11 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (KeyValuePair<string, ProjectRootElement> kvp in oldWeakCache)
                 {
+                    if (kvp.Value is null)
+                    {
+                        continue;
+                    }
+
                     if (kvp.Value.IsExplicitlyLoaded)
                     {
                         _weakCache[kvp.Key] = kvp.Value;
