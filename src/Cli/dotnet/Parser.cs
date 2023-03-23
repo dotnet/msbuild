@@ -118,17 +118,8 @@ namespace Microsoft.DotNet.Cli
                 var lines = File.ReadAllLines(filePath);
                 var trimmedLines =
                     lines
-                        // Remove content in the lines that contain #, starting from the point of the #
-                        .Select(line => {
-                            var hashPos = line.IndexOf('#');
-                            if (hashPos == -1) {
-                                return line;
-                            } else if (hashPos == 0) {
-                                return "";
-                            } else {
-                                return line.Substring(0, hashPos).Trim();
-                            }
-                        })
+                        // Remove content in the lines that start with # after trimmer leading whitespace
+                        .Select(line => line.TrimStart().StartsWith('#') ? string.Empty : line)
                         // trim leading/trailing whitespace to not pass along dead spaces
                         .Select(x => x.Trim())
                         // Remove empty lines

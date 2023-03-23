@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
         public bool Include(ISymbol symbol)
         {
             string? docId = symbol.GetDocumentationCommentId();
-            if (docId != null && _docIdsToExclude.Contains(docId))
+            if (docId is not null && _docIdsToExclude.Contains(docId))
             {
                 return false;
             }

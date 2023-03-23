@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
         /// <inheritdoc />
         public bool Include(ISymbol symbol) =>
             symbol.IsVisibleOutsideOfAssembly(IncludeInternalSymbols,
-                IncludeEffectivelyPrivateSymbols, IncludeExplicitInterfaceImplementationSymbols);
+                IncludeEffectivelyPrivateSymbols,
+                IncludeExplicitInterfaceImplementationSymbols);
     }
 }

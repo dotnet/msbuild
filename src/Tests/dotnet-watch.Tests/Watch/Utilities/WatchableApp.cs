@@ -44,11 +44,11 @@ namespace Microsoft.DotNet.Watcher.Tests
         /// <summary>
         /// Asserts that the watched process outputs a line starting with <paramref name="expectedPrefix"/> and returns the remainder of that line.
         /// </summary>
-        public async Task<string> AssertOutputLineStartsWith(string expectedPrefix)
+        public async Task<string> AssertOutputLineStartsWith(string expectedPrefix, Predicate<string> failure = null)
         {
             var line = await Process.GetOutputLineAsync(
                 success: line => line.StartsWith(expectedPrefix, StringComparison.Ordinal),
-                failure: line => line.Contains(WatchErrorOutputEmoji, StringComparison.Ordinal));
+                failure: failure ?? new Predicate<string>(line => line.Contains(WatchErrorOutputEmoji, StringComparison.Ordinal)));
 
             Assert.StartsWith(expectedPrefix, line, StringComparison.Ordinal);
 

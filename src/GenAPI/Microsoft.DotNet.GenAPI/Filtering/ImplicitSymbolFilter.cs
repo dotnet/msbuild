@@ -28,9 +28,7 @@ namespace Microsoft.DotNet.GenAPI.Filtering
                     method.MethodKind == MethodKind.EventRemove ||
                     method.MethodKind == MethodKind.EventRaise ||
                     method.MethodKind == MethodKind.DelegateInvoke)
-                {
                     return false;
-                }
             }
             return true;
         }

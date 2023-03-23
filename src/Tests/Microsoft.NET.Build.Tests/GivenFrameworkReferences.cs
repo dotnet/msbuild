@@ -817,7 +817,7 @@ namespace FrameworkReferenceTest
             {
                 Name = "ResolvedFrameworkReferenceTest",
                 IsExe = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 

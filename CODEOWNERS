@@ -66,10 +66,10 @@
 /src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ClickOnce.targets @sujitnayak
 
 # Area-Watch
-/src/Assets/TestProjects/Watch*/     @tmat @arkalyanms
-/src/Tests/dotnet-watch.Tests/       @tmat @arkalyanms
+/src/Assets/TestProjects/Watch*/     @tmat @arkalyanms @dotnet/roslyn-ide
+/src/Tests/dotnet-watch.Tests/       @tmat @arkalyanms @dotnet/roslyn-ide
 /src/Tests/Microsoft.AspNetCore.Watch.BrowserRefresh.Tests/       @dotnet/aspnet-blazor-eng
-/src/BuiltInTools/*   @tmat @arkalyanms
+/src/BuiltInTools/*   @tmat @arkalyanms @dotnet/roslyn-ide
 /src/BuiltInTools/BrowserRefresh   @dotnet/aspnet-blazor-eng
 
 # ApiCompat tools owned by runtime team

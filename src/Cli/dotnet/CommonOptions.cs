@@ -137,13 +137,17 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<string>(
                 new string[] { "--arch", "-a" },
                 CommonLocalizableStrings.ArchitectureOptionDescription)
-            .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
+            {
+                ArgumentHelpName = CommonLocalizableStrings.ArchArgumentName
+            }.SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
         public static Option<string> LongFormArchitectureOption =
             new ForwardedOption<string>(
                 new string[] { "--arch" },
                 CommonLocalizableStrings.ArchitectureOptionDescription)
-            .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
+            {
+                ArgumentHelpName = CommonLocalizableStrings.ArchArgumentName
+            }.SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
         internal static string ArchOptionValue(ParseResult parseResult) =>
             string.IsNullOrEmpty(parseResult.GetValue(CommonOptions.ArchitectureOption)) ?
@@ -154,7 +158,9 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<string>(
                 "--os",
                 CommonLocalizableStrings.OperatingSystemOptionDescription)
-            .SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
+            {
+                ArgumentHelpName = CommonLocalizableStrings.OSArgumentName
+            }.SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
 
         public static Option<bool> DebugOption = new Option<bool>("--debug");
 
@@ -175,7 +181,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> TestFrameworkOption = new Option<string>("--Framework");
 
-        public static readonly Option<string> TestLoggerOption = new Option<string>("--logger");
+        public static readonly Option<string[]> TestLoggerOption = new Option<string[]>("--logger");
 
         public static void ValidateSelfContainedOptions(bool hasSelfContainedOption, bool hasNoSelfContainedOption)
         {

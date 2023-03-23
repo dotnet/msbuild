@@ -30,9 +30,16 @@ namespace Microsoft.DotNet.Cli
             return Command;
         }
 
-        internal static void ShowWorkloadsInfo(ParseResult parseResult, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null, string dotnetDir = null)
+        internal static void ShowWorkloadsInfo(ParseResult parseResult = null, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null, string dotnetDir = null)
         {
-            workloadInfoHelper ??= new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption));
+            if(workloadInfoHelper != null)
+            {
+                workloadInfoHelper ??= new WorkloadInfoHelper(parseResult != null ? parseResult.HasOption(SharedOptions.InteractiveOption) : false);
+            }
+            else
+            {
+                workloadInfoHelper ??= new WorkloadInfoHelper(false);
+            }
             IEnumerable<WorkloadId> installedList = workloadInfoHelper.InstalledSdkWorkloadIds;
             InstalledWorkloadsCollection installedWorkloads = workloadInfoHelper.AddInstalledVsWorkloads(installedList);
             reporter ??= Cli.Utils.Reporter.Output;
@@ -70,7 +77,6 @@ namespace Microsoft.DotNet.Cli
                 reporter.Write($"{separator}{CommonStrings.WorkloadInstallTypeColumn}:");
                 reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), dotnetPath),align}"
                 );
-                reporter.WriteLine("");
             }
         }
 
@@ -79,6 +85,7 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.HasOption(InfoOption) && parseResult.RootSubCommandResult() == "workload")
             {
                 ShowWorkloadsInfo(parseResult);
+                Cli.Utils.Reporter.Output.WriteLine("");
                 return 0;
             }
             return parseResult.HandleMissingCommand();

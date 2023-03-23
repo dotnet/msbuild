@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\RazorSdk\Tasks\Microsoft.NET.Sdk.Razor.Tasks.csproj" />
+    <ProjectReference Include="..\..\..\src\StaticWebAssetsSdk\Tasks\Microsoft.NET.Sdk.StaticWebAssets.Tasks.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 

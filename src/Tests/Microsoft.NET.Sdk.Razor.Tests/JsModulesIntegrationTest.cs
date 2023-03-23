@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Utilities;

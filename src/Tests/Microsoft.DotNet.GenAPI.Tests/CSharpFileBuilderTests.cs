@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Xunit;
 using System;
 using System.IO;
 using System.Text;
@@ -12,6 +11,7 @@ using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Microsoft.DotNet.GenAPI.Filtering;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
+using Xunit;
 
 namespace Microsoft.DotNet.GenAPI.Tests
 {
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
             StringWriter stringWriter = new();
 
             var compositeFilter = new CompositeSymbolFilter()
-                .Add<ImplicitSymbolFilter>()
+                .Add(new ImplicitSymbolFilter())
                 .Add(new AccessibilitySymbolFilter(includeInternalSymbols,
                     includeEffectivelyPrivateSymbols, includeExplicitInterfaceImplementationSymbols));
             IAssemblySymbolWriter csharpFileBuilder = new CSharpFileBuilder(new ConsoleLog(MessageImportance.Low),
@@ -410,7 +410,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestDelegateGeneration()
+        public void TestDelegateGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -427,7 +427,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestAbstractEventGeneration()
+        public void TestAbstractEventGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -460,7 +460,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestCustomAttributeGeneration()
+        public void TestCustomAttributeGeneration()
         {
             RunTest(original: """
                 using System;
@@ -530,7 +530,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestFullyQualifiedNamesForDefaultEnumParameters()
+        public void TestFullyQualifiedNamesForDefaultEnumParameters()
         {
             RunTest(original: """
                 namespace Foo
@@ -576,7 +576,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestCustomComparisonOperatorGeneration()
+        public void TestCustomComparisonOperatorGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -607,7 +607,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestNestedClassGeneration()
+        public void TestNestedClassGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -637,7 +637,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 """);
         }
         [Fact]
-        void TestExplicitInterfaceImplementationMethodGeneration()
+        public void TestExplicitInterfaceImplementationMethodGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -660,7 +660,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestNullabilityGeneration()
+        public void TestNullabilityGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -689,7 +689,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestExtensionMethodsGeneration()
+        public void TestExtensionMethodsGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -712,7 +712,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestMethodsWithVariableNumberOfArgumentsGeneration()
+        public void TestMethodsWithVariableNumberOfArgumentsGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -735,7 +735,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestConversionOperatorGeneration()
+        public void TestConversionOperatorGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -771,7 +771,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestDestructorGeneration()
+        public void TestDestructorGeneration()
         {
             RunTest(original: """
                 namespace Foo
@@ -794,7 +794,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestExplicitInterfaceImplementationPropertyGeneration()
+        public void TestExplicitInterfaceImplementationPropertyGeneration()
         {
             RunTest(original: """
                     namespace Foo
@@ -833,7 +833,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestAccessibilityGenerationForPropertyAccessors()
+        public void TestAccessibilityGenerationForPropertyAccessors()
         {
             RunTest(original: """
                     namespace Foo
@@ -974,7 +974,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestSynthesizePrivateFieldsForValueTypes()
+        public void TestSynthesizePrivateFieldsForValueTypes()
         {
             RunTest(original: """
                 using System;
@@ -1000,7 +1000,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestSynthesizePrivateFieldsForReferenceTypes()
+        public void TestSynthesizePrivateFieldsForReferenceTypes()
         {
             RunTest(original: """
                 namespace Foo
@@ -1025,7 +1025,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestSynthesizePrivateFieldsForGenericTypes()
+        public void TestSynthesizePrivateFieldsForGenericTypes()
         {
             RunTest(original: """
                 namespace Foo
@@ -1049,7 +1049,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestSynthesizePrivateFieldsForNestedGenericTypes()
+        public void TestSynthesizePrivateFieldsForNestedGenericTypes()
         {
             RunTest(original: """
                 using System.Collections.Generic;
@@ -1077,7 +1077,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestSynthesizePrivateFieldsAngleBrackets()
+        public void TestSynthesizePrivateFieldsAngleBrackets()
         {
             RunTest(original: """
                 using System.Collections.Generic;
@@ -1105,7 +1105,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        void TestSynthesizePrivateFieldsForInaccessibleNestedGenericTypes()
+        public void TestSynthesizePrivateFieldsForInaccessibleNestedGenericTypes()
         {
             RunTest(original: """
                 namespace A
@@ -1449,7 +1449,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 includeInternalSymbols: false);
         }
 
-        [Fact (Skip="https://github.com/dotnet/roslyn/issues/67019")]
+        [Fact(Skip = "https://github.com/dotnet/roslyn/issues/67019")]
         public void TestInterfaceWithOperatorGeneration()
         {
             RunTest(original: """
@@ -1837,6 +1837,210 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     }
                     """,
                 includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void NewKeywordWhenBaseMethodIsHidden()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        using System;
+                        public partial class C : IFun, IExplicit, IExplicit2 {
+                            public int Foo;
+                            public const int Bar = 29;
+                            public int Baz { get; }
+                            #pragma warning disable 8618
+                            public event EventHandler MyEvent;
+                            void IExplicit.Explicit() {}
+                            #pragma warning disable 8625
+                            public void Do() => MyEvent(default(object), default(EventArgs));
+                            public void Do(float f) {}
+                            public static void DoStatic() {}
+                            public void Explicit2() {}
+                            public void Fun() {}
+                            public void Gen<T>() {}
+                            public void Zoo() {}
+                            public class MyNestedClass {}
+                            public struct MyNestedStruct {}
+                            public class MyNestedGenericClass<T> {}
+                            public struct MyNestedGenericStruct<T> {}
+                            public C this[int i]
+                            {
+                              get => default(C)!;
+                              set {}
+                            }
+                        }
+                        public class D : C, IExplicit, IExplicit2 {
+                            public new int Foo;
+                            public new const int Bar = 30;
+                            public new int Baz { get; set; }
+                            public new event EventHandler MyEvent;
+                            void IExplicit2.Explicit2() {}
+                            public new void Do() => MyEvent(default(object), default(EventArgs));
+                            public void Do(int i) {}
+                            public new static void DoStatic() {}
+                            public void Explicit() {}
+                            public new void Fun() {}
+                            public new void Gen<T>() where T : IComparable {}
+                            public new class MyNestedClass {}
+                            public new struct MyNestedStruct {}
+                            public new class MyNestedGenericClass<T> {}
+                            public new struct MyNestedGenericStruct<T> {}
+                            public new D this[int i]
+                            {
+                              get => default(D)!;
+                              set {}
+                            }
+                        }
+                        public class E : C {
+                            public new int Bar;
+                            public new const int Do = 30;
+                            public new int Foo { get; set; }
+                            public new event EventHandler MyNestedClass;
+                            public new void Baz() => MyNestedClass(default(object), default(EventArgs));
+                            public new void MyNestedStruct(double d) {}
+                            public new void Zoo() {}
+                        }
+                        public interface IExplicit {
+                            void Explicit();
+                        }
+                        public interface IExplicit2 {
+                            void Explicit2();
+                        }
+                        public interface IFun {
+                            void Fun();
+                        }
+                    }
+                    """,
+                    expected: """
+                    namespace A
+                    {
+                        public partial class C : IFun, IExplicit, IExplicit2
+                        {
+                            public const int Bar = 29;
+                            public int Foo;
+                            public int Baz { get { throw null; } }
+                            public C this[int i] { get { throw null; } set {} }
+                            public event System.EventHandler MyEvent { add {} remove {} }
+                            void IExplicit.Explicit() {}
+                            public void Do() {}
+                            public void Do(float f) {}
+                            public static void DoStatic() {}
+                            public void Explicit2() {}
+                            public void Fun() {}
+                            public void Gen<T>() {}
+                            public void Zoo() {}
+                            public partial class MyNestedClass {}
+                            public partial class MyNestedGenericClass<T> {}
+                            public partial struct MyNestedGenericStruct<T> {}
+                            public partial struct MyNestedStruct {}
+                        }
+                        public partial class D : C, IExplicit, IExplicit2
+                        {
+                            public new const int Bar = 30;
+                            public new int Foo;
+                            public new int Baz { get { throw null; } set {} }
+                            public new D this[int i] { get { throw null; } set {} }
+                            public new event System.EventHandler MyEvent { add {} remove {} }
+                            void IExplicit2.Explicit2() {}
+                            public new void Do() {}
+                            public void Do(int i) {}
+                            public new static void DoStatic() {}
+                            public void Explicit() {}
+                            public new void Fun() {}
+                            public new void Gen<T>() where T : System.IComparable {}
+                            public new partial class MyNestedClass {}
+                            public new partial class MyNestedGenericClass<T> {}
+                            public new partial struct MyNestedGenericStruct<T> {}
+                            public new partial struct MyNestedStruct {}
+                        }
+                        public partial class E : C
+                        {
+                            public new int Bar;
+                            public new const int Do = 30;
+                            public new int Foo { get { throw null; } set {} }
+                            public new event System.EventHandler MyNestedClass { add {} remove {} }
+                            public new void Baz() {}
+                            public new void MyNestedStruct(double d) {}
+                            public new void Zoo() {}
+                        }
+                        public partial interface IExplicit {
+                            void Explicit();
+                        }
+                        public partial interface IExplicit2 {
+                            void Explicit2();
+                        }
+                        public partial interface IFun {
+                            void Fun();
+                        }
+                    }
+                    """);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestAttributeWithInternalTypeArgumentOmitted(bool includeInternalSymbols)
+        {
+            string expected = includeInternalSymbols ? """
+                    namespace A
+                    {
+                        public partial class AnyTestAttribute : System.Attribute
+                        {
+                            public AnyTestAttribute(System.Type xType) { }
+
+                            public System.Type XType { get { throw null; } set { } }
+                        }
+
+                        internal partial class InternalClass
+                        {
+                        }
+
+                        [AnyTest(typeof(InternalClass))]
+                        [System.Obsolete]
+                        public partial class PublicClass
+                        {
+                        }
+                    }
+                    """ : """
+                    namespace A
+                    {
+                        public partial class AnyTestAttribute : System.Attribute
+                        {
+                            public AnyTestAttribute(System.Type xType) { }
+
+                            public System.Type XType { get { throw null; } set { } }
+                        }
+
+                        [System.Obsolete]
+                        public partial class PublicClass
+                        {
+                        }
+                    }
+                    """;
+
+            RunTest(original: """
+                    namespace A
+                    {
+                        internal class InternalClass { }
+                        public partial class AnyTestAttribute : System.Attribute
+                        {
+                            public AnyTestAttribute(System.Type xType)
+                            {
+                                XType = xType;
+                            }
+                    
+                            public System.Type XType { get; set; }
+                        }
+
+                        [AnyTest(typeof(InternalClass))]
+                        [System.Obsolete]
+                        public class PublicClass { }
+                    }
+                    """,
+                expected: expected,
+                includeInternalSymbols: includeInternalSymbols);
         }
     }
 }

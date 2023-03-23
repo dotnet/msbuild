@@ -173,9 +173,9 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false, false)]
         public void TestGlobalPropertyFlowToMultitargetedProject(bool passSelfContained, bool passRuntimeIdentifier)
         {
-            _testProject.TargetFrameworks = "net6.0;net7.0";
+            _testProject.TargetFrameworks = $"net6.0;{ToolsetInfo.CurrentTargetFramework}";
 
-            _referencedProject.TargetFrameworks = "net6.0;net7.0";
+            _referencedProject.TargetFrameworks = $"net6.0;{ToolsetInfo.CurrentTargetFramework}";
             _referencedProject.IsExe = true;
             _referencedProject.ProjectChanges.Add(project =>
             {
@@ -189,11 +189,11 @@ namespace Microsoft.NET.Build.Tests
             ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
                 targetFramework: "net6.0");
             ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                targetFramework: "net7.0");
+                targetFramework: ToolsetInfo.CurrentTargetFramework);
             ValidateProperties(testAsset, _referencedProject, expectSelfContained: false, expectRuntimeIdentifier: false,
                 targetFramework: "net6.0");
             ValidateProperties(testAsset, _referencedProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                targetFramework: "net7.0");
+                targetFramework: ToolsetInfo.CurrentTargetFramework);
         }
 
         [RequiresMSBuildVersionTheory("17.4.0.41702", Skip = "https://github.com/dotnet/msbuild/issues/8154")]

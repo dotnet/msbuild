@@ -103,19 +103,19 @@ namespace Microsoft.DotNet.GenAPI
                 loader.AddReferenceSearchPaths(context.AssemblyReferences);
             }
 
-            var compositeSymbolFilter = new CompositeSymbolFilter()
-                .Add<ImplicitSymbolFilter>()
+            CompositeSymbolFilter compositeSymbolFilter = new CompositeSymbolFilter()
+                .Add(new ImplicitSymbolFilter())
                 .Add(new AccessibilitySymbolFilter(
                     context.IncludeVisibleOutsideOfAssembly,
                     includeEffectivelyPrivateSymbols: true,
                     includeExplicitInterfaceImplementationSymbols: true));
 
-            if (context.ExcludeAttributesFiles != null)
+            if (context.ExcludeAttributesFiles is not null)
             {
                 compositeSymbolFilter.Add(new DocIdSymbolFilter(context.ExcludeAttributesFiles));
             }
 
-            if (context.ExcludeApiFiles != null)
+            if (context.ExcludeApiFiles is not null)
             {
                 compositeSymbolFilter.Add(new DocIdSymbolFilter(context.ExcludeApiFiles));
             }
@@ -123,13 +123,13 @@ namespace Microsoft.DotNet.GenAPI
             IReadOnlyList<IAssemblySymbol?> assemblySymbols = loader.LoadAssemblies(context.Assemblies);
             foreach (IAssemblySymbol? assemblySymbol in assemblySymbols)
             {
-                if (assemblySymbol == null) continue;
+                if (assemblySymbol == null)
+                    continue;
 
                 using TextWriter textWriter = GetTextWriter(context.OutputPath, assemblySymbol.Name);
                 textWriter.Write(ReadHeaderFile(context.HeaderFile));
 
-                using CSharpFileBuilder fileBuilder = new(
-                    logger,
+                using CSharpFileBuilder fileBuilder = new(logger,
                     compositeSymbolFilter,
                     textWriter,
                     context.ExceptionMessage,
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.GenAPI
             {
                 foreach (Diagnostic warning in roslynDiagnostics)
                 {
-                    logger.LogWarning(warning.Id, $"RoslynDiagnostic: '{warning}'");
+                    logger.LogWarning(warning.Id, warning.ToString());
                 }
             }
 
@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.GenAPI
             {
                 foreach (AssemblyLoadWarning warning in loadWarnings)
                 {
-                    logger.LogWarning(warning.DiagnosticId, $"AssemblyLoadWarning: '{warning.Message}'");
+                    logger.LogWarning(warning.DiagnosticId, warning.Message);
                 }
             }
         }
@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.GenAPI
         /// <returns></returns>
         private static TextWriter GetTextWriter(string? outputDirPath, string assemblyName)
         {
-            if (outputDirPath == null)
+            if (outputDirPath is null)
             {
                 return Console.Out;
             }
@@ -198,11 +198,9 @@ namespace Microsoft.DotNet.GenAPI
 
             """;
 
-            if (!string.IsNullOrEmpty(headerFile))
-            {
-                return File.ReadAllText(headerFile);
-            }
-            return defaultFileHeader;
+            return !string.IsNullOrEmpty(headerFile) ?
+                File.ReadAllText(headerFile) :
+                defaultFileHeader;
         }
     }
 }

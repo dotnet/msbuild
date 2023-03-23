@@ -42,12 +42,13 @@ namespace Microsoft.DotNet.Watcher.Tests
         [Theory]
         [InlineData(new[] { "--no-hot-reload", "run" }, "")]
         [InlineData(new[] { "--no-hot-reload", "run", "args" }, "args")]
-        [InlineData(new[] { "--no-hot-reload", "--", "run", "args" }, "args")]
+        [InlineData(new[] { "--no-hot-reload", "--", "run", "args" }, "run,args")]
         [InlineData(new[] { "--no-hot-reload" }, "")]
         [InlineData(new string[] {}, "")]
         [InlineData(new[] { "run" }, "")]
         [InlineData(new[] { "run", "args" }, "args")]
-        [InlineData(new[] { "--", "run", "args" }, "args")]
+        [InlineData(new[] { "--", "run", "args" }, "run,args")]
+        [InlineData(new[] { "abc" }, "abc")]
         public async Task Arguments(string[] arguments, string expectedApplicationArgs)
         {
             var testAsset = TestAssets.CopyTestAsset("WatchHotReloadApp", identifier: string.Join(",", arguments))
@@ -60,19 +61,42 @@ namespace Microsoft.DotNet.Watcher.Tests
         }
 
         [Fact]
-        public async Task OnlyRunSupportsHotReload()
+        public async Task RunArguments_NoHotReload()
         {
-            var testAsset = TestAssets.CopyTestAsset("WatchHotReloadApp")
+            var testAsset = TestAssets.CopyTestAsset("WatchHotReloadAppMultiTfm")
                 .WithSource()
                 .Path;
 
-            App.Start(testAsset, new[] { "--verbose", "abc" });
+            App.Start(testAsset, arguments: new[]
+            {
+                "--no-hot-reload",
+                "run",
+                "-f",         // dotnet watch does not recognize this arg -> dotnet run arg
+                "net6.0",
+                "--property:AssemblyVersion=1.2.3.4",
+                "--property",
+                "AssemblyTitle= | A=B'\tC | ",
+                "--",         // the following args are not dotnet watch args
+                "-v",         // dotnet run arg
+                "minimal",
+                "--",         // the following args are not dotnet run args
+                "-v",         // application arg
+            });
 
-           await App.AssertOutputLineStartsWith("dotnet watch ❌ Only 'run' command supports Hot Reload");
+            Assert.Equal("-v", await App.AssertOutputLineStartsWith("Arguments = "));
+            Assert.Equal("WatchHotReloadAppMultiTfm, Version=1.2.3.4, Culture=neutral, PublicKeyToken=null", await App.AssertOutputLineStartsWith("AssemblyName = "));
+            Assert.Equal("' | A=B'\tC | '", await App.AssertOutputLineStartsWith("AssemblyTitle = "));
+            Assert.Equal(".NETCoreApp,Version=v6.0", await App.AssertOutputLineStartsWith("TFM = "));
+
+            // expected output from build (-v minimal):
+            Assert.Contains(App.Process.Output, l => l.Contains("Determining projects to restore..."));
+
+            // not expected to find verbose output of dotnet watch
+            Assert.DoesNotContain(App.Process.Output, l => l.Contains("Running dotnet with the following arguments"));
         }
 
         [Fact]
-        public async Task RunArguments()
+        public async Task RunArguments_HotReload()
         {
             var testAsset = TestAssets.CopyTestAsset("WatchHotReloadAppMultiTfm")
                 .WithSource()
@@ -82,22 +106,68 @@ namespace Microsoft.DotNet.Watcher.Tests
             {
                 "run",
                 "-f",         // dotnet watch does not recognize this arg -> dotnet run arg
-                "net6.0",     
-                "--",         // the following args are not dotnet watch args
-                "-v",         // dotnet run arg
-                "minimal",
+                "net6.0",
+                "--property",
+                "AssemblyVersion=1.2.3.4",
+                "--property",
+                "AssemblyTitle= | A=B'\tC | ",
                 "--",         // the following args are not dotnet run args
                 "-v",         // application arg
             });
 
-            Assert.Equal("-v", await App.AssertOutputLineStartsWith("Arguments = "));
+            Assert.Equal("-v", await App.AssertOutputLineStartsWith("Arguments = ", failure: s => s.Contains("MSBUILD")));
+            Assert.Equal("WatchHotReloadAppMultiTfm, Version=1.2.3.4, Culture=neutral, PublicKeyToken=null", await App.AssertOutputLineStartsWith("AssemblyName = "));
+            Assert.Equal("' | A=B'\tC | '", await App.AssertOutputLineStartsWith("AssemblyTitle = "));
             Assert.Equal(".NETCoreApp,Version=v6.0", await App.AssertOutputLineStartsWith("TFM = "));
-
-            // expected output from build (-v minimal):
-            Assert.Contains(App.Process.Output, l => l.Contains("Determining projects to restore..."));
 
             // not expected to find verbose output of dotnet watch
             Assert.DoesNotContain(App.Process.Output, l => l.Contains("Running dotnet with the following arguments"));
+
+            Assert.Contains(App.Process.Output, l => l.Contains("Hot reload enabled."));
+        }
+
+        [Theory]
+        [InlineData("P1", "argP1")]
+        [InlineData("P and Q and \"R\"", "argPQR")]
+        public async Task ArgumentsFromLaunchSettings_Watch(string profileName, string expectedArgs)
+        {
+            var testAsset = TestAssets.CopyTestAsset("WatchAppWithLaunchSettings")
+                .WithSource()
+                .Path;
+
+            App.Start(testAsset, arguments: new[]
+            {
+                "--verbose",
+                "--no-hot-reload",
+                "-lp",
+                profileName
+            });
+
+            Assert.Equal(expectedArgs, await App.AssertOutputLineStartsWith("Arguments: "));
+
+            Assert.Contains(App.Process.Output, l => l.Contains($"Found named launch profile '{profileName}'."));
+            Assert.Contains(App.Process.Output, l => l.Contains("Hot Reload disabled by command line switch."));
+        }
+
+        [Theory]
+        [InlineData("P1", "argP1")]
+        [InlineData("P and Q and \"R\"", "argPQR")]
+        public async Task ArgumentsFromLaunchSettings_HotReload(string profileName, string expectedArgs)
+        {
+            var testAsset = TestAssets.CopyTestAsset("WatchAppWithLaunchSettings")
+                .WithSource()
+                .Path;
+
+            App.Start(testAsset, arguments: new[]
+            {
+                "--verbose",
+                "-lp",
+                profileName
+            });
+
+            Assert.Equal(expectedArgs, await App.AssertOutputLineStartsWith("Arguments: "));
+
+            Assert.Contains(App.Process.Output, l => l.Contains($"Found named launch profile '{profileName}'."));
         }
     }
 }

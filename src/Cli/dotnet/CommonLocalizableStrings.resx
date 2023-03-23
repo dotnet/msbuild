@@ -711,4 +711,10 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="MSBuildAdditionalOptionTitle" xml:space="preserve">
     <value>.NET Cli Options:</value>
   </data>
+  <data name="ArchArgumentName" xml:space="preserve">
+    <value>ARCH</value>
+  </data>
+  <data name="OSArgumentName" xml:space="preserve">
+    <value>OS</value>
+  </data>
 </root>

@@ -321,7 +321,7 @@ namespace Microsoft.DotNet.Watcher
                 processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(_muxerPath);
             }
 
-            if (context.LaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)
+            if (context.LaunchSettingsProfile.EnvironmentVariables is { } envVariables)
             {
                 foreach (var entry in envVariables)
                 {
