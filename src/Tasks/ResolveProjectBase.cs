@@ -124,7 +124,7 @@ namespace Microsoft.Build.Tasks
         {
             string projectGuid = projectRef.GetMetadata(attributeProject);
 
-            if ((_solutionConfiguration.TryGetProjectByGuid(projectGuid, out XmlElement projectElement)) && (projectElement != null))
+            if (_solutionConfiguration.TryGetProjectByGuid(projectGuid, out XmlElement projectElement))
             {
                 return projectElement;
             }
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Tasks
             // next we'll try a lookup by the absolute path of the project
             string projectFullPath = projectRef.GetMetadata("FullPath"); // reserved metadata "FullPath" is used at it will cache the value
 
-            if ((_solutionConfiguration.TryGetProjectByAbsolutePath(projectFullPath, out projectElement)) && (projectElement != null))
+            if (_solutionConfiguration.TryGetProjectByAbsolutePath(projectFullPath, out projectElement))
             {
                 return projectElement;
             }
