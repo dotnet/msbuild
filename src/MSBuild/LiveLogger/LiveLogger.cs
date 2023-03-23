@@ -7,8 +7,6 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Framework;
 
-#nullable disable
-
 namespace Microsoft.Build.Logging.LiveLogger;
 
 internal sealed class LiveLogger : INodeLogger
@@ -17,11 +15,11 @@ internal sealed class LiveLogger : INodeLogger
 
     private readonly CancellationTokenSource _cts = new();
 
-    private NodeStatus[] _nodes;
+    private NodeStatus?[] _nodes = Array.Empty<NodeStatus>();
 
     private readonly Dictionary<ProjectContext, Project> _notableProjects = new();
 
-    private readonly Dictionary<ProjectContext, (bool Notable, string Path, string Targets)> _notabilityByContext = new();
+    private readonly Dictionary<ProjectContext, (bool Notable, string? Path, string? Targets)> _notabilityByContext = new();
 
     private readonly Dictionary<ProjectInstance, ProjectContext> _relevantContextByInstance = new();
 
@@ -29,11 +27,11 @@ internal sealed class LiveLogger : INodeLogger
 
     private int _usedNodes = 0;
 
-    private ProjectContext _restoreContext;
+    private ProjectContext? _restoreContext;
 
-    private Thread _refresher;
+    private Thread? _refresher;
 
-    private List<string> _nodeStringBuffer = new();
+    private readonly List<string> _nodeStringBuffer = new();
 
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
     public string Parameters { get => ""; set { } }
@@ -81,7 +79,7 @@ internal sealed class LiveLogger : INodeLogger
         eventSource.WarningRaised += new BuildWarningEventHandler(WarningRaised);
         eventSource.ErrorRaised += new BuildErrorEventHandler(ErrorRaised);
 
-        _refresher = new(ThreadProc);
+        _refresher = new Thread(ThreadProc);
         _refresher.Start();
     }
 
@@ -114,9 +112,15 @@ internal sealed class LiveLogger : INodeLogger
 
     private void ProjectStarted(object sender, ProjectStartedEventArgs e)
     {
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
         bool notable = IsNotableProject(e);
 
-        ProjectContext c = new ProjectContext(e);
+        ProjectContext c = new ProjectContext(buildEventContext);
 
         if (notable)
         {
@@ -134,7 +138,7 @@ internal sealed class LiveLogger : INodeLogger
 
         _notabilityByContext[c] = (notable, e.ProjectFile, e.TargetNames);
 
-        var key = new ProjectInstance(e);
+        var key = new ProjectInstance(buildEventContext);
         if (!_relevantContextByInstance.ContainsKey(key))
         {
             _relevantContextByInstance.Add(key, c);
@@ -158,13 +162,18 @@ internal sealed class LiveLogger : INodeLogger
 
     private void ProjectFinished(object sender, ProjectFinishedEventArgs e)
     {
-        ProjectContext c = new(e);
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        ProjectContext c = new(buildEventContext);
 
         if (_restoreContext is ProjectContext restoreContext && c == restoreContext)
         {
             lock (_lock)
             {
-
                 _restoreContext = null;
 
                 double duration = _notableProjects[restoreContext].Stopwatch.Elapsed.TotalSeconds;
@@ -179,7 +188,7 @@ internal sealed class LiveLogger : INodeLogger
             }
         }
 
-        if (_notabilityByContext[c].Notable && _relevantContextByInstance[new ProjectInstance(e)] == c)
+        if (_notabilityByContext[c].Notable && _relevantContextByInstance[new ProjectInstance(buildEventContext)] == c)
         {
             lock (_lock)
             {
@@ -199,7 +208,7 @@ internal sealed class LiveLogger : INodeLogger
         bool stringBufferWasUpdated = false;
 
         int i = 0;
-        foreach (NodeStatus n in _nodes)
+        foreach (NodeStatus? n in _nodes)
         {
             if (n is null)
             {
@@ -258,7 +267,11 @@ internal sealed class LiveLogger : INodeLogger
 
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
-        _nodes[NodeIndexForContext(e.BuildEventContext)] = new(e.ProjectFile, e.TargetName, _projectTimeCounter[new ProjectContext(e)]);
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null)
+        {
+            _nodes[NodeIndexForContext(buildEventContext)] = new(e.ProjectFile, e.TargetName, _projectTimeCounter[new ProjectContext(buildEventContext)]);
+        }
     }
 
     private int NodeIndexForContext(BuildEventContext context)
@@ -272,10 +285,11 @@ internal sealed class LiveLogger : INodeLogger
 
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
-        if (e.TaskName == "MSBuild")
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null && e.TaskName == "MSBuild")
         {
             // This will yield the node, so preemptively mark it idle
-            _nodes[NodeIndexForContext(e.BuildEventContext)] = null;
+            _nodes[NodeIndexForContext(buildEventContext)] = null;
         }
     }
 
@@ -305,20 +319,12 @@ internal record ProjectContext(int Id)
     public ProjectContext(BuildEventContext context)
         : this(context.ProjectContextId)
     { }
-
-    public ProjectContext(BuildEventArgs e)
-        : this(e.BuildEventContext)
-    { }
 }
 
 internal record ProjectInstance(int Id)
 {
     public ProjectInstance(BuildEventContext context)
         : this(context.ProjectInstanceId)
-    { }
-
-    public ProjectInstance(BuildEventArgs e)
-        : this(e.BuildEventContext)
     { }
 }
 
@@ -329,5 +335,3 @@ internal record NodeStatus(string Project, string Target, Stopwatch Stopwatch)
         return $"{Project} {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)";
     }
 }
-
-internal record ProjectReferenceUniqueness(ProjectInstance Instance, string TargetList);
