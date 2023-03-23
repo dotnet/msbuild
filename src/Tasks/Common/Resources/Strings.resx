@@ -825,7 +825,7 @@ You may need to build the project on another operating system or architecture, o
   </data>
   <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
     <value>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</value>
-    <comment>{StrBegin="NETSDK1179: "}</comment>
+    <comment>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}</comment>
   </data>
   <data name="CouldNotGetPackVersionFromWorkloadManifests" xml:space="preserve">
     <value>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</value>
