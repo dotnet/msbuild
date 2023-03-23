@@ -172,7 +172,7 @@ Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) ha
                 .Should()
                 .ExitWith(0)
                 //TODO: replace with de-DE translation when translation is ready
-                .And.HaveStdOutContaining("Warnung: Failed to read or parse localization file ").And.HaveStdOutContaining("localize/templatestrings.de-DE.json")
+                .And.HaveStdOutContaining("Warnung: Fehler beim Lesen oder parsen der Lokalisierungsdatei ").And.HaveStdOutContaining("localize/templatestrings.de-DE.json")
                 .And.HaveStdOutContaining("Die Vorlage \"name\" wurde erfolgreich erstellt.").And.NotHaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
         }
 
