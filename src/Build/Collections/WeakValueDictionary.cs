@@ -239,7 +239,11 @@ namespace Microsoft.Build.Collections
         {
             foreach (KeyValuePair<K, WeakReference<V>> kvp in _dictionary)
             {
-                if (kvp.Value is not null && kvp.Value.TryGetTarget(out V target))
+                if (kvp.Value is null)
+                {
+                    yield return new KeyValuePair<K, V>(kvp.Key, null);
+                }
+                else if (kvp.Value.TryGetTarget(out V target))
                 {
                     yield return new KeyValuePair<K, V>(kvp.Key, target);
                 }
