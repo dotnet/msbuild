@@ -1,10 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml;
-using System;
 
 namespace Microsoft.Build.Shared
 {
@@ -113,14 +114,14 @@ namespace Microsoft.Build.Shared
 
         public ICollection<XmlElement> ProjectConfigurations => _cachedProjectElements.Values;
 
-        public bool TryGetProjectByGuid(string projectGuid, out XmlElement? projectElement) => _cachedProjectElements.TryGetValue(projectGuid, out projectElement);
+        public bool TryGetProjectByGuid(string projectGuid, [MaybeNullWhen(false)] out XmlElement? projectElement) => _cachedProjectElements.TryGetValue(projectGuid, out projectElement);
 
-        public bool TryGetProjectByAbsolutePath(string projectFullPath, out XmlElement? projectElement) => _cachedProjectElementsByAbsolutePath.TryGetValue(projectFullPath, out projectElement);
+        public bool TryGetProjectByAbsolutePath(string projectFullPath, [MaybeNullWhen(false)] out XmlElement? projectElement) => _cachedProjectElementsByAbsolutePath.TryGetValue(projectFullPath, out projectElement);
 
-        public bool TryGetProjectGuidByAbsolutePath(string projectFullPath, out string? projectGuid) => _cachedProjectGuidsByAbsolutePath.TryGetValue(projectFullPath, out projectGuid);
+        public bool TryGetProjectGuidByAbsolutePath(string projectFullPath, [MaybeNullWhen(false)] out string? projectGuid) => _cachedProjectGuidsByAbsolutePath.TryGetValue(projectFullPath, out projectGuid);
 
-        public bool TryGetProjectDependencies(string projectGuid, out List<string>? dependencyProjectGuids) => _cachedDependencyProjectGuidsByDependingProjectGuid.TryGetValue(projectGuid, out dependencyProjectGuids);
+        public bool TryGetProjectDependencies(string projectGuid, [MaybeNullWhen(false)] out List<string>? dependencyProjectGuids) => _cachedDependencyProjectGuidsByDependingProjectGuid.TryGetValue(projectGuid, out dependencyProjectGuids);
 
-        public bool TryGetProjectPathByGuid(string projectGuid, out string? projectPath) => _cachedProjectAbsolutePathsByGuid.TryGetValue(projectGuid, out projectPath);
+        public bool TryGetProjectPathByGuid(string projectGuid, [MaybeNullWhen(false)] out string? projectPath) => _cachedProjectAbsolutePathsByGuid.TryGetValue(projectGuid, out projectPath);
     }
 }
