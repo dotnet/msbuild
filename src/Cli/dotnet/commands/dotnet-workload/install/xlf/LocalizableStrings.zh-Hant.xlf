@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AdManifestPackageDoesNotExist">
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">未更新廣告資訊清單。{0} 的資訊清單封裝並不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdManifestUpdated">
+        <source>Updated advertising manifest {0}.</source>
+        <target state="translated">已更新廣告資訊清單 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CacheMissingPackage">
+        <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
+        <target state="translated">離線快取 {2} 中並沒有套件 {0} 版本 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">無法同時使用 {0} 與 {1} 選項。如果從復原檔案安裝，請移除 {0}。否則，請移除 {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">正在檢查更新的工作負載資訊清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeletingWorkloadPack">
+        <source>Uninstalling workload pack {0} version {1}…</source>
+        <target state="translated">正在解除安裝工作負載套件 {0} 版本 {1}…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadToCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="translated">目錄</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadToCacheOptionDescription">
+        <source>Download packages needed to install a workload to a folder that can be used for offline installation.</source>
+        <target state="translated">必須下載套件，以將工作負載安裝置至可用於離線安裝的資料夾中。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadingPackToCacheMessage">
+        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
+        <target state="translated">正在將套件 {0} 版本 {1} 下載到離線快取 {2}…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">MSI 中的預期單一資訊清單級區和資訊清單資料夾來自套件 {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedAdManifestUpdate">
+        <source>Failed to update the advertising manifest {0}: {1}.</source>
+        <target state="translated">無法更新廣告資訊清單 {0}: {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToDownloadPackageManifest">
+        <source>Failed to download manifest package {0}.</source>
+        <target state="translated">無法下載資訊清單套件 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">無法從 MSI 擷取資訊: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallWorkloadManifest">
+        <source>Failed to install manifest {0} version {1}: {2}.</source>
+        <target state="translated">無法安裝資訊清單 {0} 版本 {1}: {2}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="translated">目錄</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromCacheOptionDescription">
+        <source>Complete the operation from cache (offline).</source>
+        <target state="translated">從快取完成作業 (離線)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GarbageCollectingSdkFeatureBandsMessage">
+        <source>Garbage collecting for SDK feature band(s) {0}...</source>
+        <target state="translated">SDK 功能級區 {0} 的垃圾收集...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GarbageCollectionFailed">
+        <source>Warning: Workload garbage collection failed with error: {0}.</source>
+        <target state="translated">警告: 工作負載垃圾收集失敗，錯誤碼: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InadequatePermissions">
+        <source>Inadequate permissions. Run the command with elevated privileges.</source>
+        <target state="translated">權限不足。以較高的權限執行命令。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncludePreviewOptionDescription">
+        <source>Allow prerelease workload manifests.</source>
+        <target state="translated">允許發行前階段工作負載資訊清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncompatibleManifests">
+        <source>The current SDK isn't compatible with workload manifests of SDK version {0}.</source>
+        <target state="translated">目前的 SDK 與 SDK 版本 {0} 的工作負載資訊清單不相容。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallationSucceeded">
+        <source>Successfully installed workload(s) {0}.</source>
+        <target state="translated">已成功安裝工作負載 (s) {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingPackVersionMessage">
+        <source>Installing pack {0} version {1}...</source>
+        <target state="translated">正在安裝套件 {0} 版本 {1}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingWorkloadManifest">
+        <source>Installing workload manifest {0} version {1}…</source>
+        <target state="translated">正在安裝工作負載資訊清單 {0} 版本 {1}…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InsufficientPrivilegeToStartServer">
+        <source>Insufficient privilege to start the server.</source>
+        <target state="translated">權限不足，無法啟動伺服器。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">剖析工作負載資訊清單識別碼 '{1}' 的版本 '{0}' 時發生錯誤</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidWorkloadConfiguration">
+        <source>The settings file in the workload's NuGet package is invalid: {0}</source>
+        <target state="translated">工作負載的 NuGet 套件設定檔案無效: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Install one or more workloads.</source>
+        <target state="translated">安裝一或多個工作負載。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">要使用的 NuGet 組態檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to install the workload for.</source>
+        <target state="translated">要為工作負載安裝的目標 Framework。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDoesNotExist">
+        <source>No manifest with ID {0} exists.</source>
+        <target state="translated">沒有識別碼為 {0} 的資訊清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">在 NuGet 套件 {0} 中找不到資訊清單 MSI</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">未解析資訊清單封裝。{0} 的資訊清單套件或 URL 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressInstall">
+        <source>Installing {0} </source>
+        <target state="translated">安裝 {0} </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressRepair">
+        <source>Repairing {0} </source>
+        <target state="translated">修復 {0} </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressUninstall">
+        <source>Removing {0} </source>
+        <target state="translated">正在移除 {0} </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestsExistForFeatureBand">
+        <source>No manifests exist for SDK version {0}.</source>
+        <target state="translated">沒有 SDK 版本 {0} 的資訊清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoTrustWithParentPID">
+        <source>Failed to establish a trust relationship with parent process ({0}).</source>
+        <target state="translated">無法與父處理序 ({0}) 建立信任關係。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSDoesNotSupportMsi">
+        <source>MSI installations are only supported on Windows.</source>
+        <target state="translated">只有 Windows 支援 MSI 安裝。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PendingReboot">
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">機器有擱置中的重新開機。安裝將繼續，但您可能需要重新開機。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolvingPackageUrls">
+        <source>Resolving package URLs for workload(s) {0}...</source>
+        <target state="translated">正在解析工作負載 {0} 的套件 URL...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollBackFailedMessage">
+        <source>Installation rollback failed: {0}</source>
+        <target state="translated">安裝復原失敗: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
+        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
+        <target state="translated">無效的復原定義。復原定義 {0} 中的資訊清單識別碼不符合已安裝的資訊清單識別碼 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollbackDefinitionFileDoesNotExist">
+        <source>Provided rollback definition file {0} doesn't exist.</source>
+        <target state="translated">提供的復原定義檔案 {0} 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackInstall">
+        <source>Workload installation failed. Rolling back installed packs...</source>
+        <target state="translated">工作負載安裝失敗。正在復原已安裝的套件...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackPackInstall">
+        <source>Rolling back pack {0} installation...</source>
+        <target state="translated">正在回復套件 {0} 安裝...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipManifestUpdateOptionDescription">
+        <source>Skip updating the workload manifests.</source>
+        <target state="translated">跳過更新工作負載資訊清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">略過工作負載套件和安裝程式的簽章驗證。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkippingManifestUpdate">
+        <source>Manifest packages were not found. Skipping manifest update...</source>
+        <target state="translated">找不到資訊清單套件。正在略過資訊清單更新...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceOptionDescription">
+        <source>The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</source>
+        <target state="translated">還原期間要使用的 NuGet 套件資料來源。若要指定多個來源，請重複選項。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">資料來源</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TempDirOptionDescription">
+        <source>Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</source>
+        <target state="translated">指定此命令的暫存目錄，以下載並解壓縮 NuGet 套件 (必須為安全)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownInstallType">
+        <source>Unknown installation type: {0}.</source>
+        <target state="translated">未知的安裝類型: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedPackError">
+        <source>Pack ID {0} unrecognized.</source>
+        <target state="translated">無法辨識套件識別碼 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrintDownloadLinkOnlyDescription">
+        <source>Only print the list of links to download without downloading.</source>
+        <target state="translated">只列印要下載的連結清單，而不下載。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingCacheForPackInstall">
+        <source>Installing package {0} version {1} from offline cache {2}.</source>
+        <target state="translated">正在從離線快取 {2} 安裝套件 {0} 版本 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version of the SDK.</source>
+        <target state="translated">SDK 的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallFullCommandNameLocalized">
+        <source>.NET install command</source>
+        <target state="translated">.NET 安裝命令</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' doesn't exist.</source>
+        <target state="translated">NuGet 組態檔 '{0}' 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' isn't a valid NuGet version range.</source>
+        <target state="translated">指定的版本 '{0}' 不是有效的 NuGet 版本範圍。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadAlreadyInstalled">
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">已安裝工作負載 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadCacheDownloadFailed">
+        <source>Download of workload packs to offline cache failed: {0}</source>
+        <target state="translated">將工作負載套件下載到離線快取失敗: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdArgumentDescription">
+        <source>The NuGet package ID of the workload to install.</source>
+        <target state="translated">要安裝工作負載的 NuGet 套件識別碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdArgumentName">
+        <source>WORKLOAD_ID</source>
+        <target state="translated">WORKLOAD_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInstallationFailed">
+        <source>Workload installation failed: {0}</source>
+        <target state="translated">工作負載安裝失敗: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotRecognized">
+        <source>Workload ID {0} is not recognized.</source>
+        <target state="translated">無法辨識工作負載識別碼 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotSupportedOnPlatform">
+        <source>Workload ID {0} isn't supported on this platform.</source>
+        <target state="translated">此平台不支援工作負載識別碼 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPackAlreadyInstalledMessage">
+        <source>Pack {0} version {1} is already installed.</source>
+        <target state="translated">套件{0} ({1} 版本) 已經安裝。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionDescription">
+        <source>The directory where the workload will be installed. The directory will be created if it doesn't exist.</source>
+        <target state="translated">安裝工作負載所在的目錄。若目錄不存在，則會建立該目錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionName">
+        <source>PATH</source>
+        <target state="translated">路徑</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
+        <target state="translated">有可用的工作負載更新。如需詳細資訊，請執行 `dotnet workload list`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingPackInstallRecordMessage">
+        <source>Writing workload pack installation record for {0} version {1}...</source>
+        <target state="translated">正在寫入 {0} 版本 {1} 的工作負載套件安裝記錄...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingWorkloadInstallRecordMessage">
+        <source>Writing workload installation record for {0}...</source>
+        <target state="translated">正在寫入 {0} 的工作負載安裝記錄...</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

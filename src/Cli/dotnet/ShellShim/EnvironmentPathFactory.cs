@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ShellShim
             }
 
             IEnvironmentPath environmentPath = new DoNothingEnvironmentPath();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 if (isDotnetBeingInvokedFromNativeInstaller)
                 {
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.ShellShim
                         Reporter.Output);
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && isDotnetBeingInvokedFromNativeInstaller)
+            else if (OperatingSystem.IsLinux() && isDotnetBeingInvokedFromNativeInstaller)
             {
                 environmentPath = new LinuxEnvironmentPath(
                     CliFolderPathCalculator.ToolsShimPathInUnix,
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.ShellShim
                     environmentProvider,
                     new FileWrapper());
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && isDotnetBeingInvokedFromNativeInstaller)
+            else if (OperatingSystem.IsMacOS() && isDotnetBeingInvokedFromNativeInstaller)
             {
                 environmentPath = new OsxBashEnvironmentPath(
                     executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ShellShim
                 environmentProvider = new EnvironmentProvider();
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ZshDetector.IsZshTheUsersShell(environmentProvider))
+            if (OperatingSystem.IsMacOS() && ZshDetector.IsZshTheUsersShell(environmentProvider))
             {
                 return new OsxZshEnvironmentPathInstruction(
                     executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.ShellShim
                     environmentProvider: environmentProvider);
             }
 
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			if (OperatingSystem.IsWindows())
             {
                 return new WindowsEnvironmentPath(
                     CliFolderPathCalculator.ToolsShimPath,

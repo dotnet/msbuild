@@ -1,0 +1,62 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.ImportWorkloads.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Workload support -->
+
+  <!-- Import workload manifests -->
+  <Import Project="WorkloadManifest.targets" Sdk="Microsoft.NET.SDK.WorkloadManifestTargetsLocator"/>
+
+  <UsingTask TaskName="ShowMissingWorkloads" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="GetSuggestedWorkloads"
+          Returns="@(SuggestedWorkload)"
+          Condition="@(MissingWorkloadPack) != ''">
+    <ShowMissingWorkloads MissingWorkloadPacks="@(MissingWorkloadPack)"
+                          NetCoreRoot="$(NetCoreRoot)"
+                          NETCoreSdkVersion="$(NETCoreSdkVersion)"
+                          GenerateErrorsForMissingWorkloads="false">
+      <Output TaskParameter="SuggestedWorkloads" ItemName="SuggestedWorkload" />
+    </ShowMissingWorkloads>
+  </Target>
+
+  <!-- Skip this target for design time builds when there are missing workload packs.
+       This will prevent design time builds from failing and therefore allow
+       Visual Studio to collect the workloads from the GetSuggestedWorkloads target -->
+  <Target Name="_CheckForMissingWorkload"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform;_CheckForUnsupportedTargetPlatformIdentifier"
+        Condition="'@(MissingWorkloadPack)' != '' And '$(DesignTimeBuild)' != 'true'">
+
+    <ShowMissingWorkloads MissingWorkloadPacks="@(MissingWorkloadPack)"
+                          NetCoreRoot="$(NetCoreRoot)"
+                          NETCoreSdkVersion="$(NETCoreSdkVersion)"
+                          GenerateErrorsForMissingWorkloads="true"/>
+  </Target>
+
+  <!--  This target is not part of the build. Only used by dotnet workload restore command. Global property "SkipResolvePackageAssets"
+        need to be set to "true" to avoid requiring restore (which would likely fail if the required workloads aren't already installed).-->
+  <Target Name="_GetRequiredWorkloads" DependsOnTargets="GetSuggestedWorkloads;PrepareProjectReferences" Returns="@(_ResolvedSuggestedWorkload)">
+    <MSBuild
+      Projects="@(_MSBuildProjectReferenceExistent)"
+      Targets="_GetRequiredWorkloads"
+      BuildInParallel="$(BuildInParallel)"
+      Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
+      RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences);TargetFramework;TargetFrameworks">
+      <Output TaskParameter="TargetOutputs" ItemName="SuggestedWorkloadFromReference"/>
+    </MSBuild>
+
+    <ItemGroup>
+      <_ResolvedSuggestedWorkload Include="@(SuggestedWorkload)"/>
+      <_ResolvedSuggestedWorkload Include="@(SuggestedWorkloadFromReference)"/>
+    </ItemGroup>
+
+  </Target>
+</Project>

@@ -26,9 +26,8 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "CopyPPToOutputTest",
-                IsSdkProject = true, 
                 IsExe = true, 
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.PackageReferences.Add(packageReference);
             testProject.AdditionalProperties.Add("RestoreAdditionalProjectSources", Path.GetDirectoryName(packageReference.NupkgPath));
@@ -37,7 +36,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();
@@ -53,8 +52,7 @@ namespace Microsoft.NET.Build.Tests
             var referencedPackage = new TestProject()
             {
                 Name = "CopyPPFilesToOutput",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage);

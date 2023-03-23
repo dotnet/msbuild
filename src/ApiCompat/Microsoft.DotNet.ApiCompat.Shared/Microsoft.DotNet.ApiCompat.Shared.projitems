@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>9d36039f-d0a1-462f-85b4-81763c6b02cb</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Microsoft.DotNet.ApiCompat</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ApiCompatServiceProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuppressionFileHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValidatePackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValidateAssemblies.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RegexStringTransformer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RoslynResolver.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)CommonResources.resx" GenerateSource="true" SubType="Designer" Generator="MSBuild:_GenerateResxSource" ClassName="Microsoft.DotNet.ApiCompat.CommonResources" ManifestResourceName="Microsoft.DotNet.ApiCompat.CommonResources" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="DownloadVersionFailed">
+        <source>Downloading {0} version {1} failed.</source>
+        <target state="translated">Stahování {0} verze {1} selhalo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSource">
+        <source>Failed to load NuGet source {0}</source>
+        <target state="translated">Nepovedlo se načíst zdroj NuGet {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSourceSourceIsNotValid">
+        <source>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</source>
+        <target state="translated">Nepovedlo se načíst zdroj Nuget {0}: zdroj není platný. Při dalším zpracování se přeskočí.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToValidatePackageSigning">
+        <source>Failed to validate package signing.</source>
+        <target state="translated">Nepodařilo se ověřit podepisování balíčku.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IsNotFoundInNuGetFeeds">
+        <source>{0} is not found in NuGet feeds {1}".</source>
+        <target state="translated">Balíček {0} se nenašel v informačních kanálech NuGet {1}“.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="translated">Přeskakuje se ověření podpisu balíčku NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
+        <source>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</source>
+        <target state="translated">Přeskočit ověřování podepisování balíčku NuGet. Ověřování podepisování balíčku NuGet není k dispozici na Linuxu nebo v macOS https://aka.ms/workloadskippackagevalidation.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>$(AspNetTestTfm)</TargetFramework>
+    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);./TestPackages</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- We don't want to run build server when not running as tests. -->
+    <UseRazorBuildServer>false</UseRazorBuildServer>
+  </PropertyGroup>
+
+  <Target Name="BuildLocalNuget" BeforeTargets="Restore">
+    <MSBuild
+      Projects="..\PackageLibraryDirectDependency\PackageLibraryDirectDependency.csproj"
+      Targets="Restore;Pack"
+    />
+    <MSBuild
+      Projects="..\PackageLibraryTransitiveDependency\PackageLibraryTransitiveDependency.csproj"
+      Targets="Restore;Pack"
+    />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="PackageLibraryDirectDependency" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AnotherClassLib\AnotherClassLib.csproj" />
+  </ItemGroup>
+
+</Project>

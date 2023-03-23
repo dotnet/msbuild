@@ -19,6 +19,8 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Reflection.Metadata;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -37,7 +39,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
@@ -65,7 +67,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AutoRuntimeIdentifierTest",
                 TargetFrameworks = "net472",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -81,7 +82,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: packageName + "_" + referencePlatformPackage.ToString());
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()
@@ -140,7 +141,7 @@ namespace Microsoft.NET.Build.Tests
                        }
                    });
 
-                var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+                var buildCommand = new BuildCommand(testAsset);
                 buildCommand
                     .Execute()
                     .Should()
@@ -163,9 +164,9 @@ namespace Microsoft.NET.Build.Tests
         // implicit rid with option to append rid to output path on -> do not append (never append implicit rid irrespective of option)
         [InlineData("implicitOn", "", true, false)]
         // explicit  rid with option to append rid to output path off -> do not append
-        [InlineData("explicitOff", "win7-x86", false, false)]
+        [InlineData("explicitOff", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86", false, false)]
         // explicit rid with option to append rid to output path on -> append
-        [InlineData("explicitOn", "win7-x64", true, true)]
+        [InlineData("explicitOn", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64", true, true)]
         public void It_appends_rid_to_outdir_correctly(string identifier, string rid, bool useAppendOption, bool shouldAppend)
         {
             foreach (bool multiTarget in new[] { false, true })
@@ -188,13 +189,13 @@ namespace Microsoft.NET.Build.Tests
                         }
                     });
 
-                var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+                var buildCommand = new BuildCommand(testAsset);
                 buildCommand
                     .Execute()
                     .Should()
                     .Pass();
 
-                var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute(multiTarget ? new[] { "/p:TargetFramework=net46" } : Array.Empty<string>())
                     .Should()
@@ -207,11 +208,11 @@ namespace Microsoft.NET.Build.Tests
                         expectedOutput = "Native code was not used (MSIL)";
                         break;
 
-                    case "win7-x86":
+                    case $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86":
                         expectedOutput = "Native code was not used (X86)";
                         break;
 
-                    case "win7-x64":
+                    case $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64":
                         expectedOutput = "Native code was not used (Amd64)";
                         break;
 
@@ -242,11 +243,10 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("win8-x86-aot", "x86")]
         [InlineData("win7-x64", "x64")]
         [InlineData("win8-x64-aot", "x64")]
-        [InlineData("win10-arm", "arm")]
-        [InlineData("win10-arm-aot", "arm")]
-        //PlatformTarget=arm64 is not supported and never inferred
-        [InlineData("win10-arm64", "AnyCPU")]
-        [InlineData("win10-arm64-aot", "AnyCPU")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm", "arm")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm-aot", "arm")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm64", "arm64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm64-aot", "arm64")]
         // cpu architecture is never expected at the front
         [InlineData("x86-something", "AnyCPU")]
         [InlineData("x64-something", "AnyCPU")]
@@ -282,7 +282,7 @@ namespace Microsoft.NET.Build.Tests
                 "net46", "PlatformTarget", GetValuesCommand.ValueType.Property);
 
             getValuesCommand
-                .Execute($"/p:RuntimeIdentifier=win7-x86", "/p:PlatformTarget=x64")
+                .Execute($"/p:RuntimeIdentifier={ToolsetInfo.LatestWinRuntimeIdentifier}-x86", "/p:PlatformTarget=x64")
                 .Should()
                 .Pass();
 
@@ -299,8 +299,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DefaultReferences",
                 //  TODO: Add net35 to the TargetFrameworks list once https://github.com/Microsoft/msbuild/issues/1333 is fixed
-                TargetFrameworks = "net40;net45;net461",
-                IsSdkProject = true,
+                TargetFrameworks = "net40;net45;net462",
                 IsExe = true
             };
 
@@ -322,7 +321,7 @@ namespace DefaultReferences
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "DefaultReferences"));
+            var buildCommand = new BuildCommand(testAsset, "DefaultReferences");
 
             buildCommand
                 .Execute()
@@ -341,13 +340,12 @@ namespace DefaultReferences
                 Name = "MissingReferenceAssemblies",
                 //  A version of .NET we don't expect to exist
                 TargetFrameworks = "net469",
-                IsSdkProject = true,
                 IsExe = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
             var result = buildCommand.Execute("/clp:summary");
@@ -370,8 +368,7 @@ namespace DefaultReferences
             var testProject = new TestProject()
             {
                 Name = "DuplicateFrameworkReferences",
-                TargetFrameworks = "net461",
-                IsSdkProject = true,
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -386,7 +383,7 @@ namespace DefaultReferences
                     itemGroup.Add(new XElement(ns + "Reference", new XAttribute("Include", "System")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -402,8 +399,7 @@ namespace DefaultReferences
             var testProject = new TestProject()
             {
                 Name = "DesktopConflictsNuGet",
-                TargetFrameworks = "net461",
-                IsSdkProject = true,
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -417,10 +413,10 @@ namespace DefaultReferences
 
                     itemGroup.Add(new XElement(ns + "PackageReference",
                                     new XAttribute("Include", "NewtonSoft.Json"),
-                                    new XAttribute("Version", "9.0.1")));
+                                    new XAttribute("Version", "13.0.1")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -441,8 +437,7 @@ namespace DefaultReferences
             var testProject = new TestProject()
             {
                 Name = "DesktopConflictsHttp4_1",
-                TargetFrameworks = "net461",
-                IsSdkProject = true,
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -450,7 +445,7 @@ namespace DefaultReferences
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             //  Verify that ResolveAssemblyReference doesn't generate any conflicts
             buildCommand
@@ -467,8 +462,7 @@ namespace DefaultReferences
             var testProject = new TestProject()
             {
                 Name = "DesktopConflictsRuntimeTargets",
-                TargetFrameworks = "net461",
-                IsSdkProject = true,
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -486,7 +480,7 @@ namespace DefaultReferences
                                     new XAttribute("Version", "4.3.0")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             var buildResult = buildCommand
                 .Execute("/v:normal");
@@ -528,7 +522,6 @@ namespace DefaultReferences
 
             if (useSdkProject)
             {
-                testProject.IsSdkProject = true;
                 testProject.TargetFrameworks = "net472";
             }
             else
@@ -539,7 +532,7 @@ namespace DefaultReferences
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", httpPackageVersion));
 
-            testProject.SourceFiles["Program.cs"] = 
+            testProject.SourceFiles["Program.cs"] =
                 (useAlias ? "extern alias snh;" + Environment.NewLine : "") +
 
                 @"using System;
@@ -578,7 +571,7 @@ class Program
                     itemGroup.Add(httpReference);
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -612,8 +605,7 @@ class Program
             {
                 Name = "OverriddenAlias",
                 IsExe = true,
-                IsSdkProject = true,
-                TargetFrameworks = "net461"
+                TargetFrameworks = "net462"
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", "4.3.3"));
@@ -645,7 +637,7 @@ class Program
                 });
 
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -660,14 +652,14 @@ class Program
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: "win7-x86");
+            var outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             outputDirectory.Should().HaveFiles(new[] {
                 "DesktopNeedsBindingRedirects.exe",
@@ -696,7 +688,7 @@ class Program
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -704,7 +696,7 @@ class Program
                 .Pass();
 
             FileInfo outputfile = buildCommand
-                .GetIntermediateDirectory("net452", runtimeIdentifier: "win7-x86")
+                .GetIntermediateDirectory("net452", runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86")
                 .GetFiles("DesktopNeedsBindingRedirects.exe.withSupportedRuntime.config").Single();
 
             DateTime firstBuildWriteTime = File.GetLastWriteTimeUtc(outputfile.FullName);
@@ -785,14 +777,14 @@ class Program
 
         private XElement BuildTestAssetGetAppConfig(TestAsset testAsset)
         {
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: "win7-x86");
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             return XElement.Load(outputDirectory.GetFiles("DesktopNeedsBindingRedirects.exe.config").Single().FullName);
         }
@@ -806,7 +798,6 @@ class Program
             {
                 Name = "DesktopUsingPackageWithSatellites",
                 TargetFrameworks = "net46",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -828,7 +819,7 @@ class Program
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute("/v:normal")
                 .Should()
@@ -849,17 +840,239 @@ class Program
                 Name = "UppercaseTargetFrameworkVersion",
                 IsSdkProject = false,
                 IsExe = true,
-                TargetFrameworkVersion = "V4.6.1"
+                TargetFrameworkVersion = "V4.6.2"
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
+        }
+
+        [WindowsOnlyFact]
+        public void It_places_package_xml_in_ref_folder_in_output_directory()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopUsingPackageWithdXmlInRefFolder",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            // This package contains an xml in ref, but not in lib.
+            testProject.PackageReferences.Add(new TestPackageReference("system.diagnostics.debug", "4.3.0"));
+
+            testProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", "true");
+            testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", "true");
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            // this xml is coming from ref folder
+            outputDirectory.Should().HaveFile("System.Diagnostics.Debug.xml");
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("true",  "true")]
+        [InlineData("true",  "false")]
+        [InlineData("false", "true")]
+        [InlineData("false", "false")]
+        public void It_places_package_pdb_and_xml_files_in_output_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopUsingPackageWithPdbAndXml",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
+            
+            testProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", enableCopyDebugSymbolFilesFromPackages);
+            testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", enableDocumentationFilesFromPackages);
+
+            string testPath = enableCopyDebugSymbolFilesFromPackages + enableDocumentationFilesFromPackages;
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: testPath);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            HelperCheckPdbAndDocumentation(outputDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("true",  "true")]
+        [InlineData("true",  "false")]
+        [InlineData("false", "true")]
+        [InlineData("false", "false")]
+        public void It_places_package_pdb_and_xml_files_from_project_references_in_output_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)
+        {
+            var libraryProject = new TestProject()
+            {
+                Name = "ProjectWithPackage",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = false,
+            };
+
+            libraryProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
+
+            var consumerProject = new TestProject()
+            {
+                Name = "ConsumerProject",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            consumerProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", enableCopyDebugSymbolFilesFromPackages);
+            consumerProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", enableDocumentationFilesFromPackages);
+
+            consumerProject.ReferencedProjects.Add(libraryProject);
+
+            string testPath = enableCopyDebugSymbolFilesFromPackages + enableDocumentationFilesFromPackages;
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(consumerProject, consumerProject.Name, identifier: testPath);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(libraryProject.TargetFrameworks);
+
+            HelperCheckPdbAndDocumentation(outputDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("true",  "true")]
+        [InlineData("true",  "false")]
+        [InlineData("false", "true")]
+        [InlineData("false", "false")]
+        public void It_places_package_pdb_and_xml_files_in_publish_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopPublishPackageWithPdbAndXml",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
+
+            testProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", enableCopyDebugSymbolFilesFromPackages);
+            testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", enableDocumentationFilesFromPackages);
+
+            string testPath = enableCopyDebugSymbolFilesFromPackages + enableDocumentationFilesFromPackages;
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: testPath);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand
+                .Execute()
+                .Should()
+            .Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            HelperCheckPdbAndDocumentation(publishDirectory, "Microsoft.Build", enableCopyDebugSymbolFilesFromPackages, enableDocumentationFilesFromPackages);
+        }
+
+        [WindowsOnlyFact]
+        public void It_places_package_xml_files_in_output_directory_but_not_in_publish()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopPackageWithXmlNotPublished",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
+
+            testProject.AdditionalProperties.Add("PublishReferencesDocumentationFiles", "false");
+            testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", "true");
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand
+                .Execute()
+                .Should()
+            .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            outputDirectory.Should().HaveFile("Microsoft.Build.xml");
+            publishDirectory.Should().NotHaveFile("Microsoft.Build.xml");
+        }
+
+        void HelperCheckPdbAndDocumentation(
+            DirectoryInfo directoryInfo,
+            string packageName,
+            string enableCopyDebugSymbolFilesFromPackages,
+            string enableDocumentationFilesFromPackages)
+        {
+            string assemblyFile = packageName + ".dll";
+            string pdbFile = packageName + ".pdb";
+            string docFile = packageName + ".xml";
+
+            ShouldHave(assemblyFile);
+            if (enableCopyDebugSymbolFilesFromPackages == "true")
+            {
+                ShouldHave(pdbFile);
+            }
+            else
+            {
+                ShouldNotHave(pdbFile);
+            }
+
+            if (enableDocumentationFilesFromPackages == "true")
+            {
+                ShouldHave(docFile);
+            }
+            else
+            {
+                ShouldNotHave(docFile);
+            }
+
+            void ShouldHave(string file) => directoryInfo.Should().HaveFile(file);
+
+            void ShouldNotHave(string file) => directoryInfo.Should().NotHaveFile(file);
         }
     }
 }

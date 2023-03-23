@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="DownloadVersionFailed">
+        <source>Downloading {0} version {1} failed.</source>
+        <target state="translated">下载 {0} 版本 {1} 失败。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSource">
+        <source>Failed to load NuGet source {0}</source>
+        <target state="translated">无法加载 NuGet 源 {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSourceSourceIsNotValid">
+        <source>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</source>
+        <target state="translated">无法加载 NuGet 源 {0}: 源无效。进一步处理中将跳过它。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToValidatePackageSigning">
+        <source>Failed to validate package signing.</source>
+        <target state="translated">验证包签名失败。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IsNotFoundInNuGetFeeds">
+        <source>{0} is not found in NuGet feeds {1}".</source>
+        <target state="translated">在 NuGet 源 {1} 中找不到 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="translated">正在跳过 NuGet 包签名验证。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
+        <source>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</source>
+        <target state="translated">跳过 NuGet 包签名验证。Linux 或 macOS 上不提供 NuGet 签名验证。https://aka.ms/workloadskippackagevalidation。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

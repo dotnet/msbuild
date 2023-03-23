@@ -2,20 +2,37 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
+using Xunit.Sdk;
 
 namespace Microsoft.NET.TestFramework.ProjectConstruction
 {
     public class TestProject
     {
+        public TestProject([CallerMemberName] string name = null)
+        {
+            if (name != null)
+            {
+                Name = name;
+            }
+        }
+
+        /// <summary>
+        /// A name for the test project that's used to isolate it from a test's root folder by appending it to the root test path.
+        /// By default, it is the unhashed name of the function that instantiated the TestProject object.
+        /// </summary>
         public string Name { get; set; }
 
-        public bool IsSdkProject { get; set; }
+        public bool IsSdkProject { get; set; } = true;
 
         public bool IsExe { get; set; }
 
+        /// <summary>
+        /// This value merely sets the OutputType and is not automatically tied here to whether the project is a WPF or Windows Form App Executable.
+        /// </summary>
         public bool IsWinExe { get; set; }
 
         public string ProjectSdk { get; set; }
@@ -41,16 +58,27 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public List<TestPackageReference> PackageReferences { get; } = new List<TestPackageReference>();
 
         public List<TestPackageReference> DotNetCliToolReferences { get; } = new List<TestPackageReference>();
-        
+
         public List<CopyFilesTarget> CopyFilesTargets { get; } = new List<CopyFilesTarget>();
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
         public Dictionary<string, string> EmbeddedResources { get; } = new Dictionary<string, string>();
 
+        /// <summary>
+        /// Use this dictionary to set a property (the key) to a value for the created project.
+        /// </summary>
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
-        public Dictionary<string, string> AdditionalItems { get; } = new Dictionary<string, string>();
+        public List<KeyValuePair<string, Dictionary<string, string>>> AdditionalItems { get; } = new();
+
+        public List<Action<XDocument>> ProjectChanges { get; } = new List<Action<XDocument>>();
+
+        /// <summary>
+        /// A list of properties to record the values for when the project is built.
+        /// Values can be retrieved with <see cref="GetPropertyValues"/>
+        /// </summary>
+        public List<string> PropertiesToRecord { get; } = new List<string>();
 
         public IEnumerable<string> TargetFrameworkIdentifiers
         {
@@ -144,8 +172,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             foreach (TestPackageReference packageReference in PackageReferences)
             {
+                var includeOrUpdate = packageReference.UpdatePackageReference ? "Update" : "Include";
                 var packageReferenceElement = new XElement(ns + "PackageReference",
-                    new XAttribute("Include", packageReference.ID));
+                    new XAttribute(includeOrUpdate, packageReference.ID));
                 if (packageReference.Version != null)
                 {
                     packageReferenceElement.Add(new XAttribute("Version", packageReference.Version));
@@ -157,6 +186,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 if (packageReference.Aliases != null)
                 {
                     packageReferenceElement.Add(new XAttribute("Aliases", packageReference.Aliases));
+                }
+                if (packageReference.Publish != null)
+                {
+                    packageReferenceElement.Add(new XAttribute("Publish", packageReference.Publish));
                 }
                 packageReferenceItemGroup.Add(packageReferenceElement);
             }
@@ -221,9 +254,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         additionalItemGroup = new XElement(ns + "ItemGroup");
                         projectXml.Root.Add(packageReferenceItemGroup);
                     }
-                    additionalItemGroup.Add(new XElement(
-                        ns + additionalItem.Key, 
-                        new XAttribute("Include", additionalItem.Value)));
+                    var item = new XElement(ns + additionalItem.Key);
+                    foreach (var attribute in additionalItem.Value)
+                        item.Add(new XAttribute(attribute.Key, attribute.Value));
+                    additionalItemGroup.Add(item);
                 }
             }
 
@@ -279,7 +313,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         new XAttribute("Include", frameworkReference)));
                 }
             }
-            
+
             if (this.CopyFilesTargets.Any())
             {
                 foreach (var copyFilesTarget in CopyFilesTargets)
@@ -302,6 +336,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 }
             }
 
+            foreach (var projectChange in ProjectChanges)
+            {
+                projectChange(projectXml);
+            }
+
             using (var file = File.CreateText(targetProjectPath))
             {
                 projectXml.Save(file);
@@ -309,11 +348,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             if (SourceFiles.Count == 0)
             {
-                string source;
-
                 if (this.IsExe || this.IsWinExe)
                 {
-                    source =
+                    string source =
     @"using System;
 
 class Program
@@ -325,40 +362,49 @@ class Program
 
                     foreach (var dependency in this.ReferencedProjects)
                     {
-                        source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.Name);" + Environment.NewLine;
-                        source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.List);" + Environment.NewLine;
+                        string safeDependencyName = dependency.Name.Replace('.', '_');
+
+                        source += $"        Console.WriteLine({safeDependencyName}.{safeDependencyName}Class.Name);" + Environment.NewLine;
+                        source += $"        Console.WriteLine({safeDependencyName}.{safeDependencyName}Class.List);" + Environment.NewLine;
                     }
 
                     source +=
     @"    }
 }";
+                    string sourcePath = Path.Combine(targetFolder, this.Name + "Program.cs");
+
+                    File.WriteAllText(sourcePath, source);
                 }
-                else
+
                 {
-                    source =
+                    string safeThisName = this.Name.Replace('.', '_');
+                    string source =
     $@"using System;
 using System.Collections.Generic;
 
-namespace {this.Name}
+namespace {safeThisName}
 {{
-    public class {this.Name}Class
+    public class {safeThisName}Class
     {{
         public static string Name {{ get {{ return ""{this.Name}""; }} }}
         public static List<string> List {{ get {{ return null; }} }}
 ";
                     foreach (var dependency in this.ReferencedProjects)
                     {
-                        source += $"        public string {dependency.Name}Name {{ get {{ return {dependency.Name}.{dependency.Name}Class.Name; }} }}" + Environment.NewLine;
-                        source += $"        public List<string> {dependency.Name}List {{ get {{ return {dependency.Name}.{dependency.Name}Class.List; }} }}" + Environment.NewLine;
+                        string safeDependencyName = dependency.Name.Replace('.', '_');
+
+                        source += $"        public string {safeDependencyName}Name {{ get {{ return {safeDependencyName}.{safeDependencyName}Class.Name; }} }}" + Environment.NewLine;
+                        source += $"        public List<string> {safeDependencyName}List {{ get {{ return {safeDependencyName}.{safeDependencyName}Class.List; }} }}" + Environment.NewLine;
                     }
 
                     source +=
     @"    }
 }";
-                }
-                string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
+                    string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
 
-                File.WriteAllText(sourcePath, source);
+                    File.WriteAllText(sourcePath, source);
+                }
+
             }
             else
             {
@@ -372,6 +418,80 @@ namespace {this.Name}
             {
                 File.WriteAllText(Path.Combine(targetFolder, kvp.Key), kvp.Value);
             }
+
+            if (PropertiesToRecord.Any())
+            {
+                string propertiesElements = "";
+                foreach (var propertyName in PropertiesToRecord)
+                {
+                    propertiesElements += $"      <LinesToWrite Include=`{propertyName}: $({propertyName})`/>" + Environment.NewLine;
+                }
+
+                string injectTargetContents =
+    $@"<Project>
+  <Target Name=`WritePropertyValues` BeforeTargets=`AfterBuild`>
+    <ItemGroup>
+{propertiesElements}
+    </ItemGroup>
+    <WriteLinesToFile
+      File=`$(BaseIntermediateOutputPath)\$(Configuration)\$(TargetFramework)\PropertyValues.txt`
+      Lines=`@(LinesToWrite)`
+      Overwrite=`true`
+      Encoding=`Unicode`
+      />
+  </Target>
+</Project>";
+
+                injectTargetContents = injectTargetContents.Replace('`', '"');
+
+                string targetPath = Path.Combine(targetFolder, "obj", Name + ".csproj.WriteValuesToFile.g.targets");
+
+                if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+                }
+
+                File.WriteAllText(targetPath, injectTargetContents);
+            }
+        }
+
+        public void AddItem(string itemName, string attributeName, string attributeValue)
+        {
+            AddItem(itemName, new Dictionary<string, string>() { { attributeName, attributeValue } });
+        }
+
+        public void AddItem(string itemName, Dictionary<string, string> attributes)
+        {
+            AdditionalItems.Add(new(itemName, attributes));
+        }
+
+        public void RecordProperties(params string[] propertyNames)
+        {
+            PropertiesToRecord.AddRange(propertyNames);
+        }
+
+        /// <returns>
+        /// A dictionary of property keys to property value strings, case sensitive.
+        /// Only properties added to the <see cref="PropertiesToRecord"/> member will be observed.
+        /// </returns>
+        public Dictionary<string, string> GetPropertyValues(string testRoot, string targetFramework = null, string configuration = "Debug")
+        {
+            var propertyValues = new Dictionary<string, string>();
+
+            string intermediateOutputPath = Path.Combine(testRoot, Name, "obj", configuration, targetFramework ?? TargetFrameworks);
+
+            foreach (var line in File.ReadAllLines(Path.Combine(intermediateOutputPath, "PropertyValues.txt")))
+            {
+                int colonIndex = line.IndexOf(':');
+                if (colonIndex > 0)
+                {
+                    string propertyName = line.Substring(0, colonIndex);
+                    string propertyValue = line.Length == colonIndex + 1 ? String.Empty : line.Substring(colonIndex + 2);
+                    propertyValues[propertyName] = propertyValue;
+                }
+            }
+
+            return propertyValues;
         }
 
         public static bool ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion targetFrameworkVersion)

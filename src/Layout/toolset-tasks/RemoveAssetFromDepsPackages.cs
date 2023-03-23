@@ -51,6 +51,10 @@ namespace Microsoft.DotNet.Cli.Build
                                 break;
                             }
                         }
+                        if (assetPath.Equals("*"))
+                        {
+                            section.Parent.Remove();
+                        }
                     }
                 }
             }

@@ -1,0 +1,35 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithConditionalParameters",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithConditionalParameters",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithConditionalParameters",
+  "shortName": "TestAssets.TemplateWithConditionalParameters",
+  "symbols": {
+    "paramA": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "parameter A description",
+      "isEnabled": "A_enabled",
+      "isRequired": true,
+      "replaces": "placeholderA"
+    },
+    "paramB": {
+      "type": "parameter",
+      "datatype": "bool",
+      "isEnabled": "B_enabled",
+      "description": "parameter B description",
+      "replaces": "placeholderB"
+    },
+    "A_enabled": {
+      "type": "parameter",
+      "datatype": "bool"
+    },
+    "B_enabled": {
+      "type": "parameter",
+      "datatype": "bool"
+    }
+  }
+}

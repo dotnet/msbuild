@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NuGet.Common;
 using Xunit;
 using static Microsoft.NET.Build.Tasks.UnitTests.LockFileSnippets;
 
@@ -20,9 +21,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         [Theory]
         [MemberData(nameof(ItemCounts))]
-        public void ItRaisesLockFileToMSBuildItems(string projectName, int [] counts)
+        public void ItRaisesLockFileToMSBuildItems(string projectName, int[] counts)
         {
-            var task = GetExecutedTaskFromPrefix(projectName);
+            var task = GetExecutedTaskFromPrefix(projectName, out _);
 
             task.PackageDefinitions .Count().Should().Be(counts[0]);
             task.FileDefinitions    .Count().Should().Be(counts[1]);
@@ -39,11 +40,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 {
                     new object[] {
                         "dotnet.new",
-                        new int[] { 110, 2536, 1, 846, 73 }
+                        new int[] { 110, 2536, 1, 845, 75 },
                     },
                     new object[] {
                         "simple.dependencies",
-                        new int[] { 113, 2613, 1, 878, 94}
+                        new int[] { 113, 2613, 1, 877, 96 },
                     },
                 };
             }
@@ -54,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [InlineData("simple.dependencies")]
         public void ItAssignsTypeMetaDataToEachDefinition(string projectName)
         {
-            var task = GetExecutedTaskFromPrefix(projectName);
+            var task = GetExecutedTaskFromPrefix(projectName, out _);
 
             Func<ITaskItem[], bool> allTyped =
                 (items) => items.All(x => !string.IsNullOrEmpty(x.GetMetadata(MetadataKeys.Type)));
@@ -73,7 +74,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = GetExecutedTaskFromPrefix(projectName, out lockFile);
 
             // set of valid targets and packages
-            HashSet<string> validTargets = new HashSet<string>(lockFile.Targets.Select(x => x.Name));
+            HashSet<string> validTargets = new HashSet<string>(lockFile.PackageSpec.TargetFrameworks.Select(tf => tf.TargetAlias));
             HashSet<string> validPackages = new HashSet<string>(lockFile.Libraries.Select(x => $"{x.Name}/{x.Version.ToNormalizedString()}"));
 
             Func<ITaskItem[], bool> allValidParentTarget =
@@ -129,7 +130,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
@@ -138,8 +139,47 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             topLevels.All(t => t.ItemSpec == "LibA/1.2.3").Should().BeTrue();
             topLevels.Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
                 .Should().Contain(new string[] {
-                    ".NETCoreApp,Version=v1.0", ".NETCoreApp,Version=v1.0/osx.10.11-x64"
+                    "netcoreapp1.0", "netcoreapp1.0/osx.10.11-x64"
                 });
+        }
+
+        [Fact]
+        public void ItAssignsDiagnosticLevel()
+        {
+            const string target1 = ".NETCoreApp,Version=v1.0";
+            const string target2 = ".NETCoreApp,Version=v2.0";
+
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] {
+                    CreateTarget("netcoreapp1.0", TargetLibA, TargetLibB, TargetLibC),
+                    CreateTarget("netcoreapp1.0/osx.10.11-x64", TargetLibA, TargetLibB, TargetLibC),
+                },
+                libraries: new string[] { LibADefn, LibBDefn, LibCDefn },
+                projectFileDependencyGroups: new string[] { NETCoreGroup, NETCoreOsxGroup },
+                logs: new[]
+                {
+                    // LibA
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibA", targetGraphs: new[] { target1 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibA", targetGraphs: new[] { target1 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Error,       "", libraryId: "LibA", targetGraphs: new[] { target1 }),
+                    // LibB
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibB", targetGraphs: new[] { target1, target2 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibB", targetGraphs: new[] { target1, target2 }),
+                    // LibC (wrong target)
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibB", targetGraphs: new[] { target2 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibB", targetGraphs: new[] { target2 })
+                }
+            );
+
+            var task = GetExecutedTaskFromContents(lockFileContent, out _, target: "netcoreapp1.0");
+
+            var defs = task.PackageDefinitions.ToLookup(def => def.ItemSpec);
+
+            defs.Count().Should().Be(3);
+
+            defs["LibA/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().Be("Error");
+            defs["LibB/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().Be("Warning");
+            defs["LibC/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().BeEmpty();
         }
 
         [Fact]
@@ -166,7 +206,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
@@ -176,14 +216,14 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             topLevels.Where(t => t.ItemSpec == "LibA/1.2.3")
                 .Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
                 .Should().Contain(new string[] {
-                    ".NETCoreApp,Version=v1.0", ".NETCoreApp,Version=v1.0/osx.10.11-x64"
+                    "netcoreapp1.0", "netcoreapp1.0/osx.10.11-x64"
                 });
 
             topLevels.Where(t => t.ItemSpec == "LibD/1.2.3").Count().Should().Be(1);
             topLevels.Where(t => t.ItemSpec == "LibD/1.2.3")
                 .Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
                 .Should().Contain(new string[] {
-                    ".NETCoreApp,Version=v1.0"
+                    "netcoreapp1.0"
                 });
         }
 
@@ -199,7 +239,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.TargetDefinitions.Count().Should().Be(2);
 
@@ -295,11 +335,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             var packageDep = task.PackageDependencies.Where(t => t.ItemSpec == "LibA/1.2.3").First();
             packageDep.GetMetadata(MetadataKeys.ParentPackage).Should().BeEmpty();
-            packageDep.GetMetadata(MetadataKeys.ParentTarget).Should().Be(".NETCoreApp,Version=v1.0");
+            packageDep.GetMetadata(MetadataKeys.ParentTarget).Should().Be("netcoreapp1.0");
 
             packageDep = task.PackageDependencies.Where(t => t.ItemSpec == "LibB/1.2.3").First();
             packageDep.GetMetadata(MetadataKeys.ParentPackage).Should().Be("LibA/1.2.3");
-            packageDep.GetMetadata(MetadataKeys.ParentTarget).Should().Be(".NETCoreApp,Version=v1.0");
+            packageDep.GetMetadata(MetadataKeys.ParentTarget).Should().Be("netcoreapp1.0");
 
             // LibC has both a package and project that depend on it
             var packageDeps = task.PackageDependencies.Where(t => t.ItemSpec == "LibC/1.2.3");
@@ -307,7 +347,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             packageDeps.Select(t => t.GetMetadata(MetadataKeys.ParentPackage))
                 .Should().Contain(new string[] { "LibB/1.2.3", "ClassLibP/1.2.3" });
             packageDeps.Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
-                .Should().OnlyContain(s => s == ".NETCoreApp,Version=v1.0");
+                .Should().OnlyContain(s => s == "netcoreapp1.0");
         }
 
         [Fact]
@@ -338,7 +378,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDefns;
 
@@ -385,7 +425,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDeps;
 
@@ -408,7 +448,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     fileDeps.Select(t => t.GetMetadata(MetadataKeys.ParentPackage))
                         .Should().OnlyContain(s => s == "LibB/1.2.3");
                     fileDeps.Select(t => t.GetMetadata(MetadataKeys.ParentTarget))
-                        .Should().Contain(new string[] { ".NETCoreApp,Version=v1.0", ".NETCoreApp,Version=v1.0/osx.10.11-x64" });
+                        .Should().Contain(new string[] { "netcoreapp1.0", "netcoreapp1.0/osx.10.11-x64" });
                 }
             }
         }
@@ -426,7 +466,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDeps;
 
@@ -474,7 +514,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.FileDefinitions
                 .Any(t => t.GetMetadata(MetadataKeys.Path) == "lib/file/Z.dll")
@@ -539,8 +579,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 "analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll",
             };
             var expectedTargets = new string[] {
-                ".NETCoreApp,Version=v1.0",
-                ".NETCoreApp,Version=v1.0/osx.10.11-x64"
+                "netcoreapp1.0",
+                "netcoreapp1.0/osx.10.11-x64"
             };
 
             foreach (var analyzer in analyzers)
@@ -619,8 +659,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             fileDefns.Count().Should().Be(3);
 
             var expectedTargets = new string[] {
-                ".NETCoreApp,Version=v1.0",
-                ".NETCoreApp,Version=v1.0/osx.10.11-x64"
+                "netcoreapp1.0",
+                "netcoreapp1.0/osx.10.11-x64"
             };
 
             foreach (var analyzer in expectIncluded)
@@ -677,7 +717,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var chiDeps = task.PackageDependencies
                 .Where(t => t.ItemSpec.StartsWith("Dep.Lib.Chi"));
@@ -687,11 +727,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             // Dep.Lib.Chi has version range [4.0.0, 5.0.0), but the version assigned 
             // is that of the library in the same target
 
-            chiDeps.Where(t => t.GetMetadata(MetadataKeys.ParentTarget) == ".NETCoreApp,Version=v1.0")
+            chiDeps.Where(t => t.GetMetadata(MetadataKeys.ParentTarget) == "netcoreapp1.0")
                 .Select(t => t.ItemSpec)
                 .First().Should().Be("Dep.Lib.Chi/4.0.0");
 
-            chiDeps.Where(t => t.GetMetadata(MetadataKeys.ParentTarget) == ".NETCoreApp,Version=v1.0/osx.10.11-x64")
+            chiDeps.Where(t => t.GetMetadata(MetadataKeys.ParentTarget) == "netcoreapp1.0/osx.10.11-x64")
                 .Select(t => t.ItemSpec)
                 .First().Should().Be("Dep.Lib.Chi/4.1.0");
         }
@@ -749,7 +789,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, out var lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.PackageDependencies.Count().Should().Be(6);
 
@@ -766,31 +806,30 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             others.Where(t => t.ItemSpec == "ProjF/1.0.0").Count().Should().Be(1);
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix)
+        [Fact]
+        public void ItDoesNotThrowOnCrossTargetingWithTargetPlatforms()
         {
-            LockFile lockFile;
-            return GetExecutedTaskFromPrefix(lockFilePrefix, out lockFile);
+            string lockFileContent = CreateCrossTargetingLockFileSnippet(
+                targets: new string[] { CreateTarget(".NETFramework,Version=v4.6.2"), CreateTarget("net5.0"), CreateTarget("net5.0-windows7.0") },
+                originalTargetFrameworks: new string[] { "\"net462\"", "\"net5.0\"", "\"net5.0-windows\"" },
+                targetFrameworks: new string[] { CreateTargetFramework("net5.0"), CreateTargetFramework("net5.0-windows7.0", "net5.0-windows"), CreateTargetFramework("net462") });
+
+            GetExecutedTaskFromContents(lockFileContent, out _); // Task should not fail on matching framework names
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile, string target = null)
         {
             lockFile = TestLockFiles.GetLockFile(lockFilePrefix);
-            return GetExecutedTask(lockFile);
+            return GetExecutedTask(lockFile, target);
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents)
-        {
-            LockFile lockFile;
-            return GetExecutedTaskFromContents(lockFileContents, out lockFile);
-        }
-
-        private ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile, string target = null)
         {
             lockFile = TestLockFiles.CreateLockFile(lockFileContents);
-            return GetExecutedTask(lockFile);
+            return GetExecutedTask(lockFile, target);
         }
 
-        private ResolvePackageDependencies GetExecutedTask(LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTask(LockFile lockFile, string target)
         {
             var resolver = new MockPackageResolver(_packageRoot);
 
@@ -798,7 +837,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 ProjectAssetsFile = lockFile.Path,
                 ProjectPath = _projectPath,
-                ProjectLanguage = null
+                ProjectLanguage = null,
+                TargetFramework = target
             };
 
             task.Execute().Should().BeTrue();

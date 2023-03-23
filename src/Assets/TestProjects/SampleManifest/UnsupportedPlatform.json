@@ -1,0 +1,18 @@
+﻿{
+  "version": "6.0.0",
+  "workloads": {
+    "unsupported": {
+      "description": "description",
+      "packs": [
+        "mock-pack"
+      ],
+      "platforms": [ "fake" ]
+    }
+  },
+  "packs": {
+    "mock-pack" : {
+      "kind": "framework",
+      "version": "6.0.0"
+    }
+  }
+}

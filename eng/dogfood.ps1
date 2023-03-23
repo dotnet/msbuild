@@ -44,6 +44,7 @@ try {
   $env:MicrosoftNETBuildExtensionsTargets = Join-Path $ArtifactsDir "bin\$configuration\Sdks\Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets"
 
   $env:PATH = "$TestDotnetRoot;$env:Path"
+  $env:DOTNET_ROOT = $TestDotnetRoot
 
   if ($command -eq $null -and $env:DOTNET_SDK_DOGFOOD_SHELL -ne $null) {
     $command = , $env:DOTNET_SDK_DOGFOOD_SHELL

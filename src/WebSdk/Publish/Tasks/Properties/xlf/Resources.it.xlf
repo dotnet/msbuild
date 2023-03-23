@@ -1,0 +1,1203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="it" original="../Resources.resx">
+    <body>
+      <trans-unit id="BUILDTASK_ColectFilesInFolder_RootIsNotValid">
+        <source>The root folder for cllecting files is not a valid directory.({0})</source>
+        <target state="translated">La cartella radice per la raccolta dei file non è valida ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_CopyFailed">
+        <source>Copying file {0} to {1} failed. {2}</source>
+        <target state="translated">Copia del file {0} in {1} non riuscita. {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_Copying">
+        <source>Copying {0} to {1}.</source>
+        <target state="translated">Copia di {0} in {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_DeleteFailed">
+        <source>Deleting file {0} failed. {1}</source>
+        <target state="translated">Eliminazione del file {0} non riuscita. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_Deleting">
+        <source>Deleting {0}.</source>
+        <target state="translated">Eliminazione di {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_RetryDelayOutOfRange">
+        <source>RetryDelay should be greater than zero.</source>
+        <target state="translated">RetryDelay deve essere maggiore di zero.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_UpToDate">
+        <source>Skip copying {0} to {1}, File {1} is up to date</source>
+        <target state="translated">Ignorare la copia di {0} in {1}. Il file {1} è aggiornato</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CreateFolder_Failed">
+        <source>Create Folder {0} failed. {1}</source>
+        <target state="translated">Creazione della cartella {0} non riuscita. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_DetectAntaresCLR45Error">
+        <source>Your hosting provider does not yet support ASP.NET 4.6, which your application is configured to use. To learn more about this please visit: http://go.microsoft.com/fwlink/?LinkID=615797&amp;clcid=0x409</source>
+        <target state="translated">Il provider di servizi di hosting non fornisce ancora il supporto per ASP.NET 4.6 richiesto dalla configurazione dell'applicazione. Per altre informazioni, vedere: http://go.microsoft.com/fwlink/?LinkID=615797&amp;clcid=0x410</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_FailedToLoadThisVersionMsDeployTryingTheNext">
+        <source>Failed to load this version Microsoft.Web.Deployment ({0}) reason: {1}.
+ Trying the next one specified in $(_MSDeployVersionsToTry)..</source>
+        <target state="translated">Non è stato possibile caricare questa versione di Microsoft.Web.Deployment ({0}). Motivo: {1}.
+ Verrà effettuato un tentativo con la versione successiva specificata in $(_MSDeployVersionsToTry).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_IISSetting_RequireWebAdminDLL">
+        <source>To include IIS setting, it is required to have assembly Microsoft.Web.Administration installed on the machine.</source>
+        <target state="translated">Per includere l'impostazione di IIS è necessario che l'assembly Microsoft.Web.Administration sia installato nel computer.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_IsCleanMSDeployPackageNeeded_PackageByDifferentVersion">
+        <source>Existing package/archiveDir is created by different version of Msdeploy. It is not compatible for incremental build. Mark as Clean needed({0}).</source>
+        <target state="translated">La directory di archiviazione o il pacchetto esistente è stato creato da una versione differente di Msdeploy e non è compatibile per la compilazione incrementale. Contrassegnare come Pulizia necessaria ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_ManifestFile_IISSettingNotInFirst">
+        <source>Validation failure.IIS Setting should be the first element in the Manifest file.({0})</source>
+        <target state="translated">Errore di convalida. L'impostazione di IIS deve essere il primo elemento nel file manifesto ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapProjectURLToIisWeb_InvalidProjectURL">
+        <source>The project URL is not well formed.({0})</source>
+        <target state="translated">Formato dell'URL del progetto non valido ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapProjectURLToIisWeb_UnsupportedProjectURL">
+        <source>The project URL url host name type is not supported.({0})</source>
+        <target state="translated">Tipo di nome host dell'URL del progetto non supportato ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapURIToIisWebServer_AdminRequired">
+        <source>Retrieving local IIS properties from the URI requires Administrator permission.  Please elevate to Administrator before executing the program.</source>
+        <target state="translated">Per recuperare le proprietà locali di IIS dall'URI è necessario disporre di autorizzazioni di amministratore. Elevare i privilegi a livello di amministratore prima di eseguire il programma.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_RemoveEmptyDirectories_Deleting">
+        <source>Deleting empty directory {0}.</source>
+        <target state="translated">Eliminazione della directory vuota {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFile">
+        <source>Scanning sql command variable(s) from sql script ({0}).</source>
+        <target state="translated">Analisi delle variabili del comando SQL dello script SQL ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFileDone">
+        <source>Found {0} sql command variable(s){1}.</source>
+        <target state="translated">Trovata/e {0} variabile/i di comando SQL {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFileFailed">
+        <source>Failed to parse sql command variable sql script ({0}).</source>
+        <target state="translated">Impossibile analizzare lo script SQL con variabili di comando SQL ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFoundMsDeployUnsupportedCommands">
+        <source>Found {0} unsupported sql command(s) in {1}. The unsupported sql command(s) are: {2}.
+Please note ':EXIT' without argument is treated as ':QUIT' command.</source>
+        <target state="translated">Sono stati trovati {0} comandi SQL non supportati in {1}. Comandi SQL non supportati: {2}.
+Si noti che ':EXIT' senza argomento è equivalente al comando ':QUIT'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessInvalidSqlScript">
+        <source>Failed to parse the sql script file {0}. Please make sure the SQL script syntax is correct.
+Detail:
+{1}.</source>
+        <target state="translated">Non è stato possibile analizzare il file di script SQL {0}. Assicurarsi che la sintassi dello script SQL sia corretta.
+Dettagli:
+{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_DestinationWriteFailed">
+        <source>Could not write Destination file: {0}</source>
+        <target state="translated">Impossibile scrivere il file di destinazione: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_SourceLoadFailed">
+        <source>Could not open Source file: {0}</source>
+        <target state="translated">Non è stato possibile aprire il file di origine: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformLoadFailed">
+        <source>Could not open Transform file: {0}</source>
+        <target state="translated">Impossibile aprire il file di trasformazione: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformOutput">
+        <source>Output File: {0}</source>
+        <target state="translated">File di output: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationApply">
+        <source>Applying Transform File: {0}</source>
+        <target state="translated">Applicazione del file di trasformazione: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationFailed">
+        <source>Transformation failed</source>
+        <target state="translated">Trasformazione non riuscita</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationNoChange">
+        <source>No transformation occurred, not saving output file</source>
+        <target state="translated">Nessuna trasformazione eseguita. Il file di output non verrà salvato</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationStart">
+        <source>Transforming Source File: {0}</source>
+        <target state="translated">Trasformazione del file di origine: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationSucceeded">
+        <source>Transformation succeeded</source>
+        <target state="translated">Trasformazione riuscita</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_FailToCopyFile">
+        <source>Failded to copy file from '{0}' to '{1}' for SQLExpress Data Publish</source>
+        <target state="translated">Non è stato possibile copiare il file da '{0}' a '{1}' per la pubblicazione dati SQL Express</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_ImportPublishDatabaseSettingNotFound">
+        <source>Publish Database Setting Source Verification Error: The publish profile specified '{1} ({2})' for '{0}' does not have a corresponding connection string in '{3}'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="translated">Si è verificato un errore di verifica dell'origine dell'impostazione del database di pubblicazione. Per il profilo di pubblicazione specificato '{1} ({2})' per '{0}' non esiste una stringa di connessione corrispondente in '{3}'. La pubblicazione è stata quindi bloccata. Se l'operazione è intenzionale, è possibile disabilitare questo controllo specificando il valore "True" per la proprietà "IgnoreDatabaseSettingOutOfSync" di MSBuild. In caso contrario, aprire la finestra di dialogo Pubblica in Visual Studio con il profilo corrente per correggere la discrepanza. Per altre informazioni, vedere http://go.microsoft.com/fwlink/?LinkId=241526 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_ImportValidationSourceNotFound">
+        <source>Publish Database Setting Source Verification Error: The source connection string for '{0}' no longer exists in the source '{1}'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="translated">Si è verificato un errore di verifica dell'origine dell'impostazione del database di pubblicazione. La stringa di connessione di origine per '{0}' non esiste più nell'origine '{1}'. La pubblicazione è stata quindi bloccata. Se l'operazione è intenzionale, è possibile disabilitare questo controllo specificando il valore "True" per la proprietà "IgnoreDatabaseSettingOutOfSync" di MSBuild. In caso contrario, aprire la finestra di dialogo Pubblica in Visual Studio con il profilo corrente per correggere la discrepanza. Per altre informazioni, vedere http://go.microsoft.com/fwlink/?LinkId=241526 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_InvalidMSBuildFormat">
+        <source>Publish Database Setting Source Verification Error: The publish profile specified '{1}' for '{0}' is not valid and could not be loaded. Review the file for any errors and try again.</source>
+        <target state="translated">Errore di verifica origine impostazione database di pubblicazione: Il profilo di pubblicazione specificato '{1}' per '{0}' non è valido e non è stato possibile scaricarlo. Verificare se nel file sono presenti errori e riprovare.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_InvalidPublishDatabaseSetting">
+        <source>Publish Database Setting Source Verification Error:The publish profile specified '{1} ({2})' for '{0}' does not have valid $(PublishDatabaseSettings) value. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="translated">Si è verificato un errore di verifica dell'origine dell'impostazione del database di pubblicazione. Il profilo di pubblicazione specificato '{1} ({2})' per '{0}' non contiene un valore $(PublishDatabaseSettings) valido. La pubblicazione è stata quindi bloccata. Se l'operazione è intenzionale, è possibile disabilitare questo controllo specificando il valore "True" per la proprietà "IgnoreDatabaseSettingOutOfSync" di MSBuild. In caso contrario, aprire la finestra di dialogo Pubblica in Visual Studio con il profilo corrente per correggere la discrepanza. Per altre informazioni, vedere http://go.microsoft.com/fwlink/?LinkId=241526 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_MustProviderProvidersXMLorProvidersFile">
+        <source>CreateProviderList expected either ProvidersXml or ProvidersFile parameter</source>
+        <target state="translated">CreateProviderList prevede il parametro ProvidersXml o ProvidersFile</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_NotExpectingAdditionalParameter">
+        <source>Publish Database Setting encountered an unexpected error. The provider '{0}' doesn't expect any addition arguments '{1}'.</source>
+        <target state="translated">Si è verificato un errore imprevisto nell'impostazione del database di pubblicazione. Il provider '{0}' non prevede alcun argomento aggiuntivo '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_NotSupportBothProvidersXMLAndProvidersFile">
+        <source>CreateProviderList does not support ProvidersXml and ProvidersFile parameters at the same time</source>
+        <target state="translated">CreateProviderList non supporta i parametri ProvidersXml e ProvidersFile contemporaneamente</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_OutofSyncWithSourcePublishDatabaseSetting">
+        <source>Publish Database Setting Source Verification Error: The connection '{0}' in the publish profile has changed from what is currently declared for '{1} ({2})'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="translated">Si è verificato un errore di verifica dell'origine dell'impostazione del database di pubblicazione. La connessione '{0}' nel profilo di pubblicazione è cambiata rispetto al valore attualmente dichiarato per '{1} ({2})'. La pubblicazione è stata quindi bloccata. Se l'operazione è intenzionale, è possibile disabilitare questo controllo specificando il valore "True" per la proprietà "IgnoreDatabaseSettingOutOfSync" di MSBuild. In caso contrario, aprire la finestra di dialogo Pubblica in Visual Studio con il profilo corrente per correggere la discrepanza. Per altre informazioni, vedere http://go.microsoft.com/fwlink/?LinkId=241526 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_SqlExpressPublishRequireLocalDB">
+        <source>SQL Server Express LocalDB is required in order to publish one or more of your databases. To learn more and install it, follow this link http://go.microsoft.com/fwlink/?LinkId=245956 </source>
+        <target state="translated">Per pubblicare uno o più database è necessaria la modalità LocalDB di SQL Server Express. Per altre informazioni e per le istruzioni di installazione, vedere http://go.microsoft.com/fwlink/?LinkId=245956 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeploymentError_MissingDbDacFx">
+        <source>The remote host does not have the dbDacFx Web Deploy provider installed, which is required for database publishing. To learn more about this visit this link.
+
+FWLink: http://go.microsoft.com/fwlink/?LinkId=246068</source>
+        <target state="translated">Nell'host remoto non è installato il provider di Distribuzione Web dbDacFx, necessario per la pubblicazione di database. Per altre informazioni, vedere il collegamento seguente.
+
+FWLink: http://go.microsoft.com/fwlink/?LinkId=246068</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EFSCRIPT_Generating">
+        <source>Generating Entity Framework SQL Scripts...</source>
+        <target state="translated">Generazione dello script SQL di Entity Framework...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EFSCRIPT_GenerationCompleted">
+        <source>Generating Entity Framework SQL Scripts completed successfully</source>
+        <target state="translated">La generazione dello script SQL di Entity Framework è stata completata</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EFSCRIPT_GenerationFailed">
+        <source>Entity Framework SQL Script generation failed</source>
+        <target state="translated">La generazione dello script SQL di Entity Framework non è riuscita</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AddingFile">
+        <source>Adding file ({0}).</source>
+        <target state="translated">Aggiunta del file ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AddingFileFailed">
+        <source>Adding file ({0}) failed. Reason: {1}.</source>
+        <target state="translated">Aggiunta del file ({0}) non riuscita. Motivo: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AzurePublishErrorReason">
+        <source>Unable to publish to Azure. Error Details : '{0}'.</source>
+        <target state="translated">Impossibile pubblicare in Azure. Dettagli errore: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_ConnectionInfoMissing">
+        <source>Azure connection information cannot be empty.</source>
+        <target state="translated">Le informazioni di connessione di Azure non possono essere vuote.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_CopyingToTempLocation">
+        <source>Copying all files to temporary location for publish: '{0}'.</source>
+        <target state="translated">Copia di tutti i file nel percorso temporaneo per la pubblicazione: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_CopyingToTempLocationCompleted">
+        <source>Copying all files to temporary location completed.</source>
+        <target state="translated">Copia di tutti i file nel percorso temporaneo completata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_DeployOutputPathEmpty">
+        <source>DeployOutputPath property cannot be empty.</source>
+        <target state="translated">La proprietà DeployOutputPath non può essere vuota.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_OperationTimeout">
+        <source>Publish operation timed out.</source>
+        <target state="translated">Time out dell'operazione di pubblicazione.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishAzure">
+        <source>Publishing to Azure.</source>
+        <target state="translated">Pubblicazione in Azure.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishFailed">
+        <source>Publish Failed.</source>
+        <target state="translated">Pubblicazione non riuscita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishSucceeded">
+        <source>Publish Succeeded.</source>
+        <target state="translated">Pubblicazione riuscita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishZipFailedReason">
+        <source>Publishing to site '{0}' failed. Reason: '{1}'.</source>
+        <target state="translated">Pubblicazione nel sito '{0}' non riuscita. Motivo: '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Failed">
+        <source>Failed to execute msdeploy.exe.</source>
+        <target state="translated">Impossibile eseguire msdeploy.exe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_PreviewOnly">
+        <source>Generate msdeploy.exe command line for preview only.</source>
+        <target state="translated">Generare la riga di comando di msdeploy.exe per la sola anteprima.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Start">
+        <source>Running msdeploy.exe.</source>
+        <target state="translated">Esecuzione di msdeploy.exe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Succeeded">
+        <source>Successfully execute msdeploy.exe.</source>
+        <target state="translated">Esecuzione di msdeploy.exe riuscita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidDestinationCount">
+        <source>Invalidate destination item count: {0}</source>
+        <target state="translated">Conteggio elementi di destinazione invalidati: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidSourceCount">
+        <source>Invalidate source items count: {0}</source>
+        <target state="translated">Conteggio elementi di origine invalidati: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidVerbForTheInput">
+        <source>Invalid verb({0}) for supplied source ({1}) and destination ({2}).</source>
+        <target state="translated">Verbo ({0}) non valido per l'origine ({1}) e la destinazione ({2}) specificate.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="POWERSHELL_PublishProfileParsingError">
+        <source>Unable to parse the pubxml file {0}.</source>
+        <target state="translated">Non è possibile analizzare il file pubxml {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Publich_InvalidPublishToolsVersion_Error">
+        <source>The publish profile used for publishing was created in a newer version of the Visual Studio Web Publish features. In order to publish using this profile you will need to update your web publish components. To learn more about this, please visit http://go.microsoft.com/fwlink/?LinkId=256245</source>
+        <target state="translated">Il profilo di pubblicazione usato per la pubblicazione è stato creato con una versione più recente delle funzionalità di pubblicazione sul Web di Visual Studio. Per eseguire la pubblicazione usando questo profilo, sarà necessario aggiornare i componenti di pubblicazione sul Web. Per altre informazioni, vedere http://go.microsoft.com/fwlink/?LinkId=256245</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishArgumentError_InvalidRemoteServiceUrl">
+        <source>Invalid Web Deploy service URL</source>
+        <target state="translated">URL servizio Distribuzione Web non valido</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishArgumentError_InvalidSiteAppName">
+        <source>Invalid site/application name</source>
+        <target state="translated">Nome di sito/applicazione non valido</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_AutoConnectionStringTransformConfigToTransformOutputFile">
+        <source>Auto ConnectionString Transformed {0} into {1}.</source>
+        <target state="translated">Elemento ConnectionString automatico: {0} trasformato in {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_CheckingForValidMsBuildPropertyValue">
+        <source>$({0}) is {1}. Validating...</source>
+        <target state="translated">$({0}) è {1}. Convalida in corso...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DatabaseConnectionStringParameterDescription">
+        <source>Connection string for setting up this application database.</source>
+        <target state="translated">Stringa di connessione per la configurazione del database dell'applicazione.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeFileExtentionOutMessage">
+        <source>Exclude *.out files under root folder.</source>
+        <target state="translated">Escludere i file con estensione out nella cartella radice.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeIntermediateOutputFolderMessage">
+        <source>Exclude all files under obj folder.</source>
+        <target state="translated">Escludere tutti i file nella cartella obj.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeSourceControlItems">
+        <source>Set all .scc .vspscc file as _IgnorableFilesInProjectFolder.  Set _CollectFiles_IncludeIgnorableFile to True to include in the packaging.</source>
+        <target state="translated">Impostare tutti i file con estensione scc e vspscc come _IgnorableFilesInProjectFolder. Impostare _CollectFiles_IncludeIgnorableFile su True per includerli nella creazione del pacchetto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_EFCodeFirstConnectionStringParameterDescription">
+        <source>Connection String used by Entity Framework Code First Model to deploy the database.</source>
+        <target state="translated">Stringa di connessione utilizzata dal modello Entity Framework Code First per la distribuzione del database.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorCannotDeployFromIIS7AboveToLowerIIS">
+        <source>Deploy with IIS Setting from a IIS 7 or above to a lower verstion of IIS server is not supported. To fix the problem, please set the %24(IncludeIisSettings) to false. Your current setting are $(IncludeIisSettings) is {0}, $(DestinationIisVersion) is {1} and $(LocalIisVersion) is  {2}.</source>
+        <target state="translated">La distribuzione con impostazione del server IIS su una versione precedente alla 7 non è supportata. Per risolvere il problema, impostare %24(IncludeIisSettings) su False. Impostazioni correnti: $(IncludeIisSettings) = {0}, $(DestinationIisVersion) = {1} e $(LocalIisVersion) = {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorInvalidMSBuildItemCollectionCount">
+        <source>@({0}) have {1} item(s) in the collection. It should only have {2} item(s).</source>
+        <target state="translated">@({0}) dispone di {1} elemento/i nella raccolta. Il numero di elementi deve essere pari a {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorInvalidPropertyWhenSettingPropertyIsTrue">
+        <source>Invalid $({0}): When $({1}) is set True. It is required to have a valid $({0}) to be use for creating parameters correctly.</source>
+        <target state="translated">$({0}) non valido se $({1}) è impostato su True. È necessario disporre di un elemento $({0}) valido da utilizzare per la creazione corretta dei parametri.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorPackageAsFilePointToAnExistingFolder">
+        <source>'{0}' exists as a folder. You can't package as a single file to be the same path as an existing folder. Please delete the folder before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it.</source>
+        <target state="translated">'{0}' esiste come cartella. Impossibile creare un pacchetto come singolo file il cui percorso corrisponde a quello di una cartella esistente. Eliminare la cartella prima di creare il pacchetto. In alternativa, è possibile chiamare msbuild con destinazione /t:CleanWebsitesPackage per rimuoverla.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorPackageAsFolderPointToAnExistingFile">
+        <source>'{0}' exists as a file. You can't package as an archive directory to be the same path as an existing file. Please delete the file before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it.</source>
+        <target state="translated">'{0}' esiste come file. Impossibile creare un pacchetto come directory di archiviazione il cui percorso corrisponde a quello di un file esistente. Eliminare il file prima di creare il pacchetto. In alternativa, è possibile chiamare msbuild con destinazione /t:CleanWebsitesPackage per rimuoverlo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorUseIisIsTrueButIisUrlIsEmpty">
+        <source>IisUrl property is required when UseIis property is True</source>
+        <target state="translated">La proprietà IisUrl è obbligatoria se la proprietà UseIis è impostata su True</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorUseWPP_CopyWebApplicationAndPipelineDependsOnBuildBothTrue">
+        <source>These two Properties are not compatable: $(UseWPP_CopyWebApplication) and  $(PipelineDependsOnBuild) both are True.
+Please correct the problem by either set $(Disable_CopyWebApplication) to true or set $(PipelineDependsOnBuild) to false to break the circular build dependency.
+Detail: $(UseWPP_CopyWebApplication) make the publsih pipeline (WPP) to be Part of the build and $(PipelineDependsOnBuild) make the WPP depend on build thus cause the build circular build dependency.</source>
+        <target state="translated">Queste due proprietà non sono compatibili: $(UseWPP_CopyWebApplication) e $(PipelineDependsOnBuild) sono entrambe impostate su True.
+Correggere il problema impostando $(Disable_CopyWebApplication) su True o $(PipelineDependsOnBuild) su False per interrompere la dipendenza di compilazione circolare.
+Dettagli: $(UseWPP_CopyWebApplication) rende la pipeline di pubblicazione (WPP) parte della compilazione, mentre $(PipelineDependsOnBuild) rende WPP dipendente dalla compilazione, causando la dipendenza di compilazione circolare.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ExcludeAllDebugSymbols">
+        <source>Exclude All Debug Symbols</source>
+        <target state="translated">Escludi tutti i simboli di debug</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ExcludeAllFilesUnderFolder">
+        <source>Exclude All files under {0}</source>
+        <target state="translated">Escludi tutti i file in {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_FinishGenerateSampleMsDeployBatchScript">
+        <source>Sample script for deploying this package is generated at the following location:
+{0}
+For this sample script, you can change the deploy parameters by changing the following file: 
+{1}</source>
+        <target state="translated">Lo script di esempio per la distribuzione del pacchetto viene generato nel percorso seguente:
+{0}
+Per questo script di esempio, è possibile modificare i parametri di distribuzione nel file seguente: 
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_FoundApplicationConfigForTransformation">
+        <source>Found The following for Config tranformation:
+{0}</source>
+        <target state="translated">Elementi trovati per la trasformazione della configurazione:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherAllFilesInProjectFolderExceptExclusion">
+        <source>Gather all files from project folder except in the exclusion list.</source>
+        <target state="translated">Raccogliere tutti i file dalla cartella di progetto ad eccezione di quelli nell'elenco di esclusione.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificItemsFromProject">
+        <source>Gather all files from Project items @({0}). Adding:</source>
+        <target state="translated">Raccogliere tutti i file dagli elementi del progetto @({0}). Aggiunta di:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificItemsFromProjectNoDetail">
+        <source>Gather all files from Project items @({0}).</source>
+        <target state="translated">Raccogliere tutti i file dagli elementi del progetto @({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificOutputsFromProject">
+        <source>Gather all files from Project output ({0}). Adding:</source>
+        <target state="translated">Raccogliere tutti i file dall'output del progetto ({0}). Aggiunta di:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GenerateMsdeploySourceManifestFile">
+        <source>Generate source manifest file for Web Deploy package/publish ...</source>
+        <target state="translated">Genera file manifesto di origine per la pubblicazione/creazione pacchetto di Web Deploy ...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GenerateSampleMsdeployBatchScript">
+        <source>Generating a sample batch commandline script for deploying this package...</source>
+        <target state="translated">È in corso la generazione di uno script della riga di comando batch di esempio per la distribuzione del pacchetto...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_IISAppParameterDescription">
+        <source>IIS Web Site/Application name</source>
+        <target state="translated">Nome applicazione/sito Web IIS</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_IISAppPhysicalPathDescription">
+        <source>Physical path for this Web Application.</source>
+        <target state="translated">Percorso fisico per l'applicazione Web.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InsertAdditionalConnectionStringTransformConfigToTransformOutputFile">
+        <source>Insert additional ConnectionString Transformed {0} into {1}.</source>
+        <target state="translated">Inserire elemento ConnectionString aggiuntivo {0} trasformato in {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InsertEFCodeFirstDeployContextTransformConfigToTransformOutputFile">
+        <source>Insert additional EFCodeFirst Database Deployment Transformed {0} into {1}.</source>
+        <target state="translated">Inserire distribuzione di database EFCodeFirst aggiuntiva {0} trasformata in {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InvalidArgument">
+        <source>GetPublishingLocalizedString Task encounter invalid argument ID;</source>
+        <target state="translated">ID argomento non valido nell'attività GetPublishingLocalizedString;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_MSBuildTargetFailed">
+        <source>Target {0} failed.</source>
+        <target state="translated">{0} di destinazione non riuscita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_MsBuildPropertySettingValue">
+        <source>$({0}) is {1}</source>
+        <target state="translated">Il valore della proprietà $({0}) è {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_PackagingIntoLocation">
+        <source>Packaging into {0}.</source>
+        <target state="translated">Creazione pacchetto in {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpEnviroment">
+        <source>
+===========================
+Environment-Specific Settings:
+--------------------------
+</source>
+        <target state="translated">
+===========================
+Impostazioni specifiche dell'ambiente:
+--------------------------
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpEnviromentExplained">
+        <source>
+	To customize application-specific settings for each deployment environment (for example, the IIS application name, the physical path, and any connection strings), edit the settings in the following file: 
+		 "{0}"</source>
+        <target state="translated">
+	Per personalizzare impostazioni specifiche dell'applicazione per ogni ambiente di sviluppo (ad esempio il nome dell'applicazione IIS, il percorso fisico ed eventuali stringhe di connessione), modificare le impostazioni nel file seguente: 
+		 "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpMoreInfo">
+        <source>
+===========================
+For more information on this deploy script visit:	{0}
+</source>
+        <target state="translated">
+===========================
+Per ulteriori informazioni su questo script di distribuzione, visitare:	{0}
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptional">
+        <source>
+===========================
+Optional Flags:
+--------------------------
+ By Default, this script deploy on the current machine where this script is called with current user credential without agent service. Only pass the following value for advance scenario.
+</source>
+        <target state="translated">
+===========================
+Flag facoltativi:
+--------------------------
+ Per impostazione predefinita, questo script esegue la distribuzione nel computer in cui viene chiamato con le credenziali dell'utente corrente senza servizio agente. Passare solo il valore seguente per lo scenario avanzato.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedAdditionalFlags">
+        <source>
+[Additional msdeploy.exe flags]
+	The msdeploy.exe command supports additional flags. You can include any of these additional flags in the "$(ProjectName).Deploy.cmd" file, and the flags are passed through to msdeploy.exe during execution.
+	Alternatively, you can specify additional flags by setting the "_MsDeployAdditionalFlags" environment variable. These settings are used by this batch file.
+	Note: Any flag value that includes an equal sign (=) must be enclosed in double quotation marks, as shown in the following example, which will skip deploying the databases that are included in the package:
+		"-skip:objectName=dbFullSql" 
+</source>
+        <target state="translated">
+[Altri flag di msdeploy.exe]
+	Il comando msdeploy.exe supporta ulteriori flag. È possibile includere uno o più flag aggiuntivi nel file "$(ProjectName).Deploy.cmd" per passarli tramite msdeploy.exe durante l'esecuzione.
+	In alternativa, è possibile specificare ulteriori flag impostando la variabile di ambiente "_MsDeployAdditionalFlags". Queste impostazioni sono utilizzate dal file batch.
+	Nota: i valori di flag che includono un segno di uguale (=) devono essere racchiusi tra virgolette doppie, come illustrato nell'esempio seguente che ignora la distribuzione dei database inclusi nel pacchetto:
+		"-skip:objectName=dbFullSql" 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagA">
+        <source>
+/A:&lt;Basic | NTLM&gt;
+	Specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic; otherwise, the default authentication type is NTLM. 
+</source>
+        <target state="translated">
+/A:&lt;Di base | NTLM&gt;
+	Specifica il tipo di autenticazione da utilizzare. I valori possibili sono NTLM e Di base. Se è specificata l'impostazione del provider wmsvc, il tipo di autenticazione predefinito è Di base; in caso contrario il tipo è NTLM. 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagG">
+        <source>
+/G:&lt;True | False&gt;
+	Specifies that the package is deployed by creating a temporary listener on the destination server. This requires no special installation on the destination server, but it requires you to be an administrator on that server. The default value of this flag is False. 
+</source>
+        <target state="translated">
+/G:&lt;True | False&gt;
+	Specifica che il pacchetto viene distribuito creando un listener temporaneo nel server di destinazione. A tale scopo, non è necessaria un'installazione speciale sul server di destinazione, bensì la disponibilità di autorizzazioni di amministratore sul server. Il valore predefinito del flag è False. 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagL">
+        <source>
+/L 
+	Specifies that the package is deployed to local IISExpress user instance.
+</source>
+        <target state="translated">
+/L 
+	Specifica che il pacchetto viene distribuito all'istanza utente di IIS Express locale.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagM">
+        <source>
+/M:&lt;Destination server name or Service URL&gt;
+	If this flag is not specified, the package is installed on the computer where the command is run. The Service URL can be in the following format:
+		https://&lt;DestinationServer&gt;:8172/MSDeploy.axd 
+	This format requires that IIS 7 be installed on the destination server and that IIS 7 Web Management Service(WMSvc) and Web Deployment Handler be set up.
+	The service URL can also be in the following format:
+		http://&lt;DestinationServer&gt;/MSDeployAgentService 
+	This format requires administrative rights on the destination server, and it requires that Web Deploy Remote Service (MsDepSvc) be installed on the destination server. IIS 7 does not have to be installed on the destination server.
+</source>
+        <target state="translated">
+/M:&lt;Nome server di destinazione o URL servizio&gt;
+	Se questo flag non è specificato, il pacchetto viene installato nel computer in cui viene eseguito il comando. L'URL del servizio può essere nel formato seguente:
+		https://&lt;ServerDestinazione&gt;:8172/MSDeploy.axd 
+	Questo formato richiede che IIS 7 sia installato nel server di destinazione e che il servizio di gestione Web (VMSvc) e il gestore distribuzione Web per IIS siano configurati.
+	L'URL del servizio può inoltre essere nel formato seguente:
+		http://&lt;ServerDestinazione&gt;/MSDeployAgentService 
+	Questo formato richiede la disponibilità di diritti di amministratore sul server di destinazione e che il servizio remoto di Distribuzione Web (MsDepSvc) sia installato in tale server, nel quale non deve essere installato IIS 7.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagUP">
+        <source>
+/U:&lt;UserName&gt;
+/P:&lt;Password&gt;</source>
+        <target state="translated">
+/U:&lt;NomeUtente&gt;
+/P:&lt;Password&gt;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpPrerequisites">
+        <source>
+===========================
+Prerequisites :
+--------------------------
+To deploy this Web package, Web Deploy (msdeploy.exe) must be installed on the computer that runs the .cmd file. For information about how to install Web Deploy, see the following URL:
+{0}
+This batch file requires that the package file "{1}" and optionally provided the parameters file "{2}" in the same folder or destination folder by environment variable.
+</source>
+        <target state="translated">
+===========================
+Prerequisiti :
+--------------------------
+Per distribuire il pacchetto Web, Distribuzione Web (msdeploy.exe) deve essere installato nel computer in cui viene eseguito il file con estensione cmd. Per informazioni su come installare il servizio Distribuzione Web, vedere l'URL seguente:
+{0}
+Questo file batch richiede che il file del pacchetto "{1}" e il file dei parametri facoltativo "{2}" si trovino nella stessa cartella o nella cartella di destinazione della variabile di ambiente.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequired">
+        <source>
+===========================
+Required Flags:
+--------------------------</source>
+        <target state="translated">
+===========================
+Flag obbligatori:
+--------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagT">
+        <source>
+/T:
+	Calls msdeploy.exe with the "-whatif" flag, which simulates deployment. This does not deploy the package. Instead, it creates a report of what will happen when you actually deploy the package.</source>
+        <target state="translated">
+/T:
+	Chiama msdeploy.exe con il flag "-whatif" in modo da simulare la distribuzione. Non esegue la distribuzione del pacchetto, bensì crea un report relativo a ciò che si verificherà quando il pacchetto verrà effettivamente distribuito.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagY">
+        <source>
+/Y:
+	Calls msdeploy.exe without the "-whatif" flag, which deploys the package to the current machine or a destination server. Use /Y after you have verified the output that was generated by using the /T flag.
+
+Note: Do not use /T and /Y in the same command.
+</source>
+        <target state="translated">
+/Y:
+	Chiama msdeploy.exe senza il flag "-whatif" in modo da distribuire il pacchetto nel computer corrente o in un server di destinazione. Utilizzare /Y dopo aver verificato l'output generato mediante il flag /T.
+
+Nota: non utilizzare /T e /Y nello stesso comando.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpSection1">
+        <source>
+===========================
+Usage:
+--------------------------
+{0} [/T|/Y] [/M:ComputerName] [/U:UserName] [/P:Password] [/G:UseTempAgent] [Additional msdeploy.exe flags ...]
+
+</source>
+        <target state="translated">
+===========================
+Sintassi:
+--------------------------
+{0} [/T|/Y] [/M:NomeComputer] [/U:NomeUtente] [/P:Password] [/G:UsoAgenteTemp] [Altri flag di msdeploy.exe...]
+
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SqlCommandVariableParameterDescription">
+        <source>Sql Command Variable for setting up this application database.</source>
+        <target state="translated">Variabile di comando SQL per l'impostazione del database dell'applicazione.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_StartMsDeployPublishToRemote">
+        <source>Start Web Deploy Publish the Application/package to {0} ...</source>
+        <target state="translated">Avvia pubblicazione tramite Distribuzione Web dell'applicazione o del pacchetto in {0}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_TestDeployPackageOnCurrentMachine">
+        <source>Test deploy this Web Deploy package onto current machine.</source>
+        <target state="translated">Verificare la distribuzione del pacchetto di Web Deploy nel computer corrente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_TransformConfigUsingTransformFileToTransformOutputFile">
+        <source>Transformed {0} using {1} into {2}.</source>
+        <target state="translated">Trasformazione di {0} mediante {1} in {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ValidateErrorMsDeployPublishSetting">
+        <source>Web Deploy publish/package validating error: Missing or Invalid property value for $({0})</source>
+        <target state="translated">Errore di convalida pubblicazione/creazione pacchetto di Distribuzione Web: valore proprietà mancante o non valido per $({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ValidatingMsDeployPublishSettings">
+        <source>Validating Web Deploy package/publish related properties...</source>
+        <target state="translated">Convalida delle proprietà correlate alla pubblicazione/creazione pacchetto di Web Deploy...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WarningOnSettingBothIncludeIisSettingsOnPublishAndDeployAsIisApp">
+        <source>Setting both property values of DeployAsIisApp and IncludeIisSettingsOnPublish to true is not recommended, as IncludeIisSettingsOnPublish is a superset of DeployAsIisApp</source>
+        <target state="translated">Non è consigliabile impostare sia DeployAsIisApp sia IncludeIisSettingsOnPublish su True in quanto IncludeIisSettingsOnPublish è un superset di DeployAsIisApp</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WarningOnSettingRemoteSitePhysicalPathWhenIISSettingIsNotInclude">
+        <source>Setting value to $(RemoteSitePhysicalPath) might not work if IIS setting is not included</source>
+        <target state="translated">L'impostazione del valore su $(RemoteSitePhysicalPath) potrebbe non funzionare se non è inclusa l'impostazione di IIS</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebConfigConnectionStringParameterDescription">
+        <source>Connection String used in web.config by the application to access the database.</source>
+        <target state="translated">Stringa di connessione utilizzata in web.config per l'accesso al database da parte dell'applicazione.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishInvalidatePublishProfileSettings">
+        <source>The value for PublishProfile is set to '{0}', expected to find the file at '{1}' but it could not be found.</source>
+        <target state="translated">Il valore per PublishProfile è impostato su '{0}'. Non è stato possibile trovare il file previsto in '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishMethodIsNotSupportedInCmdLine">
+        <source>This specific WebPublishMethod({0}) is not yet supported on msbuild command line.  Please use Visual Studio to publish.</source>
+        <target state="translated">Questo metodo di pubblicazione sul Web specifico ({0}) non è ancora supportato nella riga di comando di MSBuild. Usare Visual Studio per la pubblicazione.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineCollectFilesPhase">
+        <source>Publish Pipeline Collect Files Phase</source>
+        <target state="translated">Pipeline di pubblicazione - Fase di raccolta file</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineCopyWebApplication">
+        <source>Copying Web Application Project Files for {0} to {1}.</source>
+        <target state="translated">Copia dei file di progetto dell'applicazione Web per {0} in {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineDeployPhase">
+        <source>Publish Pipeline Deploy Phase</source>
+        <target state="translated">Pipeline di pubblicazione - Fase di distribuzione</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineDeployPhaseStage1">
+        <source>Publish Pipeline Deploy phase Stage {0}</source>
+        <target state="translated">Pipeline di pubblicazione - Fase di distribuzione - Fase {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineMSDeploySettings">
+        <source>Invoking Web Deploy to generate the package with the following settings:</source>
+        <target state="translated">Chiamata a Distribuzione Web per generare il pacchetto con le impostazioni seguenti:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineMaterializeAllFilesToTempDir">
+        <source>Copying all files to temporary location below for package/publish:
+{0}.</source>
+        <target state="translated">Copia di tutti i file nel percorso temporaneo indicato di seguito per pubblicazione/creazione del pacchetto:
+{0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelinePhase">
+        <source>Publish Pipeline {0} Phase</source>
+        <target state="translated">Pipeline di pubblicazione - Fase di {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineTransformPhase">
+        <source>Publish Pipeline Transform Phase</source>
+        <target state="translated">Pipeline di pubblicazione - Fase di trasformazione</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishProfileInvalidPropertyValue">
+        <source>PublishProfile({0}) is set. But the $({1}) does not have a valid value.  Current Value is "{2}".</source>
+        <target state="translated">Il profilo di pubblicazione ({0}) è stato impostato, ma $({1}) non contiene un valore valido. Il valore corrente è "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishValidatePublishProfileSettings">
+        <source>Validating PublishProfile({0}) settings.</source>
+        <target state="translated">Convalida delle impostazioni del profilo di pubblicazione ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_AddParameterIntoObject">
+        <source>Adding Parameter ({0}) with value ({1}) into to object ({2}).</source>
+        <target state="translated">Aggiunta del parametro ({0}) con valore ({1}) nell'oggetto ({2}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Canceled">
+        <source>User cancel Web deployment operation.</source>
+        <target state="translated">Operazione di distribuzione Web annullata dall'utente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_DuplicateItemMetadata">
+        <source>The following two items have duplicate item metadata %({0}). The two items data are {1} and {2}.</source>
+        <target state="translated">I due elementi seguenti contengono metadati duplicati %({0}). I dati dei due elementi sono {1} e {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_EncryptionExceptionMessage">
+        <source>An IIS secure setting was detected while packaging/publishing. An encryption password is required to proceed.
+In Visual Studio, the password can be entered in the project's Package/Publish property page.
+In team build or command line, password can be provided by setting MsBuild $(DeployEncryptKey) property.
+Error details:</source>
+        <target state="translated">È stata rilevata un'impostazione di sicurezza di IIS durante la pubblicazione/creazione pacchetto. Per continuare, è necessaria una password di crittografia.
+In Visual Studio è possibile immettere la password nella pagina delle proprietà Pubblicazione/creazione pacchetto del progetto.
+In Team Build o nella riga di comando è possibile specificare la password impostando la proprietà MsBuild $(DeployEncryptKey).
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedDeploy">
+        <source>Publish failed to deploy.</source>
+        <target state="translated">Distribuzione pubblicazione non riuscita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedPackage">
+        <source>Package failed.</source>
+        <target state="translated">Creazione pacchetto non riuscita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedWithException">
+        <source>Web deployment task failed. ({0})</source>
+        <target state="translated">Attività di distribuzione Web non riuscita ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedWithExceptionWithDetail">
+        <source>Web deployment task failed. ({0})
+{1}</source>
+        <target state="translated">Attività di distribuzione Web non riuscita. ({0})
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidOperation">
+        <source>Source ({0}) and destination ({1}) are not compatible for given operation.</source>
+        <target state="translated">Origine ({0}) e destinazione ({1}) non compatibili per l'operazione specificata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidProviderName">
+        <source>Provider({0})is not a recognized provider.</source>
+        <target state="translated">Provider ({0}) non riconosciuto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidProviderOption">
+        <source>Unknown ProviderOption:{0}. Known ProviderOptions are:{1}.</source>
+        <target state="translated">ProviderOption sconosciuto: {0}. Elementi ProviderOption noti: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_LoadVSCertUIFailed">
+        <source>Failed to load publish certificate dialog due to error of {0}</source>
+        <target state="translated">Non è stato possibile caricare la finestra di dialogo del certificato di pubblicazione a causa di un errore {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOY32bit">
+        <source>For x86(32 bit): http://go.microsoft.com/fwlink/?LinkId=109365.</source>
+        <target state="translated">Per sistemi x86 (a 32 bit): http://go.microsoft.com/fwlink/?LinkId=109365.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOY64bit">
+        <source>For x64(64 bit): http://go.microsoft.com/fwlink/?LinkId=109366.</source>
+        <target state="translated">Per sistemi x64 (a 64 bit): http://go.microsoft.com/fwlink/?LinkId=109366.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYASSEMBLYLOAD_FAIL">
+        <source>Package/Publish task {0} failed to load Web Deploy assemblies. Microsoft Web Deploy is not correctly installed on this machine. Microsoft Web Deploy v3 or higher is recommended.</source>
+        <target state="translated">L'attività di pubblicazione/creazione pacchetto {0} non è riuscita a caricare gli assembly di Web Deploy. Microsoft Web Deploy non è installato correttamente nel computer. È consigliabile usare Microsoft Web Deploy v3 o versione successiva.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYLOADFAIL">
+        <source>Package/Publish depends on Microsoft Web Deploy technology. Microsoft Web Deploy is not correctly installed on this machine. Please install from following link: {0}{1}. ({2})</source>
+        <target state="translated">La pubblicazione/creazione pacchetto dipende dalla tecnologia di distribuzione Web Microsoft. Lo strumento di distribuzione Web non è installato correttamente nel computer. Installarlo dal collegamento seguente: {0}{1}. ({2})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYMinVersion">
+        <source>Package/Publish depends on Microsoft Web Deployment technology. Microsoft Web Deployment is installed but doesn't meet the minimum version requirement. Please reinstall from following link: {0}{1}. (Current Version:{2}, Minimum Version needed:{3})</source>
+        <target state="translated">La pubblicazione/creazione pacchetto dipende dalla tecnologia di distribuzione Web Microsoft. Lo strumento di distribuzione Web Microsoft è installato ma non soddisfa il requisito di versione minima. Reinstallarlo dal collegamento seguente: {0}{1}. Versione corrente: {2}, versione minima necessaria: {3}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYVERSIONLOAD">
+        <source>Package/Publish task {0} load assembly {1}</source>
+        <target state="translated">Attività pubblicazione/creazione pacchetto {0} assembly caricato {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1Message">
+        <source>Failed to invoke or execute {0} provider on the web server.  The Web Deployment Tool's {0} provider is either not enabled or failed to executed specific commands on the server.  Please contact your server administrator for assistance. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="translated">Non è stato possibile richiamare o eseguire il provider {0} nel server Web. Il provider {0} dello Strumento di distribuzione Web non è abilitato oppure non è riuscito a eseguire determinati comandi nel server. Per ottenere assistenza, contattare l'amministratore del server. Provider di Distribuzione Web: "{0}".
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1SQLMessage">
+        <source>Make sure the database connection string for the server is correct and that you have appropriate permission to access the database. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="translated">Assicurarsi che la stringa di connessione al database per il server sia corretta e di avere le autorizzazioni necessarie per accedere al database. Provider di Distribuzione Web: "{0}".
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1SiteMessage">
+        <source>Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permissions on the server. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="translated">Assicurarsi di avere le autorizzazioni appropriate per il server per pubblicare le impostazioni di IIS. In alternativa, escludere le impostazioni che richiedono autorizzazioni di amministratore sul server. Provider di Distribuzione Web: "{0}".
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink2Message">
+        <source>Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permission on the server.
+Error details:</source>
+        <target state="translated">Assicurarsi di avere le autorizzazioni appropriate per il server per pubblicare le impostazioni di IIS. In alternativa, escludere le impostazioni che richiedono autorizzazioni di amministratore sul server.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink3Message">
+        <source>This can occur if the publish process cannot connect to the database on the server. Make sure the database connection string is correct.
+Error details:</source>
+        <target state="translated">Questo problema può verificarsi se il processo di pubblicazione non riesce a connettersi al database nel server. Assicurarsi che la stringa di connessione al database sia corretta.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink4Message">
+        <source>Failed to publish the database. This can happen if the remote database cannot run the script. Try modifying the database scripts, or disabling database publishing in the Package/Publish Web properties page. If the script failed due to database tables already exist, try dropping existing database objects before creating new ones. For more information on doing these options from Visual Studio, see http://go.microsoft.com/fwlink/?LinkId=179181.
+Error details:</source>
+        <target state="translated">Non è stato possibile pubblicare il database. Questa condizione può verificarsi se il database remoto non riesce a eseguire lo script. Provare a modificare gli script di database oppure a disabilitare la pubblicazione di database nella pagina delle proprietà di creazione pacchetto/pubblicazione sul Web. Se lo script non è riuscito perché le tabelle del database esistono già, provare a eliminare gli oggetti di database esistenti prima di crearne di nuovi. Per altre informazioni sull'utilizzo di queste opzioni in Visual Studio, vedere http://go.microsoft.com/fwlink/?LinkId=179181.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_ObjectIdentity">
+        <source>{0}({1})</source>
+        <target state="translated">{0}({1})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SQLCEMigrationNeedLatestMSDeploy">
+        <source>Generate schema/data sql scripts from SQLCE require Web Deploy 2.0 and up to function properly.  Please install the latest Web Deploy from {0}.</source>
+        <target state="translated">Per eseguire correttamente la generazione degli script SQL schema/dati da SQLCE è necessario Distribuzione Web 2.0. Installare l'ultima versione di Distribuzione Web da {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SkipDirectiveSetEnable">
+        <source>Skip Directive {0} enable state is changed to {1}.</source>
+        <target state="translated">Stato di abilitazione della direttiva di omissione {0} modificato su {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Start">
+        <source>Starting Web deployment task from source: {0} to Destination: {1}.</source>
+        <target state="translated">Avvio attività di distribuzione Web dall'origine {0} alla destinazione {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedArchiveDir">
+        <source>Package is successfully created as archive directory at the following location:
+{0}</source>
+        <target state="translated">Il pacchetto è stato creato come directory di archiviazione nel percorso seguente:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedDeploy">
+        <source>Publish Succeeded.</source>
+        <target state="translated">Pubblicazione riuscita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedPackage">
+        <source>Package "{0}" is successfully created as single file at the following location:
+{1}</source>
+        <target state="translated">Il pacchetto "{0}" è stato creato come singolo file nel percorso seguente:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Succeeded">
+        <source>Successfully executed Web deployment task.</source>
+        <target state="translated">Attività di distribuzione Web eseguita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_UnknownParameter">
+        <source>Unknown Parameter {0}. Source Known Parameters are: {1}.</source>
+        <target state="translated">Parametro {0} sconosciuto. Parametri di origine noti: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_UnknownSkipDirective">
+        <source>Skip Directive {0} can not be identified.</source>
+        <target state="translated">Impossibile identificare la direttiva di omissione {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException401Message">
+        <source>Make sure the site name, user name, and password are correct. If the issue is not resolved, please contact your local or server administrator.
+Error details:</source>
+        <target state="translated">Assicurarsi che il nome del sito, il nome utente e la password siano corretti. Se il problema non viene risolto, contattare l'amministratore locale o del server.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException404Message">
+        <source>The requested resource does not exist, or the requested URL is incorrect.
+Error details:</source>
+        <target state="translated">La risorsa richiesta non esiste oppure l'URL non è corretto.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException502Message">
+        <source>Make sure firewall and network settings on your computer and on the server are configured to allow connections between them. If the issue is not resolved, please contact your local or server administrator.
+Error details:</source>
+        <target state="translated">Assicurarsi che le impostazioni del firewall e della rete nel computer e nel server siano configurate per consentire connessioni tra tali componenti. Se il problema non viene risolto, contattare l'amministratore locale o del server.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException550Message">
+        <source>Make sure the site that you are deploying to is a valid site on the destination server. If the issue is not resolved, please contact your server administrator.
+Error details:</source>
+        <target state="translated">Assicurarsi che il sito in fase di distribuzione sia un sito valido nel server di destinazione. Se il problema non viene risolto, contattare l'amministratore del server.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException551Message">
+        <source>Make sure the appliction that you are deploying to is a valide application on the destination server. If the issue is not resolved, please contact your server administrator.
+Error details:</source>
+        <target state="translated">Assicurarsi che l'applicazione in fase di distribuzione sia un'applicazione valida nel server di destinazione. Se il problema non viene risolto, contattare l'amministratore del server.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebExceptionConnectFailureMessage">
+        <source>This error indicates that you cannot connect to the server. Make sure the service URL is correct, firewall and network settings on this computer and on the server computer are configured properly, and the appropriate services have been started on the server.
+Error details:</source>
+        <target state="translated">Questo errore indica che non è possibile connettersi al server. Assicurarsi che l'URL del servizio sia corretto, che le impostazioni del firewall e della rete nel computer e nel server siano configurate correttamente e che nel server siano stati avviati i servizi appropriati.
+Dettagli errore:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebPackageHelpLink">
+        <source>http://go.microsoft.com/fwlink/?LinkId=124618</source>
+        <target state="new">http://go.microsoft.com/fwlink/?LinkId=124618</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebPackageHelpLinkMessage">
+        <source>To get the instructions on how to deploy the web package please visit the following link:</source>
+        <target state="translated">Per ottenere le istruzioni su come distribuire il pacchetto Web, visitare il collegamento seguente:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValidateParameter_ArgumentNullError">
+        <source>Property '{0}' must be non-empty.</source>
+        <target state="translated">Il valore della proprietà '{0}' non può essere vuoto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Attribute">
+        <source>Setting {0}</source>
+        <target state="translated">Impostazione di {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Failed">
+        <source>Failed to Generate AssemblyInfo file.</source>
+        <target state="translated">Impossibile generare il file AssemblyInfo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
+        <source>Generating AssemblyInfo.</source>
+        <target state="translated">Generazione delle informazioni sull'assembly.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">
+        <source>Successfully generated AssemblyInfo file.</source>
+        <target state="translated">Generazione del file AssemblyInfo completata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_ApplicationPath">
+        <source>Missing ApplicationPath parameter (the physical path of the precompiled application).</source>
+        <target state="translated">Parametro ApplicationPath mancante (il percorso fisico dell'applicazione precompilata).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_ContentAssemblyName">
+        <source>ContentAssembly parameter cannot be combined with the Prefix or NameSingleAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name.</source>
+        <target state="translated">Impossibile combinare il parametro ContentAssembly con il parametro Prefix o NameSingleAssemblyName. Se viene specificato, l'intera applicazione verrà unita in un singolo assembly con il nome specificato.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Failed">
+        <source>Failed to merge '{0}'.</source>
+        <target state="translated">Impossibile unire '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_SingleAssemblyName">
+        <source>SingleAssemblyName parameter cannot be combined with the Prefix or ContentAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name.</source>
+        <target state="translated">Impossibile combinare il parametro SingleAssemblyName con il parametro Prefix o ContentAssemblyName. Se viene specificato, l'intera applicazione verrà unita in un singolo assembly con il nome specificato.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Start">
+        <source>Running aspnet_merge.exe.</source>
+        <target state="translated">Esecuzione di aspnet_merge.exe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Succeeded">
+        <source>Successfully merged '{0}'.</source>
+        <target state="translated">Merge di '{0}' completato.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WebConfigTransform_HostingModel_Error">
+        <source>The acceptable value for AspNetCoreHostingModel property is either "InProcess" or "OutOfProcess".</source>
+        <target state="translated">Il valore accettabile per la proprietà AspNetCoreHostingModel è "InProcess" o "OutOfProcess".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WebConfigTransform_InvalidHostingOption">
+        <source>In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to at least AspNetCoreModuleV2.</source>
+        <target state="translated">L'hosting in-process non è supportato per AspNetCoreModule. Modificare AspNetCoreModule almeno in AspNetCoreModuleV2.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Check_DeploymentStatus">
+        <source>Checking the deployment status...</source>
+        <target state="translated">Controllo dello stato della distribuzione...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_DeploymentStatus">
+        <source>Deployment status is {0}.</source>
+        <target state="translated">Lo stato della distribuzione è {0}.</target>
+        <note>{0} - Success or failed</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_DeploymentStatusPolling">
+        <source>Polling for deployment status...</source>
+        <target state="translated">Polling dello stato della distribuzione...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Failed">
+        <source>Zip Deployment failed. </source>
+        <target state="translated">La distribuzione del file ZIP non è riuscita. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedDeploy">
+        <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'.</source>
+        <target state="translated">Il tentativo di pubblicazione del file ZIP tramite '{0}' non è riuscito. Codice di stato HTTP restituito: '{1}'.</target>
+        <note>{0} - URL to deploy zip, {1} - HTTP response code</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedDeployWithLogs">
+        <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'. See the logs at '{2}'.</source>
+        <target state="translated">Il tentativo di pubblicazione del file ZIP tramite '{0}' non è riuscito. Codice di stato HTTP restituito: '{1}'. Vedere i log in '{2}'.</target>
+        <note>{0} - URL to deploy zip, {1} - HTTP response code, {2} - Logs URL</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedToRetrieveCred">
+        <source>Failed to retrieve credentials.</source>
+        <target state="translated">Non è stato possibile recuperare le credenziali.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_InvalidSiteNamePublishUrl">
+        <source>Neither SiteName nor PublishUrl was given a value.</source>
+        <target state="translated">Non è stato specificato alcun valore per SiteName o PublishUrl.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_PublishingZip">
+        <source>Publishing {0} to {1}...</source>
+        <target state="translated">Pubblicazione di {0} in {1}...</target>
+        <note>{0} - Path of zip to publish, {1} - URL to deploy zip</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Succeeded">
+        <source>Zip Deployment succeeded.</source>
+        <target state="translated">La distribuzione del file ZIP è riuscita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Uploaded">
+        <source>Uploaded the Zip file to the target.</source>
+        <target state="translated">Il file ZIP è stato caricato nella destinazione.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

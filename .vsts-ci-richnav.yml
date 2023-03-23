@@ -1,0 +1,87 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+      - release/*.*
+
+pr: none
+
+variables:
+  - name: teamName
+    value: Roslyn-Project-System
+  - name: PostBuildSign
+    value: true
+  - template: /eng/common/templates/variables/pool-providers.yml
+
+stages:
+- stage: build
+  displayName: Build
+  jobs:
+    - template: /eng/common/templates/job/job.yml
+      parameters:
+        name: Windows_NT_FullFramework
+        enableRichCodeNavigation: true
+        richCodeNavigationLanguage: 'csharp'
+        richCodeNavigationEnvironment: 'production'
+        pool:
+            name: $(DncEngPublicBuildPool)
+            demands: ImageOverride -equals windows.vs2019.amd64.open   
+        timeoutInMinutes: 180
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+              _Test: -test
+        workspace:
+          clean: all
+        variables:
+          - _AgentOSName: Windows_NT_FullFramework
+          - _TeamName: DotNetCore
+          - _OfficialBuildIdArgs: ''
+          - _PublishArgs: ''
+          - _SignArgs: ''
+          - _InternalRuntimeDownloadArgs: ''
+        steps:
+        - powershell: eng\common\build.ps1
+                    -restore
+                    -ci
+                    -build
+                    -pack
+                    -sign
+                    -configuration $(_BuildConfig)
+                    $(_PublishArgs)
+                    $(_SignArgs)
+                    $(_OfficialBuildIdArgs)
+                    $(_InternalRuntimeDownloadArgs)
+                    /p:Test=false
+          displayName: Build
+          env:
+            BuildConfig: $(_BuildConfig)
+            BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+            PublishType: $(_PublishType)
+            TestFullMSBuild: 'true'
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+        - task: CopyFiles@2	
+          displayName: Gather Logs	
+          inputs:	
+            SourceFolder: '$(Build.SourcesDirectory)/artifacts'	
+            Contents: |	
+              log/$(_BuildConfig)/**/*	
+              TestResults/$(_BuildConfig)/**/*	
+              SymStore/$(_BuildConfig)/**/* 
+            TargetFolder: '$(Build.ArtifactStagingDirectory)'	
+          continueOnError: true	
+          condition: always()
+
+        - task: PublishBuildArtifacts@1	
+          displayName: Publish Logs to VSTS	
+          inputs:	
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'	
+            ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
+            publishLocation: Container	
+          continueOnError: true	
+          condition: always()

@@ -1,0 +1,173 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Analyzers.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+
+    <!-- Analysis level is a single property that can be used to control both the compiler warning waves
+         and enable .NET analyzers. Valid values are 'none', 'latest', 'preview', or a version number  -->
+
+    <!-- If not specified and equal to the current most-recent TFM, default the AnalysisLevel to latest.
+         Otherwise, default AnalysisLevel to the TFM. We set 'latest' indirectly here because the
+         next chunk of logic handles user-defined prefix/suffix, which can also set 'latest', so
+         we choose to only do the 'latest' => actual value translation one time. -->
+
+    <_NoneAnalysisLevel>4.0</_NoneAnalysisLevel>
+    <!-- When the base TFM of the platform bumps, these must be bumped as well. Preview should always be the 'next' TFM. -->
+    <_LatestAnalysisLevel>8.0</_LatestAnalysisLevel>
+    <_PreviewAnalysisLevel>9.0</_PreviewAnalysisLevel>
+
+    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
+                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                              $([MSBuild]::VersionEquals($(_TargetFrameworkVersionWithoutV), '$(_LatestAnalysisLevel)'))">latest</AnalysisLevel>
+    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
+                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">$(_TargetFrameworkVersionWithoutV)</AnalysisLevel>
+
+    <!-- AnalysisLevel can also contain compound values with a prefix and suffix separated by a '-' character.
+         The prefix indicates the core AnalysisLevel and the suffix indicates the bucket of
+         rules to enable by default. For example, some valid compound values for AnalysisLevel are:
+           1. '5-all' - Indicates core AnalysisLevel = '5' with 'all' the rules enabled by default.
+           2. 'latest-none' - Indicates core AnalysisLevel = 'latest' with 'none' of the rules enabled by default.
+         AnalysisLevelPrefix is used to set the EffectiveAnalysisLevel below.
+         AnalysisLevelSuffix is processed further in Microsoft.CodeAnalysis.NetAnalyzers.targets imported below.
+    -->
+    <AnalysisLevelPrefix Condition="$(AnalysisLevel.Contains('-'))">$([System.Text.RegularExpressions.Regex]::Replace($(AnalysisLevel), '-(.)*', ''))</AnalysisLevelPrefix>
+    <AnalysisLevelSuffix Condition="'$(AnalysisLevelPrefix)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(AnalysisLevel), '$(AnalysisLevelPrefix)-', ''))</AnalysisLevelSuffix>
+
+    <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
+         and an implied numerical option (such as '4')-->
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">$(_NoneAnalysisLevel)</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">$(_LatestAnalysisLevel)</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">$(_PreviewAnalysisLevel)</EffectiveAnalysisLevel>
+
+    <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
+    <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
+                                       '$(AnalysisLevelPrefix)' != ''">$(AnalysisLevelPrefix)</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
+                                       '$(AnalysisLevel)' != ''">$(AnalysisLevel)</EffectiveAnalysisLevel>
+
+    <!-- Set WarningLevel based on all we know about the project -->
+    <!-- NOTE: at this time only the C# compiler supports warning waves like this. -->
+    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
+    <!-- The CSharp.props used to hard-code WarningLevel to 4, so to maintain parity with .NET Framework projects we do that here. -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETFramework' ">4</WarningLevel>
+    <!-- .NET projects, however, can float up to their TFM's major version -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">$(_TargetFrameworkVersionWithoutV.Substring(0, 1))</WarningLevel>
+  </PropertyGroup>
+
+  <!-- Enable Analyzers based on EffectiveAnalysisLevel -->
+  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' != '' And
+                             $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">
+
+    <!-- EnableNETAnalyzers Allows analyzers to be disabled in bulk via msbuild if the user wants to -->
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">true</EnableNETAnalyzers>
+
+    <!-- Intermediate step to enable ILLink.Analyzers so ILLink, Blazor, Xamarin, AOT, etc. can enable the same flags -->
+    <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == '' And
+                                         ('$(PublishSingleFile)' == 'true' Or '$(PublishAot)' == 'true')">true</EnableSingleFileAnalyzer>
+
+    <!-- Enable the trim analyzer when any trimming settings are enabled. Warnings may suppressed based on other settings. -->
+    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And 
+                                   ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true' Or '$(PublishAot)' == 'true')">true</EnableTrimAnalyzer>
+
+    <!-- Enable the AOT analyzer when AOT is enabled. Warnings may suppressed based on other settings. -->
+    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == '' And '$(PublishAot)' == 'true'">true</EnableAotAnalyzer>
+
+    <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
+    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- Establish good defaults for scenarios where no EffectiveAnalysisLevel was set (e.g. .NETFramework) -->
+  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' == '' Or ('$(EffectiveAnalysisLevel)' != '' And $([MSBuild]::VersionLessThanOrEquals($(EffectiveAnalysisLevel), '4.0')))">
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
+    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == ''">false</EnableTrimAnalyzer>
+    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == ''">false</EnableAotAnalyzer>
+    <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == ''">false</EnableSingleFileAnalyzer>
+  </PropertyGroup>
+
+  <!-- Unconditionally import 'Microsoft.CodeAnalysis.NetAnalyzers.props' for all C# and VB projects for supporting https://github.com/dotnet/roslyn-analyzers/issues/3977 -->
+  <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.props"
+          Condition="'$(Language)' == 'C#' Or '$(Language)' == 'VB'" />
+  <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
+          Condition="$(EnableNETAnalyzers)" />
+  <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.NET.ILLink.Analyzers.props"
+          Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'" />
+
+  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\cs\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.targets"
+          Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'" />
+  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\vb\build\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.targets"
+          Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'VB'" />
+
+  <!-- .NET Analyzers -->
+  <ItemGroup Condition="$(EnableNETAnalyzers)">
+    <Analyzer
+      Condition="'$(Language)' == 'VB'"
+      Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Condition="'$(Language)' == 'C#'"
+      Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <!-- ILLinker Analyzers -->
+  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'">
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\analyzers\ILLink.*.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <!-- CompilerVisibleProperties for .NET -->
+  <ItemGroup Condition="'$(Language)' == 'C#' Or '$(Language)' == 'VB'">
+    <!-- Used for analyzer to match namespace to folder structure -->
+    <CompilerVisibleProperty Include="RootNamespace" />
+    <CompilerVisibleProperty Include="ProjectDir" />
+  </ItemGroup>
+
+  <!-- C# Code Style Analyzers -->
+  <ItemGroup Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'">
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CSharp.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <!-- Visual Basic Code Style Analyzers -->
+  <ItemGroup Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'VB'">
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+</Project>

@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="translated">ID_PACCHETTO</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -52,6 +52,16 @@
         <target state="translated">Lo strumento '{0}' è stato aggiornato dalla versione '{1}' alla versione '{2}' (file manifesto {3}).</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="translated">Lo strumento '{0}' è stato reinstallato con l'ultima versione preliminare (versione '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">Lo strumento '{0}' è stato reinstallato con l'ultima versione stabile (versione '{1}').</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">La versione richiesta {0} è inferiore a quella esistente {1}.</target>
@@ -68,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">Aggiorna uno strumento globale.</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">Aggiornare uno strumento globale o locale.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -132,11 +142,6 @@ Per trovare i nomi degli strumenti e gli ID pacchetto corrispondente
 per gli strumenti installati, usare il comando 'dotnet tool list'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">Lo strumento '{0}' è stato reinstallato con l'ultima versione stabile (versione '{1}').</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UpdateToolFailed">
         <source>Tool '{0}' failed to update due to the following:</source>
         <target state="translated">L'aggiornamento dello strumento '{0}' non è riuscito. Motivi:</target>
@@ -149,7 +154,7 @@ per gli strumenti installati, usare il comando 'dotnet tool list'.</target>
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="translated">ORIGINE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
@@ -164,7 +169,7 @@ per gli strumenti installati, usare il comando 'dotnet tool list'.</target>
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="translated">PERCORSO</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
@@ -174,7 +179,7 @@ per gli strumenti installati, usare il comando 'dotnet tool list'.</target>
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">VERSIONE</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
     </body>

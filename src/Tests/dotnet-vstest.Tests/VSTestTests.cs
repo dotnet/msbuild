@@ -25,18 +25,19 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
         {
             var testAppName = "VSTestCore";
-            var testRoot = _testAssetsManager.CopyTestAsset(testAppName)
+            var testAsset = _testAssetsManager.CopyTestAsset(testAppName, identifier: "VSTestTests")
                 .WithSource()
-                .WithVersionVariables()
-                .Path;
+                .WithVersionVariables();
+
+            var testRoot = testAsset.Path;
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            new BuildCommand(Log, testRoot)
+            new BuildCommand(testAsset)
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testRoot, "bin", configuration, "netcoreapp3.0", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testRoot, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{testAppName}.dll");
 
             // Call vstest
             var result = new DotnetVSTestCommand(Log)
@@ -47,8 +48,8 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                     .Should().Contain("Total tests: 2")
                     .And.Contain("Passed: 1")
                     .And.Contain("Failed: 1")
-                    .And.Contain("\u221a VSTestPassTest")
-                    .And.Contain("X VSTestFailTest");
+                    .And.Contain("Passed VSTestPassTest")
+                    .And.Contain("Failed VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -65,7 +66,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.0", "VSTestTestRunParameters.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "VSTestTestRunParameters.dll");
 
             // Call test
             CommandResult result = new DotnetVSTestCommand(Log)
@@ -87,10 +88,114 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 result.StdOut.Should().NotMatch("The test run parameter argument '*' is invalid.");
                 result.StdOut.Should().Contain("Total tests: 1");
                 result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("\u221a VSTestTestRunParameters");
+                result.StdOut.Should().Contain("Passed VSTestTestRunParameters");
             }
 
             result.ExitCode.Should().Be(0);
+        }
+
+        [Fact]
+        public void ItShouldSetDotnetRootToLocationOfDotnetExecutable()
+        {
+            var testAppName = "VSTestCore";
+            var testAsset = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
+                .WithVersionVariables();
+
+            var testRoot = testAsset.Path;
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should().Pass();
+
+            var outputDll = Path.Combine(testRoot, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{testAppName}.dll");
+
+            // Call vstest
+            var result = new DotnetVSTestCommand(Log)
+                .Execute(outputDll, "--logger:console;verbosity=normal");
+
+            result.ExitCode.Should().Be(1);
+            var dotnet = result.StartInfo.FileName;
+            Path.GetFileNameWithoutExtension(dotnet).Should().Be("dotnet");
+            string dotnetRoot = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
+            result.StartInfo.EnvironmentVariables.ContainsKey(dotnetRoot).Should().BeTrue($"because {dotnetRoot} should be set");
+            result.StartInfo.EnvironmentVariables[dotnetRoot].Should().Be(Path.GetDirectoryName(dotnet));
+        }
+
+        [Fact]
+        public void ItShouldAcceptMultipleLoggers()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp();
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            new BuildCommand(Log, testProjectDirectory)
+                .Execute()
+                .Should().Pass();
+
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "VSTestTestRunParameters.dll");
+
+            var logFileName = $"{Path.GetTempFileName()}.trx";
+            // Call test
+            CommandResult result = new DotnetVSTestCommand(Log)
+                                        .Execute(new[] {
+                                            outputDll,
+                                            "--logger:console;verbosity=normal",
+                                            $"--logger:trx;LogFileName={logFileName}",
+                                            "--",
+                                            "TestRunParameters.Parameter(name=\"myParam\",",
+                                            "value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",",
+                                            "value=\"value",
+                                            "with",
+                                            "space\")"
+                                        });
+
+            // Verify
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().NotMatch("The test run parameter argument '*' is invalid.");
+                result.StdOut.Should().Contain("Total tests: 1");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("Passed VSTestTestRunParameters");
+            }
+            result.ExitCode.Should().Be(0, $"Should have executed successfully, but got: {result.StdOut}");
+
+            var testResultsDirectory = new FileInfo(Path.Combine(Environment.CurrentDirectory, "TestResults", logFileName));
+            testResultsDirectory.Exists.Should().BeTrue("expected the test results file to be created");
+        }
+
+        [Fact]
+        public void ItShouldAcceptNoLoggers()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp();
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            new BuildCommand(Log, testProjectDirectory)
+                .Execute()
+                .Should().Pass();
+
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "VSTestTestRunParameters.dll");
+
+            // Call test
+            CommandResult result = new DotnetVSTestCommand(Log)
+                                        .Execute(new[] {
+                                            outputDll,
+                                            "--",
+                                            "TestRunParameters.Parameter(name=\"myParam\",",
+                                            "value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",",
+                                            "value=\"value",
+                                            "with",
+                                            "space\")"
+                                        });
+
+            //Verify
+            // since there are no loggers, all we have to go on it the exit code
+            result.ExitCode.Should().Be(0, $"Should have executed successfully, but got: {result.StdOut}");
         }
 
         private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")
@@ -105,7 +210,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             var testProjectDirectory = testInstance.Path;
 
             // Restore project VSTestCore
-            new RestoreCommand(Log, testProjectDirectory)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

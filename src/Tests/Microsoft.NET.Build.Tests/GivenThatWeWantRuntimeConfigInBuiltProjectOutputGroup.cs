@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp1.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_has_target_path_and_final_outputput_path_metadata(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -59,14 +59,13 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RuntimeConfigPartialBuild",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
@@ -88,7 +87,7 @@ namespace Microsoft.NET.Build.Tests
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "2"));
             });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
@@ -105,10 +104,9 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "UpdateRuntimeConfigPartialBuild",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
@@ -122,7 +120,7 @@ namespace Microsoft.NET.Build.Tests
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "3"));
             });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
@@ -144,7 +142,7 @@ namespace Microsoft.NET.Build.Tests
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "2"));
             });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();

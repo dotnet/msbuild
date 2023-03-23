@@ -2,14 +2,54 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchArgumentName">
+        <source>ARCH</source>
+        <target state="new">ARCH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArchitectureOptionDescription">
+        <source>The target architecture.</source>
+        <target state="translated">Hedef mimari.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotResolveRuntimeIdentifier">
+        <source>Resolving the current runtime identifier failed.</source>
+        <target state="translated">Geçerli çalışma zamanı tanımlayıcısı çözümlenemedi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
+        <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
+        <target state="translated">Hem `-r|--runtime` hem de `-a|--arch` seçeneğinin belirtilmesi desteklenmiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
+        <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
+        <target state="translated">Hem `-r|--runtime` hem de `-os` seçeneğinin belirtilmesi desteklenmiyor.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="translated">Komutun durup kullanıcı girişini veya eylemini (örneğin, kimlik doğrulamasının tamamlanmasını) beklemesine izin verir .</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandPrereleaseOptionDescription">
+        <source>Allows prerelease packages to be installed.</source>
+        <target state="translated">Ön sürüm paketlerinin yüklenmesini sağlar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CorruptSolutionProjectFolderStructure">
+        <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</source>
+        <target state="translated">'{0}' çözüm dosyasında EndProject etiketleri eksik veya proje GUID'i etrafında geçersiz alt-üst proje klasörü eşlemeleri var: '{1}'. Çözümü manuel olarak onarın veya Visual Studio'da açıp kaydetmeyi deneyin."</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">`{0}` içinde proje bulunamadı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableBuildServersOptionDescription">
+        <source>Force the command to ignore any persistent build servers.</source>
+        <target state="translated">Komutu kalıcı derleme sunucularını yoksaymaya zorla.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
@@ -70,9 +110,29 @@ export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
+      <trans-unit id="FrameworkDependentOptionDescription">
+        <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
+        <target state="translated">Uygulamanızı çerçeveye bağımlı bir uygulama olarak yayımlayın. Uygulamanızı çalıştırmak için hedef makineye uyumlu bir .NET çalışma zamanı yüklenmelidir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildAdditionalOptionTitle">
+        <source>.NET Cli Options:</source>
+        <target state="new">.NET Cli Options:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">`{0}` içinde birden fazla proje bulundu. Hangisinin kullanılacağını belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperatingSystemOptionDescription">
+        <source>The target operating system.</source>
+        <target state="translated">Hedef işletim sistemi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -128,6 +188,23 @@ export PATH="$PATH:{0}"
       <trans-unit id="Package">
         <source>Package</source>
         <target state="translated">Paket</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResponseFileNotFound">
+        <source>Response file '{0}' does not exist.</source>
+        <target state="translated">'{0}' yanıt dosyası mevcut değil.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
+        <target state="translated">'--self-contained' ve '--no-self-contained' seçenekleri birlikte kullanılamaz.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">Uygulamanızla birlikte .NET çalışma zamanını yayımladığınızda hedef makinede çalışma zamanının yüklü olması gerekmez.
+Çalışma zamanı tanımlayıcısı belirtildiyse varsayılan değer 'true' olur.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -642,7 +719,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">ÇERÇEVE</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
@@ -709,17 +786,17 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="needs-review-translation">.NET Core SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce oturumunuzu kapatmanız veya oturumu yeniden başlatmanız gerekiyor.</target>
+        <target state="translated">.NET SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce oturumunuzu kapatmanız veya oturumu yeniden başlatmanız gerekiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="needs-review-translation">.NET Core SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce terminali yeniden açmanız gerekiyor.</target>
+        <target state="translated">.NET SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce terminali yeniden açmanız gerekiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="needs-review-translation">.NET Core SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce Komut İstemi penceresini yeniden açmanız gerekiyor.</target>
+        <target state="translated">.NET SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce Komut İstemi penceresini yeniden açmanız gerekiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
@@ -896,7 +973,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="translated">PROJE</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
@@ -911,22 +988,22 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="translated">ÇERÇEVE</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">ÇALIŞMA_ZAMANI_TANIMLAYICISI</target>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="translated">YAPILANDIRMA</target>
+        <target state="translated">CONFIGURATION</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="translated">SÜRÜM_SONEKİ</target>
+        <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
@@ -936,7 +1013,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="translated">PROJE | ÇÖZÜM</target>
+        <target state="translated">PROJECT | SOLUTION</target>
         <note />
       </trans-unit>
     </body>

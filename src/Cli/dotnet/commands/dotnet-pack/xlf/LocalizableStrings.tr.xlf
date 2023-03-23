@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="translated">ÇIKIŞ_DİZİNİ</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>
-        <target state="translated">PROJE</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="translated">Paketi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
+        <source>The configuration to use for building the package. The default is 'Release'.</source>
+        <target state="needs-review-translation">Paket derlemede kullanmak için yapılandırma. Varsayılan değer: 'Debug'. Bu komutta, 'Release' komutunu varsayılan yapmak için 'PackRelease' özelliğini kullanın.</target>
         <note />
       </trans-unit>
     </body>

@@ -33,14 +33,11 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(project, identifier: targetFramework);
 
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -56,7 +53,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             project.SourceFiles[project.Name + ".cs"] = $@"
@@ -83,9 +79,7 @@ public static class {project.Name}
 
                 });
 
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()

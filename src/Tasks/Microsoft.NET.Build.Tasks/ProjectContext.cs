@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
-using Microsoft.DotNet.PlatformAbstractions;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using System;
@@ -80,7 +79,8 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                CompilationLockFileTarget = lockFile.GetTargetAndThrowIfNotFound(lockFileTarget.TargetFramework, null);
+                var frameworkAlias = lockFile.GetLockFileTargetAlias(lockFileTarget);
+                CompilationLockFileTarget = lockFile.GetTargetAndThrowIfNotFound(frameworkAlias, null);
             }
 
             PlatformLibrary = platformLibrary;
@@ -190,10 +190,12 @@ namespace Microsoft.NET.Build.Tasks
             Dictionary<string, LockFileTargetLibrary> libraryLookup =
                 lockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
 
+            string lockFileTargetFramework = lockFileTarget.Name.Split('/')[0];
+
             return lockFile
                 .ProjectFileDependencyGroups
                 .Where(dg => dg.FrameworkName == string.Empty ||
-                             dg.FrameworkName == lockFileTarget.TargetFramework.DotNetFrameworkName)
+                             dg.FrameworkName == lockFileTargetFramework)
                 .SelectMany(g => g.Dependencies)
                 .Select(projectFileDependency =>
                 {

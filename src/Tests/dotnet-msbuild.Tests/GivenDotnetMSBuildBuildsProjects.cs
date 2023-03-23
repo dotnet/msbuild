@@ -40,14 +40,14 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var testProjectDirectory = testInstance.Path;
 
             new MSBuildCommand(Log, "SayHello", testProjectDirectory)
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello, from MSBuild!");
 
             new MSBuildCommand(Log, "SayGoodbye", testProjectDirectory)
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Pass()
                 .And
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             }
 
             // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
-            var testInstance = _testAssetsManager.CopyTestAsset("LibraryWithUnresolvablePackageReference")
+            var testInstance = _testAssetsManager.CopyTestAsset("LibraryWithUnresolvablePackageReference", identifier: propertyFormat.GetHashCode().ToString())
                                         .WithSource();
 
             var root = testInstance.Path;
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             var result = new DotnetCommand(Log)
                 .WithWorkingDirectory(root)
-                .Execute("msbuild", $"{propertyFormat}:RestoreSources={somePathThatExists};https://api.nuget.org/v3/index.json", "/t:restore", "LibraryWithUnresolvablePackageReference.csproj");
+                .Execute("msbuild", $"{propertyFormat}:RestoreSources={somePathThatExists};https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json", "/t:restore", "LibraryWithUnresolvablePackageReference.csproj");
 
             result.Should().Fail();
 

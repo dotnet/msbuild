@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="DotnetWorkloadInfoLabel">
+        <source>.NET workloads installed:</source>
+        <target state="new">.NET workloads installed:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MalformedText">
         <source>Malformed command text '{0}'</source>
         <target state="translated">無効な形式のコマンド テキスト '{0}'</target>
@@ -28,11 +33,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">指定されたコマンドまたはファイルが見つからなかったため、実行できませんでした。
-次のような原因が考えられます:
+        <target state="translated">指定されたコマンドまたはファイルが見つからなかったため、実行できませんでした。
+次のような原因が考えられます。
   * 組み込みの dotnet コマンドのスペルが間違っている。
-  * .NET Core プログラムを実行しようとしたが、{0} が存在しない。
-  * グローバル ツールを実行しようとしたが、プレフィックスとして dotnet が付いたこの名前の実行可能ファイルが PATH に見つからなかった。</target>
+  * .NET プログラムを実行しようとしたが、{0} が存在しない。
+  * グローバル ツールを実行しようとしたが、プレフィックスとして dotnet が付いたこの名前の実行可能なものが PATH に見つからなかった。</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -76,8 +81,8 @@ Possible reasons for this include:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">.NET Core SDK (global.json を反映):</target>
+        <source>.NET SDK:</source>
+        <target state="translated">.NET SDK:</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -111,7 +116,7 @@ dotnet tool install --global {1} コマンドを実行してインストール�
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">.NET Core SDK</target>
+        <target state="translated">.NET SDK</target>
         <note />
       </trans-unit>
     </body>

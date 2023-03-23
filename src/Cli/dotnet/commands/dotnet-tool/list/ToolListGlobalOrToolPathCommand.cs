@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.List
@@ -20,19 +19,16 @@ namespace Microsoft.DotNet.Tools.Tool.List
     internal class ToolListGlobalOrToolPathCommand : CommandBase
     {
         public const string CommandDelimiter = ", ";
-        private readonly AppliedOption _options;
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private CreateToolPackageStore _createToolPackageStore;
 
         public ToolListGlobalOrToolPathCommand(
-            AppliedOption options,
             ParseResult result,
             CreateToolPackageStore createToolPackageStore = null,
             IReporter reporter = null)
             : base(result)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
             _createToolPackageStore = createToolPackageStore ?? ToolPackageFactory.CreateToolPackageStoreQuery;
@@ -40,7 +36,14 @@ namespace Microsoft.DotNet.Tools.Tool.List
 
         public override int Execute()
         {
-            var toolPathOption = _options.ValueOrDefault<string>(ToolAppliedOption.ToolPathOption);
+            var toolPathOption = _parseResult.GetValue(ToolListCommandParser.ToolPathOption);
+            var packageIdArgument = _parseResult.GetValue(ToolListCommandParser.PackageIdArgument);
+
+            PackageId? packageId = null;
+            if (!string.IsNullOrWhiteSpace(packageIdArgument))
+            {
+                packageId = new PackageId(packageIdArgument);
+            }
 
             DirectoryPath? toolPath = null;
             if (!string.IsNullOrWhiteSpace(toolPathOption))
@@ -68,16 +71,27 @@ namespace Microsoft.DotNet.Tools.Tool.List
                 LocalizableStrings.CommandsColumn,
                 p => string.Join(CommandDelimiter, p.Commands.Select(c => c.Name)));
 
-            table.PrintRows(GetPackages(toolPath), l => _reporter.WriteLine(l));
+            var packageEnumerable = GetPackages(toolPath, packageId);
+            table.PrintRows(packageEnumerable, l => _reporter.WriteLine(l));
+            if (packageId.HasValue && !packageEnumerable.Any())
+            {
+                // return 1 if target package was not found
+                return 1;
+            }
             return 0;
         }
 
-        private IEnumerable<IToolPackage> GetPackages(DirectoryPath? toolPath)
+        private IEnumerable<IToolPackage> GetPackages(DirectoryPath? toolPath, PackageId? packageId)
         {
             return _createToolPackageStore(toolPath).EnumeratePackages()
-                .Where(PackageHasCommands)
+                .Where((p) => PackageHasCommands(p) && PackageIdMatches(p, packageId))
                 .OrderBy(p => p.Id)
                 .ToArray();
+        }
+
+        internal static bool PackageIdMatches(IToolPackage package, PackageId? packageId)
+        {
+            return !packageId.HasValue || package.Id.Equals(packageId);
         }
 
         private bool PackageHasCommands(IToolPackage package)

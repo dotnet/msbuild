@@ -36,7 +36,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject toolProject = new TestProject()
             {
                 Name = "TestTool",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.2", // netcoreapp2.2 is the highest possible project tools tfm
                 IsExe = true
             };
@@ -56,7 +55,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject toolProject = new TestProject()
             {
                 Name = "DependencyContextTool",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.2", // netcoreapp2.2 is the highest possible project tools tfm
                 IsExe = true
             };
@@ -117,7 +115,6 @@ class Program
             TestProject toolReferencer = new TestProject()
             {
                 Name = "ToolReferencer",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0"
             };
 
@@ -235,7 +232,7 @@ class Program
                 FileName = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
                 Arguments = dotnetArgs
             };
-            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec);
+            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec.Environment);
 
             ICommand toolCommand = toolCommandSpec.ToCommand().CaptureStdOut();
 

@@ -29,7 +29,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "MissingPackageDeletedSinceRestore",
                 TargetFrameworks = "netstandard1.3",
-                IsSdkProject = true,
                 PackageReferences = { package },
             };
 
@@ -43,9 +42,7 @@ namespace Microsoft.NET.Build.Tests
 
             RemovePackageFromCache(package);
 
-            var build = new BuildCommand(
-                Log,
-                Path.Combine(asset.TestRoot, project.Name));
+            var build = new BuildCommand(asset);
 
             build.ExecuteWithoutRestore()
                  .Should()
@@ -89,7 +86,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "packagethatwillgomissing",
                 TargetFrameworks = "netstandard1.3",
-                IsSdkProject = true,
             };
 
             var asset = _testAssetsManager

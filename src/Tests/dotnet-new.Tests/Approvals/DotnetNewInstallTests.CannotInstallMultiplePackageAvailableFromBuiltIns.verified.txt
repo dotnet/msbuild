@@ -1,0 +1,8 @@
+﻿Installing the template package(s) will override the available template package(s).
+The following template package(s) are already available:
+   Microsoft.DotNet.Common.ItemTemplates::%VERSION%
+
+To install the template package(s) anyway, apply '--force' option:
+   dotnet new install Microsoft.DotNet.Common.ItemTemplates::6.0.100 Microsoft.DotNet.Web.ItemTemplates::5.0.0 --force
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#106

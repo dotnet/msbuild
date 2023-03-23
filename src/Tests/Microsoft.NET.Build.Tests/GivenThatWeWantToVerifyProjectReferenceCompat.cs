@@ -79,9 +79,7 @@ namespace Microsoft.NET.Build.Tests
                 restoreCommand.Execute().Should().Fail();
             }
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, referencerProject.Name);
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset);
 
             var result = buildCommand.Execute();
 

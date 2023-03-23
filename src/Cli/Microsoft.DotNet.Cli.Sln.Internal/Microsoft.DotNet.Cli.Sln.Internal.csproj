@@ -7,7 +7,7 @@
     <AssemblyName>Microsoft.DotNet.Cli.Sln.Internal</AssemblyName>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PublicSign Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">true</PublicSign>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 

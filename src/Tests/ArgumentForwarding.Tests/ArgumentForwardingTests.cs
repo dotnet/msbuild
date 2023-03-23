@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             {
                 rawEvaluatedArgument.Length.Should().Be(escapedEvaluatedRawArgument.Length);
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 Console.WriteLine("Argument Lists differ in length.");
 
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
                 Console.WriteLine($"Expected: {expected}");
                 Console.WriteLine($"Actual: {actual}");
 
-                throw e;
+                throw;
             }
 
             for (int i = 0; i < rawEvaluatedArgument.Length; ++i)
@@ -132,11 +132,11 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
                 {
                     rawArg.Should().Be(escapedArg);
                 }
-                catch(Exception e)
+                catch(Exception)
                 {
                     Console.WriteLine($"Expected: {rawArg}");
                     Console.WriteLine($"Actual: {escapedArg}");
-                    throw e;
+                    throw;
                 }
             }
         }

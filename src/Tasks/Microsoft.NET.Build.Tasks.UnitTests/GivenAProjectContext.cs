@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             LockFile lockFile = TestLockFiles.GetLockFile("dependencies.withgraphs");
             ProjectContext projectContext = lockFile.CreateProjectContext(
-               FrameworkConstants.CommonFrameworks.NetStandard16,
+               FrameworkConstants.CommonFrameworks.NetStandard16.GetShortFolderName(),
                runtime: null,
                Constants.DefaultPlatformLibrary,
                runtimeFrameworks: null,

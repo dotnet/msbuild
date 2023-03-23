@@ -1,0 +1,101 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Publish.FileSystem.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process to deploy web application projects.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <_DotNetPublishFiles>
+      FileSystemPublish;
+    </_DotNetPublishFiles>
+  </PropertyGroup>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : FileSystemPublish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <FileSystemPublishDependsOn>
+      $(FileSystemPublishDependsOn);
+      _DeleteDestinationFilesIfSpecified;
+      _CopyEntityFrameworkScripts;
+      _GatherFilesFromPublishIntermediateOutputPath;
+    </FileSystemPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="FileSystemPublish"
+          DependsOnTargets="$(FileSystemPublishDependsOn)"
+          Inputs="@(_PublishIntermediateOutputPathFiles)"
+          Outputs="@(_PublishIntermediateOutputPathFiles ->'$(PublishUrl)%(RecursiveDir)%(Filename)%(Extension)')">
+
+    <Copy
+        SourceFiles="@(_PublishIntermediateOutputPathFiles)"
+        DestinationFiles="@(_PublishIntermediateOutputPathFiles ->'$(PublishUrl)%(RecursiveDir)%(Filename)%(Extension)')" />
+
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _DeleteDestinationFilesIfSpecified
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_DeleteDestinationFilesIfSpecified">
+    <PropertyGroup>
+      <PublishUrl Condition="'$(PublishUrl)' != '' And !HasTrailingSlash('$(PublishUrl)')">$(PublishUrl)\</PublishUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_DestinationFiles Include="$(PublishUrl)**\*" />
+    </ItemGroup>
+
+    <Delete
+      Files="@(_DestinationFiles)"
+      Condition="'$(DeleteExistingFiles)' == 'true'" />
+
+    <RemoveDir
+      Directories="$(PublishUrl)"
+      Condition="'$(DeleteExistingFiles)' == 'true' And '$(PreserveDestinationFolder)' != 'true' And Exists('$(PublishUrl)')" />
+
+    <MakeDir
+      Directories="$(PublishUrl)"
+      Condition="'$(DeleteExistingFiles)' == 'true' And '$(PreserveDestinationFolder)' != 'true' And !Exists('$(PublishUrl)')"/>
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _GatherFilesFromPublishIntermediateOutputPath
+  ***********************************************************************************************
+ -->
+  <Target Name="_GatherFilesFromPublishIntermediateOutputPath">
+    <ItemGroup>
+      <_PublishIntermediateOutputPathFiles Include="$(PublishIntermediateOutputPath)**\*.*" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _CopyEntityFrameworkScripts
+  ***********************************************************************************************
+ -->
+  <Target Name="_CopyEntityFrameworkScripts">
+
+    <Copy
+    Condition="@(_EFSQLScripts) != ''"
+    SourceFiles="@(_EFSQLScripts)"
+    DestinationFiles="@(_EFSQLScripts ->'$(PublishIntermediateOutputPath)$(EFSQLScriptsFolderName)\%(Filename)%(Extension)')"
+    ContinueOnError="true"/>
+  </Target>
+
+</Project>

@@ -51,13 +51,12 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -83,7 +82,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App_Referencing_NetStandard20",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -91,14 +89,13 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard20_Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             testProject.ReferencedProjects.Add(netStandardProject);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_ns20");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -126,7 +123,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471_NuGetFacades",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -134,7 +130,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -167,7 +163,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App_Referencing_NetStandard16",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -175,14 +170,13 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard16_Library",
                 TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
             };
 
             testProject.ReferencedProjects.Add(netStandardProject);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_ns16");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -211,7 +205,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App_Referencing_Net471Library",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -219,22 +212,20 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471_Library",
                 TargetFrameworks = "net471",
-                IsSdkProject = true
             };
 
-            var net461library = new TestProject()
+            var net462library = new TestProject()
             {
-                Name = "Net461_Library",
-                TargetFrameworks = "net461",
-                IsSdkProject = true
+                Name = "net462_Library",
+                TargetFrameworks = "net462",
             };
 
             testProject.ReferencedProjects.Add(net471library);
-            testProject.ReferencedProjects.Add(net461library);
+            testProject.ReferencedProjects.Add(net462library);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_net471_net461");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_net471_net462");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -252,8 +243,8 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{net471library.Name}.dll",
                 $"{net471library.Name}.pdb",
-                $"{net461library.Name}.dll",
-                $"{net461library.Name}.pdb",
+                $"{net462library.Name}.dll",
+                $"{net462library.Name}.pdb",
             });
         }
 
@@ -264,7 +255,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -272,7 +262,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_with_override_property");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -299,7 +289,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471AliasTest",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -307,7 +296,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard20_Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             testProject.SourceFiles["Program.cs"] = $@"
@@ -341,7 +329,7 @@ public static class Program
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -390,7 +378,6 @@ public static class Program
             {
                 Name = "NetStandard16_Library",
                 TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
             };
 
             netStandardProject.PackageReferences.AddRange(new[]
@@ -490,7 +477,7 @@ public static class NS16LibClass
                                 }
                             });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:m")
@@ -597,7 +584,7 @@ public class Startup
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute().Should().Pass();
         }

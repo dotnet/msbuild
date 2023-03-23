@@ -1,0 +1,1200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Resources.resx">
+    <body>
+      <trans-unit id="BUILDTASK_ColectFilesInFolder_RootIsNotValid">
+        <source>The root folder for cllecting files is not a valid directory.({0})</source>
+        <target state="translated">파일 수집용 루트 폴더가 올바른 디렉터리가 아닙니다({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_CopyFailed">
+        <source>Copying file {0} to {1} failed. {2}</source>
+        <target state="translated">{0} 파일을 {1}(으)로 복사하지 못했습니다. {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_Copying">
+        <source>Copying {0} to {1}.</source>
+        <target state="translated">{0}을(를) {1}(으)로 복사하고 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_DeleteFailed">
+        <source>Deleting file {0} failed. {1}</source>
+        <target state="translated">{0} 파일을 삭제하지 못했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_Deleting">
+        <source>Deleting {0}.</source>
+        <target state="translated">{0}을(를) 삭제 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_RetryDelayOutOfRange">
+        <source>RetryDelay should be greater than zero.</source>
+        <target state="translated">RetryDelay는 0보다 커야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_UpToDate">
+        <source>Skip copying {0} to {1}, File {1} is up to date</source>
+        <target state="translated">{0}을(를) {1}(으)로 복사하는 작업을 건너뜁니다. {1} 파일은 최신 상태입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CreateFolder_Failed">
+        <source>Create Folder {0} failed. {1}</source>
+        <target state="translated">{0} 폴더를 만들지 못했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_DetectAntaresCLR45Error">
+        <source>Your hosting provider does not yet support ASP.NET 4.6, which your application is configured to use. To learn more about this please visit: http://go.microsoft.com/fwlink/?LinkID=615797&amp;clcid=0x409</source>
+        <target state="translated">호스팅 공급자가 애플리케이션에서 사용하도록 구성된 ASP.NET 4.6을 아직 지원하지 않습니다. 자세한 정보는 http://go.microsoft.com/fwlink/?LinkID=615797&amp;clcid=0x409를 참조하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_FailedToLoadThisVersionMsDeployTryingTheNext">
+        <source>Failed to load this version Microsoft.Web.Deployment ({0}) reason: {1}.
+ Trying the next one specified in $(_MSDeployVersionsToTry)..</source>
+        <target state="translated">이 Microsoft.Web.Deployment 버전({0})을 로드하지 못했습니다. 이유: {1}.
+ $(_MSDeployVersionsToTry)에서 지정된 다음 항목을 시도하는 중...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_IISSetting_RequireWebAdminDLL">
+        <source>To include IIS setting, it is required to have assembly Microsoft.Web.Administration installed on the machine.</source>
+        <target state="translated">IIS 설정을 포함하려면 어셈블리 Microsoft.Web.Administration을 컴퓨터에 설치해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_IsCleanMSDeployPackageNeeded_PackageByDifferentVersion">
+        <source>Existing package/archiveDir is created by different version of Msdeploy. It is not compatible for incremental build. Mark as Clean needed({0}).</source>
+        <target state="translated">기존의 패키지 또는 보관 디렉터리가 다른 버전의 Msdeploy에 의해 만들어져 증분 빌드와 호환되지 않습니다. 정리로 표시해야 합니다({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_ManifestFile_IISSettingNotInFirst">
+        <source>Validation failure.IIS Setting should be the first element in the Manifest file.({0})</source>
+        <target state="translated">유효성 검사 오류가 발생했습니다. IIS 설정이 매니페스트 파일의 첫 번째 요소여야 합니다({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapProjectURLToIisWeb_InvalidProjectURL">
+        <source>The project URL is not well formed.({0})</source>
+        <target state="translated">프로젝트 URL 형식이 잘못되었습니다({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapProjectURLToIisWeb_UnsupportedProjectURL">
+        <source>The project URL url host name type is not supported.({0})</source>
+        <target state="translated">프로젝트 URL의 URL 호스트 이름 형식이 지원되지 않습니다({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapURIToIisWebServer_AdminRequired">
+        <source>Retrieving local IIS properties from the URI requires Administrator permission.  Please elevate to Administrator before executing the program.</source>
+        <target state="translated">URI에서 로컬 IIS 속성을 검색하려면 관리자 권한이 필요합니다. 프로그램을 실행하기 전에 관리자로 권한 수준을 높이세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_RemoveEmptyDirectories_Deleting">
+        <source>Deleting empty directory {0}.</source>
+        <target state="translated">빈 디렉터리 {0}을(를) 삭제하고 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFile">
+        <source>Scanning sql command variable(s) from sql script ({0}).</source>
+        <target state="translated">SQL 스크립트에서 SQL 명령 변수를 검색하고 있습니다({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFileDone">
+        <source>Found {0} sql command variable(s){1}.</source>
+        <target state="translated">{1}에서 {0}개의 SQL 명령 변수를 찾았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFileFailed">
+        <source>Failed to parse sql command variable sql script ({0}).</source>
+        <target state="translated">SQL 명령 변수 SQL 스크립트를 구문 분석하지 못했습니다({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFoundMsDeployUnsupportedCommands">
+        <source>Found {0} unsupported sql command(s) in {1}. The unsupported sql command(s) are: {2}.
+Please note ':EXIT' without argument is treated as ':QUIT' command.</source>
+        <target state="translated">{1}에서 지원되지 않는 SQL 명령 {0}개를 찾았습니다. 지원되지 않는 SQL 명령은 {2}입니다.
+인수 없이 사용된 ':EXIT'는 ':QUIT' 명령으로 처리됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessInvalidSqlScript">
+        <source>Failed to parse the sql script file {0}. Please make sure the SQL script syntax is correct.
+Detail:
+{1}.</source>
+        <target state="translated">SQL 스크립트 파일 {0}을(를) 구문 분석하지 못했습니다. SQL 스크립트 구문이 올바른지 확인하세요.
+자세한 정보:
+{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_DestinationWriteFailed">
+        <source>Could not write Destination file: {0}</source>
+        <target state="translated">대상 파일을 쓸 수 없습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_SourceLoadFailed">
+        <source>Could not open Source file: {0}</source>
+        <target state="translated">소스 파일을 열 수 없습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformLoadFailed">
+        <source>Could not open Transform file: {0}</source>
+        <target state="translated">변환 파일을 열 수 없습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformOutput">
+        <source>Output File: {0}</source>
+        <target state="translated">출력 파일: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationApply">
+        <source>Applying Transform File: {0}</source>
+        <target state="translated">변환 파일을 적용하고 있습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationFailed">
+        <source>Transformation failed</source>
+        <target state="translated">변환하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationNoChange">
+        <source>No transformation occurred, not saving output file</source>
+        <target state="translated">변환이 발생하지 않았습니다. 출력 파일을 저장하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationStart">
+        <source>Transforming Source File: {0}</source>
+        <target state="translated">소스 파일을 변환하고 있습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationSucceeded">
+        <source>Transformation succeeded</source>
+        <target state="translated">변환 성공</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_FailToCopyFile">
+        <source>Failded to copy file from '{0}' to '{1}' for SQLExpress Data Publish</source>
+        <target state="translated">SQLExpress 데이터 게시를 위해 파일을 '{0}'에서 '{1}'(으)로 복사하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_ImportPublishDatabaseSettingNotFound">
+        <source>Publish Database Setting Source Verification Error: The publish profile specified '{1} ({2})' for '{0}' does not have a corresponding connection string in '{3}'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="translated">데이터베이스 게시 설정 소스 확인 오류: '{0}'에 대해 지정된 게시 프로필 '{1}({2})'이(가) '{3}'에 해당 연결 문자열이 없습니다. 이로 인해 게시가 차단되었습니다. 이 내용을 의도한 경우 MSBuild 속성 "IgnoreDatabaseSettingOutOfSync"에 대해 "True" 값을 지정하여 이 검사를 사용하지 않도록 설정할 수 있습니다. 이 내용을 의도하지 않은 경우 이 프로필을 사용하여 Visual Studio에서 [게시] 대화 상자를 열어 차이를 수정하세요. 자세한 정보는 http://go.microsoft.com/fwlink/?LinkId=241526을 참조하세요. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_ImportValidationSourceNotFound">
+        <source>Publish Database Setting Source Verification Error: The source connection string for '{0}' no longer exists in the source '{1}'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="translated">데이터베이스 게시 설정 소스 확인 오류: '{0}'에 대한 소스 연결 문자열이 더 이상 소스 '{1}'에 없습니다. 이로 인해 게시가 차단되었습니다. 이 내용을 의도한 경우 MSBuild 속성 "IgnoreDatabaseSettingOutOfSync"에 대해 "True" 값을 지정하여 이 검사를 사용하지 않도록 설정할 수 있습니다. 이 내용을 의도하지 않은 경우 이 프로필을 사용하여 Visual Studio에서 [게시] 대화 상자를 열어 차이를 수정하세요. 자세한 정보는 http://go.microsoft.com/fwlink/?LinkId=241526을 참조하세요. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_InvalidMSBuildFormat">
+        <source>Publish Database Setting Source Verification Error: The publish profile specified '{1}' for '{0}' is not valid and could not be loaded. Review the file for any errors and try again.</source>
+        <target state="translated">게시 데이터베이스 설정 소스 확인 오류: '{0}'에 지정된 게시 프로필 '{1}'이(가) 올바르지 않아 로드할 수 없습니다. 파일에 오류가 있는지 검토한 후에 다시 시도하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_InvalidPublishDatabaseSetting">
+        <source>Publish Database Setting Source Verification Error:The publish profile specified '{1} ({2})' for '{0}' does not have valid $(PublishDatabaseSettings) value. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="translated">데이터베이스 게시 설정 소스 확인 오류: '{0}'에 대해 지정된 게시 프로필 '{1}({2})'에 유효한 $(PublishDatabaseSettings) 값이 없습니다. 이로 인해 게시가 차단되었습니다. 이 내용을 의도한 경우 MSBuild 속성 "IgnoreDatabaseSettingOutOfSync"에 대해 "True" 값을 지정하여 이 검사를 사용하지 않도록 설정할 수 있습니다. 이 내용을 의도하지 않은 경우 이 프로필을 사용하여 Visual Studio에서 [게시] 대화 상자를 열어 차이를 수정하세요. 자세한 정보는 http://go.microsoft.com/fwlink/?LinkId=241526을 참조하세요. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_MustProviderProvidersXMLorProvidersFile">
+        <source>CreateProviderList expected either ProvidersXml or ProvidersFile parameter</source>
+        <target state="translated">CreateProviderList에 ProvidersXml 매개 변수나 ProvidersFile 매개 변수가 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_NotExpectingAdditionalParameter">
+        <source>Publish Database Setting encountered an unexpected error. The provider '{0}' doesn't expect any addition arguments '{1}'.</source>
+        <target state="translated">게시 데이터베이스 설정에서 예기치 않은 오류가 발생했습니다. '{0}' 공급자에는 추가 인수 '{1}'이(가) 필요하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_NotSupportBothProvidersXMLAndProvidersFile">
+        <source>CreateProviderList does not support ProvidersXml and ProvidersFile parameters at the same time</source>
+        <target state="translated">CreateProviderList는 ProvidersXml 매개 변수와 ProvidersFile 매개 변수를 동시에 지원하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_OutofSyncWithSourcePublishDatabaseSetting">
+        <source>Publish Database Setting Source Verification Error: The connection '{0}' in the publish profile has changed from what is currently declared for '{1} ({2})'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="translated">데이터베이스 게시 설정 소스 확인 오류: 게시 프로필에서 '{0}' 연결이 현재 '{1}({2})'에 대해 선언된 내용에서 변경되었습니다. 이로 인해 게시가 차단되었습니다. 이 내용을 의도한 경우 MSBuild 속성 "IgnoreDatabaseSettingOutOfSync"에 대해 "True" 값을 지정하여 이 검사를 사용하지 않도록 설정할 수 있습니다. 이 내용을 의도하지 않은 경우 이 프로필을 사용하여 Visual Studio에서 [게시] 대화 상자를 열어 차이를 수정하세요. 자세한 정보는 http://go.microsoft.com/fwlink/?LinkId=241526을 참조하세요. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_SqlExpressPublishRequireLocalDB">
+        <source>SQL Server Express LocalDB is required in order to publish one or more of your databases. To learn more and install it, follow this link http://go.microsoft.com/fwlink/?LinkId=245956 </source>
+        <target state="translated">하나 이상의 데이터베이스를 게시하려면 SQL Server Express LocalDB가 필요합니다. 자세한 정보를 알아보고 이 데이터베이스를 설치하려면 http://go.microsoft.com/fwlink/?LinkId=245956 링크를 따르세요. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeploymentError_MissingDbDacFx">
+        <source>The remote host does not have the dbDacFx Web Deploy provider installed, which is required for database publishing. To learn more about this visit this link.
+
+FWLink: http://go.microsoft.com/fwlink/?LinkId=246068</source>
+        <target state="translated">원격 호스트에 데이터베이스 게시에 필요한 dbDacFx 웹 배포 공급자가 설치되어 있지 않습니다. 자세한 정보는 다음 링크를 참조하세요.
+
+FWLink: http://go.microsoft.com/fwlink/?LinkId=246068</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EFSCRIPT_Generating">
+        <source>Generating Entity Framework SQL Scripts...</source>
+        <target state="translated">Entity Framework SQL 스크립트 생성 중...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EFSCRIPT_GenerationCompleted">
+        <source>Generating Entity Framework SQL Scripts completed successfully</source>
+        <target state="translated">Entity Framework SQL 스크립트를 생성했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EFSCRIPT_GenerationFailed">
+        <source>Entity Framework SQL Script generation failed</source>
+        <target state="translated">Entity Framework SQL 스크립트를 생성하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AddingFile">
+        <source>Adding file ({0}).</source>
+        <target state="translated">파일({0})을 추가 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AddingFileFailed">
+        <source>Adding file ({0}) failed. Reason: {1}.</source>
+        <target state="translated">파일({0})을 추가하지 못했습니다. 이유: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AzurePublishErrorReason">
+        <source>Unable to publish to Azure. Error Details : '{0}'.</source>
+        <target state="translated">Azure에 게시할 수 없습니다. 오류 정보: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_ConnectionInfoMissing">
+        <source>Azure connection information cannot be empty.</source>
+        <target state="translated">Azure 연결 정보는 비워 둘 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_CopyingToTempLocation">
+        <source>Copying all files to temporary location for publish: '{0}'.</source>
+        <target state="translated">모든 파일을 임시 게시 위치로 복사하고 있습니다. '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_CopyingToTempLocationCompleted">
+        <source>Copying all files to temporary location completed.</source>
+        <target state="translated">모든 파일을 임시 위치로 복사했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_DeployOutputPathEmpty">
+        <source>DeployOutputPath property cannot be empty.</source>
+        <target state="translated">DeployOutputPath 속성은 비워 둘 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_OperationTimeout">
+        <source>Publish operation timed out.</source>
+        <target state="translated">게시 작업 시간이 초과되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishAzure">
+        <source>Publishing to Azure.</source>
+        <target state="translated">Azure에 게시 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishFailed">
+        <source>Publish Failed.</source>
+        <target state="translated">게시하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishSucceeded">
+        <source>Publish Succeeded.</source>
+        <target state="translated">게시했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishZipFailedReason">
+        <source>Publishing to site '{0}' failed. Reason: '{1}'.</source>
+        <target state="translated">'{0}' 사이트에 게시하지 못했습니다. 이유: '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Failed">
+        <source>Failed to execute msdeploy.exe.</source>
+        <target state="translated">msdeploy.exe를 실행하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_PreviewOnly">
+        <source>Generate msdeploy.exe command line for preview only.</source>
+        <target state="translated">미리 보기 전용 msdeploy.exe 명령줄을 생성합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Start">
+        <source>Running msdeploy.exe.</source>
+        <target state="translated">msdeploy.exe 실행 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Succeeded">
+        <source>Successfully execute msdeploy.exe.</source>
+        <target state="translated">msdeploy.exe를 실행했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidDestinationCount">
+        <source>Invalidate destination item count: {0}</source>
+        <target state="translated">잘못된 대상 항목 수: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidSourceCount">
+        <source>Invalidate source items count: {0}</source>
+        <target state="translated">잘못된 소스 항목 수: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidVerbForTheInput">
+        <source>Invalid verb({0}) for supplied source ({1}) and destination ({2}).</source>
+        <target state="translated">제공된 소스({1})와 대상({2})에 대해 잘못된 동사({0})입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="POWERSHELL_PublishProfileParsingError">
+        <source>Unable to parse the pubxml file {0}.</source>
+        <target state="translated">pubxml 파일 {0}을(를) 구문 분석할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Publich_InvalidPublishToolsVersion_Error">
+        <source>The publish profile used for publishing was created in a newer version of the Visual Studio Web Publish features. In order to publish using this profile you will need to update your web publish components. To learn more about this, please visit http://go.microsoft.com/fwlink/?LinkId=256245</source>
+        <target state="translated">게시에 사용되는 게시 프로필이 최신 버전의 Visual Studio 웹 게시 기능으로 만들어졌습니다. 이 프로필을 사용하여 게시하려면 웹 게시 구성 요소를 업데이트해야 합니다. 자세한 정보는 http://go.microsoft.com/fwlink/?LinkId=256245를 참조하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishArgumentError_InvalidRemoteServiceUrl">
+        <source>Invalid Web Deploy service URL</source>
+        <target state="translated">잘못된 Web Deploy 서비스 URL입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishArgumentError_InvalidSiteAppName">
+        <source>Invalid site/application name</source>
+        <target state="translated">잘못된 사이트/애플리케이션 이름</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_AutoConnectionStringTransformConfigToTransformOutputFile">
+        <source>Auto ConnectionString Transformed {0} into {1}.</source>
+        <target state="translated">ConnectionString {0}을(를) {1}(으)로 자동 변환했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_CheckingForValidMsBuildPropertyValue">
+        <source>$({0}) is {1}. Validating...</source>
+        <target state="translated">$({0})이(가) {1}입니다. 유효성을 검사하고 있습니다...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DatabaseConnectionStringParameterDescription">
+        <source>Connection string for setting up this application database.</source>
+        <target state="translated">이 애플리케이션 데이터베이스를 설정하기 위한 연결 문자열입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeFileExtentionOutMessage">
+        <source>Exclude *.out files under root folder.</source>
+        <target state="translated">루트 폴더에서 *.out 파일을 제외하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeIntermediateOutputFolderMessage">
+        <source>Exclude all files under obj folder.</source>
+        <target state="translated">obj 폴더에서 모든 파일을 제외하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeSourceControlItems">
+        <source>Set all .scc .vspscc file as _IgnorableFilesInProjectFolder.  Set _CollectFiles_IncludeIgnorableFile to True to include in the packaging.</source>
+        <target state="translated">모든 .scc .vspscc 파일을 _IgnorableFilesInProjectFolder로 설정하세요. 패키징에 포함하려면 _CollectFiles_IncludeIgnorableFile을 True로 설정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_EFCodeFirstConnectionStringParameterDescription">
+        <source>Connection String used by Entity Framework Code First Model to deploy the database.</source>
+        <target state="translated">Entity Framework Code First Model에서 데이터베이스를 배포하기 위해 사용되는 연결 문자열입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorCannotDeployFromIIS7AboveToLowerIIS">
+        <source>Deploy with IIS Setting from a IIS 7 or above to a lower verstion of IIS server is not supported. To fix the problem, please set the %24(IncludeIisSettings) to false. Your current setting are $(IncludeIisSettings) is {0}, $(DestinationIisVersion) is {1} and $(LocalIisVersion) is  {2}.</source>
+        <target state="translated">IIS 설정을 사용하여 IIS 7 이상에서 이전 버전의 IIS 서버로 배포하는 작업은 지원되지 않습니다. 이 문제를 해결하려면 %24(IncludeIisSettings)를 false로 설정하세요. 현재 설정은 $(IncludeIisSettings)가 {0}, $(DestinationIisVersion)이 {1}, $(LocalIisVersion)이 {2}입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorInvalidMSBuildItemCollectionCount">
+        <source>@({0}) have {1} item(s) in the collection. It should only have {2} item(s).</source>
+        <target state="translated">컬렉션에 @({0})의 항목이 {1}개 있습니다. {2}개의 항목만 있어야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorInvalidPropertyWhenSettingPropertyIsTrue">
+        <source>Invalid $({0}): When $({1}) is set True. It is required to have a valid $({0}) to be use for creating parameters correctly.</source>
+        <target state="translated">잘못된 $({0}): $({1})을(를) True로 설정할 경우 올바른 $({0})을(를) 사용해야 매개 변수가 올바르게 만들어집니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorPackageAsFilePointToAnExistingFolder">
+        <source>'{0}' exists as a folder. You can't package as a single file to be the same path as an existing folder. Please delete the folder before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it.</source>
+        <target state="translated">'{0}'이(가) 폴더로 존재합니다. 기존 폴더와 같은 경로가 되도록 단일 파일로 패키지할 수 없습니다. 패키지하기 전에 해당 폴더를 삭제하세요. 또는 /t:CleanWebsitesPackage 대상으로 msbuild를 호출하여 해당 폴더를 제거할 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorPackageAsFolderPointToAnExistingFile">
+        <source>'{0}' exists as a file. You can't package as an archive directory to be the same path as an existing file. Please delete the file before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it.</source>
+        <target state="translated">'{0}'이(가) 파일로 존재합니다. 기존 파일과 같은 경로가 되도록 보관 디렉터리로 패키지할 수 없습니다. 패키지하기 전에 해당 파일을 삭제하세요. 또는 /t:CleanWebsitesPackage 대상으로 msbuild를 호출하여 해당 파일을 제거할 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorUseIisIsTrueButIisUrlIsEmpty">
+        <source>IisUrl property is required when UseIis property is True</source>
+        <target state="translated">UseIis 속성이 True이면 IisUrl 속성이 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorUseWPP_CopyWebApplicationAndPipelineDependsOnBuildBothTrue">
+        <source>These two Properties are not compatable: $(UseWPP_CopyWebApplication) and  $(PipelineDependsOnBuild) both are True.
+Please correct the problem by either set $(Disable_CopyWebApplication) to true or set $(PipelineDependsOnBuild) to false to break the circular build dependency.
+Detail: $(UseWPP_CopyWebApplication) make the publsih pipeline (WPP) to be Part of the build and $(PipelineDependsOnBuild) make the WPP depend on build thus cause the build circular build dependency.</source>
+        <target state="translated">다음 두 속성은 서로 호환되지 않습니다. $(UseWPP_CopyWebApplication)과 $(PipelineDependsOnBuild)가 모두 True입니다.
+$(Disable_CopyWebApplication)을 true로 설정하거나 $(PipelineDependsOnBuild)를 false로 설정하여 순환 빌드 종속성을 해제함으로써 문제를 해결하세요.
+자세한 정보: $(UseWPP_CopyWebApplication)은 게시 파이프라인(WPP)을 빌드의 일부로 만들고 $(PipelineDependsOnBuild)는 WPP가 빌드에 종속되게 만들어 순환 빌드 종속성을 유발합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ExcludeAllDebugSymbols">
+        <source>Exclude All Debug Symbols</source>
+        <target state="translated">모든 디버그 기호 제외</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ExcludeAllFilesUnderFolder">
+        <source>Exclude All files under {0}</source>
+        <target state="translated">{0}에서 모든 파일 제외</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_FinishGenerateSampleMsDeployBatchScript">
+        <source>Sample script for deploying this package is generated at the following location:
+{0}
+For this sample script, you can change the deploy parameters by changing the following file: 
+{1}</source>
+        <target state="translated">이 패키지를 배포하기 위한 샘플 스크립트가 {0}에 생성되었습니다.
+이 샘플 스크립트의 경우 {1} 파일을 변경하여 배포 매개 변수를 변경할 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_FoundApplicationConfigForTransformation">
+        <source>Found The following for Config tranformation:
+{0}</source>
+        <target state="translated">Config 변환에 대해 다음을 찾았습니다.
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherAllFilesInProjectFolderExceptExclusion">
+        <source>Gather all files from project folder except in the exclusion list.</source>
+        <target state="translated">제외 목록에 있는 파일을 제외하고 프로젝트 폴더의 모든 파일을 수집합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificItemsFromProject">
+        <source>Gather all files from Project items @({0}). Adding:</source>
+        <target state="translated">프로젝트 항목 @({0})의 모든 파일을 수집합니다. 추가 중:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificItemsFromProjectNoDetail">
+        <source>Gather all files from Project items @({0}).</source>
+        <target state="translated">프로젝트 항목 @({0})의 모든 파일을 수집합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificOutputsFromProject">
+        <source>Gather all files from Project output ({0}). Adding:</source>
+        <target state="translated">프로젝트 출력({0})의 모든 파일을 수집합니다. 추가 중:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GenerateMsdeploySourceManifestFile">
+        <source>Generate source manifest file for Web Deploy package/publish ...</source>
+        <target state="translated">Web Deploy 패키지/게시용 소스 매니페스트 파일을 생성합니다...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GenerateSampleMsdeployBatchScript">
+        <source>Generating a sample batch commandline script for deploying this package...</source>
+        <target state="translated">이 패키지를 배포하기 위한 샘플 배치 명령줄 스크립트를 생성하고 있습니다...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_IISAppParameterDescription">
+        <source>IIS Web Site/Application name</source>
+        <target state="translated">IIS 웹 사이트/애플리케이션 이름</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_IISAppPhysicalPathDescription">
+        <source>Physical path for this Web Application.</source>
+        <target state="translated">이 웹 애플리케이션의 실제 경로입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InsertAdditionalConnectionStringTransformConfigToTransformOutputFile">
+        <source>Insert additional ConnectionString Transformed {0} into {1}.</source>
+        <target state="translated">변환된 추가 ConnectionString {0}을(를) {1}에 삽입하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InsertEFCodeFirstDeployContextTransformConfigToTransformOutputFile">
+        <source>Insert additional EFCodeFirst Database Deployment Transformed {0} into {1}.</source>
+        <target state="translated">변환된 추가 EFCodeFirst 데이터베이스 배포 {0}을(를) {1}에 삽입하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InvalidArgument">
+        <source>GetPublishingLocalizedString Task encounter invalid argument ID;</source>
+        <target state="translated">GetPublishingLocalizedString 작업에 잘못된 인수 ID가 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_MSBuildTargetFailed">
+        <source>Target {0} failed.</source>
+        <target state="translated">{0}을(를) 대상으로 지정하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_MsBuildPropertySettingValue">
+        <source>$({0}) is {1}</source>
+        <target state="translated">$({0})은(는) {1}입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_PackagingIntoLocation">
+        <source>Packaging into {0}.</source>
+        <target state="translated">{0}(으)로 패키지하는 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpEnviroment">
+        <source>
+===========================
+Environment-Specific Settings:
+--------------------------
+</source>
+        <target state="translated">
+===========================
+환경 관련 설정:
+--------------------------
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpEnviromentExplained">
+        <source>
+	To customize application-specific settings for each deployment environment (for example, the IIS application name, the physical path, and any connection strings), edit the settings in the following file: 
+		 "{0}"</source>
+        <target state="translated">
+	각 배포 환경에 대한 애플리케이션별 설정(예: IIS 애플리케이션 이름, 실제 경로 및 모든 연결 문자열)을 사용자 지정하려면 다음 파일의 설정을 편집하세요. 
+		 "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpMoreInfo">
+        <source>
+===========================
+For more information on this deploy script visit:	{0}
+</source>
+        <target state="translated">
+===========================
+이 배포 스크립트에 대한 자세한 내용을 보려면 다음을 방문하세요.	{0}
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptional">
+        <source>
+===========================
+Optional Flags:
+--------------------------
+ By Default, this script deploy on the current machine where this script is called with current user credential without agent service. Only pass the following value for advance scenario.
+</source>
+        <target state="translated">
+===========================
+선택적 플래그:
+--------------------------
+ 기본적으로 이 스크립트는 에이전트 서비스 없이 현재 사용자 자격 증명으로 이 스크립트가 호출된 현재 컴퓨터에 배포됩니다. 고급 시나리오의 경우에만 다음 값을 전달하세요.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedAdditionalFlags">
+        <source>
+[Additional msdeploy.exe flags]
+	The msdeploy.exe command supports additional flags. You can include any of these additional flags in the "$(ProjectName).Deploy.cmd" file, and the flags are passed through to msdeploy.exe during execution.
+	Alternatively, you can specify additional flags by setting the "_MsDeployAdditionalFlags" environment variable. These settings are used by this batch file.
+	Note: Any flag value that includes an equal sign (=) must be enclosed in double quotation marks, as shown in the following example, which will skip deploying the databases that are included in the package:
+		"-skip:objectName=dbFullSql" 
+</source>
+        <target state="translated">
+[추가 msdeploy.exe 플래그]
+	msdeploy.exe 명령은 추가 플래그를 지원합니다. 이러한 추가 플래그를 "$(ProjectName).Deploy.cmd" 파일에 포함할 수 있으며 포함된 플래그는 실행 중에 msdeploy.exe로 전달됩니다.
+	또는 "_MsDeployAdditionalFlags" 환경 변수를 설정하여 추가 플래그를 지정할 수 있습니다. 이러한 설정은 이 배치 파일에 사용됩니다.
+	참고: 등호(=)를 포함하는 플래그 값은 다음 예에서와 같이 큰따옴표로 묶어야 합니다. 이렇게 하면 패키지에 포함된 데이터베이스를 배포하는 작업을 건너뛰게 됩니다.
+		"-skip:objectName=dbFullSql" 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagA">
+        <source>
+/A:&lt;Basic | NTLM&gt;
+	Specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic; otherwise, the default authentication type is NTLM. 
+</source>
+        <target state="translated">
+/A:&lt;Basic | NTLM&gt;
+	사용할 인증 형식을 지정합니다. 가능한 값은 NTLM과 Basic입니다. wmsvc 공급자 설정을 지정할 경우 기본 인증 형식은 Basic이며, 그렇지 않을 경우 기본 인증 형식은 NTLM입니다. 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagG">
+        <source>
+/G:&lt;True | False&gt;
+	Specifies that the package is deployed by creating a temporary listener on the destination server. This requires no special installation on the destination server, but it requires you to be an administrator on that server. The default value of this flag is False. 
+</source>
+        <target state="translated">
+/G:&lt;True | False&gt;
+	대상 서버에 임시 수신기를 만들어 패키지가 배포되도록 지정합니다. 이 작업을 위해 대상 서버에 특별한 프로그램을 설치할 필요는 없지만 사용자가 해당 서버에서 관리자여야 합니다. 이 플래그의 기본값은 False입니다. 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagL">
+        <source>
+/L 
+	Specifies that the package is deployed to local IISExpress user instance.
+</source>
+        <target state="translated">
+/L 
+	패키지가 로컬 IISExpress 사용자 인스턴스에 배포되도록 지정합니다.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagM">
+        <source>
+/M:&lt;Destination server name or Service URL&gt;
+	If this flag is not specified, the package is installed on the computer where the command is run. The Service URL can be in the following format:
+		https://&lt;DestinationServer&gt;:8172/MSDeploy.axd 
+	This format requires that IIS 7 be installed on the destination server and that IIS 7 Web Management Service(WMSvc) and Web Deployment Handler be set up.
+	The service URL can also be in the following format:
+		http://&lt;DestinationServer&gt;/MSDeployAgentService 
+	This format requires administrative rights on the destination server, and it requires that Web Deploy Remote Service (MsDepSvc) be installed on the destination server. IIS 7 does not have to be installed on the destination server.
+</source>
+        <target state="translated">
+/M:&lt;대상 서버 이름 또는 서비스 URL&gt;
+	이 플래그를 지정하지 않으면 명령을 실행하는 컴퓨터에 패키지가 설치됩니다. 서비스 URL의 형식은 다음과 같을 수 있습니다.
+		https://&lt;대상 서버&gt;:8172/MSDeploy.axd 
+	이 형식을 사용하려면 대상 서버에 IIS 7을 설치하고 IIS 7 웹 관리 서비스(WMSvc) 및 Web Deployment 처리기를 설정해야 합니다.
+	서비스 URL의 형식은 다음과 같을 수도 있습니다.
+		http://&lt;대상 서버&gt;/MSDeployAgentService 
+	이 형식을 사용하려면 대상 서버에 대한 관리 권한이 있어야 하며 대상 서버에 Web Deploy 원격 서비스(MsDepSvc)를 설치해야 합니다. IIS 7은 대상 서버에 설치하지 않아도 됩니다.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagUP">
+        <source>
+/U:&lt;UserName&gt;
+/P:&lt;Password&gt;</source>
+        <target state="translated">
+/U:&lt;사용자 이름&gt;
+/P:&lt;암호&gt;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpPrerequisites">
+        <source>
+===========================
+Prerequisites :
+--------------------------
+To deploy this Web package, Web Deploy (msdeploy.exe) must be installed on the computer that runs the .cmd file. For information about how to install Web Deploy, see the following URL:
+{0}
+This batch file requires that the package file "{1}" and optionally provided the parameters file "{2}" in the same folder or destination folder by environment variable.
+</source>
+        <target state="translated">
+===========================
+필수 구성 요소:
+--------------------------
+이 웹 패키지를 배포하려면 .cmd 파일을 실행하는 컴퓨터에 Web Deploy(msdeploy.exe)를 설치해야 합니다. Web Deploy를 설치하는 방법에 대한 자세한 내용은 다음 URL을 참조하세요.
+{0}
+이 배치 파일을 사용하려면 패키지 파일 "{1}"이(가) 필요하며 환경 변수를 설정하여 매개 변수 파일 "{2}"을(를) 같은 폴더 또는 대상 폴더에 선택적으로 제공해야 합니다.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequired">
+        <source>
+===========================
+Required Flags:
+--------------------------</source>
+        <target state="translated">
+===========================
+필수 플래그:
+--------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagT">
+        <source>
+/T:
+	Calls msdeploy.exe with the "-whatif" flag, which simulates deployment. This does not deploy the package. Instead, it creates a report of what will happen when you actually deploy the package.</source>
+        <target state="translated">
+/T:
+	"-whatif" 플래그로 msdeploy.exe를 호출하여 배포를 시뮬레이션합니다. 이로 인해 패키지가 배포되지는 않습니다. 대신 실제로 패키지를 배포할 때 발생할 상황에 대한 보고서가 만들어집니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagY">
+        <source>
+/Y:
+	Calls msdeploy.exe without the "-whatif" flag, which deploys the package to the current machine or a destination server. Use /Y after you have verified the output that was generated by using the /T flag.
+
+Note: Do not use /T and /Y in the same command.
+</source>
+        <target state="translated">
+/Y:
+	"-whatif" 플래그 없이 msdeploy.exe를 호출하여 패키지를 현재 컴퓨터 또는 대상 서버에 배포합니다. /T 플래그를 사용하여 생성한 출력을 확인한 후에 /Y를 사용하세요.
+
+참고: 같은 명령에서 /T와 /Y를 사용하지 마세요.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpSection1">
+        <source>
+===========================
+Usage:
+--------------------------
+{0} [/T|/Y] [/M:ComputerName] [/U:UserName] [/P:Password] [/G:UseTempAgent] [Additional msdeploy.exe flags ...]
+
+</source>
+        <target state="translated">
+===========================
+사용법:
+--------------------------
+{0} [/T|/Y] [/M:컴퓨터 이름] [/U:사용자 이름] [/P:암호] [/G:임시 에이전트 사용] [추가 msdeploy.exe 플래그...]
+
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SqlCommandVariableParameterDescription">
+        <source>Sql Command Variable for setting up this application database.</source>
+        <target state="translated">이 애플리케이션 데이터베이스를 설정하기 위한 SQL 명령 변수입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_StartMsDeployPublishToRemote">
+        <source>Start Web Deploy Publish the Application/package to {0} ...</source>
+        <target state="translated">{0}(으)로의 애플리케이션 Web Deploy 게시/패키지를 시작합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_TestDeployPackageOnCurrentMachine">
+        <source>Test deploy this Web Deploy package onto current machine.</source>
+        <target state="translated">이 Web Deploy 패키지를 현재 컴퓨터로 테스트 배포합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_TransformConfigUsingTransformFileToTransformOutputFile">
+        <source>Transformed {0} using {1} into {2}.</source>
+        <target state="translated">{1}을(를) 사용하는 {0}을(를) {2}(으)로 변환했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ValidateErrorMsDeployPublishSetting">
+        <source>Web Deploy publish/package validating error: Missing or Invalid property value for $({0})</source>
+        <target state="translated">Web Deploy 게시/패키지 유효성 검사 오류: $({0})의 속성 값이 없거나 잘못되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ValidatingMsDeployPublishSettings">
+        <source>Validating Web Deploy package/publish related properties...</source>
+        <target state="translated">Web Deploy 패키지/게시 관련 속성의 유효성을 검사하고 있습니다...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WarningOnSettingBothIncludeIisSettingsOnPublishAndDeployAsIisApp">
+        <source>Setting both property values of DeployAsIisApp and IncludeIisSettingsOnPublish to true is not recommended, as IncludeIisSettingsOnPublish is a superset of DeployAsIisApp</source>
+        <target state="translated">IncludeIisSettingsOnPublish가 DeployAsIisApp의 상위 집합이므로 DeployAsIisApp와 IncludeIisSettingsOnPublish의 속성 값을 모두 true로 설정하지 않는 것이 좋습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WarningOnSettingRemoteSitePhysicalPathWhenIISSettingIsNotInclude">
+        <source>Setting value to $(RemoteSitePhysicalPath) might not work if IIS setting is not included</source>
+        <target state="translated">IIS 설정이 포함되지 않은 경우 값을 $(RemoteSitePhysicalPath)로 설정하면 문제가 발생할 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebConfigConnectionStringParameterDescription">
+        <source>Connection String used in web.config by the application to access the database.</source>
+        <target state="translated">데이터베이스에 액세스하기 위해 애플리케이션에 의해 web.config에 사용된 연결 문자열입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishInvalidatePublishProfileSettings">
+        <source>The value for PublishProfile is set to '{0}', expected to find the file at '{1}' but it could not be found.</source>
+        <target state="translated">PublishProfile의 값이 '{0}'(으)로 설정되었고, '{1}'에서 파일을 찾을 것으로 예상했지만 해당 파일을 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishMethodIsNotSupportedInCmdLine">
+        <source>This specific WebPublishMethod({0}) is not yet supported on msbuild command line.  Please use Visual Studio to publish.</source>
+        <target state="translated">이 특정 WebPublishMethod({0})는 아직 msbuild 명령줄에서 지원되지 않습니다. 게시하려면 Visual Studio를 사용하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineCollectFilesPhase">
+        <source>Publish Pipeline Collect Files Phase</source>
+        <target state="translated">게시 파이프라인 파일 수집 단계</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineCopyWebApplication">
+        <source>Copying Web Application Project Files for {0} to {1}.</source>
+        <target state="translated">{0}에 대한 웹 애플리케이션 프로젝트 파일을 {1}(으)로 복사하고 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineDeployPhase">
+        <source>Publish Pipeline Deploy Phase</source>
+        <target state="translated">게시 파이프라인 배포 단계</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineDeployPhaseStage1">
+        <source>Publish Pipeline Deploy phase Stage {0}</source>
+        <target state="translated">게시 파이프라인 배포 단계 {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineMSDeploySettings">
+        <source>Invoking Web Deploy to generate the package with the following settings:</source>
+        <target state="translated">다음 설정으로 패키지를 생성하기 위해 Web Deploy를 호출하고 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineMaterializeAllFilesToTempDir">
+        <source>Copying all files to temporary location below for package/publish:
+{0}.</source>
+        <target state="translated">패키지/게시를 위해 모든 파일을 아래의 임시 위치로 복사하고 있습니다.
+{0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelinePhase">
+        <source>Publish Pipeline {0} Phase</source>
+        <target state="translated">게시 파이프라인 {0} 단계</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineTransformPhase">
+        <source>Publish Pipeline Transform Phase</source>
+        <target state="translated">게시 파이프라인 변환 단계</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishProfileInvalidPropertyValue">
+        <source>PublishProfile({0}) is set. But the $({1}) does not have a valid value.  Current Value is "{2}".</source>
+        <target state="translated">PublishProfile({0})이 설정되었습니다. 그러나 $({1})에 올바른 값이 없습니다. 현재 값은 "{2}"입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishValidatePublishProfileSettings">
+        <source>Validating PublishProfile({0}) settings.</source>
+        <target state="translated">PublishProfile({0}) 설정의 유효성을 검사하는 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_AddParameterIntoObject">
+        <source>Adding Parameter ({0}) with value ({1}) into to object ({2}).</source>
+        <target state="translated">값 {1}이(가) 지정된 {0} 매개 변수를 {2} 개체로 추가하고 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Canceled">
+        <source>User cancel Web deployment operation.</source>
+        <target state="translated">사용자가 Web deployment 작업을 취소했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_DuplicateItemMetadata">
+        <source>The following two items have duplicate item metadata %({0}). The two items data are {1} and {2}.</source>
+        <target state="translated">다음 두 항목에 중복 항목 메타데이터 %({0})이(가) 있습니다. 해당 두 항목 데이터는 {1}과(와) {2}입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_EncryptionExceptionMessage">
+        <source>An IIS secure setting was detected while packaging/publishing. An encryption password is required to proceed.
+In Visual Studio, the password can be entered in the project's Package/Publish property page.
+In team build or command line, password can be provided by setting MsBuild $(DeployEncryptKey) property.
+Error details:</source>
+        <target state="translated">패키지/게시하는 동안 IIS 보안 설정이 발견되었습니다. 계속하려면 암호화 암호가 필요합니다.
+Visual Studio에서는 암호를 프로젝트의 [패키지 및 게시] 속성 페이지에서 입력할 수 있습니다.
+팀 빌드 또는 명령줄에서는 MsBuild $(DeployEncryptKey) 속성을 설정하여 암호를 제공할 수 있습니다.
+오류 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedDeploy">
+        <source>Publish failed to deploy.</source>
+        <target state="translated">게시를 배포하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedPackage">
+        <source>Package failed.</source>
+        <target state="translated">패키지하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedWithException">
+        <source>Web deployment task failed. ({0})</source>
+        <target state="translated">Web deployment 작업에 실패했습니다({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedWithExceptionWithDetail">
+        <source>Web deployment task failed. ({0})
+{1}</source>
+        <target state="translated">웹 배포 작업에 실패했습니다. ({0})
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidOperation">
+        <source>Source ({0}) and destination ({1}) are not compatible for given operation.</source>
+        <target state="translated">지정한 작업의 소스({0})와 대상({1})이 호환되지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidProviderName">
+        <source>Provider({0})is not a recognized provider.</source>
+        <target state="translated">공급자({0})가 인식할 수 있는 공급자가 아닙니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidProviderOption">
+        <source>Unknown ProviderOption:{0}. Known ProviderOptions are:{1}.</source>
+        <target state="translated">알 수 없는 ProviderOption {0}입니다. 알려진 ProviderOption은 {1}입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_LoadVSCertUIFailed">
+        <source>Failed to load publish certificate dialog due to error of {0}</source>
+        <target state="translated">{0}의 오류로 인해 게시 인증서 대화 상자를 로드하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOY32bit">
+        <source>For x86(32 bit): http://go.microsoft.com/fwlink/?LinkId=109365.</source>
+        <target state="translated">x86(32비트): http://go.microsoft.com/fwlink/?LinkId=109365.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOY64bit">
+        <source>For x64(64 bit): http://go.microsoft.com/fwlink/?LinkId=109366.</source>
+        <target state="translated">x64(64비트): http://go.microsoft.com/fwlink/?LinkId=109366.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYASSEMBLYLOAD_FAIL">
+        <source>Package/Publish task {0} failed to load Web Deploy assemblies. Microsoft Web Deploy is not correctly installed on this machine. Microsoft Web Deploy v3 or higher is recommended.</source>
+        <target state="translated">패키지/게시 작업 {0}에서 Web Deploy 어셈블리를 로드하지 못했습니다. 이 컴퓨터에 Microsoft Web Deploy가 제대로 설치되어 있지 않습니다. Microsoft Web Deploy v3 이상이 권장됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYLOADFAIL">
+        <source>Package/Publish depends on Microsoft Web Deploy technology. Microsoft Web Deploy is not correctly installed on this machine. Please install from following link: {0}{1}. ({2})</source>
+        <target state="translated">패키지 및 게시는 Microsoft Web Deploy 기술에 종속됩니다. Microsoft Web Deploy가 이 컴퓨터에 올바르게 설치되어 있지 않습니다. {0}{1} 링크에서 설치하세요. ({2})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYMinVersion">
+        <source>Package/Publish depends on Microsoft Web Deployment technology. Microsoft Web Deployment is installed but doesn't meet the minimum version requirement. Please reinstall from following link: {0}{1}. (Current Version:{2}, Minimum Version needed:{3})</source>
+        <target state="translated">패키지 및 게시는 Microsoft Web deployment 기술에 종속됩니다. Microsoft Web deployment가 설치되어 있지만 최소 버전 요구 사항에 맞지 않습니다. {0}{1} 링크에서 다시 설치하세요. 현재 버전: {2}, 필요한 최소 버전: {3}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYVERSIONLOAD">
+        <source>Package/Publish task {0} load assembly {1}</source>
+        <target state="translated">패키지/게시 작업 {0}이(가) {1} 어셈블리를 로드합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1Message">
+        <source>Failed to invoke or execute {0} provider on the web server.  The Web Deployment Tool's {0} provider is either not enabled or failed to executed specific commands on the server.  Please contact your server administrator for assistance. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="translated">웹 서버에서 {0} 공급자를 호출 또는 실행하지 못했습니다. 웹 배포 도구 {0} 공급자가 사용되고 있지 않거나 서버에서 특정 명령을 실행하지 못했습니다. 서버 관리자에게 문의하세요. 웹 배포 공급자는 "{0}"입니다.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1SQLMessage">
+        <source>Make sure the database connection string for the server is correct and that you have appropriate permission to access the database. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="translated">서버에 대한 데이터베이스 연결 문자열이 올바르며 데이터베이스에 대한 적절한 액세스 권한이 있는지 확인하세요. 웹 배포 공급자는 "{0}"입니다.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1SiteMessage">
+        <source>Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permissions on the server. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="translated">IIS 설정을 게시할 서버에 대한 적절한 권한이 있는지 확인하거나 서버에 대한 관리 권한을 필요로 하는 설정을 제외하세요. 웹 배포 공급자는 "{0}"입니다.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink2Message">
+        <source>Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permission on the server.
+Error details:</source>
+        <target state="translated">IIS 설정을 게시할 서버에 대한 적절한 권한이 있는지 확인하세요. 또는 서버에 대한 관리 권한을 필요로 하는 설정을 제외하세요.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink3Message">
+        <source>This can occur if the publish process cannot connect to the database on the server. Make sure the database connection string is correct.
+Error details:</source>
+        <target state="translated">이는 게시 프로세스가 서버의 데이터베이스에 연결할 수 없는 경우 발생할 수 있습니다. 데이터베이스 연결 문자열이 올바른지 확인하세요.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink4Message">
+        <source>Failed to publish the database. This can happen if the remote database cannot run the script. Try modifying the database scripts, or disabling database publishing in the Package/Publish Web properties page. If the script failed due to database tables already exist, try dropping existing database objects before creating new ones. For more information on doing these options from Visual Studio, see http://go.microsoft.com/fwlink/?LinkId=179181.
+Error details:</source>
+        <target state="translated">데이터베이스를 게시하지 못했습니다. 원격 데이터베이스에서 스크립트를 실행할 수 없는 경우 이 문제가 발생할 수 있습니다. [웹 패키지 및 게시] 속성 페이지에서 데이터베이스 게시를 사용하지 않도록 설정하거나 데이터베이스 스크립트를 수정해 보세요. 데이터베이스 테이블이 이미 있어 스크립트가 실패한 경우 기존 데이터베이스 개체를 삭제한 후 새 데이터베이스 개체를 만들어 보세요. Visual Studio에서 이 옵션을 수행하는 방법에 대한 자세한 정보는 http://go.microsoft.com/fwlink/?LinkId=179181을 참조하세요.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_ObjectIdentity">
+        <source>{0}({1})</source>
+        <target state="translated">{0}({1})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SQLCEMigrationNeedLatestMSDeploy">
+        <source>Generate schema/data sql scripts from SQLCE require Web Deploy 2.0 and up to function properly.  Please install the latest Web Deploy from {0}.</source>
+        <target state="translated">SQLCE에서 스키마/데이터 sql 스크립트를 생성하려면 Web Deploy 2.0이 있고 제대로 작동 중이어야 합니다. {0}에서 최신 Web Deploy를 설치하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SkipDirectiveSetEnable">
+        <source>Skip Directive {0} enable state is changed to {1}.</source>
+        <target state="translated">Skip 지시문 {0}의 사용 가능 상태가 {1}(으)로 변경되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Start">
+        <source>Starting Web deployment task from source: {0} to Destination: {1}.</source>
+        <target state="translated">소스 {0}에서 대상 {1}(으)로 Web deployment 작업을 시작하고 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedArchiveDir">
+        <source>Package is successfully created as archive directory at the following location:
+{0}</source>
+        <target state="translated">패키지가 {0}에 보관 디렉터리로 생성되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedDeploy">
+        <source>Publish Succeeded.</source>
+        <target state="translated">게시했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedPackage">
+        <source>Package "{0}" is successfully created as single file at the following location:
+{1}</source>
+        <target state="translated">"{0}" 패키지가 다음 위치에서 단일 파일로 생성되었습니다.
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Succeeded">
+        <source>Successfully executed Web deployment task.</source>
+        <target state="translated">Web deployment 작업을 실행했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_UnknownParameter">
+        <source>Unknown Parameter {0}. Source Known Parameters are: {1}.</source>
+        <target state="translated">알 수 없는 매개 변수 {0}입니다. 소스가 알려진 매개 변수는 {1}입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_UnknownSkipDirective">
+        <source>Skip Directive {0} can not be identified.</source>
+        <target state="translated">Skip 지시문 {0}을(를) 식별할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException401Message">
+        <source>Make sure the site name, user name, and password are correct. If the issue is not resolved, please contact your local or server administrator.
+Error details:</source>
+        <target state="translated">사이트 이름, 사용자 이름 및 암호가 올바른지 확인하세요. 문제가 해결되지 않으면 로컬 또는 서버 관리자에게 문의하세요.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException404Message">
+        <source>The requested resource does not exist, or the requested URL is incorrect.
+Error details:</source>
+        <target state="translated">요청한 리소스가 없거나 요청한 URL이 잘못되었습니다.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException502Message">
+        <source>Make sure firewall and network settings on your computer and on the server are configured to allow connections between them. If the issue is not resolved, please contact your local or server administrator.
+Error details:</source>
+        <target state="translated">사용자 컴퓨터와 서버의 방화벽 및 네트워크 설정이 둘 간의 연결을 허용하도록 구성되어 있는지 확인하세요. 문제가 해결되지 않으면 로컬 또는 서버 관리자에게 문의하세요.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException550Message">
+        <source>Make sure the site that you are deploying to is a valid site on the destination server. If the issue is not resolved, please contact your server administrator.
+Error details:</source>
+        <target state="translated">배포 대상 사이트가 대상 서버에서 유효한 사이트인지 확인하세요. 문제가 해결되지 않으면 서버 관리자에게 문의하세요.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException551Message">
+        <source>Make sure the appliction that you are deploying to is a valide application on the destination server. If the issue is not resolved, please contact your server administrator.
+Error details:</source>
+        <target state="translated">배포 대상 애플리케이션이 대상 서버에서 유효한 애플리케이션인지 확인하세요. 문제가 해결되지 않으면 서버 관리자에게 문의하세요.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebExceptionConnectFailureMessage">
+        <source>This error indicates that you cannot connect to the server. Make sure the service URL is correct, firewall and network settings on this computer and on the server computer are configured properly, and the appropriate services have been started on the server.
+Error details:</source>
+        <target state="translated">이 오류는 사용자가 서버에 연결할 수 없음을 나타냅니다. 서비스 URL이 올바르고 이 컴퓨터와 서버 컴퓨터의 방화벽 및 네트워크 설정이 올바르게 구성되어 있으며 적절한 서비스가 서버에서 시작되었는지 확인하세요.
+오류 세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebPackageHelpLink">
+        <source>http://go.microsoft.com/fwlink/?LinkId=124618</source>
+        <target state="new">http://go.microsoft.com/fwlink/?LinkId=124618</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebPackageHelpLinkMessage">
+        <source>To get the instructions on how to deploy the web package please visit the following link:</source>
+        <target state="translated">웹 패키지를 배포하는 방법에 대한 지침을 얻으려면 다음 링크를 방문하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValidateParameter_ArgumentNullError">
+        <source>Property '{0}' must be non-empty.</source>
+        <target state="translated">'{0}' 속성은 비워 둘 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Attribute">
+        <source>Setting {0}</source>
+        <target state="translated">설정 {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Failed">
+        <source>Failed to Generate AssemblyInfo file.</source>
+        <target state="translated">어셈블리 정보 파일을 생성하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
+        <source>Generating AssemblyInfo.</source>
+        <target state="translated">어셈블리 정보를 생성 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">
+        <source>Successfully generated AssemblyInfo file.</source>
+        <target state="translated">어셈블리 정보 파일을 생성했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_ApplicationPath">
+        <source>Missing ApplicationPath parameter (the physical path of the precompiled application).</source>
+        <target state="translated">ApplicationPath 매개 변수(미리 컴파일된 응용 프로그램의 실제 경로)가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_ContentAssemblyName">
+        <source>ContentAssembly parameter cannot be combined with the Prefix or NameSingleAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name.</source>
+        <target state="translated">ContentAssembly 매개 변수를 Prefix 또는 NameSingleAssemblyName 매개 변수와 함께 사용할 수 없습니다. 지정하는 경우 전체 애플리케이션이 지정된 이름의 단일 어셈블리로 병합됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Failed">
+        <source>Failed to merge '{0}'.</source>
+        <target state="translated">'{0}'을(를) 병합하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_SingleAssemblyName">
+        <source>SingleAssemblyName parameter cannot be combined with the Prefix or ContentAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name.</source>
+        <target state="translated">SingleAssemblyName 매개 변수를 Prefix 또는 ContentAssemblyName 매개 변수와 함께 사용할 수 없습니다. 지정하는 경우 전체 애플리케이션이 지정된 이름의 단일 어셈블리로 병합됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Start">
+        <source>Running aspnet_merge.exe.</source>
+        <target state="translated">aspnet_merge.exe 실행 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Succeeded">
+        <source>Successfully merged '{0}'.</source>
+        <target state="translated">'{0}'을(를) 병합했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WebConfigTransform_HostingModel_Error">
+        <source>The acceptable value for AspNetCoreHostingModel property is either "InProcess" or "OutOfProcess".</source>
+        <target state="translated">AspNetCoreHostingModel 속성에 허용되는 값은 "InProcess" 또는 "OutOfProcess"입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WebConfigTransform_InvalidHostingOption">
+        <source>In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to at least AspNetCoreModuleV2.</source>
+        <target state="translated">AspNetCoreModule에 In Process 호스팅이 지원되지 않습니다. AspNetCoreModule을 적어도 AspNetCoreModuleV2로 변경하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Check_DeploymentStatus">
+        <source>Checking the deployment status...</source>
+        <target state="translated">배포 상태를 확인하는 중...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_DeploymentStatus">
+        <source>Deployment status is {0}.</source>
+        <target state="translated">배포 상태는 {0}입니다.</target>
+        <note>{0} - Success or failed</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_DeploymentStatusPolling">
+        <source>Polling for deployment status...</source>
+        <target state="translated">배포 상태에 대한 폴링...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Failed">
+        <source>Zip Deployment failed. </source>
+        <target state="translated">Zip 배포에 실패했습니다. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedDeploy">
+        <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'.</source>
+        <target state="translated">'{0}'을(를) 통해 ZIP 파일을 게시하려는 시도가 HTTP 상태 코드 '{1}'과(와) 함께 실패했습니다.</target>
+        <note>{0} - URL to deploy zip, {1} - HTTP response code</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedDeployWithLogs">
+        <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'. See the logs at '{2}'.</source>
+        <target state="translated">'{0}'을(를) 통해 ZIP 파일을 게시하려는 시도가 HTTP 상태 코드 '{1}'과(와) 함께 실패했습니다. '{2}'에서 로그를 참조하세요.</target>
+        <note>{0} - URL to deploy zip, {1} - HTTP response code, {2} - Logs URL</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedToRetrieveCred">
+        <source>Failed to retrieve credentials.</source>
+        <target state="translated">자격 증명을 검색하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_InvalidSiteNamePublishUrl">
+        <source>Neither SiteName nor PublishUrl was given a value.</source>
+        <target state="translated">SiteName 또는 PublishUrl에 값이 지정되지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_PublishingZip">
+        <source>Publishing {0} to {1}...</source>
+        <target state="translated">{1}에 {0} 게시 중...</target>
+        <note>{0} - Path of zip to publish, {1} - URL to deploy zip</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Succeeded">
+        <source>Zip Deployment succeeded.</source>
+        <target state="translated">Zip 배포에 성공했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Uploaded">
+        <source>Uploaded the Zip file to the target.</source>
+        <target state="translated">대상에 Zip 파일을 업로드했습니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

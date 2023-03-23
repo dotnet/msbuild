@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
+  <PropertyGroup>
+    <PublishingVersion>3</PublishingVersion>
+    <!-- This repo does its own symbol package generation to avoid generating symbols for a bunch of unrelated test packages. -->
+    <AutoGenerateSymbolPackages>false</AutoGenerateSymbolPackages>
+  </PropertyGroup>
 
   <PropertyGroup>
     <Product>Sdk</Product>
@@ -11,6 +16,33 @@
 
     <TempWorkingDirectory>$(ArtifactsDir)\..\AssetsTmpDir\$([System.Guid]::NewGuid())</TempWorkingDirectory>
   </PropertyGroup>
+
+  <!-- Pulled from arcade's publish.proj see https://github.com/dotnet/arcade/issues/5790 for
+       issue on making this common in arcade so it doesn't have to be duplicated here -->
+  <PropertyGroup>
+    <CollectionUri>$(SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)</CollectionUri>
+
+    <!-- When we have dev.azure.com/<account>/ -->
+    <AzureDevOpsAccount Condition="$(CollectionUri.IndexOf('dev.azure.com')) >= 0">$(CollectionUri.Split('/')[3])</AzureDevOpsAccount>
+
+    <!-- When we have <account>.visualstudio.com -->
+    <AzureDevOpsAccount Condition="$(CollectionUri.IndexOf('visualstudio.com')) >= 0">$(CollectionUri.Split('.')[0].Split('/')[2])</AzureDevOpsAccount>
+  </PropertyGroup>
+
+  <!--
+    The new Maestro/BAR build model keeps separate Azure DevOps and GitHub build information.
+    The GitHub information will be extracted based on the Azure DevOps repository.
+  -->
+  <ItemGroup>
+    <ManifestBuildData Include="InitialAssetsLocation=$(SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$(SYSTEM_TEAMPROJECT)/_apis/build/builds/$(BUILD_BUILDID)/artifacts" />
+    <ManifestBuildData Include="AzureDevOpsBuildId=$(BUILD_BUILDID)" />
+    <ManifestBuildData Include="AzureDevOpsBuildDefinitionId=$(SYSTEM_DEFINITIONID)" />
+    <ManifestBuildData Include="AzureDevOpsAccount=$(AzureDevOpsAccount)" />
+    <ManifestBuildData Include="AzureDevOpsProject=$(SYSTEM_TEAMPROJECT)" />
+    <ManifestBuildData Include="AzureDevOpsBuildNumber=$(BUILD_BUILDNUMBER)" />
+    <ManifestBuildData Include="AzureDevOpsRepository=$(BUILD_REPOSITORY_URI)" />
+    <ManifestBuildData Include="AzureDevOpsBranch=$(BUILD_SOURCEBRANCH)" />
+  </ItemGroup>
 
   <ItemGroup>
     <ToolsetAssetsToPublish Include="$(ArtifactsNonShippingPackagesDir)*.zip" />
@@ -26,28 +58,69 @@
     </CreateProperty>
   </Target>
 
+  <!-- FSharp needs to push different packages to nuget.org depending on whether the SDK is preview or not,
+       To achieve this, we find the FSharp compiler package, then the stable or non-stable FSharp.Core and Compiler service
+       package contained within, depending on the stability switch of the SDK. The SDK then treats these packages as its own outputs,
+       whch means they get automatically pushed on release day. -->
+  <PropertyGroup>
+    <PublishDependsOnTargets>$(PublishDependsOnTargets);_ResolvePublishFSharpNuGetPackages</PublishDependsOnTargets>
+  </PropertyGroup>
+    
+  <Target Name="_ResolvePublishFSharpNuGetPackages">
+    <PropertyGroup>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'!='release'">Shipping</FSharpCorePath>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'=='release'">Release</FSharpCorePath>
+    </PropertyGroup>
+    <ItemGroup>
+        <FSharpPackagesToPush Include="$(NuGetPackageRoot)\Microsoft.FSharp.Compiler\$(MicrosoftFSharpCompilerPackageVersion)\contentFiles\$(FSharpCorePath)\FSharp.Core.*.nupkg"/>
+        <FSharpPackagesToPush Include="$(NuGetPackageRoot)\Microsoft.FSharp.Compiler\$(MicrosoftFSharpCompilerPackageVersion)\contentFiles\$(FSharpCorePath)\FSharp.Compiler.Service.*.nupkg" />
+        <ItemsToPushToBlobFeed Include="@(FSharpPackagesToPush)" />
+    </ItemGroup>
+  </Target>
+ 
   <!-- We use a separate target to publish this to blob storage so that we can push this to
        a relative path inside the blob storage. -->
-  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="'$(PublishToAzure)' == 'true'">
+  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish">
     <ItemGroup>
-      <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)" IsShipping="false" >
+      <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)">
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(ToolsetVersionValue)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
-        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
+        <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
       </ToolsetAssetsToPushToBlobFeed>
     </ItemGroup>
+    
+    <ItemGroup Condition="'$(PostBuildSign)' == 'true'">
+      <ItemsToSignPostBuild Remove="@(ItemsToSignPostBuild)" />
+      <ItemsToSignPostBuild Include="@(ToolsetAssetsToPublish->'%(Filename)%(Extension)')" />
+    </ItemGroup>
+    
+    <PropertyGroup>
+      <IsStableBuild>false</IsStableBuild>
+      <IsStableBuild Condition="'$(DotNetFinalVersionKind)' == 'release'">true</IsStableBuild>
+    </PropertyGroup>
+    
 
     <MakeDir Directories="$(TempWorkingDirectory)"/>
 
     <PushToAzureDevOpsArtifacts
+      AzureDevOpsCollectionUri="$(SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)"
+      AzureDevOpsProject="$(SYSTEM_TEAMPROJECT)"
+      AzureDevOpsBuildId="$(BUILD_BUILDID)"
       ItemsToPush="@(ToolsetAssetsToPushToBlobFeed)"
-      ManifestBuildData="Location=$(DotNetPublishBlobFeedUrl)"
-      ManifestRepoUri="$(BUILD_REPOSITORY_URI)"
+      ItemsToSign="@(ItemsToSignPostBuild)"
+      CertificatesSignInfo="@(CertificatesSignInfo)"
+      StrongNameSignInfo="@(StrongNameSignInfo)"
+      FileSignInfo="@(FileSignInfo)"
+      FileExtensionSignInfo="@(FileExtensionSignInfo)"
+      ManifestBuildData="@(ManifestBuildData)"
+      ManifestRepoUri="$(BUILD_REPOSITORY_NAME)"
       ManifestBranch="$(BUILD_SOURCEBRANCH)"
       ManifestBuildId="$(BUILD_BUILDNUMBER)"
       ManifestCommit="$(BUILD_SOURCEVERSION)"
       PublishFlatContainer="true"
       AssetManifestPath="$(SdkAssetsManifestFilePath)"
-      AssetsTemporaryDirectory="$(TempWorkingDirectory)" />
+      AssetsTemporaryDirectory="$(TempWorkingDirectory)" 
+      PublishingVersion="3"
+      IsStableBuild="$(IsStableBuild)" />
 
     <Copy
       SourceFiles="$(SdkAssetsManifestFilePath)"

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "TestAppWithLaunchSettings": {
+      "commandName": "Project",
+      "dotnetRunMessages": "true",
+      "commandLineArgs": "TestAppCommandLineArguments SecondTestAppCommandLineArguments",
+      "environmentVariables": {
+        "MyCoolEnvironmentVariableKey": "MyCoolEnvironmentVariableValue"
+      }
+    }
+  }
+}

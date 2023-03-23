@@ -4,7 +4,7 @@
           BeforeTargets="Build">
 
     <PropertyGroup>
-      <OSName Condition=" '$(OSName)' == '' AND $([MSBuild]::IsOSPlatform('WINDOWS')) ">win</OSName>
+      <OSName Condition=" '$(OSName)' == '' AND $([MSBuild]::IsOSPlatform(`Windows`)) ">win</OSName>
       <OSName Condition=" '$(OSName)' == '' AND $([MSBuild]::IsOSPlatform('OSX')) ">osx</OSName>
       <OSName Condition=" '$(OSName)' == '' ">linux</OSName>
 

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="DownloadVersionFailed">
+        <source>Downloading {0} version {1} failed.</source>
+        <target state="translated">{0} 버전 {1} 다운로드에 실패했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSource">
+        <source>Failed to load NuGet source {0}</source>
+        <target state="translated">NuGet 원본 {0}을(를) 로드하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSourceSourceIsNotValid">
+        <source>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</source>
+        <target state="translated">NuGet 원본 {0}을(를) 로드하지 못했습니다. 원본이 유효하지 않습니다. 추가 처리에서 건너뛰세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToValidatePackageSigning">
+        <source>Failed to validate package signing.</source>
+        <target state="translated">패키지 서명의 유효성을 검사하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IsNotFoundInNuGetFeeds">
+        <source>{0} is not found in NuGet feeds {1}".</source>
+        <target state="translated">NuGet 피드 {1}"에서 {0}을(를) 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="translated">NuGet 패키지 서명 확인을 건너뛰는 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
+        <source>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</source>
+        <target state="translated">NuGet 패키지 서명 유효성 검사를 건너뜁니다. NuGet 서명 유효성 검사는 Linux 또는 macOS https://aka.ms/workloadskippackagevalidation에서 사용할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

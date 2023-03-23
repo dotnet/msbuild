@@ -292,7 +292,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
 
 
-            var embeddedResourceItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "EmbeddedResource", setup, projectChanges: projectChanges);
+            var embeddedResourceItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "EmbeddedResource", setup, projectChanges: projectChanges, identifier: "EmbeddedResource");
 
             var expectedEmbeddedResourceItems = new[]
             {
@@ -343,7 +343,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
 
 
-            var contentItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "Content", setup, projectChanges: projectChanges);
+            var contentItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "Content", setup, projectChanges: projectChanges, identifier: "Content");
 
             var expectedContentItems = new[]
             {
@@ -354,7 +354,7 @@ namespace Microsoft.NET.Build.Tests
 
             contentItems.Should().BeEquivalentTo(expectedContentItems);
 
-            var noneItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "None", setup, projectChanges: projectChanges);
+            var noneItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "None", setup, projectChanges: projectChanges, identifier: expectedContentItems.GetHashCode().ToString());
 
             var expectedNoneItems = new[]
             {
@@ -367,32 +367,42 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_does_not_include_source_or_resx_files_in_None()
+        public void It_does_not_include_items_in_any_group_if_group_specific_default_include_properties_are_false()
         {
             var testProject = new TestProject()
             {
                 Name = "DontIncludeSourceFilesInNone",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                IsSdkProject = true
             };
             testProject.AdditionalProperties["EnableDefaultCompileItems"] = "false";
             testProject.AdditionalProperties["EnableDefaultResourceItems"] = "false";
 
+            // Windows App SDK related
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkContentItems"] = "true";
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkPRIResourceItems"] = "true";
+            testProject.AdditionalProperties["EnableDefaultContentItems"] = "false";
+            testProject.AdditionalProperties["EnableDefaultPRIResourceItems"] = "false";
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project =>
                 {
+                    // "Manual" include via project file modification.
                     var ns = project.Root.Name.Namespace;
                     XElement itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", testProject.Name + ".cs")));
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", testProject.Name + "Program.cs")));
                 });
 
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
             File.WriteAllText(Path.Combine(projectFolder, "ShouldBeIgnored.cs"), "!InvalidCSharp!");
             File.WriteAllText(Path.Combine(projectFolder, "Resources.resx"), "<Resource/>");
+            File.WriteAllText(Path.Combine(projectFolder, "ResourcesResw.resw"), "<root/>");
+            File.WriteAllText(Path.Combine(projectFolder, "TestImage.jpg"), "");
 
+            // Validate Compile items.
             var getCompileItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Compile", GetValuesCommand.ValueType.Item);
             getCompileItemsCommand.Execute()
                 .Should()
@@ -400,8 +410,9 @@ namespace Microsoft.NET.Build.Tests
 
             var compileItems = getCompileItemsCommand.GetValues();
             RemoveGeneratedCompileItems(compileItems);
-            compileItems.ShouldBeEquivalentTo(new[] { testProject.Name + ".cs" });
+            compileItems.Should().BeEquivalentTo(new[] { testProject.Name + ".cs", testProject.Name + "Program.cs" });
 
+            // Validate None items.
             var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
             getNoneItemsCommand.Execute()
                 .Should()
@@ -410,6 +421,7 @@ namespace Microsoft.NET.Build.Tests
             getNoneItemsCommand.GetValues()
                 .Should().BeEmpty();
 
+            // Validate Resource items.
             var getResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Resource", GetValuesCommand.ValueType.Item);
             getResourceItemsCommand.Execute()
                 .Should()
@@ -418,6 +430,23 @@ namespace Microsoft.NET.Build.Tests
             getResourceItemsCommand.GetValues()
                 .Should().BeEmpty();
 
+            // Validate PRIResource items.
+            var getPRIResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "PRIResource", GetValuesCommand.ValueType.Item);
+            getPRIResourceItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getPRIResourceItemsCommand.GetValues()
+                .Should().BeEmpty();
+
+            // Validate Content items.
+            var getContentItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Content", GetValuesCommand.ValueType.Item);
+            getContentItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getContentItemsCommand.GetValues()
+                .Should().BeEmpty();
         }
 
         [Fact]
@@ -442,9 +471,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithProjectChanges(projectChanges);
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
 
             WriteFile(Path.Combine(buildCommand.ProjectRootPath, "ProjectRoot.txt"), "ProjectRoot");
             WriteFile(Path.Combine(buildCommand.ProjectRootPath, "Subfolder", "ProjectSubfolder.txt"), "ProjectSubfolder");
@@ -468,8 +495,8 @@ namespace Microsoft.NET.Build.Tests
                 "wwwroot/wwwsubfolder/wwwsubfolder.txt",
             });
         }
- 
-        [Fact]
+
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void Compile_items_can_be_explicitly_specified_while_default_EmbeddedResource_items_are_used()
         {
             Action<XDocument> projectChanges = project =>
@@ -500,7 +527,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DuplicateCompileItems",
                 TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -512,7 +538,7 @@ namespace Microsoft.NET.Build.Tests
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"**\*.cs")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             WriteFile(Path.Combine(buildCommand.ProjectRootPath, "Class1.cs"), "public class Class1 {}");
 
@@ -533,7 +559,6 @@ namespace Microsoft.NET.Build.Tests
                 //  Underscore is in the project name so we can verify that the warning message output contained "PackageReference"
                 Name = "DeduplicatePackage_Reference",
                 TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "DeduplicatePackage_Reference")
@@ -554,7 +579,7 @@ namespace Microsoft.NET.Build.Tests
                         new XAttribute("Include", "netstandard.Library"), new XAttribute("Version", "1.6.1")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -570,8 +595,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "OverrideImplicitFrameworkReference",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -586,7 +610,7 @@ namespace Microsoft.NET.Build.Tests
                         new XAttribute("Include", "Microsoft.NETCore.App")));
                 });
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 .Execute()
@@ -594,7 +618,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass()
                 .And.HaveStdOutContaining("NETSDK1086");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -609,8 +633,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "DuplicateFrameworkReference",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -631,7 +654,7 @@ namespace Microsoft.NET.Build.Tests
                         new XAttribute("Include", "Microsoft.NETCore.App")));
                 });
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 .Execute()
@@ -649,7 +672,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "OverrideNetCoreApp",
                 TargetFrameworks = "netcoreapp2.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -663,7 +685,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: disableImplicitFrameworkReferences.ToString());
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -686,12 +708,11 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "DuplicatePackageReference",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             
             testProject.SourceFiles["Test.cs"] = @"
 public class Class1
@@ -704,7 +725,7 @@ public class Class1
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -736,6 +757,113 @@ public class Class1
                 r.metadata["ExcludeAssets"].Should().BeEmpty();
                 r.metadata["IsImplicitlyDefined"].Should().BeEmpty();
             }
+        }
+
+        [Fact]
+        public void It_includes_Windows_App_SDK_items_in_the_correct_groups_if_Windows_App_SDK_is_present()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DontIncludeSourceFilesInNone",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            // Windows App SDK
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkContentItems"] = "true";
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkPRIResourceItems"] = "true";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            File.WriteAllText(Path.Combine(projectFolder, "ResourcesResw.resw"), "<root/>");
+            string[] imageFiles = { "TestImage1.png", "TestImage2.bmp", "TestImage3.jpg", "TestImage4.dds", "TestImage5.tif", "TestImage6.tga", "TestImage7.gif" };
+            foreach (string fileName in imageFiles)
+            {
+                File.WriteAllText(Path.Combine(projectFolder, fileName), "");
+            }
+
+            // Validate None items.
+            var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
+            getNoneItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getNoneItemsCommand.GetValues()
+                .Should()
+                .BeEmpty();
+
+            // Validate PRIResource items.
+            var getPRIResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "PRIResource", GetValuesCommand.ValueType.Item);
+            getPRIResourceItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getPRIResourceItems = getPRIResourceItemsCommand.GetValues();
+            getPRIResourceItems.Should().BeEquivalentTo(new[] { "ResourcesResw.resw" });
+
+            // Validate Content items.
+            var getContentItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Content", GetValuesCommand.ValueType.Item);
+            getContentItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getContentItems = getContentItemsCommand.GetValues();
+            getContentItems.Should().BeEquivalentTo(imageFiles);
+        }
+
+        [Fact]
+        public void It_does_not_include_Windows_App_SDK_items_if_Windows_App_SDK_is_absent()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DontIncludeSourceFilesInNone",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            // Not setting the "EnableDefaultWindowsAppSdkContentItems" or "EnableDefaultWindowsAppSdkPRIResourceItems" properties!
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            File.WriteAllText(Path.Combine(projectFolder, "ResourcesResw.resw"), "<root/>");
+            List<string> imageFiles = new List<string>{ "TestImage1.png", "TestImage2.bmp", "TestImage3.jpg", "TestImage4.dds", "TestImage5.tif", "TestImage6.tga", "TestImage7.gif" };
+            foreach (string fileName in imageFiles)
+            {
+                File.WriteAllText(Path.Combine(projectFolder, fileName), "");
+            }
+
+            // Validate None items.
+            var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
+            getNoneItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getNoneItems = getNoneItemsCommand.GetValues();
+            List<string> expectedFiles = imageFiles;
+            expectedFiles.Add("ResourcesResw.resw");
+            getNoneItems.Should().BeEquivalentTo(expectedFiles.ToArray());
+
+            // Validate PRIResource items.
+            var getPRIResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "PRIResource", GetValuesCommand.ValueType.Item);
+            getPRIResourceItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getPRIResourceItemsCommand.GetValues()
+                .Should()
+                .BeEmpty();
+
+            // Validate Content items.
+            var getContentItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Content", GetValuesCommand.ValueType.Item);
+            getContentItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getContentItemsCommand.GetValues()
+                .Should()
+                .BeEmpty();
         }
 
         void RemoveGeneratedCompileItems(List<string> compileItems)

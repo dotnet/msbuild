@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>List workloads available.</source>
+        <target state="translated">사용 가능한 워크로드를 나열합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadListFooter">
+        <source>Use `dotnet workload search` to find additional workloads to install.</source>
+        <target state="translated">`dotnet workload search`을 사용하여 설치할 추가 워크로드를 찾습니다.</target>
+        <note>{Locked="dotnet workload search"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">다음 워크로드에 대한 업데이트를 사용할 수 있습니다. {0}. 최신 버전을 받으려면 `dotnet workload update`를 실행하세요.</target>
+        <note>{Locked="dotnet workload update"}</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

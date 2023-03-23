@@ -7,9 +7,14 @@
         <target state="translated">Almacena los ensamblados especificados para la plataforma .NET. De forma predeterminada, estos se optimizarán para el tiempo de ejecución y la plataforma de destino.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CurrentRuntimeOptionDescription">
+        <source>Use current runtime as the target runtime.</source>
+        <target state="translated">Use el runtime actual como runtime de destino.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
-        <target state="translated">DIRECTORIO_DE_SALIDA</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">

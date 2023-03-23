@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="SolutionArgumentName">
         <source>SLN_FILE</source>
-        <target state="translated">PLIK_SLN</target>
+        <target state="translated">SLN_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionArgumentDescription">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="AddProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="translated">ŚCIEŻKA_PROJEKTU</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjectPathArgumentDescription">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="translated">ŚCIEŻKA_PROJEKTU</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentDescription">

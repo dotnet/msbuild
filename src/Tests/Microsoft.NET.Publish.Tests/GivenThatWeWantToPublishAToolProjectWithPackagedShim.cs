@@ -35,7 +35,7 @@ namespace Microsoft.NET.Publish.Tests
                 {
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
+                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
                 });
 
@@ -46,11 +46,11 @@ namespace Microsoft.NET.Publish.Tests
         public void It_contains_dependencies_shims()
         {
             var testAsset = SetupTestAsset();
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute();
 
-            publishCommand.GetOutputDirectory(targetFramework: "netcoreapp2.1")
+            publishCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework)
                 .Sub("shims")
                 .Sub("win-x64")
                 .EnumerateFiles().Should().Contain(f => f.Name == _customToolCommandName + ".exe");
@@ -60,14 +60,14 @@ namespace Microsoft.NET.Publish.Tests
         public void It_contains_dependencies_shims_with_no_build()
         {
             var testAsset = SetupTestAsset();
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute();
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute("/p:NoBuild=true");
 
-            publishCommand.GetOutputDirectory(targetFramework: "netcoreapp2.1")
+            publishCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework)
                 .Sub("shims")
                 .Sub("win-x64")
                 .EnumerateFiles().Should().Contain(f => f.Name == _customToolCommandName + ".exe");

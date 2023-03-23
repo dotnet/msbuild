@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="WorkloadIdArgumentName" xml:space="preserve">
+    <value>WORKLOAD_ID</value>
+  </data>
+  <data name="WorkloadIdArgumentDescription" xml:space="preserve">
+    <value>The NuGet package ID of the workload to install.</value>
+  </data>
+  <data name="VersionOptionName" xml:space="preserve">
+    <value>VERSION</value>
+  </data>
+  <data name="VersionOptionDescription" xml:space="preserve">
+    <value>The version of the SDK.</value>
+  </data>
+  <data name="SourceOptionName" xml:space="preserve">
+    <value>SOURCE</value>
+  </data>
+  <data name="SourceOptionDescription" xml:space="preserve">
+    <value>The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</value>
+  </data>
+  <data name="CommandDescription" xml:space="preserve">
+    <value>Install one or more workloads.</value>
+  </data>
+  <data name="ConfigFileOptionName" xml:space="preserve">
+    <value>FILE</value>
+  </data>
+  <data name="ConfigFileOptionDescription" xml:space="preserve">
+    <value>The NuGet configuration file to use.</value>
+  </data>
+  <data name="FrameworkOptionDescription" xml:space="preserve">
+    <value>The target framework to install the workload for.</value>
+  </data>
+  <data name="SkipManifestUpdateOptionDescription" xml:space="preserve">
+    <value>Skip updating the workload manifests.</value>
+  </data>
+  <data name="NuGetConfigurationFileDoesNotExist" xml:space="preserve">
+    <value>NuGet configuration file '{0}' doesn't exist.</value>
+  </data>
+  <data name="InstallationSucceeded" xml:space="preserve">
+    <value>Successfully installed workload(s) {0}.</value>
+  </data>
+  <data name="InstallFullCommandNameLocalized" xml:space="preserve">
+    <value>.NET install command</value>
+  </data>
+  <data name="InvalidWorkloadConfiguration" xml:space="preserve">
+    <value>The settings file in the workload's NuGet package is invalid: {0}</value>
+  </data>
+  <data name="WorkloadInstallationFailed" xml:space="preserve">
+    <value>Workload installation failed: {0}</value>
+  </data>
+  <data name="WorkloadCacheDownloadFailed" xml:space="preserve">
+    <value>Download of workload packs to offline cache failed: {0}</value>
+  </data>
+  <data name="WorkloadAlreadyInstalled" xml:space="preserve">
+    <value>Workload(s) '{0}' are already installed.</value>
+  </data>
+  <data name="InvalidNuGetVersionRange" xml:space="preserve">
+    <value>Specified version '{0}' isn't a valid NuGet version range.</value>
+  </data>
+  <data name="WorkloadPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="WorkloadPathOptionDescription" xml:space="preserve">
+    <value>The directory where the workload will be installed. The directory will be created if it doesn't exist.</value>
+  </data>
+  <data name="PrintDownloadLinkOnlyDescription" xml:space="preserve">
+    <value>Only print the list of links to download without downloading.</value>
+  </data>
+  <data name="DownloadToCacheOptionDescription" xml:space="preserve">
+    <value>Download packages needed to install a workload to a folder that can be used for offline installation.</value>
+  </data>
+  <data name="FromCacheOptionDescription" xml:space="preserve">
+    <value>Complete the operation from cache (offline).</value>
+  </data>
+  <data name="TempDirOptionDescription" xml:space="preserve">
+    <value>Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</value>
+  </data>
+  <data name="UnrecognizedPackError" xml:space="preserve">
+    <value>Pack ID {0} unrecognized.</value>
+  </data>
+  <data name="InstallingPackVersionMessage" xml:space="preserve">
+    <value>Installing pack {0} version {1}...</value>
+  </data>
+  <data name="DownloadingPackToCacheMessage" xml:space="preserve">
+    <value>Downloading pack {0} version {1} to offline cache {2}…</value>
+  </data>
+  <data name="WorkloadPackAlreadyInstalledMessage" xml:space="preserve">
+    <value>Pack {0} version {1} is already installed.</value>
+  </data>
+  <data name="WritingPackInstallRecordMessage" xml:space="preserve">
+    <value>Writing workload pack installation record for {0} version {1}...</value>
+  </data>
+  <data name="WritingWorkloadInstallRecordMessage" xml:space="preserve">
+    <value>Writing workload installation record for {0}...</value>
+  </data>
+  <data name="GarbageCollectingSdkFeatureBandsMessage" xml:space="preserve">
+    <value>Garbage collecting for SDK feature band(s) {0}...</value>
+  </data>
+  <data name="RollBackFailedMessage" xml:space="preserve">
+    <value>Installation rollback failed: {0}</value>
+  </data>
+  <data name="RollingBackInstall" xml:space="preserve">
+    <value>Workload installation failed. Rolling back installed packs...</value>
+  </data>
+  <data name="RollingBackPackInstall" xml:space="preserve">
+    <value>Rolling back pack {0} installation...</value>
+  </data>
+  <data name="CacheMissingPackage" xml:space="preserve">
+    <value>Package {0} version {1} doesn't exist in offline cache {2}.</value>
+  </data>
+  <data name="UsingCacheForPackInstall" xml:space="preserve">
+    <value>Installing package {0} version {1} from offline cache {2}.</value>
+  </data>
+  <data name="AdManifestUpdated" xml:space="preserve">
+    <value>Updated advertising manifest {0}.</value>
+  </data>
+  <data name="FailedAdManifestUpdate" xml:space="preserve">
+    <value>Failed to update the advertising manifest {0}: {1}.</value>
+  </data>
+  <data name="AdManifestPackageDoesNotExist" xml:space="preserve">
+    <value>Advertising manifest not updated. Manifest package for {0} doesn't exist.</value>
+  </data>
+  <data name="ManifestDoesNotExist" xml:space="preserve">
+    <value>No manifest with ID {0} exists.</value>
+  </data>
+  <data name="FailedToInstallWorkloadManifest" xml:space="preserve">
+    <value>Failed to install manifest {0} version {1}: {2}.</value>
+  </data>
+  <data name="InstallingWorkloadManifest" xml:space="preserve">
+    <value>Installing workload manifest {0} version {1}…</value>
+  </data>
+  <data name="IncludePreviewOptionDescription" xml:space="preserve">
+    <value>Allow prerelease workload manifests.</value>
+  </data>
+  <data name="ResolvingPackageUrls" xml:space="preserve">
+    <value>Resolving package URLs for workload(s) {0}...</value>
+  </data>
+  <data name="FailedToDownloadPackageManifest" xml:space="preserve">
+    <value>Failed to download manifest package {0}.</value>
+  </data>
+  <data name="ManifestPackageUrlNotResolved" xml:space="preserve">
+    <value>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</value>
+  </data>
+  <data name="OSDoesNotSupportMsi" xml:space="preserve">
+    <value>MSI installations are only supported on Windows.</value>
+  </data>
+  <data name="DeletingWorkloadPack" xml:space="preserve">
+    <value>Uninstalling workload pack {0} version {1}…</value>
+  </data>
+  <data name="SkippingManifestUpdate" xml:space="preserve">
+    <value>Manifest packages were not found. Skipping manifest update...</value>
+  </data>
+  <data name="NoManifestsExistForFeatureBand" xml:space="preserve">
+    <value>No manifests exist for SDK version {0}.</value>
+  </data>
+  <data name="IncompatibleManifests" xml:space="preserve">
+    <value>The current SDK isn't compatible with workload manifests of SDK version {0}.</value>
+  </data>
+  <data name="InadequatePermissions" xml:space="preserve">
+    <value>Inadequate permissions. Run the command with elevated privileges.</value>
+  </data>
+  <data name="WorkloadNotSupportedOnPlatform" xml:space="preserve">
+    <value>Workload ID {0} isn't supported on this platform.</value>
+  </data>
+  <data name="WorkloadNotRecognized" xml:space="preserve">
+    <value>Workload ID {0} is not recognized.</value>
+  </data>
+  <data name="RollbackDefinitionFileDoesNotExist" xml:space="preserve">
+    <value>Provided rollback definition file {0} doesn't exist.</value>
+  </data>
+  <data name="RollbackDefinitionContainsExtraneousManifestIds" xml:space="preserve">
+    <value>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</value>
+  </data>
+  <data name="InsufficientPrivilegeToStartServer" xml:space="preserve">
+    <value>Insufficient privilege to start the server.</value>
+  </data>
+  <data name="NoTrustWithParentPID" xml:space="preserve">
+    <value>Failed to establish a trust relationship with parent process ({0}).</value>
+  </data>
+  <data name="WorkloadUpdatesAvailable" xml:space="preserve">
+    <value>Workload updates are available. Run `dotnet workload list` for more information.</value>
+  </data>
+  <data name="PendingReboot" xml:space="preserve">
+    <value>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</value>
+  </data>
+  <data name="MsiProgressInstall" xml:space="preserve">
+    <value>Installing {0} </value>
+  </data>
+  <data name="MsiProgressRepair" xml:space="preserve">
+    <value>Repairing {0} </value>
+  </data>
+  <data name="MsiProgressUninstall" xml:space="preserve">
+    <value>Removing {0} </value>
+  </data>
+  <data name="UnknownInstallType" xml:space="preserve">
+    <value>Unknown installation type: {0}.</value>
+  </data>
+  <data name="GarbageCollectionFailed" xml:space="preserve">
+    <value>Warning: Workload garbage collection failed with error: {0}.</value>
+  </data>
+  <data name="FromCacheOptionArgumentName" xml:space="preserve">
+    <value>DIRECTORY</value>
+  </data>
+  <data name="DownloadToCacheOptionArgumentName" xml:space="preserve">
+    <value>DIRECTORY</value>
+  </data>
+  <data name="CannotCombineSkipManifestAndRollback" xml:space="preserve">
+    <value>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</value>
+  </data>
+  <data name="SkipSignCheckOptionDescription" xml:space="preserve">
+    <value>Skip signature verification of workload packages and installers.</value>
+  </data>
+  <data name="CheckForUpdatedWorkloadManifests" xml:space="preserve">
+    <value>Checking for updated workload manifests.</value>
+  </data>
+  <data name="InvalidVersionForWorkload" xml:space="preserve">
+    <value>Error parsing version '{1}' for workload manifest ID '{0}'</value>
+  </data>
+  <data name="ExpectedSingleManifest" xml:space="preserve">
+    <value>Expected single manifest feature band and manifest folder in MSI from package {0}</value>
+  </data>
+  <data name="FailedToExtractMsi" xml:space="preserve">
+    <value>Failed to extract information from MSI: {0}</value>
+  </data>
+  <data name="ManifestMsiNotFoundInNuGetPackage" xml:space="preserve">
+    <value>Manifest MSI not found in NuGet package {0}</value>
+  </data>
+</root>

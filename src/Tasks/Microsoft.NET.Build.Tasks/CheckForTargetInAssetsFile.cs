@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tasks
         public string AssetsFilePath { get; set; }
 
         [Required]
-        public string TargetFrameworkMoniker { get; set; }
+        public string TargetFramework { get; set; }
 
         public string RuntimeIdentifier { get; set; }
 
@@ -23,9 +23,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
 
-            var nugetFramework = NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker);
-
-            lockFile.GetTargetAndThrowIfNotFound(nugetFramework, RuntimeIdentifier);
+            lockFile.GetTargetAndThrowIfNotFound(TargetFramework, RuntimeIdentifier);
         }
     }
 }

@@ -104,9 +104,9 @@ EndGlobal
         {
         }
 
-        private string CreateFile([CallerMemberName] string callerName = null)
+        private string CreateFile([CallerMemberName] string callerName = null, string identifier = null)
         {
-            var folder = _testAssetsManager.CreateTestDirectory(testName: callerName);
+            var folder = _testAssetsManager.CreateTestDirectory(testName: callerName +  identifier);
             var filename = Path.Combine(folder.Path, Guid.NewGuid().ToString() + ".tmp");
             using (new FileStream(filename, FileMode.CreateNew)) { }
             return filename;
@@ -271,7 +271,7 @@ EndGlobal
             File.SetAttributes(tmpFile, attr);
         
             Action act = () => SlnFile.Read(tmpFile);
-            act.ShouldNotThrow("Because readonly file is not being modified.");
+            act.Should().NotThrow("Because readonly file is not being modified.");
         }
 
         [Fact]
@@ -324,7 +324,7 @@ EndGlobal
         [InlineData("First Line\nSecondLine\nMicrosoft Visual Studio Solution File, Format Version \nFourth Line", 3)]
         public void WhenGivenASolutionWithMissingHeaderVersionItThrows(string fileContents, int lineNum)
         {
-            var tmpFile = CreateFile();
+            var tmpFile = CreateFile(identifier: fileContents.GetHashCode().ToString());
             File.WriteAllText(tmpFile, fileContents);
 
             Action action = () =>
@@ -332,7 +332,7 @@ EndGlobal
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(lineNum, LocalizableStrings.FileHeaderMissingVersionError));
         }
 
@@ -342,7 +342,7 @@ EndGlobal
         [InlineData("Microsoft Visual\nStudio Solution File,\nFormat Version ")]
         public void WhenGivenASolutionWithMissingHeaderItThrows(string fileContents)
         {
-            var tmpFile = CreateFile();
+            var tmpFile = CreateFile(identifier: fileContents.GetHashCode().ToString());
             File.WriteAllText(tmpFile, fileContents);
 
             Action action = () =>
@@ -350,7 +350,7 @@ EndGlobal
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(LocalizableStrings.FileHeaderMissingError);
         }
 
@@ -372,7 +372,7 @@ EndGlobal
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(5, LocalizableStrings.GlobalSectionMoreThanOnceError));
         }
 
@@ -391,7 +391,7 @@ Global
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(3, LocalizableStrings.GlobalSectionNotClosedError));
         }
 
@@ -410,7 +410,7 @@ Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App\App.csproj"
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(3, LocalizableStrings.ProjectSectionNotClosedError));
         }
 
@@ -431,7 +431,7 @@ EndProject
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(3, LocalizableStrings.ProjectParsingErrorFormatString, "(", 0));
         }
 
@@ -453,7 +453,7 @@ EndGlobal
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(4, LocalizableStrings.InvalidSectionTypeError, "thisIsUnknown"));
         }
 
@@ -475,7 +475,7 @@ EndGlobal
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(4, LocalizableStrings.SectionIdMissingError));
         }
 
@@ -496,7 +496,7 @@ EndGlobal
                 SlnFile.Read(tmpFile);
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(6, LocalizableStrings.ClosingSectionTagNotFoundError));
         }
 
@@ -525,7 +525,7 @@ EndGlobal
                 }
             };
 
-            action.ShouldThrow<InvalidSolutionFormatException>()
+            action.Should().Throw<InvalidSolutionFormatException>()
                 .WithMessage(FormatError(7, LocalizableStrings.InvalidPropertySetFormatString, "."));
         }
 

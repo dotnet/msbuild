@@ -27,7 +27,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var targetFramework = "netcoreapp1.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorldVB")
+                .CopyTestAsset("HelloWorldVB", configuration)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tests
                 });
 
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new[] { "/v:d", $"/p:Configuration={configuration}" })
                 .Should().HaveStdOutContaining($"$(ImplicitConfigurationDefine)=\"{expected}\"");

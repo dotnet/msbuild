@@ -18,11 +18,9 @@ namespace Microsoft.DotNet.ShellShim
         private readonly IFilePermissionSetter _filePermissionSetter;
         private const ushort WindowsGUISubsystem = 0x2;
 
-        public AppHostShellShimMaker(string appHostSourceDirectory = null, IFilePermissionSetter filePermissionSetter = null)
+        public AppHostShellShimMaker(string appHostSourceDirectory, IFilePermissionSetter filePermissionSetter = null)
         {
-            _appHostSourceDirectory =
-                appHostSourceDirectory
-                ?? Path.Combine(AppContext.BaseDirectory, "AppHostTemplate");
+            _appHostSourceDirectory = appHostSourceDirectory;
 
             _filePermissionSetter =
                 filePermissionSetter
@@ -32,7 +30,7 @@ namespace Microsoft.DotNet.ShellShim
         public void CreateApphostShellShim(FilePath entryPoint, FilePath shimPath)
         {
             string appHostSourcePath;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 appHostSourcePath = Path.Combine(_appHostSourceDirectory, ApphostNameWithoutExtension + ".exe");
             }
@@ -53,17 +51,18 @@ namespace Microsoft.DotNet.ShellShim
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
                                          windowsGraphicalUserInterface: (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem),
-                                         assemblyToCopyResorcesFrom: entryPointFullPath);
+                                         assemblyToCopyResourcesFrom: entryPointFullPath);
             }
             else
             {
-                // by passing null to assemblyToCopyResorcesFrom, it will skip copying resources,
+                // by passing null to assemblyToCopyResourcesFrom, it will skip copying resources,
                 // which is only supported on Windows
                 HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
                                          windowsGraphicalUserInterface: false,
-                                         assemblyToCopyResorcesFrom: null);
+                                         assemblyToCopyResourcesFrom: null,
+                                         enableMacOSCodeSign: OperatingSystem.IsMacOS());
             }
 
             _filePermissionSetter.SetUserExecutionPermission(appHostDestinationFilePath);

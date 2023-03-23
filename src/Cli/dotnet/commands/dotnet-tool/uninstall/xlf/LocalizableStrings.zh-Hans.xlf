@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="translated">已成功卸载工具“{0}”（版本“{1}”）。</target>
+        <target state="translated">已成功卸载工具“{0}”(版本“{1}”).</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">

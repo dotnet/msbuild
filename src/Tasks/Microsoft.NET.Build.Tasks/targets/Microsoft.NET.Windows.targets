@@ -1,0 +1,87 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Windows.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--C++/CLI does not support nuget restore which is required for Windows SDK Ref. Also these are C# projections.-->
+  <PropertyGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true'
+                             and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                             and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))
+                             and '$(TargetPlatformIdentifier)' == 'Windows'
+                             and '$(TargetPlatformVersion)' != ''
+                             and $([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), '10.0'))
+                             and '$(Language)' != 'C++'
+                             and '$(IncludeWindowsSDKRefFrameworkReferences)' == ''">
+    <IncludeWindowsSDKRefFrameworkReferences>true</IncludeWindowsSDKRefFrameworkReferences>
+  </PropertyGroup>
+
+  <!-- If UseWindowsSDKPreview is true, then allow any target platform version, not just the ones defined by the SDK -->
+  <PropertyGroup Condition="'$(UseWindowsSDKPreview)' == 'true'">
+    <TargetPlatformVersionSupported>true</TargetPlatformVersionSupported>
+  </PropertyGroup>
+
+  <!-- Set 7.0 as the TargetPlatformVersion for windows. -->
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows' and '$(TargetPlatformVersion)' == ''" >
+    <TargetPlatformVersion>7.0</TargetPlatformVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'Windows'">
+    <!-- When targeting Windows, sync the SupportedOSPlatformVersion and TargetPlatformMinVersion.  If either one isn't set, set it to the
+         other value. -->
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformMinVersion)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
+
+    <!-- If neither were set, then use the TargetPlatformVersion value for both -->
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformVersion)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(TargetPlatformVersion)</TargetPlatformMinVersion>
+  </PropertyGroup>
+
+  <Target Name="_ErrorOnUnresolvedWindowsSDKAssemblyConflict"
+          AfterTargets="ResolveAssemblyReferences"
+          Condition=" '@(ResolveAssemblyReferenceUnresolvedAssemblyConflicts)' != '' ">
+    <ItemGroup>
+      <_WindowsSDKUnresolvedRef Include="@(ResolveAssemblyReferenceUnresolvedAssemblyConflicts)" Condition="'%(Identity)' == 'Microsoft.Windows.SDK.NET' " />
+    </ItemGroup>
+
+    <NETSdkError ResourceName="WindowsSDKVersionConflicts"
+                 Condition="@(_WindowsSDKUnresolvedRef) != ''"/>
+  </Target>
+
+  <Target Name="RemoveManagedWinRTComponentWinMDReferences"
+          AfterTargets="ResolveProjectReferences">
+    
+    <ItemGroup>
+      <!-- Before we remove them from _ResolvedProjectReferencePaths, grab the implementation .dll's path -->
+      <ManagedWinRTComponentImplementations 
+        Include="@(_ResolvedProjectReferencePaths->'%(ManagedImplementation)')" 
+        Condition="('%(_ResolvedProjectReferencePaths.Extension)' == '.winmd') And ('%(_ResolvedProjectReferencePaths.Implementation)' == 'WinRT.Host.dll')"
+      />
+    </ItemGroup>
+
+    <!-- Managed WinRT components include both the WinMD and the .NET DLL in the result from GetTargetPath.  Managed projects need to only reference the .NET DLL, not the WinMD.
+         The WinMD in this case can be identified because the Implementation metadata value is WinRT.Host.dll.  So here we remove any such WinMD references. -->
+    <ItemGroup>
+      <_ResolvedProjectReferencePaths Remove="@(_ResolvedProjectReferencePaths)"
+                                      Condition="('%(_ResolvedProjectReferencePaths.Extension)' == '.winmd') And ('%(_ResolvedProjectReferencePaths.Implementation)' == 'WinRT.Host.dll')"
+                                      />
+    </ItemGroup>
+    
+  </Target>
+
+  <Target Name="AddWinRTComponentImplementationReference" AfterTargets="ResolveProjectReferences" DependsOnTargets="RemoveManagedWinRTComponentWinMDReferences" Condition="'@(ManagedWinRTComponentImplementations)' != ''">
+    
+    <ItemGroup>
+      <Reference Include="@(ManagedWinRTComponentImplementations)"/>
+    </ItemGroup>
+
+  </Target>
+</Project>

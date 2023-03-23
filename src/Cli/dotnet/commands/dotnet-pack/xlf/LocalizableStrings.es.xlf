@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="translated">DIRECTORIO_DE_SALIDA</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>
-        <target state="translated">PROYECTO</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="translated">La configuración que se usará para compilar el paquete. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
+        <source>The configuration to use for building the package. The default is 'Release'.</source>
+        <target state="needs-review-translation">Configuración que se va a usar para compilar el paquete. El valor predeterminado es "Debug". Use la propiedad "PackRelease" para que "Release" sea el valor predeterminado para este comando.</target>
         <note />
       </trans-unit>
     </body>

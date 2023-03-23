@@ -1,0 +1,62 @@
+<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. -->
+<Project>
+  <PropertyGroup>
+    <!-- This is an approximation to identify a standalone inner build. -->
+    <RunApiCompatValidateAssembliesInInnerBuild Condition="'$(TargetFrameworks)' == ''">true</RunApiCompatValidateAssembliesInInnerBuild>
+  </PropertyGroup>
+
+  <!-- ApiCompat Validate Assemblies main entry point that only runs for single targeting projects. -->
+  <Target Name="ApiCompatValidateAssemblies"
+          AfterTargets="CoreCompile"
+          BeforeTargets="PrepareForRun"
+          Condition="'$(ApiCompatValidateAssemblies)' == 'true' and '$(RunApiCompatValidateAssembliesInInnerBuild)' == 'true'"
+          DependsOnTargets="PrepareInputsForApiCompatValidateAssemblies;ApiCompatValidateAssembliesCore" />
+
+  <Target Name="PrepareInputsForApiCompatValidateAssemblies"
+          DependsOnTargets="CoreCompile;GetApiCompatContractAssembly;GetReferencesForApiCompatValidateAssemblies">
+    <ItemGroup>
+      <ApiCompatLeftAssemblies Include="$(ApiCompatContractAssembly)" />
+      <ApiCompatRightAssemblies Include="@(IntermediateAssembly)" />
+
+      <ApiCompatLeftAssembliesReferences Include="@(ApiCompatContractAssemblyReferences, ',')" />
+      <ApiCompatRightAssembliesReferences Include="@(ApiCompatAssemblyReferences, ',')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Lazily retrieve api compat's contract assembly. If a ApiCompatContractItemName property is supplied,
+       it likely links to an item that isn't available before project references are resolved. -->
+  <Target Name="GetApiCompatContractAssembly"
+          Condition="'$(ApiCompatContractAssembly)' == ''"
+          DependsOnTargets="ResolveProjectReferences">
+    <PropertyGroup>
+      <ApiCompatContractAssembly Condition="'$(ApiCompatContractAssembly)' == '' and '$(ApiCompatContractItemName)' != ''">@($(ApiCompatContractItemName))</ApiCompatContractAssembly>
+    </PropertyGroup>
+
+    <Error Text="ApiCompatContractAssembly property must be provided to run assembly validation."
+           Condition="'$(ApiCompatContractAssembly)' == ''" />
+  </Target>
+
+  <!-- Retrieve the implementation and contract references. -->
+  <Target Name="GetReferencesForApiCompatValidateAssemblies"
+          DependsOnTargets="FindReferenceAssembliesForReferences">
+    <ItemGroup>
+      <ApiCompatAssemblyReferences Include="@(ReferencePathWithRefAssemblies)" />
+      <!-- Use the implementation's references if contract references aren't supplied. -->
+      <ApiCompatContractAssemblyReferences Include="@(ApiCompatAssemblyReferences)"
+                                           Condition="'$(ApiCompatUseImplementationReferencesForContract)' != 'false'" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Annotate the TargetPath item to make the ApiCompatContractAssembly property accessible in the the cross-targeting build. -->
+  <Target Name="ApiCompatAnnotateTargetPathWithTargetPlatformMoniker"
+          Condition="'$(ApiCompatValidateAssemblies)' == 'true'"
+          DependsOnTargets="GetApiCompatContractAssembly;GetReferencesForApiCompatValidateAssemblies"
+          AfterTargets="GetTargetPathWithTargetPlatformMoniker">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker ApiCompatContractAssembly="$(ApiCompatContractAssembly)"
+                                           ApiCompatAssemblyReferences="@(ApiCompatAssemblyReferences, ',')"
+                                           ApiCompatContractAssemblyReferences="@(ApiCompatContractAssemblyReferences, ',')"
+                                           ApiCompatValidateAssemblies="$(ApiCompatValidateAssemblies)" />
+    </ItemGroup>
+  </Target>
+</Project>

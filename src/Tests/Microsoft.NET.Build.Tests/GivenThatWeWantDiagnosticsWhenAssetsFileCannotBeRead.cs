@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_reports_inaccessible_file()
         {
             var testAsset = _testAssetsManager.CopyTestAsset("HelloWorld").WithSource().Restore(Log);
-            var build = new BuildCommand(Log, testAsset.TestRoot);
+            var build = new BuildCommand(testAsset);
             var assetsFile = Path.Combine(build.GetBaseIntermediateDirectory().FullName, "project.assets.json");
 
             using (var exclusive = File.Open(assetsFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_reports_missing_file()
         {
             var testAsset = _testAssetsManager.CopyTestAsset("HelloWorld").WithSource();
-            var build = new BuildCommand(Log, testAsset.TestRoot);
+            var build = new BuildCommand(testAsset);
             var assetsFile = Path.Combine(build.GetBaseIntermediateDirectory().FullName, "project.assets.json");
 
             build.ExecuteWithoutRestore().Should().Fail().And.HaveStdOutContaining(assetsFile);
@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_reports_corrupt_file()
         {
             var testAsset = _testAssetsManager.CopyTestAsset("HelloWorld").WithSource().Restore(Log);
-            var build = new BuildCommand(Log, testAsset.TestRoot);
+            var build = new BuildCommand(testAsset);
             var assetsFile = Path.Combine(build.GetBaseIntermediateDirectory().FullName, "project.assets.json");
 
             File.WriteAllText(assetsFile, "{ corrupt_file: ");

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
+    <body>
+      <trans-unit id="GlobalJsonResolutionFailed">
+        <source>Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">Nepovedlo se najít sadu .NET SDK uvedenou v souboru global.json. Zkontrolujte prosím, že je nainstalovaná zadaná verze.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">Nepovedlo se najít verzi sady .NET SDK {0} podle souboru global.json. Zkontrolujte prosím, jestli je zadaná verze nainstalovaná.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSDKDirectoryNotFound">
+        <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="translated">{0} nejde najít. Zajistěte, aby byla nainstalovaná dostatečně vysoká verze sady .NET SDK, nebo zvyšte verzi zadanou v souboru global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSmallerThanMinimumVersion">
+        <source>Version {0} of the .NET SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="translated">Verze {0} sady .NET SDK vyžaduje alespoň verzi {1} nástroje MSBuild. Aktuální dostupná verze nástroje MSBuild je {2}. Změňte verzi sady .NET SDK zadanou v souboru global.json na starší verzi, která vyžaduje aktuálně dostupnou verzi nástroje MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="translated">Verze {0} sady .NET SDK je nižší než minimální požadovaná verze {1}. Zajistěte, aby byla nainstalovaná dostatečně vysoká verze sady .NET SDK, zvyšte minimální verzi zadanou v projektu nebo zvyšte verzi zadanou v souboru global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET SDK is installed or increase the version specified in global.json.</source>
+        <target state="translated">Verze {0} sady .NET SDK je nižší než minimální verze {1}, kterou vyžaduje Visual Studio. Zajistěte, aby byla nainstalovaná dostatečně vysoká verze sady .NET SDK, nebo zvyšte verzi zadanou v souboru global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateNETCoreSdk">
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">Nepovedlo se najít sadu .NET SDK. Zkontrolujte, jestli je nainstalovaná, jestli je vaše cesta nakonfigurovaná pro správnou architekturu a jestli verze zadaná v souboru global.json (pokud existuje) odpovídá nainstalované verzi.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

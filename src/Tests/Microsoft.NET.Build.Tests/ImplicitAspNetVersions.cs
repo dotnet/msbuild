@@ -32,7 +32,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetImplicitVersion",
                 TargetFrameworks = "netcoreapp2.1",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -41,7 +40,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -63,7 +62,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetImplicitVersion",
                 TargetFrameworks = "netcoreapp2.1",
-                IsSdkProject = true,
                 IsExe = true,
                 
             };
@@ -75,7 +73,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -97,7 +95,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetExplicitVersion",
                 TargetFrameworks = "netcoreapp2.1",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -107,7 +104,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -121,37 +118,6 @@ namespace Microsoft.NET.Build.Tests
             aspnetVersion.ToString().Should().Be(explicitVersion);
         }
 
-        [Theory]
-        [InlineData("netcoreapp2.0", "Microsoft.AspNetCore.All", "2.0.9")]
-        [InlineData("netcoreapp1.1", "Microsoft.AspNetCore", "1.1.7")]
-        public void ExplicitVersionsDontWarnForOlderVersions(string targetFramework, string packageName, string packageVersion)
-        {
-            var testProject = new TestProject()
-            {
-                Name = "AspNetPreviousVersion",
-                TargetFrameworks = targetFramework,
-                IsSdkProject = true,
-                IsExe = true
-            };
-
-            testProject.PackageReferences.Add(new TestPackageReference(packageName, packageVersion));
-
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
-
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-
-            buildCommand
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .NotHaveStdOutContaining("warning");
-
-            var aspnetVersion = GetLibraryVersion(testProject, buildCommand, packageName);
-
-            aspnetVersion.ToString().Should().Be(packageVersion);
-        }
-
         [Fact]
         public void MultipleWarningsAreGeneratedForMultipleExplicitReferences()
         {
@@ -159,7 +125,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "MultipleExplicitReferences",
                 TargetFrameworks = "netcoreapp2.1",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -168,16 +133,16 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand
                 .Execute()
                 .Should()
                 .Pass()
                 .And
                 .NotHaveStdOutContaining("NETSDK1071");
-                
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -199,7 +164,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetCoreAll_On3_0",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 ProjectSdk = useWebSdk ? "Microsoft.NET.Sdk.Web" : null,
                 IsExe = true
             };
@@ -209,14 +173,14 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{useWebSdk}_{packageVersion}");
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand.Execute()
                 .Should()
                 .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1079");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()
@@ -235,7 +199,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetCoreApp_On3_0",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 ProjectSdk = useWebSdk ? "Microsoft.NET.Sdk.Web" : null,
                 IsExe = true
             };
@@ -245,14 +208,14 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{useWebSdk}_{packageVersion}");
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand.Execute()
                 .Should()
                 .Pass()
                 .And
                 .HaveStdOutContaining("NETSDK1080");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()

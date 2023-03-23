@@ -1,1306 +1,656 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using FluentAssertions;
 using Microsoft.Build.Framework;
+using Microsoft.NET.TestFramework;
 using Xunit;
+using Xunit.Abstractions;
+using static Microsoft.NET.Build.Tasks.ResolvePackageAssets;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {
-    public class GivenThatWeWantToGetDependenciesViaDesignTimeBuild
+    public class GivenThatWeWantToGetDependenciesViaDesignTimeBuild : SdkTest
     {
-        [Fact]
-        public void ItShouldReturnOnlyValidTargetsWithoutRIDs()
+        public GivenThatWeWantToGetDependenciesViaDesignTimeBuild(ITestOutputHelper log) : base(log)
         {
-            // Arrange 
-            // target definitions 
-            var mockTargetWithType = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net45" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.5" },
-                    { MetadataKeys.Type, "target" } // lower case just in case
-                });
-
-            var mockTargetWithRidToBeSkipped = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5/win7x86",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "" },
-                    { MetadataKeys.TargetFrameworkMoniker, "" },
-                    { MetadataKeys.FrameworkName, "" },
-                    { MetadataKeys.FrameworkVersion, "" },
-                    { MetadataKeys.Type, ""}
-                });
-
-            var mockTargetWithoutType = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.6",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net46" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.6" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.6" },
-                });
-
-            var mockTargetWithEmptyItemSpecToBeSkipped = new MockTaskItem(
-                itemSpec: "",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "" },
-                    { MetadataKeys.TargetFrameworkMoniker, "" },
-                    { MetadataKeys.FrameworkName, "" },
-                    { MetadataKeys.FrameworkVersion, "" }
-                });
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] {
-                mockTargetWithType,
-                mockTargetWithRidToBeSkipped,
-                mockTargetWithoutType,
-                mockTargetWithEmptyItemSpecToBeSkipped
-            };
-            task.PackageDefinitions = new ITaskItem[] { };
-            task.FileDefinitions = new ITaskItem[] { };
-            task.PackageDependencies = new ITaskItem[] { };
-            task.FileDependencies = new ITaskItem[] { };
-            task.References = new ITaskItem[] { };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = string.Empty;
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(1);
-
-            var resultTargetsWithType = task.DependenciesDesignTime
-                                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            resultTargetsWithType.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Target, mockTargetWithType, resultTargetsWithType[0]);
-        }
-
-        [Fact]
-        public void ItShouldNotReturnPackagesWithUnknownTypes()
-        {
-            // Arrange 
-            // target definitions 
-            var mockTarget = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net45" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.5" },
-                    { MetadataKeys.Type, "Target" }
-                });
-
-            // package definitions
-            var mockPackageNoType = new MockTaskItem(
-                itemSpec: "mockPackageNoType/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageNoType" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some path" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            var mockPackageUnknown = new MockTaskItem(
-                itemSpec: "mockPackageUnknown/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageUnknown" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "qqqq" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            // package dependencies
-            var mockPackageDepNoType = new MockTaskItem(
-                itemSpec: "mockPackageNoType/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageDepUnknown = new MockTaskItem(
-                itemSpec: "mockPackageUnknown/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { mockTarget };
-            task.PackageDefinitions = new ITaskItem[] { mockPackageNoType, mockPackageUnknown };
-            task.FileDefinitions = new ITaskItem[] { };
-            task.PackageDependencies = new ITaskItem[] { mockPackageDepNoType, mockPackageDepUnknown };
-            task.FileDependencies = new ITaskItem[] { };
-            task.References = new ITaskItem[] { };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = string.Empty;
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(1);
-
-            var resultTargets = task.DependenciesDesignTime
-                                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            resultTargets.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
-        }
-
-        [Fact]
-        public void ItShouldReturnUnresolvedPackageDependenciesWithTypePackage()
-        {
-            // Arrange 
-            // target definitions 
-            var mockTarget = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net45" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.5" },
-                    { MetadataKeys.Type, "Target" }
-                });
-
-            // package definitions
-            var mockPackageUnresolved = new MockTaskItem(
-                itemSpec: "mockPackageUnresolved/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageUnresolved" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "" },
-                    { MetadataKeys.Type, "Unresolved" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            // package dependencies
-            var mockPackageDepUnresolved = new MockTaskItem(
-                itemSpec: "mockPackageUnresolved/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { mockTarget };
-            task.PackageDefinitions = new ITaskItem[] { mockPackageUnresolved };
-            task.FileDefinitions = new ITaskItem[] { };
-            task.PackageDependencies = new ITaskItem[] { mockPackageDepUnresolved };
-            task.FileDependencies = new ITaskItem[] { };
-            task.References = new ITaskItem[] { };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = string.Empty;
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(2);
-
-            var resultTargets = task.DependenciesDesignTime
-                                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            resultTargets.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
-
-            var resultPackageUnresolved = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/mockPackageUnresolved/1.0.0")).ToArray();
-            resultPackageUnresolved.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Package, mockPackageUnresolved, resultPackageUnresolved[0]);
         }
 
         [Fact]
         public void ItShouldIgnoreAllDependenciesWithTypeNotEqualToPackageOrUnresolved()
         {
-            // Arrange 
-            // target definitions 
-            var mockTarget = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net45" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.5" },
-                    { MetadataKeys.Type, "Target" }
-                });
+            var testRoot = _testAssetsManager.CreateTestDirectory().Path;
+            Log.WriteLine("Test root: " + testRoot);
 
-            // package definitions
-            var mockPackageExternalProject = new MockTaskItem(
-                itemSpec: "mockPackageExternalProject/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageExternalProject" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some path" },
-                    { MetadataKeys.Type, "ExternalProject" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
+            string projectAssetsJsonPath = Path.Combine(testRoot, "project.assets.json");
+            string projectCacheAssetsJsonPath = Path.Combine(testRoot, "projectassets.cache");
+            // project.assets.json
+            var assetsContent = CreateBasicProjectAssetsFile(testRoot, package2Type: "unresolved", package3Type: "unknown");
 
-            var mockPackageProject = new MockTaskItem(
-                itemSpec: "mockPackageProject/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageProject" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Project" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
+            File.WriteAllText(projectAssetsJsonPath, assetsContent);
+            var task = InitializeTask(testRoot, out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.ProjectAssetsCacheFile = projectCacheAssetsJsonPath;
+            task.TargetFramework = "net6.0";
 
-            var mockPackageContent = new MockTaskItem(
-                itemSpec: "mockPackageContent/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageContent" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Content" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
+            task.Execute();
 
-            var mockPackageAssembly = new MockTaskItem(
-                itemSpec: "mockPackageAssembly/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageAssembly" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Assembly" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
+            Assert.Equal(2, task.PackageDependenciesDesignTime.Count());
 
-            var mockPackageFrameworkAssembly = new MockTaskItem(
-                itemSpec: "mockPackageFrameworkAssembly/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageFrameworkAssembly" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "FrameworkAssembly" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
+            // Verify only 
+            // top.package1 is type 'package'
+            // top.package2 is type 'unresolved'
+            // 
+            // top.package3 is type 'unknown'. Should not appear in the list
+            var item1 = task.PackageDependenciesDesignTime[0];
+            Assert.Equal("top.package1/1.0.0", item1.ItemSpec);
 
-            var mockPackageDiagnostic = new MockTaskItem(
-                itemSpec: "mockPackageDiagnostic/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageDiagnostic" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Diagnostic" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            var mockPackageWinmd = new MockTaskItem(
-                itemSpec: "mockPackageWinmd/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageWinmd" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Winmd" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            var mockPackageReference = new MockTaskItem(
-                itemSpec: "mockPackageReference/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockPackageReference" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Reference" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            // package dependencies
-            var mockPackageExternalProjectDep = new MockTaskItem(
-                itemSpec: "mockPackageExternalProject/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageProjectDep = new MockTaskItem(
-                itemSpec: "mockPackageProject/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageContentDep = new MockTaskItem(
-                itemSpec: "mockPackageContent/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageAssemblyDep = new MockTaskItem(
-                itemSpec: "mockPackageAssembly/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageFrameworkAssemblyDep = new MockTaskItem(
-                itemSpec: "mockPackageFrameworkAssembly/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageDiagnosticDep = new MockTaskItem(
-                itemSpec: "mockPackageDiagnostic/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageWinmdDep = new MockTaskItem(
-                itemSpec: "mockPackageWinmd/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageReferenceDep = new MockTaskItem(
-                itemSpec: "mockPackageReference/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { mockTarget };
-            task.PackageDefinitions = new ITaskItem[] {
-                mockPackageExternalProject,
-                mockPackageProject,
-                mockPackageContent,
-                mockPackageAssembly,
-                mockPackageFrameworkAssembly,
-                mockPackageWinmd,
-                mockPackageReference
-            };
-            task.FileDefinitions = new ITaskItem[] { };
-            task.PackageDependencies = new ITaskItem[] {
-                mockPackageExternalProjectDep,
-                mockPackageProjectDep,
-                mockPackageContentDep,
-                mockPackageAssemblyDep,
-                mockPackageFrameworkAssemblyDep,
-                mockPackageWinmdDep,
-                mockPackageReferenceDep
-            };
-            task.FileDependencies = new ITaskItem[] { };
-            task.References = new ITaskItem[] { };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = string.Empty;
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(1);
-
-            // Target with type
-            var resultTargets = task.DependenciesDesignTime
-                                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            resultTargets.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
+            var item2 = task.PackageDependenciesDesignTime[1];
+            Assert.Equal("top.package2/1.0.0", item2.ItemSpec);
         }
 
         [Fact]
-        public void ItReturnsCorrectHierarchyOfDependenciesThatHaveChildren()
+        public void ItShouldIdentifyDefaultImplicitPackages()
         {
-            // Arrange 
-            // target definitions 
-            var mockTarget = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net45" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.5" },
-                    { MetadataKeys.Type, "Target" }
-                });
+            var testRoot = _testAssetsManager.CreateTestDirectory().Path;
+            Log.WriteLine("Test root: " + testRoot);
 
-            // package definitions
-            var mockPackage = new MockTaskItem(
-                itemSpec: "Package3/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "Package3" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { PreprocessPackageDependenciesDesignTime.DependenciesMetadata, "ChildPackage1/1.0.0;ChildPackage2/2.0.0" },
-                    { MetadataKeys.IsTopLevelDependency, "True" }
-                });
+            string projectAssetsJsonPath = Path.Combine(testRoot, "project.assets.json");
+            string projectCacheAssetsJsonPath = Path.Combine(testRoot, "projectassets.cache");
+            // project.assets.json
+            File.WriteAllText(projectAssetsJsonPath, CreateBasicProjectAssetsFile(testRoot));
+            var task = InitializeTask(testRoot, out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.ProjectAssetsCacheFile = projectCacheAssetsJsonPath;
+            task.TargetFramework = "net6.0";
+            // Set implicit packages
+            task.DefaultImplicitPackages = "top.package2;top.package3";
 
-            var mockChildPackage1 = new MockTaskItem(
-                itemSpec: "ChildPackage1/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "ChildPackage1" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { PreprocessPackageDependenciesDesignTime.DependenciesMetadata, "ChildPackage11/1.0.0" },
-                    { MetadataKeys.IsTopLevelDependency, "False" }
-                });
+            task.Execute();
 
-            var mockChildPackage11 = new MockTaskItem(
-                itemSpec: "ChildPackage11/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "ChildPackage11" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { MetadataKeys.IsTopLevelDependency, "False" }
-                });
+            Assert.Equal(3, task.PackageDependenciesDesignTime.Count());
 
-            var mockChildPackage2 = new MockTaskItem(
-                itemSpec: "ChildPackage2/2.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "ChildPackage2" },
-                    { MetadataKeys.Version, "2.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { MetadataKeys.IsTopLevelDependency, "False" }
-                });
+            // Verify implicit packages
+            var item1 = task.PackageDependenciesDesignTime[0];
+            Assert.Equal("top.package1/1.0.0", item1.ItemSpec);
+            Assert.Equal("False", item1.GetMetadata(MetadataKeys.IsImplicitlyDefined));
 
-            // package dependencies
-            var mockPackageDep = new MockTaskItem(
-                            itemSpec: "Package3/1.0.0",
-                            metadata: new Dictionary<string, string>
-                            {
-                                { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                            });
+            var item2 = task.PackageDependenciesDesignTime[1];
+            Assert.Equal("top.package2/1.0.0", item2.ItemSpec);
+            Assert.Equal("True", item2.GetMetadata(MetadataKeys.IsImplicitlyDefined));
 
-            var mockChildPackageDep1 = new MockTaskItem(
-                itemSpec: "ChildPackage1/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.ParentPackage, "Package3/1.0.0" }
-                });
-
-            var mockChildPackageDep11 = new MockTaskItem(
-                itemSpec: "ChildPackage11/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.ParentPackage, "ChildPackage1/1.0.0" }
-                });
-
-            var mockChildPackageDep2 = new MockTaskItem(
-                itemSpec: "ChildPackage2/2.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.ParentPackage, "Package3/1.0.0" }
-                });
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { mockTarget };
-            task.PackageDefinitions = new ITaskItem[] {
-                mockPackage,
-                mockChildPackage1,
-                mockChildPackage11,
-                mockChildPackage2
-            };
-            task.FileDefinitions = new ITaskItem[] { };
-            task.PackageDependencies = new ITaskItem[] {
-                mockPackageDep,
-                mockChildPackageDep1,
-                mockChildPackageDep11,
-                mockChildPackageDep2
-            };
-            task.FileDependencies = new ITaskItem[] { };
-            task.References = new ITaskItem[] { };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = string.Empty;
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(5);
-
-            var resultTargets = task.DependenciesDesignTime
-                                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            resultTargets.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
-
-            mockPackage.SetMetadata(MetadataKeys.Path, mockPackage.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultPackage = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/Package3/1.0.0")).ToArray();
-            resultPackage.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Package, mockPackage, resultPackage[0]);
-
-            mockChildPackage1.SetMetadata(MetadataKeys.Path, mockChildPackage1.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultChildPackage1 = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/ChildPackage1/1.0.0")).ToArray();
-            resultChildPackage1.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Package, mockChildPackage1, resultChildPackage1[0]);
-
-            mockChildPackage11.SetMetadata(MetadataKeys.Path, mockChildPackage11.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultChildPackage11 = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/ChildPackage11/1.0.0")).ToArray();
-            resultChildPackage11.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Package, mockChildPackage11, resultChildPackage11[0]);
-
-            mockChildPackage2.SetMetadata(MetadataKeys.Path, mockChildPackage2.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultChildPackage2 = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/ChildPackage2/2.0.0")).ToArray();
-            resultChildPackage2.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Package, mockChildPackage2, resultChildPackage2[0]);
+            var item3 = task.PackageDependenciesDesignTime[2];
+            Assert.Equal("top.package3/1.0.0", item3.ItemSpec);
+            Assert.Equal("True", item3.GetMetadata(MetadataKeys.IsImplicitlyDefined));
         }
 
         [Fact]
-        public void ItShouldIgnoreFileDependenciesThatAre_NotAssemblies_And_DontBelongToCompileTimeAssemblyGroup()
+        public void ItShouldOnlyReturnPackagesInTheSpecifiedTarget()
         {
-            // Arrange 
-            // target definitions 
-            var mockTarget = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net45" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.5" },
-                    { MetadataKeys.Type, "Target" }
-                });
+            var testRoot = _testAssetsManager.CreateTestDirectory().Path;
+            Log.WriteLine("Test root: " + testRoot);
 
-            // package definitions
-            var mockExternalProject = new MockTaskItem(
-                itemSpec: "mockExternalProject/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockExternalProject" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some path" },
-                    { MetadataKeys.Type, "ExternalProject" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
+            string projectAssetsJsonPath = Path.Combine(testRoot, "project.assets.json");
+            string projectCacheAssetsJsonPath = Path.Combine(testRoot, "projectassets.cache");
+            // project.assets.json
+            var assetsContent =
+"""
+{
+  "version" : 3,
+  "targets" : {
+    "net6.0" :{
+      "top.package1/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "dependent.package1": "1.0.0",
+          "dependent.package2": "1.0.0",
+        },
+        "compile": {
+          "lib/netstandard2.1/top.package1.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/top.package1.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "dependent.package1/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "dependent.package3": "1.0.0"
+        },
+        "compile": {
+          "lib/netcoreapp3.1/_._": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/dependent.package1.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "dependent.package2/1.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/dependent.package2.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/dependent.package2.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "dependent.package3/1.0.0": {
+          "type": "package",
+          "compile": {
+          "lib/netstandard2.1/dependent.package3.dll": {
+              "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/dependent.package3.dll": {
+              "related": ".xml"
+          }
+        }
+      }
+    },
+    "net7.0" : {
+      "top.package2/1.0.0" : {
+        "type" : "package",
+        "compile" : {
+            "lib/netstandard2.0/top.package2.dll" : {
+                "related" : ".pdb;.xml"
+            }
+        },
+        "runtime" : {
+            "lib/netstandard2.0/top.package2.dll" : {
+                "related": ".pdb;.xml"
+            }
+        }
+      },
+      "top.package3/1.0.0" : {
+          "type" : "package",
+          "dependencies": {
+              "dependent.package1" : "1.0.1"
+          },
+          "compile" : {
+              "lib/netstandard2.0/top.package3.dll" : {
+                  "related" : ".pdb;.xml"
+              }
+          },
+          "runtime" : {
+              "lib/netstandard2.0/top.package3.dll" : {
+                  "related" : ".pdb;.xml"
+               }
+          }
+      },
+      "dependent.package1/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "dependent.package3": "1.0.0"
+        },
+        "compile": {
+          "lib/netcoreapp3.1/_._": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/dependent.package1.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "dependent.package3/1.0.0": {
+          "type": "package",
+          "compile": {
+          "lib/netstandard2.1/dependent.package3.dll": {
+              "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/dependent.package3.dll": {
+              "related": ".xml"
+          }
+        }
+      }
+    }
+  },
+  "libraries" : {
+    "dependent.package1/1.0.0" : {
+        "sha512" : "xyz",
+        "type" : "package",
+        "path" : "dependent.package1/1.0.0",
+        "files" : [
+          "lib/net461/dependent.package1.dll",
+          "lib/net461/dependent.package1.xml"
+        ]
+    },
+    "dependent.package2/1.0.0" : {
+        "sha512" : "xyz",
+        "type" : "package",
+        "path" : "dependent.package2/1.0.0",
+        "files" : [
+          ".nupkg.metadata"
+        ]
+    },
+    "dependent.package3/1.0.0" : {
+        "sha512" : "xyz",
+        "type" : "package",
+        "path" : "dependent.package3/1.0.0",
+        "files" : [
+          "lib/net472/dependent.package3.dll",
+          "lib/net472/dependent.package3.xml"
+        ]
+    },
+    "top.package1/1.0.0" : {
+        "sha512" : "xyz",
+        "type" : "package",
+        "path" : "top.package1/1.0.0",
+        "files" : [
+            "lib/net20/top.package1.dll",
+            "lib/net20/top.package1.pdb",
+            "lib/net20/top.package1.xml"
+        ]
+    },
+    "top.package2/1.0.0" : {
+        "sha512" : "abc",
+        "type" : "package",
+        "path" : "top.package2/1.0.0",
+        "files" : [
+            "lib/net45/top.package2.dll",
+            "lib/net45/top.package2.pdb",
+            "lib/net45/top.package2.xml"
+        ]
+    },
+    "top.package3/1.0.0" : {
+        "sha512" : "abc",
+        "type" : "package",
+        "path" : "top.package3/1.0.0",
+        "files" : [
+           ".nupkg.metadata",
+        ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net6.0": [
+      "top.package1 >= 1.0.0"
+    ],
+    "net7.0": [
+      "top.package2 >= 1.0.0",
+      "top.package3 >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\.nuget\\packages\\" : {}
+  },
+  "project" : {
+      "version" : "1.0.0",
+      "restore": {
+          "projectUniqueName": "C:\\projDir1\\projDir2\\proj.csproj",
+          "projectName": "proj",
+          "projectPath": "C:\\projDir1\\projDir2\\proj.csproj",
+          "packagesPath": "C:\\.nuget\\packages\\",
+          "outputPath": "C:\\projDir1\\projDir2\\obj\\",
+          "projectStyle": "PackageReference",
+          "fallbackFolders": [
+            "C:\\fallbackDir\\NuGetPackages"
+          ],
+          "configFilePaths": [
+            "C:\\configDir\\NuGet.Config",
+            "C:\\configDir2\\Microsoft.VisualStudio.FallbackLocation.config",
+            "C:\\configDir3\\Microsoft.VisualStudio.Offline.config"
+          ],
+          "originalTargetFrameworks": [
+            "net6.0"
+          ],
+          "frameworks": {
+            "net6.0": {
+              "targetAlias": "net6.0",
+              "projectReferences": {}
+            }
+          },
+          "warningProperties": {
+            "warnAsError": [
+              "NU1605"
+            ]
+      }
+    },
+      "frameworks" : {
+          "net6.0": {
+              "targetAlias" : "net6.0",
+              "dependencies" : {
+                  "top.package1" : {
+                      "target" : "Package",
+                      "version" : "[1.0.0, )"
+                   }
+              }
+          }
+      }
+  }
+}
+""";
+            assetsContent = assetsContent.Replace(@"C:\\.nuget", $@"{testRoot.Replace("\\", "\\\\")}\\.nuget"); ;
 
-            var mockProject = new MockTaskItem(
-                itemSpec: "mockProject/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockProject" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Project" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
+            File.WriteAllText(projectAssetsJsonPath, assetsContent);
+            var task = InitializeTask(testRoot, out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.ProjectAssetsCacheFile = projectCacheAssetsJsonPath;
+            // Set target to verify
+            task.TargetFramework = "net6.0";
+            task.Execute();
 
-            var mockContent = new MockTaskItem(
-                itemSpec: "mockContent/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockContent" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Content" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
+            Assert.Single(task.PackageDependenciesDesignTime);
 
-            var mockPackage = new MockTaskItem(
-                itemSpec: "mockPackage/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockAssembly" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Assembly" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            var mockDiagnostic = new MockTaskItem(
-                itemSpec: "mockDiagnostic/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockDiagnostic" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Diagnostic" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            var mockWinmd = new MockTaskItem(
-                itemSpec: "mockWinmd/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockWinmd" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Winmd" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            var mockReference = new MockTaskItem(
-                itemSpec: "mockReference/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockReference" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Reference" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "False" }
-                });
-
-            // package dependencies
-            var mockExternalProjectDep = new MockTaskItem(
-                itemSpec: "mockExternalProject/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockProjectDep = new MockTaskItem(
-                itemSpec: "mockProject/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockContentDep = new MockTaskItem(
-                itemSpec: "mockContent/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageDep = new MockTaskItem(
-                itemSpec: "mockPackage/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockDiagnosticDep = new MockTaskItem(
-                itemSpec: "mockDiagnostic/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockWinmdDep = new MockTaskItem(
-                itemSpec: "mockWinmd/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockReferenceDep = new MockTaskItem(
-                itemSpec: "mockReference/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { mockTarget };
-            task.PackageDefinitions = new ITaskItem[] { };
-            task.FileDefinitions = new ITaskItem[] {
-                mockExternalProject,
-                mockProject,
-                mockContent,
-                mockPackage,
-                mockWinmd,
-                mockReference
-            };
-            task.PackageDependencies = new ITaskItem[] { };
-            task.FileDependencies = new ITaskItem[] {
-                mockExternalProjectDep,
-                mockProjectDep,
-                mockContentDep,
-                mockPackageDep,
-                mockWinmdDep,
-                mockReferenceDep
-            };
-            task.References = new ITaskItem[] { };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = string.Empty;
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(1);
-
-            // Target with type
-            var resultTargets = task.DependenciesDesignTime
-                                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            resultTargets.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
+            // Verify top packages in target
+            var item1 = task.PackageDependenciesDesignTime[0];
+            Assert.Equal("top.package1/1.0.0", item1.ItemSpec);
         }
 
         [Fact]
-        public void ItShouldReturnCorrectHierarchyWhenPackageHasChildAssemblyOrAnalyzerDependencies()
+        public void ItShouldOnlyReturnTopLevelPackages()
         {
-            // Arrange 
-            // target definitions 
-            var mockTarget = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net45" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.5" },
-                    { MetadataKeys.Type, "Target" }
-                });
+            var testRoot = _testAssetsManager.CreateTestDirectory().Path;
+            Log.WriteLine("Test root: " + testRoot);
 
-            // package definitions
-            var mockPackage = new MockTaskItem(
-                itemSpec: "Package3/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "Package3" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { PreprocessPackageDependenciesDesignTime.DependenciesMetadata,
-                      @"mockChildAssembly1;somepath/mockChildAssembly2;somepath/mockChildAnalyzerAssembly" },
-                    { MetadataKeys.IsImplicitlyDefined, "True" }
-                });
+            string projectAssetsJsonPath = Path.Combine(testRoot, "project.assets.json");
+            string projectCacheAssetsJsonPath = Path.Combine(testRoot, "projectassets.cache");
+            // project.assets.json
+            File.WriteAllText(projectAssetsJsonPath, CreateBasicProjectAssetsFile(testRoot));
+            var task = InitializeTask(testRoot, out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.ProjectAssetsCacheFile = projectCacheAssetsJsonPath;
+            task.TargetFramework = "net6.0";
+            task.Execute();
 
-            var mockPackage4 = new MockTaskItem(
-                itemSpec: "Package4/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "Package4" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { MetadataKeys.IsImplicitlyDefined, "True" }
-                });
+            // Verify all top packages are listed here
+            Assert.Equal(3, task.PackageDependenciesDesignTime.Count());
 
-            var mockChildAssembly1 = new MockTaskItem(
-                itemSpec: @"mockChildAssembly1",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockChildAssembly1" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Assembly" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
-                });
+            var item1 = task.PackageDependenciesDesignTime[0];
+            Assert.Equal("top.package1/1.0.0", item1.ItemSpec);
 
-            var mockChildAssembly2 = new MockTaskItem(
-                itemSpec: @"somepath/mockChildAssembly2",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockChildAssembly2" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "FrameworkAssembly" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
-                });
+            var item2 = task.PackageDependenciesDesignTime[1];
+            Assert.Equal("top.package2/1.0.0", item2.ItemSpec);
 
-            var mockChildAssemblyNoCompileMetadata = new MockTaskItem(
-                itemSpec: @"somepath/mockChildAssemblyNoCompileMetadata",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockChildAssemblyNoCompileMetadata" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Assembly" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
-                });
-
-            var mockChildAnalyzerAssembly = new MockTaskItem(
-                itemSpec: @"somepath/mockChildAnalyzerAssembly",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "mockChildAnalyzerAssembly" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "AnalyzerAssembly" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
-                });
-
-            // package dependencies
-            var mockPackageDep = new MockTaskItem(
-                itemSpec: "Package3/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockPackageDep4 = new MockTaskItem(
-                itemSpec: "Package4/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockChildAssemblyDep1 = new MockTaskItem(
-                itemSpec: "mockChildAssembly1",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.ParentPackage, "Package3/1.0.0" },
-                    { MetadataKeys.FileGroup, PreprocessPackageDependenciesDesignTime.CompileTimeAssemblyMetadata }
-                });
-
-            var mockChildAssemblyDep2 = new MockTaskItem(
-                itemSpec: @"somepath/mockChildAssembly2",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.ParentPackage, "Package3/1.0.0" },
-                    { MetadataKeys.FileGroup, PreprocessPackageDependenciesDesignTime.CompileTimeAssemblyMetadata }
-                });
-
-            var mockChildAssemblyNoCompileMetadataDep = new MockTaskItem(
-                itemSpec: "somepath/mockChildAssemblyNoCompileMetadata",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.ParentPackage, "Package3/1.0.0" }
-                });
-
-            var mockChildAnalyzerAssemblyDep = new MockTaskItem(
-                itemSpec: "somepath/mockChildAnalyzerAssembly",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.ParentPackage, "Package3/1.0.0" }
-                });
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { mockTarget };
-            task.PackageDefinitions = new ITaskItem[] {
-                mockPackage,
-                mockPackage4
-            };
-            task.FileDefinitions = new ITaskItem[] {
-                mockChildAssembly1,
-                mockChildAssembly2,
-                mockChildAssemblyNoCompileMetadata,
-                mockChildAnalyzerAssembly
-            };
-            task.PackageDependencies = new ITaskItem[] {
-                mockPackageDep,
-                mockPackageDep4
-            };
-            task.FileDependencies = new ITaskItem[] {
-                mockChildAssemblyDep1,
-                mockChildAssemblyDep2,
-                mockChildAssemblyNoCompileMetadataDep,
-                mockChildAnalyzerAssemblyDep
-            };
-            task.References = new ITaskItem[] { };
-            task.DefaultImplicitPackages = "Package3;Package4";
-            task.TargetFrameworkMoniker = string.Empty;
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(6);
-
-            var resultTargets = task.DependenciesDesignTime
-                                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            resultTargets.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Target, mockTarget, resultTargets[0]);
-
-            mockPackage.SetMetadata(MetadataKeys.Path, mockPackage.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultPackage = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/Package3/1.0.0")).ToArray();
-            resultPackage.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Package, mockPackage, resultPackage[0]);
-
-            mockPackage4.SetMetadata(MetadataKeys.Path, mockPackage4.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultPackage4 = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/Package4/1.0.0")).ToArray();
-            resultPackage4.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Package, mockPackage4, resultPackage4[0]);
-
-            mockChildAssembly1.SetMetadata(MetadataKeys.Path, mockChildAssembly1.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultChildAssembly1 = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/mockChildAssembly1")).ToArray();
-            resultChildAssembly1.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.Assembly, mockChildAssembly1, resultChildAssembly1[0]);
-
-            mockChildAssembly2.SetMetadata(MetadataKeys.Path, mockChildAssembly2.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultChildAssembly2 = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/somepath/mockChildAssembly2")).ToArray();
-            resultChildAssembly2.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.FrameworkAssembly, mockChildAssembly2, resultChildAssembly2[0]);
-
-            mockChildAnalyzerAssembly.SetMetadata(MetadataKeys.Path, mockChildAnalyzerAssembly.GetMetadata(MetadataKeys.ResolvedPath));
-            var resultChildAnalyzerAssembly = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/somepath/mockChildAnalyzerAssembly")).ToArray();
-            resultChildAnalyzerAssembly.Length.Should().Be(1);
-            VerifyTargetTaskItem(DependencyType.AnalyzerAssembly, mockChildAnalyzerAssembly, resultChildAnalyzerAssembly[0]);
+            var item3 = task.PackageDependenciesDesignTime[2];
+            Assert.Equal("top.package3/1.0.0", item3.ItemSpec);
         }
 
-        [Fact]
-        public void ItShouldReturnCorrectPackagesForCorrespondingTarget()
+        private string CreateBasicProjectAssetsFile(string testRoot, string package2Type = "package", string package3Type = "package")
         {
-            // Arrange
-            // target definitions
-            var mockTarget = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.5",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net45" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.5" },
-                    { MetadataKeys.Type, "Target" }
-                });
-
-            var mockTarget2 = new MockTaskItem(
-                itemSpec: ".Net Framework,Version=v4.6",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "net46" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".Net Framework,Version=v4.6" },
-                    { MetadataKeys.FrameworkName, ".Net Framework" },
-                    { MetadataKeys.FrameworkVersion, "4.6" },
-                    { MetadataKeys.Type, "Target" }
-                });
-
-            // package definitions
-            var mockPackage1 = new MockTaskItem(
-                itemSpec: "Package1/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "Package1" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
-                });
-
-            var mockChildPackage1 = new MockTaskItem(
-                itemSpec: "ChildPackage1/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "ChildPackage1" },
-                    { MetadataKeys.Version, "1.0.0" },
-                    { MetadataKeys.Path, "some path" },
-                    { MetadataKeys.ResolvedPath, "some resolved path" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { MetadataKeys.IsTopLevelDependency, "False" }
-                });
-
-            // package dependencies
-            var mockPackageDep1 = new MockTaskItem(
-                itemSpec: "Package1/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
-                });
-
-            var mockChildPackageDep1 = new MockTaskItem(
-                itemSpec: "ChildPackage1/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
-                    { MetadataKeys.ParentPackage, "Package1/1.0.0" }
-                });
-
-            var mockPackageDep2 = new MockTaskItem(
-                itemSpec: "Package1/1.0.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.6" }
-                });
-
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { mockTarget, mockTarget2 };
-            task.PackageDefinitions = new ITaskItem[] { mockPackage1, mockChildPackage1 };
-            task.FileDefinitions = new ITaskItem[] { };
-            task.PackageDependencies = new ITaskItem[] { mockPackageDep1, mockPackageDep2, mockChildPackageDep1 };
-            task.FileDependencies = new ITaskItem[] { };
-            task.References = new ITaskItem[] { };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = string.Empty;
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(5);
-
-            var resultTargets = task.DependenciesDesignTime
-                                    .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5")).ToArray();
-            resultTargets.Length.Should().Be(1);
-
-            resultTargets = task.DependenciesDesignTime
-                                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.6")).ToArray();
-            resultTargets.Length.Should().Be(1);
-
-            var resultPackage1 = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.5/Package1/1.0.0")).ToArray();
-            resultPackage1.Length.Should().Be(1);
-            resultPackage1[0].GetMetadata(PreprocessPackageDependenciesDesignTime.DependenciesMetadata)
-                             .Should().Be("ChildPackage1/1.0.0");
-
-            resultPackage1 = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".Net Framework,Version=v4.6/Package1/1.0.0")).ToArray();
-            resultPackage1.Length.Should().Be(1);
-            resultPackage1[0].GetMetadata(PreprocessPackageDependenciesDesignTime.DependenciesMetadata)
-                             .Should().Be("");
+            var json =
+"""
+{
+  "version" : 3,
+  "targets" : {
+    "net6.0" : {
+      "top.package1/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "dependent.package1": "1.0.0",
+          "dependent.package2": "1.0.0",
+        },
+        "compile": {
+          "lib/netstandard2.1/top.package1.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/top.package1.dll": {
+            "related": ".xml"
+          }
         }
-
-        [Fact]
-        public void ItShouldCreateDependenciesForReferencesWithNuGetMetadata()
-        {
-            // Arrange
-            // target definitions
-            var netStandard20Target = new MockTaskItem(
-                itemSpec: ".NETStandard,Version=v2.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "netstandard2.0" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".NETStandard,Version=v2.0" },
-                    { MetadataKeys.FrameworkName, ".NETStandard" },
-                    { MetadataKeys.FrameworkVersion, "2.0" },
-                    { MetadataKeys.Type, "Target" }
-                });
-
-            // package definitions
-            var myPackage = new MockTaskItem(
-                itemSpec: "MyPackage/1.5.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "MyPackage" },
-                    { MetadataKeys.Version, "1.5.0" },
-                    { MetadataKeys.Path, "Packages\\MyPackage\\1.5.0" },
-                    { MetadataKeys.ResolvedPath, "" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
-                });
-
-            // package dependencies
-            var myPackageDependency = new MockTaskItem(
-                itemSpec: "MyPackage/1.5.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".NETStandard,Version=v2.0" }
-                });
-
-            // references
-            var referenceWithMetadata = new MockTaskItem(
-                itemSpec: "Packages\\MyPackage\\1.5.0\\AnAssembly.dll",
-                metadata: new Dictionary<string, string>
-                {
-                    { "NuGetPackageId", "MyPackage" },
-                    { "NuGetPackageVersion", "1.5.0" }
-                });
-
-            var referenceWithoutMetadata = new MockTaskItem(
-                itemSpec: "Packages\\MyPackage\\1.5.0\\AnotherAssembly.dll",
-                metadata: new Dictionary<string, string>());
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { netStandard20Target };
-            task.PackageDefinitions = new ITaskItem[] { myPackage };
-            task.FileDefinitions = new ITaskItem[] {  };
-            task.PackageDependencies = new ITaskItem[] { myPackageDependency };
-            task.FileDependencies = new ITaskItem[] { };
-            task.References = new ITaskItem[] { referenceWithMetadata, referenceWithoutMetadata };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = ".NETStandard,Version=v2.0";
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(3);
-
-            var resultPackage = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/MyPackage/1.5.0")).ToArray();
-            resultPackage.Length.Should().Be(1);
-            resultPackage[0].GetMetadata(PreprocessPackageDependenciesDesignTime.DependenciesMetadata)
-                            .Should().Be("MyPackage/1.5.0/AnAssembly.dll");
+      },
+      "top.package2/1.0.0" : {
+        "type" : "PACKAGE2_TYPE",
+        "compile" : {
+            "lib/netstandard2.0/top.package2.dll" : {
+                "related" : ".pdb;.xml"
+            }
+        },
+        "runtime" : {
+            "lib/netstandard2.0/top.package2.dll" : {
+                "related": ".pdb;.xml"
+            }
         }
-
-        [Fact]
-        public void ItShouldMakeFacadeReferencesInvisible()
-        {
-            // Arrange
-            // target definitions
-            var netStandard20Target = new MockTaskItem(
-                itemSpec: ".NETStandard,Version=v2.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, "netstandard2.0" },
-                    { MetadataKeys.TargetFrameworkMoniker, ".NETStandard,Version=v2.0" },
-                    { MetadataKeys.FrameworkName, ".NETStandard" },
-                    { MetadataKeys.FrameworkVersion, "2.0" },
-                    { MetadataKeys.Type, "Target" }
-                });
-
-            // package definitions
-            var myPackage = new MockTaskItem(
-                itemSpec: "MyPackage/1.5.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, "MyPackage" },
-                    { MetadataKeys.Version, "1.5.0" },
-                    { MetadataKeys.Path, "Packages\\MyPackage\\1.5.0" },
-                    { MetadataKeys.ResolvedPath, "" },
-                    { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
-                });
-
-            // package dependencies
-            var myPackageDependency = new MockTaskItem(
-                itemSpec: "MyPackage/1.5.0",
-                metadata: new Dictionary<string, string>
-                {
-                    { MetadataKeys.ParentTarget, ".NETStandard,Version=v2.0" }
-                });
-
-            // references
-            var alphaReference = new MockTaskItem(
-                itemSpec: "Packages\\MyPackage\\1.5.0\\AlphaAssembly.dll",
-                metadata: new Dictionary<string, string>
-                {
-                    { "NuGetPackageId", "MyPackage" },
-                    { "NuGetPackageVersion", "1.5.0" }
-                });
-
-            var betaReference = new MockTaskItem(
-                itemSpec: "Packages\\MyPackage\\1.5.0\\BetaAssembly.dll",
-                metadata: new Dictionary<string, string>
-                {
-                    { "NuGetPackageId", "MyPackage" },
-                    { "NuGetPackageVersion", "1.5.0" },
-                    { "Facade", "false" }
-                });
-
-            var gammaReference = new MockTaskItem(
-                itemSpec: "Packages\\MyPackage\\1.5.0\\GammaAssembly.dll",
-                metadata: new Dictionary<string, string>
-                {
-                    { "NuGetPackageId", "MyPackage" },
-                    { "NuGetPackageVersion", "1.5.0" },
-                    { "Facade", "true" }
-                });
-
-            var task = new PreprocessPackageDependenciesDesignTime();
-            task.TargetDefinitions = new[] { netStandard20Target };
-            task.PackageDefinitions = new ITaskItem[] { myPackage };
-            task.FileDefinitions = new ITaskItem[] { };
-            task.PackageDependencies = new ITaskItem[] { myPackageDependency };
-            task.FileDependencies = new ITaskItem[] { };
-            task.References = new ITaskItem[] { alphaReference, betaReference, gammaReference };
-            task.DefaultImplicitPackages = string.Empty;
-            task.TargetFrameworkMoniker = ".NETStandard,Version=v2.0";
-
-            // Act
-            var result = task.Execute();
-
-            // Assert
-            result.Should().BeTrue();
-            task.DependenciesDesignTime.Count().Should().Be(5);
-
-            var alphaDependency = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/MyPackage/1.5.0/AlphaAssembly.dll"))
-                .Single();
-            alphaDependency.GetBooleanMetadata(PreprocessPackageDependenciesDesignTime.VisibleMetadata)
-                .Should().BeTrue();
-
-            var betaDependency = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/MyPackage/1.5.0/BetaAssembly.dll"))
-                .Single();
-            betaDependency.GetBooleanMetadata(PreprocessPackageDependenciesDesignTime.VisibleMetadata)
-                .Should().BeTrue();
-
-            var gammaDependency = task.DependenciesDesignTime
-                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/MyPackage/1.5.0/GammaAssembly.dll"))
-                .Single();
-            gammaDependency.GetBooleanMetadata(PreprocessPackageDependenciesDesignTime.VisibleMetadata)
-                .Should().BeFalse();
+      },
+      "top.package3/1.0.0" : {
+          "type" : "PACKAGE3_TYPE",
+          "dependencies": {
+              "dependent.package1" : "1.0.1"
+          },
+          "compile" : {
+              "lib/netstandard2.0/top.package3.dll" : {
+                  "related" : ".pdb;.xml"
+              }
+          },
+          "runtime" : {
+              "lib/netstandard2.0/top.package3.dll" : {
+                  "related" : ".pdb;.xml"
+               }
+          }
+      },
+      "dependent.package1/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "dependent.package3": "1.0.0"
+        },
+        "compile": {
+          "lib/netcoreapp3.1/_._": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/dependent.package1.dll": {
+            "related": ".xml"
+          }
         }
-
-        private void VerifyTargetTaskItem(DependencyType type, ITaskItem input, ITaskItem output)
+      },
+      "dependent.package2/1.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/dependent.package2.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/dependent.package2.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "dependent.package3/1.0.0": {
+          "type": "package",
+          "compile": {
+          "lib/netstandard2.1/dependent.package3.dll": {
+              "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/dependent.package3.dll": {
+              "related": ".xml"
+          }
+        }
+      }
+    }
+  },
+  "libraries" : {
+    "dependent.package1/1.0.0" : {
+        "sha512" : "xyz",
+        "type" : "package",
+        "path" : "dependent.package1/1.0.0",
+        "files" : [
+          "lib/net461/dependent.package1.dll",
+          "lib/net461/dependent.package1.xml"
+        ]
+    },
+    "dependent.package2/1.0.0" : {
+        "sha512" : "xyz",
+        "type" : "package",
+        "path" : "dependent.package2/1.0.0",
+        "files" : [
+          ".nupkg.metadata"
+        ]
+    },
+    "dependent.package3/1.0.0" : {
+        "sha512" : "xyz",
+        "type" : "package",
+        "path" : "dependent.package3/1.0.0",
+        "files" : [
+          "lib/net472/dependent.package3.dll",
+          "lib/net472/dependent.package3.xml"
+        ]
+    },
+    "top.package1/1.0.0" : {
+        "sha512" : "xyz",
+        "type" : "package",
+        "path" : "top.package1/1.0.0",
+        "files" : [
+            "lib/net20/top.package1.dll",
+            "lib/net20/top.package1.pdb",
+            "lib/net20/top.package1.xml"
+        ]
+    },
+    "top.package2/1.0.0" : {
+        "sha512" : "abc",
+        "type" : "PACKAGE2_TYPE",
+        "path" : "top.package2/1.0.0",
+        "files" : [
+            "lib/net45/top.package2.dll",
+            "lib/net45/top.package2.pdb",
+            "lib/net45/top.package2.xml"
+        ]
+    },
+    "top.package3/1.0.0" : {
+        "sha512" : "abc",
+        "type" : "PACKAGE3_TYPE",
+        "path" : "top.package3/1.0.0",
+        "files" : [
+           ".nupkg.metadata",
+        ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net6.0": [
+      "top.package1 >= 1.0.0",
+      "top.package2 >= 1.0.0",
+      "top.package3 >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\.nuget\\packages\\" : {}
+  },
+  "project" : {
+      "version" : "1.0.0",
+      "restore": {
+          "projectUniqueName": "C:\\projDir1\\projDir2\\proj.csproj",
+          "projectName": "proj",
+          "projectPath": "C:\\projDir1\\projDir2\\proj.csproj",
+          "packagesPath": "C:\\.nuget\\packages\\",
+          "outputPath": "C:\\projDir1\\projDir2\\obj\\",
+          "projectStyle": "PackageReference",
+          "fallbackFolders": [
+            "C:\\fallbackDir\\NuGetPackages"
+          ],
+          "configFilePaths": [
+            "C:\\configDir\\NuGet.Config",
+            "C:\\configDir2\\Microsoft.VisualStudio.FallbackLocation.config",
+            "C:\\configDir3\\Microsoft.VisualStudio.Offline.config"
+          ],
+          "originalTargetFrameworks": [
+            "net6.0"
+          ],
+          "frameworks": {
+            "net6.0": {
+              "targetAlias": "net6.0",
+              "projectReferences": {}
+            }
+          },
+          "warningProperties": {
+            "warnAsError": [
+              "NU1605"
+            ]
+      }
+    },
+      "frameworks" : {
+          "net6.0": {
+              "targetAlias" : "net6.0",
+              "dependencies" : {
+                  "top.package1" : {
+                      "target" : "Package",
+                      "version" : "[1.0.0, )"
+                   }
+              }
+          }
+      }
+  }
+}
+""";
+            return json.Replace("PACKAGE2_TYPE", package2Type)
+                       .Replace("PACKAGE3_TYPE", package3Type)
+                       .Replace(@"C:\\.nuget", $@"{testRoot.Replace("\\", "\\\\")}\\.nuget");
+        }
+        private ResolvePackageAssets InitializeTask(string testRoot, out IEnumerable<PropertyInfo> inputProperties)
         {
-            type.ToString().Should().Be(output.GetMetadata(MetadataKeys.Type));
+            inputProperties = typeof(ResolvePackageAssets)
+                .GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
+                .Where(p => !p.IsDefined(typeof(OutputAttribute)) &&
+                            p.Name != nameof(ResolvePackageAssets.DesignTimeBuild))
+                .OrderBy(p => p.Name, StringComparer.Ordinal);
 
-            // remove unnecessary metadata to keep only ones that would be in result task items
-            var removeMetadata = new[] { MetadataKeys.Type, MetadataKeys.ResolvedPath };
+            var requiredProperties = inputProperties
+                .Where(p => p.IsDefined(typeof(RequiredAttribute)));
 
-            foreach (var rm in removeMetadata)
+            var task = new ResolvePackageAssets();
+            // Initialize all required properties as a genuine task invocation would. We do this
+            // because HashSettings need not defend against required parameters being null.
+            foreach (var property in requiredProperties)
             {
-                output.RemoveMetadata(rm);
-                input.RemoveMetadata(rm);
+                property.PropertyType.Should().Be(
+                    typeof(string),
+                    because: $"this test hasn't been updated to handle non-string required task parameters like {property.Name}");
+
+                property.SetValue(task, "_");
             }
 
-            foreach (var metadata in input.MetadataNames)
-            {
-                input.GetMetadata(metadata.ToString()).Should().Be(output.GetMetadata(metadata.ToString()));
-            }
+            task.BuildEngine = new MockBuildEngine();
+
+            CreateFolders(testRoot);
+
+            return task;
+        }
+
+        private void CreateFolders(string testRoot)
+        {
+            Directory.CreateDirectory($@"{testRoot}\.nuget\packages\top.package1\1.0.0\");
+            Directory.CreateDirectory($@"{testRoot}\.nuget\packages\top.package2\1.0.0\");
+            Directory.CreateDirectory($@"{testRoot}\.nuget\packages\top.package3\1.0.0\");
+            Directory.CreateDirectory($@"{testRoot}\.nuget\packages\dependent.package1\1.0.0\");
+            Directory.CreateDirectory($@"{testRoot}\.nuget\packages\dependent.package2\1.0.0\");
+            Directory.CreateDirectory($@"{testRoot}\.nuget\packages\dependent.package3\1.0.0\");
+            using (File.Create($@"{testRoot}\.nuget\packages\top.package1\1.0.0\.nupkg.metadata")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\top.package1\1.0.0\top.package1.1.0.0.nupkg.sha512")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\top.package2\1.0.0\.nupkg.metadata")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\top.package2\1.0.0\top.package2.1.0.0.nupkg.sha512")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\top.package3\1.0.0\.nupkg.metadata")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\top.package3\1.0.0\top.package3.1.0.0.nupkg.sha512")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\dependent.package1\1.0.0\.nupkg.metadata")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\dependent.package1\1.0.0\dependent.package1.10.0.nupkg.sha512")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\dependent.package2\1.0.0\.nupkg.metadata")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\dependent.package2\1.0.0\dependent.package2.1.0.0.nupkg.sha512")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\dependent.package3\1.0.0\.nupkg.metadata")) { }
+            using (File.Create($@"{testRoot}\.nuget\packages\dependent.package3\1.0.0\dependent.package3.1.0.0.nupkg.sha512")) { }
+
         }
     }
 }
+

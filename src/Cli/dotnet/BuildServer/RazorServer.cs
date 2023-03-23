@@ -36,6 +36,14 @@ namespace Microsoft.DotNet.BuildServer
 
         public void Shutdown()
         {
+            if(!_fileSystem.File.Exists(PidFile.ServerPath.Value))
+            {
+                // The razor server path doesn't exist anymore so trying to shut it down would fail
+                // Ensure the pid file is cleaned up so we don't try to shut it down again
+                DeletePidFile();
+                return;
+            }
+
             var command = _commandFactory
                 .Create(
                     "exec",
@@ -60,6 +68,11 @@ namespace Microsoft.DotNet.BuildServer
 
             // After a successful shutdown, ensure the pid file is deleted
             // If the pid file was left behind due to a rude exit, this ensures we don't try to shut it down again
+            DeletePidFile();
+        }
+
+        void DeletePidFile()
+        {
             try
             {
                 if (_fileSystem.File.Exists(PidFile.Path.Value))

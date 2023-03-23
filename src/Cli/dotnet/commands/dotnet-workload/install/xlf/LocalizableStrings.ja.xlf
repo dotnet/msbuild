@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AdManifestPackageDoesNotExist">
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">広告マニフェストが更新されません。{0} 向けマニフェスト パッケージが存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdManifestUpdated">
+        <source>Updated advertising manifest {0}.</source>
+        <target state="translated">広告マニフェスト {0} を更新しました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CacheMissingPackage">
+        <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
+        <target state="translated">パッケージ {0} バージョン {1} がオフラインキャッシュ {2} に存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">{0} オプションと {1} オプションを併用することはできません。ロールバック ファイルからインストールする場合、{0} を削除してください。その他の場合には、{1} を削除します</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">更新されたワークロード マニフェストを確認しています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeletingWorkloadPack">
+        <source>Uninstalling workload pack {0} version {1}…</source>
+        <target state="translated">ワークロード パック {0} バージョン {1} をアンインストールしています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadToCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="translated">ディレクトリ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadToCacheOptionDescription">
+        <source>Download packages needed to install a workload to a folder that can be used for offline installation.</source>
+        <target state="translated">ワークロードのインストールに必要なパッケージをフォルダーにダウンロードし、オフライン インストールに使用できるようにします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadingPackToCacheMessage">
+        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
+        <target state="translated">パック {0} のバージョン {1} をオフライン キャッシュ {2} にダウンロードしています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">パッケージ {0} からの MSI に 1 つのマニフェスト機能バンドとマニフェスト フォルダーが必要です</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedAdManifestUpdate">
+        <source>Failed to update the advertising manifest {0}: {1}.</source>
+        <target state="translated">広告マニフェスト {0} を更新できませんでした: {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToDownloadPackageManifest">
+        <source>Failed to download manifest package {0}.</source>
+        <target state="translated">マニフェスト パッケージ {0} をダウンロードできませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">MSI から情報を抽出できませんでした: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallWorkloadManifest">
+        <source>Failed to install manifest {0} version {1}: {2}.</source>
+        <target state="translated">マニフェスト {0} のバージョン {1} をインストールできませんでした: {2}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="translated">ディレクトリ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromCacheOptionDescription">
+        <source>Complete the operation from cache (offline).</source>
+        <target state="translated">キャッシュから操作を完了します (オフライン)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GarbageCollectingSdkFeatureBandsMessage">
+        <source>Garbage collecting for SDK feature band(s) {0}...</source>
+        <target state="translated">SDK 機能バンド {0} のガベージ コレクトを行っています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GarbageCollectionFailed">
+        <source>Warning: Workload garbage collection failed with error: {0}.</source>
+        <target state="translated">警告: ワークロードのガベージ コレクションでエラーが発生しました: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InadequatePermissions">
+        <source>Inadequate permissions. Run the command with elevated privileges.</source>
+        <target state="translated">十分なアクセス許可がありません。昇格された特権を使用してコマンドを実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncludePreviewOptionDescription">
+        <source>Allow prerelease workload manifests.</source>
+        <target state="translated">プレリリースのワークロード マニフェストを許可します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncompatibleManifests">
+        <source>The current SDK isn't compatible with workload manifests of SDK version {0}.</source>
+        <target state="translated">現在の SDK は、SDK バージョン {0} のワークロード マニフェストと互換性がありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallationSucceeded">
+        <source>Successfully installed workload(s) {0}.</source>
+        <target state="translated">ワークロード {0} が正常にインストールされました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingPackVersionMessage">
+        <source>Installing pack {0} version {1}...</source>
+        <target state="translated">Pack {0} バージョン {1} をインストールしています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingWorkloadManifest">
+        <source>Installing workload manifest {0} version {1}…</source>
+        <target state="translated">ワークロード マニフェスト {0} のバージョン {1} をインストールしています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InsufficientPrivilegeToStartServer">
+        <source>Insufficient privilege to start the server.</source>
+        <target state="translated">サーバーを起動するための十分な特権がありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">ワークロード マニフェスト ID '{0}' のバージョン '{1}' の解析でエラーが発生しました</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidWorkloadConfiguration">
+        <source>The settings file in the workload's NuGet package is invalid: {0}</source>
+        <target state="translated">ワークロードの NuGet パッケージ内の設定ファイルが無効です: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Install one or more workloads.</source>
+        <target state="translated">1 つ以上のワークロードをインストールします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">使用する NuGet 構成ファイル。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to install the workload for.</source>
+        <target state="translated">ワークロードをインストールするターゲット フレームワーク。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDoesNotExist">
+        <source>No manifest with ID {0} exists.</source>
+        <target state="translated">ID を持つ {0} マニフェストが存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">NuGet パッケージ {0} にマニフェスト MSI が見つかりません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">マニフェスト パッケージが解決されていません。{0} のマニフェスト パッケージまたは URL が存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressInstall">
+        <source>Installing {0} </source>
+        <target state="translated">{0} をインストールしています </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressRepair">
+        <source>Repairing {0} </source>
+        <target state="translated">{0} を修復しています </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressUninstall">
+        <source>Removing {0} </source>
+        <target state="translated">{0} を削除しています </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestsExistForFeatureBand">
+        <source>No manifests exist for SDK version {0}.</source>
+        <target state="translated">SDK バージョン {0} のマニフェストが存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoTrustWithParentPID">
+        <source>Failed to establish a trust relationship with parent process ({0}).</source>
+        <target state="translated">親プロセス ({0}) との信頼関係を確立できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSDoesNotSupportMsi">
+        <source>MSI installations are only supported on Windows.</source>
+        <target state="translated">MSI のインストールは Windows でのみサポートされています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PendingReboot">
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">コンピューターの再起動が保留中です。インストールは続行されますが、再起動が必要になる場合があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolvingPackageUrls">
+        <source>Resolving package URLs for workload(s) {0}...</source>
+        <target state="translated">ワークロード {0} 向けパッケージ URL を解決しています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollBackFailedMessage">
+        <source>Installation rollback failed: {0}</source>
+        <target state="translated">インストールのロールバックに失敗しました: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
+        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
+        <target state="translated">無効なロールバック定義。ロールバック定義 {0} のマニフェスト ID が、インストール済みのマニフェスト ID {1} と一致しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollbackDefinitionFileDoesNotExist">
+        <source>Provided rollback definition file {0} doesn't exist.</source>
+        <target state="translated">指定されたロールバック定義ファイル {0} が存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackInstall">
+        <source>Workload installation failed. Rolling back installed packs...</source>
+        <target state="translated">ワークロードをインストールできませんでした。インストール パックをロールバックしています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackPackInstall">
+        <source>Rolling back pack {0} installation...</source>
+        <target state="translated">パック {0} のインストールをロールバックしています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipManifestUpdateOptionDescription">
+        <source>Skip updating the workload manifests.</source>
+        <target state="translated">ワークロード マニフェストの更新をスキップします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">ワークロード パッケージとインストーラーの署名の認証をスキップします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkippingManifestUpdate">
+        <source>Manifest packages were not found. Skipping manifest update...</source>
+        <target state="translated">マニフェスト パッケージが見つかりませんでした。マニフェストの更新をスキップしています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceOptionDescription">
+        <source>The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</source>
+        <target state="translated">復元中に使用する NuGet パッケージ ソース。複数のソースを指定するには、オプションを繰り返します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">ソース</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TempDirOptionDescription">
+        <source>Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</source>
+        <target state="translated">このコマンドに NuGet パッケージをダウンロードして抽出するための一時ディレクトリを指定します (セキュリティで保護する必要があります)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownInstallType">
+        <source>Unknown installation type: {0}.</source>
+        <target state="translated">不明なインストールの種類: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedPackError">
+        <source>Pack ID {0} unrecognized.</source>
+        <target state="translated">パック ID {0} を認識できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrintDownloadLinkOnlyDescription">
+        <source>Only print the list of links to download without downloading.</source>
+        <target state="translated">ダウンロードするリンクの一覧をダウンロードせず、印刷だけを行います。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingCacheForPackInstall">
+        <source>Installing package {0} version {1} from offline cache {2}.</source>
+        <target state="translated">オフライン キャッシュ {2} でパッケージ {0} のバージョン {1} をインストールしています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version of the SDK.</source>
+        <target state="translated">SDK のバージョンです。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallFullCommandNameLocalized">
+        <source>.NET install command</source>
+        <target state="translated">.NET インストール コマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' doesn't exist.</source>
+        <target state="translated">NuGet 構成ファイル '{0}' は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' isn't a valid NuGet version range.</source>
+        <target state="translated">指定されたバージョン '{0}' は、有効な NuGet バージョン範囲ではありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadAlreadyInstalled">
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">ワークロード '{0}' は既にインストールされています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadCacheDownloadFailed">
+        <source>Download of workload packs to offline cache failed: {0}</source>
+        <target state="translated">オフライン キャッシュへのワークロード パックのダウンロードに失敗しました: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdArgumentDescription">
+        <source>The NuGet package ID of the workload to install.</source>
+        <target state="translated">インストールするワークロードの NuGet パッケージ ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdArgumentName">
+        <source>WORKLOAD_ID</source>
+        <target state="translated">WORKLOAD_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInstallationFailed">
+        <source>Workload installation failed: {0}</source>
+        <target state="translated">ワークロード {0} をインストールできませんでした</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotRecognized">
+        <source>Workload ID {0} is not recognized.</source>
+        <target state="translated">ワークロード ID {0} は認識されません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotSupportedOnPlatform">
+        <source>Workload ID {0} isn't supported on this platform.</source>
+        <target state="translated">ワークロード ID {0} は、このプラットフォームでサポートされていません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPackAlreadyInstalledMessage">
+        <source>Pack {0} version {1} is already installed.</source>
+        <target state="translated">パック '{0}' バージョン {1} は既にインストールされています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionDescription">
+        <source>The directory where the workload will be installed. The directory will be created if it doesn't exist.</source>
+        <target state="translated">ワークロードがインストールされるディレクトリ。このディレクトリが存在しない場合は、作成されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionName">
+        <source>PATH</source>
+        <target state="translated">パス</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
+        <target state="translated">ワークロードの更新が利用可能です。詳細については、`dotnet workload list` を実行してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingPackInstallRecordMessage">
+        <source>Writing workload pack installation record for {0} version {1}...</source>
+        <target state="translated">{0} バージョン {1} のワークロード パックのインストール レコードを書き込んでいます...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingWorkloadInstallRecordMessage">
+        <source>Writing workload installation record for {0}...</source>
+        <target state="translated">{0} のワークロード インストール レコードを書き込んでいます...</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

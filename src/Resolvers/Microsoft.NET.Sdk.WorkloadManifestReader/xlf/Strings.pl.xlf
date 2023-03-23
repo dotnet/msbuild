@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../Strings.resx">
+    <body>
+      <trans-unit id="ConcreteWorkloadHasNoDescription">
+        <source>Workload definition '{0}' is a concrete dev workload but has no description</source>
+        <target state="translated">Definicja obciążenia pracą „{0}” jest konkretnym obciążeniem deweloperskim, ale nie ma opisu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConflictingWorkloadDefinition">
+        <source>Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
+        <target state="translated">Definicja obciążenia „{0}” w manifeście „{1}” [{2}] powoduje konflikt z manifestem „{3}” [{4}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConflictingWorkloadPack">
+        <source>Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
+        <target state="translated">Pakiet obciążenia „{0}” w manifeście „{1}” [{2}] powoduje konflikt z manifestem „{3}” [{4}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CyclicWorkloadRedirect">
+        <source>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</source>
+        <target state="translated">Cykliczne przekierowanie obciążenia „{0}” w manifeście „{1}” [{2}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateKeyAtOffset">
+        <source>Duplicate key '{0}' at offset {1}</source>
+        <target state="translated">Zduplikowany klucz „{0}” pod przesunięciem {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateManifestID">
+        <source>Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</source>
+        <target state="translated">Dostawca manifestu {0} zwrócił zduplikowany identyfikator manifestu „{1}” [{2}], który powoduje konflikt z istniejącym manifestem [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedBoolAtOffset">
+        <source>Expected boolean value at offset {0}</source>
+        <target state="translated">Oczekiwano wartości logicznej pod przesunięciem {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedIntegerAtOffset">
+        <source>Expected integer value at offset {0}</source>
+        <target state="translated">Oczekiwano wartości całkowitej pod przesunięciem {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedStringAtOffset">
+        <source>Expected string value at offset {0}</source>
+        <target state="translated">Oczekiwano wartości ciągu pod przesunięciem {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedTokenAtOffset">
+        <source>Expected {0} token at offset {1}</source>
+        <target state="translated">Oczekiwano tokenu {0} pod przesunięciem {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncompleteDocument">
+        <source>Document ended prematurely</source>
+        <target state="translated">Dokument zakończony przedwcześnie</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Nieprawidłowa wersja: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDependencyMissing">
+        <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
+        <target state="translated">Nie znaleziono zależności manifestu obciążenia „{0}” wymaganej przez manifest „{1}” [{2}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDependencyVersionTooLow">
+        <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
+        <target state="translated">Zależność manifestu obciążenia „{0}” w wersji „{1}” jest niższa niż w wersji "{2}" wymaganej przez manifest „{3}”[{4}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingBaseWorkload">
+        <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
+        <target state="translated">Nie można odnaleźć obciążenia „{0}” rozszerzonego przez obciążenie „{1}" w manifeście „{2}” [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingOrInvalidManifestVersion">
+        <source>Missing or invalid manifest version</source>
+        <target state="translated">Brak wersji manifestu lub jest ona nieprawidłowa</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingWorkloadPackKind">
+        <source>Missing kind for workload pack '{0}'</source>
+        <target state="translated">Brak rodzaju dla pakietu obciążenia „{0}”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingWorkloadPackVersion">
+        <source>Missing version for workload pack '{0}'</source>
+        <target state="translated">Brak wersji dla pakietu obciążenia „{0}”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RedirectWorkloadHasOtherKeys">
+        <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
+        <target state="translated">Obciążenie przekierowania „{0}” ma klucze inne niż „redirect-to”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedTokenAtOffset">
+        <source>Unexpected token '{0}' at offset {1}</source>
+        <target state="translated">Nieoczekiwany token „{0}” pod przesunięciem {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownKeyAtOffset">
+        <source>Unknown key '{0}' at offset {1}</source>
+        <target state="translated">Nieznany klucz „{0}” pod przesunięciem {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownWorkloadDefinitionKind">
+        <source>Unknown workload definition kind '{0}' at offset {1}</source>
+        <target state="translated">Nieznany rodzaj definicji obciążenia „{0}” pod przesunięciem {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownWorkloadPackKind">
+        <source>Unknown workload pack kind '{0}' at offset {1}</source>
+        <target state="translated">Nieznany rodzaj pakietu obciążenia „{0}” pod przesunięciem {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnresolvedWorkloadRedirect">
+        <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
+        <target state="translated">Nierozpoznany element docelowy „{0}” przekierowania obciążenia „{1}” w manifeście „{2}” [{3}]</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

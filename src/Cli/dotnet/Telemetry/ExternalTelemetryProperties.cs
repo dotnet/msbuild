@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         internal static string GetInstallationType()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (!OperatingSystem.IsWindows())
             {
                 return "";
             }
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         internal static string GetProductType()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (!OperatingSystem.IsWindows())
             {
                 return "";
             }
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         internal static string GetLibcRelease()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 return "";
             }
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         internal static string GetLibcVersion()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 return "";
             }

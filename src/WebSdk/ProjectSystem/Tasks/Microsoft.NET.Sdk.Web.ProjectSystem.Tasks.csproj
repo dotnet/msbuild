@@ -1,0 +1,29 @@
+﻿<Project>
+  <PropertyGroup>
+    <ProjectSystemRoot Condition="'$(ProjectSystemRoot)' == ''">$(RepoRoot)\src\WebSdk\ProjectSystem\</ProjectSystemRoot>
+    <PackageId>Microsoft.NET.Sdk.Web.ProjectSystem</PackageId>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\tools</OutDirName>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalContent Include="$(ProjectSystemRoot)\Targets\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>targets</PackagePath>
+    </AdditionalContent>
+
+    <AdditionalContent Include="$(ProjectSystemRoot)\Sdk\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </AdditionalContent>
+  </ItemGroup>
+
+  <Import Project="$(RepoRoot)\src\WebSdk\CopyPackageLayout.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

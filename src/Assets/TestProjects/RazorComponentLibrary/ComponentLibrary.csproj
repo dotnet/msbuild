@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RazorLangVersion>3.0</RazorLangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- We don't want to run build server when not running as tests. -->
+    <UseRazorBuildServer>false</UseRazorBuildServer>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.10" />
+  </ItemGroup>
+  
+
+  <Target Name="_IntrospectGetCopyToOutputDirectoryItems">
+    <Message Text="AllItemsFullPathWithTargetPath: %(AllItemsFullPathWithTargetPath.TargetPath)" Importance="High" />
+  </Target>
+
+  <Target Name="_IntrospectRazorComponentWithTargetPath">
+    <Message Text="RazorComponentWithTargetPath: %(RazorComponentWithTargetPath.Identity) %(RazorComponentWithTargetPath.TargetPath) %(RazorComponentWithTargetPath.GeneratedOutput) %(RazorComponentWithTargetPath.GeneratedDeclaration)" Importance="High" />
+  </Target>
+
+  <Target Name="_IntrospectResolvedConfiguration">
+    <Message Text="RazorLangVersion: $(RazorLangVersion)" Importance="High" />
+    <Message Text="ResolvedRazorConfiguration: @(ResolvedRazorConfiguration)" Importance="High" />
+  </Target>
+
+</Project>

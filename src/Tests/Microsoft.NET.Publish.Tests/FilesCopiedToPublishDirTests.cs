@@ -39,8 +39,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "TestFilesCopiedToPublishDir",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
@@ -56,9 +55,9 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishSingleFile"] = "true";
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: specifyRid.ToString() + singleFile.ToString());
 
-            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
+            var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand
                 .Execute()
                 .Should()

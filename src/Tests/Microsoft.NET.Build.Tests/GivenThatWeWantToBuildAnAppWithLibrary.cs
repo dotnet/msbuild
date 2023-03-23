@@ -49,10 +49,8 @@ namespace Microsoft.NET.Build.Tests
 
         void VerifyAppBuilds(TestAsset testAsset)
         {
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
+            var buildCommand = new BuildCommand(testAsset, "TestApp");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             buildCommand
                 .Execute()
@@ -62,9 +60,9 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",
                 "TestApp.pdb",
+                $"TestApp{EnvironmentInfo.ExecutableExtension}",
                 "TestApp.deps.json",
                 "TestApp.runtimeconfig.json",
-                "TestApp.runtimeconfig.dev.json",
                 "TestLibrary.dll",
                 "TestLibrary.pdb",
             });
@@ -100,15 +98,13 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("KitchenSink")
                 .WithSource();
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestApp");
             buildCommand
-                .Execute()
+                .Execute("/p:PredefinedCulturesOnly=false")
                 .Should()
                 .Pass();
 
-            var outputDir = buildCommand.GetOutputDirectory("netcoreapp2.0");
+            var outputDir = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             var commandResult = new DotnetCommand(Log, Path.Combine(outputDir.FullName, "TestApp.dll"))
                 .Execute();
@@ -147,22 +143,20 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestApp");
 
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",
                 "TestApp.pdb",
+                $"TestApp{EnvironmentInfo.ExecutableExtension}",
                 "TestApp.deps.json",
-                "TestApp.runtimeconfig.dev.json",
                 "TestApp.runtimeconfig.json",
                 "TestLibrary.dll",
                 "TestLibrary.pdb"
@@ -185,7 +179,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppxReferencingCrossTargeting")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(asset.TestRoot, "Appx"));
+            var buildCommand = new BuildCommand(asset, "Appx");
 
             buildCommand
                 .Execute()

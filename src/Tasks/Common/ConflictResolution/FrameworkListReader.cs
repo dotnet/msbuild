@@ -1,6 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+//Microsoft.NET.Build.Extensions.Tasks (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
+#nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
+
 using Microsoft.NET.Build.Tasks;
 using Microsoft.Build.Utilities;
 using System;
@@ -73,6 +78,13 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var ret = new List<ConflictItem>();
             foreach (var file in frameworkList.Root.Elements("File"))
             {
+                var type = file.Attribute("Type")?.Value;
+
+                if (type?.Equals("Analyzer", StringComparison.OrdinalIgnoreCase) ?? false)
+                {
+                    continue;
+                }
+
                 var assemblyName = file.Attribute("AssemblyName")?.Value;
                 var assemblyVersionString = file.Attribute("Version")?.Value;
 

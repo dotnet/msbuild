@@ -29,9 +29,9 @@ namespace Microsoft.NET.TestFramework
 
         public string SdkVersion { get; private set; }
 
-        public string MSBuildSDKsPath { get; private set; }
-
         public string TestExecutionDirectory { get; set; }
+
+        public string MsbuildAdditionalSdkResolverFolder { get; set; }
 
         public List<string> TestConfigFiles { get; private set; } = new List<string>();
 
@@ -68,10 +68,6 @@ namespace Microsoft.NET.TestFramework
                 {
                     ret.SDKRepoConfiguration = argStack.Pop();
                 }
-                else if (arg.Equals("-MSBuildSDKsPath", StringComparison.InvariantCultureIgnoreCase) && argStack.Any())
-                {
-                    ret.MSBuildSDKsPath = argStack.Pop();
-                }
                 else if (arg.Equals("-noRepoInference", StringComparison.CurrentCultureIgnoreCase))
                 {
                     ret.NoRepoInference = true;
@@ -83,6 +79,10 @@ namespace Microsoft.NET.TestFramework
                 else if (arg.Equals("-testExecutionDirectory", StringComparison.CurrentCultureIgnoreCase))
                 {
                     ret.TestExecutionDirectory = argStack.Pop();
+                }
+                else if (arg.Equals("-msbuildAdditionalSdkResolverFolder", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    ret.MsbuildAdditionalSdkResolverFolder = argStack.Pop();
                 }
                 else if (arg.Equals("-testConfigFile", StringComparison.CurrentCultureIgnoreCase) ||
                          arg.Equals("-testConfig", StringComparison.CurrentCultureIgnoreCase))
@@ -295,6 +295,9 @@ Other options:
   -testConfigFile         : XML file with tests to skip, or test lists that can be run (can specify multiple)
   -testList               : List of tests (from config file) which should be run (can specify multiple)
   -testExecutionDirectory : Folder for tests to create and build projects
+  -msbuildAdditionalSdkResolverFolder
+                          : Folder for tests to override 'MsbuildAdditionalSdkResolverFolder' environment variable in tests
+                            in order to test build built sdk resolvers.
   -showSdkInfo            : Shows SDK info (dotnet --info) for SDK which will be used
   -help                   : Show help");
         }

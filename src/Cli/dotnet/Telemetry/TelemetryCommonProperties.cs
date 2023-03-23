@@ -18,34 +18,41 @@ namespace Microsoft.DotNet.Cli.Telemetry
             Func<string, string> hasher = null,
             Func<string> getMACAddress = null,
             IDockerContainerDetector dockerContainerDetector = null,
-            IUserLevelCacheWriter userLevelCacheWriter = null)
+            IUserLevelCacheWriter userLevelCacheWriter = null,
+            ICIEnvironmentDetector ciEnvironmentDetector = null)
         {
             _getCurrentDirectory = getCurrentDirectory ?? Directory.GetCurrentDirectory;
             _hasher = hasher ?? Sha256Hasher.Hash;
             _getMACAddress = getMACAddress ?? MacAddressGetter.GetMacAddress;
             _dockerContainerDetector = dockerContainerDetector ?? new DockerContainerDetectorForTelemetry();
             _userLevelCacheWriter = userLevelCacheWriter ?? new UserLevelCacheWriter();
+            _ciEnvironmentDetector = ciEnvironmentDetector ?? new CIEnvironmentDetectorForTelemetry();
         }
 
         private readonly IDockerContainerDetector _dockerContainerDetector;
+        private readonly ICIEnvironmentDetector _ciEnvironmentDetector;
         private Func<string> _getCurrentDirectory;
         private Func<string, string> _hasher;
         private Func<string> _getMACAddress;
         private IUserLevelCacheWriter _userLevelCacheWriter;
         private const string OSVersion = "OS Version";
         private const string OSPlatform = "OS Platform";
+        private const string OSArchitecture = "OS Architecture";
         private const string OutputRedirected = "Output Redirected";
         private const string RuntimeId = "Runtime Id";
         private const string ProductVersion = "Product Version";
         private const string TelemetryProfile = "Telemetry Profile";
         private const string CurrentPathHash = "Current Path Hash";
         private const string MachineId = "Machine ID";
+        private const string MachineIdOld = "Machine ID Old";
         private const string DockerContainer = "Docker Container";
         private const string KernelVersion = "Kernel Version";
         private const string InstallationType = "Installation Type";
         private const string ProductType = "Product Type";
         private const string LibcRelease = "Libc Release";
         private const string LibcVersion = "Libc Version";
+
+        private const string CI = "Continuous Integration";
 
         private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
         private const string CannotFindMacAddress = "Unknown";
@@ -59,13 +66,16 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 {OSVersion, RuntimeEnvironment.OperatingSystemVersion},
                 {OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString()},
+                {OSArchitecture, RuntimeInformation.OSArchitecture.ToString()},
                 {OutputRedirected, Console.IsOutputRedirected.ToString()},
                 {RuntimeId, RuntimeInformation.RuntimeIdentifier},
                 {ProductVersion, Product.Version},
                 {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
                 {DockerContainer, _userLevelCacheWriter.RunWithCache(IsDockerContainerCacheKey, () => _dockerContainerDetector.IsDockerContainer().ToString("G") )},
+                {CI, _ciEnvironmentDetector.IsCIEnvironment().ToString() },
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
-                // we don't want to recalcuate a new id for every new SDK version. Reuse the same path accross versions.
+                {MachineIdOld, _userLevelCacheWriter.RunWithCache(MachineIdCacheKey, GetMachineId)},
+                // we don't want to recalcuate a new id for every new SDK version. Reuse the same path across versions.
                 // If we change the format of the cache later.
                 // We need to rename the cache from v1 to v2
                 {MachineId,

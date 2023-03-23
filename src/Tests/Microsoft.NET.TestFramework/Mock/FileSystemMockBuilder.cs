@@ -154,7 +154,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                     else
                     {
                         DirectoryNode directoryNode = new DirectoryNode();
-                        directoryNode = (DirectoryNode) current.Subs.GetOrAdd(p , directoryNode);
+                        directoryNode = (DirectoryNode)current.Subs.GetOrAdd(p, directoryNode);
                         current = directoryNode;
                     }
                 }
@@ -237,7 +237,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 }
 
                 PathModel pathModel = CreateFullPathModel(path);
-                if (current.Subs.TryGetValue(pathModel.FileOrDirectoryName(), out var node) )
+                if (current.Subs.TryGetValue(pathModel.FileOrDirectoryName(), out var node))
                 {
                     if (node is FileNode)
                     {
@@ -283,7 +283,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 }
 
                 string[] pathArray = path.Split(
-                    new[] {directorySeparatorChar, altDirectorySeparatorChar},
+                    new[] { directorySeparatorChar, altDirectorySeparatorChar },
                     StringSplitOptions.RemoveEmptyEntries);
                 Volume = volume;
                 PathArray = pathArray;
@@ -451,7 +451,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
                 if (_files.TryGetNodeParent(destination, out DirectoryNode current) && current != null)
                 {
-                    sourceFileNode = (FileNode) current.Subs.GetOrAdd(new PathModel(destination).FileOrDirectoryName(), sourceFileNode);
+                    sourceFileNode = (FileNode)current.Subs.GetOrAdd(new PathModel(destination).FileOrDirectoryName(), sourceFileNode);
                     sourceParent.Subs.TryRemove(new PathModel(source).FileOrDirectoryName(), out _);
                 }
                 else
@@ -525,9 +525,9 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
                 if (_files.TryGetNodeParent(path, out DirectoryNode current))
                 {
-                        PathModel pathModel = new PathModel(path);
+                    PathModel pathModel = new PathModel(path);
 
-                    return current.Subs.TryGetValue(pathModel.FileOrDirectoryName(), out var node) 
+                    return current.Subs.TryGetValue(pathModel.FileOrDirectoryName(), out var node)
                            && node is DirectoryNode;
                 }
 
@@ -539,6 +539,15 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 TemporaryDirectoryMock temporaryDirectoryMock = new TemporaryDirectoryMock(_files.TemporaryFolder);
                 CreateDirectory(temporaryDirectoryMock.DirectoryPath);
                 return temporaryDirectoryMock;
+            }
+
+            public IEnumerable<string> EnumerateDirectories(string path)
+            {
+                if (path == null) throw new ArgumentNullException(nameof(path));
+
+                return _files.EnumerateDirectory(path,
+                    subs => subs.Where(s => s.Value is DirectoryNode)
+                        .Select(s => Path.Combine(path, s.Key)));
             }
 
             public IEnumerable<string> EnumerateFiles(string path)
@@ -568,6 +577,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 if (path == null) throw new ArgumentNullException(nameof(path));
 
                 _files.CreateDirectory(path);
+            }
+
+            public string CreateTemporarySubdirectory()
+            {
+                return CreateTemporaryDirectory().DirectoryPath;
             }
 
             public void Delete(string path, bool recursive)

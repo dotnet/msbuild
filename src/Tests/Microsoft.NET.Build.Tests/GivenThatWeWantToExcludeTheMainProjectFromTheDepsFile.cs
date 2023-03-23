@@ -29,15 +29,13 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ExcludeMainProjectFromDeps",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
             TestProject referencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0",
                 IsExe = false
             };
@@ -58,7 +56,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()

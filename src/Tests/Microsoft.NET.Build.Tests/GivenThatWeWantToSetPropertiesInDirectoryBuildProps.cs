@@ -29,7 +29,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DirectoryBuildPropsTest",
                 TargetFrameworks = "netstandard1.4",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(project);
@@ -55,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()

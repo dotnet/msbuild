@@ -9,6 +9,7 @@ obj/
 # Visual Studio
 ###############################################################################
 .vs/
+.vscode/
 .dotnet/
 .tools/
 .packages/
@@ -18,7 +19,8 @@ obj/
 
 *.binlog
 
-sdk.sln.DotSettings.user
+# User specific files
+*.user
 
 # Debian and python stuff
 *.dsc
@@ -37,3 +39,6 @@ cmake/
 
 # Helix payload
 .dotnet.payload
+
+# MSBuild Logs
+**/MSBuild_Logs/MSBuild_pid-*.failure.txt

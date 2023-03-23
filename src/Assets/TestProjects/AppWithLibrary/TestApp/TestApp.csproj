@@ -6,7 +6,8 @@
     <AssemblyTitle>Test AssemblyTitle</AssemblyTitle>
     <Copyright>Copyright (c) Test Authors</Copyright>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />

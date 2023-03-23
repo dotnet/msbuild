@@ -39,7 +39,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "FilterSatelliteAssemblies",
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
@@ -51,7 +50,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testProjectInstance);
             var buildResult = buildCommand.Execute();
 
             buildResult.Should().Pass();
@@ -76,7 +75,7 @@ namespace Microsoft.NET.Build.Tests
                     $"{testProject.Name}.runtimeconfig.dev.json"
                 });
 
-                if (testProject.TargetFrameworks == "netcoreapp3.0" && !RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                if (testProject.TargetFrameworks == "netcoreapp3.0")
                 {
                     expectedFiles.Add($"{testProject.Name}{Constants.ExeSuffix}");
                 }
@@ -105,7 +104,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "DontFilterSatelliteAssemblies",
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
@@ -116,7 +114,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testProjectInstance);
             var buildResult = buildCommand.Execute();
 
             buildResult.Should().Pass();

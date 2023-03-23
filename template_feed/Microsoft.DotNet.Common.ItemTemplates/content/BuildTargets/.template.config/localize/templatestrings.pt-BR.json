@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Arquivo MSBuild Directory.Build.targets",
+  "description": "Um arquivo Directory.Build.targets vazio que pode ser usado para especificar tarefas e destinos do MSBuild para uma pasta inteira",
+  "symbols/inherit/displayName": "Herdar",
+  "symbols/inherit/description": "Se verdadeiro, adiciona um Import para o Directory.Build.targets mais próximo na hierarquia de diretórios do sistema de arquivos. Directory.Build.targets não herdam por padrão, portanto, isso permite que você crie um conjunto de personalizações pasta por pasta."
+}

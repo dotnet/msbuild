@@ -1,0 +1,44 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Web.DefaultItems.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0">
+
+  <ItemGroup Condition="'$(EnableDefaultItems)' == 'true'
+             And '$(EnableDefaultContentItems)' == 'true'
+             And '$(EnableDefaultNoneItems)' == 'true'
+             And '$(AppDesignerFolder)' != ''">
+
+    <_WebToolingArtifacts Include="$(AppDesignerFolder)\launchSettings*.json;
+                          $(AppDesignerFolder)\serviceDependencies*.json;
+                          $(AppDesignerFolder)\serviceDependencies.*.json;
+                          $(AppDesignerFolder)\ServiceDependencies\**;
+                          $(AppDesignerFolder)\PublishProfiles\**"
+                          Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)"/>
+
+    <!-- Removing the tooling artifacts from all other globs and adding it to the none glob. This ensures that the
+         up-to-date check is unimpacted by the changes to the tooling artifacts -->
+    <None Remove="@(_WebToolingArtifacts)" />
+    <None Include="@(_WebToolingArtifacts)"
+          CopyToOutputDirectory="Never"
+          CopyToPublishDirectory="Never"
+          ExcludeFromSingleFile="true" />
+
+    <Content Remove="@(_WebToolingArtifacts)" />
+    <Compile Remove="@(_WebToolingArtifacts)" />
+    <EmbeddedResource Remove="@(_WebToolingArtifacts)" />
+
+    <!-- Keep track of the default content items for later to distinguish them from newly generated content items -->
+    <_ContentIncludedByDefault Remove="@(_ContentIncludedByDefault)" />
+    <_ContentIncludedByDefault Include="@(Content)" />
+
+  </ItemGroup>
+
+</Project>

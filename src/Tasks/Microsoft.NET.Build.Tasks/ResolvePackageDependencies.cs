@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
@@ -15,9 +16,13 @@ namespace Microsoft.NET.Build.Tasks
     /// Raises Nuget LockFile representation to MSBuild items and resolves
     /// assets specified in the lock file.
     /// </summary>
+    /// <remarks>
+    /// Only called for backwards compatability, when <c>ResolvePackageDependencies</c> is true.
+    /// </remarks>
     public sealed class ResolvePackageDependencies : TaskBase
     {
         private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         private HashSet<string> _projectFileDependencies;
         private IPackageResolver _packageResolver;
         private LockFile _lockFile;
@@ -49,7 +54,7 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         /// <summary>
-        /// All the files in the lock file
+        /// All the files in the lock file.
         /// </summary>
         [Output]
         public ITaskItem[] FileDefinitions
@@ -58,7 +63,7 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         /// <summary>
-        /// All the dependencies between packages. Each package has metadata 'ParentPackage' 
+        /// All the dependencies between packages. Each package has metadata 'ParentPackage'
         /// to refer to the package that depends on it. For top level packages this value is blank.
         /// </summary>
         [Output]
@@ -69,7 +74,7 @@ namespace Microsoft.NET.Build.Tasks
 
         /// <summary>
         /// All the dependencies between files and packages, labeled by the group containing
-        /// the file (e.g. CompileTimeAssembly, RuntimeAssembly, etc.)
+        /// the file (e.g. CompileTimeAssembly, RuntimeAssembly, etc.).
         /// </summary>
         [Output]
         public ITaskItem[] FileDependencies
@@ -106,6 +111,8 @@ namespace Microsoft.NET.Build.Tasks
             get; set;
         }
 
+        public string TargetFramework { get; set; }
+
         #endregion
 
         public ResolvePackageDependencies()
@@ -123,57 +130,49 @@ namespace Microsoft.NET.Build.Tasks
 
         #endregion
 
-        private IPackageResolver PackageResolver
-        {
-            get
-            {
-                if (_packageResolver == null)
-                {
-                    _packageResolver = NuGetPackageResolver.CreateResolver(LockFile);
-                }
+        private IPackageResolver PackageResolver => _packageResolver ??= NuGetPackageResolver.CreateResolver(LockFile);
 
-                return _packageResolver;
-            }
-        }
+        private LockFile LockFile => _lockFile ??= new LockFileCache(this).GetLockFile(ProjectAssetsFile);
 
-        private LockFile LockFile
-        {
-            get
-            {
-                if (_lockFile == null)
-                {
-                    _lockFile = new LockFileCache(this).GetLockFile(ProjectAssetsFile);
-                }
-
-                return _lockFile;
-            }
-        }
+        private Dictionary<string, string> _targetNameToAliasMap;
 
         /// <summary>
         /// Raise Nuget LockFile representation to MSBuild items
         /// </summary>
         protected override void ExecuteCore()
         {
-            ReadProjectFileDependencies();
+            _targetNameToAliasMap = LockFile.Targets.ToDictionary(t => t.Name, t =>
+            {
+                var alias = LockFile.GetLockFileTargetAlias(t);
+                if (string.IsNullOrEmpty(t.RuntimeIdentifier))
+                {
+                    return alias;
+                }
+                else
+                {
+                    return alias + "/" + t.RuntimeIdentifier;
+                }
+            });
+
+            ReadProjectFileDependencies(string.IsNullOrEmpty(TargetFramework) || !_targetNameToAliasMap.ContainsKey(TargetFramework) ? null : _targetNameToAliasMap[TargetFramework]);
             RaiseLockFileTargets();
             GetPackageAndFileDefinitions();
         }
 
-        private void ReadProjectFileDependencies()
+        private void ReadProjectFileDependencies(string frameworkAlias)
         {
-            _projectFileDependencies = LockFile.GetProjectFileDependencySet();
+            _projectFileDependencies = LockFile.GetProjectFileDependencySet(frameworkAlias);
         }
 
         // get library and file definitions
         private void GetPackageAndFileDefinitions()
         {
-            TaskItem item;
             foreach (var package in LockFile.Libraries)
             {
                 var packageName = package.Name;
                 var packageVersion = package.Version.ToNormalizedString();
                 string packageId = $"{packageName}/{packageVersion}";
-                item = new TaskItem(packageId);
+                var item = new TaskItem(packageId);
                 item.SetMetadata(MetadataKeys.Name, packageName);
                 item.SetMetadata(MetadataKeys.Type, package.Type);
                 item.SetMetadata(MetadataKeys.Version, packageVersion);
@@ -182,6 +181,8 @@ namespace Microsoft.NET.Build.Tasks
 
                 string resolvedPackagePath = ResolvePackagePath(package);
                 item.SetMetadata(MetadataKeys.ResolvedPath, resolvedPackagePath ?? string.Empty);
+
+                item.SetMetadata(MetadataKeys.DiagnosticLevel, GetPackageDiagnosticLevel(package));
 
                 _packageDefinitions.Add(item);
 
@@ -212,8 +213,10 @@ namespace Microsoft.NET.Build.Tasks
 
                         foreach (var target in parentTargets)
                         {
+                            string frameworkAlias = _targetNameToAliasMap[target.Name];
+
                             var fileDepsItem = new TaskItem(fileKey);
-                            fileDepsItem.SetMetadata(MetadataKeys.ParentTarget, target.Name); // Foreign Key
+                            fileDepsItem.SetMetadata(MetadataKeys.ParentTarget, frameworkAlias); // Foreign Key
                             fileDepsItem.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
 
                             _fileDependencies.Add(fileDepsItem);
@@ -222,8 +225,7 @@ namespace Microsoft.NET.Build.Tasks
                     else
                     {
                         // get a type for the file if one is available
-                        string fileType;
-                        if (!_fileTypes.TryGetValue(fileKey, out fileType))
+                        if (!_fileTypes.TryGetValue(fileKey, out string fileType))
                         {
                             fileType = "unknown";
                         }
@@ -233,16 +235,36 @@ namespace Microsoft.NET.Build.Tasks
                     _fileDefinitions.Add(fileItem);
                 }
             }
+
+            string GetPackageDiagnosticLevel(LockFileLibrary package)
+            {
+                string target = TargetFramework ?? "";
+
+                var messages = LockFile.LogMessages.Where(log => log.LibraryId == package.Name && log.TargetGraphs
+                                .Select(tg =>
+                                {
+                                    var parsedTargetGraph = NuGetFramework.Parse(tg);
+                                    var alias = _lockFile.PackageSpec.TargetFrameworks.FirstOrDefault(tf => tf.FrameworkName == parsedTargetGraph)?.TargetAlias;
+                                    return alias ?? tg;
+                                }).Contains(target));
+
+                if (!messages.Any())
+                {
+                    return string.Empty;
+                }
+
+                return messages.Max(log => log.Level).ToString();
+            }
         }
 
         // get target definitions and package and file dependencies
         private void RaiseLockFileTargets()
         {
-            TaskItem item;
             foreach (var target in LockFile.Targets)
             {
-                item = new TaskItem(target.Name);
+                TaskItem item = new TaskItem(target.Name);
                 item.SetMetadata(MetadataKeys.RuntimeIdentifier, target.RuntimeIdentifier ?? string.Empty);
+                item.SetMetadata(MetadataKeys.TargetFramework, TargetFramework);
                 item.SetMetadata(MetadataKeys.TargetFrameworkMoniker, target.TargetFramework.DotNetFrameworkName);
                 item.SetMetadata(MetadataKeys.FrameworkName, target.TargetFramework.Framework);
                 item.SetMetadata(MetadataKeys.FrameworkVersion, target.TargetFramework.Version.ToString());
@@ -260,21 +282,22 @@ namespace Microsoft.NET.Build.Tasks
             var resolvedPackageVersions = target.Libraries
                 .ToDictionary(pkg => pkg.Name, pkg => pkg.Version.ToNormalizedString(), StringComparer.OrdinalIgnoreCase);
 
+            string frameworkAlias = _targetNameToAliasMap[target.Name];
+
             var transitiveProjectRefs = new HashSet<string>(
                 target.Libraries
-                    .Where(lib => lib.IsTransitiveProjectReference(LockFile, ref _projectFileDependencies))
+                    .Where(lib => lib.IsTransitiveProjectReference(LockFile, ref _projectFileDependencies, frameworkAlias))
                     .Select(pkg => pkg.Name), 
                 StringComparer.OrdinalIgnoreCase);
-            
-            TaskItem item;
+
             foreach (var package in target.Libraries)
             {
                 string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
 
                 if (_projectFileDependencies.Contains(package.Name))
                 {
-                    item = new TaskItem(packageId);
-                    item.SetMetadata(MetadataKeys.ParentTarget, target.Name); // Foreign Key
+                    TaskItem item = new TaskItem(packageId);
+                    item.SetMetadata(MetadataKeys.ParentTarget, frameworkAlias); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, string.Empty); // Foreign Key
 
                     _packageDependencies.Add(item);
@@ -295,19 +318,18 @@ namespace Microsoft.NET.Build.Tasks
             HashSet<string> transitiveProjectRefs)
         {
             string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
-            TaskItem item;
+            string frameworkAlias = _targetNameToAliasMap[targetName];
             foreach (var deps in package.Dependencies)
             {
-                string version;
-                if (!resolvedPackageVersions.TryGetValue(deps.Id, out version))
+                if (!resolvedPackageVersions.TryGetValue(deps.Id, out string version))
                 {
                     continue;
                 }
 
                 string depsName = $"{deps.Id}/{version}";
 
-                item = new TaskItem(depsName);
-                item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
+                TaskItem item = new TaskItem(depsName);
+                item.SetMetadata(MetadataKeys.ParentTarget, frameworkAlias); // Foreign Key
                 item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
 
                 if (transitiveProjectRefs.Contains(deps.Id))
@@ -322,6 +344,7 @@ namespace Microsoft.NET.Build.Tasks
         private void GetFileDependencies(LockFileTargetLibrary package, string targetName)
         {
             string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
+            string frameworkAlias = _targetNameToAliasMap[targetName];
 
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
@@ -340,7 +363,7 @@ namespace Microsoft.NET.Build.Tasks
                     var fileKey = $"{packageId}/{filePath}";
                     var item = new TaskItem(fileKey);
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
-                    item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
+                    item.SetMetadata(MetadataKeys.ParentTarget, frameworkAlias); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
 
                     if (fileGroup == FileGroup.FrameworkAssembly)
@@ -370,8 +393,7 @@ namespace Microsoft.NET.Build.Tasks
             string fileType = fileGroup.GetTypeMetadata();
             if (fileType != null)
             {
-                string currentFileType;
-                if (!_fileTypes.TryGetValue(fileKey, out currentFileType))
+                if (!_fileTypes.TryGetValue(fileKey, out string currentFileType))
                 {
                     _fileTypes.Add(fileKey, fileType);
                 }
@@ -401,18 +423,29 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private string ResolveFilePath(string relativePath, string resolvedPackagePath)
+        private static string ResolveFilePath(string relativePath, string resolvedPackagePath)
         {
             if (NuGetUtils.IsPlaceholderFile(relativePath))
             {
                 return null;
             }
+
+            if (resolvedPackagePath == null)
+            {
+                return string.Empty;
+            }
+
+            if (Path.DirectorySeparatorChar != '/')
+            {
+                relativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
+            }
             
-            relativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
-            relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
-            return resolvedPackagePath != null
-                ? Path.Combine(resolvedPackagePath, relativePath)
-                : string.Empty;
+            if (Path.DirectorySeparatorChar != '\\')
+            {
+                relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
+            }
+            
+            return Path.Combine(resolvedPackagePath, relativePath);
         }
 
         private string GetAbsolutePathFromProjectRelativePath(string path)

@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.IO;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Cli.Telemetry;
+using System.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -15,11 +15,11 @@ namespace Microsoft.DotNet.Cli
     {
         internal const string TelemetrySessionIdEnvironmentVariableName = "DOTNET_CLI_TELEMETRY_SESSIONID";
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
             var telemetry = new ThreadBlockingTelemetry();
-            ProcessInputAndSendTelemetry(args, telemetry);
-
+            ProcessInputAndSendTelemetry(parseResult, telemetry);
+            telemetry.Dispose();
             return 0;
         }
 
@@ -27,9 +27,12 @@ namespace Microsoft.DotNet.Cli
         {
             var parser = Parser.Instance;
             var result = parser.ParseFrom("dotnet internal-reportinstallsuccess", args);
+            ProcessInputAndSendTelemetry(result, telemetry);
+        }
 
-            var internalReportinstallsuccess = result["dotnet"]["internal-reportinstallsuccess"];
-            var exeName = Path.GetFileName(internalReportinstallsuccess.Arguments.Single());
+        public static void ProcessInputAndSendTelemetry(ParseResult result, ITelemetry telemetry)
+        {
+            var exeName = Path.GetFileName(result.GetValue(InternalReportinstallsuccessCommandParser.Argument));
 
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             foreach (var e in filter.Filter(new InstallerSuccessReport(exeName)))
@@ -52,6 +55,11 @@ namespace Microsoft.DotNet.Cli
 
             public void Flush()
             {
+            }
+
+            public void Dispose()
+            {
+                telemetry.Dispose();
             }
 
             public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)

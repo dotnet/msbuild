@@ -52,6 +52,16 @@
         <target state="translated">'{0}' aracı, '{1}' sürümünden '{2}' (bildirim dosyası {3}) sürümüne başarıyla güncelleştirildi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="translated">'{0}' aracı, en yeni ön sürüm (sürüm '{1}') ile yeniden yüklendi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">'{0}' aracı, en son kararlı sürüm (sürüm '{1}') ile yeniden yüklendi.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">İstenen sürümü ({0}) mevcut sürümünden ({1}) düşük.</target>
@@ -68,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">Genel bir aracı güncelleştirin.</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">Genel veya yerel bir aracı güncelleştirin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -132,11 +142,6 @@ karşılık gelen paket kimliklerini bulmak için
 'dotnet tool list' komutunu kullanabilirsiniz.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">'{0}' aracı, en son kararlı sürüm (sürüm '{1}') ile yeniden yüklendi.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UpdateToolFailed">
         <source>Tool '{0}' failed to update due to the following:</source>
         <target state="translated">Aşağıdaki nedenlerle '{0}' aracı güncelleştirilemedi:</target>
@@ -159,7 +164,7 @@ karşılık gelen paket kimliklerini bulmak için
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="translated">ÇERÇEVE</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
@@ -174,7 +179,7 @@ karşılık gelen paket kimliklerini bulmak için
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">SÜRÜM</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
     </body>

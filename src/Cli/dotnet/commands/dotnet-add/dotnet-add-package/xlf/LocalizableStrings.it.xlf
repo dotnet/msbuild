@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
-        <target state="translated">VERSIONE</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -59,12 +59,12 @@
       </trans-unit>
       <trans-unit id="CmdSource">
         <source>SOURCE</source>
-        <target state="translated">ORIGINE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIR</source>
-        <target state="translated">DIR_PACCHETTO</target>
+        <target state="translated">PACKAGE_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="translated">NOME_PACCHETTO</target>
+        <target state="translated">PACKAGE_NAME</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">

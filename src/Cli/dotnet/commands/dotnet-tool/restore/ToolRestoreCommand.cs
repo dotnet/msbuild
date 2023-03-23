@@ -3,10 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
@@ -22,7 +23,6 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
         private readonly IReporter _errorReporter;
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
         private readonly IToolManifestFinder _toolManifestFinder;
-        private readonly AppliedOption _options;
         private readonly IFileSystem _fileSystem;
         private readonly IReporter _reporter;
         private readonly string[] _sources;
@@ -30,7 +30,6 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
         private readonly string _verbosity;
 
         public ToolRestoreCommand(
-            AppliedOption appliedCommand,
             ParseResult result,
             IToolPackageInstaller toolPackageInstaller = null,
             IToolManifestFinder toolManifestFinder = null,
@@ -39,15 +38,13 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             IReporter reporter = null)
             : base(result)
         {
-            _options = appliedCommand ?? throw new ArgumentNullException(nameof(appliedCommand));
-
             if (toolPackageInstaller == null)
             {
                 (IToolPackageStore,
                     IToolPackageStoreQuery,
                     IToolPackageInstaller installer) toolPackageStoresAndInstaller
                         = ToolPackageFactory.CreateToolPackageStoresAndInstaller(
-                            additionalRestoreArguments: appliedCommand.OptionValuesToBeForwarded());
+                            additionalRestoreArguments: result.OptionValuesToBeForwarded(ToolRestoreCommandParser.GetCommand()));
                 _toolPackageInstaller = toolPackageStoresAndInstaller.installer;
             }
             else
@@ -65,9 +62,9 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
 
-            _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
-            _sources = appliedCommand.ValueOrDefault<string[]>("add-source");
-            _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
+            _configFilePath = result.GetValue(ToolRestoreCommandParser.ConfigOption);
+            _sources = result.GetValue(ToolRestoreCommandParser.AddSourceOption);
+            _verbosity = Enum.GetName(result.GetValue(ToolRestoreCommandParser.VerbosityOption));
         }
 
         public override int Execute()
@@ -75,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             FilePath? customManifestFileLocation = GetCustomManifestFileLocation();
 
             FilePath? configFile = null;
-            if (_configFilePath != null)
+            if (!string.IsNullOrEmpty(_configFilePath))
             {
                 configFile = new FilePath(_configFilePath);
             }
@@ -87,7 +84,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             }
             catch (ToolManifestCannotBeFoundException e)
             {
-                if (CommandContext.IsVerbose())
+                if (CommandLoggingContext.IsVerbose)
                 {
                     _reporter.WriteLine(string.Join(Environment.NewLine, e.VerboseMessage).Yellow());
                 }
@@ -248,9 +245,9 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
 
         private FilePath? GetCustomManifestFileLocation()
         {
-            string customFile = _options.ValueOrDefault<string>("tool-manifest");
+            string customFile = _parseResult.GetValue(ToolRestoreCommandParser.ToolManifestOption);
             FilePath? customManifestFileLocation;
-            if (customFile != null)
+            if (!string.IsNullOrEmpty(customFile))
             {
                 customManifestFileLocation = new FilePath(customFile);
             }

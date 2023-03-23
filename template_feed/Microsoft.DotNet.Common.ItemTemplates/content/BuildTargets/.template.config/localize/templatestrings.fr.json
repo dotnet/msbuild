@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Fichier MSBuild Directory.Build.targets",
+  "description": "Fichier Directory.Build.targets vide qui peut être utilisé pour spécifier des tâches et des cibles MSBuild pour un dossier entier",
+  "symbols/inherit/displayName": "Hériter",
+  "symbols/inherit/description": "Si la valeur est true, ajoute une importation pour Directory.Build.targets le plus proche dans la hiérarchie du répertoire du système de fichiers. Directory.Build.targets n’hérite pas par défaut. Cela vous permet donc de créer un ensemble de personnalisations dossier par dossier."
+}

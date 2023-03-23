@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "first": {
+      "commandName": "Project"
+      },
+    "FIRST": {
+      "commandName": "Project"
+      }
+  }
+}

@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = _testAssetsManager.CopyTestAsset("VBTestApp")
                 .WithSource();
 
-            new BuildCommand(Log, testInstance.Path)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
         }
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tests
                 testInstance.Path,
                 "bin",
                 configuration,
-                "netcoreapp3.0",
+                ToolsetInfo.CurrentTargetFramework,
                 "publish",
                 "VBTestApp.dll");
 

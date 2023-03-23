@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CommandNameArgumentName">
         <source>COMMAND_NAME</source>
-        <target state="translated">NAZWA_POLECENIA</target>
+        <target state="translated">COMMAND_NAME</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOneCommandName">

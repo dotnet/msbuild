@@ -110,7 +110,7 @@ namespace Microsoft.NET.Publish.Tests
                 msbuildArgs.Add("/p:TargetLatestRuntimePatch=true");
             }
 
-            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(testAsset, "App");
             restoreCommand
                 .Execute(msbuildArgs.ToArray())
                 .Should()
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(msbuildArgs.ToArray())
                 .Should().Pass();
 
-            publishDirectory = publishCommand.GetOutputDirectory("netcoreapp2.1", runtimeIdentifier: runtimeIdentifier);
+            publishDirectory = publishCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: runtimeIdentifier);
         }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -35,22 +36,20 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibraryAndRid")
                 .WithSource();
 
-            var projectPath = Path.Combine(testAsset.TestRoot, "App");
-
-            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(testAsset, "App");
             restoreCommand
                 .Execute(msbuildArgs)
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Log, projectPath);
+            var buildCommand = new BuildCommand(testAsset, "App");
 
             buildCommand
                 .Execute(msbuildArgs)
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp2.1", runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: runtimeIdentifier);
             var selfContainedExecutable = $"App{Constants.ExeSuffix}";
 
             string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
@@ -84,37 +83,38 @@ namespace Microsoft.NET.Build.Tests
                 });
             }
 
-            var projectPath = Path.Combine(testAsset.TestRoot, "App");
-
-            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(testAsset, "App");
             restoreCommand
                 .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Log, projectPath);
+            var buildCommand = new BuildCommand(testAsset, "App");
 
             buildCommand
                 .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}", $"/p:TestRuntimeIdentifier={runtimeIdentifier}", "/p:SelfContained=false")
                 .Should().Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp2.1", runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: runtimeIdentifier);
 
             outputDirectory.Should().NotHaveSubDirectories();
-            outputDirectory.Should().OnlyHaveFiles(new[] {
+
+            string[] expectedFiles = new[] {
                 $"App{Constants.ExeSuffix}",
                 "App.dll",
                 "App.pdb",
                 "App.deps.json",
                 "App.runtimeconfig.json",
-                "App.runtimeconfig.dev.json",
                 "LibraryWithoutRid.dll",
                 "LibraryWithoutRid.pdb",
                 "LibraryWithRid.dll",
                 "LibraryWithRid.pdb",
                 "LibraryWithRids.dll",
                 "LibraryWithRids.pdb",
-            });
+                $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}"
+            };
+
+            outputDirectory.Should().OnlyHaveFiles(expectedFiles.Where(x => !String.IsNullOrEmpty(x)).ToList() );
 
             new DotnetCommand(Log, Path.Combine(outputDirectory.FullName, "App.dll"))
                 .Execute()

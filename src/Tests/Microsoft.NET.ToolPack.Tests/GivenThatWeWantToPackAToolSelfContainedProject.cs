@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Build.Tasks;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -41,16 +42,16 @@ namespace Microsoft.NET.ToolPack.Tests
         {
             TestAsset helloWorldAsset = CreateAsset();
 
-            var packCommand = new BuildCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new BuildCommand(helloWorldAsset);
 
             CommandResult result = packCommand.Execute();
             result.ExitCode.Should().Be(0);
         }
 
-        private TestAsset CreateAsset()
+        private TestAsset CreateAsset([CallerMemberName] string callingMethod = "")
         {
             TestAsset helloWorldAsset = _testAssetsManager
-                                                    .CopyTestAsset("PortableTool", "PackSelfContainedTool")
+                                                    .CopyTestAsset("PortableTool", callingMethod)
                                                     .WithSource()
                                                     .WithProjectChanges(project =>
                                                     {

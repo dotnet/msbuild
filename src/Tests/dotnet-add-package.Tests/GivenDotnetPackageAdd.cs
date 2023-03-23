@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Add.PackageReference;
-using System;
 using System.IO;
-using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.Cli.Package.Add.Tests
 {
@@ -31,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
                 .Path;
 
             var packageName = "Newtonsoft.Json";
-            var packageVersion = "9.0.1";
+            var packageVersion = "13.0.1";
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("add", "package", packageName, "--version",  packageVersion);
@@ -39,6 +40,59 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
             cmd.StdOut.Should().Contain($"PackageReference for package '{packageName}' version '{packageVersion}' " +
                 $"added to file '{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj'.");
             cmd.StdErr.Should().BeEmpty();
+        }
+
+        public static readonly List<object[]> AddPkg_PackageVersionsLatestPrereleaseSucessData
+            = new List<object[]>
+            {
+                    new object[] { new string[] { "0.0.5", "0.9.0", "1.0.0-preview.3" }, "1.0.0-preview.3" },
+                    new object[] { new string[] { "0.0.5", "0.9.0", "1.0.0-preview.3", "1.1.1-preview.7" }, "1.1.1-preview.7" },
+                    new object[] { new string[] { "0.0.5", "0.9.0", "1.0.0" }, "1.0.0" },
+                    new object[] { new string[] { "0.0.5", "0.9.0", "1.0.0-preview.3", "2.0.0" }, "2.0.0" },
+                    new object[] { new string[] { "1.0.0-preview.1", "1.0.0-preview.2", "1.0.0-preview.3" }, "1.0.0-preview.3" },
+            };
+
+        [Theory]
+        [MemberData(nameof(AddPkg_PackageVersionsLatestPrereleaseSucessData))]
+        public void WhenPrereleaseOptionIsPassed(string[] inputVersions, string expectedVersion)
+        {
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
+            TestProject testProject = new TestProject()
+            {
+                Name = "Project",
+                IsExe = false,
+                TargetFrameworks = targetFramework,
+            };
+
+            var packages = inputVersions.Select(e => GetPackagePath(targetFramework, "A", e, identifier: expectedVersion + e +  inputVersions.GetHashCode().ToString())).ToArray(); 
+
+            testProject.AdditionalProperties.Add("RestoreSources",
+                                     "$(RestoreSources);" + string.Join(";", packages.Select(package => Path.GetDirectoryName(package))));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: inputVersions.GetHashCode().ToString());
+
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute("add", "package", "--prerelease", "A")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining($"PackageReference for package 'A' version '{expectedVersion}' ")
+                .And.NotHaveStdErr();
+        }
+
+        [Fact]
+        public void WhenPrereleaseAndVersionOptionIsPassedFails()
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppSimple")
+                .WithSource()
+                .Path;
+
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"add", "package", "--prerelease", "Newtonsoft.Json", "--version", "13.0.1")
+                .Should().Fail()
+                .And.HaveStdOutContaining("The --prerelease and --version options are not supported in the same command.");
         }
 
         [Fact]
@@ -53,17 +107,14 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
 
             var csproj = $"{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj";
             var packageName = "Newtonsoft.Json";
-            var packageVersion = "9.0.1";
+            var packageVersion = "13.0.1";
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("add", csproj, "package", packageName, "--version", packageVersion);
-
-            cmd.Should().Pass();
-
-            cmd.StdOut.Should()
-               .Contain($"PackageReference for package \'{packageName}\' version \'{packageVersion}\' added to file '{csproj}'.");
-
-            cmd.StdErr.Should().BeEmpty();
+                .Execute("add", csproj, "package", packageName, "--version", packageVersion)
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining($"PackageReference for package \'{packageName}\' version \'{packageVersion}\' added to file '{csproj}'.")
+                .And.NotHaveStdErr();
         }
 
         [Fact]
@@ -80,17 +131,14 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
 
             var csproj = $"{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj";
             var packageName = "Newtonsoft.Json";
-            var packageVersion = "9.0.1";
+            var packageVersion = "13.0.1";
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("add", csproj, "package", packageName, "--version", packageVersion, "--package-directory", packageDirectory);
-
-            cmd.Should().Pass();
-
-            cmd.StdOut.Should()
-               .Contain($"PackageReference for package \'{packageName}\' version \'{packageVersion}\' added to file '{csproj}'.");
-
-            cmd.StdErr.Should().BeEmpty();
+                .Execute("add", csproj, "package", packageName, "--version", packageVersion, "--package-directory", packageDirectory)
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining($"PackageReference for package \'{packageName}\' version \'{packageVersion}\' added to file '{csproj}'.")
+                .And.NotHaveStdErr();
 
             var restoredPackageDirectory = Path.Combine(packageDirectory, packageName.ToLowerInvariant(), packageVersion);
             var packageDirectoryExists = Directory.Exists(restoredPackageDirectory);
@@ -107,14 +155,15 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
                 .Path;
 
             var packageName = "Newtonsoft.Json";
-            var packageVersion = "9.0.1";
+            var packageVersion = "13.0.1";
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute($"add", "package", "--version", packageVersion, packageName);
-            cmd.Should().Pass();
-            cmd.StdOut.Should().Contain($"PackageReference for package '{packageName}' version '{packageVersion}' " +
-                $"added to file '{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj'.");
-            cmd.StdErr.Should().BeEmpty();
+                .Execute($"add", "package", "--version", packageVersion, packageName)
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining($"PackageReference for package '{packageName}' version '{packageVersion}' " +
+                $"added to file '{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj'.")
+                .And.NotHaveStdErr();
         }
 
         [Fact]
@@ -127,15 +176,16 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
                 .Path;
 
             var packageName = "Newtonsoft.Json";
-            var packageVersion = "9.0.1";
-            var framework = "netcoreapp3.0";
+            var packageVersion = "13.0.1";
+            var framework = ToolsetInfo.CurrentTargetFramework;
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute($"add", "package", packageName, "--version", packageVersion, "--framework", framework);
-            cmd.Should().Pass();
-            cmd.StdOut.Should().Contain($"PackageReference for package '{packageName}' version '{packageVersion}' " +
-                $"added to file '{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj'.");
-            cmd.StdErr.Should().BeEmpty();
+                .Execute($"add", "package", packageName, "--version", packageVersion, "--framework", framework)
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining($"PackageReference for package '{packageName}' version '{packageVersion}' " +
+                $"added to file '{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj'.")
+                .And.NotHaveStdErr();
         }
 
         [Fact]
@@ -148,13 +198,14 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
                 .Path;
 
             var packageName = "Newtonsoft.Json";
-            var packageVersion = "9.0.1";
+            var packageVersion = "13.0.1";
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute($"add", "package", packageName, "--version", packageVersion);
-            cmd.Should().Pass();
-            cmd.StdOut.Should().NotContain("Microsoft (R) Build Engine version");
-            cmd.StdErr.Should().BeEmpty();
+                .Execute($"add", "package", packageName, "--version", packageVersion)
+                .Should()
+                .Pass()
+                .And.NotHaveStdOutContaining("Microsoft (R) Build Engine version")
+                .And.NotHaveStdErr();
         }
 
         [Fact]
@@ -167,9 +218,9 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
 
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("add", "package", "package1", "package2", "package3");
-            cmd.Should().Fail();
-            cmd.StdErr.Should().Contain(LocalizableStrings.SpecifyExactlyOnePackageReference);
+                .Execute("add", "package", "package1", "package2", "package3")
+                .Should()
+                .Fail();
         }
 
         [Fact]
@@ -182,9 +233,34 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
 
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute($"add", "package");
-            cmd.Should().Fail();
-            cmd.StdErr.Should().Contain(LocalizableStrings.SpecifyExactlyOnePackageReference);
+                .Execute($"add", "package")
+                .Should()
+                .Fail();
+        }
+
+
+        private static TestProject GetProject(string targetFramework, string referenceProjectName, string version)
+        {
+            var project = new TestProject()
+            {
+                Name = referenceProjectName,
+                TargetFrameworks = targetFramework,
+            };
+            project.AdditionalProperties.Add("Version", version);
+            return project;
+        }
+
+        private string GetPackagePath(string targetFramework, string packageName, string version, [CallerMemberName] string callingMethod = "", string identifier = null)
+        {
+            var project = GetProject(targetFramework, packageName, version);
+            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier).TestRoot, packageName);
+
+            packCommand
+                .Execute()
+                .Should()
+                .Pass();
+            return packCommand.GetNuGetPackage(packageName, packageVersion: version);
         }
     }
 }
+

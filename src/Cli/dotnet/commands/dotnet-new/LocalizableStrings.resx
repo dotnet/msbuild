@@ -1,0 +1,311 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CapabilityExpressionEvaluator_Exception_InvalidExpression" xml:space="preserve">
+    <value>Invalid expression, position: {0}.</value>
+  </data>
+  <data name="Diagnostics_OptionDescription" xml:space="preserve">
+    <value>Enables diagnostic output.</value>
+  </data>
+  <data name="DisableProjectContextEval_OptionDescription" xml:space="preserve">
+    <value>Disables evaluating project context using MSBuild.</value>
+  </data>
+  <data name="DisableSdkTemplates_OptionDescription" xml:space="preserve">
+    <value>If present, prevents templates bundled in the SDK from being presented.</value>
+  </data>
+  <data name="MSBuildEvaluationResult_Error_NoProjectFound" xml:space="preserve">
+    <value>No project was found at the path: {0}.</value>
+    <comment>{0} - the file path where project was expected to be found.</comment>
+  </data>
+  <data name="MSBuildEvaluationResult_Error_NotRestored" xml:space="preserve">
+    <value>{0} is not restored.</value>
+    <comment>{0} - the full path to the project.</comment>
+  </data>
+  <data name="MSBuildEvaluator_Error_NoTargetFramework" xml:space="preserve">
+    <value>Project '{0}' is a SDK-style project, but does not specify the framework.</value>
+    <comment>{0} - the full path to the project.</comment>
+  </data>
+  <data name="MultipleProjectsEvaluationResult_Error" xml:space="preserve">
+    <value>Multiple projects found: {0}.</value>
+    <comment>{0} - semi-colon separated list of path to projects found.</comment>
+  </data>
+  <data name="PostAction_AddProjToSln_Error_NoProjectsToAdd" xml:space="preserve">
+    <value>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</value>
+  </data>
+  <data name="PostAction_AddProjToSln_Error_NoSolutionFile" xml:space="preserve">
+    <value>Unable to determine which solution file to add the reference to.</value>
+  </data>
+  <data name="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified" xml:space="preserve">
+    <value>Add project reference to solution action is not configured correctly in the template.
+    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</value>
+    <comment>do not translate: 'solutionFolder', 'inRoot'</comment>
+  </data>
+  <data name="PostAction_AddProjToSln_Failed" xml:space="preserve">
+    <value>Failed to add project(s) to the solution: {0}</value>
+    <comment>{0} - the reason why operation failed, normally ends with period</comment>
+  </data>
+  <data name="PostAction_AddProjToSln_Failed_NoReason" xml:space="preserve">
+    <value>Failed to add project(s) to a solution file.</value>
+  </data>
+  <data name="PostAction_AddProjToSln_Running" xml:space="preserve">
+    <value>Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</value>
+    <comment>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</comment>
+  </data>
+  <data name="PostAction_AddProjToSln_InRoot_Running" xml:space="preserve">
+    <value>Adding
+    project(s): {0}
+    in the root of solution file: {1}</value>
+    <comment>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</comment>
+  </data>
+  <data name="PostAction_AddProjToSln_Succeeded" xml:space="preserve">
+    <value>Successfully added project(s) to a solution file.</value>
+  </data>
+  <data name="PostAction_AddReference_AddPackageReference" xml:space="preserve">
+    <value>Adding a package reference {0} to project file {1}:</value>
+  </data>
+  <data name="PostAction_AddReference_AddPackageReference_Failed" xml:space="preserve">
+    <value>Failed to add package reference: {0}</value>
+    <comment>{0} - the reason why operation failed, normally ends with period</comment>
+  </data>
+  <data name="PostAction_AddReference_AddPackageReference_WithVersion" xml:space="preserve">
+    <value>Adding a package reference {0} (version: {1}) to project file {2}:</value>
+  </data>
+  <data name="PostAction_AddReference_AddProjectReference" xml:space="preserve">
+    <value>Adding a project reference {0} to project file {1}:</value>
+  </data>
+  <data name="PostAction_AddReference_AddProjectReference_Failed" xml:space="preserve">
+    <value>Failed to add project reference: {0}</value>
+    <comment>{0} - the reason why operation failed, normally ends with period</comment>
+  </data>
+  <data name="PostAction_AddReference_Error_ActionMisconfigured" xml:space="preserve">
+    <value>Add reference action is not configured correctly in the template.</value>
+  </data>
+  <data name="PostAction_AddReference_Error_FrameworkNotSupported" xml:space="preserve">
+    <value>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</value>
+  </data>
+  <data name="PostAction_AddReference_Error_ProjFileListHeader" xml:space="preserve">
+    <value>Project files found:</value>
+  </data>
+  <data name="PostAction_AddReference_Error_UnresolvedProjFile" xml:space="preserve">
+    <value>Unable to determine which project file to add the reference to.</value>
+  </data>
+  <data name="PostAction_AddReference_Error_UnsupportedRefType" xml:space="preserve">
+    <value>Adding reference type {0} is not supported.</value>
+  </data>
+  <data name="PostAction_AddReference_Failed" xml:space="preserve">
+    <value>Failed to add a reference to the project file.</value>
+  </data>
+  <data name="PostAction_AddReference_Succeeded" xml:space="preserve">
+    <value>Successfully added a reference to the project file.</value>
+  </data>
+  <data name="PostAction_Restore_Error_FailedToDetermineProjectToRestore" xml:space="preserve">
+    <value>Couldn't determine files to restore.</value>
+  </data>
+  <data name="PostAction_Restore_Error_NoProjectsToRestore" xml:space="preserve">
+    <value>No projects are configured to restore. Check primary outputs configuration in template.json.</value>
+  </data>
+  <data name="PostAction_Restore_Failed" xml:space="preserve">
+    <value>Restore failed.</value>
+  </data>
+  <data name="PostAction_Restore_RestoreFailed" xml:space="preserve">
+    <value>Failed to perform restore: {0}</value>
+    <comment>{0} - the reason why operation failed, normally ends with period</comment>
+  </data>
+  <data name="PostAction_Restore_Running" xml:space="preserve">
+    <value>Restoring {0}:</value>
+    <comment>{0} - path to a project to restore</comment>
+  </data>
+  <data name="PostAction_Restore_Succeeded" xml:space="preserve">
+    <value>Restore succeeded.</value>
+  </data>
+  <data name="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed" xml:space="preserve">
+    <value>Failed to create constraint '{0}': failed to evaluate the project: {1}</value>
+    <comment>{0} - type of constraint (non-localizable), {1} - localized reason why evaluation failed, ends with period.</comment>
+  </data>
+  <data name="ProjectCapabilityConstraintFactory_Exception_NoEvaluator" xml:space="preserve">
+    <value>Failed to create constraint '{0}': {1} component is not available.</value>
+    <comment>{0} - type of constraint (non-localizable), {1} - name of required component (non-localizable).</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_DisplayName" xml:space="preserve">
+    <value>Project capabiltities</value>
+  </data>
+  <data name="ProjectCapabilityConstraint_Error_ArgumentShouldBeString" xml:space="preserve">
+    <value>argument should be a string</value>
+    <comment>part of a sentence</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Error_ArgumentShouldNotBeEmpty" xml:space="preserve">
+    <value>arguments should not contain empty values</value>
+    <comment>part of a sentence</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Error_InvalidConstraintConfiguration" xml:space="preserve">
+    <value>Invalid constraint configuration</value>
+    <comment>part of a sentence</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Error_InvalidJson" xml:space="preserve">
+    <value>invalid JSON</value>
+    <comment>part of a sentence</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_EvaluationFailed_Message" xml:space="preserve">
+    <value>Failed to evaluate project context: {0}</value>
+    <comment>{0} - failure reason</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_Message" xml:space="preserve">
+    <value>The template needs project capability '{0}', and current project ({1}) does not satisfy it.</value>
+    <comment>{0} - project capability expression (non-localizable), {1} - path to the project.</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA" xml:space="preserve">
+    <value>Specify the project to use using {0} option.</value>
+    <comment>{0} - option to use - non localizable</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_NonSDKStyle_Message" xml:space="preserve">
+    <value>The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</value>
+    <comment>{0} - path to the project</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_NoProjectFound_CTA" xml:space="preserve">
+    <value>This template can only be created inside the project.</value>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_NotRestored_CTA" xml:space="preserve">
+    <value>Run 'dotnet restore {0}' to restore the project.</value>
+    <comment>{Locked="dotnet restore {0}"}</comment>
+  </data>
+  <data name="ProjectContextSymbolSource_DisplayName" xml:space="preserve">
+    <value>Project context</value>
+  </data>
+  <data name="SdkInfoProvider_Message_InstallSdk" xml:space="preserve">
+    <value>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</value>
+    <comment>{0} is the list of supported versions.</comment>
+  </data>
+  <data name="SdkInfoProvider_Message_SwitchSdk" xml:space="preserve">
+    <value>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</value>
+    <comment>{0} is the list of installed and supported versions.</comment>
+  </data>
+  <data name="Verbosity_OptionDescription" xml:space="preserve">
+    <value>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</value>
+  </data>
+  <data name="WorkloadInfoProvider_Message_AddWorkloads" xml:space="preserve">
+    <value>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</value>
+    <comment>{Locked="dotnet workload search"}</comment>
+  </data>
+</root>

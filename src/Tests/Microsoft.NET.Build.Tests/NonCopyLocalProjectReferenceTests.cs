@@ -24,12 +24,11 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void NonCopyLocalProjectReferenceDoesNotGoToDeps()
         {
-            var targetFramework = "netcoreapp3.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
 
             var referencedProject = new TestProject
             {
                 Name = "ReferencedProject",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = false,
             };
@@ -37,7 +36,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "MainProject",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = true,
                 ReferencedProjects = { referencedProject },
@@ -53,7 +51,7 @@ namespace Microsoft.NET.Build.Tests
                        .SingleOrDefault()
                        ?.Add(new XAttribute("Private", "False")));
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);

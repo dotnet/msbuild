@@ -13,7 +13,7 @@ using Microsoft.NET.HostModel.ComHost;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class GenerateClsidMap : TaskBase
+    public class GenerateClsidMap : TaskWithAssemblyResolveHooks
     {
         [Required]
         public string IntermediateAssembly { get; set; }

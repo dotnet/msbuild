@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="DotnetWorkloadInfoLabel">
+        <source>.NET workloads installed:</source>
+        <target state="new">.NET workloads installed:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MalformedText">
         <source>Malformed command text '{0}'</source>
         <target state="translated">Hatalı biçimlendirilmiş komut metni: '{0}'</target>
@@ -28,11 +33,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Belirtilen komut veya dosya bulunamadığından yürütülemedi.
+        <target state="translated">Belirtilen komut veya dosya bulunamadığından yürütülemedi.
 Bunun nedeni şunlardan biri olabilir:
   * Yerleşik bir dotnet komutunu yanlış yazdınız.
-  * Bir .NET Core programını yürütmeyi amaçladınız, ancak {0} mevcut değil.
-  * Genel bir aracı çalıştırmayı amaçladınız, ancak adı bu olan dotnet ön ekli yürütülebilir dosya PATH üzerinde bulunamadı.</target>
+  * Bir .NET programını yürütmeyi amaçladınız, ancak {0} yok.
+  * Genel bir aracı çalıştırmayı amaçladınız, ancak bu ada sahip dotnet ön ekli yürütülebilir dosya PATH üzerinde bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -76,8 +81,8 @@ Bunun nedeni şunlardan biri olabilir:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">.NET Core SDK (varsa global.json’u yansıtır):</target>
+        <source>.NET SDK:</source>
+        <target state="translated">.NET SDK:</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -92,7 +97,7 @@ Bunun nedeni şunlardan biri olabilir:
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">Belirtilen dosya adı ('{0})' 1024 bayttan uzun</target>
+        <target state="translated">Belirtilen dosya adı '{0}' 1024 bayttan uzun</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
@@ -111,7 +116,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">.NET Core SDK'sı</target>
+        <target state="translated">.NET SDK</target>
         <note />
       </trans-unit>
     </body>

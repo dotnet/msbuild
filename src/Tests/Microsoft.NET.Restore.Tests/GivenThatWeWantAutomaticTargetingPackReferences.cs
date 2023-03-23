@@ -24,7 +24,7 @@ namespace Microsoft.NET.Restore.Tests
         [Theory]
         [InlineData("4.7.1")]
         [InlineData("4.7.2")]
-        [InlineData("4.5.1")]
+        [InlineData("4.5.2")]
         [InlineData("4.8")]
         public void It_restores_net_framework_project_successfully(string version)
         {
@@ -34,10 +34,9 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = "ProjectWithoutTargetingPackRef",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: version);
 
             string projectAssetsJsonPath = Path.Combine(
                 testAsset.Path,
@@ -71,15 +70,14 @@ namespace Microsoft.NET.Restore.Tests
             var testProject = new TestProject()
             {
                 Name = "ProjectWithoutTargetingPackRef",
-                TargetFrameworks = "net471;net472;netcoreapp3.0",
-                IsSdkProject = true,
+                TargetFrameworks = $"net471;net472;{ToolsetInfo.CurrentTargetFramework}",
             };
 
             TestAsset testAsset = null;
             if (includeExplicitReference)
             {
                 // Add explicit reference to assembly packs
-                testAsset = _testAssetsManager.CreateTestProject(testProject).WithProjectChanges(project =>
+                testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: includeExplicitReference.ToString()).WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
                     var itemGroup = project.Root.Elements(ns + "ItemGroup").FirstOrDefault();
@@ -142,7 +140,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = "ProjectWithoutTargetingPackRef",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
 
             // Add explicit reference to assembly packs
@@ -152,7 +149,7 @@ namespace Microsoft.NET.Restore.Tests
                 var itemGroup = project.Root.Elements(ns + "ItemGroup").FirstOrDefault();
                 itemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"Newtonsoft.Json"),
-                    new XAttribute("Version", $"11.0.2")));
+                    new XAttribute("Version", $"13.0.1")));
                 itemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"sqlite"),
                     new XAttribute("Version", $"3.13.0")));
@@ -191,13 +188,12 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = "ProjectWithoutTargetingPackRef",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
             testProject.AdditionalProperties["AutomaticallyUseReferenceAssemblyPackages"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             if (TestProject.ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version472))
             {
                 buildCommand.Execute()

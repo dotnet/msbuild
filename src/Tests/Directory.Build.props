@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.tmp</DefaultItemExcludes>
   </PropertyGroup>
 
   <Import Project="..\..\Directory.Build.props" />
@@ -19,6 +20,9 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     
     <DebugType>embedded</DebugType>
+
+    <!-- Don't generate separate symbol packages for the test packages -->
+    <IncludeSymbols>false</IncludeSymbols>
   </PropertyGroup>
 
 </Project>

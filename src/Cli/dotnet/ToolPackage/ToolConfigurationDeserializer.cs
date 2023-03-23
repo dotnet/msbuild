@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ToolPackage
 
             try
             {
-                using (var fs = new FileStream(pathToXml, FileMode.Open))
+                using (var fs = File.OpenRead(pathToXml))
                 {
                     var reader = XmlReader.Create(fs);
                     dotNetCliTool = (DotNetCliTool)serializer.Deserialize(reader);

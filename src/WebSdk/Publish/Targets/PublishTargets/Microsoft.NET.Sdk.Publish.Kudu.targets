@@ -1,0 +1,60 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Publish.Kudu.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process to deploy web application projects.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="KuduDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+
+
+  <PropertyGroup>
+    <_DotNetPublishFiles>
+      KuduPublish;
+    </_DotNetPublishFiles>
+  </PropertyGroup>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : KuduPublish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <KuduPublishDependsOn>
+      $(KuduPublishDependsOn);
+    </KuduPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="KuduPublish" DependsOnTargets="$(KuduPublishDependsOn)">
+    <ValidateParameter
+    ParameterName="PublishSiteName"
+    ParameterValue="$(PublishSiteName)"/>
+
+    <ValidateParameter
+    ParameterName="UserName"
+    ParameterValue="$(UserName)"/>
+
+    <PropertyGroup>
+      <PublishUrl Condition=" '$(PublishUrl)'=='' ">https://{0}.scm.azurewebsites.net/api/{1}</PublishUrl>
+      <DeployIndividualFiles Condition=" '$(DeployIndividualFiles)' != 'true'">false</DeployIndividualFiles>
+    </PropertyGroup>
+
+    <KuduDeploy
+      PublishIntermediateOutputPath="$(PublishIntermediateOutputPath)"
+      PublishUrl = "$(PublishUrl)"
+      UserName = "$(UserName)"
+      Password ="$(Password)"
+      PublishSiteName ="$(PublishSiteName)">
+    </KuduDeploy>
+  </Target>
+</Project>

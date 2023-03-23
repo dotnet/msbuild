@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Generates the $(project).deps.json file.
     /// </summary>
-    public class GenerateDepsFile : TaskBase
+    public class GenerateDepsFile : TaskWithAssemblyResolveHooks
     {
         [Required]
         public string ProjectPath { get; set; }
@@ -90,7 +90,11 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IsSelfContained { get; set; }
 
+        public bool IsSingleFile { get; set; }
+
         public bool IncludeRuntimeFileVersions { get; set; }
+
+        public bool IncludeProjectsNotInAssetsFile { get; set; }
 
         [Required]
         public string RuntimeGraphPath { get; set; }
@@ -123,20 +127,19 @@ namespace Microsoft.NET.Build.Tasks
 
         private void WriteDepsFile(string depsFilePath)
         {
-            ProjectContext projectContext;
-            if (AssetsFilePath == null)
-            {
-                projectContext = null;
-            }
-            else
+            ProjectContext projectContext = null;
+            LockFileLookup lockFileLookup = null;
+            if (AssetsFilePath != null)
             {
                 LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
                 projectContext = lockFile.CreateProjectContext(
-                 NuGetUtils.ParseFrameworkName(TargetFramework),
-                 RuntimeIdentifier,
-                 PlatformLibraryName,
-                 RuntimeFrameworks,
-                 IsSelfContained);
+                    TargetFramework,
+                    RuntimeIdentifier,
+                    PlatformLibraryName,
+                    RuntimeFrameworks,
+                    IsSelfContained);
+
+                lockFileLookup = new LockFileLookup(lockFile);
             }
 
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
@@ -154,22 +157,42 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ReferenceInfo> referenceAssemblyInfos =
                 ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
 
-            // If there is a generated asset file. The projectContext will have project reference.
-            // So remove it from directReferences to avoid duplication
-            var projectContextHasProjectReferences = projectContext != null;
+            // If there is a generated asset file, the projectContext will contain most of the project references.
+            // So remove any project reference contained within projectContext from directReferences to avoid duplication
             IEnumerable<ReferenceInfo> directReferences =
-                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths,
+                ReferenceInfo.CreateDirectReferenceInfos(
+                    ReferencePaths,
                     ReferenceSatellitePaths,
-                    projectContextHasProjectReferences, isUserRuntimeAssembly);
+                    lockFileLookup,
+                    isUserRuntimeAssembly,
+                    IncludeProjectsNotInAssetsFile);
 
             IEnumerable<ReferenceInfo> dependencyReferences =
                 ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
 
             Dictionary<string, SingleProjectInfo> referenceProjects =
-                SingleProjectInfo.CreateProjectReferenceInfos(ReferencePaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
+                SingleProjectInfo.CreateProjectReferenceInfos(ReferencePaths, ReferenceSatellitePaths,
+                    isUserRuntimeAssembly);
+
+            bool ShouldIncludeRuntimeAsset(ITaskItem item)
+            {
+                if (IsSelfContained)
+                {
+                    if (!IsSingleFile || !item.GetMetadata(MetadataKeys.DropFromSingleFile).Equals("true"))
+                    {
+                        return true;
+                    }
+                }
+                else if (item.HasMetadataValue(MetadataKeys.RuntimePackAlwaysCopyLocal, "true"))
+                {
+                    return true;
+                }
+
+                return false;
+            }
 
             IEnumerable<RuntimePackAssetInfo> runtimePackAssets =
-                IsSelfContained ? RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item)) : Enumerable.Empty<RuntimePackAssetInfo>();
+                RuntimePackAssets.Where(ShouldIncludeRuntimeAsset).Select(RuntimePackAssetInfo.FromItem);
 
             DependencyContextBuilder builder;
             if (projectContext != null)
@@ -190,7 +213,7 @@ namespace Microsoft.NET.Build.Tasks
                 RuntimeGraph runtimeGraph =
                     IsSelfContained ? new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath) : null;
 
-                builder = new DependencyContextBuilder(mainProject, IncludeRuntimeFileVersions, runtimeGraph, projectContext);
+                builder = new DependencyContextBuilder(mainProject, IncludeRuntimeFileVersions, runtimeGraph, projectContext, lockFileLookup);
             }
             else
             {

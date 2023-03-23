@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.CommandLineValidation;
 using Microsoft.DotNet.Tools.Common;
 using Xunit;
 using Xunit.Abstractions;
@@ -26,12 +28,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void AddReferenceHasDefaultArgumentSetToCurrentDirectory()
         {
-            var command = Parser.Instance;
+            var result = Parser.Instance.Parse("dotnet add reference my.csproj");
 
-            var result = command.Parse("dotnet add reference my.csproj");
-
-            result["dotnet"]["add"]
-                .Arguments
+            result.GetValue<string>(AddCommandParser.ProjectArgument)
                 .Should()
                 .BeEquivalentTo(
                     PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
@@ -40,36 +39,25 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void AddReferenceHasInteractiveFlag()
         {
-            var command = Parser.Instance;
+            var result = Parser.Instance.Parse("dotnet add reference my.csproj --interactive");
 
-            var result = command.Parse("dotnet add reference my.csproj --interactive");
-
-            AppliedOption appliedOption = result["dotnet"]["add"]["reference"];
-            CommonOptionResult.GetInteractive(appliedOption).Should().BeTrue();
+            result.GetValue<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
+                .Should().BeTrue();
         }
 
         [Fact]
         public void AddReferenceDoesNotHaveInteractiveFlagByDefault()
         {
-            var command = Parser.Instance;
+            var result = Parser.Instance.Parse("dotnet add reference my.csproj");
 
-            var result = command.Parse("dotnet add reference my.csproj");
-
-            AppliedOption appliedOption = result["dotnet"]["add"]["reference"];
-            CommonOptionResult.GetInteractive(appliedOption).Should().BeFalse();
-        }
-
-        private static bool GetInteractive(AppliedOption appliedOption)
-        {
-            return appliedOption["interactive"].Value<bool>();
+            result.GetValue<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
+                .Should().BeFalse();
         }
 
         [Fact]
         public void AddReferenceWithoutArgumentResultsInAnError()
         {
-            var command = Parser.Instance;
-
-            var result = command.Parse("dotnet add reference");
+            var result = Parser.Instance.Parse("dotnet add reference");
 
             result
                 .Errors

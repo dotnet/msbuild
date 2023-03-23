@@ -26,8 +26,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "AssemblyPartDiscovery",
-                IsSdkProject = true,
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -52,8 +51,7 @@ public class Program
             TestProject referencedProjectWithPart = new TestProject()
             {
                 Name = "ReferencedProjectWithPart",
-                IsSdkProject = true,
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
@@ -69,9 +67,8 @@ class Class1
             TestProject referencedProjectWithMvc = new TestProject()
             {
                 Name = "ReferencedProjectWithMVC",
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
@@ -83,7 +80,7 @@ class Class1
             var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject, identifier: aspnetVersion);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -97,7 +94,7 @@ class Class1
             {
                 FileName = exePath
             };
-            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec);
+            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec.Environment);
 
             ICommand toolCommand = toolCommandSpec.ToCommand().CaptureStdOut();
 

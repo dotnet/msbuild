@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,16 +22,15 @@ namespace Microsoft.NET.Build.Tests
         public GivenThatWeHaveAPackageReferenceWithAliases(ITestOutputHelper log) : base(log)
         { }
 
-        [RequiresMSBuildVersionFact("16.7.0")]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithPackageReferencesWithConflictingTypes()
         {
-            var targetFramework = "netcoreapp5.0";
-            var packageReferences = GetPackageReferencesWithConflictingTypes(targetFramework, "A", "B");
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
+            var packageReferences = GetPackageReferencesWithConflictingTypes(targetFramework, packageNames: new string[] { "A", "B" });
 
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = false,
                 TargetFrameworks = targetFramework,
             };
@@ -43,26 +43,27 @@ namespace Microsoft.NET.Build.Tests
                     packageReferences.Last().NupkgPath,
                     packageReferences.Last().PrivateAssets,
                     aliases: "Special"));
-            var packagesPaths = packageReferences.Select(e => Path.GetDirectoryName(e.NupkgPath));
-
-            testProject.AdditionalProperties.Add("RestoreSources",
-                                     "$(RestoreSources);" + string.Join(";", packagesPaths));
 
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
             testProject.SourceFiles[$"{testProject.Name}.cs"] = ConflictingClassLibUsage;
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var packagesPaths = packageReferences.Select(e => Path.GetDirectoryName(e.NupkgPath));
+            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreBlobFeed };
+            sources.AddRange(packagesPaths);
+            NuGetConfigWriter.Write(testAsset.TestRoot, sources);
+
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();
         }
 
-        [RequiresMSBuildVersionFact("16.7.0")]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithMultiplePackageReferencesWithAliases()
         {
-            var targetFramework = "netcoreapp5.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
 
             var packageReferenceA = GetPackageReference(targetFramework, "A", ClassLibClassA);
             var packageReferenceB = GetPackageReference(targetFramework, "B", ClassLibClassB);
@@ -70,7 +71,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = false,
                 TargetFrameworks = targetFramework,
             };
@@ -90,31 +90,30 @@ namespace Microsoft.NET.Build.Tests
                    packageReferenceB.PrivateAssets,
                    aliases: "Second"));
 
-            testProject.AdditionalProperties.Add("RestoreSources",
-                                     "$(RestoreSources);" + Path.GetDirectoryName(packageReferenceA.NupkgPath) + ";" + Path.GetDirectoryName(packageReferenceB.NupkgPath));
-
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
             testProject.SourceFiles[$"{testProject.Name}.cs"] = ClassLibAandBUsage;
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreBlobFeed, Path.GetDirectoryName(packageReferenceA.NupkgPath), Path.GetDirectoryName(packageReferenceB.NupkgPath) };
+            NuGetConfigWriter.Write(testAsset.TestRoot, sources);
+
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();
         }
 
-        [RequiresMSBuildVersionFact("16.7.0")]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithAPackageReferenceWithMultipleAliases()
         {
-            var targetFramework = "netcoreapp5.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
 
             var packageReferenceA = GetPackageReference(targetFramework, "A", ClassLibMultipleClasses);
 
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = false,
                 TargetFrameworks = targetFramework,
             };
@@ -127,32 +126,34 @@ namespace Microsoft.NET.Build.Tests
                    packageReferenceA.PrivateAssets,
                    aliases: "First,Second"));
 
-            testProject.AdditionalProperties.Add("RestoreSources",
-                                     "$(RestoreSources);" + Path.GetDirectoryName(packageReferenceA.NupkgPath));
-
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
             testProject.SourceFiles[$"{testProject.Name}.cs"] = ClassLibAandBUsage;
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreBlobFeed, Path.GetDirectoryName(packageReferenceA.NupkgPath) };
+            NuGetConfigWriter.Write(testAsset.TestRoot, sources);
+
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();
         }
 
-        private IEnumerable<TestPackageReference> GetPackageReferencesWithConflictingTypes(string targetFramework, params string[] packageNames)
+        private IEnumerable<TestPackageReference> GetPackageReferencesWithConflictingTypes(string targetFramework, string[] packageNames, [CallerMemberName] string callingMethod = "")
         {
+            var result = new List<TestPackageReference>();
             foreach (var packageName in packageNames)
             {
-                yield return GetPackageReference(targetFramework, packageName, ClassLibConflictingMethod);
+                result.Add(GetPackageReference(targetFramework, packageName, ClassLibConflictingMethod, callingMethod, packageName));
             }
+            return result;
         }
 
-        private TestPackageReference GetPackageReference(string targetFramework, string packageName, string projectFileContent)
+        private TestPackageReference GetPackageReference(string targetFramework, string packageName, string projectFileContent, [CallerMemberName] string callingMethod = "", string identifier = null)
         {
             var project = GetProject(targetFramework, packageName, projectFileContent);
-            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project).TestRoot, packageName);
+            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier).TestRoot, packageName);
 
             packCommand
                 .Execute()
@@ -167,7 +168,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = referenceProjectName,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
             project.SourceFiles[$"{referenceProjectName}.cs"] = projectFileContent;
             return project;

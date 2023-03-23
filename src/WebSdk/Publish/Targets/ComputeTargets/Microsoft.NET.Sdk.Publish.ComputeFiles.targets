@@ -1,0 +1,62 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Publish.ComputeFiles.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Only the compute target relevant to the project type will be invoked.  -->
+  <PropertyGroup>
+    <_DotNetPublishComputeFiles>
+      _DetermineProjectType;
+    </_DotNetPublishComputeFiles>
+  </PropertyGroup>
+
+
+  <!--***************************************************************-->
+  <!-- Target _DetermineProjectType                                  -->
+  <!--***************************************************************-->
+
+  <Target Name="_DetermineProjectType" >
+    <PropertyGroup>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(_IsAspNetCoreProject)' == 'true' ">AspNetCore</_PublishProjectType>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(WebJobName)' != '' and '$(WebJobType)' != ''">WebJob</_PublishProjectType>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">Console</_PublishProjectType>
+    </PropertyGroup>
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- This will ensure that all values have the required metadata        -->
+  <!--********************************************************************-->
+  <ItemDefinitionGroup>
+    <DotNetPublishFiles>
+      <DestinationRelativePath></DestinationRelativePath>
+      <Exclude>False</Exclude>
+    </DotNetPublishFiles>
+  </ItemDefinitionGroup>
+
+
+  <!--***************************************************************-->
+  <!-- Target _IncludePrePublishGeneratedContent                     -->
+  <!--***************************************************************-->
+
+  <Target Name="_IncludePrePublishGeneratedContent" BeforeTargets="GetCopyToPublishDirectoryItems" Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
+    <ItemGroup>
+      <!-- First, clean up previously generated content that may have been removed. -->
+      <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="!Exists('%(Identity)')" />
+      <!-- Next, include any newly generated content. -->
+      <_WebProjectGeneratedContent Include="wwwroot\**" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);@(_ContentIncludedByDefault)" />
+      <ContentWithTargetPath Include="@(_WebProjectGeneratedContent)" TargetPath="%(Identity)" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+
+</Project>

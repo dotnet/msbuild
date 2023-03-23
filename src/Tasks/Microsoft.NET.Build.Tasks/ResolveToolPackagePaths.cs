@@ -5,9 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using NuGet.Frameworks;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -26,7 +28,9 @@ namespace Microsoft.NET.Build.Tasks
         public string PublishDir { get; set; }
 
         [Required]
-        public string TargetFramework { get; set; }
+        public string TargetFrameworkMoniker { get; set; }
+
+        public string TargetPlatformMoniker { get; set; }
 
         [Output]
         public ITaskItem[] ResolvedFileToPublishWithPackagePath { get; private set; }
@@ -50,7 +54,12 @@ namespace Microsoft.NET.Build.Tasks
                     Path.Combine(PublishDir,
                     relativePath));
                 var i = new TaskItem(fullpath);
-                i.SetMetadata("PackagePath", $"tools/{TargetFramework}/any/{GetDirectoryPathInRelativePath(relativePath)}");
+
+                var shortFrameworkName = NuGetFramework
+                    .ParseComponents(TargetFrameworkMoniker, TargetPlatformMoniker)
+                    .GetShortFolderName();
+
+                i.SetMetadata("PackagePath", $"tools/{shortFrameworkName}/any/{GetDirectoryPathInRelativePath(relativePath)}");
                 result.Add(i);
             }
 

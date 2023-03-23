@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="DotnetWorkloadInfoLabel">
+        <source>.NET workloads installed:</source>
+        <target state="new">.NET workloads installed:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MalformedText">
         <source>Malformed command text '{0}'</source>
         <target state="translated">Nesprávně naformátovaný text příkazu {0}</target>
@@ -28,10 +33,10 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Spuštění nebylo úspěšné, protože zadaný příkaz nebo soubor se nenašly.
+        <target state="translated">Spuštění nebylo úspěšné, protože zadaný příkaz nebo soubor se nenašly.
 Mezi možné příčiny patří toto:
   * V integrovaném příkazu dotnet je překlep.
-  * Chtěli jste spustit program .NET Core, ale {0} neexistuje.
+  * Chtěli jste spustit program .NET, ale {0} neexistuje.
   * Chtěli jste spustit globální nástroj, ale v proměnné PATH se nepovedlo najít spustitelný soubor s předponou dotnet s tímto názvem.</target>
         <note />
       </trans-unit>
@@ -76,8 +81,8 @@ Mezi možné příčiny patří toto:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">Sada .NET Core SDK (vyjadřující jakýkoli global.json):</target>
+        <source>.NET SDK:</source>
+        <target state="translated">SADA .NET SDK:</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -111,7 +116,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">Sada .NET Core SDK</target>
+        <target state="translated">Sada .NET SDK</target>
         <note />
       </trans-unit>
     </body>

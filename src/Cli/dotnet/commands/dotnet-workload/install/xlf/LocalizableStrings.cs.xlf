@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AdManifestPackageDoesNotExist">
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Manifest reklamy není aktualizován. Balíček manifestu pro {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdManifestUpdated">
+        <source>Updated advertising manifest {0}.</source>
+        <target state="translated">Aktualizoval se manifest reklamy {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CacheMissingPackage">
+        <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
+        <target state="translated">Balíček {0} verze {1} v offline mezipaměti {2} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">Možnosti {0} a {1} nelze použít společně. Při instalaci ze souboru vráceného zpět odeberte {0}. V opačném případě odeberte {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Kontrolují se aktualizované manifesty úloh.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeletingWorkloadPack">
+        <source>Uninstalling workload pack {0} version {1}…</source>
+        <target state="translated">Probíhá odinstalace sady úloh {0} verze {1}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadToCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="translated">ADRESÁŘ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadToCacheOptionDescription">
+        <source>Download packages needed to install a workload to a folder that can be used for offline installation.</source>
+        <target state="translated">Stáhněte si balíčky potřebné pro instalaci úlohy do složky, kterou je možné použít pro offline instalaci.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadingPackToCacheMessage">
+        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
+        <target state="translated">Probíhá stahování balíčku {0} verze {1} do offline mezipaměti {2}…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">Z balíčku {0} se očekávalo jedno pásmo funkce manifestu a složka manifestu ve službě MSI.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedAdManifestUpdate">
+        <source>Failed to update the advertising manifest {0}: {1}.</source>
+        <target state="translated">Nepovedlo se aktualizovat manifest reklamy {0}: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToDownloadPackageManifest">
+        <source>Failed to download manifest package {0}.</source>
+        <target state="translated">Nepovedlo se stáhnout balíček manifestu {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">Nepovedlo se extrahovat informace z MSI: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallWorkloadManifest">
+        <source>Failed to install manifest {0} version {1}: {2}.</source>
+        <target state="translated">Nepodařilo se nainstalovat manifest {0} verze {1}: {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="translated">ADRESÁŘ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromCacheOptionDescription">
+        <source>Complete the operation from cache (offline).</source>
+        <target state="translated">Dokončete operaci z mezipaměti (offline).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GarbageCollectingSdkFeatureBandsMessage">
+        <source>Garbage collecting for SDK feature band(s) {0}...</source>
+        <target state="translated">Pásma funkcí sady SDK {0} pro uvolňování paměti...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GarbageCollectionFailed">
+        <source>Warning: Workload garbage collection failed with error: {0}.</source>
+        <target state="translated">Upozornění: uvolňování paměti úlohy selhalo s chybou: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InadequatePermissions">
+        <source>Inadequate permissions. Run the command with elevated privileges.</source>
+        <target state="translated">Nedostatečná oprávnění. Spusťte příkaz se zvýšenými oprávněními.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncludePreviewOptionDescription">
+        <source>Allow prerelease workload manifests.</source>
+        <target state="translated">Povolit předběžné verze manifestů úloh.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncompatibleManifests">
+        <source>The current SDK isn't compatible with workload manifests of SDK version {0}.</source>
+        <target state="translated">Aktuální sada SDK není kompatibilní s manifesty úlohy sady SDK verze {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallationSucceeded">
+        <source>Successfully installed workload(s) {0}.</source>
+        <target state="translated">Úlohy {0} se úspěšně nainstalovaly.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingPackVersionMessage">
+        <source>Installing pack {0} version {1}...</source>
+        <target state="translated">Instaluje se sada {0} verze {1}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingWorkloadManifest">
+        <source>Installing workload manifest {0} version {1}…</source>
+        <target state="translated">Instaluje se manifest úlohy {0} verze {1}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InsufficientPrivilegeToStartServer">
+        <source>Insufficient privilege to start the server.</source>
+        <target state="translated">Nedostatečná oprávnění pro spuštění serveru</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Chyba při analýze verze {1} pro ID manifestu úlohy {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidWorkloadConfiguration">
+        <source>The settings file in the workload's NuGet package is invalid: {0}</source>
+        <target state="translated">Soubor nastavení v balíčku NuGet úlohy je neplatný: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Install one or more workloads.</source>
+        <target state="translated">Nainstalujte jednu nebo více úloh.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">Konfigurační soubor NuGet, který se použije.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to install the workload for.</source>
+        <target state="translated">Cílová architektura, pro kterou se má úloha nainstalovat</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDoesNotExist">
+        <source>No manifest with ID {0} exists.</source>
+        <target state="translated">Neexistuje žádný manifest s ID {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">Instalační služba MSI manifestu se nenašla v balíčku NuGet {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">Balíček manifestu nebyl přeložen. Balíček manifestu nebo adresa URL pro {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressInstall">
+        <source>Installing {0} </source>
+        <target state="translated">Instaluje se {0}. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressRepair">
+        <source>Repairing {0} </source>
+        <target state="translated">Opravuje se {0} </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressUninstall">
+        <source>Removing {0} </source>
+        <target state="translated">Odebírání {0}. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestsExistForFeatureBand">
+        <source>No manifests exist for SDK version {0}.</source>
+        <target state="translated">Pro sadu SDK verze {0} neexistují žádné manifesty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoTrustWithParentPID">
+        <source>Failed to establish a trust relationship with parent process ({0}).</source>
+        <target state="translated">Nepovedlo se navázat vztah důvěryhodnosti s nadřazeným procesem ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSDoesNotSupportMsi">
+        <source>MSI installations are only supported on Windows.</source>
+        <target state="translated">Instalace MSI jsou podporovány pouze v systému Windows.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PendingReboot">
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Počítač čeká na restartování. Instalace bude pokračovat, ale bude pravděpodobně nutné restartovat počítač.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolvingPackageUrls">
+        <source>Resolving package URLs for workload(s) {0}...</source>
+        <target state="translated">Překládají se adresy URL balíčků pro úlohy {0}…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollBackFailedMessage">
+        <source>Installation rollback failed: {0}</source>
+        <target state="translated">Vrácení instalace se nepovedlo: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
+        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
+        <target state="translated">Neplatná definice vrácení zpět. ID manifestu v definici vrácení zpět {0} neodpovídají nainstalovaným ID manifestu {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollbackDefinitionFileDoesNotExist">
+        <source>Provided rollback definition file {0} doesn't exist.</source>
+        <target state="translated">Zadaný soubor definice vrácení zpět {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackInstall">
+        <source>Workload installation failed. Rolling back installed packs...</source>
+        <target state="translated">Instalace úlohy se nepovedla. Vrací se zpět nainstalované balíčky…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackPackInstall">
+        <source>Rolling back pack {0} installation...</source>
+        <target state="translated">Vrací se zpět instalace balíčku {0}…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipManifestUpdateOptionDescription">
+        <source>Skip updating the workload manifests.</source>
+        <target state="translated">Přeskočit aktualizaci manifestů úlohy</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">Přeskočit ověření podpisu balíčků úloh a instalačních programů</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkippingManifestUpdate">
+        <source>Manifest packages were not found. Skipping manifest update...</source>
+        <target state="translated">Balíčky manifestu se nepovedlo najít. Aktualizace manifestu bude přeskočena...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceOptionDescription">
+        <source>The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</source>
+        <target state="translated">Zdroj balíčku NuGet, který se má použít při obnovení. Chcete-li zadat více zdrojů, opakujte tuto možnost.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">ZDROJ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TempDirOptionDescription">
+        <source>Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</source>
+        <target state="translated">Zadejte dočasný adresář pro tento příkaz, který se má stáhnout a extrahujte balíčky NuGet (musí být zabezpečené).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownInstallType">
+        <source>Unknown installation type: {0}.</source>
+        <target state="translated">Neznámý typ instalace: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedPackError">
+        <source>Pack ID {0} unrecognized.</source>
+        <target state="translated">ID sady {0} se nerozpoznalo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrintDownloadLinkOnlyDescription">
+        <source>Only print the list of links to download without downloading.</source>
+        <target state="translated">Vytiskne pouze seznam odkazů, které se mají stáhnout, aniž by se tento seznam stahoval.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingCacheForPackInstall">
+        <source>Installing package {0} version {1} from offline cache {2}.</source>
+        <target state="translated">Instaluje se balíček {0} verze {1} z offline mezipaměti {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version of the SDK.</source>
+        <target state="translated">Verze sady SDK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallFullCommandNameLocalized">
+        <source>.NET install command</source>
+        <target state="translated">Příkaz instalovat rozhraní .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' doesn't exist.</source>
+        <target state="translated">Konfigurační soubor NuGet {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' isn't a valid NuGet version range.</source>
+        <target state="translated">Zadaná verze {0} není platným rozsahem verzí NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadAlreadyInstalled">
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">{0} úlohy jsou už nainstalované.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadCacheDownloadFailed">
+        <source>Download of workload packs to offline cache failed: {0}</source>
+        <target state="translated">Stažení balíčků úloh do offline mezipaměti se nepovedlo: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdArgumentDescription">
+        <source>The NuGet package ID of the workload to install.</source>
+        <target state="translated">ID balíčku NuGet úlohy, která se má nainstalovat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdArgumentName">
+        <source>WORKLOAD_ID</source>
+        <target state="translated">WORKLOAD_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInstallationFailed">
+        <source>Workload installation failed: {0}</source>
+        <target state="translated">Instalace úlohy se nezdařila: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotRecognized">
+        <source>Workload ID {0} is not recognized.</source>
+        <target state="translated">ID úlohy {0} nebylo rozpoznáno.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotSupportedOnPlatform">
+        <source>Workload ID {0} isn't supported on this platform.</source>
+        <target state="translated">ID úlohy {0} na této platformě není podporované.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPackAlreadyInstalledMessage">
+        <source>Pack {0} version {1} is already installed.</source>
+        <target state="translated">Sada {0} verze {1} se už nainstalovala.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionDescription">
+        <source>The directory where the workload will be installed. The directory will be created if it doesn't exist.</source>
+        <target state="translated">Adresář, do kterého se úloha nainstaluje. Pokud tento adresář neexistuje, vytvoří se.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionName">
+        <source>PATH</source>
+        <target state="translated">CESTA</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
+        <target state="translated">Jsou k dispozici aktualizace úloh. Pokud chcete získat další informace, spusťte `dotnet workload list`.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingPackInstallRecordMessage">
+        <source>Writing workload pack installation record for {0} version {1}...</source>
+        <target state="translated">Zapisuje se záznam instalace sady úloh pro {0} verze {1}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingWorkloadInstallRecordMessage">
+        <source>Writing workload installation record for {0}...</source>
+        <target state="translated">Zapisuje se záznam instalace úlohy pro {0}...</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

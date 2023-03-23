@@ -5,13 +5,20 @@
     <WriteLinesToFile File="$(OutputPath)/.toolsetversion"
                       Lines="$(GitCommitHash);$(Version);$(Rid)"
                       Overwrite="true" />
-    
+
     <!-- The .version file in the final product will be the .NET Core SDK version.  But
          for the layout we produce here, use the toolset information, so that we don't
          just always use the stage 0 version. -->
     <WriteLinesToFile File="$(OutputPath)/.version"
                       Lines="$(GitCommitHash);$(Version);$(Rid)"
                       Overwrite="true" />
+
+	<!-- Development env and CI loads DotnetFiles type from the following location
+	      The resolution of the product version (https://github.com/dotnet/sdk/blob/main/src/Cli/Microsoft.DotNet.Cli.Utils/DotnetFiles.cs#L21)
+		  then need the version file there as well. -->
+    <Copy SourceFiles="$(OutputPath)/.version" DestinationFiles="$(BaseOutputPath)$(Configuration)/.version" SkipUnchangedFiles="true" />
+
+
   </Target>
 
   <Target Name="PublishRoslyn"
@@ -20,7 +27,7 @@
       <RoslynDirectory>$(OutputPath)/Roslyn</RoslynDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.net.compilers.toolset/$(MicrosoftNetCompilersToolsetPackageVersion)/tasks/netcoreapp3.1/**/*" />
+      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.net.compilers.toolset/$(MicrosoftNetCompilersToolsetPackageVersion)/tasks/net6.0/**/*" />
     </ItemGroup>
     <Error Condition="'@(RoslynBits)' == ''" Text="Something moved around in Roslyn package, adjust code here accordingly. TFM change?" />
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -30,42 +37,145 @@
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
+  <Target Name="PublishNETAnalyzers"
+          BeforeTargets="Build;PublishNetSdk">
+     <PropertyGroup>
+      <AnalyzerAssembliesDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\analyzers</AnalyzerAssembliesDirectory>
+      <AnalyzerTargetsDirectory>$(AnalyzerAssembliesDirectory)\build</AnalyzerTargetsDirectory>
+      <AnalyzerConfigDirectory>$(AnalyzerTargetsDirectory)\config</AnalyzerConfigDirectory>
+      <CodeStyleAssembliesCSharpDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\codestyle\cs</CodeStyleAssembliesCSharpDirectory>
+      <CodeStyleAssembliesVisualBasicDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\codestyle\vb</CodeStyleAssembliesVisualBasicDirectory>
+      <CodeStyleCSharpTargetsDirectory>$(CodeStyleAssembliesCSharpDirectory)\build</CodeStyleCSharpTargetsDirectory>
+      <CodeStyleVisualBasicTargetsDirectory>$(CodeStyleAssembliesVisualBasicDirectory)\build</CodeStyleVisualBasicTargetsDirectory>
+      <CodeStyleCSharpConfigDirectory>$(CodeStyleCSharpTargetsDirectory)\config</CodeStyleCSharpConfigDirectory>
+      <CodeStyleVisualBasicConfigDirectory>$(CodeStyleVisualBasicTargetsDirectory)\config</CodeStyleVisualBasicConfigDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/cs/**/*.dll" />
+      <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll" />
+      <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props" />
+      <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets" />
+      <AnalyzerConfig Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/buildTransitive/config/**/*" />
+
+      <ILLinkAnalyzersTargets Include="$(PkgMicrosoft_NET_ILLink_Tasks)/build/Microsoft.NET.ILLink.Analyzers.props" />
+      <ILLinkAnalyzersAssemblies Include="$(PkgMicrosoft_NET_ILLink_Tasks)/analyzers/dotnet/cs/**/*.dll" />
+
+      <CodeStyleCSharpAssemblies Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/analyzers/dotnet/cs/**/*.dll" />
+      <CodeStyleVisualBasicAssemblies Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/analyzers/dotnet/vb/**/*.dll" />
+      <!-- The props files from these packages explicitly say they should never be included in the SDK -->
+      <CodeStyleCSharpTargets Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/Microsoft.CodeAnalysis.CSharp.CodeStyle.targets" />
+      <CodeStyleVisualBasicTargets Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/Microsoft.CodeAnalysis.VisualBasic.CodeStyle.targets" />
+      <!-- The files in the build/config folder are identical across packages -->
+      <CodeStyleCSharpConfig Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/config/**/*" />
+      <CodeStyleVisualBasicConfig Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/config/**/*" />
+    </ItemGroup>
+    <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(AnalyzerTargets)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(AnalyzerConfig)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleCSharpAssemblies)' == ''" Text="Something moved around in the C# Code style package, could not find assembles. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleVisualBasicAssemblies)' == ''" Text="Something moved around in the VB Code style package, could not find assembles. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleCSharpTargets)' == ''" Text="Something moved around in Code style packeges, could not find targets/props. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleVisualBasicTargets)' == ''" Text="Something moved around in Code style packeges, could not find targets/props. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleCSharpConfig)' == ''" Text="Something moved around in Code style packeges, could not find globalconfig files. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleVisualBasicConfig)' == ''" Text="Something moved around in Code style packeges, could not find globalconfig files. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(ILLinkAnalyzersTargets)' == ''" Text="Something moved around in ILLink Analyzers package, adjust code accordingly." />
+    <Error Condition="'@(ILLinkAnalyzersAssemblies)' == ''" Text="Something moved around in ILLink Analyzers package, adjust code accordingly." />
+
+    <Copy SourceFiles="@(AnalyzerAssemblies)" DestinationFiles="@(AnalyzerAssemblies->'$(AnalyzerAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(AnalyzerTargets)" DestinationFiles="@(AnalyzerTargets->'$(AnalyzerTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(AnalyzerConfig)" DestinationFiles="@(AnalyzerConfig->'$(AnalyzerConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleCSharpAssemblies)" DestinationFiles="@(CodeStyleCSharpAssemblies->'$(CodeStyleAssembliesCSharpDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleVisualBasicAssemblies)" DestinationFiles="@(CodeStyleVisualBasicAssemblies->'$(CodeStyleAssembliesVisualBasicDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleCSharpTargets)" DestinationFiles="@(CodeStyleCSharpTargets->'$(CodeStyleCSharpTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleVisualBasicTargets)" DestinationFiles="@(CodeStyleVisualBasicTargets->'$(CodeStyleVisualBasicTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleCSharpConfig)" DestinationFiles="@(CodeStyleCSharpConfig->'$(CodeStyleCSharpConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleVisualBasicConfig)" DestinationFiles="@(CodeStyleVisualBasicConfig->'$(CodeStyleVisualBasicConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ILLinkAnalyzersTargets)" DestinationFiles="@(ILLinkAnalyzersTargets->'$(AnalyzerTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ILLinkAnalyzersAssemblies)" DestinationFiles="@(ILLinkAnalyzersAssemblies->'$(AnalyzerAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="PublishDotnetFormat"
+          BeforeTargets="Build;PublishNetSdk">
+    <PropertyGroup>
+      <DotnetFormatDestinationDirectory>$(OutputPath)/DotnetTools/dotnet-format</DotnetFormatDestinationDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <DotnetFormatDllFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.dll" />
+      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.json" />
+      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.config" />
+    </ItemGroup>
+
+    <Error Condition="'@(DotnetFormatDllFiles)' == ''" Text="Something moved around in dotnet-format package, adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(DotnetFormatConfigFiles)' == ''" Text="Something moved around in dotnet-format package, adjust code here accordingly. TFM change?" />
+    <Copy SourceFiles="@(DotnetFormatDllFiles)" DestinationFiles="@(DotnetFormatDllFiles->'$(DotnetFormatDestinationDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(DotnetFormatConfigFiles)" DestinationFiles="@(DotnetFormatConfigFiles->'$(DotnetFormatDestinationDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
   <Target Name="PublishMSBuildExtensions"
           DependsOnTargets="GenerateMSBuildExtensions"
           BeforeTargets="Build">
     <Copy SourceFiles="@(MSBuildExtensionsContent)"
           DestinationFiles="@(MSBuildExtensionsContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    
+
   </Target>
 
-  <Target Name="PublishNetSdk"
+  <Target Name="PublishNetSdks"
           BeforeTargets="Build">
+    <ItemGroup>
+      <WebSdkProjectFile Include="$(RepoRoot)src\WebSdk\**\*.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(WebSdkProjectFile)" />
+
     <PropertyGroup>
       <NETSdkSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk</NETSdkSourceRoot>
+      <NETSdkWebSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web</NETSdkWebSourceRoot>
+      <NETSdkPublishSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Publish</NETSdkPublishSourceRoot>
+      <NETSdkWebProjectSystemSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web.ProjectSystem</NETSdkWebProjectSystemSourceRoot>
+      <NETSdkWorkerSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Worker</NETSdkWorkerSourceRoot>
+      <NETSdkBlazorWasmSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly</NETSdkBlazorWasmSourceRoot>
+      <NETSdkRazorSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor</NETSdkRazorSourceRoot>
+      <NETSdkStaticWebAssetsSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.StaticWebAssets</NETSdkStaticWebAssetsSourceRoot>
     </PropertyGroup>
     <ItemGroup>
-      <NETSdkContent Include="$(NETSdkSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk"/>
+      <NETSdksContent Include="$(NETSdkWebSourceRoot)\**\*.*"
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web"/>
+      <NETSdksContent Include="$(NETSdkPublishSourceRoot)\**\*.*"
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Publish"/>
+      <NETSdksContent Include="$(NETSdkWebProjectSystemSourceRoot)\**\*.*"
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web.ProjectSystem"/>
+      <NETSdksContent Include="$(NETSdkWorkerSourceRoot)\**\*.*"
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Worker"/>
+      <NETSdksContent Include="$(NETSdkBlazorWasmSourceRoot)\**\*.*"
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.BlazorWebAssembly"/>
+      <NETSdksContent Include="$(NETSdkRazorSourceRoot)\**\*.*"
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Razor"/>
+      <NETSdksContent Include="$(NETSdkStaticWebAssetsSourceRoot)\**\*.*"
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.StaticWebAssets"/>
     </ItemGroup>
-    <Copy SourceFiles="@(NETSdkContent)"
-      DestinationFiles="@(NETSdkContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-
+    <Copy SourceFiles="@(NETSdksContent)"
+      DestinationFiles="@(NETSdksContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishTestCli"
           BeforeTargets="Build">
     <PropertyGroup>
-      <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.1/</TestCliNuGetDirectory>
+      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' != 'true'" >netcoreapp3.1</TestCliNuGetDirectoryTargetFramework>
+      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'" >net7.0</TestCliNuGetDirectoryTargetFramework>
+      <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/$(TestCliNuGetDirectoryTargetFramework)/</TestCliNuGetDirectory>
     </PropertyGroup>
     <ItemGroup>
       <!-- https://github.com/microsoft/vstest/issues/1886 -->
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NewtonSoft.Json.dll" />
-      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.DotNet.PlatformAbstractions.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.Extensions.DependencyModel.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.Extensions.FileSystemGlobbing.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Memory.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Runtime.CompilerServices.Unsafe.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NuGet.Frameworks.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Text.Json.dll" />
       <TestCliBits Include="$(TestCliNuGetDirectory)**/*"
                    Exclude="@(TestCliBitsToExclude)" />
     </ItemGroup>
@@ -102,6 +212,13 @@
           NewName="%(BundledTools.Identity).deps.json" />
   </Target>
 
+  <Target Name="RemoveResourcesFromDotnetDeps"
+        AfterTargets="Build">
+    <RemoveAssetFromDepsPackages DepsFile="$(OutputPath)/dotnet.deps.json"
+               SectionName="resources"
+               AssetPath="*" />
+  </Target>
+
   <Target Name="MakeFscRunnableAndMoveToPublishDir"
           AfterTargets="Build"
           BeforeTargets="RemoveFilesAfterPublish">
@@ -136,6 +253,58 @@
     <Delete Files="$(FSharpDirectory)/tool_fsc.pdb" />
     <Delete Files="$(FSharpDirectory)/tool_fsc.runtimeconfig.json" />
     <Delete Files="$(FSharpDirectory)/tool_fsc.deps.json" />
+  </Target>
+
+  <Target Name="PublishBlazorWasmTools"
+          BeforeTargets="PublishNetSdks">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/BlazorWasmSdk/Tool/Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="MoveBlazorWasmTools" AfterTargets="PublishBlazorWasmTools">
+    <ItemGroup>
+      <_WebAssemblyToolsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
+    </ItemGroup>
+
+    <Error
+      Text="WebAssembly SDK tools outputs were not found in $(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish"
+      Condition="'@(_WebAssemblyToolsOutput->Count())' == '0'" />
+
+    <Copy
+      SourceFiles="@(_WebAssemblyToolsOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly\tools\$(SdkTargetFramework)\"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="PublishRazorSdkTools"
+          BeforeTargets="PublishNetSdks">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/RazorSdk/Tool/Microsoft.NET.Sdk.Razor.Tool.csproj"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="MoveRazorSdkTools" AfterTargets="PublishRazorSdkTools">
+    <ItemGroup>
+      <_RazorToolOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
+      <!-- To reduce the size of the SDK, we use the compiler dependencies that are located in the `Rosyln/bincore` location
+      instead of shipping our own copies in the Razor compiler. These assemblies will be resolved by path in the
+      rzc executable. -->
+      <_RazorToolOutput Remove="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.CodeAnalysis.dll" />
+      <_RazorToolOutput Remove="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.CodeAnalysis.CSharp.dll" />
+      <_RazorSourceGeneratorsOutput Include="$(PkgMicrosoft_NET_Sdk_Razor_SourceGenerators_Transport)\source-generators\*" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="@(_RazorToolOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\tools\"
+      SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="@(_RazorSourceGeneratorsOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\source-generators\"
+      SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="PublishTargetExtensions"
@@ -226,8 +395,9 @@
     </PropertyGroup>
     <ItemGroup>
       <!-- Exclude F# from retargeting: https://github.com/dotnet/toolset/issues/2866 -->
+      <!-- Exclude testhost from retargeting: https://github.com/dotnet/sdk/issues/24769 -->
       <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json"
-                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json"/>
+                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json;$(OutputPath)/**/testhost-*.runtimeconfig.json"/>
 
       <MSBuild15Items Include="$(OutputPath)/15.0/**/*" />
     </ItemGroup>
@@ -249,6 +419,7 @@
                             PublishRoslyn;
                             PublishMSBuildExtensions;
                             PublishFSharp;
+                            PublishBlazorWasmTools;
                             GenerateCliRuntimeConfigurationFiles;
                             MakeFscRunnableAndMoveToPublishDir;
                             RemoveFscFilesAfterPublish;
@@ -257,7 +428,8 @@
                             PublishSdks;
                             ChmodPublishDir;
                             DeleteSymbolsFromPublishDir;
-                            RetargetTools"
+                            RetargetTools;
+                            GetDotnetWatchRedistOutputDirectory"
           AfterTargets="Build">
     <PropertyGroup>
       <LayoutDirectory>$(BaseOutputPath)$(Configuration)\layouts\</LayoutDirectory>
@@ -268,18 +440,24 @@
     <ItemGroup>
       <ToolsetLayoutInput Include="$(OutputPath)/**/*" />
       <ToolsetLanguagePackInput Include="$(OutputPath)/**/*.resources.dll" />
+
+      <!--
+        Include redist outputs published by dotnet-watch.csproj build.
+      -->
+      <ToolsetLayoutInput Include="$(DotnetWatchRedistOutputDirectory)/**/*" LayoutSubdirectory="DotnetTools\dotnet-watch\"/>
+      <ToolsetLanguagePackInput Include="$(DotnetWatchRedistOutputDirectory)/**/*.resources.dll" LayoutSubdirectory="DotnetTools\dotnet-watch\"/>
     </ItemGroup>
 
     <!-- Set up Items Defining Layouts for easy change -->
     <ItemGroup>
       <LayoutDefinition Include="Sdk">
         <InputFiles>@(ToolsetLayoutInput)</InputFiles>
-        <OutputFiles>@(ToolsetLayoutInput -> '$(SdkLayoutOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
+        <OutputFiles>@(ToolsetLayoutInput -> '$(SdkLayoutOutputDirectory)\%(LayoutSubdirectory)%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
       </LayoutDefinition>
 
       <LayoutDefinition Include="SdkLanguagePack">
         <InputFiles>@(ToolsetLanguagePackInput)</InputFiles>
-        <OutputFiles>@(ToolsetLanguagePackInput -> '$(SdkLanguagePackOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
+        <OutputFiles>@(ToolsetLanguagePackInput -> '$(SdkLanguagePackOutputDirectory)\%(LayoutSubdirectory)%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
       </LayoutDefinition>
     </ItemGroup>
 

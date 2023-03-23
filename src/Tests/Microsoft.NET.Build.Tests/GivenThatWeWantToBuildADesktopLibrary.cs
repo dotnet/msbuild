@@ -39,7 +39,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net46",
-                IsSdkProject = true,
             };
 
             netFrameworkLibrary.PackageReferences.Add(new TestPackageReference("System.Collections.Immutable", "1.4.0"));
@@ -55,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
                 }";
 
             var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "FacadesFromTargetFramework");
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
         }
 
@@ -66,7 +65,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NETStandardLibrary",
                 TargetFrameworks = "netstandard1.4",
-                IsSdkProject = true
             };
 
             netStandardLibrary.SourceFiles["NETStandard.cs"] = @"
@@ -83,8 +81,7 @@ public class NETStandard
             var netFrameworkLibrary = new TestProject()
             {
                 Name = "NETFrameworkLibrary",
-                TargetFrameworks = "net461",
-                IsSdkProject = true
+                TargetFrameworks = "net462",
             };
 
             netFrameworkLibrary.ReferencedProjects.Add(netStandardLibrary);
@@ -114,7 +111,7 @@ public class NETFramework
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -131,7 +128,6 @@ public class NETFramework
             {
                 Name = "NETStandardLibrary",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             netStandardLibrary.SourceFiles["NETStandard.cs"] = @"
@@ -146,8 +142,7 @@ public class NETStandard
             var netFrameworkLibrary = new TestProject()
             {
                 Name = "NETFrameworkLibrary",
-                TargetFrameworks = "net461",
-                IsSdkProject = true
+                TargetFrameworks = "net462",
             };
             netFrameworkLibrary.ReferencedProjects.Add(netStandardLibrary);
 
@@ -162,7 +157,7 @@ public class NETFramework
 ";
             var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "ExchangeNETStandard2");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -183,7 +178,6 @@ public class NETFramework
             {
                 Name = "NETStandardLibrary",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             netStandardLibrary.SourceFiles["NETStandard.cs"] = @"
@@ -201,7 +195,6 @@ public class NETStandard
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net47",
-                IsSdkProject = true
             };
             netFrameworkLibrary.ReferencedProjects.Add(netStandardLibrary);
 
@@ -220,7 +213,7 @@ public class NETFramework
 ";
             var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "ExchangeValueTuple");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -235,7 +228,7 @@ public class NETFramework
                 .CopyTestAsset("DesktopReferencingNetStandardLibrary")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should().Pass();
@@ -254,7 +247,6 @@ public class NETFramework
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
-                IsSdkProject = true
             };
 
             project.SourceFiles[project.Name + ".cs"] = $@"
@@ -285,9 +277,7 @@ public static class {project.Name}
 
                 });
 
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -308,7 +298,6 @@ public static class {project.Name}
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
-                IsSdkProject = true
             };
 
             if (useFacades)
@@ -317,7 +306,6 @@ public static class {project.Name}
                 {
                     Name = "NETStandard20Project",
                     TargetFrameworks = "netstandard2.0",
-                    IsSdkProject = true
                 };
 
                 project.ReferencedProjects.Add(netStandard2Project);
@@ -390,7 +378,6 @@ public static class {project.Name}
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
-                IsSdkProject = true
             };
 
             TestAsset testAsset = _testAssetsManager.CreateTestProject(project, "SimpleNamesWithHintPathsWithNewLines")
@@ -407,7 +394,7 @@ public static class {project.Name}
                             new XElement("HintPath", $"   {Environment.NewLine}{hintPath}   {Environment.NewLine}")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, project.Name));
+            var buildCommand = new BuildCommand(testAsset);
             var msbuildBuildCommand = new MSBuildCommand(Log, "Build", buildCommand.FullPathProjectFile);
             msbuildBuildCommand.Execute().Should().Pass()
                 .And.NotHaveStdOutContaining("System.ArgumentException");
@@ -419,14 +406,13 @@ public static class {project.Name}
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
-                IsSdkProject = true
             };
 
             TestAsset referencedTestAsset = _testAssetsManager
                 .CreateTestProject(referencedProject, "SimpleNamesWithHintPathsWithNewLinesReferenced");
 
             var referencedbuildCommand =
-                new BuildCommand(Log, Path.Combine(referencedTestAsset.TestRoot, referencedProject.Name));
+                new BuildCommand(referencedTestAsset);
 
             referencedbuildCommand.Execute();
 
@@ -442,8 +428,7 @@ public static class {project.Name}
             TestProject testProject = new TestProject()
             {
                 Name = "DependsOnPublish",
-                IsSdkProject = true,
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
@@ -458,7 +443,7 @@ public static class {project.Name}
                         new XAttribute("BeforeTargets", "BeforeBuild")));
                 });
 
-            var buildCommand = new BuildCommand(Log, testInstance.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testInstance);
 
             buildCommand.Execute()
                 .Should()

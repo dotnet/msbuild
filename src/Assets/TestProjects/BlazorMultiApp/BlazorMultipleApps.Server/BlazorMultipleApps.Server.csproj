@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>$(AspNetTestTfm)</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlazorMultipleApps.SecondClient\BlazorMultipleApps.SecondClient.csproj" />
+    <ProjectReference Include="..\BlazorMultipleApps.FirstClient\BlazorMultipleApps.FirstClient.csproj" />
+    <ProjectReference Include="..\BlazorMultipleApps.Shared\BlazorMultipleApps.Shared.csproj" />
+  </ItemGroup>
+
+  <!-- Enabling compression increases build time. We want to avoid this for tests so we
+  disable it here. This doesn't affect any test assertions. -->
+  <PropertyGroup>
+    <_BlazorBrotliCompressionLevel>NoCompression</_BlazorBrotliCompressionLevel>
+  </PropertyGroup>
+
+</Project>

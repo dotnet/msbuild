@@ -1,0 +1,7 @@
+﻿File actions would have been taken:
+  Create: ./MyProject.csproj
+  Create: ./Program.cs
+
+Processing post-creation actions...
+Action would have been taken automatically:
+   Restore NuGet packages required by this project.

@@ -1,11 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using System;
 
 namespace Microsoft.DotNet.Tools.Run
 {
@@ -13,25 +15,41 @@ namespace Microsoft.DotNet.Tools.Run
     {
         public static RunCommand FromArgs(string[] args)
         {
-            var result = Parser.Instance.ParseFrom("dotnet run", args);
+            var parseResult = Parser.Instance.ParseFrom("dotnet run", args);
+            return FromParseResult(parseResult);
+        }
 
-            result.ShowHelpOrErrorIfAppropriate();
-
-            var command = result["dotnet"]["run"].Value<RunCommand>();
-
-            if (result.UnparsedTokens != null)
+        public static RunCommand FromParseResult(ParseResult parseResult)
+        {
+            var project = parseResult.GetValue(RunCommandParser.ProjectOption);
+            if (parseResult.UsingRunCommandShorthandProjectOption())
             {
-                command.Args = command.Args.Concat(result.UnparsedTokens);
+                Reporter.Output.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
+                project = parseResult.GetRunCommandShorthandProjectValues().FirstOrDefault();
             }
+
+            var command = new RunCommand(
+                configuration: parseResult.GetValue(RunCommandParser.ConfigurationOption),
+                framework: parseResult.GetValue(RunCommandParser.FrameworkOption),
+                runtime: parseResult.GetCommandLineRuntimeIdentifier(),
+                noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
+                project: project,
+                launchProfile: parseResult.GetValue(RunCommandParser.LaunchProfileOption),
+                noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
+                noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
+                interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),
+                restoreArgs: parseResult.OptionValuesToBeForwarded(RunCommandParser.GetCommand()),
+                args: parseResult.GetValue(RunCommandParser.ApplicationArguments)
+            );
 
             return command;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            parseResult.HandleDebugSwitch();
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

@@ -32,6 +32,35 @@
         <target state="translated">Nie można przekonwertować wartości właściwości „{0}” na ciąg.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DuplicateCaseInsensitiveLaunchProfileNames">
+        <source>There are several launch profiles with case-sensitive names, which isn't permitted:
+{0}
+Make the profile names distinct.</source>
+        <target state="translated">Istnieje kilka profilów uruchamiania z nazwami z uwzględnieniem wielkości liter, co jest niedozwolone:
+{0}
+Rozróżnij nazwy profilów.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileDoesNotExist">
+        <source>A launch profile with the name '{0}' doesn't exist.</source>
+        <target state="translated">Profil uruchamiania o nazwie „{0}” nie istnieje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyOneProjectAllowed">
+        <source>Only one project can be specified at a time using the `-p` option.</source>
+        <target state="translated">Jednocześnie można określić tylko jeden projekt przy użyciu opcji „-p”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyOptionDescription">
+        <source>Properties to be passed to MSBuild.</source>
+        <target state="translated">Właściwości do przekazania do programu MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandBuilding">
+        <source>Building...</source>
+        <target state="translated">Trwa kompilowanie...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
         <target state="translated">Kompilacja nie powiodła się. Napraw błędy kompilacji i uruchom ją ponownie.</target>
@@ -59,9 +88,9 @@ Projekt ma wiele platform docelowych. Określ platformę do uruchomienia przy u�
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Nie można uruchomić projektu.
+        <target state="translated">Nie można uruchomić projektu.
 Upewnij się, że używany typ projektu umożliwia uruchamianie oraz że element „{0}” obsługuje ten projekt.
-Projekt z możliwością uruchamiania musi mieć moniker TFM z możliwością uruchomienia (np. netcoreapp2.0) i typ OutputType „Exe”.
+Projekt z możliwością uruchamiania musi mieć moniker TFM z możliwością uruchomienia (np. net5.0) i typ OutputType „Exe”.
 Bieżący element {1}: „{2}”.</target>
         <note />
       </trans-unit>
@@ -86,8 +115,8 @@ Bieżący element {1}: „{2}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
-        <source>The specified launch profile could not be located.</source>
-        <target state="translated">Nie można odnaleźć określonego profilu uruchamiania.</target>
+        <source>The specified launch profile '{0}' could not be located.</source>
+        <target state="translated">Nie można odnaleźć określonego profilu uruchamiania „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
@@ -102,14 +131,19 @@ Bieżący element {1}: „{2}”.</target>
         <target state="translated">(Domyślne)</target>
         <note />
       </trans-unit>
+      <trans-unit id="RunCommandProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">Ostrzeżenie NETSDK1174: Skrót -p dla polecenia --project jest przestarzały. Użyj polecenia --project.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">
         <source>Using launch settings from {0}...</source>
         <target state="translated">Używanie ustawień uruchamiania z profilu {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
-        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
-        <target state="translated">Nie można znaleźć profilu o określonej nazwie lub nie jest to prawidłowy obiekt JSON.</target>
+        <source>A profile with the specified name isn't a valid JSON object.</source>
+        <target state="translated">Profil o określonej nazwie nie jest prawidłowym obiektem JSON.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

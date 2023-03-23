@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.resx">
+    <body>
+      <trans-unit id="ConcreteWorkloadHasNoDescription">
+        <source>Workload definition '{0}' is a concrete dev workload but has no description</source>
+        <target state="translated">A definição de carga de trabalho '{0}' é uma carga de trabalho de desenvolvimento concreta, mas não tem nenhuma descrição</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConflictingWorkloadDefinition">
+        <source>Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
+        <target state="translated">A definição de workload '{0}' no manifesto '{1}' [{2}] conflite com o manifesto '{3}' [{4}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConflictingWorkloadPack">
+        <source>Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
+        <target state="translated">O Workload Pack '{0}' no manifesto '{1}' [{2}] conflite com o manifesto '{3}' [{4}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CyclicWorkloadRedirect">
+        <source>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</source>
+        <target state="translated">Redirecionamento de carga de trabalho cíclica '{0}' no manifesto ' {1} ' [{2}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateKeyAtOffset">
+        <source>Duplicate key '{0}' at offset {1}</source>
+        <target state="translated">Chave duplicada '{0}' no deslocamento {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateManifestID">
+        <source>Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</source>
+        <target state="translated">O provedor de manifesto {0} retornou uma ID de manifesto duplicada '{1}' [{2}] que entra em conflito com o manifesto existente [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedBoolAtOffset">
+        <source>Expected boolean value at offset {0}</source>
+        <target state="translated">Valor booliano esperado no deslocamento {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedIntegerAtOffset">
+        <source>Expected integer value at offset {0}</source>
+        <target state="translated">Valor inteiro esperado no deslocamento {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedStringAtOffset">
+        <source>Expected string value at offset {0}</source>
+        <target state="translated">Valor de cadeia de caracteres esperado no deslocamento {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedTokenAtOffset">
+        <source>Expected {0} token at offset {1}</source>
+        <target state="translated">Token {0} esperado no deslocamento {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncompleteDocument">
+        <source>Document ended prematurely</source>
+        <target state="translated">O documento terminou prematuramente</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Versão inválida: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDependencyMissing">
+        <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
+        <target state="translated">Não foi possível encontrar a dependência do manifesto de carga de trabalho '{0}' exigida pelo manifesto '{1}' [{2}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDependencyVersionTooLow">
+        <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
+        <target state="translated">A dependência do manifesto de carga de trabalho '{0}' versão '{1}' é inferior à versão '{2}' exigida pelo manifesto '{3}' [{4}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingBaseWorkload">
+        <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
+        <target state="translated">Não foi possível localizar a carga de trabalho '{0}' estendida pela carga de trabalho '{1}' no manifesto '{2}' [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingOrInvalidManifestVersion">
+        <source>Missing or invalid manifest version</source>
+        <target state="translated">Versão do manifesto ausente ou inválida</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingWorkloadPackKind">
+        <source>Missing kind for workload pack '{0}'</source>
+        <target state="translated">O tipo do pacote de carga de trabalho '{0}' está ausente</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingWorkloadPackVersion">
+        <source>Missing version for workload pack '{0}'</source>
+        <target state="translated">Versão do pacote de carga de trabalho '{0}' ausente</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RedirectWorkloadHasOtherKeys">
+        <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
+        <target state="translated">A carga de trabalho de redirecionamento '{0}' tem chaves diferentes além de 'redirecionar-para'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedTokenAtOffset">
+        <source>Unexpected token '{0}' at offset {1}</source>
+        <target state="translated">Token inesperado '{0}' no deslocamento {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownKeyAtOffset">
+        <source>Unknown key '{0}' at offset {1}</source>
+        <target state="translated">Chave desconhecida '{0}' no deslocamento {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownWorkloadDefinitionKind">
+        <source>Unknown workload definition kind '{0}' at offset {1}</source>
+        <target state="translated">Tipo de definição de carga de trabalho '{0}' desconhecido no deslocamento {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownWorkloadPackKind">
+        <source>Unknown workload pack kind '{0}' at offset {1}</source>
+        <target state="translated">Tipo de pacote de carga de trabalho '{0}' desconhecido no deslocamento {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnresolvedWorkloadRedirect">
+        <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
+        <target state="translated">Destino '{0}' não resolvido para o redirecionamento de carga de trabalho '{1}' no manifesto '{2}' [{3}]</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

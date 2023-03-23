@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -22,21 +22,30 @@ Copyright (c) .NET Foundation. All rights reserved.
          BundledRuntimeIdentifierGraphFile is set. -->
     <RuntimeIdentifierGraphPath Condition="'$(RuntimeIdentifierGraphPath)' == ''">$(BundledRuntimeIdentifierGraphFile)</RuntimeIdentifierGraphPath>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <!-- Disable web SDK implicit package versions for ASP.NET packages, since the .NET SDK now handles that -->
     <EnableWebSdkImplicitPackageVersions>false</EnableWebSdkImplicitPackageVersions>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <__WindowsAppSdkDefaultImageIncludes>**/*.png;**/*.bmp;**/*.jpg;**/*.dds;**/*.tif;**/*.tga;**/*.gif</__WindowsAppSdkDefaultImageIncludes>
+  </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' ">
     <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
     <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
+    <!-- Microsoft.WindowsAppSDK is a NuGet delivered SDK. EnableDefaultWindowsAppSdkContentItems and EnableDefaultWindowsAppSdkPRIResourceItems are overridable properties that the SDK will set to true by default. -->
+    <Content Include="$(__WindowsAppSdkDefaultImageIncludes)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultContentItems)' != 'false' And '$(EnableDefaultWindowsAppSdkContentItems)' == 'true' " />
+    <PRIResource Include="**/*.resw" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultPRIResourceItems)' != 'false' And '$(EnableDefaultWindowsAppSdkPRIResourceItems)' == 'true' "/>
   </ItemGroup>
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultNoneItems)' == 'true' ">
     <None Include="**/*" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
     <None Remove="**/*$(DefaultLanguageSourceExtension)" />
     <None Remove="**/*.resx" />
+    <!-- Microsoft.WindowsAppSDK is a NuGet delivered SDK. EnableDefaultWindowsAppSdkContentItems and EnableDefaultWindowsAppSdkPRIResourceItems are overridable properties that the SDK will set to true by default. -->
+    <None Remove="$(__WindowsAppSdkDefaultImageIncludes)" Condition=" '$(EnableDefaultWindowsAppSdkContentItems)' == 'true' "/>
+    <None Remove="**/*.resw" Condition=" '$(EnableDefaultWindowsAppSdkPRIResourceItems)' == 'true' "/>
   </ItemGroup>
 
   <!-- Automatically reference NETStandard.Library or Microsoft.NETCore.App package if targeting the corresponding target framework.
@@ -48,7 +57,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- If targeting .NET Standard 2.0 or higher, then don't include a dependency on NETStandard.Library in the package produced by pack -->
     <PackageReference Update="NETStandard.Library"
                       Condition=" ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0') "
-                      PrivateAssets="All" 
+                      PrivateAssets="All"
                       Publish="true" />
   </ItemGroup>
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(_TargetFrameworkVersionWithoutV)' >= '2.1'">
@@ -56,11 +65,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    
+
     <!-- Use implicit PackageReference for Microsoft.NETCore.App on versions prior to 3.0.  For 3.0 or higher, use
          an implicit FrameworkReference -->
-    
-    <PackageReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true" 
+
+    <PackageReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true"
                       Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' &lt; '3.0')"/>
 
     <!-- For targeting .NET Core 2.0 or higher, don't include a dependency on Microsoft.NETCore.App in the package produced by pack.
@@ -73,7 +82,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FrameworkReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true"
                         Pack="false"
                         PrivateAssets="All"
-                    Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
+                        Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
+
+    <!-- Allow opt-in to Mono runtime pack for .NET 6.0 or higher -->
+    <FrameworkReference Update="Microsoft.NETCore.App"
+                        RuntimePackLabels="Mono"
+                        Condition="'$(UseMonoRuntime)' == 'true' And ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '6.0')" />
 
   </ItemGroup>
 

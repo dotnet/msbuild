@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                NuGetUtils.ParseFrameworkName(TargetFramework),
+                TargetFramework,
                 RuntimeIdentifier,
                 PlatformLibraryName,
                 RuntimeFrameworks,

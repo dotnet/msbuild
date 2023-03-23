@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
@@ -16,15 +17,9 @@ namespace Microsoft.DotNet.Tools.Sln.List
         private readonly string _fileOrDirectory;
 
         public ListProjectsInSolutionCommand(
-            AppliedOption appliedCommand, 
-            string fileOrDirectory,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-            _fileOrDirectory = fileOrDirectory;
+            _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
         }
 
         public override int Execute()

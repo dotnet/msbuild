@@ -1,0 +1,64 @@
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.ComponentModel;
+using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
+using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.ToolPackage.ToolConfigurationDeserialization;
+using Microsoft.DotNet.Tools;
+
+namespace Microsoft.DotNet.Cli.NuGetPackageDownloader.WorkloadUnixFilePermissions
+{
+    [Serializable]
+    [DesignerCategory("code")]
+    [XmlType(AnonymousType = true)]
+    [XmlRoot(Namespace = "", IsNullable = false)]
+    public class FileList
+    {
+        private FileListFile[] fileField;
+
+        [XmlElement("File")]
+        public FileListFile[] File
+        {
+            get => fileField;
+            set => fileField = value;
+        }
+        
+        public static FileList Deserialize(string pathToXml)
+        {
+            var serializer = new XmlSerializer(typeof(FileList));
+
+            using var fs = new FileStream(pathToXml, FileMode.Open);
+            var reader = XmlReader.Create(fs);
+            FileList fileList = (FileList)serializer.Deserialize(reader);
+            return fileList;
+        }
+    }
+
+    [Serializable]
+    [DesignerCategory("code")]
+    [XmlType(AnonymousType = true)]
+    public class FileListFile
+    {
+        private string pathField;
+
+        private string permissionField;
+
+        [XmlAttribute]
+        public string Path
+        {
+            get => pathField;
+            set => pathField = value;
+        }
+
+        [XmlAttribute]
+        public string Permission
+        {
+            get => permissionField;
+            set => permissionField = value;
+        }
+    }
+}

@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             // build projects separately with BuildProjectReferences=false to simulate VS build behavior
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
+            new BuildCommand(testAsset, "NETCoreCppCliTest")
                 .Execute("-p:Platform=win32")
                 .Should()
                 .Pass();

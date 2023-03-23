@@ -41,5 +41,14 @@ namespace Microsoft.DotNet.Tests
             result.Should().Pass();
             result.StdOut.Trim().Should().Be(expectedVersion);
         }
+
+        [Fact]
+        public void VersionIsNotDisplayedFollowingUnrecognizedCommand()
+        {
+            var result = new DotnetCommand(Log)
+                .Execute(new string[] { "faketool", "--version" });
+
+            result.ExitCode.Should().Be(1);
+        }
     }
 }

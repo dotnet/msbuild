@@ -1,0 +1,21 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Razor.BeforeCommon.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- Configure PreserveCompilationContext and PreserveCompilationReferences defaults for .NET Framework apps and .NET Core apps targets 5.0 and earlier. -->
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' OR ('$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionLessThan($(TargetFrameworkVersion), 6.0)))">
+        <!-- Determines if the deps file includes complication context -->
+        <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">true</PreserveCompilationContext>
+
+        <!-- Determines if the refs folder is produced as part of build \ publish -->
+        <PreserveCompilationReferences Condition="'$(PreserveCompilationReferences)' == ''">false</PreserveCompilationReferences>
+  </PropertyGroup>
+</Project>

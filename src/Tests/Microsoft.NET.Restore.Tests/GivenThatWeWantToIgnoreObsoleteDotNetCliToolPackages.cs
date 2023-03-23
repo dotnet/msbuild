@@ -27,7 +27,6 @@ namespace Microsoft.NET.Restore.Tests
             TestProject toolProject = new TestProject()
             {
                 Name = "ObsoleteCliToolRefRestoreProject",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0",
             };
 

@@ -5,18 +5,19 @@ using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStrings;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.NET.TestFramework.Utilities;
+using Microsoft.DotNet.Cli;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -24,7 +25,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
     {
         private readonly IFileSystem _fileSystem;
         private readonly string _temporaryDirectoryParent;
-        private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
         private readonly BufferedReporter _reporter;
         private readonly string _temporaryDirectory;
@@ -48,9 +48,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _toolManifestEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             _parseResult = Parser.Instance.Parse($"dotnet tool uninstall {_packageIdDotnsay.ToString()}");
-            _appliedCommand = _parseResult["dotnet"]["tool"]["uninstall"];
             _defaultToolUninstallLocalCommand = new ToolUninstallLocalCommand(
-                _appliedCommand,
                 _parseResult,
                 _toolManifestFinder,
                 _toolManifestEditor,
@@ -71,15 +69,15 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _fileSystem.File.Delete(_manifestFilePath);
             Action a = () => _defaultToolUninstallLocalCommand.Execute().Should().Be(0);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                .And.Message.Should()
                .Contain(Tools.Tool.Common.LocalizableStrings.NoManifestGuide);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.Message.Should()
                 .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.VerboseMessage.Should().Contain(string.Format(ToolManifest.LocalizableStrings.ListOfSearched, ""));
         }
 
@@ -91,7 +89,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => _defaultToolUninstallLocalCommand.Execute().Should().Be(0);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                .And.Message.Should()
                .Contain(string.Format(LocalizableStrings.NoManifestFileContainPackageId, _packageIdDotnsay));
         }
@@ -107,9 +105,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var parseResult
                 = Parser.Instance.Parse(
                     $"dotnet tool uninstall {_packageIdDotnsay.ToString()} --tool-manifest {explicitManifestFilePath}");
-            var appliedCommand = parseResult["dotnet"]["tool"]["uninstall"];
             var toolUninstallLocalCommand = new ToolUninstallLocalCommand(
-                appliedCommand,
                 parseResult,
                 _toolManifestFinder,
                 _toolManifestEditor,
@@ -123,15 +119,12 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void WhenRunFromToolUninstallRedirectCommandWithPackageIdItShouldRemoveFromManifestFile()
         {
             var parseResult = Parser.Instance.Parse($"dotnet tool uninstall {_packageIdDotnsay.ToString()}");
-            var appliedCommand = parseResult["dotnet"]["tool"]["uninstall"];
             var toolUninstallLocalCommand = new ToolUninstallLocalCommand(
-                appliedCommand,
                 parseResult,
                 _toolManifestFinder,
                 _toolManifestEditor,
                 _reporter);
             var toolUninstallCommand = new ToolUninstallCommand(
-                appliedCommand,
                 parseResult,
                 toolUninstallLocalCommand: toolUninstallLocalCommand);
 

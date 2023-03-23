@@ -4,24 +4,22 @@
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.List;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
-using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolListLocalCommandTests
     {
-        private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
         private readonly BufferedReporter _reporter;
         private readonly string _temporaryDirectory;
@@ -43,12 +41,15 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         NuGetVersion.Parse("2.1.4"),
                         new[] {new ToolCommandName("package-name")},
                         new DirectoryPath(_temporaryDirectory)), new FilePath(_testManifestPath)),
+                    (new ToolManifestPackage(
+                        new PackageId("foo.bar"),
+                        NuGetVersion.Parse("1.0.8"),
+                        new[] {new ToolCommandName("foo-bar")},
+                        new DirectoryPath(_temporaryDirectory)), new FilePath(_testManifestPath))
                 }
             );
             _parseResult = Parser.Instance.Parse("dotnet tool list");
-            _appliedCommand = _parseResult["dotnet"]["tool"]["list"];
             _defaultToolListLocalCommand = new ToolListLocalCommand(
-                _appliedCommand,
                 _parseResult,
                 _toolManifestInspector,
                 _reporter);
@@ -58,6 +59,39 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void GivenManifestInspectorItPrintsTheTable()
         {
             _defaultToolListLocalCommand.Execute();
+            _reporter.Lines.Count.Should().Be(4);
+            _reporter.Lines.Should().Contain(l => l.Contains("package.id"));
+            _reporter.Lines.Should().Contain(l => l.Contains("2.1.4"));
+            _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
+            _reporter.Lines.Should().Contain(l => l.Contains("package-name"));
+            _reporter.Lines.Should().Contain(l => l.Contains("foo.bar"));
+            _reporter.Lines.Should().Contain(l => l.Contains("1.0.8"));
+            _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
+            _reporter.Lines.Should().Contain(l => l.Contains("foo-bar"));
+        }
+
+        [Fact]
+        public void GivenManifestInspectorWhenCalledFromRedirectCommandItPrintsTheTable()
+        {
+            var command = new ToolListCommand(result: _parseResult,
+                toolListLocalCommand: _defaultToolListLocalCommand);
+            _defaultToolListLocalCommand.Execute();
+            _reporter.Lines.Count.Should().Be(4);
+            _reporter.Lines.Should().Contain(l => l.Contains("package.id"));
+            _reporter.Lines.Should().Contain(l => l.Contains("2.1.4"));
+            _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
+            _reporter.Lines.Should().Contain(l => l.Contains("package-name"));
+            _reporter.Lines.Should().Contain(l => l.Contains("foo.bar"));
+            _reporter.Lines.Should().Contain(l => l.Contains("1.0.8"));
+            _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
+            _reporter.Lines.Should().Contain(l => l.Contains("foo-bar"));
+        }
+
+        [Fact]
+        public void GivenPackageIdArgumentItPrintsTheCorrectPackageInfo()
+        {
+            CreateCommandWithArg("package.id").Execute().Should().Be(0);
+            _reporter.Lines.Count.Should().Be(3);
             _reporter.Lines.Should().Contain(l => l.Contains("package.id"));
             _reporter.Lines.Should().Contain(l => l.Contains("2.1.4"));
             _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
@@ -65,16 +99,20 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         }
 
         [Fact]
-        public void GivenManifestInspectorWhenCalledFromRedirectCommandItPrintsTheTable()
+        public void GivenNotInstalledPackageItPrintsEmpty()
         {
-            var command = new ToolListCommand(_appliedCommand,
-                result: _parseResult,
-                toolListLocalCommand: _defaultToolListLocalCommand);
-            _defaultToolListLocalCommand.Execute();
-            _reporter.Lines.Should().Contain(l => l.Contains("package.id"));
-            _reporter.Lines.Should().Contain(l => l.Contains("2.1.4"));
-            _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
-            _reporter.Lines.Should().Contain(l => l.Contains("package-name"));
+            CreateCommandWithArg("not-installed-package").Execute().Should().Be(1);
+            _reporter.Lines.Count.Should().Be(2);
+        }
+
+        private ToolListLocalCommand CreateCommandWithArg(string arg)
+        {
+            var parseResult = Parser.Instance.Parse("dotnet tool list " + arg);
+            var command = new ToolListLocalCommand(
+                parseResult,
+                _toolManifestInspector,
+                _reporter);
+            return command;
         }
 
         private class FakeManifestInspector : IToolManifestInspector

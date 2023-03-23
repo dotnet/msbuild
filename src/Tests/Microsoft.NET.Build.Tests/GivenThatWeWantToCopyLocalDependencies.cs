@@ -35,18 +35,17 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -56,10 +55,10 @@ namespace Microsoft.NET.Build.Tests
 
             var expectedFiles = new []
             {
+                $"{ProjectName}{Constants.ExeSuffix}",
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 "runtimes/linux-x64/native/libsqlite3.so",
@@ -68,7 +67,7 @@ namespace Microsoft.NET.Build.Tests
                 "runtimes/win7-x86/native/sqlite3.dll"
             };
 
-            outputDirectory.Should().OnlyHaveFiles(AssertionHelper.AppendApphostOnNonMacOS(ProjectName, expectedFiles));
+            outputDirectory.Should().OnlyHaveFiles(expectedFiles);
         }
 
         [Fact]
@@ -79,30 +78,29 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "false";
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute().Should().Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
-            outputDirectory.Should().OnlyHaveFiles(AssertionHelper.AppendApphostOnNonMacOS(ProjectName, new[] {
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{ProjectName}{Constants.ExeSuffix}",
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
-            }));
+            });
         }
 
         [Fact]
@@ -110,25 +108,24 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            var rid = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0");
+            var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
             testProject.AdditionalProperties.Add("RuntimeIdentifier", rid);
             testProject.AdditionalProperties.Add("SelfContained", "false");
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -141,7 +138,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 // NOTE: this may break in the future when the SDK supports platforms that sqlite does not
@@ -157,18 +153,17 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = false
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -190,19 +185,18 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = false
             };
 
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -229,17 +223,16 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0"
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -261,19 +254,18 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0"
             };
 
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
             testProject.AdditionalProperties["CopyLocalRuntimeTargetAssets"] = "true";
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -300,17 +292,16 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "net46"
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -329,24 +320,23 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            var rid = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0");
+            var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
             testProject.AdditionalProperties.Add("RuntimeIdentifier", rid);
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -359,7 +349,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 // NOTE: this may break in the future when the SDK supports platforms that sqlite does not

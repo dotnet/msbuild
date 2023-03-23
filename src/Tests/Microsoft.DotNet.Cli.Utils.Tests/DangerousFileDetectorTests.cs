@@ -5,6 +5,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
@@ -24,6 +25,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
         }
 
+#if NETCOREAPP
+        [SupportedOSPlatform("windows")]
+#endif
         [WindowsOnlyFact]
         public void ItShouldDetectFileWithMarkOfTheWeb()
         {
@@ -63,6 +67,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             new DangerousFileDetector().IsDangerous(testFile).Should().BeFalse();
         }
 
+#if NETCOREAPP
+        [SupportedOSPlatform("windows")]
+#endif
         private static bool HasInternetSecurityManagerNativeApi()
         {
             try

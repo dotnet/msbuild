@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../Strings.resx">
+    <body>
+      <trans-unit id="GlobalJsonResolutionFailed">
+        <source>Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">global.json で指定されている .NET SDK が見つかりません。指定されたバージョンがインストールされていることをご確認ください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">global.json で指定されている .NET SDK バージョン '{0}' が見つかりません。指定されたバージョンがインストールされていることをご確認ください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSDKDirectoryNotFound">
+        <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="translated">{0} が見つかりません。十分新しい .NET SDK がインストールされていることを確認するか、global.json で指定するバージョンを上げてください (どちらも実行する必要がある場合もあります)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSmallerThanMinimumVersion">
+        <source>Version {0} of the .NET SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="translated">.NET SDK バージョン {0} では、MSBuild バージョン {1} 以上が必要です。現在利用可能な MSBuild のバージョンは {2} です。global.json で指定した .NET SDK を、現在利用可能な MSBuild バージョンが求められる古いバージョンに変更します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="translated">.NET SDK のバージョン {0} は、要求されている最低バージョン {1} 未満です。新しい .NET SDK がインストールされていることを確認し、プロジェクトで指定された最低バージョンを上げるか、global.json で指定されたバージョンを上げてください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET SDK is installed or increase the version specified in global.json.</source>
+        <target state="translated">.NET SDK のバージョン {0} が、Visual Studio で必要な最低バージョン {1} 未満です。十分に新しい .NET SDK がインストールされていることを確認するか、global.json で指定されたバージョンを上げてください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateNETCoreSdk">
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">.NET SDK が見つかりません。それがインストールされていること、正しいアーキテクチャについて PATH が構成されていること、そのインストール済みバージョンが global.json で指定されているバージョンと一致していること (指定されている場合) をご確認ください。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

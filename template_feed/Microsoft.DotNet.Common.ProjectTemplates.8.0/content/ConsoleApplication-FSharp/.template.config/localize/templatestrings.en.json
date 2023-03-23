@@ -1,0 +1,16 @@
+{
+  "author": "Microsoft",
+  "name": "Console App",
+  "description": "A project for creating a command-line application that can run on .NET on Windows, Linux and macOS",
+  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
+  "symbols/TargetFrameworkOverride/displayName": "Target framework override",
+  "symbols/Framework/description": "The target framework for the project.",
+  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
+  "symbols/Framework/displayName": "Framework",
+  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
+  "symbols/skipRestore/displayName": "Skip restore",
+  "postActions/restore/description": "Restore NuGet packages required by this project.",
+  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
+  "postActions/open-file/description": "Opens Program.fs in the editor"
+}

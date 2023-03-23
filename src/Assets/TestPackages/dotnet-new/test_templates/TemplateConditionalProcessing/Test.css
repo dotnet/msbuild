@@ -1,0 +1,23 @@
+﻿a {
+  /*#if (defaultTrue) */
+  DefaultTrueIncluded: 0;
+  /*#else*/
+  DefaultTrueExcluded: 0;
+  /*#endif*/
+/*-:cnd:noEmit*/
+  /*#if (defaultTrue) */
+  InsideUnknownDirectiveNoEmit: 0;
+  /*#endif*/
+/*+:cnd:noEmit*/
+  /*#if (defaultFalse) */
+  DefaultFalseExcluded: 0;
+  /*#else*/
+  DefaultFalseIncluded: 0;
+  /*#endif*/
+/*Without noEmit the following line will be emitted*/
+/*-:cnd*/
+  /*#if (defaultFalse) */
+  InsideUnknownDirectiveEmit: 0;
+  /*#endif*/
+/*+:cnd*/
+}

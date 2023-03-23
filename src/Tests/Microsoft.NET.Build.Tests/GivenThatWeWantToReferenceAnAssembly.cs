@@ -40,7 +40,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
 
@@ -66,7 +65,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -93,8 +91,8 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "netstandard2.0")]
-        [InlineData("netcoreapp2.0", "netcoreapp2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFramework)]
         public void ItRunsAppsDirectlyReferencingAssembliesWithSatellites(
             string referencerTarget,
             string dependencyTarget)
@@ -109,7 +107,6 @@ public static class Program
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
 
@@ -189,7 +186,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -233,7 +229,6 @@ public static class Program
             TestProject dllDependencyProjectDependency = new TestProject()
             {
                 Name = "DllDependencyDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -256,7 +251,6 @@ public class Class2
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
             dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
@@ -277,7 +271,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -304,8 +297,8 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "netstandard2.0")]
-        [InlineData("netcoreapp2.0", "netcoreapp2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFramework)]
         public void ItRunsAppsDirectlyReferencingAssembliesWhichReferenceAssembliesWithSatellites(
             string referencerTarget,
             string dllDependencyTarget)
@@ -320,7 +313,6 @@ public static class Program
             TestProject dllDependencyProjectDependency = new TestProject()
             {
                 Name = "DllDependencyDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -397,7 +389,6 @@ public class Class2
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
             dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
@@ -418,7 +409,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -458,12 +448,11 @@ public static class Program
                 return;
             }
 
-            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
+            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -489,7 +478,6 @@ public class Class2
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
             dependencyProject.References.Add(dllDependencyAssemblyPath);
@@ -507,7 +495,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -534,8 +521,8 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "netstandard2.0", "netstandard2.0")]
-        [InlineData("netcoreapp2.0", "netstandard2.0", "netcoreapp2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0", "netstandard2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0", ToolsetInfo.CurrentTargetFramework)]
         public void ItRunsAppsReferencingAProjectDirectlyReferencingAssembliesWithSatellites(
             string referencerTarget,
             string dependencyTarget,
@@ -546,12 +533,11 @@ public static class Program
                 return;
             }
 
-            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
+            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -631,7 +617,6 @@ public class Class2
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
             dependencyProject.References.Add(dllDependencyAssemblyPath);
@@ -649,7 +634,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -689,12 +673,11 @@ public static class Program
                 return;
             }
 
-            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
+            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProjectDependency = new TestProject()
             {
                 Name = "DllDependencyDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -717,7 +700,6 @@ public class Class3
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
             dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
@@ -738,7 +720,6 @@ public class Class2
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
             dependencyProject.References.Add(dllDependencyAssemblyPath);
@@ -756,7 +737,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -783,8 +763,8 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "netstandard2.0", "netstandard2.0")]
-        [InlineData("netcoreapp2.0", "netstandard2.0", "netcoreapp2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0", "netstandard2.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "netstandard2.0", ToolsetInfo.CurrentTargetFramework)]
         public void ItRunsAppsReferencingAProjectDirectlyReferencingAssembliesWhichReferenceAssembliesWithSatellites(
             string referencerTarget,
             string dependencyTarget,
@@ -795,12 +775,11 @@ public static class Program
                 return;
             }
 
-            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
+            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProjectDependency = new TestProject()
             {
                 Name = "DllDependencyDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -877,7 +856,6 @@ public class Class3
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
             dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
@@ -898,7 +876,6 @@ public class Class2
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
             dependencyProject.References.Add(dllDependencyAssemblyPath);
@@ -916,7 +893,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -944,7 +920,7 @@ public static class Program
 
         private string RestoreAndBuild(TestAsset testAsset, TestProject testProject)
         {
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()

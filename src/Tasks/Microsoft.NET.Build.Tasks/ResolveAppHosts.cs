@@ -31,6 +31,9 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
 
+        [Required]
+        public string DotNetSingleFileHostExecutableNameWithoutExtension { get; set; }
+
         /// <summary>
         /// The file name of comhost asset.
         /// </summary>
@@ -48,6 +51,12 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] KnownAppHostPacks { get; set; }
 
+        public bool NuGetRestoreSupported { get; set; } = true;
+
+        public string NetCoreTargetingPackRoot { get; set; }
+        
+        public bool EnableAppHostPackDownload { get; set; } = true;
+
         [Output]
         public ITaskItem[] PackagesToDownload { get; set; }
 
@@ -56,6 +65,9 @@ namespace Microsoft.NET.Build.Tasks
         //  we can resolve the full path later)
         [Output]
         public ITaskItem[] AppHost { get; set; }
+
+        [Output]
+        public ITaskItem[] SingleFileHost { get; set; }
 
         [Output]
         public ITaskItem[] ComHost { get; set; }
@@ -89,7 +101,7 @@ namespace Microsoft.NET.Build.Tasks
                 return;
             }
 
-            var packagesToDownload = new List<ITaskItem>();
+            var packagesToDownload = new Dictionary<string,string>();
 
             if (!string.IsNullOrEmpty(AppHostRuntimeIdentifier))
             {
@@ -105,6 +117,20 @@ namespace Microsoft.NET.Build.Tasks
                 if (appHostItem != null)
                 {
                     AppHost = new ITaskItem[] { appHostItem };
+                }
+
+                var singlefileHostItem = GetHostItem(
+                    AppHostRuntimeIdentifier,
+                    knownAppHostPacksForTargetFramework,
+                    packagesToDownload,
+                    DotNetSingleFileHostExecutableNameWithoutExtension,
+                    "SingleFileHost",
+                    isExecutable: true,
+                    errorIfNotFound: true);
+
+                if (singlefileHostItem != null)
+                {
+                    SingleFileHost = new ITaskItem[] { singlefileHostItem };
                 }
 
                 var comHostItem = GetHostItem(
@@ -180,13 +206,19 @@ namespace Microsoft.NET.Build.Tasks
 
             if (packagesToDownload.Any())
             {
-                PackagesToDownload = packagesToDownload.ToArray();
+                PackagesToDownload = packagesToDownload.Select(ToPackageDownload).ToArray();
             }
+        }
+
+        private ITaskItem ToPackageDownload(KeyValuePair<string, string> packageInformation) {
+            var item = new TaskItem(packageInformation.Key);
+            item.SetMetadata(MetadataKeys.Version, packageInformation.Value);
+            return item;
         }
 
         private ITaskItem GetHostItem(string runtimeIdentifier,
                                          List<ITaskItem> knownAppHostPacksForTargetFramework,
-                                         List<ITaskItem> packagesToDownload,
+                                         IDictionary<string, string> packagesToDownload,
                                          string hostNameWithoutExtension,
                                          string itemName,
                                          bool isExecutable,
@@ -197,15 +229,17 @@ namespace Microsoft.NET.Build.Tasks
             string appHostRuntimeIdentifiers = selectedAppHostPack.GetMetadata("AppHostRuntimeIdentifiers");
             string appHostPackPattern = selectedAppHostPack.GetMetadata("AppHostPackNamePattern");
             string appHostPackVersion = selectedAppHostPack.GetMetadata("AppHostPackVersion");
+            string runtimeIdentifiersToExclude = selectedAppHostPack.GetMetadata(MetadataKeys.ExcludedRuntimeIdentifiers);
 
             if (!string.IsNullOrEmpty(RuntimeFrameworkVersion))
             {
                 appHostPackVersion = RuntimeFrameworkVersion;
             }
 
-            string bestAppHostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
+            string bestAppHostRuntimeIdentifier = NuGetUtils.GetBestMatchingRidWithExclusion(
                 new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath),
                 runtimeIdentifier,
+                runtimeIdentifiersToExclude.Split(';'),
                 appHostRuntimeIdentifiers.Split(';'),
                 out bool wasInGraph);
 
@@ -244,7 +278,6 @@ namespace Microsoft.NET.Build.Tasks
                 string hostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
                     hostNameWithoutExtension + (isExecutable ? ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier) : ".dll"));
 
-
                 TaskItem appHostItem = new TaskItem(itemName);
                 string appHostPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
@@ -257,13 +290,25 @@ namespace Microsoft.NET.Build.Tasks
                     appHostItem.SetMetadata(MetadataKeys.PackageDirectory, appHostPackPath);
                     appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, hostRelativePathInPackage));
                 }
-                else
+                else if (EnableAppHostPackDownload)
                 {
-                    //  Download apphost pack
-                    TaskItem packageToDownload = new TaskItem(hostPackName);
-                    packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);
+                    // C++/CLI does not support package download && dedup error
+                    if (!NuGetRestoreSupported && !packagesToDownload.ContainsKey(hostPackName))
+                    {
+                        Log.LogError(
+                                    Strings.TargetingApphostPackMissingCannotRestore,
+                                    "Apphost",
+                                    $"{NetCoreTargetingPackRoot}\\{hostPackName}",
+                                    selectedAppHostPack.GetMetadata("TargetFramework") ?? "",
+                                    hostPackName,
+                                    appHostPackVersion
+                                    );
+                    }
 
-                    packagesToDownload.Add(packageToDownload);
+                    // use the first one added
+                    if (!packagesToDownload.ContainsKey(hostPackName)) {
+                        packagesToDownload.Add(hostPackName, appHostPackVersion);
+                    }
 
                     appHostItem.SetMetadata(MetadataKeys.NuGetPackageId, hostPackName);
                     appHostItem.SetMetadata(MetadataKeys.NuGetPackageVersion, appHostPackVersion);

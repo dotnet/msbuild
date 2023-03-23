@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
+    <body>
+      <trans-unit id="GlobalJsonResolutionFailed">
+        <source>Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">Не удалось найти пакет SDK для .NET, указанный в файле global.json. Убедитесь, что указанная версия установлена.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">Не удалось найти пакет SDK для .NET версии {0}, указанный в файле global.json. Убедитесь, что указанная версия установлена.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSDKDirectoryNotFound">
+        <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="translated">{0} не найден. Убедитесь, что установлена достаточно свежая версия пакета SDK для .NET, и (или) увеличьте версию, указанную в файле global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSmallerThanMinimumVersion">
+        <source>Version {0} of the .NET SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="translated">Для пакета SDK для .NET версии {0} требуется версия MSBuild не ниже {1}. Текущая версия MSBuild — {2}. Измените версию пакета SDK для .NET, указанную в файле global.json, на более низкую, поддерживающую текущую версию MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="translated">Версия {0} пакета SDK для .NET ниже минимальной требуемой версии {1}. Убедитесь, что установлена достаточно свежая версия пакета SDK для .NET, увеличьте минимальную версию, указанную в проекте или в файле global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET SDK is installed or increase the version specified in global.json.</source>
+        <target state="translated">Версия {0} пакета SDK для .NET Core ниже минимальной версии {1}, требуемой для Visual Studio. Убедитесь, что установлена достаточно свежая версия пакета SDK для .NET, или увеличьте номер версии, указанный в файле global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateNETCoreSdk">
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">Не удается найти пакет SDK для .NET. Убедитесь, что пакет установлен, PATH настроен для правильной архитектуры и версия, указанная в файле global.json (если он имеется), соответствует установленной.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

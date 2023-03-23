@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Dependencies>
+    <Dependency Name="DefaultTrueIncluded" label="CommentLine"></Dependency>
+    <Dependency Name="DefaultFalseIncluded" label="CommentLine"></Dependency>
+    <Dependency Name="DefaultTrueIncluded" label="commentBlock"></Dependency>
+    <Dependency Name="DefaultFalseIncluded" label="commentBlock"></Dependency>
+</Dependencies>

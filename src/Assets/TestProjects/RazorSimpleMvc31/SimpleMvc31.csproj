@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <Target Name="_IntrospectResolvedConfiguration">
+    <Message Text="RazorLangVersion: $(RazorLangVersion)" Importance="High" />
+    <Message Text="ResolvedRazorConfiguration: @(ResolvedRazorConfiguration)" Importance="High" />
+  </Target>
+
+</Project>

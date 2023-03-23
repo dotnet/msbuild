@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.CommandFactory;
 
@@ -17,13 +18,12 @@ namespace Microsoft.DotNet.Tools.Tool.Run
         private readonly IEnumerable<string> _forwardArgument;
 
         public ToolRunCommand(
-            AppliedOption options,
             ParseResult result,
             LocalToolsCommandResolver localToolsCommandResolver = null)
             : base(result)
         {
-            _toolCommandName = options.Arguments.Single();
-            _forwardArgument = result.UnmatchedTokens.Concat(result.UnparsedTokens);
+            _toolCommandName = result.GetValue(ToolRunCommandParser.CommandNameArgument);
+            _forwardArgument = result.GetValue(ToolRunCommandParser.CommandArgument);
             _localToolsCommandResolver = localToolsCommandResolver ?? new LocalToolsCommandResolver();
         }
 

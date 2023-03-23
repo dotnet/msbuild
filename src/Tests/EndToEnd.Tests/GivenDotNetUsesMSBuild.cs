@@ -21,13 +21,14 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             string projectDirectory = _testAssetsManager.CreateTestDirectory().Path;
 
-            string [] newArgs = new[] { "console", "--debug:ephemeral-hive", "--no-restore" };
-            new DotnetCommand(Log, "new")
+            string [] newArgs = new[] { "console", "--no-restore" };
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(projectDirectory)
                 .Execute(newArgs)
                 .Should().Pass();
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should().Pass()
-                        .And.HaveStdOutContaining("Hello World!");
+                        .And.HaveStdOutContaining("Hello, World!");
 
             var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
             binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
@@ -52,7 +53,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ItCanRunToolsInACSProj()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("MSBuildTestApp")
@@ -71,7 +72,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new RestoreCommand(Log, testInstance.Path)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();
@@ -87,7 +88,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .HaveStdOutContaining("Hello Portable World!");;
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ItCanRunToolsThatPrefersTheCliRuntimeEvenWhenTheToolItselfDeclaresADifferentRuntime()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("MSBuildTestApp")
@@ -107,7 +108,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new RestoreCommand(Log, testInstance.Path)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

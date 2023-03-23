@@ -47,13 +47,11 @@ namespace Microsoft.NET.Build.Tasks
 
         private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
-        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, bool includeRuntimeFileVersions, RuntimeGraph runtimeGraph, ProjectContext projectContext)
+        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, bool includeRuntimeFileVersions, RuntimeGraph runtimeGraph, ProjectContext projectContext, LockFileLookup libraryLookup)
         {
             _mainProjectInfo = mainProjectInfo;
             _includeRuntimeFileVersions = includeRuntimeFileVersions;
             _runtimeGraph = runtimeGraph;
-
-            var libraryLookup = new LockFileLookup(projectContext.LockFile);
 
             _dependencyLibraries = projectContext.LockFileTarget.Libraries
                 .Select(lockFileTargetLibrary =>
@@ -125,6 +123,14 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             _platformLibrary = platformLibraryName;
+
+            //  NOTE: This uses the TargetFramework (ie "net5.0") as the deps.json runtimeTarget name, instead of
+            //  the TargetFrameworkMoniker (ie ".NETCoreApp,Version=v5.0"), which is normally used.
+            //
+            //  This constructor should only be used for C++/CLI, and is used because PackageReference isn't
+            //  currently supported in that context so there is no assets file to read from.
+            //
+            //  Using the TargetFramework instead should have minimal impact.
             _dotnetFrameworkName = targetFramework;
             _runtimeIdentifier = runtimeIdentifier;
 

@@ -31,20 +31,19 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DefaultProject",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
             AddConflictReferences(defaultProject);
             GetReferences(
                 defaultProject,
                 expectConflicts: false,
                 references: out List<string> defaultReferences,
-                referenceCopyLocalPaths: out List<string> defaultReferenceCopyLocalPaths);
+                referenceCopyLocalPaths: out List<string> defaultReferenceCopyLocalPaths,
+                targetFramework);
 
             var disableProject = new TestProject()
             {
                 Name = "DisableProject",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
             disableProject.AdditionalProperties.Add("DisableDefaultPackageConflictOverrides", "true");
             AddConflictReferences(disableProject);
@@ -52,7 +51,8 @@ namespace Microsoft.NET.Build.Tests
                 disableProject,
                 expectConflicts: true,
                 references: out List<string> disableReferences,
-                referenceCopyLocalPaths: out List<string> disableReferenceCopyLocalPaths);
+                referenceCopyLocalPaths: out List<string> disableReferenceCopyLocalPaths,
+                targetFramework);
 
             Assert.Equal(defaultReferences, disableReferences);
             Assert.Equal(defaultReferenceCopyLocalPaths, disableReferenceCopyLocalPaths);
@@ -66,10 +66,10 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        private void GetReferences(TestProject testProject, bool expectConflicts, out List<string> references, out List<string> referenceCopyLocalPaths)
+        private void GetReferences(TestProject testProject, bool expectConflicts, out List<string> references, out List<string> referenceCopyLocalPaths, string identifier)
         {
             string targetFramework = testProject.TargetFrameworks;
-            TestAsset tempTestAsset = _testAssetsManager.CreateTestProject(testProject);
+            TestAsset tempTestAsset = _testAssetsManager.CreateTestProject(testProject, identifier: identifier);
 
             string projectFolder = Path.Combine(tempTestAsset.TestRoot, testProject.Name);
 
@@ -111,18 +111,15 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
                 //  In deps file, assets are under the ".NETStandard,Version=v2.0/" target (ie with empty RID) for some reason
                 RuntimeIdentifier = string.Empty
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Mvc.Razor", "2.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Mvc.Razor", "2.1.0"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -148,8 +145,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ReferencePackageDllDirectly",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -166,9 +162,7 @@ namespace Microsoft.NET.Build.Tests
                         new XAttribute("Private", "true")));
                 });
 
-            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -183,7 +177,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DuplicateFrameworkAssembly",
                 TargetFrameworks = "net472",
-                IsSdkProject = true,
                 IsExe = true
             };
             testProject.References.Add("System.Runtime");
@@ -192,9 +185,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -208,8 +199,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "AspNetCoreProject",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -225,7 +215,7 @@ namespace Microsoft.NET.Build.Tests
                                     new XAttribute("Include", "Microsoft.AspNetCore.App")));
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -235,6 +225,45 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
             outputDirectory.Should().NotHaveFile("Microsoft.Extensions.DependencyInjection.Abstractions.dll");
+        }
+
+        [CoreMSBuildOnlyFact]
+        public void AnalyzersAreConflictResolved()
+        {
+            var testProject = new TestProject()
+            {
+                Name = nameof(AnalyzersAreConflictResolved),
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
+            };
+
+            // add the package referenced analyzers
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.CodeAnalysis.NetAnalyzers", "5.0.3"));
+
+            // enable inbox analyzers too
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "EnableNETAnalyzers", "true"));
+                    itemGroup.Add(new XElement(ns + "TreatWarningsAsErrors", "true"));
+                    
+                    // Don't error when generators/analyzers can't be loaded.
+                    // This can occur when running tests against FullFramework MSBuild
+                    // if the build machine has an MSBuild install with an older version of Roslyn
+                    // than the generators in the SDK reference. We aren't testing the generators here
+                    // and this failure will occur more clearly in other places when it's
+                    // actually an important failure, so don't error out here.
+                    itemGroup.Add(new XElement(ns + "WarningsNotAsErrors", "CS9057"));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

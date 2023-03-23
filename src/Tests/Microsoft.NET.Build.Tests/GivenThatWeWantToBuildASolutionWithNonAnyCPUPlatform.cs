@@ -17,27 +17,27 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_builds_solution_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("x64SolutionBuild")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "x64SolutionBuild.sln");
+            var buildCommand = new BuildCommand(testAsset, "x64SolutionBuild.sln");
             buildCommand
-                .Execute()
+                .Execute("/p:ProduceReferenceAssembly=false")
                 .Should()
                 .Pass();
 
-            buildCommand.GetOutputDirectory("netcoreapp1.1", Path.Combine("x64", "Debug"))
+            buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, Path.Combine("x64", "Debug"))
                 .Should()
                 .OnlyHaveFiles(new[] {
-                    "x64SolutionBuild.runtimeconfig.dev.json",
                     "x64SolutionBuild.runtimeconfig.json",
                     "x64SolutionBuild.deps.json",
                     "x64SolutionBuild.dll",
-                    "x64SolutionBuild.pdb"
+                    "x64SolutionBuild.pdb",
+                    $"x64SolutionBuild{EnvironmentInfo.ExecutableExtension}"
                 });
         }
     }

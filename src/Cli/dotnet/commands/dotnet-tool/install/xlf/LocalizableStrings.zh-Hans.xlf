@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 已成功安装工具“{1}”(版本“{2}”)。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">运行时标识符 {0} 无效。有效的运行时标识符为: {1}。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">安装工具并将其添加到本地工具清单(默认)。</target>
@@ -66,6 +71,11 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">要安装工具的目标框架。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">不支持在同一命令中同时使用 --prerelease 和 --version 选项</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -142,10 +152,10 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">工具“{0}”安装失败。此故障可能由以下原因导致:
+        <target state="translated">工具“{0}”安装失败。此故障可能由以下原因导致:
 
 * 你尝试安装预览版，但未使用 --version 选项来指定该版本。
-* 已找到具有此名称的包，但是它不是 .NET Core 工具。
+* 已找到具有此名称的包，但是它不是 .NET 工具。
 * 无法访问所需的 NuGet 源，这可能是由于 Internet 连接问题导致。
 * 工具名称输入错误。
 

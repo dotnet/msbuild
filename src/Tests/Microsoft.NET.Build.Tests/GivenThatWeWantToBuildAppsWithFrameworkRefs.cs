@@ -46,14 +46,13 @@ namespace Microsoft.NET.Build.Tests
                 "StopwatchLib.dll",
                 "StopwatchLib.pdb");
 
-            VerifyBuild(testAsset, "EntityFrameworkApp", "net451", "win7-x86", buildArgs,
+            VerifyBuild(testAsset, "EntityFrameworkApp", "net451", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86", buildArgs,
                 "EntityFrameworkApp.exe",
                 "EntityFrameworkApp.pdb");
 
             // Try running EntityFrameworkApp.exe
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "EntityFrameworkApp");
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
-            var outputDirectory = buildCommand.GetOutputDirectory("net451", runtimeIdentifier: "win7-x86");
+            var buildCommand = new BuildCommand(testAsset, "EntityFrameworkApp");
+            var outputDirectory = buildCommand.GetOutputDirectory("net451", runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             new RunExeCommand(Log, Path.Combine(outputDirectory.FullName, "EntityFrameworkApp.exe"))
                 .Execute()
@@ -67,9 +66,7 @@ namespace Microsoft.NET.Build.Tests
             string [] buildArgs,
             params string [] expectedFiles)
         {
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, project);
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, project);
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
 
             buildCommand
@@ -90,7 +87,7 @@ namespace Microsoft.NET.Build.Tests
                 "StopwatchLib.dll",
                 "StopwatchLib.pdb");
 
-            VerifyClean(testAsset, "EntityFrameworkApp", "net451", "win7-x86",
+            VerifyClean(testAsset, "EntityFrameworkApp", "net451", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86",
                 "EntityFrameworkApp.exe",
                 "EntityFrameworkApp.pdb");
         }
@@ -98,9 +95,7 @@ namespace Microsoft.NET.Build.Tests
         private void VerifyClean(TestAsset testAsset, string project, string targetFramework, string runtimeIdentifier,
             params string[] expectedFiles)
         {
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, project);
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, project);
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
 
             buildCommand

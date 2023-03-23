@@ -31,9 +31,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(null, "netcoreapp2.2")]
         [InlineData("true", "netcoreapp2.2")]
         [InlineData("false", "netcoreapp2.2")]
-        [InlineData(null, "netcoreapp3.0")]
-        [InlineData("true", "netcoreapp3.0")]
-        [InlineData("false", "netcoreapp3.0")]
+        [InlineData(null, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData("true", ToolsetInfo.CurrentTargetFramework)]
+        [InlineData("false", ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_with_or_without_apphost(string useAppHost, string targetFramework)
         {
             var runtimeIdentifier = RuntimeInformation.RuntimeIdentifier;
@@ -64,7 +64,7 @@ namespace Microsoft.NET.Publish.Tests
                 msbuildArgs.Add("/p:TargetLatestRuntimePatch=true");
             }
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(msbuildArgs.ToArray())
                 .Should()
@@ -113,7 +113,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .WithTargetFramework("netcoreapp2.0");
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(
                     "/p:SelfContained=false",
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(Strings.FrameworkDependentAppHostRequiresVersion21);
+                .HaveStdOutContaining(Strings.FrameworkDependentAppHostRequiresVersion21.Replace("“", "\"").Replace("”", "\""));
         }
     }
 }

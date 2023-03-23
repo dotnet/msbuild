@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="DotnetWorkloadInfoLabel">
+        <source>.NET workloads installed:</source>
+        <target state="new">.NET workloads installed:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MalformedText">
         <source>Malformed command text '{0}'</source>
         <target state="translated">Неправильный формат текста команды "{0}"</target>
@@ -28,11 +33,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Не удалось выполнить, так как не найдены указанная команда или указанный файл.
+        <target state="translated">Не удалось выполнить, так как не найдены указанная команда или указанный файл.
 Возможные причины:
-  * Вы неправильно набрали встроенную команду dotnet.
-  * Вы планировали выполнить программу .NET Core, однако {0} не существует.
-  * Вы хотели запустить глобальное средство, но по указанному в PATH пути не удалось найти исполняемый файл с префиксом dotnet, имеющий такое имя.</target>
+  * вы неправильно набрали встроенную команду dotnet;
+  * вы планировали выполнить программу .NET, однако {0} не существует;
+  * вы хотели запустить глобальное средство, но по указанному в PATH пути не удалось найти исполняемый файл с префиксом dotnet, имеющий такое имя.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -76,8 +81,8 @@ Possible reasons for this include:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">Пакет SDK для .NET Core (отражающий любой global.json):</target>
+        <source>.NET SDK:</source>
+        <target state="translated">ПАКЕТ SDK ДЛЯ .NET:</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -111,7 +116,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">Пакет SDK для .NET Core</target>
+        <target state="translated">Пакет SDK для .NET</target>
         <note />
       </trans-unit>
     </body>

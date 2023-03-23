@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Resources.resx">
+    <body>
+      <trans-unit id="Error_MultipleProjectsFound">
+        <source>Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</source>
+        <target state="translated">'{0}'에서 여러 MSBuild 프로젝트 파일을 찾았습니다. --project 옵션을 사용하여 사용할 파일을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_NoProjectsFound">
+        <source>Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</source>
+        <target state="translated">'{0}'에서 MSBuild 프로젝트 파일을 찾을 수 없습니다. --project 옵션을 사용하여 사용할 파일을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_ProjectPath_NotFound">
+        <source>The project file '{0}' does not exist.</source>
+        <target state="translated">프로젝트 파일 '{0}'이(가) 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_QuietAndVerboseSpecified">
+        <source>Cannot specify both '--quiet' and '--verbose' options.</source>
+        <target state="translated">'--quiet' 옵션과 '--verbose' 옵션을 둘 다 지정할 수는 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Warning_ProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">경고 NETSDK1174: --project에 대한 약어 -p는 더 이상 사용되지 않습니다. --project를 사용하세요.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

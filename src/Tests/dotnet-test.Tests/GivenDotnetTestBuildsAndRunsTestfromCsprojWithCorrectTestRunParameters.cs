@@ -27,19 +27,15 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void GivenAProjectAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("1");
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("2");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
                                         .Execute(ConsoleLoggerOutputNormal.Concat(new[] {
                                             "--",
-                                            "TestRunParameters.Parameter(name=\"myParam\",",
-                                            "value=\"value\")",
-                                            "TestRunParameters.Parameter(name=\"myParam2\",",
-                                            "value=\"value", 
-                                            "with", 
-                                            "space\")"
+                                            "TestRunParameters.Parameter(name=\"myParam\",value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",value=\"value with space\")"
                                         }));
 
             // Verify
@@ -48,7 +44,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 result.StdOut.Should().NotMatch("The test run parameter argument '*' is invalid.");
                 result.StdOut.Should().Contain("Total tests: 1");
                 result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("\u221a VSTestTestRunParameters");
+                result.StdOut.Should().Contain("Passed VSTestTestRunParameters");
             }
 
             result.ExitCode.Should().Be(0);
@@ -57,7 +53,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void GivenADllAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("2");
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("3");
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
@@ -65,19 +61,15 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.0", "VSTestTestRunParameters.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "VSTestTestRunParameters.dll");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)
                                         .Execute(ConsoleLoggerOutputNormal.Concat(new[] {
                                             outputDll,
                                             "--",
-                                            "TestRunParameters.Parameter(name=\"myParam\",",
-                                            "value=\"value\")",
-                                            "TestRunParameters.Parameter(name=\"myParam2\",",
-                                            "value=\"value",
-                                            "with",
-                                            "space\")"
+                                            "TestRunParameters.Parameter(name=\"myParam\",value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",value=\"value with space\")"
                                         }));
 
             // Verify
@@ -86,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 result.StdOut.Should().NotMatch("The test run parameter argument '*' is invalid.");
                 result.StdOut.Should().Contain("Total tests: 1");
                 result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("\u221a VSTestTestRunParameters");
+                result.StdOut.Should().Contain("Passed VSTestTestRunParameters");
             }
 
             result.ExitCode.Should().Be(0);
@@ -104,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testProjectDirectory = testInstance.Path;
 
             // Restore project VSTestCore
-            new RestoreCommand(Log, testProjectDirectory)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

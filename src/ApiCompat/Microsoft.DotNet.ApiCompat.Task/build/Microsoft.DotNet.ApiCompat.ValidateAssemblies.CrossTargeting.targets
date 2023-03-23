@@ -1,0 +1,22 @@
+<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. -->
+<Project>
+  <!-- ApiCompat Validate Assemblies main entry point that only runs for multi-targeting projects. -->
+  <Target Name="ApiCompatValidateAssemblies"
+          AfterTargets="DispatchToInnerBuilds"
+          Condition="'$(ApiCompatValidateAssemblies)' == 'true'"
+          DependsOnTargets="PrepareInputsForApiCompatValidateAssemblies;ApiCompatValidateAssembliesCore" />
+
+  <Target Name="PrepareInputsForApiCompatValidateAssemblies"
+          DependsOnTargets="DispatchToInnerBuilds">
+    <ItemGroup>
+      <_apiCompatInnerOutput Include="@(InnerOutput->WithMetadataValue('ApiCompatValidateAssemblies', 'true'))" />
+      
+      <ApiCompatLeftAssemblies Include="@(_apiCompatInnerOutput->Metadata('ApiCompatContractAssembly'))" />
+      <ApiCompatRightAssemblies Include="@(_apiCompatInnerOutput)" />
+    
+       <!-- Retrieve the implementation and contract references from the inner build projects. -->
+      <ApiCompatLeftAssembliesReferences Include="@(_apiCompatInnerOutput->Metadata('ApiCompatContractAssemblyReferences'))" />
+      <ApiCompatRightAssembliesReferences Include="@(_apiCompatInnerOutput->Metadata('ApiCompatAssemblyReferences'))" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Archivo Directory.Build.targets de MSBuild",
+  "description": "Un archivo Directory.Build.targets vacío que se puede usar para especificar tareas y destinos de MSBuild para una carpeta completa",
+  "symbols/inherit/displayName": "Heredar",
+  "symbols/inherit/description": "Si es true, agrega una importación para el archivo Directory.Build.targets más cercano en la jerarquía de directorios del sistema de archivos. Directory.Build.targets no hereda de forma predeterminada, por lo que esto le permite crear un conjunto de personalizaciones carpeta por carpeta."
+}

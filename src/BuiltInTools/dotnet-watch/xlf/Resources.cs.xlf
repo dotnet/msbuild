@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../Resources.resx">
+    <body>
+      <trans-unit id="Error_MultipleProjectsFound">
+        <source>Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</source>
+        <target state="translated">{0} obsahuje více souborů projektů MSBuild. Pomocí parametru --projekt zadejte, který soubor chcete použít.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_NoProjectsFound">
+        <source>Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</source>
+        <target state="translated">V {0} se nepovedlo najít soubor projektu MSBuild. Pomocí parametru --project zadejte, který projekt chcete použít.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_ProjectPath_NotFound">
+        <source>The project file '{0}' does not exist.</source>
+        <target state="translated">Soubor projektu {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_QuietAndVerboseSpecified">
+        <source>Cannot specify both '--quiet' and '--verbose' options.</source>
+        <target state="translated">Možnosti --quiet a --verbose se nedají zadat spolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Warning_ProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">Upozornění NETSDK1174: Zkratka -p pro --project je zastaralá. Použijte prosím --project.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

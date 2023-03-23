@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             var mockEnvironmentPathEditor = new MockEnvironmentPathEditor(_mockPathInternal);
             _windowsEnvironmentPath = new WindowsEnvironmentPath(
                 _toolsPath,
-                CliFolderPathCalculator.WindowsNonExpandedToolsShimPath,
+                @"%USERPROFILE%\.dotnet\tools",
                 mockEnvironmentProvider,
                 mockEnvironmentPathEditor,
                 _reporter
@@ -219,7 +219,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 switch (sdkEnvironmentVariableTarget)
                 {
                     case SdkEnvironmentVariableTarget.DotDefault:
-                        throw new ApplicationException("Should never touch DotDefault's EnvironmentVariable.");
+                        throw new InvalidOperationException("Should never touch DotDefault's EnvironmentVariable.");
                     case SdkEnvironmentVariableTarget.CurrentUser:
                         _mockPathInternal.UserLevelPath = value;
                         break;

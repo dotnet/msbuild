@@ -22,6 +22,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool DesignTimeBuild { get; set; }
 
+        public bool DisableTransitiveFrameworkReferenceDownloads { get; set; }
+
         [Output]
         public ITaskItem[] RuntimePackAssets { get; set; }
 
@@ -48,8 +50,13 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (!frameworkReferenceNames.Contains(runtimePack.GetMetadata(MetadataKeys.FrameworkName)))
                 {
-                    //  This is a runtime pack for a shared framework that ultimately wasn't referenced, so don't include its assets
-                    continue;
+                    var additionalFrameworkReferences = runtimePack.GetMetadata(MetadataKeys.AdditionalFrameworkReferences);
+                    if (additionalFrameworkReferences == null ||
+                        !additionalFrameworkReferences.Split(';').Any(afr => frameworkReferenceNames.Contains(afr)))
+                    {
+                        //  This is a runtime pack for a shared framework that ultimately wasn't referenced, so don't include its assets
+                        continue;
+                    }
                 }
 
                 string runtimePackRoot = runtimePack.GetMetadata(MetadataKeys.PackageDirectory);
@@ -61,8 +68,16 @@ namespace Microsoft.NET.Build.Tasks
                         //  Don't treat this as an error if we are doing a design-time build.  This is because the design-time
                         //  build needs to succeed in order to get the right information in order to run a restore to download
                         //  the runtime pack.
-                        Log.LogError(Strings.RuntimePackNotDownloaded, runtimePack.ItemSpec,
-                            runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+
+                        if (DisableTransitiveFrameworkReferenceDownloads)
+                        {
+                            Log.LogError(Strings.RuntimePackNotRestored_TransitiveDisabled, runtimePack.ItemSpec);
+                        }
+                        else
+                        {
+                            Log.LogError(Strings.RuntimePackNotDownloaded, runtimePack.ItemSpec,
+                                runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+                        }
                     }
                     continue;
                 }
@@ -78,7 +93,9 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (File.Exists(runtimeListPath))
                 {
-                    AddRuntimePackAssetsFromManifest(runtimePackAssets, runtimePackRoot, runtimeListPath, runtimePack);
+                    var runtimePackAlwaysCopyLocal = runtimePack.HasMetadataValue(MetadataKeys.RuntimePackAlwaysCopyLocal, "true");
+
+                    AddRuntimePackAssetsFromManifest(runtimePackAssets, runtimePackRoot, runtimeListPath, runtimePack, runtimePackAlwaysCopyLocal);
                 }
                 else
                 {
@@ -90,7 +107,7 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         private void AddRuntimePackAssetsFromManifest(List<ITaskItem> runtimePackAssets, string runtimePackRoot,
-            string runtimeListPath, ITaskItem runtimePack)
+            string runtimeListPath, ITaskItem runtimePack, bool runtimePackAlwaysCopyLocal)
         {
             var assetSubPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -111,6 +128,10 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     assetType = "native";
                 }
+                else if (typeAttributeValue.Equals("PgoData", StringComparison.OrdinalIgnoreCase))
+                {
+                    assetType = "pgodata";
+                }
                 else if (typeAttributeValue.Equals("Resources", StringComparison.OrdinalIgnoreCase))
                 {
                     assetType = "resources";
@@ -119,7 +140,7 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         throw new BuildErrorException($"Culture not set in runtime manifest for {assetPath}");
                     }
-                    if (this.SatelliteResourceLanguages.Length > 1 &&
+                    if (this.SatelliteResourceLanguages.Length >= 1 &&
                         !this.SatelliteResourceLanguages.Any(lang => string.Equals(lang.ItemSpec, culture, StringComparison.OrdinalIgnoreCase)))
                     {
                         continue;
@@ -143,6 +164,11 @@ namespace Microsoft.NET.Build.Tasks
                 assetItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion")?.Value);
                 assetItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion")?.Value);
                 assetItem.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken")?.Value);
+                assetItem.SetMetadata("DropFromSingleFile", fileElement.Attribute("DropFromSingleFile")?.Value);
+                if (runtimePackAlwaysCopyLocal)
+                {
+                    assetItem.SetMetadata(MetadataKeys.RuntimePackAlwaysCopyLocal, "true");
+                }
 
                 runtimePackAssets.Add(assetItem);
             }
@@ -154,7 +180,9 @@ namespace Microsoft.NET.Build.Tasks
 
             var assetItem = new TaskItem(assetPath);
 
-            assetItem.SetMetadata(MetadataKeys.CopyLocal, "true");
+            if (assetType != "pgodata")
+                assetItem.SetMetadata(MetadataKeys.CopyLocal, "true");
+
             if (string.IsNullOrEmpty(culture))
             {
                 assetItem.SetMetadata(MetadataKeys.DestinationSubPath, Path.GetFileName(assetPath));

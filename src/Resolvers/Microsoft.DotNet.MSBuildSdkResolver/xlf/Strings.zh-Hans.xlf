@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
+    <body>
+      <trans-unit id="GlobalJsonResolutionFailed">
+        <source>Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">无法找到 global.json 指定的 .NET SDK，请检查是否安装了指定的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">无法找到 global.json 指定的 .NET SDK 版本“{0}”，请检查是否已安装指定的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSDKDirectoryNotFound">
+        <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="translated">找不到 {0}。请检查是否安装了足够新的 .NET SDK 并/或调高在 global.json 中指定的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSmallerThanMinimumVersion">
+        <source>Version {0} of the .NET SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="translated">.NET SDK 的版本 {0} 至少需要 MSBuild 的 {1} 版本。当前可用的 MSBuild 版本为 {2}。请将在 global.json 中指定的 .NET SDK 更改为需要当前可用的 MSBuild 版本的旧版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="translated">.NET SDK 的版本 {0} 小于所请求的最低版本 {1}。请检查是否安装了最够新的 .NET SDK，调高项目中指定的最低版本, 或调高 global.json 中指定的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET SDK is installed or increase the version specified in global.json.</source>
+        <target state="translated">.NET SDK 的版本 {0} 低于 Visual Studio 所要求的最低版本 {1}。请检查是否已安装足够新的 .NET SDK，或者调高 global.json 中指定的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateNETCoreSdk">
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">找不到 .NET SDK。检查它是否已安装、是否将 PATH 配置为正确的体系结构，以及 global.json (如果有)中指定的版本是否与安装的版本匹配。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

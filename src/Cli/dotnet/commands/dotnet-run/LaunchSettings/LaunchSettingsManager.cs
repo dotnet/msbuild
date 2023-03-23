@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -21,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             };
         }
 
-        public static LaunchSettingsApplyResult TryApplyLaunchSettings(string launchSettingsJsonContents, ref ICommand command, string profileName = null)
+        public static LaunchSettingsApplyResult TryApplyLaunchSettings(string launchSettingsJsonContents, string profileName = null)
         {
             try
             {
@@ -41,15 +44,34 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     }
 
                     JsonElement profileObject;
-                    if (profileName == null)
+                    if (string.IsNullOrEmpty(profileName))
                     {
                         profileObject = profilesObject
                             .EnumerateObject()
                             .FirstOrDefault(IsDefaultProfileType).Value;
                     }
-                    else
+                    else // Find a profile match for the given profileName
                     {
-                        if (!profilesObject.TryGetProperty(profileName, out profileObject) || profileObject.ValueKind != JsonValueKind.Object)
+                        IEnumerable<JsonProperty> caseInsensitiveProfileMatches = profilesObject
+                            .EnumerateObject() // p.Name shouldn't fail, as profileObject enumerables here are only created from an existing JsonObject
+                            .Where(p => string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
+                        if (caseInsensitiveProfileMatches.Count() > 1)
+                        {
+                            throw new GracefulException(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames,
+                                String.Join(",\n", caseInsensitiveProfileMatches.Select(p => $"\t{p.Name}").ToArray()));
+                        }
+                        else if (!caseInsensitiveProfileMatches.Any())
+                        {
+                            return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileDoesNotExist, profileName));
+                        }
+                        else
+                        {
+                            profileObject = profilesObject.GetProperty(caseInsensitiveProfileMatches.First().Name);
+                        }
+
+                        if (profileObject.ValueKind != JsonValueKind.Object)
                         {
                             return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
                         }
@@ -90,7 +112,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                         return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
                     }
 
-                    return provider.TryApplySettings(profileObject, ref command);
+                    return provider.TryGetLaunchSettings(profileObject);
                 }
             }
             catch (JsonException ex)

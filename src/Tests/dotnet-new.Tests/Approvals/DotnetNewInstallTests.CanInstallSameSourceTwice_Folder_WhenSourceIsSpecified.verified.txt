@@ -1,0 +1,9 @@
+﻿The following template packages will be installed:
+   %TEMPLATE FOLDER%
+
+%TEMPLATE FOLDER% is already installed, it will be replaced with latest version.
+%TEMPLATE FOLDER% was successfully uninstalled.
+Success: %TEMPLATE FOLDER% installed the following templates:
+Template Name  Short Name  Language  Tags      
+-------------  ----------  --------  ----------
+Basic FSharp   basic       F#        Test Asset

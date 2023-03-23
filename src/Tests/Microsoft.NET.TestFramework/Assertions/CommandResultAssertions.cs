@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -113,10 +116,28 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> HaveStdErr(string expectedOutput)
+        {
+            Execute.Assertion.ForCondition(_commandResult.StdErr.Equals(expectedOutput, StringComparison.Ordinal))
+                .FailWith(AppendDiagnosticsTo($"Command did not output the expected output to StdErr.{Environment.NewLine}Expected: {expectedOutput}{Environment.NewLine}Actual:   {_commandResult.StdErr}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> HaveStdErrContaining(string pattern)
         {
             Execute.Assertion.ForCondition(_commandResult.StdErr.Contains(pattern))
                 .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> HaveStdErrContainingOnce(string pattern)
+        {
+            var lines = _commandResult.StdErr.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var matchingLines = lines.Where(line => line.Contains(pattern)).Count();
+            Execute.Assertion.ForCondition(matchingLines == 0)
+                .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}"));
+            Execute.Assertion.ForCondition(matchingLines != 1)
+                .FailWith(AppendDiagnosticsTo($"The command error output was expected to contain the pattern '{pattern}' once, but found it {matchingLines} times.{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
@@ -151,14 +172,14 @@ namespace Microsoft.NET.TestFramework.Assertions
         private string AppendDiagnosticsTo(string s)
         {
             return s + $"{Environment.NewLine}" +
-                       $"File Name: {_commandResult.StartInfo.FileName}{Environment.NewLine}" +
-                       $"Arguments: {_commandResult.StartInfo.Arguments}{Environment.NewLine}" +
+                       $"File Name: {_commandResult.StartInfo?.FileName}{Environment.NewLine}" +
+                       $"Arguments: {_commandResult.StartInfo?.Arguments}{Environment.NewLine}" +
                        $"Exit Code: {_commandResult.ExitCode}{Environment.NewLine}" +
                        $"StdOut:{Environment.NewLine}{_commandResult.StdOut}{Environment.NewLine}" +
                        $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}"; ;
         }
 
-    public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject, string frameworkFullName)
+        public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject, string frameworkFullName)
         {
             _commandResult.StdOut.Should().Contain($"Project {skippedProject} ({frameworkFullName}) was previously compiled. Skipping compilation.");
 
@@ -168,6 +189,96 @@ namespace Microsoft.NET.TestFramework.Assertions
         public AndConstraint<CommandResultAssertions> HaveCompiledProject(string compiledProject, string frameworkFullName)
         {
             _commandResult.StdOut.Should().Contain($"Project {compiledProject} ({frameworkFullName}) will be compiled");
+
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> NuPkgContain(string nupkgPath, params string[] filePaths)
+        {
+            var unzipped = ReadNuPkg(nupkgPath, filePaths);
+
+            foreach (var filePath in filePaths)
+            {
+                Execute.Assertion.ForCondition(File.Exists(Path.Combine(unzipped, filePath)))
+                    .FailWith(AppendDiagnosticsTo($"NuGet Package did not contain file {filePath}."));
+            }
+
+            return new AndConstraint<CommandResultAssertions>(this);
+
+        }
+
+        public AndConstraint<CommandResultAssertions> NuPkgDoesNotContain(string nupkgPath, params string[] filePaths)
+        {
+            var unzipped = ReadNuPkg(nupkgPath, filePaths);
+
+            foreach (var filePath in filePaths)
+            {
+                Execute.Assertion.ForCondition(!File.Exists(Path.Combine(unzipped, filePath)))
+                    .FailWith(AppendDiagnosticsTo($"NuGet Package contained file: {filePath}."));
+            }
+
+            return new AndConstraint<CommandResultAssertions>(this);
+
+        }
+
+        private string ReadNuPkg(string nupkgPath, params string[] filePaths) 
+        {
+            if (nupkgPath == null)
+            {
+                throw new ArgumentNullException(nameof(nupkgPath));
+            }
+
+            if (filePaths == null)
+            {
+                throw new ArgumentNullException(nameof(filePaths));
+            }
+
+            new FileInfo(nupkgPath).Should().Exist();
+
+            var unzipped = Path.Combine(nupkgPath, "..", Path.GetFileNameWithoutExtension(nupkgPath));
+            ZipFile.ExtractToDirectory(nupkgPath, unzipped);
+
+            return unzipped;
+        }
+
+        public AndConstraint<CommandResultAssertions> NuSpecDoesNotContain(string nuspecPath, string expected)
+        {
+            if (nuspecPath == null)
+            {
+                throw new ArgumentNullException(nameof(nuspecPath));
+            }
+
+            if (expected == null)
+            {
+                throw new ArgumentNullException(nameof(expected));
+            }    
+
+            new FileInfo(nuspecPath).Should().Exist();
+            var content = File.ReadAllText(nuspecPath);
+
+            Execute.Assertion.ForCondition(!content.Contains(expected))
+                    .FailWith(AppendDiagnosticsTo($"NuSpec contains string: {expected}."));
+
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> NuSpecContain(string nuspecPath, string expected)
+        {
+            if (nuspecPath == null)
+            {
+                throw new ArgumentNullException(nameof(nuspecPath));
+            }
+
+            if (expected == null)
+            {
+                throw new ArgumentNullException(nameof(expected));
+            }    
+
+            new FileInfo(nuspecPath).Should().Exist();
+            var content = File.ReadAllText(nuspecPath);
+
+            Execute.Assertion.ForCondition(content.Contains(expected))
+                    .FailWith(AppendDiagnosticsTo($"NuSpec does not contain string: {expected}."));
 
             return new AndConstraint<CommandResultAssertions>(this);
         }

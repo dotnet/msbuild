@@ -67,7 +67,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 {
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
+                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
 
                     if (additionalProperty != null)
@@ -84,8 +84,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void It_packs_successfully(bool multiTarget, string targetFramework)
         {
             var nugetPackage = _fixture.GetTestToolPackagePath(multiTarget, targetFramework: targetFramework);
@@ -100,8 +100,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void It_contains_dependencies_dll(bool multiTarget, string targetFramework)
         {
             var nugetPackage = _fixture.GetTestToolPackagePath(multiTarget, targetFramework: targetFramework);
@@ -121,8 +121,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void It_contains_shim(bool multiTarget, string targetFramework)
         {
             var nugetPackage = _fixture.GetTestToolPackagePath(multiTarget, targetFramework: targetFramework);
@@ -136,7 +136,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
                     allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/win-x64/{NupkgOfPackWithShimsFixture._customToolCommandName}.exe",
                         "Name should be the same as the command name even customized");
-                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/osx.10.12-x64/{NupkgOfPackWithShimsFixture._customToolCommandName}",
+                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{NupkgOfPackWithShimsFixture._customToolCommandName}",
                         "RID should be the exact match of the RID in the property, even Apphost only has version of win, osx and linux");
                 }
             }
@@ -145,19 +145,19 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void It_uses_customized_PackagedShimOutputRootDirectory(bool multiTarget, string targetFramework)
         {
             string shimoutputPath = Path.Combine(TestContext.Current.TestExecutionDirectory, "shimoutput");
             TestAsset helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("PortableTool", "PackagedShimOutputRootDirectory" + multiTarget.ToString())
+                .CopyTestAsset("PortableTool", "PackagedShimOutputRootDirectory" + multiTarget.ToString(), identifier: multiTarget.ToString() + targetFramework)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
+                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
                     propertyGroup.Add(new XElement(ns + "PackagedShimOutputRootDirectory", shimoutputPath));
                 })
@@ -171,15 +171,15 @@ namespace Microsoft.NET.ToolPack.Tests
 
             string windowShimPath = Path.Combine(shimoutputPath, $"shims/{targetFramework}/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
-            string osxShimPath = Path.Combine(shimoutputPath, $"shims/{targetFramework}/osx.10.12-x64/{_customToolCommandName}");
+            string osxShimPath = Path.Combine(shimoutputPath, $"shims/{targetFramework}/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{_customToolCommandName}");
             File.Exists(osxShimPath).Should().BeTrue($"Shim {osxShimPath} should exist");
         }
 
         [Theory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void It_uses_outputs_to_bin_by_default(bool multiTarget, string targetFramework)
         {
             TestAsset helloWorldAsset = CreateTestAsset(
@@ -197,15 +197,15 @@ namespace Microsoft.NET.ToolPack.Tests
 
             string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
-            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}/osx.10.12-x64/{_customToolCommandName}");
+            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{_customToolCommandName}");
             File.Exists(osxShimPath).Should().BeTrue($"Shim {osxShimPath} should exist");
         }
 
         [Theory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void Clean_should_remove_bin_output(bool multiTarget, string targetFramework)
         {
             TestAsset helloWorldAsset = CreateTestAsset(
@@ -226,15 +226,15 @@ namespace Microsoft.NET.ToolPack.Tests
             var outputDirectory = packCommand.GetOutputDirectory("netcoreapp2.1");
             string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeFalse($"Shim {windowShimPath} should not exists");
-            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/osx.10.12-x64/{_customToolCommandName}");
+            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{_customToolCommandName}");
             File.Exists(osxShimPath).Should().BeFalse($"Shim {osxShimPath} should not exists");
         }
 
         [Theory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void Generate_shims_runs_incrementally(bool multiTarget, string targetFramework)
         {
             TestAsset helloWorldAsset = CreateTestAsset(
@@ -246,7 +246,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             _testRoot = helloWorldAsset.TestRoot;
 
-            var buildCommand = new BuildCommand(Log, helloWorldAsset.TestRoot);
+            var buildCommand = new BuildCommand(helloWorldAsset);
             buildCommand.Execute().Should().Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
@@ -264,13 +264,13 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void It_contains_shim_with_no_build(bool multiTarget, string targetFramework)
         {
             var testAsset = CreateTestAsset(multiTarget, nameof(It_contains_shim_with_no_build) + multiTarget + targetFramework, targetFramework);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var packCommand = new PackCommand(Log, testAsset.TestRoot);
@@ -288,7 +288,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
                     allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/win-x64/{_customToolCommandName}.exe",
                         "Name should be the same as the command name even customized");
-                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/osx.10.12-x64/{_customToolCommandName}",
+                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{_customToolCommandName}",
                         "RID should be the exact match of the RID in the property, even Apphost only has version of win, osx and linux");
                 }
             }
@@ -297,8 +297,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [WindowsOnlyTheory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void It_produces_valid_shims(bool multiTarget, string targetFramework)
         {
             if (!Environment.Is64BitOperatingSystem)
@@ -314,8 +314,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [WindowsOnlyTheory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void It_produces_valid_shims_when_the_first_build_is_wrong(bool multiTarget, string targetFramework)
         {
             // The first build use wrong package id and should embed wrong string to shims. However, the pack should produce correct shim
@@ -333,7 +333,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var testRoot = helloWorldAsset.TestRoot;
 
-            var buildCommand = new BuildCommand(Log, helloWorldAsset.TestRoot);
+            var buildCommand = new BuildCommand(helloWorldAsset);
             buildCommand.Execute("/p:PackageId=wrongpackagefirstbuild");
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
@@ -349,8 +349,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [WindowsOnlyTheory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void When_version_and_packageVersion_is_different_It_produces_valid_shims(bool multiTarget, string targetFramework)
         {
             if (!Environment.Is64BitOperatingSystem)
@@ -373,8 +373,8 @@ namespace Microsoft.NET.ToolPack.Tests
         [WindowsOnlyTheory]
         [InlineData(true, "netcoreapp2.1")]
         [InlineData(false, "netcoreapp2.1")]
-        [InlineData(true, "netcoreapp3.0")]
-        [InlineData(false, "netcoreapp3.0")]
+        [InlineData(true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, ToolsetInfo.CurrentTargetFramework)]
         public void When_version_and_packageVersion_is_different_It_produces_valid_shims2(bool multiTarget, string targetFramework)
         {
             if (!Environment.Is64BitOperatingSystem)
@@ -403,13 +403,12 @@ namespace Microsoft.NET.ToolPack.Tests
             {
                 Name = "wpfTool",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
 
             testProject.AdditionalProperties.Add("UseWPF", "true");
-            testProject.AdditionalProperties.Add("PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64");
+            testProject.AdditionalProperties.Add("PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64");
             testProject.AdditionalProperties.Add("ToolCommandName", _customToolCommandName);
             testProject.AdditionalProperties.Add("PackAsTool", "true");
 

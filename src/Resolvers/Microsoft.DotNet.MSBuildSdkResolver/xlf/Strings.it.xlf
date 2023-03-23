@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="it" original="../Strings.resx">
+    <body>
+      <trans-unit id="GlobalJsonResolutionFailed">
+        <source>Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">Non è possibile trovare la versione di .NET SDK specificata in global.json. Verificare che sia installata la versione specificata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">Non è possibile trovare la versione '{0}' di .NET SDK specificata in global.json. Verificare che sia installata la versione specificata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSDKDirectoryNotFound">
+        <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="translated">{0} non è stato trovato. Verificare che sia installata una versione abbastanza recente di .NET SDK e/o aumentare la versione specificata in global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSmallerThanMinimumVersion">
+        <source>Version {0} of the .NET SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="translated">La versione {0} di .NET SDK richiede almeno la versione {1} di MSBuild. La versione disponibile corrente di MSBuild è {2}. Modificare la versione di .NET SDK specificata in global.json in una meno recente che richiede la versione di MSBuild attualmente disponibile.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="translated">La versione {0} di .NET SDK è minore di quella minima richiesta {1}. Verificare che sia installata una versione abbastanza recente di .NET SDK, aumentare la versione minima specificata nel progetto oppure aumentare la versione specificata in global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET SDK is installed or increase the version specified in global.json.</source>
+        <target state="translated">La versione {0} di .NET SDK è minore di quella minima {1} richiesta da Visual Studio. Verificare che sia installata una versione abbastanza recente di .NET SDK oppure aumentare la versione specificata in global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateNETCoreSdk">
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">Non è possibile trovare .NET SDK. Verificare che sia installato, che PATH sia configurato per l'architettura corretta e che la versione specificata in global.json, se presente, corrisponda alla versione installata.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

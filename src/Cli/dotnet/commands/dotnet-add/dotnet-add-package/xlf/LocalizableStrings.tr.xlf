@@ -49,12 +49,12 @@
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
-        <target state="translated">SÜRÜM</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">ÇERÇEVE</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">

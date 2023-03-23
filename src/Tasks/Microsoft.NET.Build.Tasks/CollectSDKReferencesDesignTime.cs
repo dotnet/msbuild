@@ -34,13 +34,34 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            ImplicitPackageReferences = 
-                PreprocessPackageDependenciesDesignTime.GetImplicitPackageReferences(DefaultImplicitPackages);
+            ImplicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
             
             var sdkDesignTimeList = new List<ITaskItem>(SdkReferences);
             sdkDesignTimeList.AddRange(GetImplicitPackageReferences());
 
             SDKReferencesDesignTime = sdkDesignTimeList.ToArray();
+        }
+
+        internal static HashSet<string> GetImplicitPackageReferences(string defaultImplicitPackages)
+        {
+            var implicitPackageReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(defaultImplicitPackages))
+            {
+                return implicitPackageReferences;
+            }
+
+            var packageNames = defaultImplicitPackages.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (packageNames.Length == 0)
+            {
+                return implicitPackageReferences;
+            }
+
+            foreach (var packageReference in packageNames)
+            {
+                implicitPackageReferences.Add(packageReference);
+            }
+
+            return implicitPackageReferences;
         }
 
         private IEnumerable<ITaskItem> GetImplicitPackageReferences()

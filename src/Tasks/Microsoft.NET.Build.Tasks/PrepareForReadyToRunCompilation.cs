@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -17,28 +17,22 @@ namespace Microsoft.NET.Build.Tasks
 {
     public class PrepareForReadyToRunCompilation : TaskBase
     {
+        [Required]
+        public ITaskItem MainAssembly { get; set; }
         public ITaskItem[] Assemblies { get; set; }
         public string[] ExcludeList { get; set; }
         public bool EmitSymbols { get; set; }
         public bool ReadyToRunUseCrossgen2 { get; set; }
+        public bool Crossgen2Composite { get; set; }
 
         [Required]
         public string OutputPath { get; set; }
         [Required]
-        public ITaskItem[] RuntimePacks { get; set; }
-        public ITaskItem[] Crossgen2Packs { get; set; }
-        [Required]
-        public ITaskItem[] TargetingPacks { get; set; }
-        [Required]
-        public string RuntimeGraphPath { get; set; }
-        [Required]
-        public string NETCoreSdkRuntimeIdentifier { get; set; }
-        [Required]
         public bool IncludeSymbolsInSingleFile { get; set; }
 
-        [Output]
+        public string[] PublishReadyToRunCompositeExclusions { get; set; }
+
         public ITaskItem CrossgenTool { get; set; }
-        [Output]
         public ITaskItem Crossgen2Tool { get; set; }
 
         // Output lists of files to compile. Currently crossgen has to run in two steps, the first to generate the R2R image
@@ -56,198 +50,107 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] ReadyToRunAssembliesToReference => _r2rReferences.ToArray();
 
-        internal struct CrossgenToolInfo
-        {
-            public string ToolPath;
-            public string PackagePath;
-            public string ClrJitPath;
-            public string DiaSymReaderPath;
-        }
+        [Output]
+        public ITaskItem[] ReadyToRunCompositeBuildReferences => _r2rCompositeReferences.ToArray();
+
+        [Output]
+        public ITaskItem[] ReadyToRunCompositeBuildInput => _r2rCompositeInput.ToArray();
+
+        private bool _crossgen2IsVersion5;
+        private int _perfmapFormatVersion;
 
         private List<ITaskItem> _compileList = new List<ITaskItem>();
         private List<ITaskItem> _symbolsCompileList = new List<ITaskItem>();
         private List<ITaskItem> _r2rFiles = new List<ITaskItem>();
         private List<ITaskItem> _r2rReferences = new List<ITaskItem>();
+        private List<ITaskItem> _r2rCompositeReferences = new List<ITaskItem>();
+        private List<ITaskItem> _r2rCompositeInput = new List<ITaskItem>();
 
-        private ITaskItem _runtimePack;
-        private ITaskItem _crossgen2Pack;
-        private string _targetRuntimeIdentifier;
-        private string _hostRuntimeIdentifier;
+        private bool IsTargetWindows
+        {
+            get
+            {
+                // Crossgen2 V6 and above always has TargetOS metadata available
+                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS))) 
+                    return Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "windows";
+                else
+                    return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            }
+        }
 
-        private CrossgenToolInfo _crossgenTool;
-        private CrossgenToolInfo _crossgen2Tool;
-
-        private Architecture _targetArchitecture;
+        private bool IsTargetLinux
+        {
+            get
+            {
+                // Crossgen2 V6 and above always has TargetOS metadata available
+                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS))) 
+                    return Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "linux";
+                else
+                    return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            }
+        }
 
         protected override void ExecuteCore()
         {
-            _runtimePack = GetNETCoreAppRuntimePack();
-            _crossgen2Pack = Crossgen2Packs?.FirstOrDefault();
-            _targetRuntimeIdentifier = _runtimePack?.GetMetadata(MetadataKeys.RuntimeIdentifier);
-
-            // Get the list of runtime identifiers that we support and can target 
-            ITaskItem targetingPack = GetNETCoreAppTargetingPack();
-            string supportedRuntimeIdentifiers = targetingPack?.GetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers);
-
-            var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
-            var supportedRIDsList = supportedRuntimeIdentifiers == null ? Array.Empty<string>() : supportedRuntimeIdentifiers.Split(';');
-
-            // Get the best RID for the host machine, which will be used to validate that we can run crossgen for the target platform and architecture
-            _hostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
-                runtimeGraph,
-                NETCoreSdkRuntimeIdentifier,
-                supportedRIDsList,
-                out bool wasInGraph);
-
-            if (_hostRuntimeIdentifier == null || _targetRuntimeIdentifier == null)
-            {
-                Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);
-                return;
-            }
-
             if (ReadyToRunUseCrossgen2)
             {
-                if (!ValidateCrossgen2Support())
-                {
-                    return;
-                }
+                string isVersion5 = Crossgen2Tool.GetMetadata(MetadataKeys.IsVersion5);
+                _crossgen2IsVersion5 = !string.IsNullOrEmpty(isVersion5) && bool.Parse(isVersion5);
 
-                // NOTE: Crossgen2 does not yet currently support emitting native symbols, and until this feature
-                // is implemented, we will use crossgen for it. This should go away in the future when crossgen2 supports the feature.
-                if (EmitSymbols && !ValidateCrossgenSupport())
+                string perfmapVersion = Crossgen2Tool.GetMetadata(MetadataKeys.PerfmapFormatVersion);
+                _perfmapFormatVersion = !string.IsNullOrEmpty(perfmapVersion) ? int.Parse(perfmapVersion) : 0;
+
+                if (Crossgen2Composite && EmitSymbols && _crossgen2IsVersion5)
                 {
-                    return;
-                }
-            }
-            else
-            {
-                if (!ValidateCrossgenSupport())
-                {
+                    Log.LogError(Strings.Crossgen5CannotEmitSymbolsInCompositeMode);
                     return;
                 }
             }
 
-            // Future: check DiaSymReaderPath in the _crossgen2Tool info when crossgen2 starts supporting emitting native symbols
-            bool hasValidDiaSymReaderLib = String.IsNullOrEmpty(_crossgenTool.DiaSymReaderPath) ? false : File.Exists(_crossgenTool.DiaSymReaderPath);
+            string diaSymReaderPath = CrossgenTool?.GetMetadata(MetadataKeys.DiaSymReader);
+
+            bool hasValidDiaSymReaderLib =
+                ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5 ||
+                !string.IsNullOrEmpty(diaSymReaderPath) && File.Exists(diaSymReaderPath);
 
             // Process input lists of files
-            ProcessInputFileList(Assemblies, _compileList, _symbolsCompileList, _r2rFiles, _r2rReferences, hasValidDiaSymReaderLib);
-        }
-
-        private bool ValidateCrossgenSupport()
-        {
-            _crossgenTool.PackagePath = _runtimePack?.GetMetadata(MetadataKeys.PackageDirectory);
-            if (_crossgenTool.PackagePath == null)
-            {
-                Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);
-                return false;
-            }
-
-            if (!ExtractTargetPlatformAndArchitecture(_targetRuntimeIdentifier, out string targetPlatform, out _targetArchitecture) ||
-                !ExtractTargetPlatformAndArchitecture(_hostRuntimeIdentifier, out string hostPlatform, out Architecture hostArchitecture) ||
-                targetPlatform != hostPlatform)
-            {
-                Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
-                return false;
-            }
-
-            if (!GetCrossgenComponentsPaths())
-            {
-                Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
-                return false;
-            }
-
-            // Create tool task item
-            CrossgenTool = new TaskItem(_crossgenTool.ToolPath);
-            CrossgenTool.SetMetadata("JitPath", _crossgenTool.ClrJitPath);
-            if (!String.IsNullOrEmpty(_crossgenTool.DiaSymReaderPath))
-            {
-                CrossgenTool.SetMetadata("DiaSymReader", _crossgenTool.DiaSymReaderPath);
-            }
-
-            return true;
-        }
-
-        private bool ValidateCrossgen2Support()
-        {
-            _crossgen2Tool.PackagePath = _crossgen2Pack?.GetMetadata(MetadataKeys.PackageDirectory);
-            if (_crossgen2Tool.PackagePath == null)
-            {
-                Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);
-                return false;
-            }
-
-            // Crossgen2 only supports the following host->target compilation scenarios in net5.0:
-            //      win-x64 -> win-x64
-            //      linux-x64 -> linux-x64
-            //      linux-musl-x64 -> linux-musl-x64
-            if (_targetRuntimeIdentifier != _hostRuntimeIdentifier)
-            {
-                Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
-                return false;
-            }
-
-            if (!GetCrossgen2ComponentsPaths())
-            {
-                Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
-                return false;
-            }
-
-            // Create tool task item
-            Crossgen2Tool = new TaskItem(_crossgen2Tool.ToolPath);
-            Crossgen2Tool.SetMetadata("JitPath", _crossgen2Tool.ClrJitPath);
-            if (!String.IsNullOrEmpty(_crossgen2Tool.DiaSymReaderPath))
-            {
-                Crossgen2Tool.SetMetadata("DiaSymReader", _crossgen2Tool.DiaSymReaderPath);
-            }
-
-            return true;
-        }
-
-        private ITaskItem GetNETCoreAppRuntimePack()
-        {
-            return GetNETCoreAppPack(RuntimePacks, MetadataKeys.FrameworkName);
-        }
-
-        private ITaskItem GetNETCoreAppTargetingPack()
-        {
-            return GetNETCoreAppPack(TargetingPacks, MetadataKeys.RuntimeFrameworkName);
-        }
-
-        private static ITaskItem GetNETCoreAppPack(ITaskItem[] packs, string metadataKey)
-        { 
-            return packs.SingleOrDefault(
-                pack => pack.GetMetadata(metadataKey)
-                            .Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase));
+            ProcessInputFileList(Assemblies, _compileList, _symbolsCompileList, _r2rFiles, _r2rReferences, _r2rCompositeReferences, _r2rCompositeInput, hasValidDiaSymReaderLib);
         }
 
         private void ProcessInputFileList(
-            ITaskItem[] inputFiles, 
+            ITaskItem[] inputFiles,
             List<ITaskItem> imageCompilationList,
             List<ITaskItem> symbolsCompilationList,
-            List<ITaskItem> r2rFilesPublishList, 
+            List<ITaskItem> r2rFilesPublishList,
             List<ITaskItem> r2rReferenceList,
+            List<ITaskItem> r2rCompositeReferenceList,
+            List<ITaskItem> r2rCompositeInputList,
             bool hasValidDiaSymReaderLib)
         {
             if (inputFiles == null)
             {
                 return;
             }
-            
-            var exclusionSet = ExcludeList == null ? null : new HashSet<string>(ExcludeList, StringComparer.OrdinalIgnoreCase);
+
+            var exclusionSet = ExcludeList == null || Crossgen2Composite ? null : new HashSet<string>(ExcludeList, StringComparer.OrdinalIgnoreCase);
+            var compositeExclusionSet = PublishReadyToRunCompositeExclusions == null || !Crossgen2Composite ? null : new HashSet<string>(PublishReadyToRunCompositeExclusions, StringComparer.OrdinalIgnoreCase);
 
             foreach (var file in inputFiles)
             {
-                var eligibility = GetInputFileEligibility(file, exclusionSet);
+                var eligibility = GetInputFileEligibility(file, Crossgen2Composite, exclusionSet, compositeExclusionSet);
 
-                if (eligibility == Eligibility.None)
+                if (eligibility.NoEligibility)
                 {
                     continue;
                 }
 
-                r2rReferenceList.Add(file);
+                if (eligibility.IsReference)
+                    r2rReferenceList.Add(file);
 
-                if (eligibility == Eligibility.ReferenceOnly)
+                if (eligibility.IsReference && !eligibility.ReferenceHiddenFromCompositeBuild && !eligibility.Compile)
+                    r2rCompositeReferenceList.Add(file);
+
+                if (!eligibility.Compile)
                 {
                     continue;
                 }
@@ -255,12 +158,60 @@ namespace Microsoft.NET.Build.Tasks
                 var outputR2RImageRelativePath = file.GetMetadata(MetadataKeys.RelativePath);
                 var outputR2RImage = Path.Combine(OutputPath, outputR2RImageRelativePath);
 
-                // This TaskItem is the IL->R2R entry, for an input assembly that needs to be compiled into a R2R image. This will be used as
-                // an input to the ReadyToRunCompiler task
-                TaskItem r2rCompilationEntry = new TaskItem(file);
-                r2rCompilationEntry.SetMetadata("OutputR2RImage", outputR2RImage);
-                r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
-                imageCompilationList.Add(r2rCompilationEntry);
+                string outputPDBImage = null;
+                string outputPDBImageRelativePath = null;
+                string crossgen1CreatePDBCommand = null;
+
+                if (EmitSymbols)
+                {
+                    if (IsTargetWindows && hasValidDiaSymReaderLib)
+                    {
+                        outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.pdb");
+                        outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.pdb");
+                        crossgen1CreatePDBCommand = $"/CreatePDB \"{Path.GetDirectoryName(outputPDBImage)}\"";
+                    }
+                    else if (IsTargetLinux)
+                    {
+                        string perfmapExtension;
+                        if (ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5 && _perfmapFormatVersion >= 1)
+                        {
+                            perfmapExtension = ".ni.r2rmap";
+                        }
+                        else
+                        {
+                            using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
+                            {
+                                PEReader pereader = new PEReader(fs);
+                                MetadataReader mdReader = pereader.GetMetadataReader();
+                                Guid mvid = mdReader.GetGuid(mdReader.GetModuleDefinition().Mvid);
+                                perfmapExtension = ".ni.{" + mvid + "}.map";
+                            }
+                        }
+
+                        outputPDBImage = Path.ChangeExtension(outputR2RImage, perfmapExtension);
+                        outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, perfmapExtension);
+                        crossgen1CreatePDBCommand = $"/CreatePerfMap \"{Path.GetDirectoryName(outputPDBImage)}\"";
+                    }
+                }
+
+                if (eligibility.CompileSeparately)
+                {
+                    // This TaskItem is the IL->R2R entry, for an input assembly that needs to be compiled into a R2R image. This will be used as
+                    // an input to the ReadyToRunCompiler task
+                    TaskItem r2rCompilationEntry = new TaskItem(file);
+                    r2rCompilationEntry.SetMetadata(MetadataKeys.OutputR2RImage, outputR2RImage);
+                    if (outputPDBImage != null && ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5)
+                    {
+                        r2rCompilationEntry.SetMetadata(MetadataKeys.EmitSymbols, "true");
+                        r2rCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, outputPDBImage);
+                    }
+                    r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+                    imageCompilationList.Add(r2rCompilationEntry);
+                }
+                else if (eligibility.CompileIntoCompositeImage)
+                {
+                    r2rCompositeInputList.Add(file);
+                }
 
                 // This TaskItem corresponds to the output R2R image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
                 // for the newly created R2R image
@@ -273,45 +224,73 @@ namespace Microsoft.NET.Build.Tasks
                 // unless an explicit PublishReadyToRunEmitSymbols flag is enabled by the app developer. There is also another way to profile that the runtime supports, which does
                 // not rely on the native PDBs/Map files, so creating them is really an opt-in option, typically used by advanced users.
                 // For debugging, only the IL PDBs are required.
-                if (EmitSymbols)
+                if (eligibility.CompileSeparately && outputPDBImage != null)
                 {
-                    string outputPDBImageRelativePath = null, outputPDBImage = null, createPDBCommand = null;
-
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && hasValidDiaSymReaderLib)
-                    {
-                        outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.pdb");
-                        outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.pdb");
-                        createPDBCommand = $"/CreatePDB \"{Path.GetDirectoryName(outputPDBImage)}\"";
-                    }
-                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                    {
-                        using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
-                        {
-                            PEReader pereader = new PEReader(fs);
-                            MetadataReader mdReader = pereader.GetMetadataReader();
-                            Guid mvid = mdReader.GetGuid(mdReader.GetModuleDefinition().Mvid);
-
-                            outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.{" + mvid + "}.map");
-                            outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.{" + mvid + "}.map");
-                            createPDBCommand = $"/CreatePerfMap \"{Path.GetDirectoryName(outputPDBImage)}\"";
-                        }
-                    }
-
-                    if (outputPDBImage != null)
+                    if (!ReadyToRunUseCrossgen2 || _crossgen2IsVersion5)
                     {
                         // This TaskItem is the R2R->R2RPDB entry, for a R2R image that was just created, and for which we need to create native PDBs. This will be used as
                         // an input to the ReadyToRunCompiler task
                         TaskItem pdbCompilationEntry = new TaskItem(file);
                         pdbCompilationEntry.ItemSpec = outputR2RImage;
-                        pdbCompilationEntry.SetMetadata("OutputPDBImage", outputPDBImage);
-                        pdbCompilationEntry.SetMetadata("CreatePDBCommand", createPDBCommand);
+                        pdbCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, outputPDBImage);
+                        pdbCompilationEntry.SetMetadata(MetadataKeys.CreatePDBCommand, crossgen1CreatePDBCommand);
                         symbolsCompilationList.Add(pdbCompilationEntry);
+                    }
 
-                        // This TaskItem corresponds to the output PDB image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
-                        // for the newly created PDB image.
-                        TaskItem r2rSymbolsFileToPublish = new TaskItem(file);
-                        r2rSymbolsFileToPublish.ItemSpec = outputPDBImage;
-                        r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, outputPDBImageRelativePath);
+                    // This TaskItem corresponds to the output PDB image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
+                    // for the newly created PDB image.
+                    TaskItem r2rSymbolsFileToPublish = new TaskItem(file);
+                    r2rSymbolsFileToPublish.ItemSpec = outputPDBImage;
+                    r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, outputPDBImageRelativePath);
+                    r2rSymbolsFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+                    if (!IncludeSymbolsInSingleFile)
+                    {
+                        r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.ExcludeFromSingleFile, "true");
+                    }
+
+                    r2rFilesPublishList.Add(r2rSymbolsFileToPublish);
+                }
+            }
+
+            if (Crossgen2Composite)
+            {
+                MainAssembly.SetMetadata(MetadataKeys.RelativePath, Path.GetFileName(MainAssembly.ItemSpec));
+
+                var compositeR2RImageRelativePath = MainAssembly.GetMetadata(MetadataKeys.RelativePath);
+                compositeR2RImageRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, "r2r" + Path.GetExtension(compositeR2RImageRelativePath));
+                var compositeR2RImage = Path.Combine(OutputPath, compositeR2RImageRelativePath);
+
+                TaskItem r2rCompilationEntry = new TaskItem(MainAssembly);
+                r2rCompilationEntry.ItemSpec = r2rCompositeInputList[0].ItemSpec;
+                r2rCompilationEntry.SetMetadata(MetadataKeys.OutputR2RImage, compositeR2RImage);
+                r2rCompilationEntry.SetMetadata(MetadataKeys.CreateCompositeImage, "true");
+                r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+
+                if (EmitSymbols)
+                {
+                    string compositePDBImage = null;
+                    string compositePDBRelativePath = null;
+                    if (IsTargetWindows && hasValidDiaSymReaderLib)
+                    {
+                        compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.pdb");
+                        compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.pdb");
+                    }
+                    else if (IsTargetLinux)
+                    {
+                        string perfmapExtension = (_perfmapFormatVersion >= 1 ? ".ni.r2rmap" : ".ni.{composite}.map");
+                        compositePDBImage = Path.ChangeExtension(compositeR2RImage, perfmapExtension);
+                        compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, perfmapExtension);
+                    }
+
+                    if (compositePDBImage != null && ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5)
+                    {
+                        r2rCompilationEntry.SetMetadata(MetadataKeys.EmitSymbols, "true");
+                        r2rCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, compositePDBImage);
+
+                        // Publish composite PDB file
+                        TaskItem r2rSymbolsFileToPublish = new TaskItem(MainAssembly);
+                        r2rSymbolsFileToPublish.ItemSpec = compositePDBImage;
+                        r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, compositePDBRelativePath);
                         r2rSymbolsFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                         if (!IncludeSymbolsInSingleFile)
                         {
@@ -321,19 +300,91 @@ namespace Microsoft.NET.Build.Tasks
                         r2rFilesPublishList.Add(r2rSymbolsFileToPublish);
                     }
                 }
+
+                imageCompilationList.Add(r2rCompilationEntry);
+
+                // Publish it
+                TaskItem compositeR2RFileToPublish = new TaskItem(MainAssembly);
+                compositeR2RFileToPublish.ItemSpec = compositeR2RImage;
+                compositeR2RFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+                compositeR2RFileToPublish.SetMetadata(MetadataKeys.RelativePath, compositeR2RImageRelativePath);
+                r2rFilesPublishList.Add(compositeR2RFileToPublish);
             }
         }
 
-        private enum Eligibility
+        private struct Eligibility
         {
-            None,
-            ReferenceOnly,
-            CompileAndReference
+            [Flags]
+            private enum EligibilityEnum
+            {
+                None = 0,
+                Reference = 1,
+                HideReferenceFromComposite = 2,
+                CompileSeparately = 4,
+                CompileIntoCompositeImage = 8,
+            }
+
+            private readonly EligibilityEnum _flags;
+
+            public static Eligibility None => new Eligibility(EligibilityEnum.None);
+
+            public bool NoEligibility => _flags == EligibilityEnum.None;
+            public bool IsReference => (_flags & EligibilityEnum.Reference) == EligibilityEnum.Reference;
+            public bool ReferenceHiddenFromCompositeBuild => (_flags & EligibilityEnum.HideReferenceFromComposite) == EligibilityEnum.HideReferenceFromComposite;
+            public bool CompileIntoCompositeImage => (_flags & EligibilityEnum.CompileIntoCompositeImage) == EligibilityEnum.CompileIntoCompositeImage;
+            public bool CompileSeparately => (_flags & EligibilityEnum.CompileSeparately) == EligibilityEnum.CompileSeparately;
+            public bool Compile => CompileIntoCompositeImage || CompileSeparately;
+
+            private Eligibility(EligibilityEnum flags)
+            {
+                _flags = flags;
+            }
+
+            public static Eligibility CreateReferenceEligibility(bool hideFromCompositeBuilds)
+            {
+                if (hideFromCompositeBuilds)
+                    return new Eligibility(EligibilityEnum.Reference | EligibilityEnum.HideReferenceFromComposite);
+                else
+                    return new Eligibility(EligibilityEnum.Reference);
+            }
+
+            public static Eligibility CreateCompileEligibility(bool doNotBuildIntoComposite)
+            {
+                if (doNotBuildIntoComposite)
+                    return new Eligibility(EligibilityEnum.Reference | EligibilityEnum.HideReferenceFromComposite | EligibilityEnum.CompileSeparately);
+                else
+                    return new Eligibility(EligibilityEnum.Reference | EligibilityEnum.CompileIntoCompositeImage);
+            }
         };
 
-        private static Eligibility GetInputFileEligibility(ITaskItem file, HashSet<string> exclusionSet)
+        private static bool IsNonCompositeReadyToRunImage(PEReader peReader)
+        {
+            if (peReader.PEHeaders == null)
+                return false;
+
+            if (peReader.PEHeaders.CorHeader == null)
+                return false;
+
+            if ((peReader.PEHeaders.CorHeader.Flags & CorFlags.ILLibrary) == 0)
+            {
+                // This is likely a composite image, but those can't be re-r2r'd
+                return false;
+            }
+            else
+            {
+                return peReader.PEHeaders.CorHeader.ManagedNativeHeaderDirectory.Size != 0;
+            }
+        }
+
+        private static Eligibility GetInputFileEligibility(ITaskItem file, bool compositeCompile, HashSet<string> exclusionSet, HashSet<string> r2rCompositeExclusionSet)
         {
             // Check to see if this is a valid ILOnly image that we can compile
+            if (!file.ItemSpec.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) && !file.ItemSpec.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                // If it isn't a dll or an exe, it certainly isn't a valid ILOnly image for compilation
+                return Eligibility.None;
+            }
+
             using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
             {
                 try
@@ -350,35 +401,54 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             return Eligibility.None;
                         }
-                        
+
                         if (IsReferenceAssembly(mdReader))
                         {
                             // crossgen can only take implementation assemblies, even as references
                             return Eligibility.None;
                         }
 
+                        bool excludeFromR2R = (exclusionSet != null && exclusionSet.Contains(Path.GetFileName(file.ItemSpec)));
+                        bool excludeFromComposite = (r2rCompositeExclusionSet != null && r2rCompositeExclusionSet.Contains(Path.GetFileName(file.ItemSpec))) || excludeFromR2R;
+
                         if ((pereader.PEHeaders.CorHeader.Flags & CorFlags.ILOnly) != CorFlags.ILOnly)
                         {
-                            return Eligibility.ReferenceOnly;
+                            // This can happen due to C++/CLI binaries or due to previously R2R compiled binaries.
+
+                            if (!IsNonCompositeReadyToRunImage(pereader))
+                            {
+                                // For C++/CLI always treat as only a reference
+                                return Eligibility.CreateReferenceEligibility(excludeFromComposite);
+                            }
+                            else
+                            {
+                                // If previously compiled as R2R, treat as reference if this would be compiled seperately
+                                if (!compositeCompile || excludeFromComposite)
+                                {
+                                    return Eligibility.CreateReferenceEligibility(excludeFromComposite);
+                                }
+                            }
                         }
 
                         if (file.HasMetadataValue(MetadataKeys.ReferenceOnly, "true"))
                         {
-                            return Eligibility.ReferenceOnly;
+                            return Eligibility.CreateReferenceEligibility(excludeFromComposite);
                         }
 
-                        if (exclusionSet != null && exclusionSet.Contains(Path.GetFileName(file.ItemSpec)))
+                        if (excludeFromR2R)
                         {
-                            return Eligibility.ReferenceOnly;
+                            return Eligibility.CreateReferenceEligibility(excludeFromComposite);
                         }
 
                         // save these most expensive checks for last. We don't want to scan all references for IL code
                         if (ReferencesWinMD(mdReader) || !HasILCode(pereader, mdReader))
                         {
-                            return Eligibility.ReferenceOnly;
+                            // Forwarder assemblies are not separately compiled via R2R, but when performing composite compilation, they are included in the bundle
+                            if (excludeFromComposite || !compositeCompile)
+                                return Eligibility.CreateReferenceEligibility(excludeFromComposite);
                         }
 
-                        return Eligibility.CompileAndReference;
+                        return Eligibility.CreateCompileEligibility(!compositeCompile || excludeFromComposite);
                     }
                 }
                 catch (BadImageFormatException)
@@ -454,159 +524,6 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return false;
-        }
-
-        private static bool ExtractTargetPlatformAndArchitecture(string runtimeIdentifier, out string platform, out Architecture architecture)
-        {
-            platform = null;
-            architecture = default;
-
-            int separator = runtimeIdentifier.LastIndexOf('-');
-            if (separator < 0 || separator >= runtimeIdentifier.Length)
-            {
-                return false;
-            }
-
-            platform = runtimeIdentifier.Substring(0, separator).ToLowerInvariant();
-            string architectureStr = runtimeIdentifier.Substring(separator + 1).ToLowerInvariant();
-
-            switch (architectureStr)
-            {
-                case "arm":
-                    architecture = Architecture.Arm;
-                    break;
-                case "arm64":
-                    architecture = Architecture.Arm64;
-                    break;
-                case "x64":
-                    architecture = Architecture.X64;
-                    break;
-                case "x86":
-                    architecture = Architecture.X86;
-                    break;
-                default:
-                    return false;
-            }
-
-            return true;
-        }
-
-        private bool GetCrossgenComponentsPaths()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (_targetArchitecture == Architecture.Arm)
-                {
-                    if (RuntimeInformation.OSArchitecture == _targetArchitecture)
-                    {
-                        // We can run native arm32 bits on an arm64 host in WOW mode
-                        _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "crossgen.exe");
-                        _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "clrjit.dll");
-                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "Microsoft.DiaSymReader.Native.arm.dll");
-                    }
-                    else
-                    {
-                        // We can use the x86-hosted crossgen compiler to target ARM
-                        _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "x86_arm", "crossgen.exe");
-                        _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", "x86_arm", "native", "clrjit.dll");
-                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "Microsoft.DiaSymReader.Native.x86.dll");
-                    }
-                }
-                else if (_targetArchitecture == Architecture.Arm64)
-                {
-                    if (RuntimeInformation.OSArchitecture == _targetArchitecture)
-                    {
-                        _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "crossgen.exe");
-                        _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "clrjit.dll");
-                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "Microsoft.DiaSymReader.Native.arm64.dll");
-                    }
-                    else
-                    {
-                        // We only have 64-bit hosted compilers for ARM64.
-                        if (RuntimeInformation.OSArchitecture != Architecture.X64)
-                        {
-                            return false;
-                        }
-
-                        _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "x64_arm64", "crossgen.exe");
-                        _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", "x64_arm64", "native", "clrjit.dll");
-                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "Microsoft.DiaSymReader.Native.amd64.dll");
-                    }
-                }
-                else
-                {
-                    _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "crossgen.exe");
-                    _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "clrjit.dll");
-                    if (_targetArchitecture == Architecture.X64)
-                    {
-                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "Microsoft.DiaSymReader.Native.amd64.dll");
-                    }
-                    else
-                    {
-                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "Microsoft.DiaSymReader.Native.x86.dll");
-                    }
-                }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                if (_targetArchitecture == Architecture.Arm || _targetArchitecture == Architecture.Arm64)
-                {
-                    if (RuntimeInformation.OSArchitecture == _targetArchitecture)
-                    {
-                        _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "crossgen");
-                        _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "libclrjit.so");
-                    }
-                    else if (RuntimeInformation.OSArchitecture == Architecture.X64)
-                    {
-                        string xarchPath = (_targetArchitecture == Architecture.Arm ? "x64_arm" : "x64_arm64");
-                        _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", xarchPath, "crossgen");
-                        _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", xarchPath, "native", "libclrjit.so");
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "crossgen");
-                    _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "libclrjit.so");
-                }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                // Only x64 supported for OSX
-                if (_targetArchitecture != Architecture.X64 || RuntimeInformation.OSArchitecture != Architecture.X64)
-                {
-                    return false;
-                }
-
-                _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "crossgen");
-                _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "libclrjit.dylib");
-            }
-            else
-            {
-                // Unknown platform
-                return false;
-            }
-
-            return File.Exists(_crossgenTool.ToolPath) && File.Exists(_crossgenTool.ClrJitPath);
-        }
-
-        private bool GetCrossgen2ComponentsPaths()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2.exe");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "clrjitilc.dll");
-            }
-            else
-            {
-                _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "libclrjitilc.so");
-            }
-
-            return File.Exists(_crossgen2Tool.ToolPath) && File.Exists(_crossgen2Tool.ClrJitPath);
         }
     }
 }

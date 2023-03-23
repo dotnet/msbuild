@@ -10,7 +10,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
-
+using NuGet.Frameworks;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -28,7 +28,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             NuGetVersion version,
             DirectoryPath packageDirectory,
             IEnumerable<string> warnings = null,
-            IReadOnlyList<FilePath> packagedShims = null)
+            IReadOnlyList<FilePath> packagedShims = null,
+            IEnumerable<NuGetFramework> frameworks = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             Id = id;
@@ -37,6 +38,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             _commands = new Lazy<IReadOnlyList<RestoredCommand>>(GetCommands);
             _warnings = warnings ?? new List<string>();
             _packagedShims = packagedShims ?? new List<FilePath>();
+            Frameworks = frameworks ?? new List<NuGetFramework>();
         }
 
         public PackageId Id { get; private set; }
@@ -61,6 +63,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 return _packagedShims;
             }
         }
+
+        public IEnumerable<NuGetFramework> Frameworks { get; private set; }
 
         private IReadOnlyList<RestoredCommand> GetCommands()
         {

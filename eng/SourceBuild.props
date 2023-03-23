@@ -1,0 +1,26 @@
+<Project>
+
+  <PropertyGroup>
+    <GitHubRepositoryName>sdk</GitHubRepositoryName>
+    <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
+    <SourceBuildTrimNetFrameworkTargets>true</SourceBuildTrimNetFrameworkTargets>
+  </PropertyGroup>
+
+  <Target Name="ConfigureInnerBuildArg" BeforeTargets="GetSourceBuildCommandConfiguration">
+    <PropertyGroup>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)\source-build.slnf"</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:UseSharedCompilation=false</InnerBuildArgs>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="GetSdkCategorizedIntermediateNupkgContents"
+          BeforeTargets="GetCategorizedIntermediateNupkgContents">
+    <ItemGroup>
+      <!--
+        Add the internal toolset zip required by dotnet/installer.
+      -->
+      <IntermediateNupkgArtifactFile Include="$(CurrentRepoSourceBuildArtifactsPackagesDir)NonShipping\dotnet-toolset-internal-*.zip" />
+    </ItemGroup>
+  </Target>
+
+</Project>

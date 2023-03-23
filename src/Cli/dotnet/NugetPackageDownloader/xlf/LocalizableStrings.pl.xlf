@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="DownloadVersionFailed">
+        <source>Downloading {0} version {1} failed.</source>
+        <target state="translated">Pobieranie {0} w wersji {1} nie powiodło się.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSource">
+        <source>Failed to load NuGet source {0}</source>
+        <target state="translated">Nie można załadować źródła pakietu NuGet {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSourceSourceIsNotValid">
+        <source>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</source>
+        <target state="translated">Nie można załadować źródła pakietu NuGet {0}: źródło jest nieprawidłowe. Zostanie ono pominięte podczas dalszego przetwarzania.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToValidatePackageSigning">
+        <source>Failed to validate package signing.</source>
+        <target state="translated">Nie można zweryfikować podpisywania pakietu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IsNotFoundInNuGetFeeds">
+        <source>{0} is not found in NuGet feeds {1}".</source>
+        <target state="translated">Nie znaleziono pakietu {0} w kanałach informacyjnych NuGet {1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="translated">Pomijanie weryfikacji podpisu pakietu NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
+        <source>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</source>
+        <target state="translated">Pomiń weryfikację podpisywania pakietu NuGet. Sprawdzanie podpisywania NuGet nie jest dostępne w systemie Linux ani MacOS https://aka.ms/workloadskippackagevalidation .</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

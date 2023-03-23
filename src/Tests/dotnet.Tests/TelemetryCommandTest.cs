@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class TelemetryCommandTests : SdkTest
     {
         private readonly FakeRecordEventNameTelemetry _fakeTelemetry;
@@ -34,7 +35,7 @@ namespace Microsoft.DotNet.Tests
         {
             string[] args = { "publish", "-r"};
             Action a = () => { Cli.Program.ProcessArgs(args); };
-            a.ShouldNotThrow<ArgumentOutOfRangeException>();
+            a.Should().NotThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Tests
         {
             string[] args = { "restore", "-v" };
             Action a = () => { Cli.Program.ProcessArgs(args); };
-            a.ShouldNotThrow<ArgumentOutOfRangeException>();
+            a.Should().NotThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]
@@ -54,6 +55,49 @@ namespace Microsoft.DotNet.Tests
             _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("HELP"));
+        }
+
+        [Fact]
+        public void TopLevelCommandNameShouldBeSentToTelemetryWithPerformanceData()
+        {
+            string[] args = { "help" };
+            Cli.Program.ProcessArgs(args, new TimeSpan(12345));
+
+            _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("HELP") &&
+                              e.Measurement.ContainsKey("Startup Time") &&
+                              e.Measurement["Startup Time"] == 1.2345 &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
+        }
+
+        [Fact]
+        public void TopLevelCommandNameShouldBeSentToTelemetryWithoutStartupTime()
+        {
+            string[] args = { "help" };
+            Cli.Program.ProcessArgs(args);
+
+            _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("HELP") &&
+                              !e.Measurement.ContainsKey("Startup Time") &&
+                                 e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
+        }
+
+        [Fact]
+        public void TopLevelCommandNameShouldBeSentToTelemetryZeroStartupTime()
+        {
+            string[] args = { "help" };
+            Cli.Program.ProcessArgs(args, new TimeSpan(0));
+
+            _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("HELP") &&
+                              !e.Measurement.ContainsKey("Startup Time") &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
         }
 
         [Fact]
@@ -69,6 +113,25 @@ namespace Microsoft.DotNet.Tests
                               e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("NEW"));
+        }
+
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/24190")]
+        public void DotnetNewCommandFirstArgumentShouldBeSentToTelemetryWithPerformanceData()
+        {
+            const string argumentToSend = "console";
+            string[] args = { "new", argumentToSend };
+            Cli.Program.ProcessArgs(args, new TimeSpan(23456));
+            _fakeTelemetry
+                .LogEntries.Should()
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("NEW") &&
+                              e.Measurement.ContainsKey("Startup Time") &&
+                              e.Measurement["Startup Time"] == 2.3456 &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
         }
 
         [Fact]
@@ -177,7 +240,7 @@ namespace Microsoft.DotNet.Tests
                               e.Properties["verb"] == Sha256Hasher.Hash("NUGET"));
         }
 
-        [Fact]
+        [Fact(Skip = "dotnet new sends the telemetry inside own commands")]
         public void DotnetNewCommandLanguageOpinionShouldBeSentToTelemetry()
         {
             const string optionKey = "language";
@@ -209,6 +272,26 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
+        public void AnyDotnetCommandVerbosityOpinionShouldBeSentToTelemetryWithPerformanceData()
+        {
+            const string optionKey = "verbosity";
+            const string optionValueToSend = "minimal";
+            string[] args = { "restore", "--" + optionKey, optionValueToSend };
+            Cli.Program.ProcessArgs(args, new TimeSpan(34567));
+            _fakeTelemetry
+                .LogEntries.Should()
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey(optionKey) &&
+                              e.Properties[optionKey] == Sha256Hasher.Hash(optionValueToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("RESTORE") &&
+                              e.Measurement.ContainsKey("Startup Time") &&
+                              e.Measurement["Startup Time"] == 3.4567 &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
+        }
+
+        [Fact]
         public void DotnetBuildAndPublishCommandOpinionsShouldBeSentToTelemetry()
         {
             const string optionKey = "configuration";
@@ -228,7 +311,7 @@ namespace Microsoft.DotNet.Tests
         public void DotnetPublishCommandRuntimeOpinionsShouldBeSentToTelemetry()
         {
             const string optionKey = "runtime";
-            const string optionValueToSend = "win10-x64";
+            const string optionValueToSend = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64";
             string[] args = { "publish", "--" + optionKey, optionValueToSend };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
@@ -243,7 +326,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void DotnetBuildAndPublishCommandOpinionsShouldBeSentToTelemetryWhenThereIsMultipleOption()
         {
-            string[] args = { "build", "--configuration", "Debug", "--runtime", "osx.10.11-x64" };
+            string[] args = { "build", "--configuration", "Debug", "--runtime", $"{ToolsetInfo.LatestMacRuntimeIdentifier}-x64" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
@@ -255,7 +338,7 @@ namespace Microsoft.DotNet.Tests
             _fakeTelemetry
                 .LogEntries.Should()
                 .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("runtime") &&
-                              e.Properties["runtime"] == Sha256Hasher.Hash("OSX.10.11-X64") &&
+                              e.Properties["runtime"] == Sha256Hasher.Hash($"{ToolsetInfo.LatestMacRuntimeIdentifier.ToUpper()}-X64") &&
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("BUILD"));
         }
@@ -263,7 +346,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void DotnetRunCleanTestCommandOpinionsShouldBeSentToTelemetryWhenThereIsMultipleOption()
         {
-            string[] args = { "clean", "--configuration", "Debug", "--framework", "netcoreapp1.0" };
+            string[] args = { "clean", "--configuration", "Debug", "--framework", ToolsetInfo.CurrentTargetFramework };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
@@ -275,7 +358,7 @@ namespace Microsoft.DotNet.Tests
             _fakeTelemetry
                 .LogEntries.Should()
                 .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("framework") &&
-                              e.Properties["framework"] == Sha256Hasher.Hash("NETCOREAPP1.0") &&
+                              e.Properties["framework"] == Sha256Hasher.Hash(ToolsetInfo.CurrentTargetFramework.ToUpper()) &&
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("CLEAN"));
         }
@@ -292,12 +375,6 @@ namespace Microsoft.DotNet.Tests
                 .LogEntries.Should()
                 .Contain(e => e.EventName == "install/reportsuccess" && e.Properties.ContainsKey("exeName") &&
                               e.Properties["exeName"] == Sha256Hasher.Hash("DOTNET-SDK-LATEST-WIN-X64.EXE"));
-        }
-
-        [Fact]
-        public void InternalreportinstallsuccessCommandIsRegisteredInBuiltIn()
-        {
-            BuiltInCommandsCatalog.Commands.Should().ContainKey("internal-reportinstallsuccess");
         }
 
         [Fact]

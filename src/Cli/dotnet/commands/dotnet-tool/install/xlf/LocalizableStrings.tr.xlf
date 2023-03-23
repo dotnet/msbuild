@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 '{1}' aracı (sürüm '{2}') başarıyla yüklendi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">{0} çalışma zamanı tanımlayıcısı geçersiz. Geçerli çalışma zamanı tanımlayıcıları: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">Aracı yükle ve yerel araç bildirimine ekle (varsayılan).</target>
@@ -66,6 +71,11 @@ Bir bildirim oluşturmak istiyorsanız 'dotnet new tool-manifest' ifadesini kull
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">Aracın yükleneceği hedef çerçeve.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">--prerelease ve --version seçenekleri aynı komutta desteklenmiyor</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -142,11 +152,11 @@ Bir bildirim oluşturmak istiyorsanız 'dotnet new tool-manifest' ifadesini kull
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">'{0}' aracı yüklenemedi. Bu sorun şunlardan kaynaklanıyor olabilir:
+        <target state="translated">'{0}' aracı yüklenemedi. Bu sorun şunlardan kaynaklanıyor olabilir:
 
 * Bir önizleme sürümünü yüklemeye çalışmış ancak sürümü belirtmek için --version seçeneğini kullanmamış olabilirsiniz.
-* Bu ada sahip bir paket bulunmuş olabilir, ancak bu paket bir .NET Core aracı olmayabilir.
-* Olası bir İnternet bağlantısı sorunundan dolayı gerekli NuGet akışına erişilemiyor olabilir.
+* Bu ada sahip bir paket bulunmuş olabilir, ancak bu paket bir .NET aracı olmayabilir.
+* Olası bir İnternet bağlantısı sorunu nedeniyle gerekli NuGet akışına erişilemiyor olabilir.
 * Aracın adını yanlış yazmış olabilirsiniz.
 
 Paket adlandırma zorlaması dahil diğer nedenler için şu adresi ziyaret edin: https://aka.ms/failure-installing-tool</target>
@@ -164,7 +174,7 @@ Paket adlandırma zorlaması dahil diğer nedenler için şu adresi ziyaret edin
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">SÜRÜM</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
@@ -174,7 +184,7 @@ Paket adlandırma zorlaması dahil diğer nedenler için şu adresi ziyaret edin
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="translated">ÇERÇEVE</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">

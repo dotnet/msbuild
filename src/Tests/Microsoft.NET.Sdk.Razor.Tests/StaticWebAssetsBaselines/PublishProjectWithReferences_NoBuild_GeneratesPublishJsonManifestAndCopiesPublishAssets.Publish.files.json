@@ -1,0 +1,13 @@
+[
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css",
+  "${OutputPath}\\wwwroot\\AppWithPackageAndP2PReference.styles.css",
+  "${OutputPath}\\wwwroot\\_content\\AnotherClassLib\\css\\site.css",
+  "${OutputPath}\\wwwroot\\_content\\AnotherClassLib\\js\\project-direct-dep.js",
+  "${OutputPath}\\wwwroot\\_content\\ClassLibrary\\ClassLibrary.bundle.scp.css",
+  "${OutputPath}\\wwwroot\\_content\\ClassLibrary\\js\\project-transitive-dep.js",
+  "${OutputPath}\\wwwroot\\_content\\ClassLibrary\\js\\project-transitive-dep.v4.js",
+  "${OutputPath}\\wwwroot\\_content\\PackageLibraryDirectDependency\\PackageLibraryDirectDependency.bundle.scp.css",
+  "${OutputPath}\\wwwroot\\_content\\PackageLibraryDirectDependency\\css\\site.css",
+  "${OutputPath}\\wwwroot\\_content\\PackageLibraryDirectDependency\\js\\pkg-direct-dep.js",
+  "${OutputPath}\\wwwroot\\_content\\PackageLibraryTransitiveDependency\\js\\pkg-transitive-dep.js"
+]

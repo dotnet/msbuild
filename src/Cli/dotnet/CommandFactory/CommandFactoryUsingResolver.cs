@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.CommandFactory
 {
     public static class CommandFactoryUsingResolver
     {
-        private static string[] _knownCommandsAvailableAsDotNetTool = new[] { "dotnet-dev-certs", "dotnet-sql-cache", "dotnet-user-secrets", "dotnet-watch" };
+        private static string[] _knownCommandsAvailableAsDotNetTool = new[] { "dotnet-dev-certs", "dotnet-sql-cache", "dotnet-user-secrets", "dotnet-watch", "dotnet-user-jwts" };
 
         public static Command CreateDotNet(
             string commandName,

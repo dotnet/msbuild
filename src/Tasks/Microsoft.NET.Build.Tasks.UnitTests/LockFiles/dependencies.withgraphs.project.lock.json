@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "targets": {
     ".NETStandard,Version=v1.6": {
       "Microsoft.CSharp/4.0.1": {
@@ -2824,9 +2824,52 @@
       "Newtonsoft.Json >= 9.0.1"
     ]
   },
-  "tools": {},
-  "projectFileToolGroups": {},
   "packageFolders": {
-    "C:\\Users\\eerhardt\\.nuget\\packages\\": {}
+    "C:\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\git\\repro\\consoletest\\consoletest.csproj",
+      "projectName": "consoletest",
+      "projectPath": "C:\\git\\repro\\consoletest\\consoletest.csproj",
+      "packagesPath": "C:\\Users\\username\\.nuget\\packages\\",
+      "outputPath": "C:\\git\\repro\\consoletest\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [],
+      "configFilePaths": [
+        "C:\\Users\\username\\AppData\\Roaming\\NuGet\\NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "netstandard1.6"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "netstandard1.6": {
+          "targetAlias": "netstandard1.6",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "netstandard1.6": {
+        "targetAlias": "netstandard1.6",
+        "dependencies": {
+          "Microsoft.NETCore.App": {
+            "target": "Package",
+            "version": "[1.0.5, )",
+            "autoReferenced": true
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\git\\dotnet-sdk\\artifacts\\bin\\redist\\Debug\\dotnet\\sdk\\5.0.100-dev\\RuntimeIdentifierGraph.json"
+      }
+    }
   }
 }

@@ -1,0 +1,85 @@
+# This is a comment.
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# @dotnet/dotnet-cli  will be requested for
+# review when someone opens a pull request.
+# Issue/PR labels to use are listed before each section
+
+# Area-WebSDK
+/src/WebSdk/ @vijayrkn
+/src/Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests/ @vijayrkn
+
+# Area-AspNetCore
+/src/BlazorWasmSdk/ @dotnet/aspnet-blazor-eng
+/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.Tests/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestProjects/BlazorHosted/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestProjects/BlazorHostedRID/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestProjects/BlazorWasmMinimal/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestProjects/BlazorWasmWithLibrary/ @dotnet/aspnet-blazor-eng
+/src/RazorSdk/ @dotnet/aspnet-blazor-eng
+/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests/ @dotnet/aspnet-blazor-eng
+/src/Tests/Microsoft.NET.Sdk.Razor.Tests/ @dotnet/aspnet-blazor-eng
+/src/Tests/Microsoft.NET.Sdk.Razor.Tool.Tests/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestPackages/PackageLibraryDirectDependency/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestPackages/PackageLibraryTransitiveDependency/ @dotnet/aspnet-blazor-eng
+/src/src/Assets/TestProjects/Razor*/ @dotnet/aspnet-blazor-eng
+
+# Area-Format
+/src/Cli/dotnet/commands/dotnet-format @jmarolf @JoeRobich
+/src/Tests/dotnet-format.Tests @jmarolf @JoeRobich
+
+# Area-NuGet
+/src/Cli/dotnet/commands/dotnet-add/dotnet-add-package @dotnet/nuget-team
+/src/Tests/dotnet-add-package.Tests @dotnet/nuget-team
+/src/Cli/dotnet/commands/dotnet-nuget @dotnet/nuget-team
+/src/Tests/dotnet-nuget.UnitTests @dotnet/nuget-team
+
+# Area-FSharp
+/src/Cli/dotnet/commands/dotnet-fsi @dotnet/fsharp
+/src/Tests/dotnet-fsi.Tests @dotnet/fsharp
+
+# Area-DotNet Test
+/src/Cli/dotnet/commands/dotnet-test @dotnet/dotnet-test-templates-admin
+/src/Cli/dotnet/commands/dotnet-vstest @dotnet/dotnet-test-templates-admin
+/src/Tests/dotnet-test.Tests @dotnet/dotnet-test-templates-admin
+/src/Tests/dotnet-vstest.Tests @dotnet/dotnet-test-templates-admin
+
+# Area-Templates
+/src/Cli/dotnet/commands/dotnet-new @dotnet/templating-engine-maintainers 
+/src/Cli/dotnet-new3 @dotnet/templating-engine-maintainers 
+/src/Cli/Microsoft.TemplateEngine.Cli @dotnet/templating-engine-maintainers 
+/src/Tests/dotnet-new.Tests @dotnet/templating-engine-maintainers
+/src/Tests/Microsoft.TemplateEngine.* @dotnet/templating-engine-maintainers 
+/template_feed @dotnet/templating-engine-maintainers 
+
+# ILLink and ReadyToRun targets and tasks owned by runtime team
+# Area-ILLink Area-ReadyToRun
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ILLink.targets clrappmodel@microsoft.com @dotnet/illink-contrib
+/src/Tasks/Microsoft.NET.Build.Tasks/PrepareForReadyToRunCompilation.cs @AntonLapounov
+/src/Tasks/Microsoft.NET.Build.Tasks/RunReadyToRunCompiler.cs @AntonLapounov
+/src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToRunILLink.cs clrappmodel@microsoft.com @dotnet/illink-contrib
+/src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToPublishReadyToRun.cs @AntonLapounov
+# Publish.targets related to ILLink and ReadyToRun is own by both runtime and SDK team
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Publish.targets clrappmodel@microsoft.com @dotnet/illink-contrib @AntonLapounov @dotnet/dotnet-cli
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ClickOnce.targets @sujitnayak
+
+# Area-Watch
+/src/Assets/TestProjects/Watch*/     @tmat @arkalyanms @dotnet/roslyn-ide
+/src/Tests/dotnet-watch.Tests/       @tmat @arkalyanms @dotnet/roslyn-ide
+/src/Tests/Microsoft.AspNetCore.Watch.BrowserRefresh.Tests/       @dotnet/aspnet-blazor-eng
+/src/BuiltInTools/*   @tmat @arkalyanms @dotnet/roslyn-ide
+/src/BuiltInTools/BrowserRefresh   @dotnet/aspnet-blazor-eng
+
+# ApiCompat tools owned by runtime team
+# Area-ApiCompat
+/src/ApiCompat/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.ApiCompatibility*/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.ApiCompat*/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.PackageValidation*/ @dotnet/area-infrastructure-libraries
+
+# Area-GenAPI
+/src/GenAPI/ @andriipatsula @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.GenAPI/ @andriipatsula @dotnet/area-infrastructure-libraries
+/src/Microsoft.DotNet.ApiSymbolExtensions/ @andriipatsula @dotnet/area-infrastructure-libraries

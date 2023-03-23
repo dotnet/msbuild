@@ -32,7 +32,6 @@ namespace Microsoft.NET.Restore.Tests
             TestProject toolProject = new TestProject()
             {
                 Name = "TestTool" + nameof(It_can_restore_with_netcoreapp2_2),
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp1.0",
                 IsExe = true
             };
@@ -48,7 +47,6 @@ namespace Microsoft.NET.Restore.Tests
             TestProject toolReferenceProject = new TestProject()
             {
                 Name = "DotNetCliToolReferenceProject",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = "netcoreapp1.0",
             };

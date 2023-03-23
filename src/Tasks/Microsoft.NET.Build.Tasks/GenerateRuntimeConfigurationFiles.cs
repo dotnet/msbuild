@@ -10,6 +10,7 @@ using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
@@ -53,6 +54,10 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool WriteIncludedFrameworks { get; set; }
 
+        public bool GenerateRuntimeConfigDevFile { get; set; }
+
+        public bool AlwaysIncludeCoreFramework { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         private static readonly string[] RollForwardValues = new string[]
@@ -73,11 +78,12 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            bool writeDevRuntimeConfig = !string.IsNullOrEmpty(RuntimeConfigDevPath);
-
             if (!WriteAdditionalProbingPathsToMainConfig)
             {
-                if (AdditionalProbingPaths?.Any() == true && !writeDevRuntimeConfig)
+                // If we want to generate the runtimeconfig.dev.json file
+                // and we have additional probing paths to add to it
+                // BUT the runtimeconfigdevpath is empty, log a warning.
+                if (GenerateRuntimeConfigDevFile && AdditionalProbingPaths?.Any() == true && string.IsNullOrEmpty(RuntimeConfigDevPath))
                 {
                     Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
                 }
@@ -126,7 +132,7 @@ namespace Microsoft.NET.Build.Tasks
                 LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
 
                 ProjectContext projectContext = lockFile.CreateProjectContext(
-                    NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
+                    TargetFramework,
                     RuntimeIdentifier,
                     PlatformLibraryName,
                     RuntimeFrameworks,
@@ -137,7 +143,7 @@ namespace Microsoft.NET.Build.Tasks
                     projectContext.IsFrameworkDependent,
                     projectContext.LockFile.PackageFolders);
 
-                if (writeDevRuntimeConfig)
+                if (GenerateRuntimeConfigDevFile && !string.IsNullOrEmpty(RuntimeConfigDevPath))
                 {
                     WriteDevRuntimeConfig(projectContext.LockFile.PackageFolders);
                 }
@@ -179,7 +185,7 @@ namespace Microsoft.NET.Build.Tasks
                                    LockFileTargetLibrary lockFilePlatformLibrary,
                                    bool isFrameworkDependent)
         {
-            runtimeOptions.Tfm = TargetFramework;
+            runtimeOptions.Tfm = NuGetFramework.Parse(TargetFrameworkMoniker).GetShortFolderName();
 
             var frameworks = new List<RuntimeConfigFramework>();
             if (runtimeFrameworks == null || runtimeFrameworks.Length == 0)
@@ -202,14 +208,15 @@ namespace Microsoft.NET.Build.Tasks
                 HashSet<string> usedFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var platformLibrary in runtimeFrameworks)
                 {
-                    if (runtimeFrameworks.Length > 1 &&
+                    //  In earlier versions of the SDK, we would exclude Microsoft.NETCore.App from the frameworks listed in the runtimeconfig file.
+                    //  This was originally a workaround for a bug: https://github.com/dotnet/core-setup/issues/4947
+                    //  We would only do this for framework-dependent apps, as the full list was required for self-contained apps.
+                    //  As the bug is fixed, we now always include the Microsoft.NETCore.App framework by default for .NET Core 6 and higher
+                    if (!AlwaysIncludeCoreFramework &&
+                        runtimeFrameworks.Length > 1 &&
                         platformLibrary.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase) &&
                         isFrameworkDependent)
                     {
-                        //  If there are multiple runtime frameworks, then exclude Microsoft.NETCore.App,
-                        //  as a workaround for https://github.com/dotnet/core-setup/issues/4947
-                        //  The workaround only applies to normal framework references, included frameworks
-                        //  (in self-contained apps) must list all frameworks.
                         continue;
                     }
 

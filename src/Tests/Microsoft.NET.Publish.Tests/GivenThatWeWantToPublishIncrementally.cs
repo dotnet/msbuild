@@ -26,8 +26,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "RegularPublishToSingleExe",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
             };
@@ -39,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish normally
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();
@@ -48,7 +47,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllText(Path.Combine(publishDir, "UserData.txt"), string.Empty);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -61,8 +60,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishSingleFile1",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
             };
@@ -72,7 +70,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFileExtensions = new string[] { ".exe", ".pdb" };
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -87,11 +85,11 @@ namespace Microsoft.NET.Publish.Tests
                 Path.Combine(testAsset.TestRoot, testProject.Name, newName + ".csproj"));
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
-            CheckPublishOutput(publishDir, expectedSingleExeFileExtensions.Select(ending => newName + ending).Append("UserData.txt").Append(testProject.Name + ".deps.json"), 
+            CheckPublishOutput(publishDir, expectedSingleExeFileExtensions.Select(ending => newName + ending).Append("UserData.txt").Append(testProject.Name + ".deps.json"),
                 expectedSingleExeFileExtensions.Select(ending => testProject.Name + ending));
         }
 
@@ -101,8 +99,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishSingleExe",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
             };
@@ -112,7 +109,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -122,7 +119,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllText(Path.Combine(publishDir, testProject.Name + ".dll"), string.Empty);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -135,8 +132,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "RegularPublishToTrimmedSingleExe",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
             };
@@ -149,7 +145,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish trimmed
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();
@@ -158,28 +154,31 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllText(Path.Combine(publishDir, "UserData.txt"), string.Empty);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
             CheckPublishOutput(publishDir, expectedSingleExeFiles.Append("UserData.txt"), expectedNonSingleExeFiles);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void It_cleans_for_mvc_projects()
         {
             // Create new mvc app from template
             var testDir = _testAssetsManager.CreateTestDirectory();
             var assetName = "MVCPublishProject";
             var runtimeId = "win-x86";
-            var newCommand = new DotnetCommand(Log);
-            newCommand.WorkingDirectory = testDir.Path;
-            newCommand.Execute("new", "mvc", "-n", assetName).Should().Pass();
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
+                .WithWorkingDirectory(testDir.Path)
+                .Execute("mvc", "-n", assetName)
+                .Should()
+                .Pass();
 
-            var expectedRegularFiles = new string[] { ".dll", ".deps.json", ".runtimeconfig.json", ".Views.dll"}
+            var expectedRegularFiles = new string[] { ".dll", ".deps.json", ".runtimeconfig.json" }
                 .Select(ending => assetName + ending);
-            var expectedSingleFiles = new string[] { ".Views.pdb", ".pdb", ".exe" }.Select(ending => assetName + ending)
-                .Concat(new string[] { "hostfxr.dll", "hostpolicy.dll", "appsettings.json", "appsettings.Development.json", "web.config" });
+            var expectedSingleFiles = new string[] { ".pdb", ".exe" }.Select(ending => assetName + ending)
+                .Concat(new string[] { "appsettings.json", "appsettings.Development.json", "web.config" });
 
             // Publish normally
             new PublishCommand(Log, Path.Combine(testDir.Path, assetName))
@@ -207,8 +206,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishToCustomDir",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
             };
@@ -221,7 +219,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish normally
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute("/p:PublishDir=" + publishOutputFolder)
                 .Should()
                 .Pass();
@@ -230,7 +228,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllText(Path.Combine(publishDir, "UserData.txt"), string.Empty);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true", "/p:PublishDir=" + publishOutputFolder)
                 .Should()
                 .Pass();
@@ -243,8 +241,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishToMultipleDirs",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
             };
@@ -259,14 +256,14 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish normally in folder 1
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute("/p:PublishDir=" + publishOutputFolder1)
                 .Should()
                 .Pass();
             CheckPublishOutput(publishDir1, expectedSingleExeFiles.Concat(expectedNonSingleExeFiles), null);
 
             // Publish as a single file in folder 2
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true", "/p:PublishDir=" + publishOutputFolder2)
                 .Should()
                 .Pass();
@@ -278,7 +275,7 @@ namespace Microsoft.NET.Publish.Tests
             var newName = "PublishToMultipleDirs1";
             File.Move(Path.Combine(testAsset.TestRoot, testProject.Name, testProject.Name + ".csproj"),
                 Path.Combine(testAsset.TestRoot, testProject.Name, newName + ".csproj"));
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute("/p:PublishDir=" + publishOutputFolder1)
                 .Should()
                 .Pass();

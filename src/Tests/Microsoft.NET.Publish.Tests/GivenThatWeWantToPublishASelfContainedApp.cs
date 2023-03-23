@@ -25,24 +25,6 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_errors_when_publishing_self_contained_app_without_rid()
-        {
-             var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName)
-                .WithSource();
-
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
-            publishCommand
-                .Execute(
-                    "/p:SelfContained=true",
-                    $"/p:TargetFramework={TargetFramework}")
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotHaveSelfContainedWithoutRuntimeIdentifier);
-        }
-
-        [Fact]
         public void It_errors_when_publishing_self_contained_without_apphost()
         {
             var runtimeIdentifier = RuntimeInformation.RuntimeIdentifier;
@@ -51,7 +33,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset(TestProjectName)
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(
                     "/p:SelfContained=true",
@@ -78,11 +60,11 @@ namespace Microsoft.NET.Publish.Tests
                     $"/p:TargetFramework={TargetFramework}",
                     $"/p:RuntimeIdentifier={runtimeIdentifier}"};
 
-            var restoreCommand = new RestoreCommand(Log, testAsset.TestRoot);
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand.Execute(msbuildArgs);
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(msbuildArgs)
                 .Should().Pass();
@@ -108,7 +90,7 @@ namespace Microsoft.NET.Publish.Tests
                     doc.Root.Element("PropertyGroup").Element("TargetFramework").SetValue(TargetFramework);
                 });
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(
                     "/p:SelfContained=true",
@@ -119,7 +101,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             string outputDirectory = publishCommand.GetOutputDirectory(
-                targetFramework: TargetFramework, 
+                targetFramework: TargetFramework,
                 runtimeIdentifier: runtimeIdentifier).FullName;
             byte[] fileContent = File.ReadAllBytes(Path.Combine(outputDirectory, TestProjectName + ".exe"));
             UInt32 peHeaderOffset = BitConverter.ToUInt32(fileContent, PEHeaderPointerOffset);
@@ -129,7 +111,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Be(2);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.4.0.41702")]
         public void It_publishes_an_app_with_a_netcoreapp_lib_reference()
         {
             var testAsset = _testAssetsManager
@@ -139,15 +121,13 @@ namespace Microsoft.NET.Publish.Tests
             var args = new string[]
             {
                 "/p:SelfContained=true",
-                "/p:TargetFramework=netcoreapp3.0",
-                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")}"
+                $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework}",
+                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)}"
             };
 
-            var projectRoot = Path.Combine(testAsset.TestRoot, "main");
+            new RestoreCommand(testAsset, "main").Execute(args);
 
-            new RestoreCommand(Log, projectRoot).Execute(args);
-
-            new PublishCommand(Log, projectRoot)
+            new PublishCommand(testAsset, "main")
                 .Execute(args)
                 .Should()
                 .Pass();
@@ -156,13 +136,12 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyFact]
         public void It_publishes_runtime_pack_resources()
         {
-            const string tfm = "netcoreapp3.0";
+            const string tfm = $"{ToolsetInfo.CurrentTargetFramework}-windows";
 
             var testProject = new TestProject()
             {
                 Name = "WpfProjectAllResources",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
@@ -172,7 +151,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
-            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var command = new PublishCommand(testProjectInstance);
 
             command
                 .Execute($"/p:RuntimeIdentifier={rid}")
@@ -201,13 +180,12 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyFact]
         public void It_publishes_runtime_pack_resources_for_specific_languages()
         {
-            const string tfm = "netcoreapp3.0";
+            const string tfm = $"{ToolsetInfo.CurrentTargetFramework}-windows";
 
             var testProject = new TestProject()
             {
                 Name = "WpfProjectSelectResources",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
@@ -218,7 +196,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
-            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var command = new PublishCommand(testProjectInstance);
 
             command
                 .Execute($"/p:RuntimeIdentifier={rid}")
@@ -247,6 +225,31 @@ namespace Microsoft.NET.Publish.Tests
                     "tr",
                     "zh-Hans",
                 });
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        public void NoStaticLibs()
+        {
+            var testAsset = _testAssetsManager
+               .CopyTestAsset(TestProjectName)
+               .WithSource();
+
+            var publishCommand = new PublishCommand(testAsset);
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var rid = RuntimeInformation.RuntimeIdentifier;
+            publishCommand
+                .Execute(
+                    "/p:SelfContained=true",
+                    $"/p:TargetFramework={tfm}",
+                    $"/p:RuntimeIdentifier={rid}")
+                .Should()
+                .Pass();
+
+            var output = publishCommand.GetOutputDirectory(targetFramework: tfm, runtimeIdentifier: rid);
+            output.Should()
+                .NotHaveFilesMatching("*.lib", SearchOption.AllDirectories)
+                .And
+                .NotHaveFilesMatching("*.a", SearchOption.AllDirectories);
         }
     }
 }

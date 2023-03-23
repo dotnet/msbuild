@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "MSBuild Directory.Build.targets dosyası",
+  "description": "Bir klasörün tamamı için MSBuild görevlerini ve hedeflerini belirtmek üzere kullanılabilecek boş bir Directory.Build.targets dosyası",
+  "symbols/inherit/displayName": "Inherit",
+  "symbols/inherit/description": "True ise, dosya sistemi dizin hiyerarşisindeki en yakın Directory.Build.targets için bir Import değeri ekler. Directory.Build.targets varsayılan olarak devralmadığından bunu yapmak, klasörden klasöre bir özelleştirme kümesi oluşturmanızı sağlar."
+}

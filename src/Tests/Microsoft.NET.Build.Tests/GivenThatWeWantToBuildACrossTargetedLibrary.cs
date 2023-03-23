@@ -20,16 +20,14 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_builds_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "NetStandardAndNetCoreApp");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "NetStandardAndNetCoreApp");
             buildCommand
                 .Execute()
                 .Should()
@@ -37,11 +35,13 @@ namespace Microsoft.NET.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "");
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                "netcoreapp1.1/NetStandardAndNetCoreApp.dll",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.pdb",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.runtimeconfig.json",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.runtimeconfig.dev.json",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.dll",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.pdb",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.runtimeconfig.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/Newtonsoft.Json.dll",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp{EnvironmentInfo.ExecutableExtension}",
                 "netstandard1.5/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.pdb",
                 "netstandard1.5/NetStandardAndNetCoreApp.deps.json"
@@ -55,9 +55,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("CrossTargeting")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "DesktopAndNetStandard");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "DesktopAndNetStandard");
             buildCommand
                 .Execute()
                 .Should()
@@ -81,8 +79,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("1", "win7-x86", "win7-x86;win7-x64", "win10-arm", "win7-x86;linux;WIN7-X86;unix", "osx-10.12", "win8-arm;win8-arm-aot",
-            "win7-x86;win7-x64;win10-arm;linux;unix;osx-10.12;win8-arm;win8-arm-aot")]
+        [InlineData("1", "win7-x86", "win7-x86;win7-x64", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm", "win7-x86;linux;WIN7-X86;unix", "osx-10.12", "win8-arm;win8-arm-aot",
+            $"win7-x86;win7-x64;{ToolsetInfo.LatestWinRuntimeIdentifier}-arm;linux;unix;osx-10.12;win8-arm;win8-arm-aot")]
         public void It_combines_inner_rids_for_restore(
             string identifier,
             string outerRid,
@@ -111,7 +109,7 @@ namespace Microsoft.NET.Build.Tests
                             new XElement(ns + "RuntimeIdentifier", firstFrameworkRid),
                             new XElement(ns + "RuntimeIdentifiers", firstFrameworkRids)),
                         new XElement(ns + "PropertyGroup",
-                            new XAttribute(ns + "Condition", "'$(TargetFramework)' == 'netcoreapp1.1'"),
+                            new XAttribute(ns + "Condition", $"'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"),
                             new XElement(ns + "RuntimeIdentifier", secondFrameworkRid),
                             new XElement(ns + "RuntimeIdentifiers", secondFrameworkRids)));
                 });

@@ -111,21 +111,21 @@ namespace Microsoft.NET.Build.Tests
             if (scenario != ReferenceScenario.ProjectReference)
             {
 
-                var libBuildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, LibraryName));
+                var libBuildCommand = new BuildCommand(testAsset, LibraryName);
                 libBuildCommand
                     .Execute()
                     .Should()
                     .Pass();
             }
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
             var outputDirectory = isSdk ? 
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net462") :
                 buildCommand.GetNonSDKOutputDirectory();
 
             outputDirectory.Should().HaveFiles(new[] {
@@ -237,25 +237,28 @@ namespace Microsoft.NET.Build.Tests
 
             if (usePackagesConfig)
             {
-                testAsset.NuGetRestore(Log, relativePath: AppName);
+                new NuGetExeRestoreCommand(Log, testAsset.TestRoot, AppName)
+                    .Execute()
+                    .Should()
+                    .Pass();
             }
             else
             {
             }
 
             // build should succeed without duplicates
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
                 .Pass()
                 .And
-                .NotHaveStdOutContaining("warning")
+                .NotHaveStdOutContaining("duplicate")
                 .And
                 .HaveStdOutContainingIgnoreCase(successMessage);
 
             var outputDirectory = isSdk ?
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net462") :
                 buildCommand.GetNonSDKOutputDirectory();
 
             outputDirectory.Should().HaveFiles(new[] {
@@ -294,7 +297,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
@@ -355,14 +358,14 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
             
             var outputDirectory = isSdk ?
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net462") :
                 buildCommand.GetNonSDKOutputDirectory();
 
             outputDirectory.Should().NotHaveFile("netstandard.dll");
@@ -393,17 +396,17 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
             var outputDirectory = isSdk ?
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net462") :
                 buildCommand.GetNonSDKOutputDirectory();
 
-            // NET461 didn't originally support netstandard2.0, (nor netstandard1.5 or netstandard1.6)
+            // net462 didn't originally support netstandard2.0, (nor netstandard1.5 or netstandard1.6)
             // Since support was added after we need to ensure we apply the shims for netstandard1.5 projects as well.
 
             outputDirectory.Should().HaveFiles(new[] {

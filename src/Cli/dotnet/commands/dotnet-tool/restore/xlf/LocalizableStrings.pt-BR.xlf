@@ -41,7 +41,7 @@
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="translated">ORIGEM</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -51,7 +51,7 @@
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="translated">ARQUIVO</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -81,7 +81,7 @@
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="translated">CAMINHO</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionDescription">

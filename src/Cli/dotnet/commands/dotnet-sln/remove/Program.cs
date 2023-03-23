@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
@@ -14,26 +16,19 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
 {
     internal class RemoveProjectFromSolutionCommand : CommandBase
     {
-        private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
+        private readonly IReadOnlyCollection<string> _arguments;
 
         public RemoveProjectFromSolutionCommand(
-            AppliedOption appliedCommand, 
-            string fileOrDirectory,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-
-            if (appliedCommand.Arguments.Count == 0)
+            _arguments = (parseResult.GetValue(SlnRemoveParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
+            if (_arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
             }
 
-            _appliedCommand = appliedCommand;
-            _fileOrDirectory = fileOrDirectory;
+            _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
         }
 
         public override int Execute()
@@ -41,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
             var baseDirectory = PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory);
-            var relativeProjectPaths = _appliedCommand.Arguments.Select(p => {
+            var relativeProjectPaths = _arguments.Select(p => {
                 var fullPath = Path.GetFullPath(p);
                 return Path.GetRelativePath(
                     baseDirectory,

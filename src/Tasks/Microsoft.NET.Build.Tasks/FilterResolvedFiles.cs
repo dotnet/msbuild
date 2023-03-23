@@ -56,7 +56,7 @@ namespace Microsoft.NET.Build.Tasks
             LockFile lockFile = lockFileCache.GetLockFile(AssetsFilePath);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                NuGetUtils.ParseFrameworkName(TargetFramework),
+                TargetFramework,
                 RuntimeIdentifier,
                 PlatformLibraryName,
                 runtimeFrameworks: null,

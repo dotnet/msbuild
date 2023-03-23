@@ -15,8 +15,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 {
     public class GivenDotnetStoresAndPublishesProjects : SdkTest
     {
-        private static string _tfm = "netcoreapp3.0";
+        private static string _tfm = "netcoreapp3.1";
         private static string _arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+        private static string _defaultConfiguration = "Debug";
 
         public GivenDotnetStoresAndPublishesProjects(ITestOutputHelper log) : base(log)
         {
@@ -38,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var profileProjectPath = _testAssetsManager.CopyTestAsset(profileProjectName).WithSource().Path;
             var profileProject = Path.Combine(profileProjectPath, $"{profileProjectName}.xml");
 
-            new RestoreCommand(Log, testProjectDirectory)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
             var profileFilter = Path.Combine(localAssemblyCache, _arch, _tfm, "artifact.xml");
 
             new DotnetPublishCommand(Log,
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             new DotnetPublishCommand(Log,
                     "-f", _tfm,
@@ -133,7 +134,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var profileProject1 = Path.Combine(profileProjectPath1, $"{profileProjectName1}.xml");
             var profileFilter1 = Path.Combine(profileProjectPath1, "FluentFilterProfile.xml");
 
-            new RestoreCommand(Log, testProjectDirectory)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 
@@ -147,7 +148,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             new DotnetPublishCommand(Log,
                     "-f", _tfm,

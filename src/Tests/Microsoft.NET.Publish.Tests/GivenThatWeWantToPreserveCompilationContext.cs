@@ -41,17 +41,15 @@ namespace Microsoft.NET.Publish.Tests
             var testLibraryProject = new TestProject()
             {
                 Name = "TestLibrary",
-                IsSdkProject = true,
                 TargetFrameworks = libraryTargetFramework
             };
 
             var testProject = new TestProject()
             {
                 Name = "TestApp",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = appTargetFramework,
-                RuntimeIdentifier = "win7-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
 
             testProject.AdditionalProperties["PreserveCompilationContext"] = "true";
@@ -62,26 +60,24 @@ namespace Microsoft.NET.Publish.Tests
             }
 
             testProject.ReferencedProjects.Add(testLibraryProject);
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "9.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("System.Data.SqlClient", "4.4.3"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework + withoutCopyingRefs);
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            var getValuesCommand = new GetValuesCommand(Log, appProjectDirectory, testProject.TargetFrameworks, "LangVersion");
+            var getValuesCommand = new GetValuesCommand(testAsset, "LangVersion");
             getValuesCommand.Execute().Should().Pass();
 
             var langVersion = getValuesCommand.GetValues().FirstOrDefault() ?? string.Empty;
 
-            var publishCommand = new PublishCommand(Log, appProjectDirectory);
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(appTargetFramework, runtimeIdentifier: "win7-x86");
+            var publishDirectory = publishCommand.GetOutputDirectory(appTargetFramework, runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             publishDirectory.Should().HaveFiles(new[] {
                 appTargetFramework == "net46" ? "TestApp.exe" : "TestApp.dll",
@@ -117,7 +113,7 @@ namespace Microsoft.NET.Publish.Tests
                     expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP", appTargetFramework.ToUpperInvariant().Replace('.', '_') };
                 }
 
-                dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
+                dependencyContext.CompilationOptions.Defines.Should().Contain(expectedDefines);
                 dependencyContext.CompilationOptions.LanguageVersion.Should().Be(langVersion);
                 dependencyContext.CompilationOptions.Platform.Should().Be("x86");
                 dependencyContext.CompilationOptions.Optimize.Should().Be(false);
@@ -201,7 +197,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllLines(manifestFile, new[]
             {
                 "<StoreArtifacts>",
-                @"  <Package Id=""Newtonsoft.Json"" Version=""9.0.1"" />",
+                @"  <Package Id=""Newtonsoft.Json"" Version=""13.0.1"" />",
                 @"  <Package Id=""System.Data.SqlClient"" Version=""4.3.0"" />",
                 "</StoreArtifacts>",
             });
@@ -214,7 +210,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: "win7-x86");
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             publishDirectory.Should().HaveFiles(new[] {
                 "TestApp.dll",
@@ -339,6 +335,9 @@ System.Collections.Immutable.dll
 System.ComponentModel.dll
 System.ComponentModel.Annotations.dll
 System.Console.dll
+System.Collections.NonGeneric.dll
+System.ComponentModel.Primitives.dll
+System.ComponentModel.TypeConverter.dll
 System.Data.Common.dll
 System.Data.SqlClient.dll
 System.Diagnostics.Debug.dll
@@ -386,6 +385,7 @@ System.Runtime.InteropServices.dll
 System.Runtime.InteropServices.RuntimeInformation.dll
 System.Runtime.Numerics.dll
 System.Runtime.Serialization.Primitives.dll
+System.Runtime.Serialization.Formatters.dll
 System.Security.Cryptography.Algorithms.dll
 System.Security.Cryptography.Encoding.dll
 System.Security.Cryptography.OpenSsl.dll
@@ -405,6 +405,7 @@ System.Threading.ThreadPool.dll
 System.Threading.Timer.dll
 System.Xml.ReaderWriter.dll
 System.Xml.XDocument.dll
+System.Xml.XmlDocument.dll
 TestLibrary.dll"
             },
             {

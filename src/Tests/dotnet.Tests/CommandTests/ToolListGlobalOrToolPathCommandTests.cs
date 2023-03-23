@@ -7,20 +7,18 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.List;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
 using NuGet.Versioning;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -61,7 +59,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => command.Execute();
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
              .And
              .Message
              .Should()
@@ -95,7 +93,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var toolPath = Path.GetTempPath();
             var result = Parser.Instance.Parse("dotnet tool list " + $"--tool-path {toolPath}");
             var toolListGlobalOrToolPathCommand = new ToolListGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["list"],
                 result,
                 toolPath1 =>
                 {
@@ -105,7 +102,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 _reporter);
 
             var toolListCommand = new ToolListCommand(
-                result["dotnet"]["tool"]["list"],
                 result,
                 toolListGlobalOrToolPathCommand);
 
@@ -245,6 +241,66 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             return package.Object;
         }
 
+        [Fact]
+        public void GivenPackageIdArgItPrintsThatPackage()
+        {
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
+            store
+                .Setup(s => s.EnumeratePackages())
+                .Returns(new[] {
+                     CreateMockToolPackage(
+                        "test.tool",
+                        "1.3.5-preview",
+                        new[] {
+                            new RestoredCommand(new ToolCommandName("foo"), "dotnet", new FilePath("tool"))
+                        }
+                    ),
+                    CreateMockToolPackage(
+                        "another.tool",
+                        "2.7.3",
+                        new[] {
+                            new RestoredCommand(new ToolCommandName("bar"), "dotnet", new FilePath("tool"))
+                        }
+                    ),
+                    CreateMockToolPackage(
+                        "some.tool",
+                        "1.0.0",
+                        new[] {
+                            new RestoredCommand(new ToolCommandName("fancy-foo"), "dotnet", new FilePath("tool"))
+                        }
+                    )
+                });
+
+            var command = CreateCommand(store.Object, "test.tool -g");
+
+            command.Execute().Should().Be(0);
+
+            _reporter.Lines.Should().Equal(EnumerateExpectedTableLines(store.Object, new PackageId("test.tool")));
+        }
+
+        [Fact]
+        public void GivenNotInstalledPackageItPrintsEmpty()
+        {
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
+            store
+                .Setup(s => s.EnumeratePackages())
+                .Returns(new[] {
+                    CreateMockToolPackage(
+                        "test.tool",
+                        "1.3.5-preview",
+                        new[] {
+                            new RestoredCommand(new ToolCommandName("foo"), "dotnet", new FilePath("tool"))
+                        }
+                    )
+                });
+
+            var command = CreateCommand(store.Object, "not-installed-package -g");
+
+            command.Execute().Should().Be(1);
+
+            _reporter.Lines.Should().Equal(EnumerateExpectedTableLines(store.Object, new PackageId("not-installed-package")));
+        }
+
         private IToolPackage CreateMockBrokenPackage(string id, string version)
         {
             var package = new Mock<IToolPackage>(MockBehavior.Strict);
@@ -257,9 +313,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
         private ToolListGlobalOrToolPathCommand CreateCommand(IToolPackageStoreQuery store, string options = "", string expectedToolPath = null)
         {
-            ParseResult result = Parser.Instance.Parse("dotnet tool list " + options);
+            var result = Parser.Instance.Parse("dotnet tool list " + options);
             return new ToolListGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["list"],
                 result,
                 toolPath => { AssertExpectedToolPath(toolPath, expectedToolPath); return store; },
                 _reporter);
@@ -278,14 +333,16 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             }
         }
 
-        private IEnumerable<string> EnumerateExpectedTableLines(IToolPackageStoreQuery store)
+        private IEnumerable<string> EnumerateExpectedTableLines(IToolPackageStoreQuery store, PackageId? targetPackageId = null)
         {
-            string GetCommandsString(IToolPackage package)
+            static string GetCommandsString(IToolPackage package)
             {
                 return string.Join(ToolListGlobalOrToolPathCommand.CommandDelimiter, package.Commands.Select(c => c.Name));
             }
 
-            var packages = store.EnumeratePackages().Where(PackageHasCommands).OrderBy(package => package.Id);
+            var packages = store.EnumeratePackages().Where(
+                (p) => PackageHasCommands(p) && ToolListGlobalOrToolPathCommand.PackageIdMatches(p, targetPackageId)
+                ).OrderBy(package => package.Id);
             var columnDelimiter = PrintableTable<IToolPackageStoreQuery>.ColumnDelimiter;
 
             int packageIdColumnWidth = LocalizableStrings.PackageIdColumn.Length;

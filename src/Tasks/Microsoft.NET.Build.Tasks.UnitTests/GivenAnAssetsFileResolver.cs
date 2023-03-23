@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             LockFile lockFile = TestLockFiles.GetLockFile(projectName);
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName(),
                 runtime,
                 Constants.DefaultPlatformLibrary,
                 runtimeFrameworks: null,
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             LockFile lockFile = TestLockFiles.GetLockFile(projectName);
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName(),
                 runtime,
                 Constants.DefaultPlatformLibrary,
                 runtimeFrameworks: null,

@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -15,6 +15,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GetFrameworkPaths" />
 
   <PropertyGroup>
+    <TargetFrameworkMonikerDisplayName Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 1.0)) and $([MSBuild]::VersionLessThanOrEquals($(TargetFrameworkVersion), 2.1))">.NET Standard $(_TargetFrameworkVersionWithoutV)</TargetFrameworkMonikerDisplayName>
+    <TargetFrameworkMonikerDisplayName Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 1.0)) and $([MSBuild]::VersionLessThanOrEquals($(TargetFrameworkVersion), 3.1))">.NET Core $(_TargetFrameworkVersionWithoutV)</TargetFrameworkMonikerDisplayName>
+    <TargetFrameworkMonikerDisplayName Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">.NET $(_TargetFrameworkVersionWithoutV)</TargetFrameworkMonikerDisplayName>
     <_TargetFrameworkDirectories />
     <FrameworkPathOverride />
     <TargetFrameworkDirectory />

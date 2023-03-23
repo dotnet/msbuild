@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Tests
     {
         public CommandResult FirstDotnetNonVerbUseCommandResult;
         public CommandResult FirstDotnetVerbUseCommandResult;
+        public CommandResult FirstDotnetWorkloadInfoResult;
         public DirectoryInfo NugetFallbackFolder;
         public DirectoryInfo DotDotnetFolder;
         public string TestDirectory;
@@ -112,7 +113,7 @@ namespace Microsoft.DotNet.Tests
                 .StartWith(firstTimeNonVerbUseMessage);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShowsTheAppropriateMessageToTheUser()
         {
 
@@ -150,9 +151,6 @@ namespace Microsoft.DotNet.Tests
 
             var command = dotnetFirstTime.Setup(Log, _testAssetsManager);
 
-            // Disable to prevent the creation of the .dotnet folder by optimizationdata.
-            command = command.WithEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT", "true");
-
             // Disable telemetry to prevent the creation of the .dotnet folder
             // for machineid and docker cache files
             command = command.WithEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "true");
@@ -163,7 +161,7 @@ namespace Microsoft.DotNet.Tests
             homeFolder.Should().NotExist();
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShowsTheTelemetryNoticeWhenInvokingACommandAfterInternalReportInstallSuccessHasBeenInvoked()
         {
             var dotnetFirstTime = new DotNetFirstTime();
@@ -207,8 +205,6 @@ namespace Microsoft.DotNet.Tests
 
             var profiled = Path.Combine(dotnetFirstTime.TestDirectory, "profile.d");
 
-            command = command.WithEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT", "true");
-
             command.Execute("internal-reportinstallsuccess", "test").Should().Pass();
 
             File.Exists(profiled).Should().BeTrue();
@@ -224,8 +220,6 @@ namespace Microsoft.DotNet.Tests
             var command = dotnetFirstTime.Setup(Log, _testAssetsManager);
 
             var pathsd = Path.Combine(dotnetFirstTime.TestDirectory, "paths.d");
-
-            command = command.WithEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT", "true");
 
             command.Execute("internal-reportinstallsuccess", "test").Should().Pass();
 

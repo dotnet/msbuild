@@ -15,7 +15,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public sealed class GenerateShims : TaskBase
+    public sealed class GenerateShims : TaskWithAssemblyResolveHooks
     {
         /// <summary>
         /// Relative paths for Apphost for different ShimRuntimeIdentifiers with RuntimeIdentifier as meta data
@@ -120,11 +120,11 @@ namespace Microsoft.NET.Build.Tasks
                                                  appHostDestinationFilePath: appHostDestinationFilePath,
                                                  appBinaryFilePath: appBinaryFilePath,
                                                  windowsGraphicalUserInterface: windowsGraphicalUserInterface,
-                                                 assemblyToCopyResorcesFrom: IntermediateAssembly);
+                                                 assemblyToCopyResourcesFrom: IntermediateAssembly);
                     }
                     else
                     {
-                        // by passing null to assemblyToCopyResorcesFrom, it will skip coping resorces,
+                        // by passing null to assemblyToCopyResourcesFrom, it will skip copying resources,
                         // which is only supported on Windows
                         if (windowsGraphicalUserInterface)
                         {
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Build.Tasks
                                                  appHostDestinationFilePath: appHostDestinationFilePath,
                                                  appBinaryFilePath: appBinaryFilePath,
                                                  windowsGraphicalUserInterface: false,
-                                                 assemblyToCopyResorcesFrom: null);
+                                                 assemblyToCopyResourcesFrom: null);
                     }
                 }
                 catch (AppNameTooLongException ex)

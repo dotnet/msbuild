@@ -1,10 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
+using System;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools.Tool.Search;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -21,19 +23,26 @@ namespace Microsoft.DotNet.Tests.ParserTests
         }
 
         [Fact]
+        public void DotnetToolSearchShouldThrowWhenNoSearchTerm()
+        {
+            var result = Parser.Instance.Parse("dotnet tool search");
+            Action a = () => new ToolSearchCommand(result);
+            a.Should().Throw<CommandParsingException>();
+        }
+
+        [Fact]
         public void ListSearchParserCanGetArguments()
         {
             var result = Parser.Instance.Parse("dotnet tool search mytool --detail --skip 3 --take 4 --prerelease");
 
-            var appliedOptions = result["dotnet"]["tool"]["search"];
-            var packageId = appliedOptions.Arguments.Single();
+            var packageId = result.GetValue<string>(ToolSearchCommandParser.SearchTermArgument);
 
             packageId.Should().Be("mytool");
             result.UnmatchedTokens.Should().BeEmpty();
-            appliedOptions.ValueOrDefault<bool>("detail").Should().Be(true);
-            appliedOptions.ValueOrDefault<string>("skip").Should().Be("3");
-            appliedOptions.ValueOrDefault<string>("take").Should().Be("4");
-            appliedOptions.ValueOrDefault<bool>("prerelease").Should().Be(true);
+            result.GetValue<bool>(ToolSearchCommandParser.DetailOption).Should().Be(true);
+            result.GetValue<string>(ToolSearchCommandParser.SkipOption).Should().Be("3");
+            result.GetValue<string>(ToolSearchCommandParser.TakeOption).Should().Be("4");
+            result.GetValue<bool>(ToolSearchCommandParser.PrereleaseOption).Should().Be(true);
         }
     }
 }

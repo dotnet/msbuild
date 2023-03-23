@@ -9,9 +9,14 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using System.Collections.Generic;
 using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.TestFramework
 {
+    /// <summary>
+    /// A directory wrapper around the <see cref="TestProject"/> class, or any other TestAsset type.
+    /// It manages the on-disk files of the test asset and provides additional functionality to edit projects.
+    /// </summary>
     public class TestAsset : TestDirectory
     {
         private readonly string _testAssetRoot;
@@ -20,17 +25,33 @@ namespace Microsoft.NET.TestFramework
 
         public string TestRoot => Path;
 
-        internal TestAsset(string testDestination, string sdkVersion) : base(testDestination, sdkVersion)
+        /// <summary>
+        /// The hashed test name (so file paths do not become too long) of the TestAsset owning test.
+        /// Contains the leaf folder name of any particular test's root folder.
+        /// The hashing occurs in <see cref="TestAssetsManager"/>.
+        /// </summary>
+        public readonly string Name;
+
+        public ITestOutputHelper Log { get; }
+
+        //  The TestProject from which this asset was created, if any
+        public TestProject TestProject { get; set; }
+
+        internal TestAsset(string testDestination, string sdkVersion, ITestOutputHelper log) : base(testDestination, sdkVersion)
         {
+            Log = log;
+            Name = new DirectoryInfo(testDestination).Name;
         }
 
-        internal TestAsset(string testAssetRoot, string testDestination, string sdkVersion) : base(testDestination, sdkVersion)
+        internal TestAsset(string testAssetRoot, string testDestination, string sdkVersion, ITestOutputHelper log) : base(testDestination, sdkVersion)
         {
             if (string.IsNullOrEmpty(testAssetRoot))
             {
                 throw new ArgumentException("testAssetRoot");
             }
 
+            Log = log;
+            Name = new DirectoryInfo(testAssetRoot).Name;
             _testAssetRoot = testAssetRoot;
         }
 
@@ -78,7 +99,26 @@ namespace Microsoft.NET.TestFramework
                 File.Copy(srcFile, destFile, true);
             }
 
+            string[][] Properties = { new string[] { "TargetFramework", "$(CurrentTargetFramework)", ToolsetInfo.CurrentTargetFramework }, new string[] { "RuntimeIdentifier", "$(LatestWinRuntimeIdentifier)", ToolsetInfo.LatestWinRuntimeIdentifier }, new string[] { "RuntimeIdentifier", "$(LatestLinuxRuntimeIdentifier)", ToolsetInfo.LatestLinuxRuntimeIdentifier }, new string[] { "RuntimeIdentifier", "$(LatestMacRuntimeIdentifier)", ToolsetInfo.LatestMacRuntimeIdentifier }, new string[] { "RuntimeIdentifier", "$(LatestRuntimeIdentifiers)", ToolsetInfo.LatestRuntimeIdentifiers } };
+
+            foreach (string[] property in Properties)
+            {
+                this.UpdateProjProperty(property[0], property[1], property[2]);
+            }
+
             return this;
+        }
+
+        public TestAsset UpdateProjProperty(string propertyName, string variableName, string targetValue)
+        {
+            return WithTargetFramework(
+            p =>
+            {
+                var ns = p.Root.Name.Namespace;
+                var getNode = p.Root.Elements(ns + "PropertyGroup").Elements(ns + propertyName).FirstOrDefault();
+                getNode ??= p.Root.Elements(ns + "PropertyGroup").Elements(ns + $"{propertyName}s").FirstOrDefault();
+                getNode?.SetValue(getNode?.Value.Replace(variableName, targetValue));
+            }, targetValue);
         }
 
         public TestAsset WithTargetFramework(string targetFramework, string projectName = null)
@@ -101,7 +141,7 @@ namespace Microsoft.NET.TestFramework
                 var ns = p.Root.Name.Namespace;
                 var propertyGroup = p.Root.Elements(ns + "PropertyGroup").First();
                 propertyGroup.Elements(ns + "TargetFramework").SingleOrDefault()?.Remove();
-                propertyGroup.Add(new XElement(ns + "TargetFramework", targetFrameworks));
+                propertyGroup.Add(new XElement(ns + "TargetFrameworks", targetFrameworks));
             },
             targetFrameworks,
             projectName);
@@ -152,7 +192,6 @@ namespace Microsoft.NET.TestFramework
             {
                 FindProjectFiles();
             }
-
             foreach (var projectFile in _projectFiles)
             {
                 var project = XDocument.Load(projectFile);
@@ -165,33 +204,17 @@ namespace Microsoft.NET.TestFramework
                 }
             }
             return this;
-            
-        }
+
+            }
 
         public RestoreCommand GetRestoreCommand(ITestOutputHelper log, string relativePath = "")
         {
             return new RestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath));
         }
 
-        public NuGetRestoreCommand GetNuGetRestoreCommand(ITestOutputHelper log, string relativePath = "")
-        {
-            return new NuGetRestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath))
-                .AddSourcesFromCurrentConfig();
-        }
-
         public TestAsset Restore(ITestOutputHelper log, string relativePath = "", params string[] args)
         {
             var commandResult = GetRestoreCommand(log, relativePath)
-                .Execute(args);
-
-            commandResult.Should().Pass();
-
-            return this;
-        }
-
-        public TestAsset NuGetRestore(ITestOutputHelper log, string relativePath = "", params string[] args)
-        {
-            var commandResult = GetNuGetRestoreCommand(log, relativePath)
                 .Execute(args);
 
             commandResult.Should().Pass();

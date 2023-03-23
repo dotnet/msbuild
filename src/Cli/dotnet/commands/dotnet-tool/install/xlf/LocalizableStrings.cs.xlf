@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">Identifikátor modulu runtime {0} je neplatný. Platné identifikátory modulu runtime jsou: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">Nainstaluje nástroj a přidá ho do manifestu místního nástroje (výchozí).</target>
@@ -66,6 +71,11 @@ Pokud chcete vytvořit manifest, použijte příkaz dotnet new tool-manifest, ob
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">Cílová architektura, pro kterou se má nástroj nainstalovat</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">Možnosti --prerelease a --version v jednom příkazu se nepodporují.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -142,10 +152,10 @@ Pokud chcete vytvořit manifest, použijte příkaz dotnet new tool-manifest, ob
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Nástroj {0} se nepodařilo nainstalovat. Možné příčiny:
+        <target state="translated">Nástroj {0} se nepovedlo nainstalovat. Možné příčiny:
 
 * Pokoušíte se nainstalovat verzi Preview, ale nespecifikovali jste ji pomocí možnosti --version.
-* Byl nalezen balíček s tímto názvem, ale není to nástroj .NET Core.
+* Byl nalezen balíček s tímto názvem, ale není to nástroj .NET.
 * Požadovaný informační kanál NuGet je nedostupný, pravděpodobně z důvodu potíží s připojením k internetu.
 * Zadali jste chybně název nástroje.
 
