@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// Determines the per-machine install location for .NET. This is similar to the logic in the standalone installers.
         /// </summary>
         /// <returns>The path where .NET is installed based on the host architecture and operating system bitness.</returns>
-        private string GetDotNetHome()
+        internal static string GetDotNetHome()
         {
             // Configure the default location, e.g., if the registry key is absent. Technically that would be suggesting
             // that the install is corrupt or we're being asked to run as an admin install in a non-admin deployment.
@@ -418,7 +418,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// Get a list of all MSI based SDK installations that match the current host architecture.
         /// </summary>
         /// <returns>A collection of all the installed SDKs. The collection may be empty if no installed versions are found.</returns>
-        protected IEnumerable<string> GetInstalledSdkVersions()
+        internal static IEnumerable<string> GetInstalledSdkVersions()
         {
             // The SDK, regardless of the installer's platform, writes detection keys to the 32-bit hive.
             using RegistryKey hklm32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);

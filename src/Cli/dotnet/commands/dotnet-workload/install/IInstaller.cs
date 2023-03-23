@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
-        void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null);
+        void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null, bool cleanAllPacks = false);
 
         void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false);
 
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void Shutdown();
 
-        
+
     }
 
     // Interface to pass to workload manifest updater

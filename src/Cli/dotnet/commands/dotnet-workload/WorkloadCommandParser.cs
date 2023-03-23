@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -29,11 +30,11 @@ namespace Microsoft.DotNet.Cli
             return Command;
         }
 
-        internal static void ShowWorkloadsInfo(ParseResult parseResult = null, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null)
+        internal static void ShowWorkloadsInfo(ParseResult parseResult = null, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null, string dotnetDir = null)
         {
             if(workloadInfoHelper != null)
             {
-                workloadInfoHelper ??= new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption));
+                workloadInfoHelper ??= new WorkloadInfoHelper(parseResult != null ? parseResult.HasOption(SharedOptions.InteractiveOption) : false);
             }
             else
             {
@@ -42,6 +43,7 @@ namespace Microsoft.DotNet.Cli
             IEnumerable<WorkloadId> installedList = workloadInfoHelper.InstalledSdkWorkloadIds;
             InstalledWorkloadsCollection installedWorkloads = workloadInfoHelper.AddInstalledVsWorkloads(installedList);
             reporter ??= Cli.Utils.Reporter.Output;
+            string dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
 
             if (!installedList.Any())
             {
@@ -73,7 +75,7 @@ namespace Microsoft.DotNet.Cli
                 reporter.WriteLine($"       {workloadManifest.ManifestPath,align}");
 
                 reporter.Write($"{separator}{CommonStrings.WorkloadInstallTypeColumn}:");
-                reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), workloadManifest.ManifestPath).ToString(),align}"
+                reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), dotnetPath),align}"
                 );
             }
         }
@@ -100,6 +102,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(WorkloadUninstallCommandParser.GetCommand());
             command.AddCommand(WorkloadRepairCommandParser.GetCommand());
             command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
+            command.AddCommand(WorkloadCleanCommandParser.GetCommand());
             command.AddCommand(WorkloadElevateCommandParser.GetCommand());
 
             command.SetHandler((parseResult) => ProcessArgs(parseResult));
