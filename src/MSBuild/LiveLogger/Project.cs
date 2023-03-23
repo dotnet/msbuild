@@ -5,7 +5,8 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.Logging.LiveLogger;
 
-internal class Project
+internal sealed class Project
 {
     public Stopwatch Stopwatch { get; } = Stopwatch.StartNew();
+    public string? OutputPath { get; set; }
 }

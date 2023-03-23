@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using Microsoft.Build.Framework;
 
@@ -195,9 +196,26 @@ internal sealed class LiveLogger : INodeLogger
                 UpdateNodeStringBuffer();
                 EraseNodes();
 
-                double duration = _notableProjects[c].Stopwatch.Elapsed.TotalSeconds;
+                Project project = _notableProjects[c];
+                double duration = project.Stopwatch.Elapsed.TotalSeconds;
+                string? outputPath = project.OutputPath;
 
-                Console.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s)");
+                if (outputPath is not null)
+                {
+                    string? url = outputPath;
+                    try
+                    {
+                        // If possible, make the link point to the containing directory of the output.
+                        url = Path.GetDirectoryName(url) ?? outputPath;
+                    }
+                    catch
+                    { }
+                    Console.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
+                }
+                else
+                {
+                    Console.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s)");
+                }
                 DisplayNodes();
             }
         }
@@ -295,6 +313,18 @@ internal sealed class LiveLogger : INodeLogger
 
     private void MessageRaised(object sender, BuildMessageEventArgs e)
     {
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is null || e.Message is null)
+        {
+            return;
+        }
+
+        int index = e.Message.IndexOf(" -> ");
+        if (index > 0)
+        {
+            string outputPath = e.Message.Substring(index + 4);
+            _notableProjects[new ProjectContext(buildEventContext)].OutputPath = outputPath;
+        }
     }
 
     private void WarningRaised(object sender, BuildWarningEventArgs e)
