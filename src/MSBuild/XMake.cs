@@ -1253,7 +1253,11 @@ namespace Microsoft.Build.CommandLine
                 if (isPreprocess)
                 {
                     // TODO: Support /preprocess for solution files.
-                    if (!isSolution)
+                    if (isSolution)
+                    {
+                        Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Preprocess);
+                    }
+                    else
                     {
                         Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
@@ -1268,6 +1272,10 @@ namespace Microsoft.Build.CommandLine
                 if (isTargets)
                 {
                     // TODO: Support /targets for solution files.
+                    if (isSolution)
+                    {
+                        Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Targets);
+                    }
                     success = isSolution || PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
                 }
 
