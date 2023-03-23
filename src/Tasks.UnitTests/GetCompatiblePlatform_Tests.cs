@@ -40,6 +40,29 @@ namespace Microsoft.Build.Tasks.UnitTests
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("x64");
         }
 
+
+        [Fact]
+        public void ResolvesViaOverride()
+        {
+            // OverridePlatformNegotiationValue always takes priority over everything. It is typically user-defined.
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("Platforms", "x64;x86;AnyCPU");
+            projectReference.SetMetadata("platform", "x86");
+            projectReference.SetMetadata("OverridePlatformNegotiationValue", "x86");
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                CurrentProjectPlatform = "x64",
+                PlatformLookupTable = "win32=x64",
+                AnnotatedProjects = new TaskItem[] { projectReference }
+            };
+
+            task.Execute().ShouldBeTrue();
+
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("");
+        }
+
         [Fact]
         public void ResolvesViaProjectReferencesPlatformLookupTable()
         {
