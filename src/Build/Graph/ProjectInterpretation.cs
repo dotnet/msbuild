@@ -135,12 +135,7 @@ namespace Microsoft.Build.Graph
                         null, // Platform negotiation requires an evaluation with no global properties first
                         _projectCollection);
 
-                    var overridePlatformNegotiationMetadataValue = "";
-
-                    if (projectReferenceItem.HasMetadata(OverridePlatformNegotiationValue))
-                    {
-                        overridePlatformNegotiationMetadataValue = projectReferenceItem.GetMetadataValue(OverridePlatformNegotiationValue);
-                    }
+                    string overridePlatformNegotiationMetadataValue = projectReferenceItem.GetMetadataValue(OverridePlatformNegotiationValue);
 
                     var selectedPlatform = PlatformNegotiation.GetNearestPlatform(overridePlatformNegotiationMetadataValue, projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
 
