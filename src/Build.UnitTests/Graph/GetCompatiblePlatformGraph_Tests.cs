@@ -139,7 +139,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
                 GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
             }
         }
