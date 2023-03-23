@@ -76,7 +76,7 @@
             <Content Include="$(OutDir)NuGet.*.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <Content Include="$(OutDir)Newtonsoft.Json.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <!-- runtime deps json -->
-            <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
+            <Content Include="$(ArtifactsDir)bin/Microsoft.NET.Build.Containers/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <!-- actual DLL  -->
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
 
@@ -94,7 +94,7 @@
 
     <!-- Hacky workaround for the fact that we don't publish the package yet. -->
     <Target Name="CopyNupkgToCustomFolder" AfterTargets="Pack">
-        <Copy SourceFiles="../../../artifacts/packages/$(Configuration)/Shipping/Microsoft.NET.Build.Containers.$(Version).nupkg"
+        <Copy SourceFiles="$(ArtifactsDir)packages/$(Configuration)/Shipping/Microsoft.NET.Build.Containers.$(Version).nupkg"
             DestinationFiles="$(ArtifactsTmpDir)Container/package/Microsoft.NET.Build.Containers.$(Version).nupkg" />
     </Target>
 
