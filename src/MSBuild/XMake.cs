@@ -1252,7 +1252,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (isPreprocess)
                 {
-                    // TODO: Support /preprocess for solution files.
+                    // TODO: Support /preprocess switch for solution files.
                     if (isSolution)
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Preprocess);
