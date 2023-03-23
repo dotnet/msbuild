@@ -115,12 +115,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
                             vsWorkloadUninstallWarnings.Add(string.Format(LocalizableStrings.VSWorkloadNotRemoved, $"{vsWorkload.Key}", $"{vsWorkload.Value}"));
                         }
                     }
-                    catch (Exception ex) when (ex is WorkloadManifestException)
+                    catch (WorkloadManifestException ex)
                     {
                         // Limitation: We don't know the dotnetPath of the other feature bands when making the manifestProvider and resolvers.
                         // This can cause the manifest resolver to fail as it may look for manifests in an invalid path.
                         // It can theoretically be customized, but that is not currently supported for workloads with VS.
                         Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, sdkVersion, _dotnetPath, defaultDotnetWinPath)));
+                        Cli.Utils.Reporter.Verbose.WriteLine(ex.Message);
                     }
                 }
 

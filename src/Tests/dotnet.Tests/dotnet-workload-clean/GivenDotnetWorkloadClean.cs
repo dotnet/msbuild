@@ -31,6 +31,17 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
         private readonly string dotnet = nameof(dotnet);
         private readonly string _profileDirectoryLeafName = "user-profile";
 
+        private (string testDirectory, string dotnetRoot, string userProfileDir, WorkloadResolver workloadResolver, MockNuGetPackageDownloader nugetDownloader) Setup(bool userLocal, bool cleanAll)
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? $"userlocal-{cleanAll}" : $"default-{cleanAll}").Path;
+            var dotnetRoot = Path.Combine(testDirectory, dotnet);
+            var userProfileDir = Path.Combine(testDirectory, _profileDirectoryLeafName);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+
+            return (testDirectory, dotnetRoot, userProfileDir, workloadResolver, nugetDownloader);
+        }
+
         public GivenDotnetWorkloadClean(ITestOutputHelper log) : base(log)
         {
             _reporter = new BufferedReporter();
@@ -44,12 +55,7 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
         [InlineData(false, false)]
         public void GivenWorkloadCleanFileBasedItRemovesPacksAndPackRecords(bool userLocal, bool cleanAll)
         {
-            // Setup ( I wish we could not copy this everywhere, but these are convenient as locals. )
-            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? $"userlocal-{cleanAll}" : $"default-{cleanAll}").Path;
-            var dotnetRoot = Path.Combine(testDirectory, dotnet);
-            var userProfileDir = Path.Combine(testDirectory, _profileDirectoryLeafName);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var (testDirectory, dotnetRoot, userProfileDir, workloadResolver, nugetDownloader) = Setup(userLocal, cleanAll);
 
             string installRoot = userLocal ? userProfileDir : dotnetRoot;
             if (userLocal)
@@ -76,14 +82,9 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void GivenWorkloadCleanAllFileBasedItCleansOnlyOlderAndCurrentFeatureBands(bool userLocal)
+        public void GivenWorkloadCleanAllFileBasedItCleansAllFeatureBands(bool userLocal)
         {
-            // Setup ( I wish we could not copy this everywhere, but these are convenient as locals. )
-            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
-            var dotnetRoot = Path.Combine(testDirectory, dotnet);
-            var userProfileDir = Path.Combine(testDirectory, _profileDirectoryLeafName);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var (testDirectory, dotnetRoot, userProfileDir, workloadResolver, nugetDownloader) = Setup(userLocal, true);
 
             const string aboveSdkFeatureBand = ToolsetInfo.NextTargetFrameworkVersion + ".100";
             const string belowSdkFeatureBand = "5.0.100"; // At the time of writing this test, it would only run on 7-8.0 SDKs or above.
@@ -102,7 +103,7 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             var extraPackPath = MakePack(installRoot);
             var workloadInstallationRecordDirectory = Path.Combine(installRoot, "metadata", "workloads", _sdkFeatureVersion, "InstalledWorkloads");
             var oldWorkloadInstallationRecordDirectory = workloadInstallationRecordDirectory.Replace(_sdkFeatureVersion, belowSdkFeatureBand);
-            MakePsuedoWorkloadRecord(oldWorkloadInstallationRecordDirectory);
+            MakePseudoWorkloadRecord(oldWorkloadInstallationRecordDirectory);
 
             var cleanCommand = GenerateWorkloadCleanAllCommand(workloadResolver, userProfileDir, dotnetRoot);
             cleanCommand.Execute();
@@ -160,7 +161,7 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
             return packPath;
         }
 
-        private void MakePsuedoWorkloadRecord(string installationPath)
+        private void MakePseudoWorkloadRecord(string installationPath)
         {
             Directory.CreateDirectory(installationPath);
             File.WriteAllText(Path.Combine(installationPath, "foo"), "");
