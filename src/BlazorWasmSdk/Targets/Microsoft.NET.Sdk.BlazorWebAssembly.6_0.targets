@@ -428,6 +428,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ComputeBlazorPublishAssets
       ResolvedFilesToPublish="@(ResolvedFileToPublish)"
+      CustomIcuCandidate="$(_BlazorIcuDataFileName)"
       TimeZoneSupport="$(_BlazorEnableTimeZoneSupport)"
       PublishPath="$(PublishDir)"
       WasmAotAssets="@(WasmNativeAsset)"
@@ -556,6 +557,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ConfigurationFiles="@(_BlazorPublishConfigFile)"
       LazyLoadedAssemblies="@(BlazorWebAssemblyLazyLoad)"
       InvariantGlobalization="$(InvariantGlobalization)"
+      LoadCustomIcuData="$(_LoadCustomIcuData)"
       LoadAllICUData="$(_BlazorWebAssemblyLoadAllGlobalizationData)"
       StartupMemoryCache="$(_BlazorWebAssemblyStartupMemoryCache)"
       Jiterpreter="$(_BlazorWebAssemblyJiterpreter)"

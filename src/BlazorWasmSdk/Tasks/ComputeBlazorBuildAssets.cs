@@ -18,9 +18,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public ITaskItem[] Candidates { get; set; }
 
-#nullable enable
-        public ITaskItem? CustomIcuCandidate { get; set; }
-#nullable disable
+        public ITaskItem CustomIcuCandidate { get; set; } = new TaskItem();
 
         [Required]
         public ITaskItem[] ProjectAssembly { get; set; }
@@ -71,8 +69,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     return true;
                 }
 
-                bool customIcuRequested = CustomIcuCandidate != null;
-                if (customIcuRequested)
+                if (TryGetAssetFilename(CustomIcuCandidate, out string customIcuCandidateFilename))
                 {
                     var customIcuCandidate = GetCustomIcuAsset(CustomIcuCandidate);
                     assetCandidates.Add(customIcuCandidate);
@@ -81,7 +78,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 for (int i = 0; i < Candidates.Length; i++)
                 {
                     var candidate = Candidates[i];
-                    if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuRequested, out var reason))
+                    if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuCandidateFilename, out var reason))
                     {
                         Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                         filesToRemove.Add(candidate);
@@ -261,7 +258,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             bool timezoneSupport,
             bool invariantGlobalization,
             bool copySymbols,
-            bool customIcuRequested,
+            string customIcuCandidateFilename,
             out string reason)
         {
             var extension = candidate.GetMetadata("Extension");
@@ -285,7 +282,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 ".props" when fromMonoPackage => "extension is .props is not supported.",
                 ".blat" when !timezoneSupport => "timezone support is not enabled.",
                 ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
-                ".dat" when customIcuRequested && fileName.StartsWith("icudt") => "custom icu file will be used instead of icu from the runtime pack",
+                ".dat" when !string.IsNullOrEmpty(customIcuCandidateFilename) && fileName != customIcuCandidateFilename => "custom icu file will be used instead of icu from the runtime pack",
                 ".json" when fromMonoPackage && (fileName == "emcc-props" || fileName == "package") => $"{fileName}{extension} is not used by Blazor",
                 ".ts" when fromMonoPackage && fileName == "dotnet.d" => "dotnet type definition is not used by Blazor",
                 ".ts" when fromMonoPackage && fileName == "dotnet-legacy.d" => "dotnet type definition is not used by Blazor",
@@ -298,7 +295,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             return reason != null;
         }
 
-        private static string GetCandidateRelativePath(ITaskItem candidate)
+        public static string GetCandidateRelativePath(ITaskItem candidate)
         {
             var destinationSubPath = candidate.GetMetadata("DestinationSubPath");
             if (!string.IsNullOrEmpty(destinationSubPath))
@@ -308,14 +305,24 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             return $"_framework/{relativePath}";
         }
 
-        private static ITaskItem GetCustomIcuAsset(ITaskItem candidate)
+        public static ITaskItem GetCustomIcuAsset(ITaskItem candidate)
         {
             var customIcuCandidate = new TaskItem(candidate);
             var relativePath = GetCandidateRelativePath(customIcuCandidate);
             customIcuCandidate.SetMetadata("RelativePath", relativePath);
             customIcuCandidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
             customIcuCandidate.SetMetadata("AssetTraitValue", "native");
+            customIcuCandidate.SetMetadata("AssetType", "native");
             return customIcuCandidate;
+        }
+
+        public static bool TryGetAssetFilename(ITaskItem candidate, out string filename)
+        {
+            bool candidateIsValid = candidate != null && !string.IsNullOrEmpty(candidate.ItemSpec);
+            filename = candidateIsValid ?
+                $"{candidate.GetMetadata("FileName")}" :
+                "";
+            return candidateIsValid;
         }
     }
 }
