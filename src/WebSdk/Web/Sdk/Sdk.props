@@ -74,7 +74,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <PropertyGroup>
-    <SdkContainerSupportPackageVersion>0.3.2</SdkContainerSupportPackageVersion>
+    <SdkContainerSupportPackageVersion>0.4.0</SdkContainerSupportPackageVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true'">
