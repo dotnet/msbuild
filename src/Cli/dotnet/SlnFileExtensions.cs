@@ -93,6 +93,16 @@ namespace Microsoft.DotNet.Tools.Common
             }
         }
 
+        public static void UpdateDuplicateProjects(this SlnFile slnFile,IList<string> solutionFolders)
+        {
+            //Update any duplicates with the new solution Folder
+            var duplicateProjects = slnFile.Projects.Where(p => solutionFolders.Contains(p.Name));
+            foreach (SlnProject duplicateProject in duplicateProjects)
+            {
+                slnFile.AddSolutionFolders(duplicateProject, solutionFolders);
+            }
+        }
+
         private static void AddDefaultBuildConfigurations(this SlnFile slnFile)
         {
             var configurationsSection = slnFile.SolutionConfigurationsSection;

@@ -74,6 +74,11 @@ namespace Microsoft.DotNet.Tools.Sln.Add
                 var solutionFolders = DetermineSolutionFolder(slnFile, fullProjectPath);
 
                 slnFile.AddProject(fullProjectPath, solutionFolders);
+
+                if (solutionFolders.Count > 0)
+                {
+                    slnFile.UpdateDuplicateProjects(solutionFolders);
+                }
             }
 
             if (slnFile.Projects.Count > preAddProjectCount)
@@ -144,9 +149,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
         private static string TrimProjectDirectory(string path)
         {
-            var directory = Path.GetDirectoryName(path);
-            if(string.IsNullOrEmpty(directory)) return path;
-            else return directory;
+            return Path.GetDirectoryName(path);
         }
     }
 }
