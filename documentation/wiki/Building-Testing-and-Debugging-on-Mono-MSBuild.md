@@ -6,7 +6,7 @@ Mono maintains a fork of msbuild (for now) at `https://github.com/mono/msbuild/`
 
 **Required packages for OSX & Ubuntu**
 
-MSBuild requires a stable version of [Mono](http://www.mono-project.com/download/) to build itself.
+MSBuild requires a stable version of [Mono](https://www.mono-project.com/download/stable/) to build itself.
 
 ## Build process ##
 
@@ -23,9 +23,9 @@ If you encounter errors, see [Something's wrong in my build](Something's-wrong-i
 `./install-mono-prefix.sh </your/mono/prefix>`
 
 ## Getting Mono MSBuild binaries without building the code ##
-The best way to get Mono MSBuild for OSX/macOS is to get the official [Mono package](http://www.mono-project.com/download/#download-mac). After installing it, you can run `msbuild`.
+The best way to get Mono MSBuild for OSX/macOS is to get the official [Mono package](https://www.mono-project.com/download/stable/#download-mac). After installing it, you can run `msbuild`.
 <br/>
-For Linux, you can install mono and msbuild from [here](http://www.mono-project.com/download/#download-lin).
+For Linux, you can install mono and msbuild from [here](https://www.mono-project.com/download/stable/#download-lin).
 
 ## Debugging
 

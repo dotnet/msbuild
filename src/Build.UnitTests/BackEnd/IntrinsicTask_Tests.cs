@@ -457,7 +457,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 
         [Fact]
-        public void ItemKeepMetadataNotExistant()
+        public void ItemKeepMetadataNotExistent()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
@@ -468,7 +468,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <m2>m2</m2>
                       <m3>m3</m3>
                     </i1>
-                    <i2 Include='@(i1)' KeepMetadata='NONEXISTANT' />
+                    <i2 Include='@(i1)' KeepMetadata='NONEXISTENT' />
                 </ItemGroup>
             </Target>
             </Project>");

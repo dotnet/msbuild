@@ -1542,6 +1542,9 @@ namespace Microsoft.Build.Evaluation
                         case ProjectChooseElement choose:
                             EvaluateChooseElement(choose);
                             break;
+                        case ProjectItemDefinitionGroupElement itemDefinition:
+                            _itemDefinitionGroupElements.Add(itemDefinition);
+                            break;
                         default:
                             ErrorUtilities.ThrowInternalError("Unexpected child type");
                             break;
@@ -1635,6 +1638,7 @@ namespace Microsoft.Build.Evaluation
             // paths will be returned (union of all files that match).
             var allProjects = new List<ProjectRootElement>();
             bool containsWildcards = FileMatcher.HasWildcards(importElement.Project);
+            bool missingDirectoryDespiteTrueCondition = false;
 
             // Try every extension search path, till we get a Hit:
             // 1. 1 or more project files loaded
@@ -1648,15 +1652,19 @@ namespace Microsoft.Build.Evaluation
 
                 string extensionPathExpanded = _data.ExpandString(extensionPath);
 
-                if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
-                {
-                    continue;
-                }
-
                 var newExpandedCondition = importElement.Condition.Replace(extensionPropertyRefAsString, extensionPathExpanded, StringComparison.OrdinalIgnoreCase);
                 if (!EvaluateConditionCollectingConditionedProperties(importElement, newExpandedCondition, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties,
                             _projectRootElementCache))
                 {
+                    continue;
+                }
+
+                // If the whole fallback folder doesn't exist, short-circuit and don't
+                // bother constructing an exact file path.
+                if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
+                {
+                    // Set to log an error only if the change wave is enabled.
+                    missingDirectoryDespiteTrueCondition = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && !containsWildcards;
                     continue;
                 }
 
@@ -1709,7 +1717,7 @@ namespace Microsoft.Build.Evaluation
             // atleastOneExactFilePathWasLookedAtAndNotFound would be false, eg, if the expression
             // was a wildcard and it resolved to zero files!
             if (allProjects.Count == 0 &&
-                atleastOneExactFilePathWasLookedAtAndNotFound &&
+                (atleastOneExactFilePathWasLookedAtAndNotFound || missingDirectoryDespiteTrueCondition) &&
                 (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
                 ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, importElement);
@@ -1839,7 +1847,8 @@ namespace Microsoft.Build.Evaluation
                 // Combine SDK path with the "project" relative path
                 try
                 {
-                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
+                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio,
+                        failOnUnresolvedSdk: !_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) || _loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk));
                 }
                 catch (SdkResolverException e)
                 {

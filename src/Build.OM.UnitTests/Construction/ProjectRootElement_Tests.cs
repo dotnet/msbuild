@@ -21,6 +21,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Shouldly;
 using Xunit;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -1853,6 +1854,10 @@ true, true, true)]
         public void ReloadDoesNotLeakCachedXmlDocuments()
         {
             using var env = TestEnvironment.Create();
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
             var testFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
             var projectFile = testFiles.CreatedFiles.First();
 

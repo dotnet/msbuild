@@ -130,8 +130,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            var fileInfo = new FileInfo(filePath);
-            if (!fileInfo.Exists || fileInfo.Length == 0)
+            if (!NativeMethodsShared.ExistAndHasContent(filePath))
             {
                 _processedFiles.Add(filePath);
                 return;
@@ -145,11 +144,9 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            using (Stream entryStream = OpenArchiveEntry(filePath))
-            using (FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
-            {
-                content.CopyTo(entryStream);
-            }
+            using Stream entryStream = OpenArchiveEntry(filePath);
+            using FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+            content.CopyTo(entryStream);
         }
 
         /// <remarks>

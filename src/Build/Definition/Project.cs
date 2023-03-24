@@ -56,7 +56,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// * and ? are invalid file name characters, but they occur in globs as wild cards.
         /// </summary>
-        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\' && c != ':').ToArray();
+        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c != '/' && c != '\\' && c != ':').ToArray();
 
         /// <summary>
         /// Context to log messages and events in.
@@ -599,6 +599,21 @@ namespace Microsoft.Build.Evaluation
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
+
+        /// <summary>
+        /// Indicates whether the global properties dictionary contains the specified key.
+        /// </summary>
+        internal bool GlobalPropertiesContains(string key) => implementation.GlobalPropertiesContains(key);
+
+        /// <summary>
+        /// Indicates how many elements are in the global properties dictionary.
+        /// </summary>
+        internal int GlobalPropertiesCount => implementation.GlobalPropertiesCount();
+
+        /// <summary>
+        /// Enumerates the values in the global properties dictionary.
+        /// </summary>
+        internal IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable => implementation.GlobalPropertiesEnumerable();
 
         /// <summary>
         /// Item types in this project.
@@ -2088,6 +2103,37 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesContains(string)"/>.
+            /// </summary>
+            /// <param name="key">The key to check for its value.</param>
+            /// <returns>Whether the key is in the global properties dictionary.</returns>
+            public override bool GlobalPropertiesContains(string key)
+            {
+                return _data.GlobalPropertiesDictionary.Contains(key);
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesCount()"/>.
+            /// </summary>
+            /// <returns>The number of properties in the global properties dictionary</returns>
+            public override int GlobalPropertiesCount()
+            {
+                return _data.GlobalPropertiesDictionary.Count;
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesEnumerable()"/>.
+            /// </summary>
+            /// <returns>An IEnumerable of the keys and values of the global properties dictionary</returns>
+            public override IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable()
+            {
+                foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
+                {
+                    yield return new KeyValuePair<string, string>(property.Name, ((IProperty)property).EvaluatedValueEscaped);
+                }
+            }
+
+            /// <summary>
             /// Read only dictionary of the global properties used in the evaluation
             /// of this project.
             /// </summary>
@@ -2736,12 +2782,13 @@ namespace Microsoft.Build.Evaluation
                     return new List<ProvenanceResult>();
                 }
 
-                return
-                    projectItemElements
+                return projectItemElements
                     .AsParallel()
-                    .AsOrdered()
-                    .Select(i => ComputeProvenanceResult(itemToMatch, i))
-                    .Where(r => r != null)
+                    .Select((item, index) => (Result: ComputeProvenanceResult(itemToMatch, item), Index: index))
+                    .Where(pair => pair.Result != null)
+                    .AsSequential()
+                    .OrderBy(pair => pair.Index)
+                    .Select(pair => pair.Result)
                     .ToList();
             }
 

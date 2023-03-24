@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks.Xaml
             //  - or xml content with the current dir prepended (like "/foo/bar/<abc .. />"),
             //    but not on Windows
             //
-            // On Windows, this means that @contentOrFile is really a non-existant file name
+            // On Windows, this means that @contentOrFile is really a non-existent file name
             if (NativeMethodsShared.IsWindows)
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleFileNotFound", maybeFullPath));
             else // On !Windows, try parsing as XML

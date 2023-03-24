@@ -787,7 +787,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         public delegate void AddMetadata(ProjectItemElement element);
 
-        public static IEnumerable<object[]> InsertMetadataElemenetAfterSiblingsTestData
+        public static IEnumerable<object[]> InsertMetadataElementAfterSiblingsTestData
         {
             get
             {
@@ -892,7 +892,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Theory]
-        [MemberData(nameof(InsertMetadataElemenetAfterSiblingsTestData))]
+        [MemberData(nameof(InsertMetadataElementAfterSiblingsTestData))]
         public void InsertMetadataElementAfterSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
             Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertAfterChild(c, r); };
@@ -900,7 +900,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             AssertMetadataConstruction(addMetadata, position, expectedItem, act);
         }
 
-        public static IEnumerable<object[]> InsertMetadataElemenetBeforeSiblingsTestData
+        public static IEnumerable<object[]> InsertMetadataElementBeforeSiblingsTestData
         {
             get
             {
@@ -934,7 +934,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Theory]
-        [MemberData(nameof(InsertMetadataElemenetBeforeSiblingsTestData))]
+        [MemberData(nameof(InsertMetadataElementBeforeSiblingsTestData))]
         public void InsertMetadataElementBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
             Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertBeforeChild(c, r); };

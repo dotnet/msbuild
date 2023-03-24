@@ -776,28 +776,6 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
-        public void GetTargetsListsShouldApplyDefaultTargetsOnlyToGraphRoots()
-        {
-            using (var env = TestEnvironment.Create())
-            {
-                var root1 = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: new Dictionary<string, string[]> {{"A", new[] {"B"}}}, defaultTargets: "A").Path;
-                var root2 = CreateProjectFile(env: env, projectNumber: 2, projectReferences: new[] {3}, projectReferenceTargets: new Dictionary<string, string[]> {{"B", new[] {"C"}}, {"X", new[] {"Y"}}}, defaultTargets: "X").Path;
-                CreateProjectFile(env: env, projectNumber: 3);
-
-
-                var projectGraph = new ProjectGraph(new []{root1, root2});
-                projectGraph.ProjectNodes.Count.ShouldBe(3);
-
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(null);
-
-                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
-                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "A" });
-                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 2)].ShouldBe(new[] { "B" });
-                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 3)].ShouldBe(new[] { "C" });
-            }
-        }
-
-        [Fact]
         public void GetTargetsListReturnsEmptyTargetsForNodeIfNoTargetsPropagatedToIt()
         {
             using (var env = TestEnvironment.Create())
@@ -1296,6 +1274,19 @@ $@"
                 targetLists[key: GetFirstNodeWithProjectNumber(graph: projectGraph, projectNum: 3)].ShouldBe(expected: new[] { "Build" });
                 targetLists[key: GetFirstNodeWithProjectNumber(graph: projectGraph, projectNum: 4)].ShouldBe(expected: new[] { "Build" });
                 targetLists[key: GetFirstNodeWithProjectNumber(graph: projectGraph, projectNum: 5)].ShouldBe(expected: new[] { "T51", "T2", "T53", "T54", "T3", "D51", "D52", "T4" });
+            }
+        }
+
+        [Fact]
+        public void ReferencedMultitargetingEntryPointNodeTargetListContainsDefaultTarget()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject1 = CreateProjectFile(env, 1, projectReferences: new[] { 2 }, defaultTargets: "A", extraContent: ProjectReferenceTargetsWithMultitargeting);
+                TransientTestFile entryProject2 = CreateProjectFile(env, 2, defaultTargets: "A", extraContent: OuterBuildSpecificationWithProjectReferenceTargets);
+                var graph = new ProjectGraph(new HashSet<string> { entryProject1.Path, entryProject2.Path });
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(null);
+                targetLists[key: GetOuterBuild(graph, 2)].ShouldBe(expected: OuterBuildTargets.Prepend("A"));
             }
         }
 

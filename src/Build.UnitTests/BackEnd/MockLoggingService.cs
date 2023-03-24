@@ -633,6 +633,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             throw new NotImplementedException();
         }
 
+        public void LogIncludeFile(BuildEventContext buildEventContext, string filePath)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

@@ -472,7 +472,7 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (string excludeSplitFile in excludeSplitFiles)
                 {
-                    excludesUnescapedForComparison.Add(excludeSplitFile);
+                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
                 }
             }
 
@@ -480,7 +480,7 @@ namespace Microsoft.Build.BackEnd
 
             for (int i = 0; i < items.Count; i++)
             {
-                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude))
+                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude.NormalizeForPathComparison()))
                 {
                     remainingItems.Add(items[i]);
                 }

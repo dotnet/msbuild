@@ -630,8 +630,16 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Gets the startup directory.
+        /// It is current directory from which MSBuild command line was recently invoked.
+        /// It is communicated to working nodes as part of NodeConfiguration deserialization once the node manager acquires a particular node.
+        /// This deserialization assign this value to static backing field making it accessible from rest of build thread.
+        /// In MSBuild server node, this value is set once <see cref="ServerNodeBuildCommand"></see> is received.
         /// </summary>
-        internal static string StartupDirectory => s_startupDirectory;
+        internal static string StartupDirectory
+        {
+            get { return s_startupDirectory; }
+            set { s_startupDirectory = value; }
+        }
 
         /// <summary>
         /// Indicates whether the build plan is enabled or not.

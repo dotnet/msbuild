@@ -700,6 +700,78 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+
+        /// <summary>
+        /// Include and Exclude items outside and inside targets should result in same behavior on
+        ///  platform specific paths.
+        /// </summary>
+        [Fact]
+        public void ItemsIncludeExcludePathsCombinations()
+        {
+            string projectFile = null;
+
+            try
+            {
+                projectFile = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <ItemGroup>
+                        <iout1 Include='a/b.foo' Exclude='a\b.foo' />
+                        <iout2 Include='a\b.foo' Exclude='a/b.foo' />
+                        <iout3 Include='a/b.foo' Exclude='a/b.foo' />
+                        <iout4 Include='a\b.foo' Exclude='a\b.foo' />
+                        <iout5 Include='a/b.foo' Exclude='a\c.foo' />
+                        <iout6 Include='a\b.foo' Exclude='a\c.foo' />
+                      </ItemGroup>
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='a/b.foo' Exclude='a\b.foo' />
+                          <iin2 Include='a\b.foo' Exclude='a/b.foo' />
+                          <iin3 Include='a/b.foo' Exclude='a/b.foo' />
+                          <iin4 Include='a\b.foo' Exclude='a\b.foo' />
+                          <iin5 Include='a/b.foo' Exclude='a\c.foo' />
+                          <iin6 Include='a\b.foo' Exclude='a\c.foo' />
+                        </ItemGroup>
+                        <Message Text='iout1=[@(iout1)]' Importance='High' />
+                        <Message Text='iout2=[@(iout2)]' Importance='High' />
+                        <Message Text='iout3=[@(iout3)]' Importance='High' />
+                        <Message Text='iout4=[@(iout4)]' Importance='High' />
+                        <Message Text='iout5=[@(iout5)]' Importance='High' />
+                        <Message Text='iout6=[@(iout6)]' Importance='High' />
+
+                        <Message Text='iin1=[@(iin1)]' Importance='High' />
+                        <Message Text='iin2=[@(iin2)]' Importance='High' />
+                        <Message Text='iin3=[@(iin3)]' Importance='High' />
+                        <Message Text='iin4=[@(iin4)]' Importance='High' />
+                        <Message Text='iin5=[@(iin5)]' Importance='High' />
+                        <Message Text='iin6=[@(iin6)]' Importance='High' />
+                      </Target>
+                    </Project>
+                ");
+
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile, logger);
+
+                Console.WriteLine(logger.FullLog);
+
+                logger.AssertLogContains("iout1=[]");
+                logger.AssertLogContains("iout2=[]");
+                logger.AssertLogContains("iout3=[]");
+                logger.AssertLogContains("iout4=[]");
+                logger.AssertLogContains("iout5=[a/b.foo]");
+                logger.AssertLogContains($"iout6=[a{Path.DirectorySeparatorChar}b.foo]");
+                logger.AssertLogContains("iin1=[]");
+                logger.AssertLogContains("iin2=[]");
+                logger.AssertLogContains("iin3=[]");
+                logger.AssertLogContains("iin4=[]");
+                logger.AssertLogContains("iin5=[a/b.foo]");
+                logger.AssertLogContains($"iin6=[a{Path.DirectorySeparatorChar}b.foo]");
+            }
+            finally
+            {
+                File.Delete(projectFile);
+            }
+        }
+
         /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>

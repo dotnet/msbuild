@@ -1,21 +1,21 @@
 # General Resources
- * [MSBuild Concepts](https://msdn.microsoft.com/en-us/library/dd637714.aspx)
- * [MSBuild Reserved and Well-Known Properties](https://msdn.microsoft.com/en-us/library/ms164309.aspx)
+ * [MSBuild Concepts](https://learn.microsoft.com/visualstudio/msbuild/msbuild-concepts)
+ * [MSBuild Reserved and Well-Known Properties](https://learn.microsoft.com/visualstudio/msbuild/msbuild-reserved-and-well-known-properties)
  * [MSBuild Tips & Tricks](MSBuild-Tips-&-Tricks.md)
  * [Target Maps](Target-Maps.md)
 
 # MSBuild Source Code
  * [https://github.com/dotnet/msbuild](https://github.com/dotnet/msbuild)
  * [https://source.dot.net](https://source.dot.net)
- * Use [http://referencesource.microsoft.com](http://referencesource.microsoft.com) or [http://source.roslyn.io](http://source.roslyn.io) to browse Microsoft MSBuild targets. Examples:
-   * search for "[_FindDependencies MSBuildProperty](http://referencesource.microsoft.com/#q=_FindDependencies%20MSBuildProperty)"
-   * find targets [http://referencesource.microsoft.com/#MSBuildTarget=ResolveAssemblyReferences](http://referencesource.microsoft.com/#MSBuildTarget=ResolveAssemblyReferences)
+ * Use [referencesource.microsoft.com](https://referencesource.microsoft.com) or [sourceroslyn.io/](https://sourceroslyn.io/) to browse Microsoft MSBuild targets. Examples:
+   * search for "[_FindDependencies MSBuildProperty](https://referencesource.microsoft.com/#q=_FindDependencies%20MSBuildProperty)"
+   * find targets [referencesource.microsoft.com/#MSBuildTarget=ResolveAssemblyReferences](https://referencesource.microsoft.com/#MSBuildTarget=ResolveAssemblyReferences)
 
 # Tools
 **Note:** These are third party tools
- * [MSBuildStructuredLog](http://msbuildlog.com/)
+ * [MSBuildStructuredLog](https://msbuildlog.com/)
    * A log viewer that displays a structured representation of executed targets, tasks, property and item values.
- * [MSBuildExtensionPack](http://www.msbuildextensionpack.com)
+ * [MSBuildExtensionPack](https://github.com/mikefourie-zz/MSBuildExtensionPack) (also via [NuGet](https://www.nuget.org/packages/MSBuild.Extension.Pack))
    * Provides a large collection of MSBuild Tasks, MSBuild Loggers and MSBuild TaskFactories.
  * [MSBuilder](https://github.com/MobileEssentials/MSBuilder)
    * Reusable blocks of MSBuild helpers; MSBuilder's goal is to provide fine-grained nuget packages that can be installed when only a certain MSBuild extension (task, property, target) is needed.
@@ -34,13 +34,13 @@
    * Lets you build Visual Studio solutions and projects as well as any MSBuild file through a context menu without opening Visual Studio.
 
 # Books
- * [Inside the Microsoft Build Engine: Using MSBuild and Team Foundation Build (2nd Edition) by Sayed Hashimi, William Bartholomew](http://www.amazon.com/Inside-Microsoft-Build-Engine-Foundation/dp/0735645248)
- * [MSBuild Trickery: 99 Ways to Bend the Build Engine to Your Will, by Brian Kretzler](http://www.amazon.com/MSBuild-Trickery-Ways-Build-Engine/dp/061550907X)
+ * [Inside the Microsoft Build Engine: Using MSBuild and Team Foundation Build (2nd Edition) by Sayed Hashimi, William Bartholomew](https://www.amazon.com/Inside-Microsoft-Build-Engine-Foundation/dp/0735645248)
+ * [MSBuild Trickery: 99 Ways to Bend the Build Engine to Your Will, by Brian Kretzler](https://www.amazon.com/MSBuild-Trickery-Ways-Build-Engine/dp/061550907X)
 
 # Blogs
- * [https://blogs.msdn.microsoft.com/msbuild](https://blogs.msdn.microsoft.com/msbuild)
- * [Sayed Hashimi's blog http://sedodream.com](http://sedodream.com)
+ * [MSBuild Team Blog](https://learn.microsoft.com/archive/blogs/msbuild/) (archive)
+ * [Sayed Hashimi's blog at sedodream.com](http://sedodream.com)
  * [Mike Fourie's blog https://mikefourie.wordpress.com](https://mikefourie.wordpress.com)
 
 # MSBuild Assemblies
-![MSBuild Assemblies](https://raw.githubusercontent.com/KirillOsenkov/MSBuildStructuredLog/master/docs/MSBuildAssemblies.png)
+![MSBuild Assemblies](https://raw.githubusercontent.com/KirillOsenkov/MSBuildStructuredLog/main/docs/MSBuildAssemblies.png)

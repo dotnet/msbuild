@@ -14,6 +14,7 @@ using System.Reflection;
 using Microsoft.Build.Eventing;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 #nullable disable
 
@@ -110,15 +111,28 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
-                return ResolveSdkUsingResolversWithPatternsFirst(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                return ResolveSdkUsingResolversWithPatternsFirst(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
             }
             else
             {
-                return ResolveSdkUsingAllResolvers(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                SdkResult result = ResolveSdkUsingAllResolvers(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, out IEnumerable<string> errors, out IEnumerable<string> warnings);
+
+                // Warnings are already logged on success.
+                if (!result.Success)
+                {
+                    if (failOnUnresolvedSdk)
+                    {
+                        loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+                    }
+
+                    LogWarnings(loggingContext, sdkReferenceLocation, warnings);
+                }
+
+                return result;
             }
         }
 
@@ -128,7 +142,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// If the first pass is unsuccessful, on the second pass all the general resolvers (i.e. resolvers without pattern), ordered by their priority, are tried one after one.
         /// After that, if the second pass is unsuccessful, sdk resolution is unsuccessful.
         /// </remarks>
-        private SdkResult ResolveSdkUsingResolversWithPatternsFirst(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        private SdkResult ResolveSdkUsingResolversWithPatternsFirst(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
             if (_specificResolversManifestsRegistry == null || _generalResolversManifestsRegistry == null)
             {
@@ -154,6 +168,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             List<SdkResolver> resolvers;
             SdkResult sdkResult;
+            List<string> errors = new List<string>(0);
+            List<string> warnings = new List<string>(0);
             if (matchingResolversManifests.Count != 0)
             {
                 // First pass.
@@ -169,10 +185,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     projectPath,
                     interactive,
                     isRunningInVisualStudio,
-                    out sdkResult))
+                    out sdkResult,
+                    out IEnumerable<string> firstErrors,
+                    out IEnumerable<string> firstWarnings))
                 {
                     return sdkResult;
                 }
+
+                errors.AddRange(firstErrors);
+                warnings.AddRange(firstWarnings);
             }
 
             // Second pass: fallback to general resolvers. 
@@ -191,10 +212,22 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 projectPath,
                 interactive,
                 isRunningInVisualStudio,
-                out sdkResult))
+                out sdkResult,
+                out IEnumerable<string> moreErrors,
+                out IEnumerable<string> moreWarnings))
             {
                 return sdkResult;
             }
+
+            errors.AddRange(moreErrors);
+            warnings.AddRange(moreWarnings);
+
+            if (failOnUnresolvedSdk)
+            {
+                loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+            }
+
+            LogWarnings(loggingContext, sdkReferenceLocation, warnings);
 
             // No resolvers resolved the sdk.
             return new SdkResult(sdk, null, null);
@@ -228,7 +261,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return resolvers;
         }
 
-        private SdkResult ResolveSdkUsingAllResolvers(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        private SdkResult ResolveSdkUsingAllResolvers(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, out IEnumerable<string> errors, out IEnumerable<string> warnings)
         {
             // Lazy initialize all SDK resolvers
             if (_resolversList == null)
@@ -246,14 +279,30 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 projectPath,
                 interactive,
                 isRunningInVisualStudio,
-                out SdkResult sdkResult);
+                out SdkResult sdkResult,
+                out errors,
+                out warnings);
 
             return sdkResult;
         }
 
-        private bool TryResolveSdkUsingSpecifiedResolvers(IList<SdkResolver> resolvers, int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, out SdkResult sdkResult)
+        private bool TryResolveSdkUsingSpecifiedResolvers(
+            IList<SdkResolver> resolvers,
+            int submissionId,
+            SdkReference sdk,
+            LoggingContext loggingContext,
+            ElementLocation sdkReferenceLocation,
+            string solutionPath,
+            string projectPath,
+            bool interactive,
+            bool isRunningInVisualStudio,
+            out SdkResult sdkResult,
+            out IEnumerable<string> errors,
+            out IEnumerable<string> warnings)
         {
             List<SdkResult> results = new List<SdkResult>();
+            errors = null;
+            warnings = null;
 
             // Loop through resolvers which have already been sorted by priority, returning the first result that was successful
             SdkLogger buildEngineLogger = new SdkLogger(loggingContext);
@@ -294,14 +343,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 SetResolverState(submissionId, sdkResolver, context.State);
 
-                if (result == null)
-                {
-                    continue;
-                }
+                result ??= (SdkResult)resultFactory.IndicateFailure(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", sdkResolver.Name) }, Array.Empty<string>());
 
                 if (result.Success)
                 {
-                    LogWarnings(loggingContext, sdkReferenceLocation, result);
+                    LogWarnings(loggingContext, sdkReferenceLocation, result.Warnings);
 
                     if (!IsReferenceSameVersion(sdk, result.Version))
                     {
@@ -319,18 +365,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 results.Add(result);
             }
 
-            foreach (SdkResult result in results)
-            {
-                LogWarnings(loggingContext, sdkReferenceLocation, result);
-
-                if (result.Errors != null)
-                {
-                    foreach (string error in result.Errors)
-                    {
-                        loggingContext.LogErrorFromText(subcategoryResourceName: null, errorCode: null, helpKeyword: null, file: new BuildEventFileInfo(sdkReferenceLocation), message: error);
-                    }
-                }
-            }
+            warnings = results.SelectMany(r => r.Warnings ?? Array.Empty<string>());
+            errors = results.SelectMany(r => r.Errors ?? Array.Empty<string>());
 
             sdkResult = new SdkResult(sdk, null, null);
             return false;
@@ -372,14 +408,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
         }
 
-        private static void LogWarnings(LoggingContext loggingContext, ElementLocation location, SdkResult result)
+        private static void LogWarnings(LoggingContext loggingContext, ElementLocation location, IEnumerable<string> warnings)
         {
-            if (result.Warnings == null)
+            if (warnings == null)
             {
                 return;
             }
 
-            foreach (string warning in result.Warnings)
+            foreach (string warning in warnings)
             {
                 loggingContext.LogWarningFromText(null, null, null, new BuildEventFileInfo(location), warning);
             }

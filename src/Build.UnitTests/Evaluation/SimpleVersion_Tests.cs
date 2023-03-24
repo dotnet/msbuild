@@ -213,9 +213,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         public static IEnumerable<object[]> Parse_Valid_TestData()
         {
-            foreach (var prefix in new[] { "", "v",  "V"})
+            foreach (var prefix in new[] { "", "v", "V", " ", "\t", "\tv" })
             {
-                foreach (var suffix in new[] { "", "-pre", "-pre+metadata", "+metadata"})
+                foreach (var suffix in new[] { "", "-pre", "-pre+metadata", "+metadata", " ", "\n", "-pre \r\n" })
                 {
                     yield return new object[] { $"{prefix}1{suffix}", new SimpleVersion(1) };
                     yield return new object[] { $"{prefix}1.2{suffix}", new SimpleVersion(1, 2) };
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             yield return new object[] { "1.2.2147483648.4", typeof(FormatException) }; // Input contains a value > int.MaxValue
             yield return new object[] { "1.2.3.2147483648", typeof(FormatException) }; // Input contains a value > int.MaxValue
 
-            // System.Version allows whitespace around components, but we don't
+            // System.Version allows whitespace around components, but we only allow it at the beginning and end of the string.
             yield return new object[] { "2  .3.    4.  \t\r\n15  ", typeof(FormatException) };
             yield return new object[] { "   2  .3.    4.  \t\r\n15  ", typeof(FormatException) };
 

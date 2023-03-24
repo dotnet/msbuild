@@ -424,7 +424,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
-        public void TestCache2()
+        public void WorksCorrectlyWithCurlyBraces()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
@@ -471,7 +471,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                string problematicTmpPath = @"C:\Users\}\blabla\temp";
+                // Check if } do not cause it to crash due to usage of String.Format or such on code path
+                string problematicTmpPath = Path.Combine(originalTmp,  "}", "blabla", "temp");
                 Environment.SetEnvironmentVariable("TMP", problematicTmpPath);
                 Environment.SetEnvironmentVariable("TEMP", problematicTmpPath);
 

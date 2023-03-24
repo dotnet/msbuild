@@ -18,8 +18,8 @@
     <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
-    <PackageReference Update="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageReference Update="System.Memory" Version="$(SystemMemoryVersion)" />
+    <PackageReference Update="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageReference Update="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageReference Update="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
     <PackageReference Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
