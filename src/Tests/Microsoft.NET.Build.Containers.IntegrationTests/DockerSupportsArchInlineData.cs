@@ -3,7 +3,9 @@
 
 using System.Reflection;
 using System.Text.Json;
-using Microsoft.DotNet.CommandUtils;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
@@ -53,7 +55,7 @@ public class DockerSupportsArchInlineData : DataAttribute
 
     private static string[] GetSupportedLinuxPlatforms()
     {
-        var inspectResult = new BasicCommand(null, "docker", "buildx", "inspect", "default").Execute();
+        var inspectResult = new RunExeCommand(NullLogger.Instance, "docker", "buildx", "inspect", "default").Execute();
         inspectResult.Should().Pass();
         var platformsLine = inspectResult.StdOut!.Split(Environment.NewLine).First(x => x.StartsWith("Platforms:", StringComparison.OrdinalIgnoreCase));
         return platformsLine.Substring("Platforms: ".Length).Split(",", StringSplitOptions.TrimEntries);
@@ -71,6 +73,22 @@ public class DockerSupportsArchInlineData : DataAttribute
         else
         {
             return false;
+        }
+    }
+
+    private class NullLogger : ITestOutputHelper
+    {
+        private NullLogger() { }
+
+        public static NullLogger Instance { get; } = new NullLogger();
+
+        public void WriteLine(string message)
+        {
+            //do nothing
+        }
+        public void WriteLine(string format, params object[] args)
+        {
+            //do nothing
         }
     }
 }

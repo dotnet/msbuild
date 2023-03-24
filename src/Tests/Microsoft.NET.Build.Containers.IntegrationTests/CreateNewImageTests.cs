@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Utilities;
-using Microsoft.DotNet.CommandUtils;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.Build.Containers.IntegrationTests;
 using Microsoft.NET.Build.Containers.UnitTests;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 
@@ -179,7 +180,7 @@ public class CreateNewImageTests
 
         Assert.True(cni.Execute());
 
-        new BasicCommand(_testOutput, "docker", "run", "--rm", $"{pcp.NewContainerImageName}:latest")
+        new RunExeCommand(_testOutput, "docker", "run", "--rm", $"{pcp.NewContainerImageName}:latest")
             .Execute()
             .Should().Pass()
             .And.HaveStdOut("Foo");

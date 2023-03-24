@@ -1,13 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Microsoft.DotNet.CommandUtils;
+namespace Microsoft.NET.TestFramework;
 
 /// <summary>
-/// This is an abstraction so we can pass ITestOutputHelper to TestCommand constructor
+/// This is an abstraction so we can pass <see cref="ITestOutputHelper"/> to <see cref="TestCommand"/> constructor.
 /// when calling from class fixture.
 /// </summary>
 public class SharedTestOutputHelper : ITestOutputHelper

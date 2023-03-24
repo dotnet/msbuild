@@ -4,9 +4,10 @@
 using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.DotNet.CommandUtils;
 using Microsoft.NET.Build.Containers.Tasks;
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
@@ -67,7 +68,7 @@ public class CreateNewImageToolTaskTests
         string args = task.GenerateCommandLineCommandsInt();
         string workDir = GetPathToContainerize();
 
-        new BasicCommand(_testOutput, "dotnet", args)
+        new DotnetCommand(_testOutput, args)
             .WithRawArguments()
             .WithWorkingDirectory(workDir)
             .Execute().Should().Fail()
@@ -234,7 +235,7 @@ public class CreateNewImageToolTaskTests
 
         string workDir = GetPathToContainerize();
 
-        new BasicCommand(_testOutput, "dotnet", args)
+        new DotnetCommand(_testOutput, args)
             .WithRawArguments()
             .WithWorkingDirectory(workDir)
             .Execute().Should().Fail()
@@ -280,7 +281,7 @@ public class CreateNewImageToolTaskTests
 
         string workDir = GetPathToContainerize();
 
-        new BasicCommand(_testOutput, "dotnet", args)
+        new DotnetCommand(_testOutput, args)
             .WithRawArguments()
             .WithWorkingDirectory(workDir)
             .Execute().Should().Fail()
@@ -325,7 +326,7 @@ public class CreateNewImageToolTaskTests
 
         string workDir = GetPathToContainerize();
 
-        new BasicCommand(_testOutput, "dotnet", args)
+        new DotnetCommand(_testOutput, args)
             .WithRawArguments()
             .WithWorkingDirectory(workDir)
             .Execute().Should().Fail()
@@ -362,7 +363,7 @@ public class CreateNewImageToolTaskTests
 
         string workDir = GetPathToContainerize();
 
-        new BasicCommand(_testOutput, "dotnet", args)
+        new DotnetCommand(_testOutput, args)
             .WithRawArguments()
             .WithWorkingDirectory(workDir)
             .Execute().Should().Fail()
@@ -407,7 +408,7 @@ public class CreateNewImageToolTaskTests
 
         string workDir = GetPathToContainerize();
 
-        new BasicCommand(_testOutput, "dotnet", args)
+        new DotnetCommand(_testOutput, args)
             .WithRawArguments()
             .WithWorkingDirectory(workDir)
             .Execute().Should().Fail()

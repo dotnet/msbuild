@@ -1,12 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.CommandUtils;
 using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.Build.Containers.UnitTests;
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
@@ -64,12 +66,12 @@ public class EndToEndTests
         await registry.PushAsync(builtImage, sourceReference, destinationReference, Console.WriteLine, cancellationToken: default).ConfigureAwait(false);
 
         // pull it back locally
-        new BasicCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
+        new RunExeCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
             .Execute()
             .Should().Pass();
 
         // Run the image
-        new BasicCommand(_testOutput, "docker", "run", "--rm", "--tty", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
+        new RunExeCommand(_testOutput, "docker", "run", "--rm", "--tty", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
             .Execute()
             .Should().Pass();
     }
@@ -106,7 +108,7 @@ public class EndToEndTests
         await new LocalDocker(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
-        new BasicCommand(_testOutput, "docker", "run", "--rm", "--tty", $"{NewImageName()}:latest")
+        new RunExeCommand(_testOutput, "docker", "run", "--rm", "--tty", $"{NewImageName()}:latest")
             .Execute()
             .Should().Pass();
     }
@@ -214,12 +216,12 @@ public class EndToEndTests
             .Execute()
             .Should().Pass();
 
-        new BasicCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
+        new RunExeCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
             .Execute()
             .Should().Pass();
 
         var containerName = "test-container-1";
-        CommandResult processResult = new BasicCommand(
+        CommandResult processResult = new RunExeCommand(
             _testOutput,
             "docker",
             "run",
@@ -258,13 +260,13 @@ public class EndToEndTests
             await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
         }
 
-        new BasicCommand(_testOutput, "docker", "logs", appContainerId)
+        new RunExeCommand(_testOutput, "docker", "logs", appContainerId)
             .Execute()
             .Should().Pass();
 
         Assert.True(everSucceeded, "http://localhost:5017/weatherforecast never responded.");
 
-        new BasicCommand(_testOutput, "docker", "stop", appContainerId)
+        new RunExeCommand(_testOutput, "docker", "stop", appContainerId)
             .Execute()
             .Should().Pass();
 
@@ -309,7 +311,7 @@ public class EndToEndTests
         await new LocalDocker(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
-        new BasicCommand(
+        new RunExeCommand(
             _testOutput,
             "docker",
             "run",

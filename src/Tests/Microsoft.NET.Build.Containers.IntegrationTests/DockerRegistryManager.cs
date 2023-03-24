@@ -1,7 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.CommandUtils;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
@@ -22,22 +24,22 @@ public class DockerRegistryManager
         if (!new LocalDocker(testOutput.WriteLine).IsAvailable()) {
             throw new InvalidOperationException("Docker daemon is not started, tests cannot run");
         }
-        CommandResult processResult = new BasicCommand(testOutput, "docker", "run", "--rm", "--publish", "5010:5000", "--detach", "registry:2").Execute();
+        CommandResult processResult = new RunExeCommand(testOutput, "docker", "run", "--rm", "--publish", "5010:5000", "--detach", "registry:2").Execute();
         processResult.Should().Pass().And.HaveStdOut();
         using var reader = new StringReader(processResult.StdOut!);
         s_registryContainerId = reader.ReadLine();
 
         foreach (var tag in new[] { Net6ImageTag, Net7ImageTag })
         {
-            new BasicCommand(testOutput, "docker", "pull", $"{BaseImageSource}{BaseImage}:{tag}")
+            new RunExeCommand(testOutput, "docker", "pull", $"{BaseImageSource}{BaseImage}:{tag}")
                 .Execute()
                 .Should().Pass();
 
-            new BasicCommand(testOutput, "docker", "tag", $"{BaseImageSource}{BaseImage}:{tag}", $"{LocalRegistry}/{BaseImage}:{tag}")
+            new RunExeCommand(testOutput, "docker", "tag", $"{BaseImageSource}{BaseImage}:{tag}", $"{LocalRegistry}/{BaseImage}:{tag}")
                 .Execute()
                 .Should().Pass();
 
-            new BasicCommand(testOutput, "docker", "push", $"{LocalRegistry}/{BaseImage}:{tag}")
+            new RunExeCommand(testOutput, "docker", "push", $"{LocalRegistry}/{BaseImage}:{tag}")
                 .Execute()
                 .Should().Pass();
         }
@@ -47,7 +49,7 @@ public class DockerRegistryManager
     {
         if (s_registryContainerId != null)
         {
-            new BasicCommand(testOutput, "docker", "stop", s_registryContainerId)
+            new RunExeCommand(testOutput, "docker", "stop", s_registryContainerId)
                 .Execute()
                 .Should().Pass();
         }
