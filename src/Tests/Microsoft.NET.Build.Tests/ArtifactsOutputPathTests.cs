@@ -365,18 +365,11 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            if (useDirectoryBuildProps)
-            {
-                new FileInfo(Path.Combine(artifactsFolder, "bin", "App", "debug", "App.dll"))
-                    .Should()
-                    .Exist();
-            }
-            else
-            {
-                new FileInfo(Path.Combine(artifactsFolder, "bin", "debug", "App.dll"))
-                    .Should()
-                    .Exist();
-            }
+            //  If ArtifactsPath is set, even in the project file itself, we still include the project name in the path,
+            //  as the path used is likely to be shared between multiple projects
+            new FileInfo(Path.Combine(artifactsFolder, "bin", "App", "debug", "App.dll"))
+                .Should()
+                .Exist();
         }
 
         [Theory]

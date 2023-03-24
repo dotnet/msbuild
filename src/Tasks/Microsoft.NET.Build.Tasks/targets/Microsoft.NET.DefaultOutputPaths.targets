@@ -37,23 +37,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
   -->
 
-  <!-- Handle ArtifactsPath if it wasn't set in Sdk.props -->
-  <PropertyGroup Condition="'$(ArtifactsPath)' != ''">
-    <UseArtifactsOutput Condition="'$(UseArtifactsOutput)' == ''">true</UseArtifactsOutput>
-  </PropertyGroup>
-
-  <!-- Repeat ArtifactsPath logic from Sdk.props here, in case UseArtifactsOutput was set in the project file -->
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(ArtifactsPath)' == '' And '$(_DirectoryBuildPropsBasePath)' != ''">
-    <!-- Default ArtifactsPath to be in the directory where Directory.Build.props is found
-         Note that we do not append a backslash to the ArtifactsPath as we do with most paths, because it may be a global property passed in on the command-line which we can't easily change -->
-    <ArtifactsPath>$(_DirectoryBuildPropsBasePath)\.artifacts</ArtifactsPath>
-    <IncludeProjectNameInArtifactsPaths Condition="'$(IncludeProjectNameInArtifactsPaths)' == ''">true</IncludeProjectNameInArtifactsPaths>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(ArtifactsPath)' == ''">
-    <!-- If there was no Directory.Build.props file, then put the artifacts path in the project folder -->
-    <ArtifactsPath>$(MSBuildProjectDirectory)\.artifacts</ArtifactsPath>
-  </PropertyGroup>
+  <!-- Import .props file to set ArtifactsPath if it wasn't already imported from Sdk.props (this is for the case when artifacts
+       properties are set in the project file instead of Directory.Build.props -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultArtifactsPath.props"
+          Condition="'$(_DefaultArtifactsPathPropsImported)' != 'true'"/>
 
   <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
     <ArtifactsProjectName Condition="'$(ArtifactsProjectName)' == ''">$(MSBuildProjectName)</ArtifactsProjectName>
