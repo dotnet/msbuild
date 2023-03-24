@@ -66,8 +66,6 @@ internal sealed class LiveLogger : INodeLogger
 
     public void Initialize(IEventSource eventSource)
     {
-        // Debugger.Launch();
-
         eventSource.BuildStarted += new BuildStartedEventHandler(BuildStarted);
         eventSource.BuildFinished += new BuildFinishedEventHandler(BuildFinished);
         eventSource.ProjectStarted += new ProjectStartedEventHandler(ProjectStarted);
@@ -198,15 +196,15 @@ internal sealed class LiveLogger : INodeLogger
 
                 Project project = _notableProjects[c];
                 double duration = project.Stopwatch.Elapsed.TotalSeconds;
-                string? outputPath = project.OutputPath;
+                ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
                 if (outputPath is not null)
                 {
-                    string? url = outputPath;
+                    ReadOnlySpan<char> url = outputPath.Value.Span;
                     try
                     {
                         // If possible, make the link point to the containing directory of the output.
-                        url = Path.GetDirectoryName(url) ?? outputPath;
+                        url = Path.GetDirectoryName(url);
                     }
                     catch
                     { }
@@ -263,14 +261,14 @@ internal sealed class LiveLogger : INodeLogger
     {
         foreach (string str in _nodeStringBuffer)
         {
-            Console.WriteLine(FitToWidth(str));
+            Console.Out.WriteLine(FitToWidth(str));
         }
         _usedNodes = _nodeStringBuffer.Count;
     }
 
-    private string FitToWidth(string input)
+    private ReadOnlySpan<char> FitToWidth(ReadOnlySpan<char> input)
     {
-        return input.Substring(0, Math.Min(input.Length, Console.BufferWidth - 1));
+        return input.Slice(0, Math.Min(input.Length, Console.BufferWidth - 1));
     }
 
     private void EraseNodes()
@@ -327,11 +325,11 @@ internal sealed class LiveLogger : INodeLogger
             int index = e.Message.IndexOf(" -> ");
             if (index > 0)
             {
-                var projectFileName = Path.GetFileName(e.ProjectFile);
-                if (!string.IsNullOrEmpty(projectFileName) &&
-                    message.StartsWith(Path.GetFileNameWithoutExtension(projectFileName)))
+                var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
+                if (!projectFileName.IsEmpty &&
+                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)))
                 {
-                    string outputPath = e.Message.Substring(index + 4);
+                    var outputPath = e.Message.AsMemory().Slice(index + 4);
                     _notableProjects[new ProjectContext(buildEventContext)].OutputPath = outputPath;
                 }
             }
