@@ -190,11 +190,11 @@ Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) ha
             string[] expectedErrors = new[]
                             {
                     """
-                    The template 'name' (TestAssets.TemplateWithLocalization) has the following validation errors in 'de-DE' localization:
+                    Fehler: Die Vorlage 'name' (TestAssets.TemplateWithLocalization) weist die folgenden Überprüfungsfehler in Lokalisierung „de-DE“ auf:
                        [Error][LOC001] In der Lokalisierungsdatei unter der POST-Aktion mit der ID „pa1“ befinden sich lokalisierte Zeichenfolgen für manuelle Anweisungen mit den IDs „do-not-exist“. Diese manuellen Anweisungen sind in der Datei „template.json“ nicht vorhanden und sollten aus der Lokalisierungsdatei entfernt werden.
         
                     """,
-                    "Failed to load the 'de-DE' localization the template 'name' (TestAssets.TemplateWithLocalization): the localization file is not valid. The localization will be skipped."
+                    "Warnung: Lokalisierung „de-DE“ der Vorlage 'name' (TestAssets.TemplateWithLocalization) konnte nicht geladen werden: Die Lokalisierungsdatei ist ungültig. Die Lokalisierung wird übersprungen."
                 };
 
             CommandResult result = new DotnetNewCommand(_log, "-i", tmpTemplateLocation)
