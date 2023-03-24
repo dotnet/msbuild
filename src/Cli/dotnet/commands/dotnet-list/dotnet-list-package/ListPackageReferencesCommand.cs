@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
         public ListPackageReferencesCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.GetValueForArgument(ListCommandParser.SlnOrProjectArgument);
+            _fileOrDirectory = parseResult.GetValue(ListCommandParser.SlnOrProjectArgument);
         }
 
         public override int Execute()
