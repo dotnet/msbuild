@@ -105,7 +105,7 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>80c3c74ca5c6d67912a19833e8cc2b10f875dc95</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.6.0-preview-20230320-03">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.6.0-preview-20230323-05">
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>2d656fe2133f89248825419fb8ffac5505486906</Sha>
     </Dependency>
