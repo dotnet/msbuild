@@ -1210,7 +1210,6 @@ namespace Microsoft.Build.CommandLine
 
                 ToolsetDefinitionLocations toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
 
-                bool isSolution = FileUtilities.IsSolutionFilename(projectFile);
                 bool isPreprocess = preprocessWriter != null;
                 bool isTargets = targetsWriter != null;
 
@@ -1221,7 +1220,7 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
-                    loadProjectsReadOnly: !isPreprocess || isSolution,
+                    loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
 
@@ -1230,9 +1229,11 @@ namespace Microsoft.Build.CommandLine
                     ThrowInvalidToolsVersionInitializationException(projectCollection.Toolsets, toolsVersion);
                 }
 
+                bool isSolution = FileUtilities.IsSolutionFilename(projectFile);
+
 #if FEATURE_XML_SCHEMA_VALIDATION
                 // If the user has requested that the schema be validated, do that here.
-                if (needToValidateProject && !FileUtilities.IsSolutionFilename(projectFile))
+                if (needToValidateProject && !isSolution)
                 {
                     Microsoft.Build.Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
                     Microsoft.Build.Evaluation.Toolset toolset = projectCollection.GetToolset(toolsVersion ?? project.ToolsVersion);
@@ -1252,10 +1253,11 @@ namespace Microsoft.Build.CommandLine
 
                 if (isPreprocess)
                 {
-                    // TODO: Support /preprocess switch for solution files.
+                    // TODO: Support /preprocess for solution files. https://github.com/dotnet/msbuild/issues/7697
                     if (isSolution)
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Preprocess);
+                        success = false;
                     }
                     else
                     {
@@ -1264,19 +1266,23 @@ namespace Microsoft.Build.CommandLine
                         project.SaveLogicalProject(preprocessWriter);
 
                         projectCollection.UnloadProject(project);
-                    }
 
-                    success = true;
+                        success = true;
+                    }
                 }
 
                 if (isTargets)
                 {
-                    // TODO: Support /targets for solution files.
+                    // TODO: Support /targets for solution files. https://github.com/dotnet/msbuild/issues/7697
                     if (isSolution)
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Targets);
+                        success = false;
                     }
-                    success = isSolution || PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
+                    else
+                    {
+                        success = PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
+                    }
                 }
 
                 if (!isPreprocess && !isTargets)
