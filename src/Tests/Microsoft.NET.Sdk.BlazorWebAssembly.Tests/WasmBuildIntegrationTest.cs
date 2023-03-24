@@ -88,8 +88,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 {
                     var reference = document
                         .Descendants()
-                        .Single(e => 
-                            e.Name == "ProjectReference" && 
+                        .Single(e =>
+                            e.Name == "ProjectReference" &&
                             e.Attribute("Include").Value == @"..\razorclasslibrary\RazorClassLibrary.csproj");
 
                     reference.Name = "Reference";
@@ -342,6 +342,50 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
+        public void Build_WithBlazorWebAssemblyLoadCustomGlobalizationData_SetsICUDataMode()
+        {
+            // Arrange
+            var testAppName = "BlazorWasmMinimal";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+            string assetsDir = ComputeBaselineFolder();
+
+            testInstance.WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var itemGroup = new XElement(ns + "PropertyGroup");
+                itemGroup.Add(new XElement("BlazorIcuDataFileName", $@"{assetsDir}/icudt_custom.dat"));
+                project.Root.Add(itemGroup);
+            });
+
+            var buildCommand = new BuildCommand(testInstance);
+            buildCommand.Execute()
+                .Should().Pass();
+
+            var buildOutputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
+            var bootJsonData = ReadBootJsonData(bootJsonPath);
+
+            bootJsonData.icuDataMode.Should().Be(ICUDataMode.Custom);
+            var runtime = bootJsonData.resources.runtime;
+
+            runtime.Should().ContainKey("dotnet.wasm");
+            runtime.Should().ContainKey("dotnet.timezones.blat");
+            runtime.Should().ContainKey("icudt_custom.dat");
+            runtime.Should().NotContainKey("icudt.dat");
+            runtime.Should().NotContainKey("icudt_CJK.dat");
+            runtime.Should().NotContainKey("icudt_EFIGS.dat");
+            runtime.Should().NotContainKey("icudt_no_CJK.dat");
+
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_custom.dat")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_no_CJK.dat")).Should().NotExist();
+        }
+
+        [Fact]
         public void Build_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsICUDataMode()
         {
             // Arrange
@@ -546,7 +590,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 }
             });
 
-            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for 
+            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for
             // the assembly to be resolved by the "app" as part of RAR
             File.WriteAllText(Path.Combine(testInstance.Path, "razorclasslibrary", "TestReference.cs"),
 @"
@@ -599,7 +643,7 @@ public class TestReference
                 }
             });
 
-            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for 
+            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for
             // the assembly to be resolved by the "app" as part of RAR
             File.WriteAllText(Path.Combine(testInstance.Path, "blazorwasm", "TestReference.cs"),
 @"

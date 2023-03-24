@@ -38,6 +38,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         public bool LoadAllICUData { get; set; }
 
+        public bool LoadCustomIcuData { get; set; }
+
         public string InvariantGlobalization { get; set; }
 
         public ITaskItem[] ConfigurationFiles { get; set; }
@@ -83,6 +85,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             {
                 icuDataMode = ICUDataMode.All;
             }
+            else if (LoadCustomIcuData)
+            {
+                icuDataMode = ICUDataMode.Custom;
+            }
 
             var result = new BootJsonData
             {
@@ -103,7 +109,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             }
 
             bool? jiterpreter = ParseOptionalBool(Jiterpreter);
-            if (jiterpreter != null) 
+            if (jiterpreter != null)
             {
                 var runtimeOptions = result.runtimeOptions?.ToHashSet() ?? new HashSet<string>(3);
                 foreach (var jiterpreterOption in jiterpreterOptions)
@@ -206,7 +212,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         Debug.Assert(!string.IsNullOrEmpty(targetPath), "Target path for '{0}' must exist.", resource.ItemSpec);
                         AddResourceToList(resource, resourceList, targetPath);
                         continue;
-                    } 
+                    }
                     else if (string.Equals("BlazorWebAssemblyResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
                              assetTraitValue.StartsWith("extension:", StringComparison.OrdinalIgnoreCase))
                     {
@@ -289,7 +295,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             }
         }
 
-        private bool? ParseOptionalBool(string value) 
+        private bool? ParseOptionalBool(string value)
         {
             if (String.IsNullOrEmpty(value) || !bool.TryParse(value, out var boolValue))
                 return null;

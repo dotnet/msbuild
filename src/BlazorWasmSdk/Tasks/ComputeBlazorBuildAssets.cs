@@ -18,6 +18,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public ITaskItem[] Candidates { get; set; }
 
+#nullable enable
+        public ITaskItem? CustomIcuCandidate { get; set; }
+#nullable disable
+
         [Required]
         public ITaskItem[] ProjectAssembly { get; set; }
 
@@ -67,10 +71,17 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     return true;
                 }
 
+                bool customIcuRequested = CustomIcuCandidate != null;
+                if (customIcuRequested)
+                {
+                    var customIcuCandidate = GetCustomIcuAsset(CustomIcuCandidate);
+                    assetCandidates.Add(customIcuCandidate);
+                }
+
                 for (int i = 0; i < Candidates.Length; i++)
                 {
                     var candidate = Candidates[i];
-                    if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
+                    if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuRequested, out var reason))
                     {
                         Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                         filesToRemove.Add(candidate);
@@ -95,7 +106,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         continue;
                     }
 
-                    var destinationSubPath = candidate.GetMetadata("DestinationSubPath");
                     if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
                     {
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
@@ -118,14 +128,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         assetCandidates.Add(newDotNetJs);
                         continue;
                     }
-                    else if (string.IsNullOrEmpty(destinationSubPath))
-                    {
-                        var relativePath = candidate.GetMetadata("FileName") + candidate.GetMetadata("Extension");
-                        candidate.SetMetadata("RelativePath", $"_framework/{relativePath}");
-                    }
                     else
                     {
-                        candidate.SetMetadata("RelativePath", $"_framework/{destinationSubPath}");
+                        string relativePath = GetCandidateRelativePath(candidate);
+                        candidate.SetMetadata("RelativePath", relativePath);
                     }
 
                     // Workaround for https://github.com/dotnet/aspnetcore/issues/37574.
@@ -255,6 +261,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             bool timezoneSupport,
             bool invariantGlobalization,
             bool copySymbols,
+            bool customIcuRequested,
             out string reason)
         {
             var extension = candidate.GetMetadata("Extension");
@@ -278,6 +285,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 ".props" when fromMonoPackage => "extension is .props is not supported.",
                 ".blat" when !timezoneSupport => "timezone support is not enabled.",
                 ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
+                ".dat" when customIcuRequested && fileName.StartsWith("icudt") => "custom icu file will be used instead of icu from the runtime pack",
                 ".json" when fromMonoPackage && (fileName == "emcc-props" || fileName == "package") => $"{fileName}{extension} is not used by Blazor",
                 ".ts" when fromMonoPackage && fileName == "dotnet.d" => "dotnet type definition is not used by Blazor",
                 ".ts" when fromMonoPackage && fileName == "dotnet-legacy.d" => "dotnet type definition is not used by Blazor",
@@ -288,6 +296,26 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             };
 
             return reason != null;
+        }
+
+        private static string GetCandidateRelativePath(ITaskItem candidate)
+        {
+            var destinationSubPath = candidate.GetMetadata("DestinationSubPath");
+            if (!string.IsNullOrEmpty(destinationSubPath))
+                return $"_framework/{destinationSubPath}";
+
+            var relativePath = candidate.GetMetadata("FileName") + candidate.GetMetadata("Extension");
+            return $"_framework/{relativePath}";
+        }
+
+        private static ITaskItem GetCustomIcuAsset(ITaskItem candidate)
+        {
+            var customIcuCandidate = new TaskItem(candidate);
+            var relativePath = GetCandidateRelativePath(customIcuCandidate);
+            customIcuCandidate.SetMetadata("RelativePath", relativePath);
+            customIcuCandidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+            customIcuCandidate.SetMetadata("AssetTraitValue", "native");
+            return customIcuCandidate;
         }
     }
 }

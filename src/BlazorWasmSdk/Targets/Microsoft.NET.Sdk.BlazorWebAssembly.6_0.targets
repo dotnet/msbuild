@@ -122,7 +122,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="_ResolveBlazorWasmConfiguration">
+  <Target Name="_ResolveGlobalizationConfiguration">
+    <Warning Condition="'$(InvariantGlobalization)' == 'true' AND '$(BlazorWebAssemblyLoadAllGlobalizationData)' == 'true'" Text="%24(BlazorWebAssemblyLoadAllGlobalizationData) has no effect when %24(InvariantGlobalization) is set to true." />
+    <Warning Condition="'$(InvariantGlobalization)' == 'true' AND '$(BlazorIcuDataFileName)' == 'true'" Text="%24(BlazorIcuDataFileName) has no effect when %24(InvariantGlobalization) is set to true." />
+    <Warning Condition="'$(BlazorWebAssemblyLoadAllGlobalizationData)' == 'true' AND '$(BlazorIcuDataFileName)' != ''" Text="%24(BlazorIcuDataFileName) has no effect when %24(BlazorWebAssemblyLoadAllGlobalizationData) is set to true." />
+    <PropertyGroup>
+      <_BlazorWebAssemblyLoadAllGlobalizationData Condition="'$(InvariantGlobalization)' != 'true'">$(BlazorWebAssemblyLoadAllGlobalizationData)</_BlazorWebAssemblyLoadAllGlobalizationData>
+      <_BlazorWebAssemblyLoadAllGlobalizationData Condition="'$(_BlazorWebAssemblyLoadAllGlobalizationData)' == ''">false</_BlazorWebAssemblyLoadAllGlobalizationData>
+      <_BlazorIcuDataFileName Condition="'$(InvariantGlobalization)' != 'true' AND '$(BlazorWebAssemblyLoadAllGlobalizationData)' != 'true'">$(BlazorIcuDataFileName)</_BlazorIcuDataFileName>
+      <_LoadCustomIcuData>false</_LoadCustomIcuData>
+      <_LoadCustomIcuData Condition="'$(_BlazorIcuDataFileName)' != ''">true</_LoadCustomIcuData>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_ResolveBlazorWasmConfiguration" DependsOnTargets="_ResolveGlobalizationConfiguration">
     <PropertyGroup>
       <_BlazorEnableTimeZoneSupport>$(BlazorEnableTimeZoneSupport)</_BlazorEnableTimeZoneSupport>
       <_BlazorEnableTimeZoneSupport Condition="'$(_BlazorEnableTimeZoneSupport)' == ''">true</_BlazorEnableTimeZoneSupport>
@@ -130,8 +143,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_BlazorInvariantGlobalization Condition="'$(_BlazorInvariantGlobalization)' == ''">true</_BlazorInvariantGlobalization>
       <_BlazorCopyOutputSymbolsToOutputDirectory>$(CopyOutputSymbolsToOutputDirectory)</_BlazorCopyOutputSymbolsToOutputDirectory>
       <_BlazorCopyOutputSymbolsToOutputDirectory Condition="'$(_BlazorCopyOutputSymbolsToOutputDirectory)'==''">true</_BlazorCopyOutputSymbolsToOutputDirectory>
-      <_BlazorWebAssemblyLoadAllGlobalizationData>$(BlazorWebAssemblyLoadAllGlobalizationData)</_BlazorWebAssemblyLoadAllGlobalizationData>
-      <_BlazorWebAssemblyLoadAllGlobalizationData Condition="'$(_BlazorWebAssemblyLoadAllGlobalizationData)' == ''">false</_BlazorWebAssemblyLoadAllGlobalizationData>
       <_BlazorWebAssemblyStartupMemoryCache>$(BlazorWebAssemblyStartupMemoryCache)</_BlazorWebAssemblyStartupMemoryCache>
       <_BlazorWebAssemblyJiterpreter>$(BlazorWebAssemblyJiterpreter)</_BlazorWebAssemblyJiterpreter>
       <_BlazorWebAssemblyRuntimeOptions>$(BlazorWebAssemblyRuntimeOptions)</_BlazorWebAssemblyRuntimeOptions>
@@ -164,6 +175,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ComputeBlazorBuildAssets
       Candidates="@(ReferenceCopyLocalPaths->Distinct());@(WasmNativeAsset)"
+      CustomIcuCandidate="$(_BlazorIcuDataFileName)"
       ProjectAssembly="@(IntermediateAssembly)"
       ProjectDebugSymbols="@(_DebugSymbolsIntermediatePath)"
       SatelliteAssemblies="@(ReferenceSatellitePaths)"
@@ -293,7 +305,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_GenerateBuildBlazorBootJson" DependsOnTargets="ResolveStaticWebAssetsInputs">
     <PropertyGroup>
       <_BlazorBuildBootJsonPath>$(IntermediateOutputPath)blazor.boot.json</_BlazorBuildBootJsonPath>
-      <_BlazorWebAssemblyLoadAllGlobalizationData Condition="'$(BlazorWebAssemblyLoadAllGlobalizationData)' == ''">false</_BlazorWebAssemblyLoadAllGlobalizationData>
     </PropertyGroup>
 
     <ItemGroup>
@@ -318,7 +329,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="Items" ItemName="_BlazorOutputWithHash" />
     </GetFileHash>
 
-
     <GenerateBlazorWebAssemblyBootJson
       AssemblyPath="@(IntermediateAssembly)"
       Resources="@(_BlazorOutputWithHash)"
@@ -329,6 +339,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ConfigurationFiles="@(_BlazorJsConfigStaticWebAsset)"
       LazyLoadedAssemblies="@(BlazorWebAssemblyLazyLoad)"
       InvariantGlobalization="$(InvariantGlobalization)"
+      LoadCustomIcuData="$(_LoadCustomIcuData)"
       LoadAllICUData="$(_BlazorWebAssemblyLoadAllGlobalizationData)"
       StartupMemoryCache="$(_BlazorWebAssemblyStartupMemoryCache)"
       Jiterpreter="$(_BlazorWebAssemblyJiterpreter)"
@@ -432,15 +443,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <ResolvedFileToPublish Remove="@(_PublishResolvedFilesToRemove)" />
       <StaticWebAsset Include="@(_NewBlazorPublishStaticWebAssets)" />
-      <PublishBlazorBootStaticWebAsset 
+      <PublishBlazorBootStaticWebAsset
         Include="@(StaticWebAsset)"
-        Condition="'%(AssetKind)' != 'Build' and 
+        Condition="'%(AssetKind)' != 'Build' and
                     (('%(StaticWebAsset.AssetTraitName)' == 'BlazorWebAssemblyResource' and '%(StaticWebAsset.AssetTraitValue)' != 'manifest' and '%(StaticWebAsset.AssetTraitValue)' != 'boot') or
                     '%(StaticWebAsset.AssetTraitName)' == 'Culture')" />
     </ItemGroup>
   </Target>
 
-  <Target 
+  <Target
     Name="ComputeBlazorExtensions"
     AfterTargets="ProcessPublishFilesForBlazor"
     DependsOnTargets="$(ComputeBlazorExtensionsDependsOn)" >
