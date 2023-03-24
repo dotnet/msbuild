@@ -319,11 +319,22 @@ internal sealed class LiveLogger : INodeLogger
             return;
         }
 
-        int index = e.Message.IndexOf(" -> ");
-        if (index > 0)
+        // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
+        // pattern used by the CopyFilesToOutputDirectory target.
+        string message = e.Message;
+        if (e.Importance == MessageImportance.High)
         {
-            string outputPath = e.Message.Substring(index + 4);
-            _notableProjects[new ProjectContext(buildEventContext)].OutputPath = outputPath;
+            int index = e.Message.IndexOf(" -> ");
+            if (index > 0)
+            {
+                var projectFileName = Path.GetFileName(e.ProjectFile);
+                if (!string.IsNullOrEmpty(projectFileName) &&
+                    message.StartsWith(Path.GetFileNameWithoutExtension(projectFileName)))
+                {
+                    string outputPath = e.Message.Substring(index + 4);
+                    _notableProjects[new ProjectContext(buildEventContext)].OutputPath = outputPath;
+                }
+            }
         }
     }
 
