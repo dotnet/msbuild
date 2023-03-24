@@ -525,15 +525,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             Dictionary<string, ITaskItem> resolvedNativeAssetToPublish)
         {
             var resolvedFilesToPublish = ResolvedFilesToPublish.ToList();
-            if (ComputeBlazorBuildAssets.TryGetAssetFilename(CustomIcuCandidate, out string customIcuCandidateFilename))
+            if (AssetsComputingHelper.TryGetAssetFilename(CustomIcuCandidate, out string customIcuCandidateFilename))
             {
-                var customIcuCandidate = ComputeBlazorBuildAssets.GetCustomIcuAsset(CustomIcuCandidate);
+                var customIcuCandidate = AssetsComputingHelper.GetCustomIcuAsset(CustomIcuCandidate);
                 resolvedFilesToPublish.Add(customIcuCandidate);
             }
 
             foreach (var candidate in resolvedFilesToPublish)
             {
-                if (ComputeBlazorBuildAssets.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuCandidateFilename, out var reason))
+                if (AssetsComputingHelper.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuCandidateFilename, out var reason))
                 {
                     Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                     if (!resolvedFilesToPublishToRemove.ContainsKey(candidate.ItemSpec))
