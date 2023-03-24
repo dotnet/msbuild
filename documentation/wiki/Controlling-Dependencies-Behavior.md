@@ -38,9 +38,9 @@ Service Layer definition:
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-	<LangVersion>10</LangVersion>
+    <LangVersion>10</LangVersion>
     <!-- This prevents referencing types from transitive project references. -->
-	<DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
   </PropertyGroup>
 </Project>
 ```
@@ -50,9 +50,9 @@ namespace Service;
 	
 public class PersonsAccessor
 {
-	private Repository.Persona _persona;
-	// This is allowed unless DisableTransitiveProjectReferences=true is passed into build.
-	// private Domain.PersonTable _tbl;
+    private Repository.Persona _persona;
+    // This is allowed unless DisableTransitiveProjectReferences=true is passed into build.
+    // private Domain.PersonTable _tbl;
 }
 ```
 
@@ -68,8 +68,8 @@ In our previous example let's have `Repository Layer` reference `newtonsoft.json
 <ItemGroup>
   <PackageReference Include="newtonsoft.json" Version="13.0.1">
     <!-- This prevents the reference to be available to referencing types. -->
-		<PrivateAssets>compile</PrivateAssets>
-	</PackageReference>
+    <PrivateAssets>compile</PrivateAssets>
+  </PackageReference>
 </ItemGroup>
 ```
 
@@ -82,7 +82,7 @@ namespace Service;
 	
 public class PersonsAccessor
 {
-	private Repository.Persona _persona;
+    private Repository.Persona _persona;
 }
 ```
 
@@ -116,8 +116,8 @@ Detailed options description can be found in [Controlling package dependency ass
 <ItemGroup>
   <PackageReference Include="newtonsoft.json" Version="13.0.1">
     <!-- This allows compiling against the dependency, but prevents it's copying to output folder or flow to downstream dependant projects. -->
-		<IncludeAssets>compile</IncludeAssets>
-	</PackageReference>
+    <IncludeAssets>compile</IncludeAssets>
+  </PackageReference>
 </ItemGroup>
 ```
 
@@ -128,8 +128,8 @@ Detailed options description can be found in [Controlling package dependency ass
   <PackageReference Include="newtonsoft.json" Version="13.0.1">
     <!-- The dependency is copied to output folder in current referencing project, 
            but it's not copied to output folder of projects referencing current project. -->
-		<PrivateAssets>all</PrivateAssets>
-	</PackageReference>
+    <PrivateAssets>all</PrivateAssets>
+  </PackageReference>
 </ItemGroup>
 ```
 
