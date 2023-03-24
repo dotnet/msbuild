@@ -214,6 +214,17 @@ internal sealed class LiveLogger : INodeLogger
                 {
                     Console.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s)");
                 }
+
+                // Print diagnostic output under the Project -> Output line.
+                foreach ((BuildMessageSeverity severity, string message) in project.EnumerateBuildMessages())
+                {
+                    switch (severity)
+                    {
+                        case BuildMessageSeverity.Warning: Console.WriteLine($"\x1b[33;1m  \x26A0 {message}\x1b[m"); break;
+                        case BuildMessageSeverity.Error: Console.WriteLine($"\x1b[31;1m  \x26A0 {message}\x1b[m"); break;
+                    }
+                }
+
                 DisplayNodes();
             }
         }
@@ -312,17 +323,17 @@ internal sealed class LiveLogger : INodeLogger
     private void MessageRaised(object sender, BuildMessageEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is null || e.Message is null)
+        if (buildEventContext is null)
         {
             return;
         }
 
-        // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
-        // pattern used by the CopyFilesToOutputDirectory target.
-        string message = e.Message;
-        if (e.Importance == MessageImportance.High)
+        string? message = e.Message;
+        if (message is not null && e.Importance == MessageImportance.High)
         {
-            int index = e.Message.IndexOf(" -> ");
+            // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
+            // pattern used by the CopyFilesToOutputDirectory target.
+            int index = message.IndexOf(" -> ");
             if (index > 0)
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
@@ -338,12 +349,20 @@ internal sealed class LiveLogger : INodeLogger
 
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
-        throw new NotImplementedException();
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null)
+        {
+            _notableProjects[new ProjectContext(buildEventContext)].AddBuildMessage(e);
+        }
     }
 
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
-        throw new NotImplementedException();
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null)
+        {
+            _notableProjects[new ProjectContext(buildEventContext)].AddBuildMessage(e);
+        }
     }
 
     public void Shutdown()
