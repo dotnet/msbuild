@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -12,6 +13,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
+using static NuGet.Client.ManagedCodeConventions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
@@ -617,6 +619,74 @@ public class TestReference
             // Make sure it's a the correct copy.
             fileInWwwroot.Length.Should().Be(referenceAssemblyPath.Length);
             Assert.Equal(File.ReadAllBytes(referenceAssemblyPath.FullName), File.ReadAllBytes(fileInWwwroot.FullName));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(null)]
+        public void Build_WithStartupMemoryCache(bool? value)
+            => BuildWasmMinimalAndValidateBootConfig(new[] { ("BlazorWebAssemblyStartupMemoryCache", value?.ToString()) }, b => b.startupMemoryCache.Should().Be(value));
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(null)]
+        public void Build_WithJiterpreter(bool? value)
+            => BuildWasmMinimalAndValidateBootConfig(new[] { ("BlazorWebAssemblyJiterpreter", value?.ToString())}, b =>
+            {
+                if (value != null)
+                {
+                    b.runtimeOptions.Should().NotBeNull();
+                    b.runtimeOptions.Length.Should().Be(3);
+                }
+                else
+                {
+                    b.runtimeOptions.Should().BeNull();
+                }
+            });
+
+        [Fact]
+        public void Build_WithJiterpreter_Advanced()
+            => BuildWasmMinimalAndValidateBootConfig(new[] { ("BlazorWebAssemblyJiterpreter", "true"), ("BlazorWebAssemblyRuntimeOptions", "--no-jiterpreter-interp-entry-enabled") }, b =>
+            {
+                b.runtimeOptions.Should().NotBeNull();
+                b.runtimeOptions.Length.Should().Be(3);
+                b.runtimeOptions.Should().Contain("--no-jiterpreter-interp-entry-enabled");
+                b.runtimeOptions.Should().NotContain("--jiterpreter-interp-entry-enabled");
+                b.runtimeOptions.Should().Contain("--jiterpreter-traces-enabled");
+                b.runtimeOptions.Should().Contain("--jiterpreter-jit-call-enabled");
+            });
+
+        private void BuildWasmMinimalAndValidateBootConfig((string name, string value)[] properties, Action<BootJsonData> validateBootConfig)
+        {
+            var testAppName = "BlazorWasmMinimal";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName, identifier: String.Join("-", properties.Select(p => p.name + p.value ?? "null")));
+
+            foreach (var property in properties)
+            {
+                if (property.value != null)
+                {
+                    testInstance.WithProjectChanges((project) =>
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var itemGroup = new XElement(ns + "PropertyGroup");
+                        itemGroup.Add(new XElement(property.name, property.value));
+                        project.Root.Add(itemGroup);
+                    });
+                }
+            }
+
+            var buildCommand = new BuildCommand(testInstance);
+            buildCommand.Execute()
+                .Should().Pass();
+
+            var buildOutputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
+            var bootJsonData = ReadBootJsonData(bootJsonPath);
+
+            validateBootConfig(bootJsonData);
         }
 
         private static BootJsonData ReadBootJsonData(string path)

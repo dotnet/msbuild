@@ -19,6 +19,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
     public class GenerateBlazorWebAssemblyBootJson : Task
     {
+        private static readonly string[] jiterpreterOptions = new[] { "jiterpreter-traces-enabled", "jiterpreter-interp-entry-enabled", "jiterpreter-jit-call-enabled" };
+
         [Required]
         public string AssemblyPath { get; set; }
 
@@ -39,6 +41,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         public string InvariantGlobalization { get; set; }
 
         public ITaskItem[] ConfigurationFiles { get; set; }
+
+        public string StartupMemoryCache { get; set; }
+
+        public string Jiterpreter { get; set; }
+
+        public string RuntimeOptions { get; set; }
 
         [Required]
         public string OutputPath { get; set; }
@@ -85,7 +93,35 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 resources = new ResourcesData(),
                 config = new List<string>(),
                 icuDataMode = icuDataMode,
+                startupMemoryCache = ParseOptionalBool(StartupMemoryCache),
             };
+
+            if (!String.IsNullOrEmpty(RuntimeOptions))
+            {
+                string[] runtimeOptions = RuntimeOptions.Split(' ');
+                result.runtimeOptions = runtimeOptions;
+            }
+
+            bool? jiterpreter = ParseOptionalBool(Jiterpreter);
+            if (jiterpreter != null) 
+            {
+                var runtimeOptions = result.runtimeOptions?.ToHashSet() ?? new HashSet<string>(3);
+                foreach (var jiterpreterOption in jiterpreterOptions)
+                {
+                    if (jiterpreter == true)
+                    {
+                        if (!runtimeOptions.Contains($"--no-{jiterpreterOption}"))
+                            runtimeOptions.Add($"--{jiterpreterOption}");
+                    }
+                    else
+                    {
+                        if (!runtimeOptions.Contains($"--{jiterpreterOption}"))
+                            runtimeOptions.Add($"--no-{jiterpreterOption}");
+                    }
+                }
+
+                result.runtimeOptions = runtimeOptions.ToArray();
+            }
 
             // Build a two-level dictionary of the form:
             // - assembly:
@@ -251,6 +287,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     resourceList.Add(resourceKey, $"sha256-{resource.GetMetadata("FileHash")}");
                 }
             }
+        }
+
+        private bool? ParseOptionalBool(string value) 
+        {
+            if (String.IsNullOrEmpty(value) || !bool.TryParse(value, out var boolValue))
+                return null;
+
+            return boolValue;
         }
 
         private void AddToAdditionalResources(ITaskItem resource, Dictionary<string, AdditionalAsset> additionalResources, string resourceName, string behavior)
