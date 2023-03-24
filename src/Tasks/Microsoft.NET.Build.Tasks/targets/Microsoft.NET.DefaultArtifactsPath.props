@@ -23,6 +23,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(ArtifactsPath)' != ''">
     <UseArtifactsOutput Condition="'$(UseArtifactsOutput)' == ''">true</UseArtifactsOutput>
     <IncludeProjectNameInArtifactsPaths Condition="'$(IncludeProjectNameInArtifactsPaths)' == ''">true</IncludeProjectNameInArtifactsPaths>
+    <_ArtifactsPathLocationType>ExplicitlySpecified</_ArtifactsPathLocationType>
   </PropertyGroup>
 
   <!-- Set up base output folders if UseArtifactsOutput is set -->
@@ -31,10 +32,12 @@ Copyright (c) .NET Foundation. All rights reserved.
          Note that we do not append a backslash to the ArtifactsPath as we do with most paths, because it may be a global property passed in on the command-line which we can't easily change -->
     <ArtifactsPath>$(_DirectoryBuildPropsBasePath)\.artifacts</ArtifactsPath>
     <IncludeProjectNameInArtifactsPaths Condition="'$(IncludeProjectNameInArtifactsPaths)' == ''">true</IncludeProjectNameInArtifactsPaths>
+    <_ArtifactsPathLocationType>DirectoryBuildPropsFolder</_ArtifactsPathLocationType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(ArtifactsPath)' == ''">
     <!-- If there was no Directory.Build.props file, then put the artifacts path in the project folder -->
     <ArtifactsPath>$(MSBuildProjectDirectory)\.artifacts</ArtifactsPath>
+    <_ArtifactsPathLocationType>ProjectFolder</_ArtifactsPathLocationType>
   </PropertyGroup>
 </Project>
