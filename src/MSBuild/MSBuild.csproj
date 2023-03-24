@@ -189,6 +189,8 @@
     <Compile Include="XMake.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <!-- LiveLogger is supported only in Core builds -->
+    <Compile Remove="LiveLogger\**\*.*" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
     <!-- This is to enable CodeMarkers in MSBuild.exe -->
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />

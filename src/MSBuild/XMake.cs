@@ -34,7 +34,9 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
+#if FEATURE_LIVELOGGER
 using LiveLogger = Microsoft.Build.Logging.LiveLogger.LiveLogger;
+#endif
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
@@ -2412,7 +2414,11 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
+#if FEATURE_LIVELOGGER
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.LiveLogger],
+#else
+                        false,
+#endif
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -3260,12 +3266,14 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
+#if FEATURE_LIVELOGGER
             if ((liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
                 && DoesEnvironmentSupportLiveLogger())
             {
                 ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
             }
             else
+#endif
             {
                 ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
@@ -3439,6 +3447,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
+#if FEATURE_LIVELOGGER
         private static bool DoesEnvironmentSupportLiveLogger()
         {
             (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
@@ -3485,6 +3494,7 @@ namespace Microsoft.Build.CommandLine
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Returns a DistributedLoggerRecord containing this logger and a ConfigurableForwardingLogger.
