@@ -21,6 +21,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
     {
         public WasmBuildIntegrationTest(ITestOutputHelper log) : base(log, GenerateBaselines) { }
 
+        private static string customIcuFilename = "icudt_custom.dat";
+
         [Fact]
         public void BuildMinimal_Works()
         {
@@ -353,7 +355,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "PropertyGroup");
-                itemGroup.Add(new XElement("BlazorIcuDataFileName", $@"{assetsDir}/icudt_custom.dat"));
+                itemGroup.Add(new XElement("BlazorIcuDataFileName", Path.Combine(assetsDir, customIcuFilename)));
                 project.Root.Add(itemGroup);
             });
 
@@ -371,14 +373,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             runtime.Should().ContainKey("dotnet.wasm");
             runtime.Should().ContainKey("dotnet.timezones.blat");
-            runtime.Should().ContainKey("icudt_custom.dat");
+            runtime.Should().ContainKey(customIcuFilename);
             runtime.Should().NotContainKey("icudt.dat");
             runtime.Should().NotContainKey("icudt_CJK.dat");
             runtime.Should().NotContainKey("icudt_EFIGS.dat");
             runtime.Should().NotContainKey("icudt_no_CJK.dat");
 
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
-            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_custom.dat")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", customIcuFilename)).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().NotExist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().NotExist();
@@ -396,7 +398,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "PropertyGroup");
-                itemGroup.Add(new XElement("BlazorIcuDataFileName", $@"{assetsDir}/icudt_custom.dat"));
+                itemGroup.Add(new XElement("BlazorIcuDataFileName", Path.Combine(assetsDir, customIcuFilename)));
                 project.Root.Add(itemGroup);
             });
 
@@ -415,14 +417,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             runtime.Should().ContainKey("dotnet.wasm");
             runtime.Should().ContainKey("dotnet.timezones.blat");
-            runtime.Should().ContainKey("icudt_custom.dat");
+            runtime.Should().ContainKey(customIcuFilename);
             runtime.Should().NotContainKey("icudt.dat");
             runtime.Should().NotContainKey("icudt_CJK.dat");
             runtime.Should().NotContainKey("icudt_EFIGS.dat");
             runtime.Should().NotContainKey("icudt_no_CJK.dat");
 
             new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
-            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_custom.dat")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", customIcuFilename)).Should().Exist();
             new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
             new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().NotExist();
             new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().NotExist();
