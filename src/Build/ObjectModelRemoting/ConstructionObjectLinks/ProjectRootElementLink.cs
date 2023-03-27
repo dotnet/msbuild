@@ -113,7 +113,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         public abstract ProjectMetadataElement CreateMetadataElement(string name);
 
         /// <summary>
-        /// Facilitate remoting the <see cref="ProjectRootElement.CreateMetadataElement(string, string)"/>.
+        /// Facilitate remoting the <see cref="ProjectRootElement.CreateMetadataElement(string, string, ElementLocation)"/>.
         /// </summary>
         public abstract ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue);
 

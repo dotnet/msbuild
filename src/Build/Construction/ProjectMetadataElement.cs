@@ -107,7 +107,10 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
-            element.Location = location;
+            if (location != null)
+            {
+                element.Location = location;
+            }
 
             return new ProjectMetadataElement(element, containingProject);
         }
