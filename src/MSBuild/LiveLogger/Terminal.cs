@@ -25,6 +25,16 @@ internal sealed class Terminal : ITerminal
         WriteLine(input.Slice(0, Math.Min(input.Length, Console.BufferWidth - 1)));
     }
 
+    public void WriteColor(TerminalColor color, string text)
+    {
+        Write($"\x1b[{(int)color};1m{text}\x1b[m");
+    }
+
+    public void WriteColorLine(TerminalColor color, string text)
+    {
+        WriteLine($"\x1b[{(int)color};1m{text}\x1b[m");
+    }
+
     public void Dispose()
     {
         Console.OutputEncoding = _originalOutputEncoding;

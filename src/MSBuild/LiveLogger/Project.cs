@@ -22,11 +22,16 @@ internal sealed class Project
     /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
     /// </summary>
-    public List<string>? BuildMessages { get; private set; }
+    public List<BuildMessage>? BuildMessages { get; private set; }
 
-    public void AddBuildMessage(string message)
+    public void AddBuildMessage(MessageSeverity severity, string message)
     {
-        BuildMessages ??= new List<string>();
-        BuildMessages.Add(message);
+        BuildMessages ??= new List<BuildMessage>();
+        BuildMessages.Add(new BuildMessage(severity, message));
     }
 }
+
+internal enum MessageSeverity { Warning, Error }
+
+internal record struct BuildMessage(MessageSeverity Severity, string Message)
+{ }

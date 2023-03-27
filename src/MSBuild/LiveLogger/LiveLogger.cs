@@ -232,9 +232,15 @@ internal sealed class LiveLogger : INodeLogger
                 // Print diagnostic output under the Project -> Output line.
                 if (project.BuildMessages is not null)
                 {
-                    foreach (string message in project.BuildMessages)
+                    foreach (BuildMessage buildMessage in project.BuildMessages)
                     {
-                        Terminal.WriteLine(message);
+                        TerminalColor color = buildMessage.Severity switch
+                        {
+                            MessageSeverity.Warning => TerminalColor.Yellow,
+                            MessageSeverity.Error => TerminalColor.Red,
+                            _ => TerminalColor.Default,
+                        };
+                        Terminal.WriteColorLine(color, $"  {buildMessage.Message}");
                     }
                 }
 
@@ -362,7 +368,7 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage($"  \x1b[33;1m⚠ {message}\x1b[m");
+            project.AddBuildMessage(MessageSeverity.Warning, $"⚠ {message}");
         }
     }
 
@@ -372,7 +378,7 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage($"  \x1b[31;1m❌ {message}\x1b[m");
+            project.AddBuildMessage(MessageSeverity.Error, $"❌ {message}");
         }
     }
 
@@ -386,14 +392,14 @@ internal sealed class LiveLogger : INodeLogger
     }
 }
 
-internal record ProjectContext(int Id)
+internal record struct ProjectContext(int Id)
 {
     public ProjectContext(BuildEventContext context)
         : this(context.ProjectContextId)
     { }
 }
 
-internal record ProjectInstance(int Id)
+internal record struct ProjectInstance(int Id)
 {
     public ProjectInstance(BuildEventContext context)
         : this(context.ProjectInstanceId)

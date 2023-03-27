@@ -14,4 +14,21 @@ internal interface ITerminal : IDisposable
     void WriteLine(ReadOnlySpan<char> text);
 
     void WriteLineFitToWidth(ReadOnlySpan<char> input);
+
+    void WriteColor(TerminalColor color, string text);
+
+    void WriteColorLine(TerminalColor color, string text);
+}
+
+internal enum TerminalColor
+{
+    Black = 30,
+    Red = 31,
+    Green = 32,
+    Yellow = 33,
+    Blue = 34,
+    Magenta = 35,
+    Cyan = 36,
+    White = 37,
+    Default = 39
 }
