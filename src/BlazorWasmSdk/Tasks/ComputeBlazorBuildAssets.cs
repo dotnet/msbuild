@@ -18,6 +18,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public ITaskItem[] Candidates { get; set; }
 
+        public ITaskItem CustomIcuCandidate { get; set; }
+
         [Required]
         public ITaskItem[] ProjectAssembly { get; set; }
 
@@ -67,10 +69,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     return true;
                 }
 
+                if (AssetsComputingHelper.TryGetAssetFilename(CustomIcuCandidate, out string customIcuCandidateFilename))
+                {
+                    var customIcuCandidate = AssetsComputingHelper.GetCustomIcuAsset(CustomIcuCandidate);
+                    assetCandidates.Add(customIcuCandidate);
+                }
+
                 for (int i = 0; i < Candidates.Length; i++)
                 {
                     var candidate = Candidates[i];
-                    if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
+                    if (AssetsComputingHelper.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuCandidateFilename, out var reason))
                     {
                         Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                         filesToRemove.Add(candidate);
@@ -95,7 +103,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         continue;
                     }
 
-                    var destinationSubPath = candidate.GetMetadata("DestinationSubPath");
                     if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
                     {
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
@@ -118,14 +125,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         assetCandidates.Add(newDotNetJs);
                         continue;
                     }
-                    else if (string.IsNullOrEmpty(destinationSubPath))
-                    {
-                        var relativePath = candidate.GetMetadata("FileName") + candidate.GetMetadata("Extension");
-                        candidate.SetMetadata("RelativePath", $"_framework/{relativePath}");
-                    }
                     else
                     {
-                        candidate.SetMetadata("RelativePath", $"_framework/{destinationSubPath}");
+                        string relativePath = AssetsComputingHelper.GetCandidateRelativePath(candidate);
+                        candidate.SetMetadata("RelativePath", relativePath);
                     }
 
                     // Workaround for https://github.com/dotnet/aspnetcore/issues/37574.
@@ -248,46 +251,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 default:
                     break;
             }
-        }
-
-        public static bool ShouldFilterCandidate(
-            ITaskItem candidate,
-            bool timezoneSupport,
-            bool invariantGlobalization,
-            bool copySymbols,
-            out string reason)
-        {
-            var extension = candidate.GetMetadata("Extension");
-            var fileName = candidate.GetMetadata("FileName");
-            var assetType = candidate.GetMetadata("AssetType");
-            var fromMonoPackage = string.Equals(
-                candidate.GetMetadata("NuGetPackageId"),
-                "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-                StringComparison.Ordinal);
-
-            reason = extension switch
-            {
-                ".a" when fromMonoPackage => "extension is .a is not supported.",
-                ".c" when fromMonoPackage => "extension is .c is not supported.",
-                ".h" when fromMonoPackage => "extension is .h is not supported.",
-                // It is safe to filter out all XML files since we are not interested in any XML file from the list
-                // of ResolvedFilesToPublish to become a static web asset. Things like this include XML doc files and
-                // so on.
-                ".xml" => "it is a documentation file",
-                ".rsp" when fromMonoPackage => "extension is .rsp is not supported.",
-                ".props" when fromMonoPackage => "extension is .props is not supported.",
-                ".blat" when !timezoneSupport => "timezone support is not enabled.",
-                ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
-                ".json" when fromMonoPackage && (fileName == "emcc-props" || fileName == "package") => $"{fileName}{extension} is not used by Blazor",
-                ".ts" when fromMonoPackage && fileName == "dotnet.d" => "dotnet type definition is not used by Blazor",
-                ".ts" when fromMonoPackage && fileName == "dotnet-legacy.d" => "dotnet type definition is not used by Blazor",
-                ".js" when assetType == "native" && fileName != "dotnet" => $"{fileName}{extension} is not used by Blazor",
-                ".pdb" when !copySymbols => "copying symbols is disabled",
-                ".symbols" when fromMonoPackage => "extension .symbols is not required.",
-                _ => null
-            };
-
-            return reason != null;
         }
     }
 }

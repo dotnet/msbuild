@@ -30,6 +30,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public ITaskItem[] ResolvedFilesToPublish { get; set; }
 
+        public ITaskItem CustomIcuCandidate { get; set; }
+
         [Required]
         public ITaskItem[] WasmAotAssets { get; set; }
 
@@ -522,9 +524,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             Dictionary<string, ITaskItem> resolvedSymbolsToPublish,
             Dictionary<string, ITaskItem> resolvedNativeAssetToPublish)
         {
-            foreach (var candidate in ResolvedFilesToPublish)
+            var resolvedFilesToPublish = ResolvedFilesToPublish.ToList();
+            if (AssetsComputingHelper.TryGetAssetFilename(CustomIcuCandidate, out string customIcuCandidateFilename))
             {
-                if (ComputeBlazorBuildAssets.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
+                var customIcuCandidate = AssetsComputingHelper.GetCustomIcuAsset(CustomIcuCandidate);
+                resolvedFilesToPublish.Add(customIcuCandidate);
+            }
+
+            foreach (var candidate in resolvedFilesToPublish)
+            {
+                if (AssetsComputingHelper.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuCandidateFilename, out var reason))
                 {
                     Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                     if (!resolvedFilesToPublishToRemove.ContainsKey(candidate.ItemSpec))
