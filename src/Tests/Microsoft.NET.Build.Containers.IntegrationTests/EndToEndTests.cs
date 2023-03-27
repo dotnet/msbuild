@@ -139,7 +139,7 @@ public class EndToEndTests
     }
 
     [DockerDaemonAvailableFact]
-    public async Task EndToEnd_NoAPI()
+    public async Task EndToEnd_NoAPI_Web()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "CreateNewImageTest"));
         DirectoryInfo privateNuGetAssets = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "ContainerNuGet"));
@@ -161,8 +161,6 @@ public class EndToEndTests
         var packagedir = new DirectoryInfo(packageDirPath);
 
         // do not pollute the primary/global NuGet package store with the private package(s)
-        var env = new (string, string)[] { new("NUGET_PACKAGES", privateNuGetAssets.FullName) };
-        // 🤢
         FileInfo[] nupkgs = packagedir.GetFiles("*.nupkg");
         if (nupkgs == null || nupkgs.Length == 0)
         {
@@ -170,7 +168,6 @@ public class EndToEndTests
             // for now, fail.
             Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
         }
-
 
         new DotnetCommand(_testOutput, "new", "webapi", "-f", ToolsetInfo.CurrentTargetFramework)
             .WithWorkingDirectory(newProjectDir.FullName)
@@ -269,6 +266,101 @@ public class EndToEndTests
         new RunExeCommand(_testOutput, "docker", "stop", appContainerId)
             .Execute()
             .Should().Pass();
+
+        newProjectDir.Delete(true);
+        privateNuGetAssets.Delete(true);
+    }
+
+    [DockerDaemonAvailableFact]
+    public void EndToEnd_NoAPI_Console()
+    {
+        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "CreateNewImageTest"));
+        DirectoryInfo privateNuGetAssets = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "ContainerNuGet"));
+
+        if (newProjectDir.Exists)
+        {
+            newProjectDir.Delete(recursive: true);
+        }
+
+        if (privateNuGetAssets.Exists)
+        {
+            privateNuGetAssets.Delete(recursive: true);
+        }
+
+        newProjectDir.Create();
+        privateNuGetAssets.Create();
+
+        var packageDirPath = Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "package");
+        var packagedir = new DirectoryInfo(packageDirPath);
+
+        FileInfo[] nupkgs = packagedir.GetFiles("*.nupkg");
+        if (nupkgs == null || nupkgs.Length == 0)
+        {
+            // Build Microsoft.NET.Build.Containers.csproj & wait.
+            // for now, fail.
+            Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
+        }
+
+
+        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithWorkingDirectory(newProjectDir.FullName)
+            // do not pollute the primary/global NuGet package store with the private package(s)
+            .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
+            .Execute()
+            .Should().Pass();
+
+        new DotnetCommand(_testOutput, "new", "nugetconfig")
+            .WithWorkingDirectory(newProjectDir.FullName)
+            .Execute()
+            .Should().Pass();
+
+        new DotnetCommand(_testOutput, "nuget", "add", "source", packagedir.FullName, "--name", "local-temp")
+            .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
+            .WithWorkingDirectory(newProjectDir.FullName)
+            .Execute()
+            .Should().Pass();
+
+        // Add package to the project
+        new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "--prerelease", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
+            .WithWorkingDirectory(newProjectDir.FullName)
+            .Execute()
+            .Should().Pass();
+
+        string imageName = NewImageName();
+        string imageTag = "1.0";
+
+        // Build & publish the project
+        new DotnetCommand(
+            _testOutput,
+            "publish",
+            "/t:PublishContainer",
+            "/p:runtimeidentifier=linux-x64",
+            "/bl",
+            $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageDefault}",
+            $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
+            $"/p:ContainerImageName={imageName}",
+            $"/p:Version={imageTag}")
+            .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
+            .WithWorkingDirectory(newProjectDir.FullName)
+            .Execute()
+            .Should().Pass();
+
+        new RunExeCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
+            .Execute()
+            .Should().Pass();
+
+        var containerName = "test-container-2";
+        CommandResult processResult = new RunExeCommand(
+            _testOutput,
+            "docker",
+            "run",
+            "--rm",
+            "--name",
+            containerName,
+            $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
+        .Execute();
+        processResult.Should().Pass().And.HaveStdOut("Hello, World!");
 
         newProjectDir.Delete(true);
         privateNuGetAssets.Delete(true);
