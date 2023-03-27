@@ -106,8 +106,16 @@ internal sealed class LiveLogger : INodeLogger
             {
                 if (UpdateNodeStringBuffer())
                 {
-                    EraseNodes();
-                    DisplayNodes();
+                    Terminal.BeginUpdate();
+                    try
+                    {
+                        EraseNodes();
+                        DisplayNodes();
+                    }
+                    finally
+                    {
+                        Terminal.EndUpdate();
+                    }
                 }
             }
         }
@@ -192,11 +200,20 @@ internal sealed class LiveLogger : INodeLogger
                 double duration = _notableProjects[restoreContext].Stopwatch.Elapsed.TotalSeconds;
 
                 UpdateNodeStringBuffer();
-                EraseNodes();
-                Terminal.WriteLine($"\x1b[{_usedNodes + 1}F");
-                Terminal.Write($"\x1b[0J");
-                Terminal.WriteLine($"Restore complete ({duration:F1}s)");
-                DisplayNodes();
+
+                Terminal.BeginUpdate();
+                try
+                {
+                    EraseNodes();
+                    Terminal.WriteLine($"\x1b[{_usedNodes + 1}F");
+                    Terminal.Write($"\x1b[0J");
+                    Terminal.WriteLine($"Restore complete ({duration:F1}s)");
+                    DisplayNodes();
+                }
+                finally
+                {
+                    Terminal.EndUpdate();
+                }
                 return;
             }
         }

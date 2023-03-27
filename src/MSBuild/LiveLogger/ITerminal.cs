@@ -7,6 +7,10 @@ namespace Microsoft.Build.Logging.LiveLogger;
 
 internal interface ITerminal : IDisposable
 {
+    void BeginUpdate();
+
+    void EndUpdate();
+
     void Write(string text);
 
     void WriteLine(string text);
