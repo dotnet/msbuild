@@ -30,7 +30,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public ITaskItem[] ResolvedFilesToPublish { get; set; }
 
-        public ITaskItem CustomIcuCandidate { get; set; } = new TaskItem();
+        public ITaskItem CustomIcuCandidate { get; set; }
 
         [Required]
         public ITaskItem[] WasmAotAssets { get; set; }

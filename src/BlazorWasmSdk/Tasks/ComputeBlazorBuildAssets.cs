@@ -18,7 +18,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public ITaskItem[] Candidates { get; set; }
 
-        public ITaskItem CustomIcuCandidate { get; set; } = new TaskItem();
+        public ITaskItem CustomIcuCandidate { get; set; }
 
         [Required]
         public ITaskItem[] ProjectAssembly { get; set; }
