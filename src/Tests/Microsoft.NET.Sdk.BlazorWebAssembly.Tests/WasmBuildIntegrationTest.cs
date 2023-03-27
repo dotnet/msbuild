@@ -349,13 +349,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Arrange
             var testAppName = "BlazorWasmMinimal";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
-            string assetsDir = ComputeBaselineFolder();
 
             testInstance.WithProjectChanges((project) =>
             {
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "PropertyGroup");
-                itemGroup.Add(new XElement("BlazorIcuDataFileName", Path.Combine(assetsDir, customIcuFilename)));
+                itemGroup.Add(new XElement("BlazorIcuDataFileName", customIcuFilename));
                 project.Root.Add(itemGroup);
             });
 
@@ -392,13 +391,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             var testAppName = "BlazorHosted";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
-            string assetsDir = ComputeBaselineFolder();
 
             testInstance.WithProjectChanges((project) =>
             {
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "PropertyGroup");
-                itemGroup.Add(new XElement("BlazorIcuDataFileName", Path.Combine(assetsDir, customIcuFilename)));
+                itemGroup.Add(new XElement("BlazorIcuDataFileName", customIcuFilename));
                 project.Root.Add(itemGroup);
             });
 
