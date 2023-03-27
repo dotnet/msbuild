@@ -1326,7 +1326,16 @@ namespace Microsoft.Build.Construction
         /// Creates a metadata node.
         /// Caller must add it to the location of choice in the project.
         /// </summary>
-        public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue, ElementLocation location = null)
+        public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue)
+        {
+            return this.CreateMetadataElement(name, unevaluatedValue, null);
+        }
+
+        /// <summary>
+        /// Creates a metadata node.
+        /// Caller must add it to the location of choice in the project.
+        /// </summary>
+        public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue, ElementLocation location)
         {
             if (Link != null)
             {
