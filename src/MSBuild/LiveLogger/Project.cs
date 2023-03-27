@@ -5,8 +5,6 @@ using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging.LiveLogger;
 
@@ -25,32 +23,11 @@ internal sealed class Project
     /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
     /// </summary>
-    private List<LazyFormattedBuildEventArgs>? BuildMessages { get; set; }
+    public List<string>? BuildMessages { get; private set; }
 
-    public void AddBuildMessage(LazyFormattedBuildEventArgs eventArgs)
+    public void AddBuildMessage(string message)
     {
-        BuildMessages ??= new List<LazyFormattedBuildEventArgs>();
-        BuildMessages.Add(eventArgs);
-    }
-
-    public IEnumerable<(BuildMessageSeverity, string)> EnumerateBuildMessages()
-    {
-        if (BuildMessages is not null)
-        {
-            foreach (LazyFormattedBuildEventArgs eventArgs in BuildMessages)
-            {
-                if (eventArgs.Message is not null)
-                {
-                    if (eventArgs is BuildWarningEventArgs warningEventArgs)
-                    {
-                        yield return (BuildMessageSeverity.Warning, EventArgsFormatting.FormatEventMessage(warningEventArgs, false));
-                    }
-                    else if (eventArgs is BuildErrorEventArgs errorEventArgs)
-                    {
-                        yield return (BuildMessageSeverity.Error, EventArgsFormatting.FormatEventMessage(errorEventArgs, false));
-                    }
-                }
-            }
-        }
+        BuildMessages ??= new List<string>();
+        BuildMessages.Add(message);
     }
 }

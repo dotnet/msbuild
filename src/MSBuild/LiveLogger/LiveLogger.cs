@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging.LiveLogger;
 
@@ -33,6 +35,8 @@ internal sealed class LiveLogger : INodeLogger
     private Thread? _refresher;
 
     private readonly List<string> _nodeStringBuffer = new();
+
+    private Encoding? _originalOutputEncoding;
 
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
     public string Parameters { get => ""; set { } }
@@ -77,6 +81,9 @@ internal sealed class LiveLogger : INodeLogger
         eventSource.MessageRaised += new BuildMessageEventHandler(MessageRaised);
         eventSource.WarningRaised += new BuildWarningEventHandler(WarningRaised);
         eventSource.ErrorRaised += new BuildErrorEventHandler(ErrorRaised);
+
+        _originalOutputEncoding = Console.OutputEncoding;
+        Console.OutputEncoding = Encoding.UTF8;
 
         _refresher = new Thread(ThreadProc);
         _refresher.Start();
@@ -216,12 +223,11 @@ internal sealed class LiveLogger : INodeLogger
                 }
 
                 // Print diagnostic output under the Project -> Output line.
-                foreach ((BuildMessageSeverity severity, string message) in project.EnumerateBuildMessages())
+                if (project.BuildMessages is not null)
                 {
-                    switch (severity)
+                    foreach (string message in project.BuildMessages)
                     {
-                        case BuildMessageSeverity.Warning: Console.WriteLine($"\x1b[33;1m  \x26A0 {message}\x1b[m"); break;
-                        case BuildMessageSeverity.Error: Console.WriteLine($"\x1b[31;1m  \x26A0 {message}\x1b[m"); break;
+                        Console.WriteLine(message);
                     }
                 }
 
@@ -338,10 +344,11 @@ internal sealed class LiveLogger : INodeLogger
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
                 if (!projectFileName.IsEmpty &&
-                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)))
+                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) &&
+                    _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
                 {
-                    var outputPath = e.Message.AsMemory().Slice(index + 4);
-                    _notableProjects[new ProjectContext(buildEventContext)].OutputPath = outputPath;
+                    ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
+                    project.OutputPath = outputPath;
                 }
             }
         }
@@ -350,18 +357,20 @@ internal sealed class LiveLogger : INodeLogger
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null)
+        if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
-            _notableProjects[new ProjectContext(buildEventContext)].AddBuildMessage(e);
+            string message = EventArgsFormatting.FormatEventMessage(e, false);
+            project.AddBuildMessage($"  \x1b[33;1m⚠ {message}\x1b[m");
         }
     }
 
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null)
+        if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
-            _notableProjects[new ProjectContext(buildEventContext)].AddBuildMessage(e);
+            string message = EventArgsFormatting.FormatEventMessage(e, false);
+            project.AddBuildMessage($"  \x1b[31;1m❌ {message}\x1b[m");
         }
     }
 
@@ -369,6 +378,11 @@ internal sealed class LiveLogger : INodeLogger
     {
         _cts.Cancel();
         _refresher?.Join();
+
+        if (_originalOutputEncoding is not null)
+        {
+            Console.OutputEncoding = _originalOutputEncoding;
+        }
     }
 }
 
