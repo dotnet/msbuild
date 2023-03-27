@@ -123,8 +123,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_ResolveGlobalizationConfiguration">
+    <Error Condition="'$(BlazorIcuDataFileName)' != '' AND !$([System.IO.Path]::GetFileName('$(BlazorIcuDataFileName)').StartsWith('icudt'))" Text="File name in %24(BlazorIcuDataFileName) has to start with 'icudt'." />
     <Warning Condition="'$(InvariantGlobalization)' == 'true' AND '$(BlazorWebAssemblyLoadAllGlobalizationData)' == 'true'" Text="%24(BlazorWebAssemblyLoadAllGlobalizationData) has no effect when %24(InvariantGlobalization) is set to true." />
-    <Warning Condition="'$(InvariantGlobalization)' == 'true' AND '$(BlazorIcuDataFileName)' == 'true'" Text="%24(BlazorIcuDataFileName) has no effect when %24(InvariantGlobalization) is set to true." />
+    <Warning Condition="'$(InvariantGlobalization)' == 'true' AND '$(BlazorIcuDataFileName)' != ''" Text="%24(BlazorIcuDataFileName) has no effect when %24(InvariantGlobalization) is set to true." />
     <Warning Condition="'$(BlazorWebAssemblyLoadAllGlobalizationData)' == 'true' AND '$(BlazorIcuDataFileName)' != ''" Text="%24(BlazorIcuDataFileName) has no effect when %24(BlazorWebAssemblyLoadAllGlobalizationData) is set to true." />
     <PropertyGroup>
       <_BlazorWebAssemblyLoadAllGlobalizationData Condition="'$(InvariantGlobalization)' != 'true'">$(BlazorWebAssemblyLoadAllGlobalizationData)</_BlazorWebAssemblyLoadAllGlobalizationData>
