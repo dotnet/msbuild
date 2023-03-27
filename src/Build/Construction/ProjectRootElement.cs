@@ -1326,14 +1326,14 @@ namespace Microsoft.Build.Construction
         /// Creates a metadata node.
         /// Caller must add it to the location of choice in the project.
         /// </summary>
-        public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue)
+        public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue, ElementLocation location = null)
         {
             if (Link != null)
             {
                 return RootLink.CreateMetadataElement(name, unevaluatedValue);
             }
 
-            ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this);
+            ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this, location);
 
             metadatum.Value = unevaluatedValue;
 
@@ -1783,6 +1783,15 @@ namespace Microsoft.Build.Construction
                 preserveFormatting: null);
 
             return projectRootElement;
+        }
+
+        /// <summary>
+        /// Creates a metadata node.
+        /// Caller must add it to the location of choice in the project.
+        /// </summary>
+        internal ProjectMetadataElement CreateMetadataElement(XmlAttributeWithLocation attribute)
+        {
+            return CreateMetadataElement(attribute.Name, attribute.Value, attribute.Location);
         }
 
         /// <summary>

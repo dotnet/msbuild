@@ -36,6 +36,8 @@ namespace Microsoft.Build.Shared
                 ? (XmlElementWithLocation)oldElement.OwnerDocument.CreateElement(newElementName)
                 : (XmlElementWithLocation)oldElement.OwnerDocument.CreateElement(newElementName, xmlNamespace);
 
+            newElement.Location = oldElement.Location;
+
             // Copy over all the attributes.
             foreach (XmlAttribute oldAttribute in oldElement.Attributes)
             {
