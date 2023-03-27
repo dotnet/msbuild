@@ -543,8 +543,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 string definingProjectPath,
                 Dictionary<string, string> templateGlobalProperties)
             {
-                SolutionConfiguration solutionConfiguration = new(solutionConfigurationXml);
-                ICollection<XmlElement> projectConfigurations = solutionConfiguration.ProjectConfigurations;
+                XmlNodeList? projectConfigurations = SolutionConfiguration.GetProjectConfigurations(solutionConfigurationXml);
+                if (projectConfigurations == null || projectConfigurations.Count == 0)
+                {
+                    return Array.Empty<ProjectGraphEntryPoint>();
+                }
 
                 var graphEntryPoints = new List<ProjectGraphEntryPoint>(projectConfigurations.Count);
 
@@ -552,7 +555,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 {
                     ErrorUtilities.VerifyThrowInternalNull(projectConfiguration.Attributes, nameof(projectConfiguration.Attributes));
 
-                    var buildProjectInSolution = projectConfiguration.Attributes!["BuildProjectInSolution"];
+                    var buildProjectInSolution = projectConfiguration.Attributes![SolutionConfiguration.BuildProjectInSolutionAttribute];
                     if (buildProjectInSolution is not null &&
                         string.IsNullOrWhiteSpace(buildProjectInSolution.Value) is false &&
                         bool.TryParse(buildProjectInSolution.Value, out var buildProject) &&
@@ -561,12 +564,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         continue;
                     }
 
-                    var projectPathAttribute = projectConfiguration.Attributes!["AbsolutePath"];
+                    XmlAttribute? projectPathAttribute = projectConfiguration.Attributes![SolutionConfiguration.AbsolutePathAttribute];
                     ErrorUtilities.VerifyThrow(projectPathAttribute is not null, "Expected VS to set the project path on each ProjectConfiguration element.");
 
-                    var projectPath = projectPathAttribute!.Value;
+                    string projectPath = projectPathAttribute!.Value;
 
-                    var (configuration, platform) = SolutionFile.ParseConfigurationName(projectConfiguration.InnerText, definingProjectPath, 0, solutionConfigurationXml);
+                    (string configuration, string platform) = SolutionFile.ParseConfigurationName(projectConfiguration.InnerText, definingProjectPath, 0, solutionConfigurationXml);
 
                     // Take the defining project global properties and override the configuration and platform.
                     // It's sufficient to only set Configuration and Platform.

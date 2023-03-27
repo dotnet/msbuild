@@ -11,9 +11,11 @@ namespace Microsoft.Build.Shared
 {
     internal sealed class SolutionConfiguration
     {
-        private const string AttributeProject = "Project";
+        public const string ProjectAttribute = "Project";
 
-        private const string AttributeAbsolutePath = "AbsolutePath";
+        public const string AbsolutePathAttribute = "AbsolutePath";
+
+        public const string BuildProjectInSolutionAttribute = "BuildProjectInSolution";
 
         // This field stores pre-cached project elements for project guids for quicker access by project guid
         private readonly Dictionary<string, XmlElement> _cachedProjectElements = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
@@ -32,18 +34,6 @@ namespace Microsoft.Build.Shared
 
         public SolutionConfiguration(string xmlString)
         {
-            XmlDocument? doc = null;
-
-            if (!string.IsNullOrEmpty(xmlString))
-            {
-                doc = new XmlDocument();
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader reader = XmlReader.Create(new StringReader(xmlString), settings))
-                {
-                    doc.Load(reader);
-                }
-            }
-
             // Example:
             //
             // <SolutionConfiguration>
@@ -52,12 +42,13 @@ namespace Microsoft.Build.Shared
             //  <ProjectConfiguration Project="{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}" AbsolutePath="c:foo\Project3\C.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
             // </SolutionConfiguration>
             //
-            if (doc?.DocumentElement != null)
+            XmlNodeList? projectConfigurationElements = GetProjectConfigurations(xmlString);
+            if (projectConfigurationElements != null)
             {
-                foreach (XmlElement xmlElement in doc.DocumentElement.ChildNodes)
+                foreach (XmlElement xmlElement in projectConfigurationElements)
                 {
-                    string projectGuid = xmlElement.GetAttribute(AttributeProject);
-                    string projectAbsolutePath = xmlElement.GetAttribute(AttributeAbsolutePath);
+                    string projectGuid = xmlElement.GetAttribute(ProjectAttribute);
+                    string projectAbsolutePath = xmlElement.GetAttribute(AbsolutePathAttribute);
 
                     // What we really want here is the normalized path, like we'd get with an item's "FullPath" metadata.  However, 
                     // if there's some bogus full path in the solution configuration (e.g. a website with a "full path" of c:\solutiondirectory\http://localhost) 
@@ -113,6 +104,23 @@ namespace Microsoft.Build.Shared
         public static SolutionConfiguration Empty { get; } = new SolutionConfiguration(string.Empty);
 
         public ICollection<XmlElement> ProjectConfigurations => _cachedProjectElements.Values;
+
+        public static XmlNodeList? GetProjectConfigurations(string xmlString)
+        {
+            XmlDocument? doc = null;
+
+            if (!string.IsNullOrEmpty(xmlString))
+            {
+                doc = new XmlDocument();
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                using (XmlReader reader = XmlReader.Create(new StringReader(xmlString), settings))
+                {
+                    doc.Load(reader);
+                }
+            }
+
+            return doc?.DocumentElement?.ChildNodes;
+        }
 
         public bool TryGetProjectByGuid(string projectGuid, [NotNullWhen(true)] out XmlElement? projectElement) => _cachedProjectElements.TryGetValue(projectGuid, out projectElement);
 
