@@ -3,9 +3,9 @@
 
 The feature is meant to improve the security of builds executed via MSBuild, by reducing the chances of spilling secrets (and possibly other sensitive data) from otherwise secured or/and inaccessible build environments.
 
-It builds upon the other efforts reducing the cases accidentaly logging secrets - ['not logging unused environemnt variables'](https://github.com/dotnet/msbuild/pull/7484), 'redacting known secret patterns' (internal). Distinction here is that we want to give users option how to configure their build data so that they can indicate what contains secret/sensitive data and shouldn't get output into logs.
+It builds upon the other efforts reducing the cases accidentaly logging secrets - ['not logging unused environemnt variables'](https://github.com/dotnet/msbuild/pull/7484), 'redacting known secret patterns' (internal, by @michaelcfanning). Distinction here is that we want to give users option how to configure their build scripts and build data so that they can indicate what contains secret/sensitive data and shouldn't get output into logs.
 
-The feature is envisioned to be delivered in multiple interations, while first itearation will be facilitated via global items and/or properties that will be indicating masking logging of specific types of data in log entries.
+The feature is envisioned to be delivered in multiple interations, while first itearation will be facilitated via global items and/or properties that will be indicating masking logging of specific types of data in log entries (hence no syntactic changes will be imposed for now).
 
 # North Star / Longer-term vision
 
@@ -93,7 +93,7 @@ An opt-out mechanism would allow usage of properly denoted tasks with plain stri
     * all item metadata
     * any combination of above
     * task input parameters (to denote that task is requiring sensitive data and only such can be passed in)
-    * task OutputItems (? do we want to support this as additional data type? Can be handy in cases like [`ReadLinesFromFile` task](https://learn.microsoft.com/en-us/visualstudio/msbuild/readlinesfromfile-task))
+    * task OutputItems (This can be handy in cases similar to [`ReadLinesFromFile` task](https://learn.microsoft.com/en-us/visualstudio/msbuild/readlinesfromfile-task))
  * Redacting the above will happen in all log events before they are being sent to subscribed loggers. 
  * Redacting will apply to data initializations and passing:
     * task input parameters
@@ -106,9 +106,10 @@ An opt-out mechanism would allow usage of properly denoted tasks with plain stri
 
 ## Out of scope
   * Redacting **will NOT** occure on:
-    * log events emited from tasks (this might be added as extra opt-in option - but would lead to significant build performance degradation).
-    * any other alternative output of tasks (direct writes to file system, network connections etc.)
-    * passing values to task and there embedding into additional text and passing out as output parameter - unless such is explicitly marked as containing sensitive data
+    * Log events emited from tasks (this might be added as extra opt-in option - but would lead to significant build performance degradation).
+    * Any other alternative output of tasks (direct writes to file system, network connections etc.)
+    * Passing values to task and there embedding into additional text and passing out as output parameter - unless such is explicitly marked as containing sensitive data.
+    * Encrypting/securing data in memory during therun of the build.
  
 
 # User interaction
@@ -187,14 +188,25 @@ First two presented option are not to be used. All the other options will likely
 * There are no global items today - this can be simulated by putting those to directory.props
 * Even seemingly innocent tasks with seemingly innocent logging can spill possibly sensitive data (e.g. think the RAR task, logging all the inputs, while those are just reference related info - those can contain paths that might already by itself be sensitive info). Related: [#8493](https://github.com/dotnet/msbuild/issues/8493) 
 * `MSBuild` task can pose a boundary for some context passing (e.g. properties/items).
+* Properties/items can occure dynamically after the initial processing of the script - e.g. [`CreateProperty task`](https://learn.microsoft.com/en-us/visualstudio/msbuild/createproperty-task). That should not be a problem, but we should keep it in mind (as additional entrypoint of external data into internal data holders).
 * Task authors and consumers are posibly different personas with disconected codebases. For this reason we want to support ability to indicate that task input/output is meant to be a secret. A user of the task should follow the contract and denote the data to be mounted to the task appropriately (otherwise a build warning/error will be issued).
 
 # Suggested Implementation
 
-[TBD]
-* For dynamic functionality we need to scan the data only on it's creation - so need to identify all ways of creating properties, items, metadata (including dynamic creation - e.g. [`CreateProperty task`](https://learn.microsoft.com/en-us/visualstudio/msbuild/createproperty-task))
-* We need to have a global dictionary per data type, that will be used prior passing identified messages to loggers. For this reason we might choose not to support flattened/transformed/concatenated values (would this be acceptable?)
-* Attempt to scan textual data for presence of the flagged values (e.g. to attempt to handle cases where data is passed into task and there possibly appended with other data and passed as output, or intercepting all log events produced by a task consuming a sensitive value) might get perf expensive and as well can get confused easily - e.g.:
+* Need for explicit opt-in - command line switch or environment variable.
+* On detection of opt in, all build events for loggers need to be buffered for a deffered dispatch to loggers (similarly as we have ['DeferredBuildMessage'](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/BuildManager/BuildManager.cs#L400) and [`LogDeferredMessages`](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/BuildManager/BuildManager.cs#L2890)), until the full pass through the build script (including all imports and `.props` and `.targets` files) so that properties initialization and items initialization is fully performed - as only then we know the full extent of requested redacting.
+  * In the future version - with first-class citizen type for secrets, we can possibly frontload single pass through the script just for detection of the secret redaction declarations and avoid the buffering and post-process need.
+* Buffered events need to be post-processed in respect with the redaction requests, only then dispatched.
+* We'll maintain lookup of elements requested for redaction - those explicitly requested by the name of property/item and those identified as sensitive by value or by transfer of value from other sensitive element.
+* We'll intercept assigments of value to property ([`TrackPropertyWrite`](https://github.com/dotnet/msbuild/blob/main/src/Build/Evaluation/PropertyTrackingEvaluatorDataWrapper.cs#L223)), item and task parameter
+  * If value is assigned to a task parameter and such is indicated by user as sensitive, the holder of the value (the R-value - parameter/item being assigned to the task input) needs to be as well tracked as sensitive, otherwise build waring/error will be issued.
+  * If value is assigned to a task parameter and such is not indicated by user as sensitive, but the holder of the value (the R-value - parameter/item being assigned to the task input) is tracked as sensitive (either because it was explicitly denoted by name, or it was later marked by MSBuild due to holding value matching a sensitivity value regex or callback) - a build warning/error will be issued.
+  * If value is assigned to property/item from a task output and such is indicated by user as sensitive, the L-value holder of the value (the property/item being assigned to) need to be as well tracked as sensitive, otherwise build waring/error will be issued.
+  * If value is being assigned to property or item
+    * and such is indicated by user as sensitive, the generated build event needs to be redacted.
+    * and such is not indicated by user as sensitive, but the R-value is indicated as sensitive - the data holder (property/item) is marked as holding sensitive data and treated accordingly.
+    * and such is not indicated by user as sensitive, the value is passed to sensitivity indicating regex or callback (in case any of those are configured by user) and if matched - the data holder (property/item) is marked as holding sensitive data and treated accordingly.
+* No other redacting of log events will be performed. This is not a strong requirement - we can introduce another opt-in level of strict inspection of all log events. The gain is very questionable though, while the performance impact is severe (internal experiments by @michaelcfanning measured by @rokonec indicate 4-times slow-down on mid-size build). Additionally to being perf-expensive, it can possibly get easily confused - e.g.:
 
 ```xml
 <ItemGroup>
@@ -215,7 +227,7 @@ First two presented option are not to be used. All the other options will likely
 </Target>
 ```
 
-Should we redact all occurences of value of `MySecret` from the task result? We might get a lot of false positives and very confusing results.
+In case we'd want to redact all occurences of value of `MySecret` from the task result - we might get a lot of false positives and very confusing results.
 
 # Open questions
  * What to use as a replacement of the data to be redacted? (Randomized hash, fixed token, etc.) - *very likely just a static pattern ('******').*
