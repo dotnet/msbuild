@@ -223,45 +223,61 @@ internal sealed class LiveLogger : INodeLogger
             lock (_lock)
             {
                 UpdateNodeStringBuffer();
-                EraseNodes();
 
-                Project project = _notableProjects[c];
-                double duration = project.Stopwatch.Elapsed.TotalSeconds;
-                ReadOnlyMemory<char>? outputPath = project.OutputPath;
-
-                if (outputPath is not null)
+                Terminal.BeginUpdate();
+                try
                 {
-                    ReadOnlySpan<char> url = outputPath.Value.Span;
-                    try
+                    EraseNodes();
+
+                    Project project = _notableProjects[c];
+                    double duration = project.Stopwatch.Elapsed.TotalSeconds;
+                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
+
+                    if (e.ProjectFile is not null)
                     {
-                        // If possible, make the link point to the containing directory of the output.
-                        url = Path.GetDirectoryName(url);
+                        Terminal.Write(e.ProjectFile);
+                        Terminal.Write(" ");
                     }
-                    catch
-                    { }
-                    Terminal.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
-                }
-                else
-                {
-                    Terminal.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s)");
-                }
+                    Terminal.WriteColor(TerminalColor.White, "completed");
 
-                // Print diagnostic output under the Project -> Output line.
-                if (project.BuildMessages is not null)
-                {
-                    foreach (BuildMessage buildMessage in project.BuildMessages)
+                    if (outputPath is not null)
                     {
-                        TerminalColor color = buildMessage.Severity switch
+                        ReadOnlySpan<char> url = outputPath.Value.Span;
+                        try
                         {
-                            MessageSeverity.Warning => TerminalColor.Yellow,
-                            MessageSeverity.Error => TerminalColor.Red,
-                            _ => TerminalColor.Default,
-                        };
-                        Terminal.WriteColorLine(color, $"  {buildMessage.Message}");
+                            // If possible, make the link point to the containing directory of the output.
+                            url = Path.GetDirectoryName(url);
+                        }
+                        catch
+                        { }
+                        Terminal.WriteLine($"({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
                     }
-                }
+                    else
+                    {
+                        Terminal.WriteLine($"({duration:F1}s)");
+                    }
 
-                DisplayNodes();
+                    // Print diagnostic output under the Project -> Output line.
+                    if (project.BuildMessages is not null)
+                    {
+                        foreach (BuildMessage buildMessage in project.BuildMessages)
+                        {
+                            TerminalColor color = buildMessage.Severity switch
+                            {
+                                MessageSeverity.Warning => TerminalColor.Yellow,
+                                MessageSeverity.Error => TerminalColor.Red,
+                                _ => TerminalColor.Default,
+                            };
+                            Terminal.WriteColorLine(color, $"  {buildMessage.Message}");
+                        }
+                    }
+
+                    DisplayNodes();
+                }
+                finally
+                {
+                    Terminal.EndUpdate();
+                }
             }
         }
     }
