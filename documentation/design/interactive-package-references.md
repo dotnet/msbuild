@@ -4,7 +4,43 @@ The feature is meant to simplify the process of fixing, testing and contributing
 
 It is inspired by the golang modules design - where a standalone dependency (module) has a pointer to it's source location as a first-class citizen within the ecosystem (go.mod) and the relation between the source codes and runtime dependecy is unambigously guaranteed by the compiler.
 
-The feature is envisioned to be facilitated via [`SourceLink`](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/sourcelink) repository metadata, [`PE headers`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.portableexecutable.peheaders?view=net-7.0) and pdb metadata ([`MetadataReader`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.metadata.metadatareader)), in-memory or persistent switching between `PackageReference` and `ProjectReference` and possibly verification of proper outputs (for `deterministic build` enabled projects).
+# North Star / Longer-term vision
+
+We envision the 'packages sourcing' to be a first-class-citizen within nuget client (and hence [`dotnet restore`](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-restore)). Via denoting specific metadata on `PackageReference` it would be possible to perform specific mode of restore operation for the particular package reference - by pointing to a local sources, or letting the command to figure out and fetch apropriate sources:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" ResolveAsSources="true" />
+    <PackageReference Include="Contoso.CommonPackage" ResolveAsSources="true" SourcesLocation="$(MSBuildProjectDirectory)/../CommonPackage/src/CommonPackage.csproj" />
+  </ItemGroup>
+</Project>
+```
+
+```
+dotnet restore MyProj.csproj  
+```
+
+The command would resolve and fetch remote sources of proper revision (unless explicitly pointed to local sources), build the dependency and add it to `project.assets.json` indicating the sources expansion.
+
+There would need to be special treatment for some aspect of behavior of `PackageReference` that diverges or are not defined for source code references (`ProjectReference`), listed in https://github.com/dotnet/msbuild/issues/8507.
+
+A special metadata (possibly within the nuget package, optionaly within the source repo) might be needed to ensure the proper infering of the build in more involved scenarios (or to disallow package sourcing for particular package).
+
+One of the goals of the initial iteration is to identify the limitations of automatic infering of the build and turining the `PackageReference` to `ProjectReference`. 
+
+# Scope of initial iteration
+
+The initial proof of concept of the feature is envisioned to be facilitated via [`SourceLink`](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/sourcelink) repository metadata, [`PE headers`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.portableexecutable.peheaders?view=net-7.0) and pdb metadata ([`MetadataReader`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.metadata.metadatareader)), in-memory or persistent switching between `PackageReference` and `ProjectReference` and possibly verification of proper outputs (for `deterministic build` enabled projects).
+
+## In scope
+* Standalone dotnet tool for initiating the `Package Sourcing` of particular nuget(s) via locating and fetching sources, infering the build and flipping `PackageReference` to `ProjectReference`
+
+## Out of scope
+ * **Patching the package/binary dependencies in a deployable way**. The interaction is ment to be used only on developer machine and not survive beyond repository push, external environment deployment etc.
+ * **Survival of patches accross `PackageReference` updates**.
+ * **Supporting nuget packages that are not `SourceLink` enabled**. As a fallback we might use `SourceLink` stamped symbols, but unless the `SourceLink` information is to be found either within the nuget package or published matching symbols, this feature will not be enabled.
+ * **Custom pre-build prerequisities**. First version of the feature will make several assumptions on common ways to build packages from source repository (attempt to build just the project with `dotnet build`, attempt to locate `*.sln` or `build.<cmd|sh|ps1>` script or existence of reproducible build compiler flags)
 
 # User scenarios
 
@@ -23,45 +59,6 @@ The feature is envisioned to be facilitated via [`SourceLink`](https://learn.mic
 * Bob from previous scenario needs to work on couple of components that interact with each other and which reference themselves via `PackageReference`s.
 * To simplify his work, Bob wants to include locations with components source code as reference locations for resolving `PackageReference`s, while he'd expect the build to properly interpret the components sources as packages (provided those can be successfuly build and packed)
 * Alteration of this sceanrio is referencing a reference via git repo link and commit hash (analogously to go modules).
-
-## (Out of scope) package references or general binary materials integrity and provenance report
-* Alice from the first scenario wants to verify the FooBar package integrity and OSS repo origin.
-* Alice wants to run summary report on a deployment bundle that would list signatures, sources origin and identity of reconstructive build for all verifiable binaries in her deployment bundle.
-* Tailored installable `dotnet` tool is capable to run such checks.
-  ```cmd
-  > dotnet tool install Microsoft.Build.BuildIntegrity
-  > dotnet check-package-integrity FooBar.Baz 6.5.4-beta1
-
-  Signature: OK (FooBar)
-  Sources: github.com/FooBar/Baz@0abcb66
-  Build Integrity: OK (deterministic, reconstructed localy)
-
-  > dotnet check-build-integrity \\build\share\v-1.0.0 *
-
-  Signatures summary:
-   5  Binaries unsigned
-   12 Binaries valid signature
-   2  Binaries invalid signature
-
-  Build integrity summary:
-   7  Binaries binaries unsupported for verification
-   1  Binary unverifiable (nondeterministic build)
-   11 Binaries with verified build integrity
-
-  Detailed report: check-build-integrity-report.htm
-  ```
-
-# Scope
-
-## In scope
-* API/CLI for initiating the `Package Sourcing` for particular nuget(s) (sdk?). API for flipping the `PackageReference` (msbuild?)
-* Flip to interactive reference and patching should survive between builds on a single machine 
-
-## Out of scope
- * **Patching the package/binary dependencies in a deployable way**. The interaction is ment to be used only on developer machine and not survive beyond repository push, external environment deployment etc.
- * **Survival of patches accross `PackageReference` updates**.
- * **Supporting nuget packages that are not `SourceLink` enabled**. As a fallback we might use `SourceLink` stamped symbols, but unless the `SourceLink` information is to be found either within the nuget package or published matching symbols, this feature will not be enabled.
- * **Custom pre-build prerequisities**. First version of the feature will assume existence of the project file with matching name (or `AssemblyName`) within the linked repository and it's possibility to build with `dotnet build`.
 
 # Design proposal
 
