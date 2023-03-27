@@ -73,17 +73,14 @@ namespace Microsoft.Build.CommandLine
             MSBuildClient msbuildClient = new MSBuildClient(commandLine, msbuildLocation);
             MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
 
-            if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
-                exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
-                exitResult.MSBuildClientExitType == MSBuildClientExitType.UnknownServerState ||
-                exitResult.MSBuildClientExitType == MSBuildClientExitType.LaunchError)
+            if (shouldFallback(exitResult))
             {
                 if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = exitResult.MSBuildClientExitType.ToString();
                 }
 
-                // Server is busy, fallback to old behavior.
+                // Fallback to old behavior.
                 return MSBuildApp.Execute(commandLine);
             }
 
@@ -96,6 +93,13 @@ namespace Microsoft.Build.CommandLine
             }
 
             return MSBuildApp.ExitType.MSBuildClientFailure;
+
+            bool shouldFallback(MSBuildClientExitResult clientResult) =>
+                clientResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
+                clientResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
+                clientResult.MSBuildClientExitType == MSBuildClientExitType.UnknownServerState ||
+                clientResult.MSBuildClientExitType == MSBuildClientExitType.LaunchError ||
+                clientResult.MSBuildClientExitType == MSBuildClientExitType.NonInteractive;
         }
 
         // Copied from NodeProviderOutOfProcBase.cs

@@ -128,6 +128,10 @@ namespace Microsoft.Build.Framework
         /// Name of environment variables used to enable MSBuild server.
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
+        /// <summary>
+        /// Name of environment variables used to use MSBuild server even if non interactive mode has been detected.
+        /// </summary>
+        public const string UseMSBuildServerInNonInteractiveEnvVarName = "MSBUILDUSESERVERINNONINTERACTIVE";
 
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;

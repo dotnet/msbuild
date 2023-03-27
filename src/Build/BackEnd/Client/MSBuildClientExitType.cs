@@ -33,6 +33,11 @@ namespace Microsoft.Build.Experimental
         /// This may happen when mutex that is regulating the server state throws.
         /// See: https://github.com/dotnet/msbuild/issues/7993.
         /// </remarks>
-        UnknownServerState
+        UnknownServerState,
+        /// <summary>
+        /// MSBuild usually has not advantages while used in non-interactive (output redirected) mode.
+        /// This would invoke a fallback behavior.
+        /// </summary>
+        NonInteractive
     }
 }

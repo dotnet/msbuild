@@ -26,37 +26,6 @@ using Path = System.IO.Path;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
-    public class SleepingTask : Microsoft.Build.Utilities.Task
-    {
-        public int SleepTime { get; set; }
-
-        /// <summary>
-        /// Sleep for SleepTime milliseconds.
-        /// </summary>
-        /// <returns>Success on success.</returns>
-        public override bool Execute()
-        {
-            Thread.Sleep(SleepTime);
-            return !Log.HasLoggedErrors;
-        }
-    }
-
-    public class ProcessIdTask : Microsoft.Build.Utilities.Task
-    {
-        [Output]
-        public int Pid { get; set; }
-
-        /// <summary>
-        /// Log the id for this process.
-        /// </summary>
-        /// <returns></returns>
-        public override bool Execute()
-        {
-            Pid = Process.GetCurrentProcess().Id;
-            return true;
-        }
-    }
-
     public class MSBuildServer_Tests : IDisposable
     {
         private readonly ITestOutputHelper _output;
@@ -83,6 +52,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _output = output;
             _env = TestEnvironment.Create(_output);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVERINNONINTERACTIVE", "1");
         }
 
         public void Dispose() => _env.Dispose();
@@ -333,6 +303,37 @@ namespace Microsoft.Build.Engine.UnitTests
             Regex regex = new(@$"{toFind}(\d+)");
             Match match = regex.Match(searchString);
             return int.Parse(match.Groups[1].Value);
+        }
+    }
+
+    public class SleepingTask : Microsoft.Build.Utilities.Task
+    {
+        public int SleepTime { get; set; }
+
+        /// <summary>
+        /// Sleep for SleepTime milliseconds.
+        /// </summary>
+        /// <returns>Success on success.</returns>
+        public override bool Execute()
+        {
+            Thread.Sleep(SleepTime);
+            return !Log.HasLoggedErrors;
+        }
+    }
+
+    public class ProcessIdTask : Microsoft.Build.Utilities.Task
+    {
+        [Output]
+        public int Pid { get; set; }
+
+        /// <summary>
+        /// Log the id for this process.
+        /// </summary>
+        /// <returns></returns>
+        public override bool Execute()
+        {
+            Pid = Process.GetCurrentProcess().Id;
+            return true;
         }
     }
 }
