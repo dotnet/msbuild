@@ -9,6 +9,8 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.DotNet.Cli.Utils;
+using System.IO;
+using System.Xml.Linq;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
@@ -138,8 +140,10 @@ public class EndToEndTests
         return publishDirectory;
     }
 
-    [DockerDaemonAvailableFact]
-    public async Task EndToEnd_NoAPI_Web()
+    [DockerDaemonAvailableTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task EndToEnd_NoAPI_Web(bool addPackageReference)
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "CreateNewImageTest"));
         DirectoryInfo privateNuGetAssets = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "ContainerNuGet"));
@@ -176,23 +180,36 @@ public class EndToEndTests
             .Execute()
             .Should().Pass();
 
-        new DotnetCommand(_testOutput, "new", "nugetconfig")
-            .WithWorkingDirectory(newProjectDir.FullName)
-            .Execute()
-            .Should().Pass();
+        if (addPackageReference)
+        {
+            new DotnetCommand(_testOutput, "new", "nugetconfig")
+                .WithWorkingDirectory(newProjectDir.FullName)
+                .Execute()
+                .Should().Pass();
 
-        new DotnetCommand(_testOutput, "nuget", "add", "source", packagedir.FullName, "--name", "local-temp")
-            .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
-            .WithWorkingDirectory(newProjectDir.FullName)
-            .Execute()
-            .Should().Pass();
+            new DotnetCommand(_testOutput, "nuget", "add", "source", packagedir.FullName, "--name", "local-temp")
+                .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
+                .WithWorkingDirectory(newProjectDir.FullName)
+                .Execute()
+                .Should().Pass();
 
-        // Add package to the project
-        new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "--prerelease", "-f", ToolsetInfo.CurrentTargetFramework)
-            .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
-            .WithWorkingDirectory(newProjectDir.FullName)
-            .Execute()
-            .Should().Pass();
+            // Add package to the project
+            new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "--prerelease", "-f", ToolsetInfo.CurrentTargetFramework)
+                .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
+                .WithWorkingDirectory(newProjectDir.FullName)
+                .Execute()
+                .Should().Pass();
+        }
+        else
+        {
+            string projectPath = Path.Combine(newProjectDir.FullName, newProjectDir.Name + ".csproj");
+
+            var project = XDocument.Load(projectPath);
+            var ns = project.Root?.Name.Namespace ?? throw new InvalidOperationException("Project file is empty");
+
+            project.Root?.Add(new XElement("PropertyGroup", new XElement("EnableSDKContainerSupport", "true")));
+            project.Save(projectPath);
+        }
 
         string imageName = NewImageName();
         string imageTag = "1.0";
