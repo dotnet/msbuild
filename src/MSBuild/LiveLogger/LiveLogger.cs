@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -36,7 +35,8 @@ internal sealed class LiveLogger : INodeLogger
 
     private readonly List<string> _nodeStringBuffer = new();
 
-    private Encoding? _originalOutputEncoding;
+    private ITerminal? _terminal;
+    private ITerminal Terminal => _terminal! ?? throw new InvalidOperationException();
 
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
     public string Parameters { get => ""; set { } }
@@ -61,6 +61,14 @@ internal sealed class LiveLogger : INodeLogger
             "ERROREVENT"
     };
 
+    public LiveLogger()
+    { }
+
+    public LiveLogger(ITerminal terminal)
+    {
+        _terminal = terminal;
+    }
+
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
         _nodes = new NodeStatus[nodeCount];
@@ -82,8 +90,7 @@ internal sealed class LiveLogger : INodeLogger
         eventSource.WarningRaised += new BuildWarningEventHandler(WarningRaised);
         eventSource.ErrorRaised += new BuildErrorEventHandler(ErrorRaised);
 
-        _originalOutputEncoding = Console.OutputEncoding;
-        Console.OutputEncoding = Encoding.UTF8;
+        _terminal ??= new Terminal();
 
         _refresher = new Thread(ThreadProc);
         _refresher.Start();
@@ -138,7 +145,7 @@ internal sealed class LiveLogger : INodeLogger
         if (e.TargetNames == "Restore")
         {
             _restoreContext = c;
-            Console.WriteLine("Restoring");
+            Terminal.WriteLine("Restoring");
             return;
         }
 
@@ -186,9 +193,9 @@ internal sealed class LiveLogger : INodeLogger
 
                 UpdateNodeStringBuffer();
                 EraseNodes();
-                Console.WriteLine($"\x1b[{_usedNodes + 1}F");
-                Console.Write($"\x1b[0J");
-                Console.WriteLine($"Restore complete ({duration:F1}s)");
+                Terminal.WriteLine($"\x1b[{_usedNodes + 1}F");
+                Terminal.Write($"\x1b[0J");
+                Terminal.WriteLine($"Restore complete ({duration:F1}s)");
                 DisplayNodes();
                 return;
             }
@@ -215,11 +222,11 @@ internal sealed class LiveLogger : INodeLogger
                     }
                     catch
                     { }
-                    Console.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
+                    Terminal.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
                 }
                 else
                 {
-                    Console.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s)");
+                    Terminal.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s)");
                 }
 
                 // Print diagnostic output under the Project -> Output line.
@@ -227,7 +234,7 @@ internal sealed class LiveLogger : INodeLogger
                 {
                     foreach (string message in project.BuildMessages)
                     {
-                        Console.WriteLine(message);
+                        Terminal.WriteLine(message);
                     }
                 }
 
@@ -278,14 +285,9 @@ internal sealed class LiveLogger : INodeLogger
     {
         foreach (string str in _nodeStringBuffer)
         {
-            Console.Out.WriteLine(FitToWidth(str));
+            Terminal.WriteLineFitToWidth(str);
         }
         _usedNodes = _nodeStringBuffer.Count;
-    }
-
-    private ReadOnlySpan<char> FitToWidth(ReadOnlySpan<char> input)
-    {
-        return input.Slice(0, Math.Min(input.Length, Console.BufferWidth - 1));
     }
 
     private void EraseNodes()
@@ -294,8 +296,8 @@ internal sealed class LiveLogger : INodeLogger
         {
             return;
         }
-        Console.WriteLine($"\x1b[{_usedNodes + 1}F");
-        Console.Write($"\x1b[0J");
+        Terminal.WriteLine($"\x1b[{_usedNodes + 1}F");
+        Terminal.Write($"\x1b[0J");
     }
 
     private void TargetStarted(object sender, TargetStartedEventArgs e)
@@ -379,10 +381,8 @@ internal sealed class LiveLogger : INodeLogger
         _cts.Cancel();
         _refresher?.Join();
 
-        if (_originalOutputEncoding is not null)
-        {
-            Console.OutputEncoding = _originalOutputEncoding;
-        }
+        _terminal?.Dispose();
+        _terminal = null;
     }
 }
 
