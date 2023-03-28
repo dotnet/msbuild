@@ -2,8 +2,8 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.6.0</VersionPrefix>
-    <PackageValidationBaselineVersion>17.5.0-preview-23075-01</PackageValidationBaselineVersion>
+    <VersionPrefix>17.7.0</VersionPrefix>
+    <PackageValidationBaselineVersion>17.6.0-preview-23178-11</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
