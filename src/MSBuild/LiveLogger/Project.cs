@@ -7,15 +7,18 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.Logging.LiveLogger;
 
+/// <summary>
+/// Represents a project being built.
+/// </summary>
 internal sealed class Project
 {
     /// <summary>
-    /// A stopwatch to time the build of this project.
+    /// A stopwatch to time the build of the project.
     /// </summary>
     public Stopwatch Stopwatch { get; } = Stopwatch.StartNew();
 
     /// <summary>
-    /// The full path to the primary output of the project, if known.
+    /// Full path to the primary output of the project, if known.
     /// </summary>
     public ReadOnlyMemory<char>? OutputPath { get; set; }
 
@@ -24,6 +27,9 @@ internal sealed class Project
     /// </summary>
     public List<BuildMessage>? BuildMessages { get; private set; }
 
+    /// <summary>
+    /// Adds a build message of the given severity to <see cref="BuildMessages"/>.
+    /// </summary>
     public void AddBuildMessage(MessageSeverity severity, string message)
     {
         BuildMessages ??= new List<BuildMessage>();
@@ -31,7 +37,13 @@ internal sealed class Project
     }
 }
 
+/// <summary>
+/// Enumerates the supported message severities.
+/// </summary>
 internal enum MessageSeverity { Warning, Error }
 
+/// <summary>
+/// Represents a piece of diagnostic output (message/warning/error).
+/// </summary>
 internal record struct BuildMessage(MessageSeverity Severity, string Message)
 { }

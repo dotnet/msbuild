@@ -6,12 +6,24 @@ using System.Text;
 
 namespace Microsoft.Build.Logging.LiveLogger;
 
+/// <summary>
+/// An <see cref="ITerminal"/> implementation for ANSI/VT100 terminals.
+/// </summary>
 internal sealed class Terminal : ITerminal
 {
-    private Encoding _originalOutputEncoding;
+    /// <summary>
+    /// The encoding read from <see cref="Console.OutputEncoding"/> when the terminal is instantiated.
+    /// </summary>
+    private readonly Encoding _originalOutputEncoding;
 
-    private StringBuilder _outputBuilder = new();
+    /// <summary>
+    /// A string buffer used with <see cref="BeginUpdate"/>/<see cref="EndUpdate"/>.
+    /// </summary>
+    private readonly StringBuilder _outputBuilder = new();
 
+    /// <summary>
+    /// True if <see cref="BeginUpdate"/> was called and <c>Write*</c> methods are buffering instead of directly printing.
+    /// </summary>
     private bool _isBuffering = false;
 
     public Terminal()
@@ -20,6 +32,7 @@ internal sealed class Terminal : ITerminal
         Console.OutputEncoding = Encoding.UTF8;
     }
 
+    /// <inheritdoc/>
     public void BeginUpdate()
     {
         if (_isBuffering)
@@ -29,6 +42,7 @@ internal sealed class Terminal : ITerminal
         _isBuffering = true;
     }
 
+    /// <inheritdoc/>
     public void EndUpdate()
     {
         if (!_isBuffering)
@@ -41,6 +55,7 @@ internal sealed class Terminal : ITerminal
         _outputBuilder.Clear();
     }
 
+    /// <inheritdoc/>
     public void Write(string text)
     {
         if (_isBuffering)
@@ -53,6 +68,7 @@ internal sealed class Terminal : ITerminal
         }
     }
 
+    /// <inheritdoc/>
     public void WriteLine(string text)
     {
         if (_isBuffering)
@@ -65,6 +81,7 @@ internal sealed class Terminal : ITerminal
         }
     }
 
+    /// <inheritdoc/>
     public void WriteLine(ReadOnlySpan<char> text)
     {
         if (_isBuffering)
@@ -78,11 +95,13 @@ internal sealed class Terminal : ITerminal
         }
     }
 
+    /// <inheritdoc/>
     public void WriteLineFitToWidth(ReadOnlySpan<char> input)
     {
         WriteLine(input.Slice(0, Math.Min(input.Length, Console.BufferWidth - 1)));
     }
 
+    /// <inheritdoc/>
     public void WriteColor(TerminalColor color, string text)
     {
         if (_isBuffering)
@@ -100,6 +119,7 @@ internal sealed class Terminal : ITerminal
         }
     }
 
+    /// <inheritdoc/>
     public void WriteColorLine(TerminalColor color, string text)
     {
         if (_isBuffering)
@@ -113,6 +133,7 @@ internal sealed class Terminal : ITerminal
         }
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         Console.OutputEncoding = _originalOutputEncoding;
