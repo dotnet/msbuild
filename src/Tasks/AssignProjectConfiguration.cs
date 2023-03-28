@@ -152,7 +152,6 @@ namespace Microsoft.Build.Tasks
         private const string attrFullConfiguration = "FullConfiguration";
         private const string buildReferenceMetadataName = "BuildReference";
         private const string referenceOutputAssemblyMetadataName = "ReferenceOutputAssembly";
-        private const string buildProjectInSolutionAttribute = "BuildProjectInSolution";
         private const string attrConfiguration = "Configuration";
         private const string attrPlatform = "Platform";
         private const string attrSetConfiguration = "SetConfiguration";
@@ -337,7 +336,7 @@ namespace Microsoft.Build.Tasks
             if (projectConfigurationElement != null && resolvedProjectWithConfiguration != null && onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)
             {
                 // The value of the specified attribute. An empty string is returned if a matching attribute is not found or if the attribute does not have a specified or default value. 
-                string buildProjectInSolution = projectConfigurationElement.GetAttribute(buildProjectInSolutionAttribute);
+                string buildProjectInSolution = projectConfigurationElement.GetAttribute(SolutionConfiguration.BuildProjectInSolutionAttribute);
 
                 // We could not parse out what was in the attribute, act as if it was not set in the first place. 
                 if (bool.TryParse(buildProjectInSolution, out bool buildProject))
