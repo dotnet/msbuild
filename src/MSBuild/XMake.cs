@@ -1340,7 +1340,9 @@ namespace Microsoft.Build.CommandLine
                         {
                             messagesToLogInBuildLoggers.Add(
                                 new BuildManager.DeferredBuildMessage(
-                                    String.Format("Included response file: {0}", responseFilePath),
+                                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                        "DeferredResponseFile",
+                                        responseFilePath),
                                     MessageImportance.Normal,
                                     responseFilePath));
                         }
