@@ -8,12 +8,13 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.Sdk.WebAssembly;
 
-namespace Microsoft.NET.Sdk.BlazorWebAssembly
+namespace Microsoft.NET.Sdk.WebAssembly
 {
     // This task does the build work of processing the project inputs and producing a set of pseudo-static web assets
     // specific to Blazor.
-    public class ComputeBlazorBuildAssets : Task
+    public class ComputeWasmBuildAssets : Task
     {
         [Required]
         public ITaskItem[] Candidates { get; set; }
@@ -43,6 +44,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         [Required]
         public bool CopySymbols { get; set; }
+
+        public bool FingerprintDotNetJs { get; set; }
 
         [Output]
         public ITaskItem[] AssetCandidates { get; set; }
@@ -103,7 +106,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         continue;
                     }
 
-                    if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
+                    if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js" && FingerprintDotNetJs)
                     {
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
                         var cacheBustedDotNetJSFileName = $"dotnet.{candidate.GetMetadata("NuGetPackageVersion")}.{itemHash}.js";
@@ -119,7 +122,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         var newRelativePath = $"_framework/{cacheBustedDotNetJSFileName}";
                         newDotNetJs.SetMetadata("RelativePath", newRelativePath);
 
-                        newDotNetJs.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                        newDotNetJs.SetMetadata("AssetTraitName", "WasmResource");
                         newDotNetJs.SetMetadata("AssetTraitValue", "native");
 
                         assetCandidates.Add(newDotNetJs);
@@ -229,7 +232,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 case ".dll":
                     if (string.IsNullOrEmpty(candidate.GetMetadata("AssetTraitName")))
                     {
-                        candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                        candidate.SetMetadata("AssetTraitName", "WasmResource");
                         candidate.SetMetadata("AssetTraitValue", "runtime");
                     }
                     if (string.Equals(candidate.GetMetadata("ResolvedFrom"), "{HintPathFromItem}", StringComparison.Ordinal))
@@ -240,11 +243,11 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 case ".wasm":
                 case ".blat":
                 case ".dat" when filename.StartsWith("icudt"):
-                    candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                    candidate.SetMetadata("AssetTraitName", "WasmResource");
                     candidate.SetMetadata("AssetTraitValue", "native");
                     break;
                 case ".pdb":
-                    candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                    candidate.SetMetadata("AssetTraitName", "WasmResource");
                     candidate.SetMetadata("AssetTraitValue", "symbol");
                     candidate.RemoveMetadata("OriginalItemSpec");
                     break;

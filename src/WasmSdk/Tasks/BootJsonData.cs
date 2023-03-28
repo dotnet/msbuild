@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<string, string>;
 
-namespace Microsoft.NET.Sdk.BlazorWebAssembly
+namespace Microsoft.NET.Sdk.WebAssembly
 {
 #pragma warning disable IDE1006 // Naming Styles
     /// <summary>
     /// Defines the structure of a Blazor boot JSON file
     /// </summary>
-    public class BootJsonData50
+    public class BootJsonData
     {
         /// <summary>
         /// Gets the name of the assembly with the application entry point
@@ -27,7 +27,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         /// and values are SHA-256 hashes formatted in prefixed base-64 style (e.g., 'sha256-abcdefg...')
         /// as used for subresource integrity checking.
         /// </summary>
-        public ResourcesData50 resources { get; set; } = new ResourcesData50();
+        public ResourcesData resources { get; set; } = new ResourcesData();
 
         /// <summary>
         /// Gets a value that determines whether to enable caching of the <see cref="resources"/>
@@ -53,10 +53,25 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         /// <summary>
         /// Gets or sets the <see cref="ICUDataMode"/> that determines how icu files are loaded.
         /// </summary>
-        public ICUDataMode50 icuDataMode { get; set; }
+        public ICUDataMode icuDataMode { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that determines if the caching startup memory is enabled.
+        /// </summary>
+        public bool? startupMemoryCache { get; set; }
+
+        /// <summary>
+        /// Gets a value for mono runtime options.
+        /// </summary>
+        public string[] runtimeOptions { get; set; }
+
+        /// <summary>
+        /// Gets or sets configuration extensions.
+        /// </summary>
+        public Dictionary<string, Dictionary<string, object>> extensions { get; set; }
     }
 
-    public class ResourcesData50
+    public class ResourcesData
     {
         /// <summary>
         /// .NET Wasm runtime resources (dotnet.wasm, dotnet.js) etc.
@@ -103,14 +118,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         /// Additional assets that the runtime consumes as part of the boot process.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
-        public Dictionary<string, AdditionalAsset50> runtimeAssets { get; set; }
+        public Dictionary<string, AdditionalAsset> runtimeAssets { get; set; }
 
     }
 
-    public enum ICUDataMode50 : int
+    public enum ICUDataMode : int
     {
         // Note that the numeric values are serialized and used in JS code, so don't change them without also updating the JS code
-
+    
         /// <summary>
         /// Load optimized icu data file based on the user's locale
         /// </summary>
@@ -133,7 +148,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
     }
 
     [DataContract]
-    public class AdditionalAsset50
+    public class AdditionalAsset
     {
         [DataMember(Name = "hash")]
         public string Hash { get; set; }

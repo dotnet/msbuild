@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Text.Json;
+using Microsoft.NET.Sdk.WebAssembly;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using FluentAssertions;

@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Sdk.props
+Sdk.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -9,13 +9,12 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0">
 
   <PropertyGroup>
-    <UsingMicrosoftNETSdkWebProjectSystem>true</UsingMicrosoftNETSdkWebProjectSystem>
+    <_WebAssemblyTargetsFile Condition="'$(_WebAssemblyTargetsFile)' == ''">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.WebAssembly.Current.targets</_WebAssemblyTargetsFile>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Web.ProjectSystem.props"
-		Condition="Exists('$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Web.ProjectSystem.props')" />
+  <Import Project="$(_WebAssemblyTargetsFile)" />
 
 </Project>

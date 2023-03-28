@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.AspNetCore.StaticWebAssets.Tasks;
+using Microsoft.NET.Sdk.WebAssembly;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;

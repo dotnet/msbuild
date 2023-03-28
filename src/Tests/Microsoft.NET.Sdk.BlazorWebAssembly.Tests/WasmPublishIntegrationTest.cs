@@ -15,6 +15,7 @@ using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.NET.Sdk.BlazorWebAssembly.Tests.ServiceWorkerAssert;
+using Microsoft.NET.Sdk.WebAssembly;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {

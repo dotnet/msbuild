@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.Serialization.Json;
 using FluentAssertions;
 using Microsoft.Build.Framework;
+using Microsoft.NET.Sdk.WebAssembly;
 using Moq;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void GroupsResourcesByType()
         {
             // Arrange
-            var taskInstance = new GenerateBlazorWebAssemblyBootJson
+            var taskInstance = new GenerateWasmBootJson
             {
                 AssemblyPath = "MyApp.Entrypoint.dll",
                 Resources = new[]
@@ -27,7 +28,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                         ("Extension", ".dll"),
                         ("FileHash", "abcdefghikjlmnopqrstuvwxyz"),
                         ("RelativePath", "_framework/My.Assembly1.dll"),
-                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitName", "WasmResource"),
                         ("AssetTraitValue", "runtime")),
 
                     CreateResourceTaskItem(
@@ -35,7 +36,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                         ("Extension", ".dll"),
                         ("FileHash", "012345678901234567890123456789"),
                         ("RelativePath", "_framework/My.Assembly2.dll"),
-                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitName", "WasmResource"),
                         ("AssetTraitValue", "runtime")),
 
                     CreateResourceTaskItem(
@@ -43,7 +44,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                         ("Extension", ".pdb"),
                         ("FileHash", "pdbhashpdbhashpdbhash"),
                         ("RelativePath", "_framework/SomePdb.pdb"),
-                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitName", "WasmResource"),
                         ("AssetTraitValue", "symbol")),
 
                     CreateResourceTaskItem(
@@ -51,14 +52,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                         ("Extension", ".pdb"),
                         ("FileHash", "pdbdefghikjlmnopqrstuvwxyz"),
                         ("RelativePath", "_framework/My.Assembly1.pdb"),
-                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitName", "WasmResource"),
                         ("AssetTraitValue", "symbol")),
 
                     CreateResourceTaskItem(
                         ("FileName", "some-runtime-file"),
                         ("RelativePath", "some-runtime-file"),
                         ("FileHash", "runtimehashruntimehash"),
-                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitName", "WasmResource"),
                         ("AssetTraitValue", "native")),
 
                     CreateResourceTaskItem(
@@ -91,7 +92,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                         ("FileHash", "my-custom-extensionhash"),
                         ("RelativePath", "my-custom-extension.blz"),
                         ("TargetPath", "_bin/my-custom-extension.blz"),
-                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitName", "WasmResource"),
                         ("AssetTraitValue", "extension:custom-extension")),
                 }
             };
@@ -144,7 +145,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void CanSpecifyCacheBootResources(bool flagValue)
         {
             // Arrange
-            var taskInstance = new GenerateBlazorWebAssemblyBootJson { CacheBootResources = flagValue };
+            var taskInstance = new GenerateWasmBootJson { CacheBootResources = flagValue };
             taskInstance.BuildEngine = Mock.Of<IBuildEngine>();
             using var stream = new MemoryStream();
 
@@ -162,7 +163,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void CanSpecifyDebugBuild(bool flagValue)
         {
             // Arrange
-            var taskInstance = new GenerateBlazorWebAssemblyBootJson { DebugBuild = flagValue };
+            var taskInstance = new GenerateWasmBootJson { DebugBuild = flagValue };
             taskInstance.BuildEngine = Mock.Of<IBuildEngine>();
 
             using var stream = new MemoryStream();
@@ -181,7 +182,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void CanSpecifyLinkerEnabled(bool flagValue)
         {
             // Arrange
-            var taskInstance = new GenerateBlazorWebAssemblyBootJson { LinkerEnabled = flagValue };
+            var taskInstance = new GenerateWasmBootJson { LinkerEnabled = flagValue };
             taskInstance.BuildEngine = Mock.Of<IBuildEngine>();
 
             using var stream = new MemoryStream();

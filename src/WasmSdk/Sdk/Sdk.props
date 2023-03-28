@@ -11,18 +11,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0">
   <PropertyGroup>
+    <!-- FIXME: Important to get rid of missing workload -->
     <UsingMicrosoftNETSdkBlazorWebAssembly>true</UsingMicrosoftNETSdkBlazorWebAssembly>
+    <UsingMicrosoftNETSdkWebAssembly>true</UsingMicrosoftNETSdkWebAssembly>
   </PropertyGroup>
 
   <PropertyGroup>
-    <_BlazorWebAssemblyPropsFile Condition="'$(_BlazorWebAssemblyPropsFile)' == ''">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.props</_BlazorWebAssemblyPropsFile>
+    <_WebAssemblyPropsFile Condition="'$(_WebAssemblyPropsFile)' == ''">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.WebAssembly.Current.props</_WebAssemblyPropsFile>
   </PropertyGroup>
 
-  <Import Project="$(_BlazorWebAssemblyPropsFile)" />
-
-  <ItemGroup Condition="'$(Language)' == 'C#' AND ('$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable')">
-    <Using Include="Microsoft.Extensions.Configuration" />
-    <Using Include="Microsoft.Extensions.DependencyInjection" />
-    <Using Include="Microsoft.Extensions.Logging" />
-  </ItemGroup>
+  <Import Project="$(_WebAssemblyPropsFile)" />
 </Project>

@@ -421,13 +421,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk", "Sdk", "{CA976F33-7BF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{C5C73211-A713-40BF-8FC8-A690CCBE66F5}"
 	ProjectSection(SolutionItems) = preProject
+		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.5_0.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.5_0.targets
 		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.JSModules.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.JSModules.targets
+		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.Pack.CrossTargeting.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.Pack.CrossTargeting.targets
+		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.Pack.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.Pack.targets
 		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.props = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.props
 		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.5_0.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.5_0.targets
 		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.targets
-		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.5_0.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.5_0.targets
-		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.Pack.CrossTargeting.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.Pack.CrossTargeting.targets
-		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.Pack.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.Pack.targets
 		src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.targets = src\StaticWebAssetsSdk\Targets\Microsoft.NET.Sdk.StaticWebAssets.targets
 		src\StaticWebAssetsSdk\Targets\Sdk.StaticWebAssets.CurrentVersion.props = src\StaticWebAssetsSdk\Targets\Sdk.StaticWebAssets.CurrentVersion.props
 		src\StaticWebAssetsSdk\Targets\Sdk.StaticWebAssets.CurrentVersion.targets = src\StaticWebAssetsSdk\Targets\Sdk.StaticWebAssets.CurrentVersion.targets
@@ -436,6 +436,21 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{6C8E1E65-EA73-434D-818F-E564BFFE9F86}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.StaticWebAssets.Tasks", "src\StaticWebAssetsSdk\Tasks\Microsoft.NET.Sdk.StaticWebAssets.Tasks.csproj", "{3D42A6BA-38DB-4AA5-9F86-8A78D00D9A07}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WasmSdk", "WasmSdk", "{21835A9E-D667-4761-8675-B2BC105CC2FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{71BC1256-D225-4272-ADB2-95264E09AF73}"
+	ProjectSection(SolutionItems) = preProject
+		src\WasmSdk\Targets\Microsoft.NET.Sdk.WebAssembly.Current.props = src\WasmSdk\Targets\Microsoft.NET.Sdk.WebAssembly.Current.props
+		src\WasmSdk\Targets\Microsoft.NET.Sdk.WebAssembly.Current.targets = src\WasmSdk\Targets\Microsoft.NET.Sdk.WebAssembly.Current.targets
+		src\WasmSdk\Targets\Wasm.web.config = src\WasmSdk\Targets\Wasm.web.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk", "Sdk", "{B2CE3F28-8FEC-4715-B483-5B442E3136CE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{F720D695-F35A-4700-9463-C359163D14EE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.WebAssembly.Tasks", "src\WasmSdk\Tasks\Microsoft.NET.Sdk.WebAssembly.Tasks.csproj", "{754C18B9-AEDB-4455-BAF4-844C6CEEF8F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -827,6 +842,10 @@ Global
 		{3D42A6BA-38DB-4AA5-9F86-8A78D00D9A07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D42A6BA-38DB-4AA5-9F86-8A78D00D9A07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D42A6BA-38DB-4AA5-9F86-8A78D00D9A07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{754C18B9-AEDB-4455-BAF4-844C6CEEF8F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{754C18B9-AEDB-4455-BAF4-844C6CEEF8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{754C18B9-AEDB-4455-BAF4-844C6CEEF8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{754C18B9-AEDB-4455-BAF4-844C6CEEF8F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -977,6 +996,11 @@ Global
 		{C5C73211-A713-40BF-8FC8-A690CCBE66F5} = {9E9F3BB2-6FED-47BC-869C-BFAF6E7C85FC}
 		{6C8E1E65-EA73-434D-818F-E564BFFE9F86} = {9E9F3BB2-6FED-47BC-869C-BFAF6E7C85FC}
 		{3D42A6BA-38DB-4AA5-9F86-8A78D00D9A07} = {6C8E1E65-EA73-434D-818F-E564BFFE9F86}
+		{21835A9E-D667-4761-8675-B2BC105CC2FE} = {22AB674F-ED91-4FBC-BFEE-8A1E82F9F05E}
+		{71BC1256-D225-4272-ADB2-95264E09AF73} = {21835A9E-D667-4761-8675-B2BC105CC2FE}
+		{B2CE3F28-8FEC-4715-B483-5B442E3136CE} = {21835A9E-D667-4761-8675-B2BC105CC2FE}
+		{F720D695-F35A-4700-9463-C359163D14EE} = {21835A9E-D667-4761-8675-B2BC105CC2FE}
+		{754C18B9-AEDB-4455-BAF4-844C6CEEF8F7} = {F720D695-F35A-4700-9463-C359163D14EE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}
