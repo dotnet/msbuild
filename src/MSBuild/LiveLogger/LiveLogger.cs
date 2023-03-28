@@ -252,7 +252,8 @@ internal sealed class LiveLogger : INodeLogger
         return e.TargetNames switch
         {
             "" or "Restore" => true,
-            "GetTargetFrameworks" or "GetTargetFrameworks" or "GetNativeManifest" or "GetCopyToOutputDirectoryItems" => false,
+            "GetTargetFrameworks" or "GetTargetFrameworksWithPlatformForSingleTargetFramework" or
+            "GetNativeManifest" or "GetCopyToOutputDirectoryItems" or "GetCopyToPublishDirectoryItems" => false,
             _ => true,
         };
     }
@@ -300,8 +301,8 @@ internal sealed class LiveLogger : INodeLogger
             }
         }
 
-        // If this was a notable project build, print the output path, time elapsed, and warnings/error.
-        if (_notableProjects.ContainsKey(c))
+        // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
+        if (_notableProjects.TryGetValue(c, out Project? project) && (project.OutputPath is not null || project.BuildMessages is not null))
         {
             lock (_lock)
             {
@@ -312,7 +313,6 @@ internal sealed class LiveLogger : INodeLogger
                 {
                     EraseNodes();
 
-                    Project project = _notableProjects[c];
                     double duration = project.Stopwatch.Elapsed.TotalSeconds;
                     ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
@@ -444,6 +444,7 @@ internal sealed class LiveLogger : INodeLogger
         var buildEventContext = e.BuildEventContext;
         if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
+            project.Stopwatch.Start();
             _nodes[NodeIndexForContext(buildEventContext)] = new(e.ProjectFile, e.TargetName, project.Stopwatch);
         }
     }
@@ -474,6 +475,11 @@ internal sealed class LiveLogger : INodeLogger
         {
             // This will yield the node, so preemptively mark it idle
             _nodes[NodeIndexForContext(buildEventContext)] = null;
+
+            if (_notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+            {
+                project.Stopwatch.Stop();
+            }
         }
     }
 
