@@ -73,11 +73,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
 
+  <!--Built in Microsoft.NET.Build.Containers version is same as SDK version-->
   <PropertyGroup>
-    <SdkContainerSupportPackageVersion>0.4.0</SdkContainerSupportPackageVersion>
+    <SdkContainerSupportPackageVersion Condition="'$(SdkContainerSupportPackageVersion)' == ''">$(NETCoreSdkVersion)</SdkContainerSupportPackageVersion>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true'">
+  <!--Implicit package references don't work well with central package management, so disable it. -->
+  <!--In this case the package reference should be added explicitly. -->
+  <PropertyGroup Condition=" '$(ManagePackageVersionsCentrally)' == 'true' ">
+    <DisableImplicitMicrosoftNETBuildContainersReference Condition="'$(DisableImplicitMicrosoftNETBuildContainersReference)' == ''">true</DisableImplicitMicrosoftNETBuildContainersReference>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true' AND '$(DisableImplicitMicrosoftNETBuildContainersReference)' != 'true'">
     <PackageReference Include="Microsoft.NET.Build.Containers" Version="$(SdkContainerSupportPackageVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
 
