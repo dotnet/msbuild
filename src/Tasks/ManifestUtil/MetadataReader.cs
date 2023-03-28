@@ -1,9 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using System.Collections.Specialized;
 #if RUNTIME_TYPE_NETCORE
 using System.Collections.Generic;
@@ -11,6 +9,9 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+#else
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 #endif
 
 #nullable disable
@@ -44,7 +45,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 Close();
             }
@@ -89,11 +90,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 EntityHandle ctorHandle = _reader.GetCustomAttribute(handle).Constructor;
                 if (ctorHandle.Kind != HandleKind.MemberReference)
+                {
                     continue;
+                }
 
                 EntityHandle mHandle = _reader.GetMemberReference((MemberReferenceHandle)ctorHandle).Parent;
                 if (mHandle.Kind != HandleKind.TypeReference)
+                {
                     continue;
+                }
 
                 string type = GetTypeName((TypeReferenceHandle)mHandle);
 
@@ -168,11 +173,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 an.SetPublicKey(pk);
                 byte[] pkt = an.GetPublicKeyToken();
 
-                publicKeyToken = BitConverter.ToString(pkt).Replace("-","");
+                publicKeyToken = BitConverter.ToString(pkt).Replace("-", "");
             }
 
             if (!String.IsNullOrEmpty(publicKeyToken))
+            {
                 publicKeyToken = publicKeyToken.ToUpperInvariant();
+            }
 
             return publicKeyToken;
         }
@@ -345,9 +352,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             string version = refid.GetAttribute(null, "version");
             string publicKeyToken = refid.GetAttribute(null, "publicKeyToken");
             if (String.Equals(publicKeyToken, "neutral", StringComparison.OrdinalIgnoreCase))
+            {
                 publicKeyToken = String.Empty;
+            }
             else if (!String.IsNullOrEmpty(publicKeyToken))
+            {
                 publicKeyToken = publicKeyToken.ToUpperInvariant();
+            }
+
             string culture = refid.GetAttribute(null, "culture");
             string processorArchitecture = refid.GetAttribute(null, "processorArchitecture");
             if (!String.IsNullOrEmpty(processorArchitecture))
@@ -396,7 +408,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int DefineScope();
             [PreserveSig]
-            int OpenScope([In][MarshalAs(UnmanagedType.LPWStr)]  string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid, [Out][MarshalAs(UnmanagedType.Interface)] out object obj);
+            int OpenScope([In][MarshalAs(UnmanagedType.LPWStr)] string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid, [Out][MarshalAs(UnmanagedType.Interface)] out object obj);
             int OpenScopeOnMemory();
         }
     }

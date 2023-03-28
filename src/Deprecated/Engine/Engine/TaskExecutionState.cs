@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -120,7 +124,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The thread procedure executes the tasks and calls callback once it is done
         /// </summary>
-        virtual internal void ExecuteTask()
+        internal virtual void ExecuteTask()
         {
             bool taskExecutedSuccessfully = true;
 
@@ -169,7 +173,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     taskExecutedSuccessfully =
                       TaskEngineExecuteTask
-                        (   taskEngine,
+                        (taskEngine,
                             TaskExecutionMode.ExecuteTaskAndGatherOutputs,
                             lookupForExecution
                         );
@@ -217,7 +221,7 @@ namespace Microsoft.Build.BuildEngine
         /// engine, Interface or a non sealed TaskEngine these methods can disappear.
         /// </summary>
         /// <returns></returns>
-        virtual internal bool TaskEngineExecuteTask(
+        internal virtual bool TaskEngineExecuteTask(
             TaskEngine taskEngine,
             TaskExecutionMode howTaskShouldBeExecuted,
             Lookup lookup
@@ -230,7 +234,7 @@ namespace Microsoft.Build.BuildEngine
                  );
         }
         #endregion
-  
+
         #endregion
 
         #region Fields set by the Engine thread
@@ -239,7 +243,7 @@ namespace Microsoft.Build.BuildEngine
 
         private Lookup lookupForInference;
         private Lookup lookupForExecution;
-        
+
         private ITaskHost hostObject;
         private string projectFileOfTaskNode;
         private string parentProjectFullFileName;

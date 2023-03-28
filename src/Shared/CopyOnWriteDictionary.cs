@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -34,14 +34,14 @@ namespace Microsoft.Build.Collections
         /// used as the basis of new dictionaries with that comparer to avoid
         /// allocating new comparers objects.
         /// </summary>
-        private readonly static ImmutableDictionary<string, V> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>(MSBuildNameIgnoreCaseComparer.Default);
+        private static readonly ImmutableDictionary<string, V> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>(MSBuildNameIgnoreCaseComparer.Default);
 
         /// <summary>
         /// Empty dictionary with <see cref="StringComparer.OrdinalIgnoreCase" />,
         /// used as the basis of new dictionaries with that comparer to avoid
         /// allocating new comparers objects.
         /// </summary>
-        private readonly static ImmutableDictionary<string, V> OrdinalIgnoreCaseComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ImmutableDictionary<string, V> OrdinalIgnoreCaseComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>(StringComparer.OrdinalIgnoreCase);
 #endif
 
 
@@ -192,7 +192,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                TryGetValue((string) key, out V? val);
+                TryGetValue((string)key, out V? val);
                 return val;
             }
 #nullable disable

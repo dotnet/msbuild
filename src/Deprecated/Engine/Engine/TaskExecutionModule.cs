@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections;
@@ -53,7 +57,7 @@ namespace Microsoft.Build.BuildEngine
                 this.isRunningMultipleNodes = true;
                 this.activeThreadCount = 0;
                 this.overallThreadCount = 0;
-                this.threadActiveCountEvent  = new ManualResetEvent(false);
+                this.threadActiveCountEvent = new ManualResetEvent(false);
                 this.threadOverallCountEvent = new ManualResetEvent(false);
                 this.lastTaskActivity = 0;
 
@@ -158,7 +162,7 @@ namespace Microsoft.Build.BuildEngine
         /// This method passes the task outputs to the engine, it is virtual for testing purposes to
         /// create a mock TEM
         /// </summary>
-        virtual internal void PostTaskOutputs
+        internal virtual void PostTaskOutputs
         (
             int handleId,
             bool taskExecutedSuccessfully,
@@ -174,7 +178,7 @@ namespace Microsoft.Build.BuildEngine
         /// This function implements the callback via the IBuildEngine interface
         /// </summary>
         /// <returns>result of call to engine</returns>
-        virtual internal bool BuildProjectFile
+        internal virtual bool BuildProjectFile
         (
             int handleId,
             string[] projectFileNames,
@@ -182,7 +186,7 @@ namespace Microsoft.Build.BuildEngine
             IDictionary[] globalPropertiesPerProject,
             IDictionary[] targetOutputsPerProject,
             EngineLoggingServices loggingServices,
-            string [] toolsVersions,
+            string[] toolsVersions,
             bool useResultsCache,
             bool unloadProjectsOnCompletion,
             BuildEventContext taskContext
@@ -290,22 +294,22 @@ namespace Microsoft.Build.BuildEngine
             return overallResult;
         }
 
-       /// <summary>
-       /// Once the buildRequests from the EngineCallback have been created they are sent to this method which will
-       /// post the build requests to the parent engine and then wait on the results to come back.
-       /// This method uses either a breadthFirst or depthFirst traversal strategy when sending buildRequests to the parent engine.
-       /// This method will start in breadthFirst traversal. It will continue to use this strategy until one of two events occur:
-       ///     1. The parent node sents a message indicating the TEM should switch to depthFirst traversal.
-       ///     2. The number of buildRequests is larger than the batchRequestSize.
-       /// In both of these cases the system will go from a breadthFirstTraversal to a depthFirst Traversal. In the second case
-       /// a message will be sent to the parent engine to switch the system to depthFirst traversal as the system is starting to
-       /// be overloaded with work.
-       /// In a depth first strategy the buildRequests will be sent to the parent engine one at a time and waiting for results for
-       /// each buildRequest sent. In a breadthFirst traversal strategy some number of the buildrequests will be sent to the parent engine
-       /// in a batch of requests. The system will then wait on the results of ALL the build requests sent before continuing
-       /// to send more build requests.
-       /// </summary>
-       private void WaitForBuildResults(int handleId, BuildResult[] buildResultsLocal, BuildRequest[] buildRequests)
+        /// <summary>
+        /// Once the buildRequests from the EngineCallback have been created they are sent to this method which will
+        /// post the build requests to the parent engine and then wait on the results to come back.
+        /// This method uses either a breadthFirst or depthFirst traversal strategy when sending buildRequests to the parent engine.
+        /// This method will start in breadthFirst traversal. It will continue to use this strategy until one of two events occur:
+        ///     1. The parent node sents a message indicating the TEM should switch to depthFirst traversal.
+        ///     2. The number of buildRequests is larger than the batchRequestSize.
+        /// In both of these cases the system will go from a breadthFirstTraversal to a depthFirst Traversal. In the second case
+        /// a message will be sent to the parent engine to switch the system to depthFirst traversal as the system is starting to
+        /// be overloaded with work.
+        /// In a depth first strategy the buildRequests will be sent to the parent engine one at a time and waiting for results for
+        /// each buildRequest sent. In a breadthFirst traversal strategy some number of the buildrequests will be sent to the parent engine
+        /// in a batch of requests. The system will then wait on the results of ALL the build requests sent before continuing
+        /// to send more build requests.
+        /// </summary>
+        private void WaitForBuildResults(int handleId, BuildResult[] buildResultsLocal, BuildRequest[] buildRequests)
         {
             // If the traversal strategy is breadth first and the number of requests is less than the batchRequestSize
             // or if there is only 1 build request then send ALL build requests to the parent engine and wait on the results.
@@ -392,7 +396,7 @@ namespace Microsoft.Build.BuildEngine
         /// Call into the engine to figure out the line and column number of the task XML node in the original
         /// project context
         /// </summary>
-        virtual internal void GetLineColumnOfXmlNode(int handleId, out int lineNumber, out int columnNumber)
+        internal virtual void GetLineColumnOfXmlNode(int handleId, out int lineNumber, out int columnNumber)
         {
             engineCallback.GetLineColumnOfXmlNode(handleId, out lineNumber, out columnNumber);
         }
@@ -446,7 +450,7 @@ namespace Microsoft.Build.BuildEngine
             // If we running in single proc mode, we should execute this task on the current thread
             if (moduleMode == TaskExecutionModuleMode.SingleProcMode)
             {
-               taskState.ExecuteTask();
+                taskState.ExecuteTask();
             }
             else
             {
@@ -499,13 +503,13 @@ namespace Microsoft.Build.BuildEngine
             return DateTime.Now.Ticks;
         }
 
-        internal int[] GetWaitingTaskData(List<BuildRequest []> outstandingRequests)
+        internal int[] GetWaitingTaskData(List<BuildRequest[]> outstandingRequests)
         {
             if (moduleMode != TaskExecutionModuleMode.SingleProcMode)
             {
                 return workerThread.GetWaitingTasksData(outstandingRequests);
             }
-            return new int [0];
+            return new int[0];
         }
 
         internal void Shutdown()
@@ -572,9 +576,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal TaskExecutionModuleMode GetExecutionModuleMode()
         {
-           // The Execution module mode is used to determine if they system is running under single proc or multiproc for the purposes of creating a new thread
-           // to execute tasks on.
-           return moduleMode;
+            // The Execution module mode is used to determine if they system is running under single proc or multiproc for the purposes of creating a new thread
+            // to execute tasks on.
+            return moduleMode;
         }
 
         /// <summary>
@@ -591,14 +595,16 @@ namespace Microsoft.Build.BuildEngine
         /// Callback interface to communicate with the engine
         /// </summary>
         private EngineCallback engineCallback;
+
         /// <summary>
         /// The mode in which the TEM is running
         /// </summary>
-        TaskExecutionModuleMode moduleMode;
+        private TaskExecutionModuleMode moduleMode;
+
         /// <summary>
         /// The class used to execute user tasks.
         /// </summary>
-        TaskWorkerThread workerThread;
+        private TaskWorkerThread workerThread;
 
         // Data shared between all worker threads within the TEM
         /// <summary>

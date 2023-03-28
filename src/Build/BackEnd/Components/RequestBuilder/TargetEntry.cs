@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -343,8 +343,7 @@ namespace Microsoft.Build.BackEnd
 
             // If condition is false (based on propertyBag), set this target's state to
             // "Skipped" since we won't actually build it.
-            bool condition = ConditionEvaluator.EvaluateCondition
-                (
+            bool condition = ConditionEvaluator.EvaluateCondition(
                 _target.Condition,
                 ParserOptions.AllowPropertiesAndItemLists,
                 _expander,
@@ -598,8 +597,7 @@ namespace Microsoft.Build.BackEnd
                     if (!String.IsNullOrEmpty(targetReturns))
                     {
                         // Determine if we should keep duplicates.
-                        bool keepDupes = ConditionEvaluator.EvaluateCondition
-                                 (
+                        bool keepDupes = ConditionEvaluator.EvaluateCondition(
                                  _target.KeepDuplicateOutputs,
                                  ParserOptions.AllowPropertiesAndItemLists,
                                  _expander,
@@ -678,8 +676,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (ProjectOnErrorInstance errorTargetInstance in _target.OnErrorChildren)
             {
-                bool condition = ConditionEvaluator.EvaluateCondition
-                (
+                bool condition = ConditionEvaluator.EvaluateCondition(
                     errorTargetInstance.Condition,
                     ParserOptions.AllowPropertiesAndItemLists,
                     _expander,
@@ -911,13 +908,11 @@ namespace Microsoft.Build.BackEnd
         {
             _requestEntry.RequestConfiguration.Project.Targets.TryGetValue(_targetSpecification.TargetName, out _target);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 _target != null,
                 _targetSpecification.ReferenceLocation ?? _requestEntry.RequestConfiguration.Project.ProjectFileLocation,
                 "TargetDoesNotExist",
-                _targetSpecification.TargetName
-                );
+                _targetSpecification.TargetName);
         }
     }
 }

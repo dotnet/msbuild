@@ -1,13 +1,16 @@
-﻿using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.UnitTests;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -267,7 +270,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
             var itemToRemove = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
             project.RemoveItem(itemToRemove);
-            
+
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
@@ -303,7 +306,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
             var itemToEdit = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
             itemToEdit.SetMetadataValue("ExcludeFromStyleCop", "true");
-            
+
             StringWriter writer = new StringWriter();
             project.Save(writer);
 
@@ -351,13 +354,13 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        void VerifyFormattingPreserved(string projectContents)
+        private void VerifyFormattingPreserved(string projectContents)
         {
             VerifyFormattingPreservedFromString(projectContents);
             VerifyFormattingPreservedFromFile(projectContents);
         }
 
-        void VerifyFormattingPreservedFromString(string projectContents)
+        private void VerifyFormattingPreservedFromString(string projectContents)
         {
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectContents)),
                 ProjectCollection.GlobalProjectCollection,
@@ -373,7 +376,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        void VerifyFormattingPreservedFromFile(string projectContents)
+        private void VerifyFormattingPreservedFromFile(string projectContents)
         {
             string directory = null;
 
@@ -403,13 +406,13 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             }
         }
 
-        void VerifyProjectReformatting(string originalContents, string expectedContents)
+        private void VerifyProjectReformatting(string originalContents, string expectedContents)
         {
             VerifyProjectReformattingFromString(originalContents, expectedContents);
             VerifyProjectReformattingFromFile(originalContents, expectedContents);
         }
 
-        void VerifyProjectReformattingFromString(string originalContents, string expectedContents)
+        private void VerifyProjectReformattingFromString(string originalContents, string expectedContents)
         {
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(originalContents)),
                 ProjectCollection.GlobalProjectCollection,
@@ -425,7 +428,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        void VerifyProjectReformattingFromFile(string originalContents, string expectedContents)
+        private void VerifyProjectReformattingFromFile(string originalContents, string expectedContents)
         {
             string directory = null;
 
@@ -455,7 +458,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             }
         }
 
-        void VerifyAssertLineByLine(string expected, string actual)
+        private void VerifyAssertLineByLine(string expected, string actual)
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false, _testOutput);
         }
@@ -503,8 +506,8 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
             Project project = new Project();
             project.AddItem("ProjectReference", @"..\CLREXE\CLREXE.vcxproj",
-                new[] {new KeyValuePair<string, string>("metadata", "value")});
-            
+                new[] { new KeyValuePair<string, string>("metadata", "value") });
+
             StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
@@ -653,7 +656,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             content += @"<Project><Target Name=""Build""/></Project>";
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            var file = FileUtilities.GetTemporaryFile(".proj");
+            var file = FileUtilities.GetTemporaryFileName(".proj");
             try
             {
                 File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: byteOrderMark));

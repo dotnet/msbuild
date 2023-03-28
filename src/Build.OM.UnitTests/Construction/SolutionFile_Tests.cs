@@ -1,15 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using System.Text;
 
 #nullable disable
 
@@ -53,8 +53,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ParseSolutionHelper(solutionFileContents);
                 Assert.True(false, "Should not get here");
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that a project with the C++ project guid and an arbitrary extension is seen as valid -- 
@@ -219,8 +218,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Expected version numbers less than 7 to cause an invalid project file exception.
@@ -237,8 +235,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test to parse a very basic .sln file to validate that description property in a solution file 
@@ -788,8 +785,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
@@ -815,8 +811,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
@@ -842,8 +837,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure the project configurations in solution configurations get parsed correctly 
@@ -1064,7 +1058,7 @@ namespace Microsoft.Build.UnitTests.Construction
         private static SolutionFile ParseSolutionHelper(string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-            string solutionPath = FileUtilities.GetTemporaryFile(".sln");
+            string solutionPath = FileUtilities.GetTemporaryFileName(".sln");
 
             try
             {

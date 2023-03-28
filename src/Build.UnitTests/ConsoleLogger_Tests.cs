@@ -1,26 +1,25 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-
-
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Build.Execution;
-using System.Runtime.Versioning;
+using Xunit.NetCore.Extensions;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -45,7 +44,7 @@ namespace Microsoft.Build.UnitTests
             </Target>
          </Project>";
 
-        private class SimulatedConsole
+        private sealed class SimulatedConsole
         {
             private StringBuilder _simulatedConsole;
 
@@ -119,7 +118,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
+        private sealed class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
 
         private readonly ITestOutputHelper _output;
 
@@ -176,7 +175,6 @@ namespace Microsoft.Build.UnitTests
         /// started event but there was no target printed out.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestTargetAfterProjectStarted()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -321,9 +319,7 @@ namespace Microsoft.Build.UnitTests
             output.ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + "::Number=2 TargetFramework=netcoreapp2.1]");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/6518")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Minimal path validation in Core allows expanding path containing quoted slashes.")]
-        [SkipOnMono("Minimal path validation in Mono allows expanding path containing quoted slashes.")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Minimal path validation in Core allows expanding path containing quoted slashes.", Skip = "https://github.com/dotnet/msbuild/issues/6518")]
         public void TestItemsWithUnexpandableMetadata()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -349,7 +345,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that on minimal verbosity the console logger does not log the target names.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestNoTargetNameOnMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -367,7 +362,6 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if a target has no messages logged that its started and finished events show up on detailed but not normal.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EmptyTargetsOnDetailedButNotNormal()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -412,7 +406,6 @@ namespace Microsoft.Build.UnitTests
         /// Test a number of cases where difference values from showcommandline are used with normal verbosity
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ShowCommandLineWithNormalVerbosity()
         {
             string command = "echo a";

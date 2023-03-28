@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Xml;
@@ -122,7 +126,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         internal Expander(Expander expander, SpecificItemDefinitionLibrary itemDefinitionLibrary)
-            : this(expander.lookup, null , expander.options)
+            : this(expander.lookup, null, expander.options)
         {
             if (implicitMetadataItemType == null)
             {
@@ -131,7 +135,7 @@ namespace Microsoft.Build.BuildEngine
             this.specificItemDefinitionLibrary = itemDefinitionLibrary;
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Adds metadata to the table being used by this expander.
@@ -704,7 +708,7 @@ namespace Microsoft.Build.BuildEngine
 
             return (nestLevel == 0) ? index : -1;
         }
-        
+
         /// <summary>
         /// Expand the body of the property, including any functions that it may contain
         /// </summary>
@@ -871,7 +875,7 @@ namespace Microsoft.Build.BuildEngine
         private string ExpandRegistryValue(string registryExpression, XmlNode node)
         {
             string registryLocation = registryExpression.Substring(9);
-            
+
             // Split off the value name -- the part after the "@" sign. If there's no "@" sign, then it's the default value name
             // we want.
             int firstAtSignOffset = registryLocation.IndexOf('@');
@@ -879,9 +883,9 @@ namespace Microsoft.Build.BuildEngine
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(firstAtSignOffset == lastAtSignOffset, node, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", String.Empty);
 
-            string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1 
+            string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1
                 ? null : registryLocation.Substring(lastAtSignOffset + 1);
-            
+
             // If there's no '@', or '@' is first, then we'll use null or String.Empty for the location; otherwise
             // the location is the part before the '@'
             string registryKeyName = lastAtSignOffset != -1 ? registryLocation.Substring(0, lastAtSignOffset) : registryLocation;
@@ -1231,7 +1235,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         functionResult = EscapingUtilities.Escape((string)functionResult);
                     }
-                    
+
                     // There's nothing left to deal within the function expression, return the result from the execution
                     if (String.IsNullOrEmpty(remainder))
                     {
@@ -1474,7 +1478,7 @@ namespace Microsoft.Build.BuildEngine
 
                 return objectType;
             }
-            
+
             /// <summary>
             /// Factory method to construct a function for property evaluation
             /// </summary>
@@ -1584,7 +1588,7 @@ namespace Microsoft.Build.BuildEngine
             private static string[] ExtractFunctionArguments(string expressionFunction, string argumentsContent)
             {
                 List<string> arguments = new List<string>();
-                StringBuilder argumentBuilder = new StringBuilder(argumentsContent.Length); 
+                StringBuilder argumentBuilder = new StringBuilder(argumentsContent.Length);
 
                 // Iterate over the contents of the arguments extracting the
                 // the individual arguments as we go
@@ -1945,7 +1949,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 metadataValue = GetDefaultMetadataValue(itemType, metadataName, metadataValue);
             }
-            
+
             return metadataValue ?? String.Empty;
         }
 
@@ -1955,7 +1959,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private string GetValueFromMetadataTable(string itemType, string metadataName, string metadataValue)
         {
-            if (itemMetadata == null) return null;
+            if (itemMetadata == null)
+            {
+                return null;
+            }
 
             if (implicitMetadataItemType == null)
             {
@@ -1993,7 +2000,10 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private string GetDefaultMetadataValue(string itemType, string metadataName, string metadataValue)
         {
-            if (specificItemDefinitionLibrary == null) return null;
+            if (specificItemDefinitionLibrary == null)
+            {
+                return null;
+            }
 
             if (itemType == null || String.Equals(itemType, specificItemDefinitionLibrary.ItemType, StringComparison.OrdinalIgnoreCase))
             {

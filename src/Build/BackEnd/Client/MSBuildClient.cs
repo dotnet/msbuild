@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -138,11 +138,17 @@ namespace Microsoft.Build.Experimental
 
         private void CreateNodePipeStream()
         {
-            _nodeStream = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            _nodeStream = new NamedPipeClientStream(
+                serverName: ".",
+                _pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 | PipeOptions.CurrentUserOnly
 #endif
             );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             _packetPump = new MSBuildClientPacketPump(_nodeStream);
         }
 
@@ -412,7 +418,7 @@ namespace Microsoft.Build.Experimental
 
             return (acceptAnsiColorCodes: acceptAnsiColorCodes, outputIsScreen: outputIsScreen);
         }
-        
+
         private int QueryConsoleBufferWidth()
         {
             int consoleBufferWidth = -1;
@@ -492,7 +498,7 @@ namespace Microsoft.Build.Experimental
             }
             catch (IOException ex) when (ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}",  ex);
+                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
                 CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
@@ -525,8 +531,9 @@ namespace Microsoft.Build.Experimental
 
         private bool TrySendShutdownCommand()
         {
+            CommunicationsUtilities.Trace("Sending shutdown command to server.");
             _packetPump.ServerWillDisconnect();
-            return  TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
+            return TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
         }
 
         private ServerNodeBuildCommand GetServerNodeBuildCommand()

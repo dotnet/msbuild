@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -8,6 +8,7 @@ using System.Xml.XPath;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -29,11 +30,6 @@ namespace Microsoft.Build.Tasks
         /// The XPath Query.
         /// </summary>
         private string _query;
-
-        /// <summary>
-        /// The property that this task will set.
-        /// </summary>
-        private ITaskItem _value;
 
         #endregion
 
@@ -68,18 +64,8 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// The value to be inserted into the specified location.
-        /// </summary>
-        [Required]
-        public ITaskItem Value
-        {
-            get
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(_value, nameof(Value));
-                return _value;
-            }
-
-            set => _value = value;
-        }
+        /// </summary>        
+        public ITaskItem Value { get; set; }
 
         /// <summary>
         /// The namespaces for XPath query's prefixes.
@@ -95,8 +81,12 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
-            ErrorUtilities.VerifyThrowArgumentNull(_value, "Value");
             ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, "XmlInputPath");
+            if (Value == null)
+            {
+                // When Value is null, it means Value is not set or empty. Here we treat them all as empty.
+                Value = new TaskItem(String.Empty);
+            }
 
             // Load the XPath Document
             XmlDocument xmlDoc = new XmlDocument();
@@ -164,12 +154,12 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     count++;
-                    iter.Current.InnerXml = _value.ItemSpec;
-                    Log.LogMessageFromResources(MessageImportance.Low, "XmlPoke.Replaced", iter.Current.Name, _value.ItemSpec);
+                    iter.Current.InnerXml = Value.ItemSpec;
+                    Log.LogMessageFromResources(MessageImportance.Low, "XmlPoke.Replaced", iter.Current.Name, Value.ItemSpec);
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("XmlPoke.PokeError", _value.ItemSpec, e.Message);
+                    Log.LogErrorWithCodeFromResources("XmlPoke.PokeError", Value.ItemSpec, e.Message);
                     return false;
                 }
             }

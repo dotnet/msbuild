@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 #region Using directives
 
@@ -80,7 +84,7 @@ namespace Microsoft.Build.BuildEngine
                     project_index = i;
                 }
             }
-            
+
             // The project should be in the table
             ErrorUtilities.VerifyThrow(project_index != -1, "Project missing from the list");
 
@@ -153,11 +157,11 @@ namespace Microsoft.Build.BuildEngine
             )
         {
             // Get the list of projects that have this full path.
-            ArrayList projectsWithThisFullPath = (ArrayList) this.projects[projectFileFullPath];
+            ArrayList projectsWithThisFullPath = (ArrayList)this.projects[projectFileFullPath];
 
             if ((projectsWithThisFullPath?.Count > 0))
             {
-                return (Project) projectsWithThisFullPath[0];
+                return (Project)projectsWithThisFullPath[0];
             }
 
             // No project was found that matched the full path specified.
@@ -434,7 +438,7 @@ namespace Microsoft.Build.BuildEngine
             internal string toolsVersion;
             internal int nodeIndex;
         }
-        
+
         #endregion
     }
 }

@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -20,7 +24,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="targetName"></param>
         /// <param name="subTargetName"></param>
         /// <owner>RGoel</owner>
-        static private void AddVCBuildTarget
+        private static void AddVCBuildTarget
         (
             Project msbuildProject,
             string projectPath,
@@ -55,7 +59,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="platformName">The platform parameter to VCBuild</param>
         /// <param name="fullConfigurationName">Configuration property value</param>
         /// <returns></returns>
-        static internal BuildTask AddVCBuildTaskElement
+        internal static BuildTask AddVCBuildTaskElement
         (
             Project msbuildProject,
             Target target,
@@ -133,7 +137,7 @@ namespace Microsoft.Build.BuildEngine
         /// This method generates an XmlDocument representing an MSBuild project wrapper for a VC project
         /// </summary>
         /// <owner>LukaszG</owner>
-        static internal XmlDocument GenerateVCWrapperProject(Engine parentEngine, string vcProjectFilename, string toolsVersion)
+        internal static XmlDocument GenerateVCWrapperProject(Engine parentEngine, string vcProjectFilename, string toolsVersion)
         {
             string projectPath = Path.GetFullPath(vcProjectFilename);
             Project msbuildProject;
@@ -187,13 +191,13 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Hint to give the VCBuild task to help it find vcbuild.exe.
         /// </summary>
-        static private string path;
+        private static string path;
 
         /// <summary>
         /// Hint to give the VCBuild task to help it find vcbuild.exe.
         /// Directory in which vcbuild.exe is found.
         /// </summary>
-        static internal string VCBuildLocationHint
+        internal static string VCBuildLocationHint
         {
             get
             {

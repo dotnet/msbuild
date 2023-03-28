@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -22,6 +22,7 @@ using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Shouldly;
 using Xunit;
 using Microsoft.Build.Framework;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -172,7 +173,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ConstructOverSameFileReturnsSame()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
-            projectXml1.Save(FileUtilities.GetTemporaryFile());
+            projectXml1.Save(FileUtilities.GetTemporaryFileName());
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(projectXml1.FullPath);
 
@@ -267,8 +268,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader("XXX")));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -297,8 +297,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Valid Xml, invalid syntax below the root
@@ -315,8 +314,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Root indicates upgrade needed
@@ -331,8 +329,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Valid Xml, invalid namespace below the root
@@ -349,8 +346,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that the namespace error reports are correct
@@ -403,8 +399,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Valid Xml, invalid syntax, should not get added to the Xml cache and
@@ -429,7 +424,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     try
                     {
-                        path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                        path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                         File.WriteAllText(path, content);
 
                         ProjectRootElement.Open(path);
@@ -445,8 +440,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     File.Delete(path);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify that opening project using XmlTextReader does not add it to the Xml cache
@@ -462,7 +456,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(path, content);
 
                 var reader1 = XmlReader.Create(path);
@@ -499,7 +493,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(path, content);
 
                 ProjectRootElement root1 = ProjectRootElement.Create(path);
@@ -561,8 +555,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project = ProjectRootElement.Create(reader);
 
                 project.Save();
-            }
-           );
+            });
         }
         /// <summary>
         /// Save content with transforms.
@@ -605,7 +598,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
 
                 project.Save(file);
 
@@ -697,8 +690,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.Save();
-            }
-           );
+            });
         }
         /// <summary>
         /// Verifies that the ProjectRootElement.Encoding property getter returns values
@@ -730,7 +722,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
-            string projectFullPath = FileUtilities.GetTemporaryFile();
+            string projectFullPath = FileUtilities.GetTemporaryFileName();
             try
             {
                 VerifyLoadedProjectHasEncoding(projectFullPath, Encoding.UTF8);
@@ -892,11 +884,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
         /// <summary>
-        /// Build a solution file that can't be accessed
+        /// Build a solution file that can't be accessed.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Security classes are not supported on Unix
-
+        [WindowsOnlyFact(additionalMessage: "Security classes are not supported on Unix.")]
         public void SolutionCanNotBeOpened()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -935,16 +925,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     File.Delete(tempFileSentinel);
                     Assert.False(File.Exists(solutionFile));
                 }
-            }
-           );
+            });
         }
 
         /// <summary>
-        /// Build a project file that can't be accessed
+        /// Build a project file that can't be accessed.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        // FileSecurity class is not supported on Unix
+        [WindowsOnlyFact(additionalMessage: "FileSecurity class is not supported on Unix.")]
         public void ProjectCanNotBeOpened()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -979,8 +966,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     File.Delete(projectFile);
                     Assert.False(File.Exists(projectFile));
                 }
-            }
-           );
+            });
         }
 #endif
 
@@ -996,7 +982,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 try
                 {
-                    solutionFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    solutionFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
 
                     // Arbitrary corrupt content
                     string content = @"Microsoft Visual Studio Solution File, Format Version 10.00
@@ -1011,14 +997,12 @@ Project(""{";
                 {
                     File.Delete(solutionFile);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Open lots of projects concurrently to try to trigger problems
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // This test is platform specific for Windows
+        [WindowsOnlyFact]
         public void ConcurrentProjectOpenAndCloseThroughProject()
         {
             int iterations = 500;

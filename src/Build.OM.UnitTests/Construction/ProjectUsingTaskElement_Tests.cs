@@ -1,14 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
-
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -45,8 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with empty task name attribute
@@ -63,8 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with unexpected attribute
@@ -81,8 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with neither AssemblyFile nor AssemblyName attributes
@@ -99,8 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with only empty AssemblyFile attribute
@@ -117,8 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with empty AssemblyFile attribute but AssemblyName present
@@ -135,8 +128,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with only empty AssemblyName attribute but AssemblyFile present
@@ -153,8 +145,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with both AssemblyName and AssemblyFile attributes
@@ -171,8 +162,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with both AssemblyName and AssemblyFile attributes but both are empty
@@ -189,8 +179,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read usingtask with assembly file
@@ -290,8 +279,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectUsingTaskElement usingTask = GetUsingTaskAssemblyName();
 
                 usingTask.AssemblyFile = "afb";
-            }
-           );
+            });
         }
         /// <summary>
         /// Set assembly name on a usingtask that already has assembly file
@@ -304,8 +292,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectUsingTaskElement usingTask = GetUsingTaskAssemblyFile();
 
                 usingTask.AssemblyName = "anb";
-            }
-           );
+            });
         }
         /// <summary>
         /// Set task name
@@ -370,8 +357,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure there is an exception when there are multiple task groups in the using task tag.
@@ -391,8 +377,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure there is an exception when there is an unknown child
@@ -411,8 +396,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure there is an no exception when there are children in the using task
@@ -460,8 +444,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Helpers.GetFirst(project.Children);
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Make sure there is an exception when a parameter group is added but no task factory attribute is on the using task
@@ -482,8 +465,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Helpers.GetFirst(project.Children);
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Helper to get a ProjectUsingTaskElement with a task factory, required runtime and required platform

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Buffers.Binary;
@@ -64,7 +64,7 @@ namespace Microsoft.Build.BackEnd.Client
         /// <summary>
         /// The binary translator for reading packets.
         /// </summary>
-        readonly ITranslator _binaryReadTranslator;
+        private readonly ITranslator _binaryReadTranslator;
 
         /// <summary>
         /// True if this side is gracefully disconnecting.
@@ -262,7 +262,7 @@ namespace Microsoft.Build.BackEnd.Client
 
                                 while (packetBytesRead < packetLength)
                                 {
-                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength-packetBytesRead);
+                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength - packetBytesRead);
                                     if (bytesRead == 0)
                                     {
                                         // Incomplete read.  Abort.
@@ -271,7 +271,7 @@ namespace Microsoft.Build.BackEnd.Client
 
                                     packetBytesRead += bytesRead;
                                 }
-                                
+
                                 try
                                 {
                                     _packetFactory.DeserializeAndRoutePacket(0, packetType, _binaryReadTranslator);

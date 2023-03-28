@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectMetadataLinkRemoter : MockLinkRemoter<ProjectMetadata>
+    internal sealed class MockProjectMetadataLinkRemoter : MockLinkRemoter<ProjectMetadata>
     {
         public override ProjectMetadata CreateLinkedObject(IImportHolder holder)
         {
@@ -23,7 +23,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             get
             {
                 var parent = ProjectMetadataLink.GetParent(this.Source);
-                if (parent == null) return null;
+                if (parent == null)
+                {
+                    return null;
+                }
+
                 var itemParent = parent as ProjectItem;
                 if (itemParent != null)
                 {
@@ -39,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public MockProjectMetadataLinkRemoter Predecessor => this.OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.Predecessor);
     }
 
-    internal class MockProjectMetadataLink : ProjectMetadataLink, ILinkMock
+    internal sealed class MockProjectMetadataLink : ProjectMetadataLink, ILinkMock
     {
         public MockProjectMetadataLink(MockProjectMetadataLinkRemoter proxy, IImportHolder holder)
         {
@@ -58,7 +62,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             get
             {
                 var parentRemoter = this.Proxy.Parent;
-                if (parentRemoter == null) return null;
+                if (parentRemoter == null)
+                {
+                    return null;
+                }
+
                 var itemParent = parentRemoter as MockProjectItemLinkRemoter;
                 if (itemParent != null)
                 {

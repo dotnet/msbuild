@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Linq;
@@ -20,8 +20,8 @@ namespace Microsoft.Build.Framework
     /// Coupled together with the MSBUILDDISABLEFEATURESFROMVERSION environment variable,
     /// this class acts as a way to make risky changes while giving customers an opt-out.
     /// </summary>
-    /// See docs here: https://github.com/dotnet/msbuild/blob/master/documentation/wiki/ChangeWaves.md
-    /// For dev docs: https://github.com/dotnet/msbuild/blob/master/documentation/wiki/ChangeWaves-Dev.md
+    /// See docs here: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves.md
+    /// For dev docs: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves-Dev.md
     internal class ChangeWaves
     {
         internal static readonly Version Wave17_2 = new Version(17, 2);

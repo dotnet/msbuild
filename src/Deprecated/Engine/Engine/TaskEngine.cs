@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Xml;
@@ -215,7 +219,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 // Reflection related exception
                 ProjectErrorUtilities.VerifyThrowInvalidProject(false, taskNode, "TaskInstantiationFailureError", TaskName, TaskClass.Assembly.ToString(), e.Message);
@@ -231,20 +237,20 @@ namespace Microsoft.Build.BuildEngine
                 }
                 else
                 {
-                        // Our task depend on this name to be precisely that, so if you change it make sure
-                        // you also change the checks in the tasks run in separate AppDomains. Better yet, just don't change it.
+                    // Our task depend on this name to be precisely that, so if you change it make sure
+                    // you also change the checks in the tasks run in separate AppDomains. Better yet, just don't change it.
 
-                        // Make sure we copy the appdomain configuration and send it to the appdomain we create so that if the creator of the current appdomain
-                        // has done the binding redirection in code, that we will get those settings as well.
-                        AppDomainSetup appDomainInfo = new AppDomainSetup();
+                    // Make sure we copy the appdomain configuration and send it to the appdomain we create so that if the creator of the current appdomain
+                    // has done the binding redirection in code, that we will get those settings as well.
+                    AppDomainSetup appDomainInfo = new AppDomainSetup();
 
-			// Get the current app domain setup settings
-                        byte[] currentAppdomainBytes = AppDomain.CurrentDomain.SetupInformation.GetConfigurationBytes();
+                    // Get the current app domain setup settings
+                    byte[] currentAppdomainBytes = AppDomain.CurrentDomain.SetupInformation.GetConfigurationBytes();
 
-                        //Apply the appdomain settings to the new appdomain before creating it
-                        appDomainInfo.SetConfigurationBytes(currentAppdomainBytes);
-                        taskAppDomain = AppDomain.CreateDomain("taskAppDomain", null, appDomainInfo);
-                 }
+                    //Apply the appdomain settings to the new appdomain before creating it
+                    appDomainInfo.SetConfigurationBytes(currentAppdomainBytes);
+                    taskAppDomain = AppDomain.CreateDomain("taskAppDomain", null, appDomainInfo);
+                }
             }
 
             return taskAppDomain;
@@ -276,8 +282,8 @@ namespace Microsoft.Build.BuildEngine
                     lookupHash = Utilities.CreateTableIfNecessary((Hashtable)null);
                 }
 
-		// Loop through each of the batch buckets and execute them one at a time
-                for (int i=0; i < buckets.Count; i++)
+                // Loop through each of the batch buckets and execute them one at a time
+                for (int i = 0; i < buckets.Count; i++)
                 {
                     // Execute the batch bucket, pass in which bucket we are executing so that we know when to get a new taskId for the bucket.
                     taskExecutedSuccessfully = ExecuteBucket(engineProxy, (ItemBucket)buckets[i], i, howToExecuteTask);
@@ -365,10 +371,10 @@ namespace Microsoft.Build.BuildEngine
                 // If this is the first bucket use the task context originally given to it, for the remaining buckets get a unique id for them
                 if (bucketNumber != 0)
                 {
-		    // Ask the parent engine the next Id which should be used for the taskId.
+                    // Ask the parent engine the next Id which should be used for the taskId.
                     buildEventContext = new BuildEventContext(buildEventContext.NodeId, buildEventContext.TargetId, buildEventContext.ProjectContextId, parentModule.GetNextTaskId());
 
-		    // For each batch the engineProxy needs to have the correct buildEventContext as all messages comming from a task will have the buildEventContext of the EngineProxy.
+                    // For each batch the engineProxy needs to have the correct buildEventContext as all messages comming from a task will have the buildEventContext of the EngineProxy.
                     engineProxy.BuildEventContext = buildEventContext;
                 }
 
@@ -454,13 +460,13 @@ namespace Microsoft.Build.BuildEngine
             {
                 continueOnError =
                 (
-                    // if attribute doesn't exist, default to "false"
+                        // if attribute doesn't exist, default to "false"
                         (continueOnErrorAttribute != null)
                     &&
-                    // otherwise, convert its value to a boolean
+                        // otherwise, convert its value to a boolean
                         ConversionUtilities.ConvertStringToBool
                         (
-                    // expand embedded item vectors after expanding properties and item metadata
+                            // expand embedded item vectors after expanding properties and item metadata
                             bucket.Expander.ExpandAllIntoString(continueOnErrorAttribute)
                         )
                 );
@@ -496,7 +502,7 @@ namespace Microsoft.Build.BuildEngine
 
                     task = (ITask)taskAppDomain.CreateInstanceFromAndUnwrap(TaskClass.Assembly.AssemblyFile, TaskClass.Type.FullName);
 
-                                        // this will force evaluation of the task class type and try to load the task assembly
+                    // this will force evaluation of the task class type and try to load the task assembly
                     Type taskType = task.GetType();
 
                     // If the types don't match, we have a problem. It means that our AppDomain was able to load
@@ -539,7 +545,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 // Reflection related exception
                 loggingServices.LogError(buildEventContext, CreateBuildEventFileInfoForTask(),
@@ -584,9 +592,9 @@ namespace Microsoft.Build.BuildEngine
 
                 loggingServices.LogFatalTaskError(buildEventContext,
                      e,
-                    // Display the task's exception stack.
-                    // Log the task line number, whatever the value of ContinueOnError;
-                    // because InitializeTask failure will be a hard error anyway.
+                     // Display the task's exception stack.
+                     // Log the task line number, whatever the value of ContinueOnError;
+                     // because InitializeTask failure will be a hard error anyway.
                      CreateBuildEventFileInfoForTask(),
                      TaskName);
 
@@ -666,7 +674,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 // Reflection related exception
                 loggingServices.LogError(buildEventContext, CreateBuildEventFileInfoForTask(), "AttributeTypeLoadError", TaskName, e.Message);
@@ -961,7 +971,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject(false, taskOutputSpecification.TaskParameterAttribute,
                     "FailedToRetrieveTaskOutputs", TaskName, taskParameterName, e.Message);
@@ -1283,7 +1295,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 // Reflection related exception
                 loggingServices.LogError(buildEventContext, CreateBuildEventFileInfoForTask(), "TaskParametersError", TaskName, e.Message);
@@ -1560,7 +1574,9 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
                 if (ExceptionHandling.NotExpectedReflectionException(e))
+                {
                     throw;
+                }
 
                 loggingServices.LogFatalTaskError(buildEventContext, e,
                     CreateBuildEventFileInfoForTask(),

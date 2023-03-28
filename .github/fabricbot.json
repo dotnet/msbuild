@@ -444,6 +444,40 @@
           }
         ]
       }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "prTargetsBranch",
+              "parameters": {
+                "branchName": "vs17.4"
+              }
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Comment on vs* branches",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version."
+            }
+          }
+        ]
+      }
     }
   ],
   "userGroups": []

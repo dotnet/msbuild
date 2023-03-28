@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -201,14 +201,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="frameworkName">Gets the assembly name.</param>
-        internal static void GetAssemblyMetadata
-        (
+        internal static void GetAssemblyMetadata(
             string path,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
-            out FrameworkName frameworkName
-        )
+            out FrameworkName frameworkName)
         {
             var import = assemblyMetadataCache?.GetOrAdd(path, p => new AssemblyMetadata(p))
                 ?? new AssemblyMetadata(path);
@@ -274,10 +272,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private FrameworkName GetFrameworkName()
         {
-// Disabling use of System.Reflection in case of MONO, because
-// Assembly.GetCustomAttributes* for an attribute which belongs
-// to an assembly that mono cannot find, causes a crash!
-// Instead, opt for using PEReader and friends to get that info
+            // Disabling use of System.Reflection in case of MONO, because
+            // Assembly.GetCustomAttributes* for an attribute which belongs
+            // to an assembly that mono cannot find, causes a crash!
+            // Instead, opt for using PEReader and friends to get that info
 #if !FEATURE_ASSEMBLYLOADCONTEXT && !MONO
             if (!NativeMethodsShared.IsWindows)
             {
@@ -352,11 +350,17 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private void CorePopulateMetadata()
         {
-            if (_metadataRead) return;
+            if (_metadataRead)
+            {
+                return;
+            }
 
             lock (this)
             {
-                if (_metadataRead) return;
+                if (_metadataRead)
+                {
+                    return;
+                }
 
                 using (var stream = File.OpenRead(_sourceFile))
                 using (var peFile = new PEReader(stream))
@@ -404,13 +408,13 @@ namespace Microsoft.Build.Tasks
                             continue;
                         }
 
-                        var container = metadataReader.GetMemberReference((MemberReferenceHandle) ctorHandle).Parent;
+                        var container = metadataReader.GetMemberReference((MemberReferenceHandle)ctorHandle).Parent;
                         if (container.Kind != HandleKind.TypeReference)
                         {
                             continue;
                         }
 
-                        var name = metadataReader.GetTypeReference((TypeReferenceHandle) container).Name;
+                        var name = metadataReader.GetTypeReference((TypeReferenceHandle)container).Name;
                         if (!string.Equals(metadataReader.GetString(name), "TargetFrameworkAttribute"))
                         {
                             continue;
@@ -476,8 +480,8 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-// Enabling this for MONO, because it's required by GetFrameworkName.
-// More details are in the comment for that method
+        // Enabling this for MONO, because it's required by GetFrameworkName.
+        // More details are in the comment for that method
 #if FEATURE_ASSEMBLYLOADCONTEXT || MONO
         // This method copied from DNX source: https://github.com/aspnet/dnx/blob/e0726f769aead073af2d8cd9db47b89e1745d574/src/Microsoft.Dnx.Tooling/Utils/LockFileUtils.cs#L385
         //  System.Reflection.Metadata 1.1 is expected to have an API that helps with this.
@@ -598,14 +602,14 @@ namespace Microsoft.Build.Tasks
                     }
 
                     return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength - 1) : string.Empty;
-                }                
+                }
             }
             else
             {
                 return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
             }
 #else
-                return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
+            return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
 #endif
         }
 
@@ -1093,7 +1097,9 @@ namespace Microsoft.Build.Tasks
             foreach (var s in sections)
             {
                 if (rva >= s.VirtualAddress && rva < s.VirtualAddress + s.Size)
+                {
                     return s.FileOffset + (rva - s.VirtualAddress);
+                }
             }
             return 0;
         }

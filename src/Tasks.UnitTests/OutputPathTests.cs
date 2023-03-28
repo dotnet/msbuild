@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -12,6 +12,7 @@ using Shouldly;
 
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -151,7 +152,7 @@ $@"<Project DefaultTargets=`Build` xmlns=`msbuildnamespace` ToolsVersion=`msbuil
         /// <summary>
         /// Test for [MSBuild]::NormalizePath and [MSBuild]::NormalizeDirectory returning current directory instead of current Project directory.
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsWindows), Skip = "Skipping this test for now until we have a consensus about this issue.")]
+        [WindowsOnlyFact(Skip = "Skipping this test for now until we have a consensus about this issue.")]
         public void MSBuildNormalizePathShouldReturnProjectDirectory()
         {
             // Arrange

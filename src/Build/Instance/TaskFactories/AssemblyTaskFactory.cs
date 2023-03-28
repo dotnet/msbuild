@@ -1,18 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Threading.Tasks;
 #endif
 
-using Microsoft.Build.Execution;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System.IO;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
@@ -212,6 +211,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (appDomain != null)
                 {
+                    AssemblyLoadsTracker.StopTracking(appDomain);
                     // Unload the AppDomain asynchronously to avoid a deadlock that can happen because
                     // AppDomain.Unload blocks for the process's one Finalizer thread to finalize all
                     // objects. Some objects are RCWs for STA COM objects and as such would need the
@@ -246,8 +246,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize the factory from the task registry
         /// </summary>
-        internal LoadedType InitializeFactory
-            (
+        internal LoadedType InitializeFactory(
                 AssemblyLoadInfo loadInfo,
                 string taskName,
                 IDictionary<string, TaskPropertyInfo> taskParameters,
@@ -256,8 +255,7 @@ namespace Microsoft.Build.BackEnd
                 bool taskHostFactoryExplicitlyRequested,
                 TargetLoggingContext targetLoggingContext,
                 ElementLocation elementLocation,
-                string taskProjectFile
-            )
+                string taskProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
@@ -273,6 +271,10 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
+
+                string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
+                using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
+
                 _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
@@ -358,11 +360,18 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
 
-                TaskHostTask task = new TaskHostTask(taskLocation, taskLoggingContext, buildComponentHost, mergedParameters, _loadedType
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                TaskHostTask task = new TaskHostTask(
+                    taskLocation,
+                    taskLoggingContext,
+                    buildComponentHost,
+                    mergedParameters,
+                    _loadedType
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif
                     );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 return task;
             }
             else
@@ -371,20 +380,33 @@ namespace Microsoft.Build.BackEnd
                 AppDomain taskAppDomain = null;
 #endif
 
-                ITask taskInstance = TaskLoader.CreateTask(_loadedType, _taskName, taskLocation.File, taskLocation.Line, taskLocation.Column, new TaskLoader.LogError(ErrorLoggingDelegate)
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                ITask taskInstance = TaskLoader.CreateTask(
+                    _loadedType,
+                    _taskName,
+                    taskLocation.File,
+                    taskLocation.Line,
+                    taskLocation.Column,
+                    new TaskLoader.LogError(ErrorLoggingDelegate),
 #if FEATURE_APPDOMAIN
-                    , appDomainSetup
+                    appDomainSetup,
+                    appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
 #endif
-                    , isOutOfProc
+                    isOutOfProc
 #if FEATURE_APPDOMAIN
                     , out taskAppDomain
 #endif
                     );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
 #if FEATURE_APPDOMAIN
-                if (taskAppDomain != null)
+                if (taskAppDomain != null && taskInstance != null)
                 {
                     _tasksAndAppDomains[taskInstance] = taskAppDomain;
+                }
+                else if (taskAppDomain != null)
+                {
+                    AssemblyLoadsTracker.StopTracking(taskAppDomain);
                 }
 #endif
 
@@ -458,8 +480,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!XMakeAttributes.IsValidMSBuildRuntimeValue(runtime))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject
-                                (
+                        ProjectErrorUtilities.ThrowInvalidProject(
                                     errorLocation,
                                     "TaskLoadFailureInvalidTaskHostFactoryParameter",
                                     taskName,
@@ -468,8 +489,7 @@ namespace Microsoft.Build.BackEnd
                                     XMakeAttributes.MSBuildRuntimeValues.clr2,
                                     XMakeAttributes.MSBuildRuntimeValues.clr4,
                                     XMakeAttributes.MSBuildRuntimeValues.currentRuntime,
-                                    XMakeAttributes.MSBuildRuntimeValues.any
-                                );
+                                    XMakeAttributes.MSBuildRuntimeValues.any);
                     }
                 }
 
@@ -478,8 +498,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!XMakeAttributes.IsValidMSBuildArchitectureValue(architecture))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject
-                                (
+                        ProjectErrorUtilities.ThrowInvalidProject(
                                     errorLocation,
                                     "TaskLoadFailureInvalidTaskHostFactoryParameter",
                                     taskName,
@@ -488,8 +507,7 @@ namespace Microsoft.Build.BackEnd
                                     XMakeAttributes.MSBuildArchitectureValues.x86,
                                     XMakeAttributes.MSBuildArchitectureValues.x64,
                                     XMakeAttributes.MSBuildArchitectureValues.currentArchitecture,
-                                    XMakeAttributes.MSBuildArchitectureValues.any
-                                );
+                                    XMakeAttributes.MSBuildArchitectureValues.any);
                     }
                 }
             }

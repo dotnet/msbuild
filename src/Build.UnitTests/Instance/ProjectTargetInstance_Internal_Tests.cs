@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,8 +7,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
-using static Microsoft.Build.Engine.UnitTests.TestData.ProjectInstanceTestObjects;
 using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
+using static Microsoft.Build.Engine.UnitTests.TestData.ProjectInstanceTestObjects;
 
 #nullable disable
 
@@ -41,9 +41,8 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
                             CreateTargetItemGroup(),
                             CreateTargetOnError(),
                             CreateTargetTask()
-                        }
-                    ),
-                    new ReadOnlyCollection<ProjectOnErrorInstance>(new[] {CreateTargetOnError()})
+                        }),
+                    new ReadOnlyCollection<ProjectOnErrorInstance>(new[] {CreateTargetOnError() })
                 };
 
                 yield return new object[]
@@ -59,8 +58,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
                             CreateTargetTask(),
                             CreateTargetOnError(),
                             CreateTargetTask()
-                        }
-                    ),
+                        }),
                     new ReadOnlyCollection<ProjectOnErrorInstance>(new[]
                     {
                         CreateTargetOnError(),
@@ -78,7 +76,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
         {
             var original = CreateTarget(null, children, errorChildren);
 
-            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectTargetInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, copy, new TargetComparer());

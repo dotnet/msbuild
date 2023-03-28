@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 
@@ -13,9 +13,9 @@ namespace Microsoft.Build.UnGAC
     /// It runs at VS install-time as well as repair-time.
     /// It is intended to run as best effort. Meaning that if it fails, we avoid throwing and instead log it.
     /// </summary>
-    class Program
+    internal sealed class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {

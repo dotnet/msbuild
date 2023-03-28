@@ -1,24 +1,24 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using Microsoft.Build.UnitTests;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 using SdkResultImpl = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
 
 #nullable disable
 
@@ -87,8 +87,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             sdk,
                             "path",
                             "2.0.0",
-                            Enumerable.Empty<string>()
-                            ))
+                            Enumerable.Empty<string>()))
                 });
 
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
@@ -266,8 +265,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     sdk,
                     "path",
                     "1.0.0",
-                    Enumerable.Empty<string>()
-                    ));
+                    Enumerable.Empty<string>()));
 
             var service = new CachingSdkResolverService();
             service.InitializeForTests(
@@ -354,8 +352,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     version: null,
                     propertiesToAdd,
                     itemsToAdd,
-                    warnings: null
-                    ));
+                    warnings: null));
 
             SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
@@ -381,7 +378,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             Dictionary<string, string> propertiesToAdd;
             Dictionary<string, SdkResultItem> itemsToAdd;
-           
+
             CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
 
             var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
@@ -391,8 +388,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     version: "1.0",
                     propertiesToAdd,
                     itemsToAdd,
-                    warnings: null
-                    ));
+                    warnings: null));
 
             SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
@@ -430,7 +426,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new SdkResultImpl(
                     sdk,
-                    new []
+                    new[]
                     {
                         expectedPath1,
                         expectedPath2
@@ -438,8 +434,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     version: "1.0",
                     propertiesToAdd,
                     itemsToAdd,
-                    warnings: null
-                    ));
+                    warnings: null));
 
             SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
@@ -484,8 +479,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     version: "1.1",
                     propertiesToAdd,
                     itemsToAdd,
-                    warnings: null
-                    ));
+                    warnings: null));
 
             SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
@@ -522,8 +516,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     sdk,
                     "path",
                     "1.0.0",
-                    Enumerable.Empty<string>()
-                ));
+                    Enumerable.Empty<string>()));
 
             var service = new CachingSdkResolverService();
             service.InitializeForTests(
@@ -612,7 +605,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             isRunningInVisualStudio.ShouldBeTrue();
         }
 
-        private class MockLoaderStrategy : SdkResolverLoader
+        private sealed class MockLoaderStrategy : SdkResolverLoader
         {
             private List<SdkResolver> _resolvers;
             private List<(string ResolvableSdkPattern, SdkResolver Resolver)> _resolversWithPatterns;
@@ -654,7 +647,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             ElementLocation location)
             {
                 var manifests = new List<SdkResolverManifest>();
-                foreach(SdkResolver resolver in _resolvers)
+                foreach (SdkResolver resolver in _resolvers)
                 {
                     SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(resolver.Name, null, null);
                     manifests.Add(sdkResolverManifest);
@@ -664,8 +657,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(
                         pair.Resolver.Name,
                         null,
-                        new Regex(pair.ResolvableSdkPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(500))
-                    );
+                        new Regex(pair.ResolvableSdkPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(500)));
                     manifests.Add(sdkResolverManifest);
                 }
                 return manifests;
@@ -697,7 +689,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockResolverReturnsNull : SdkResolver
+        private sealed class MockResolverReturnsNull : SdkResolver
         {
             public override string Name => nameof(MockResolverReturnsNull);
 
@@ -706,7 +698,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory) => null;
         }
 
-        private class MockSdkResolver1 : SdkResolver
+        private sealed class MockSdkResolver1 : SdkResolver
         {
             public override string Name => nameof(MockSdkResolver1);
 
@@ -717,13 +709,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolver1 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("1"))
+                {
                     return factory.IndicateSuccess("resolverpath1", "version1");
+                }
 
                 return factory.IndicateFailure(new[] { "ERROR1" });
             }
         }
 
-        private class MockSdkResolver2 : SdkResolver
+        private sealed class MockSdkResolver2 : SdkResolver
         {
             public override string Name => nameof(MockSdkResolver2);
 
@@ -734,13 +728,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolver2 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("2"))
-                    return factory.IndicateSuccess("resolverpath2", "version2", new[] {"WARNING2"});
+                {
+                    return factory.IndicateSuccess("resolverpath2", "version2", new[] { "WARNING2" });
+                }
 
-                return factory.IndicateFailure(new[] {"ERROR2"}, new[] {"WARNING2"});
+                return factory.IndicateFailure(new[] { "ERROR2" }, new[] { "WARNING2" });
             }
         }
 
-        private class MockSdkResolverWithResolvableSdkPattern1 : SdkResolver
+        private sealed class MockSdkResolverWithResolvableSdkPattern1 : SdkResolver
         {
             public override string Name => nameof(MockSdkResolverWithResolvableSdkPattern1);
 
@@ -751,13 +747,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolverWithResolvableSdkPattern1 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("11"))
+                {
                     return factory.IndicateSuccess("resolverpathwithresolvablesdkpattern1", "version3");
+                }
 
                 return factory.IndicateFailure(new[] { "ERROR3" });
             }
         }
 
-        private class MockSdkResolverWithResolvableSdkPattern2 : SdkResolver
+        private sealed class MockSdkResolverWithResolvableSdkPattern2 : SdkResolver
         {
             public override string Name => nameof(MockSdkResolverWithResolvableSdkPattern2);
 
@@ -768,13 +766,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolverWithResolvableSdkPattern2 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("2"))
+                {
                     return factory.IndicateSuccess("resolverpathwithresolvablesdkpattern2", "version4", new[] { "WARNING4" });
+                }
 
                 return factory.IndicateFailure(new[] { "ERROR4" }, new[] { "WARNING4" });
             }
         }
 
-        private class MockSdkResolverWithState : SdkResolver
+        private sealed class MockSdkResolverWithState : SdkResolver
         {
             public const string Expected = "01713226A202458F97D9074168DF2618";
 
@@ -790,7 +790,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
                 if (resolverContext.State != null)
                 {
-                    return factory.IndicateSuccess((string) resolverContext.State, "1.0");
+                    return factory.IndicateSuccess((string)resolverContext.State, "1.0");
                 }
 
                 resolverContext.State = Expected;
@@ -799,7 +799,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private class MockSdkResolverThrows : SdkResolver
+        private sealed class MockSdkResolverThrows : SdkResolver
         {
             public override string Name => nameof(MockSdkResolverThrows);
             public override int Priority => 0;

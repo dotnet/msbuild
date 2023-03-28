@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
@@ -230,7 +231,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             this.Disk = this.ImmutableDisk.GetSubFolder("Mutable");
 
             List<string> stdFiles = new List<string>();
-            for (int i=0; i< stdFilesCount; i++)
+            for (int i = 0; i < stdFilesCount; i++)
             {
                 stdFiles.Add(this.ImmutableDisk.WriteProjectFile($"Proj{i}.proj", TestCollectionGroup.SampleProjectFile));
             }
@@ -253,7 +254,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 foreach (var p in linker.Collection.LoadedProjects)
                 {
                     if (!toKeep.Contains(p))
+                    {
                         toUnload.Add(p);
+                    }
                 }
 
                 foreach (var p in toUnload)

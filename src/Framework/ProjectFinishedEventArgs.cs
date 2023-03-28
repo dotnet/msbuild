@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -36,13 +36,11 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="projectFile">name of the project</param>
         /// <param name="succeeded">true indicates project built successfully</param>
-        public ProjectFinishedEventArgs
-        (
+        public ProjectFinishedEventArgs(
             string? message,
             string? helpKeyword,
             string? projectFile,
-            bool succeeded
-        )
+            bool succeeded)
             : this(message, helpKeyword, projectFile, succeeded, DateTime.UtcNow)
         {
         }
@@ -56,14 +54,12 @@ namespace Microsoft.Build.Framework
         /// <param name="projectFile">name of the project</param>
         /// <param name="succeeded">true indicates project built successfully</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
-        public ProjectFinishedEventArgs
-        (
+        public ProjectFinishedEventArgs(
             string? message,
             string? helpKeyword,
             string? projectFile,
             bool succeeded,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.projectFile = projectFile;

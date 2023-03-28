@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 
@@ -309,7 +309,7 @@ namespace Microsoft.Build.Tasks
             {
                 // The bitness of al.exe should match the platform being built
                 // Yoda condition prevents null reference exception if Platform is null.
-                string archToLookFor =  "x86".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? Platform :
+                string archToLookFor = "x86".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? Platform :
                                         "x64".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? ProcessorArchitecture.AMD64 : // x64 maps to AMD64 in GeneratePathToTool
                                         ProcessorArchitecture.CurrentProcessArchitecture;
 
@@ -353,19 +353,15 @@ namespace Microsoft.Build.Tasks
 
             commandLine.AppendSwitchIfNotNull("", SourceModules, new[] { "TargetFile" });
 
-            commandLine.AppendSwitchIfNotNull
-            (
+            commandLine.AppendSwitchIfNotNull(
                 "/embed:",
                 EmbedResources,
-                new[] { "LogicalName", "Access" }
-            );
+                new[] { "LogicalName", "Access" });
 
-            commandLine.AppendSwitchIfNotNull
-            (
+            commandLine.AppendSwitchIfNotNull(
                 "/link:",
                 LinkResources,
-                new[] { "LogicalName", "TargetFile", "Access" }
-            );
+                new[] { "LogicalName", "TargetFile", "Access" });
 
             // It's a good idea for the response file to be the very last switch passed, just
             // from a predictability perspective.  This is also consistent with the compiler

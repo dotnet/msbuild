@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -12,8 +15,8 @@ namespace Xunit.NetCore.Extensions
 {
     public class XunitTestClassRunnerWithAssemblyFixture : XunitTestClassRunner
     {
-        readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
-        readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
+        private readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
+        private readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
 
         public XunitTestClassRunnerWithAssemblyFixture(
             List<AssemblyFixtureAttribute> assemblyFixtureAttributes,
@@ -33,14 +36,18 @@ namespace Xunit.NetCore.Extensions
             {
                 // Instantiate all the fixtures
                 foreach (var fixtureAttr in assemblyFixtureAttributes.Where(a => a.LifetimeScope == AssemblyFixtureAttribute.Scope.Class))
+                {
                     assemblyFixtureMappings[fixtureAttr.FixtureType] = Activator.CreateInstance(fixtureAttr.FixtureType);
+                }
             });
         }
         protected override Task BeforeTestClassFinishedAsync()
         {
             // Make sure we clean up everybody who is disposable, and use Aggregator.Run to isolate Dispose failures
             foreach (var disposable in assemblyFixtureMappings.Values.OfType<IDisposable>())
+            {
                 Aggregator.Run(disposable.Dispose);
+            }
 
             return base.BeforeTestClassFinishedAsync();
         }

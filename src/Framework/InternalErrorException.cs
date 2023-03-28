@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -30,10 +30,8 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Creates an instance of this exception using the given message.
         /// </summary>
-        internal InternalErrorException
-        (
-            String message
-        ) :
+        internal InternalErrorException(
+            String message) :
             base("MSB0001: Internal MSBuild Error: " + message)
         {
             ConsiderDebuggerLaunch(message, null);
@@ -44,11 +42,9 @@ namespace Microsoft.Build.Framework
         /// Adds the inner exception's details to the exception message because most bug reporters don't bother
         /// to provide the inner exception details which is typically what we care about.
         /// </summary>
-        internal InternalErrorException
-        (
+        internal InternalErrorException(
             String message,
-            Exception innerException
-        ) :
+            Exception innerException) :
             base("MSB0001: Internal MSBuild Error: " + message + (innerException == null ? String.Empty : ("\n=============\n" + innerException.ToString() + "\n\n")), innerException)
         {
             ConsiderDebuggerLaunch(message, innerException);

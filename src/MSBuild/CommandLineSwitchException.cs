@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Serialization;
@@ -23,10 +23,8 @@ namespace Microsoft.Build.CommandLine
         /// This constructor initializes the exception message.
         /// </summary>
         /// <param name="message"></param>
-        private CommandLineSwitchException
-        (
-            string message
-        ) :
+        private CommandLineSwitchException(
+            string message) :
             base(message)
         {
             // do nothing
@@ -37,11 +35,9 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="message"></param>
         /// <param name="commandLineArg"></param>
-        private CommandLineSwitchException
-        (
+        private CommandLineSwitchException(
             string message,
-            string commandLineArg
-        ) :
+            string commandLineArg) :
             this(message)
         {
             this.commandLineArg = commandLineArg;
@@ -50,11 +46,9 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Serialization constructor
         /// </summary>
-        private CommandLineSwitchException
-        (
+        private CommandLineSwitchException(
             SerializationInfo info,
-            StreamingContext context
-        ) :
+            StreamingContext context) :
             base(info, context)
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));

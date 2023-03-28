@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 
 using Microsoft.Build.Shared.FileSystem;
 
@@ -124,9 +126,9 @@ namespace Microsoft.Build.Shared
         private const string ToolsVersionsRegistryPath = @"SOFTWARE\Microsoft\MSBuild\ToolsVersions";
 #endif // FEATURE_WIN32_REGISTRY
 
-#endregion // Constants
+        #endregion // Constants
 
-#region Static member variables
+        #region Static member variables
 
         /// <summary>
         /// By default when a root path is not specified we would like to use the program files directory \ reference assemblies\framework as the root location
@@ -396,9 +398,9 @@ namespace Microsoft.Build.Shared
         private static readonly Lazy<IReadOnlyDictionary<Version, DotNetFrameworkSpec>> DotNetFrameworkSpecDict = new(() => DotNetFrameworkSpecs().ToDictionary(spec => spec.Version));
         private static readonly Lazy<IReadOnlyDictionary<Version, VisualStudioSpec>> VisualStudioSpecDict = new(() => VisualStudioSpecs.Value.ToDictionary(spec => spec.Version));
 
-#endregion // Static member variables
+        #endregion // Static member variables
 
-#region Static properties
+        #region Static properties
 
         internal static string PathToDotNetFrameworkV11
         {
@@ -620,9 +622,9 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#endregion // Static properties
+        #endregion // Static properties
 
-#region Internal methods
+        #region Internal methods
 
         internal static string GetDotNetFrameworkSdkRootRegistryKey(Version dotNetFrameworkVersion, Version visualStudioVersion)
         {
@@ -762,14 +764,12 @@ namespace Microsoft.Build.Shared
         /// <param name="getDirectories">Delegate to method that can return filesystem entries.</param>
         /// <param name="architecture">.NET framework architecture</param>
         /// <returns>Will return 'null' if there is no target frameworks on this machine.</returns>
-        internal static string FindDotNetFrameworkPath
-        (
+        internal static string FindDotNetFrameworkPath(
             string currentRuntimePath,
             string prefix,
             DirectoryExists directoryExists,
             GetDirectories getDirectories,
-            DotNetFrameworkArchitecture architecture
-        )
+            DotNetFrameworkArchitecture architecture)
         {
             if (!NativeMethodsShared.IsWindows)
             {
@@ -1088,9 +1088,9 @@ namespace Microsoft.Build.Shared
         }
 #endif
 
-#endregion // Internal methods
+        #endregion // Internal methods
 
-#region Private methods
+        #region Private methods
 
         /// <summary>
         /// Will return the path to the dot net framework reference assemblies if they exist under the program files\reference assembies\microsoft\framework directory
@@ -1113,8 +1113,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Look for the given registry value under the given key.
         /// </summary>
-        private static string FindRegistryValueUnderKey
-        (
+        private static string FindRegistryValueUnderKey(
             string registryBaseKeyName,
             string registryKeyName,
             RegistryView registryView = RegistryView.Default)
@@ -1177,7 +1176,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#endregion
+        #endregion
 
         private class VisualStudioSpec
         {
@@ -1385,8 +1384,7 @@ namespace Microsoft.Build.Shared
                 // variables to null when that's what they are already.
                 if (NativeMethodsShared.IsWindows && !CheckForFrameworkInstallation(
                     this._dotNetFrameworkRegistryKey,
-                    this._dotNetFrameworkSetupRegistryInstalledName
-                    ))
+                    this._dotNetFrameworkSetupRegistryInstalledName))
                 {
                     return null;
                 }
@@ -1407,8 +1405,7 @@ namespace Microsoft.Build.Shared
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
                     (!FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
-                     !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll")))
-                    )
+                     !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll"))))
                 {
                     return null;
                 }
@@ -1726,7 +1723,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public override string GetPathToDotNetFrameworkReferenceAssemblies()
             {
-                if (this._pathToDotNetFrameworkReferenceAssemblies== null)
+                if (this._pathToDotNetFrameworkReferenceAssemblies == null)
                 {
 #if FEATURE_WIN32_REGISTRY
                     this._pathToDotNetFrameworkReferenceAssemblies = FindRegistryValueUnderKey(

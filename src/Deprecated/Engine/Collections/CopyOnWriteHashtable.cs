@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections;
@@ -22,9 +26,9 @@ namespace Microsoft.Build.BuildEngine
         private object sharedLock;
 
         // Carry around the StringComparer when possible to make Clear less expensive.
-        StringComparer stringComparer = null;
+        private StringComparer stringComparer = null;
 
-#region Construct
+        #region Construct
         /// <summary>
         /// Construct as a traditional data-backed hashtable.
         /// </summary>
@@ -101,7 +105,7 @@ namespace Microsoft.Build.BuildEngine
             this.sharedLock = new object();
             ConstructFrom(that);
         }
-        
+
         /// <summary>
         /// Implementation of construction logic.
         /// </summary>
@@ -136,11 +140,11 @@ namespace Microsoft.Build.BuildEngine
                 return this.readonlyData != null;
             }
         }
-#endregion
-#region Pass-through Hashtable methods.
-        public bool Contains(Object key) {return ReadOperation.Contains(key);}
-        public void Add(Object key, Object value) {WriteOperation.Add(key, value);}
-        public void Clear() 
+        #endregion
+        #region Pass-through Hashtable methods.
+        public bool Contains(Object key) { return ReadOperation.Contains(key); }
+        public void Add(Object key, Object value) { WriteOperation.Add(key, value); }
+        public void Clear()
         {
             lock (sharedLock)
             {
@@ -152,25 +156,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         IEnumerator IEnumerable.GetEnumerator() { return ((IEnumerable)ReadOperation).GetEnumerator(); }
-        public IDictionaryEnumerator GetEnumerator() {return ReadOperation.GetEnumerator();}
-        public void Remove(Object key) {WriteOperation.Remove(key);}        
-        public bool IsFixedSize { get { return ReadOperation.IsFixedSize; }}
-        public bool IsReadOnly {get {return ReadOperation.IsFixedSize;}}
-        public ICollection Keys {get {return ReadOperation.Keys;}}
-        public ICollection Values {get {return ReadOperation.Values;}}
+        public IDictionaryEnumerator GetEnumerator() { return ReadOperation.GetEnumerator(); }
+        public void Remove(Object key) { WriteOperation.Remove(key); }
+        public bool IsFixedSize { get { return ReadOperation.IsFixedSize; } }
+        public bool IsReadOnly { get { return ReadOperation.IsFixedSize; } }
+        public ICollection Keys { get { return ReadOperation.Keys; } }
+        public ICollection Values { get { return ReadOperation.Values; } }
         public void CopyTo(Array array, int arrayIndex) { ReadOperation.CopyTo(array, arrayIndex); }
-        public int Count{get { return ReadOperation.Count; }}
-        public bool IsSynchronized {get { return ReadOperation.IsSynchronized; }}
-        public Object SyncRoot {get { return ReadOperation.SyncRoot; }}
-        public bool ContainsKey(Object key)    {return ReadOperation.Contains(key);}
-        
-        public Object this[Object key] 
+        public int Count { get { return ReadOperation.Count; } }
+        public bool IsSynchronized { get { return ReadOperation.IsSynchronized; } }
+        public Object SyncRoot { get { return ReadOperation.SyncRoot; } }
+        public bool ContainsKey(Object key) { return ReadOperation.Contains(key); }
+
+        public Object this[Object key]
         {
-            get 
+            get
             {
                 return ReadOperation[key];
             }
-            set 
+            set
             {
                 lock (sharedLock)
                 {
@@ -189,7 +193,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
         }
-#endregion
+        #endregion
 
         /// <summary>
         /// Clone this.

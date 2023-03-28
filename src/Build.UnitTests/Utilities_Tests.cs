@@ -1,28 +1,22 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
-
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Shared;
-
+using Shouldly;
+using Xunit;
+using Xunit.Abstractions;
 using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-
 using Toolset = Microsoft.Build.Evaluation.Toolset;
-
-
 using XmlDocumentWithLocation = Microsoft.Build.Construction.XmlDocumentWithLocation;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
-
-using Xunit;
-using System.Collections.Generic;
-using System.IO;
-using Xunit.Abstractions;
-using Shouldly;
 
 #nullable disable
 
@@ -165,8 +159,7 @@ namespace Microsoft.Build.UnitTests
                     <Import Project=`$(MSBuildBinPath)\\Microsoft.CSharp.Targets` />
                 </Project>
             ");
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify ProjectExtensions cannot exist twice
@@ -183,8 +176,7 @@ namespace Microsoft.Build.UnitTests
                     <ProjectExtensions/>
                 </Project>
             ");
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that we can correctly pass a CDATA tag containing less-than signs into a property value.

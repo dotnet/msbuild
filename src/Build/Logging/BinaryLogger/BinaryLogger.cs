@@ -1,9 +1,11 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -55,7 +57,9 @@ namespace Microsoft.Build.Logging
         //   - TargetSkippedEventArgs: added SkipReason, OriginalBuildEventContext
         // version 15:
         //   - new record kind: ResponseFileUsedEventArgs
-        internal const int FileFormatVersion = 15;
+        // version 16:
+        //   - AssemblyLoadBuildEventArgs
+        internal const int FileFormatVersion = 16;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -63,6 +67,7 @@ namespace Microsoft.Build.Logging
         private ProjectImportsCollector projectImportsCollector;
         private string _initialTargetOutputLogging;
         private bool _initialLogImports;
+        private string _initialIsBinaryLoggerEnabled;
 
         /// <summary>
         /// Describes whether to collect the project files (including imported project files) used during the build.
@@ -112,9 +117,12 @@ namespace Microsoft.Build.Logging
         {
             _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
+            _initialIsBinaryLoggerEnabled = Environment.GetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED");
 
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "true");
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+            Environment.SetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED", bool.TrueString);
+
             Traits.Instance.EscapeHatches.LogProjectImports = true;
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
@@ -212,6 +220,8 @@ namespace Microsoft.Build.Logging
         {
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports ? "1" : "");
+            Environment.SetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED", _initialIsBinaryLoggerEnabled);
+
             Traits.Instance.EscapeHatches.LogProjectImports = _initialLogImports;
 
             if (projectImportsCollector != null)

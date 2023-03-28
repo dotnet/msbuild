@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections;
@@ -247,7 +251,8 @@ namespace Microsoft.Build.Conversion
             {
                 switch (c)
                 {
-                    case '\t': case ' ':
+                    case '\t':
+                    case ' ':
                         if (inQuotes)
                         {
                             option.Append(c);
@@ -260,15 +265,15 @@ namespace Microsoft.Build.Conversion
                                 option.Length = 0;
                             }
                         }
-                    break;
+                        break;
 
                     case '"':
                         inQuotes = !inQuotes;
-                    break;
+                        break;
 
                     default:
                         option.Append(c);
-                    break;
+                        break;
                 }
             }
 
@@ -291,7 +296,7 @@ namespace Microsoft.Build.Conversion
         {
             string matchedID = null;
             // First see if we have a match...
-            for (int i=0; i<compSwitchInfo.SwitchIDs.Length; i++)
+            for (int i = 0; i < compSwitchInfo.SwitchIDs.Length; i++)
             {
                 if (compSwitch.StartsWith(compSwitchInfo.SwitchIDs[i], StringComparison.Ordinal))
                 {
@@ -333,7 +338,7 @@ namespace Microsoft.Build.Conversion
                     {
                         Debug.Assert(false, "Cannot parse boolean switch: " + compSwitch);
                     }
-                break;
+                    break;
 
                 case SwitchValueType.SVT_String:
                     if (matchedID.Length < compSwitch.Length)
@@ -348,7 +353,7 @@ namespace Microsoft.Build.Conversion
                     {
                         Debug.Assert(false, "Cannot parse string switch: " + compSwitch);
                     }
-                break;
+                    break;
 
                 case SwitchValueType.SVT_MultiString:
                     Debug.Assert(
@@ -369,11 +374,11 @@ namespace Microsoft.Build.Conversion
                     {
                         Debug.Assert(false, "Cannot parse multistring switch: " + compSwitch);
                     }
-                break;
+                    break;
 
                 default:
                     Debug.Assert(false, "Unknown switch value type");
-                break;
+                    break;
             }
 
             return true;
@@ -405,7 +410,7 @@ namespace Microsoft.Build.Conversion
                                 compSwitchInfo.SwitchValue.ToString().ToLower(CultureInfo.InvariantCulture)
                             );
                         }
-                    break;
+                        break;
 
                     case SwitchValueType.SVT_String:
                         if (compSwitchInfo.SwitchValue != null)
@@ -415,7 +420,7 @@ namespace Microsoft.Build.Conversion
                                 compSwitchInfo.SwitchValue.ToString()
                             );
                         }
-                    break;
+                        break;
 
                     case SwitchValueType.SVT_MultiString:
                         Debug.Assert(compSwitchInfo.SwitchValue != null, "Expected non null value for multistring switch");
@@ -426,11 +431,11 @@ namespace Microsoft.Build.Conversion
                                 compSwitchInfo.SwitchValue.ToString()
                             );
                         }
-                    break;
+                        break;
 
                     default:
                         Debug.Assert(false, "Unknown switch value type");
-                    break;
+                        break;
                 }
             }
         }

@@ -1,10 +1,14 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -99,7 +103,12 @@ namespace Microsoft.Build.UnitTests
             parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
             // build and log into binary logger, mock logger, serial and parallel console loggers
-            ObjectModelHelpers.BuildProjectExpectSuccess(projectText, binaryLogger, mockLogFromBuild, serialFromBuild, parallelFromBuild);
+            // no logging on evaluation
+            using (ProjectCollection collection = new())
+            {
+                Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
+                project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, serialFromBuild, parallelFromBuild }).ShouldBeTrue();
+            }
 
             var mockLogFromPlayback = new MockLogger();
 
@@ -180,6 +189,55 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void AssemblyLoadsDuringTaskRunLogged()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                string contents = $"""
+                    <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Hello">
+                      <!-- This simple inline task displays "Hello, world!" -->
+                      <UsingTask
+                        TaskName="HelloWorld"
+                        TaskFactory="RoslynCodeTaskFactory"
+                        AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+                        <ParameterGroup />
+                        <Task> 
+                          <Using Namespace="System"/>
+                          <Using Namespace="System.IO"/>
+                          <Using Namespace="System.Reflection"/>
+                          <Code Type="Fragment" Language="cs">
+                    <![CDATA[
+                        // Display "Hello, world!"
+                        Log.LogMessage("Hello, world!");
+                    	//load assembly
+                    	var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                    	var diagAssembly = Assembly.LoadFrom(Path.Combine(Path.GetDirectoryName(assemblies[0].Location), "System.Diagnostics.Debug.dll"));
+                    	Log.LogMessage("Loaded: " + diagAssembly);
+                    ]]>
+                          </Code>
+                        </Task>
+                      </UsingTask>
+
+                    <Target Name="Hello">
+                      <HelloWorld />
+                    </Target>
+                    </Project>
+                    """;
+                TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
+                TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
+                BinaryLogger logger = new();
+                logger.Parameters = _logFile;
+                env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{logger.Parameters}", out bool success);
+                success.ShouldBeTrue();
+                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
+                success.ShouldBeTrue();
+                string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
+                text.ShouldContain("Assembly loaded during TaskRun (InlineCode.HelloWorld): System.Diagnostics.Debug");
+            }
+        }
+
+        [Fact]
         public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
         {
             using var buildManager = new BuildManager();
@@ -207,17 +265,19 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
         }
 
-        [Fact]
+        [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
             string testFileName = "foobar.txt";
             string symlinkName = "symlink1.txt";
             string symlinkLvl2Name = "symlink2.txt";
+            string emptyFileName = "empty.txt";
             TransientTestFolder testFolder = _env.DefaultTestDirectory.CreateDirectory("TestDir");
             TransientTestFolder testFolder2 = _env.DefaultTestDirectory.CreateDirectory("TestDir2");
             TransientTestFile testFile = testFolder.CreateFile(testFileName, string.Join(Environment.NewLine, new[] { "123", "456" }));
             string symlinkPath = Path.Combine(testFolder2.Path, symlinkName);
             string symlinkLvl2Path = Path.Combine(testFolder2.Path, symlinkLvl2Name);
+            string emptyFile = testFolder.CreateFile(emptyFileName).Path;
 
             string errorMessage = string.Empty;
             Assert.True(NativeMethodsShared.MakeSymbolicLink(symlinkPath, testFile.Path, ref errorMessage), errorMessage);
@@ -248,9 +308,12 @@ namespace Microsoft.Build.UnitTests
         <CreateItem Include=""{1}"">
             <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
         </CreateItem>
+        <CreateItem Include=""{2}"">
+            <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
+        </CreateItem>
     </Target>
 </Project>";
-            var testProject = string.Format(testProjectFmt, symlinkPath, symlinkLvl2Path);
+            var testProject = string.Format(testProjectFmt, symlinkPath, symlinkLvl2Path, emptyFile);
             ObjectModelHelpers.BuildProjectExpectSuccess(testProject, binaryLogger);
             var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
@@ -261,6 +324,7 @@ namespace Microsoft.Build.UnitTests
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkName));
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkLvl2Name));
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(emptyFileName));
         }
 
         [Fact]

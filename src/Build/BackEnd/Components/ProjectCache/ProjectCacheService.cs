@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -234,7 +234,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             try
             {
-                return (ProjectCachePluginBase) Activator.CreateInstance(pluginType)!;
+                return (ProjectCachePluginBase)Activator.CreateInstance(pluginType)!;
             }
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             IEnumerable<Type> GetTypes<T>(Assembly assembly)
             {
                 return assembly.ExportedTypes
-                    .Select(type => new {type, info = type.GetTypeInfo()})
+                    .Select(type => new { type, info = type.GetTypeInfo() })
                     .Where(
                         t => t.info.IsClass &&
                              t.info.IsPublic &&
@@ -374,8 +374,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                             _buildManager,
                             submission.BuildRequestData.Flags,
                             submission.SubmissionId,
-                            Scheduler.InProcNodeId
-                        );
+                            Scheduler.InProcNodeId);
 
                         // If we're taking the time to evaluate, avoid having other nodes to repeat the same evaluation.
                         // Based on the assumption that ProjectInstance serialization is faster than evaluating from scratch.
@@ -542,8 +541,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(
                 string solutionConfigurationXml,
                 string definingProjectPath,
-                Dictionary<string, string> templateGlobalProperties
-            )
+                Dictionary<string, string> templateGlobalProperties)
             {
                 // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
                 var doc = new XmlDocument();
