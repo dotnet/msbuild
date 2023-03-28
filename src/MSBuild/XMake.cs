@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1319,8 +1319,6 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    // List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
-
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
                     BuildResultCode? result = null;
@@ -1341,7 +1339,7 @@ namespace Microsoft.Build.CommandLine
                             messagesToLogInBuildLoggers.Add(
                                 new BuildManager.DeferredBuildMessage(
                                     String.Format("Included response file: {0}", responseFilePath),
-                                    MessageImportance.Normal,
+                                    MessageImportance.Low,
                                     responseFilePath));
                         }
                     }
