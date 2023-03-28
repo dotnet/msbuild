@@ -6,7 +6,7 @@ MSBuild recognizes a [few types of references](https://learn.microsoft.com/previ
 
 [.NET SDK projects](https://learn.microsoft.com/dotnet/core/project-sdk/overview) by default make all transitive references accessible as if they were direct references.
 
-This is required by the compiler and analyzers to be able to properly inspect the whole dependency or/and inheritance chain of types when deciding about particular checks.
+This is provided for the compiler and analyzers to be able to properly inspect the whole dependency or/and inheritance chain of types when deciding about particular checks.
 
 It is facilitated via `project.assets.json` file created by NuGet client during the restore operation. This file captures the whole transitive closure of the project dependency tree.
 
@@ -58,11 +58,23 @@ public class PersonsAccessor
 
 ## Access to transitive package references
 
-The transitive access to references works by default for package references as well. This can be opted out via `PrivateAssets=compile` on the `PackageReference` of the concern. (More details on [Controlling package dependency assets](https://learn.microsoft.com/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets))
+The transitive access to references works by default for package references as well. This can be opted out for referencing projects via `PrivateAssets=compile` on the `PackageReference` of the concern. (More details on [Controlling package dependency assets](https://learn.microsoft.com/nuget/consume-packages/package-references-in-project-files#controlling-dependency-assets)).
+
+When using this metadatum - the access to the package, its dirrect and transitive dependencies is **not** restricted for the project declaring the refenerence on the package in its `Project` element. It is restricted for the projects referencing the project (or package) that specified the `PackageRegerence` with the `PrivateAssets` metadatum.
 
 *Example*:
 
 In our previous example let's have `Repository Layer` reference `newtonsoft.json`:
+
+```mermaid
+flowchart LR
+    Service[Service Layer] --> Repository
+    Repository[Repository Layer] --> newtonsoft.json[newtonsoft.json]
+```
+
+We are not able to influence access to `newtonsoft.json` and its dependencies (would there be any) in the `Repository Layer`, but we can prevent it from propagating to `Service Layer`.
+
+`Repository Layer`:
 
 ```xml
 <ItemGroup>
@@ -73,7 +85,7 @@ In our previous example let's have `Repository Layer` reference `newtonsoft.json
 </ItemGroup>
 ```
 
-Then our `Service Layer` would have access to `newtonsoft.json` (unless opted out via `PrivateAssets=compile`):
+Unless opted out via `PrivateAssets=compile`, our `Service Layer` would have access to `newtonsoft.json`:
 
 ```csharp
 namespace Service;
@@ -85,6 +97,9 @@ public class PersonsAccessor
     private Repository.Persona _persona;
 }
 ```
+
+**Notes:**
+   `PrivateAssets` metadatum (and it's counterparts `IncludeAssets` and `ExcludeAssets`) is applicable to `PackageReference` and controls exposure of dependencies to the consuming projects, not the current project. It is currently not possible to prevent access to package references from within directly referencing project - this is purely decision of the package itself (as it can define it's dependencies as `PrivateAssets`).
 
 ## Not copying dependencies to output
 
