@@ -4,13 +4,13 @@ MSBuild recognizes a [few types of references](https://learn.microsoft.com/previ
 
 ## .NET SDK projects and access to transitive references
 
-For [.NET SDK projects](https://learn.microsoft.com/dotnet/core/project-sdk/overview) restore operation by default makes all transitive references accessible as if they were direct references.
+[.NET SDK projects](https://learn.microsoft.com/dotnet/core/project-sdk/overview) by default make all transitive references accessible as if they were direct references.
 
 This is required by the compiler and analyzers to be able to properly inspect the whole dependency or/and inheritance chain of types when deciding about particular checks.
 
 It is facilitated via `project.assets.json` file created by NuGet client during the restore operation. This file captures the whole transitive closure of the project dependency tree.
 
-SDK build tasks require existence of this file (hence the infamous `Assets file <path>\project.assets.json not found` if the MSBuild.exe is run without prior restore operation). It is used to reconstruct the `ProjectReference`s and `PackageReference`s for the project and pass them to MSBuild. For this reason MSBuild and compiler by default sees those transitive references as if they were direct references.
+SDK build tasks require existence of this file (hence the infamous `Assets file <path>\project.assets.json not found` if the MSBuild.exe is run without prior restore operation). It is used to reconstruct the `ProjectReference`s and create `Reference` items for the content of `PackageReference`s for the project and make them available to the rest of the build. For this reason MSBuild and compiler by default sees those transitive references as if they were direct references.
 
 ## Access to transitive project references
 
