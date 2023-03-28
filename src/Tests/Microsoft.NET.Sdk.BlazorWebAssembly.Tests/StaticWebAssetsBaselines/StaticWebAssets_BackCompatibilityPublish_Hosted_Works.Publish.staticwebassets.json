@@ -15,7 +15,7 @@
       "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework",
       "GetBuildAssetsTargets": "GetCurrentProjectStaticWebAssetsV2",
       "AdditionalBuildProperties": "",
-      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
+      "AdditionalBuildPropertiesToRemove": "RuntimeIdentifier;SelfContained;WebPublishProfileFile;TargetFramework"
     },
     {
       "Identity": "${ProjectPath}\\razorclasslibrary\\RazorClassLibrary.csproj",
