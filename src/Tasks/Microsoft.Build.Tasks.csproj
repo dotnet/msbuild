@@ -102,6 +102,9 @@
     <Compile Include="..\Shared\StrongNameHelpers.cs">
       <Link>StrongNameHelpers.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\SolutionConfiguration.cs">
+      <Link>SolutionConfiguration.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>

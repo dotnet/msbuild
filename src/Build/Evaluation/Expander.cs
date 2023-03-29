@@ -1946,11 +1946,16 @@ namespace Microsoft.Build.Evaluation
                 // If there are no items of the given type, then bail out early
                 if (itemsOfType.Count == 0)
                 {
-                    // .. but only if there isn't a function "Count()", since that will want to return something (zero) for an empty list
+                    // ... but only if there isn't a function "Count", since that will want to return something (zero) for an empty list
                     if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
                     {
-                        itemsFromCapture = new List<Pair<string, S>>();
-                        return false;
+                        // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
+                        if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) ||
+                            expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
+                        {
+                            itemsFromCapture = new List<Pair<string, S>>();
+                            return false;
+                        }
                     }
                 }
 

@@ -1039,6 +1039,13 @@
         <target state="translated">MSB3190: ClickOnce 不支持请求执行级别“{0}”。</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.BinaryFormatterUse">
+        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</source>
+        <target state="new">MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</target>
+        <note>{StrBegin="MSB3825: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
         <target state="translated">MSB3824: 要使用 .NET Core 进行生成，资源输入必须为 .txt 或 .resx 格式。</target>

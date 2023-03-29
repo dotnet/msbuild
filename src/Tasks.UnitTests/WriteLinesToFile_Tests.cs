@@ -154,6 +154,28 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [Fact]
+        public void RedundantParametersAreLogged()
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create(_output);
+
+            MockEngine engine = new(_output);
+
+            string file = testEnv.ExpectFile().Path;
+
+            WriteLinesToFile task = new()
+            {
+                BuildEngine = engine,
+                File = new TaskItem(file),
+                Lines = new ITaskItem[] { new TaskItem($"{nameof(RedundantParametersAreLogged)} Test") },
+                WriteOnlyWhenDifferent = true,
+                Overwrite = false,
+            };
+
+            task.Execute().ShouldBeTrue();
+            engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", file);
+        }
+
         /// <summary>
         /// Should create directory structure when target <see cref="WriteLinesToFile.File"/> does not exist.
         /// </summary>
