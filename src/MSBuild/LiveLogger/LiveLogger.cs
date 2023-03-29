@@ -32,11 +32,13 @@ internal sealed class LiveLogger : INodeLogger
     /// <summary>
     /// Encapsulates the per-node data shown in live node output.
     /// </summary>
-    internal record NodeStatus(string Project, string Target, Stopwatch Stopwatch)
+    internal record NodeStatus(string Project, string? TargetFramework, string Target, Stopwatch Stopwatch)
     {
         public override string ToString()
         {
-            return $"{Indentation}{Project} {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)";
+            return string.IsNullOrEmpty(TargetFramework)
+                ? $"{Indentation}{Project} {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)"
+                : $"{Indentation}{Project} [{TargetFramework}] {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)";
         }
     }
 
@@ -217,11 +219,6 @@ internal sealed class LiveLogger : INodeLogger
     /// </summary>
     private void BuildStarted(object sender, BuildStartedEventArgs e)
     {
-        _notableProjects.Clear();
-
-        _buildHasErrors = false;
-        _buildHasWarnings = false;
-
         _refresher = new Thread(ThreadProc);
         _refresher.Start();
 
@@ -235,6 +232,9 @@ internal sealed class LiveLogger : INodeLogger
     {
         _cts.Cancel();
         _refresher?.Join();
+
+        _notableProjects.Clear();
+        _usedNodes = 0;
 
         Terminal.BeginUpdate();
         try
@@ -252,6 +252,9 @@ internal sealed class LiveLogger : INodeLogger
         {
             Terminal.EndUpdate();
         }
+
+        _buildHasErrors = false;
+        _buildHasWarnings = false;
     }
 
     /// <summary>
@@ -271,7 +274,11 @@ internal sealed class LiveLogger : INodeLogger
 
         if (notable)
         {
-            _notableProjects[c] = new();
+            if (e.GlobalProperties?.TryGetValue("TargetFramework", out string? targetFramework) != true)
+            {
+                targetFramework = null;
+            }
+            _notableProjects[c] = new(targetFramework);
         }
 
         if (e.TargetNames == "Restore")
@@ -307,8 +314,8 @@ internal sealed class LiveLogger : INodeLogger
     /// Print a build result summary to the output.
     /// </summary>
     /// <param name="succeeded">True if the build completed with success.</param>
-    /// <param name="hadError">True if the build logged at least one error.</param>
-    /// <param name="hadWarning">True if the build logged at least one warning.</param>
+    /// <param name="hasError">True if the build has logged at least one error.</param>
+    /// <param name="hasWarning">True if the build has logged at least one warning.</param>
     private void PrintBuildResult(bool succeeded, bool hasError, bool hasWarning)
     {
         if (!succeeded)
@@ -397,6 +404,10 @@ internal sealed class LiveLogger : INodeLogger
                         string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
                         Terminal.Write(projectFile);
                         Terminal.Write(" ");
+                    }
+                    if (!string.IsNullOrEmpty(project.TargetFramework))
+                    {
+                        Terminal.Write($"[{project.TargetFramework}] ");
                     }
 
                     // Print 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
@@ -533,7 +544,7 @@ internal sealed class LiveLogger : INodeLogger
             project.Stopwatch.Start();
 
             string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
-            _nodes[NodeIndexForContext(buildEventContext)] = new(projectFile, e.TargetName, project.Stopwatch);
+            _nodes[NodeIndexForContext(buildEventContext)] = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
         }
     }
 
