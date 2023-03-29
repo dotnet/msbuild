@@ -318,7 +318,8 @@ internal sealed class LiveLogger : INodeLogger
 
                     if (e.ProjectFile is not null)
                     {
-                        Terminal.Write(e.ProjectFile);
+                        string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
+                        Terminal.Write(projectFile);
                         Terminal.Write(" ");
                     }
                     Terminal.WriteColor(TerminalColor.White, "completed");
@@ -445,7 +446,9 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             project.Stopwatch.Start();
-            _nodes[NodeIndexForContext(buildEventContext)] = new(e.ProjectFile, e.TargetName, project.Stopwatch);
+
+            string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
+            _nodes[NodeIndexForContext(buildEventContext)] = new(projectFile, e.TargetName, project.Stopwatch);
         }
     }
 
