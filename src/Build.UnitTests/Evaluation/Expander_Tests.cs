@@ -222,6 +222,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("false", itemsFalse[0].EvaluatedInclude);
         }
 
+        [Fact]
+        public void ExpandEmptyItemVectorFunctionWithAnyHaveMetadataValue()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateItemFunctionExpander();
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(project, "i");
+
+            IList<ProjectItemInstance> itemsEmpty = expander.ExpandIntoItemsLeaveEscaped("@(unsetItem->AnyHaveMetadataValue('Metadatum', 'value'))", itemFactory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
+            ProjectItemInstance pii = itemsEmpty.ShouldHaveSingleItem<ProjectItemInstance>();
+            pii.EvaluatedInclude.ShouldBe("false");
+        }
+
         /// <summary>
         /// Expand an item vector function Metadata()->DirectoryName()->Distinct()
         /// </summary>
