@@ -3,11 +3,8 @@
 
 using System;
 using System.IO;
-
 using Microsoft.Build.Tasks;
-
 using Shouldly;
-
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
