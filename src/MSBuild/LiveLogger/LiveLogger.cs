@@ -127,6 +127,8 @@ internal sealed class LiveLogger : INodeLogger
     /// <remarks>
     /// If LiveLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
     /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+    /// Important: Note that LiveLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
+    /// so changing this list may impact the minimum message importance logging optimization.
     /// </remarks>
     public static readonly string[] ConfigurableForwardingLoggerParameters =
     {
