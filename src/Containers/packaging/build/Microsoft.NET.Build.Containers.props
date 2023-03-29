@@ -3,7 +3,7 @@
          <!-- A flag representing this package existing in a project.  -->
         <SDKContainerSupportEnabled>true</SDKContainerSupportEnabled>
         <ContainerTaskFolderName>tasks</ContainerTaskFolderName>
-        <ContainerTaskFramework Condition="'$(MSBuildRuntimeType)' == 'Core'">net7.0</ContainerTaskFramework>
+        <ContainerTaskFramework Condition="'$(MSBuildRuntimeType)' == 'Core'">net8.0</ContainerTaskFramework>
         <ContainerTaskFramework Condition="'$(MSBuildRuntimeType)' == 'Full'">net472</ContainerTaskFramework>
         <ContainerizeFolderName>containerize</ContainerizeFolderName>
         <!--The folder where the custom task will be present. It points to inside the nuget package. -->

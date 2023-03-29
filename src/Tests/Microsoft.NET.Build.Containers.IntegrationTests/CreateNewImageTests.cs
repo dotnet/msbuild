@@ -9,6 +9,7 @@ using Microsoft.NET.Build.Containers.IntegrationTests;
 using Microsoft.NET.Build.Containers.UnitTests;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 
@@ -34,7 +35,7 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", "net8.0")
+        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
@@ -50,7 +51,7 @@ public class CreateNewImageTests
         task.BaseImageTag = "7.0";
 
         task.OutputRegistry = "localhost:5010";
-        task.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "Release", "net7.0", "linux-arm64", "publish");
+        task.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "linux-arm64", "publish");
         task.ImageName = "dotnet/testimage";
         task.ImageTags = new[] { "latest" };
         task.WorkingDirectory = "app/";
@@ -74,7 +75,7 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", "net8.0")
+        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
@@ -104,7 +105,7 @@ public class CreateNewImageTests
         cni.BaseImageTag = pcp.ParsedContainerTag;
         cni.ImageName = pcp.NewContainerImageName;
         cni.OutputRegistry = "localhost:5010";
-        cni.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "release", "net7.0");
+        cni.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "release", ToolsetInfo.CurrentTargetFramework);
         cni.WorkingDirectory = "app/";
         cni.Entrypoint = new TaskItem[] { new("ParseContainerProperties_EndToEnd") };
         cni.ImageTags = pcp.NewContainerTags;
@@ -130,7 +131,7 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", "net8.0")
+        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
@@ -169,7 +170,7 @@ public class CreateNewImageTests
         cni.BaseImageTag = pcp.ParsedContainerTag;
         cni.ImageName = pcp.NewContainerImageName;
         cni.OutputRegistry = pcp.NewContainerRegistry;
-        cni.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "release", "net7.0", "linux-x64");
+        cni.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "release", ToolsetInfo.CurrentTargetFramework, "linux-x64");
         cni.WorkingDirectory = "/app";
         cni.Entrypoint = new TaskItem[] { new("/app/Tasks_EndToEnd_With_EnvironmentVariable_Validation") };
         cni.ImageTags = pcp.NewContainerTags;
