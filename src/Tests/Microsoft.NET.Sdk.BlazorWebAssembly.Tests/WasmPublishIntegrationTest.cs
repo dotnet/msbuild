@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.IO;
 using System.IO.Compression;
@@ -1088,6 +1089,50 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             AssertRIDPublishOuput(publishCommand, testInstance, hosted: true);
         }
 
+        [ConditionalFact()]
+        public void Publish_HostedApp_WithRidSpecifiedAsArgument_NoSelfContained_Works()
+        {
+            // Arrange
+            var testAppName = "BlazorHostedRID";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+            testInstance.WithProjectChanges((project, doc) =>
+            {
+                if (Path.GetFileName(project) == "blazorhosted-rid.csproj")
+                {
+                    var projectReference = doc.Descendants("ProjectReference").Single();
+                    var itemGroup = projectReference.Parent;
+                    projectReference.Remove();
+                    itemGroup.Add(XElement.Parse("""
+    <ProjectReference Include="..\blazorwasm\blazorwasm.csproj">
+      <GlobalPropertiesToRemove>SelfContained</GlobalPropertiesToRemove>
+    </ProjectReference>
+    """));
+                }
+            });
+            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            publishCommand.WithRuntime("linux-x64");
+            publishCommand.WithWorkingDirectory(Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            var result = publishCommand.Execute("--no-self-contained", "/bl");
+            result.Should().Pass();
+            AssertRIDPublishOuput(publishCommand, testInstance, hosted: true, selfContained: false);
+        }
+
+        [Fact]
+        public void Publish_HostedApp_WithRidSpecifiedAsArgument_Works()
+        {
+            // Arrange
+            var testAppName = "BlazorHostedRID";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+
+            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            publishCommand.WithWorkingDirectory(Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            publishCommand.WithRuntime("linux-x64");
+            var result = publishCommand.Execute("--self-contained", "/bl");
+
+            result.Should().Pass();
+            AssertRIDPublishOuput(publishCommand, testInstance, hosted: true);
+        }
+
         [Fact]
         public void Publish_HostedApp_WithRid_Works()
         {
@@ -1111,6 +1156,89 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "libhostfxr.so" // Verify that we're doing a self-contained deployment
             });
+
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "RazorClassLibrary.dll",
+                "blazorwasm.dll",
+            });
+
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/blazor.boot.json",
+                "wwwroot/_framework/blazor.webassembly.js",
+                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/blazorwasm.dll",
+                "wwwroot/_framework/System.Text.Json.dll"
+            });
+
+
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                // Verify project references appear as static web assets
+                "wwwroot/_framework/RazorClassLibrary.dll",
+                // Also verify project references to the server project appear in the publish output
+                "RazorClassLibrary.dll",
+            });
+
+            // Verify static assets are in the publish directory
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/index.html"
+            });
+
+            // Verify static web assets from referenced projects are copied.
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
+                "wwwroot/_content/RazorClassLibrary/styles.css",
+            });
+
+            if (!hosted)
+            {
+                // Verify web.config
+                publishDirectory.Should().HaveFiles(new[]
+                {
+                    "web.config"
+                });
+            }
+
+            VerifyBootManifestHashes(testInstance, Path.Combine(publishDirectory.ToString(), "wwwroot"));
+
+            // Verify compression works
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/dotnet.wasm.br",
+                "wwwroot/_framework/blazorwasm.dll.br",
+                "wwwroot/_framework/RazorClassLibrary.dll.br",
+                "wwwroot/_framework/System.Text.Json.dll.br"
+            });
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/dotnet.wasm.gz",
+                "wwwroot/_framework/blazorwasm.dll.gz",
+                "wwwroot/_framework/RazorClassLibrary.dll.gz",
+                "wwwroot/_framework/System.Text.Json.dll.gz"
+            });
+
+            VerifyServiceWorkerFiles(testInstance, Path.Combine(publishDirectory.ToString(), "wwwroot"),
+                serviceWorkerPath: Path.Combine("serviceworkers", "my-service-worker.js"),
+                serviceWorkerContent: "// This is the production service worker",
+                assetsManifestPath: "custom-service-worker-assets.js");
+        }
+
+        private void AssertRIDPublishOuput(DotnetPublishCommand command, TestAsset testInstance, bool hosted = false, bool selfContained = true)
+        {
+            var publishDirectory = command.GetOutputDirectory(DefaultTfm, "Release", "linux-x64");
+
+            if(selfContained)
+            {
+                // Make sure the main project exists
+                publishDirectory.Should().HaveFiles(new[]
+                {
+                    "libhostfxr.so" // Verify that we're doing a self-contained deployment
+                });
+            }
 
             publishDirectory.Should().HaveFiles(new[]
             {
@@ -1361,6 +1489,21 @@ public class TestReference
             return JsonSerializer.Deserialize<BootJsonData>(
                 File.ReadAllText(path),
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+    }
+
+    internal static class DotNetPublishCommandExtensions
+    {
+        public static DirectoryInfo GetOutputDirectory(this DotnetPublishCommand command, string targetFramework = "netcoreapp1.1", string configuration = "Debug", string runtimeIdentifier = "")
+        {
+            targetFramework = targetFramework ?? string.Empty;
+            configuration = configuration ?? string.Empty;
+            runtimeIdentifier = runtimeIdentifier ?? string.Empty;
+
+            string output = Path.Combine(command.WorkingDirectory, "bin", configuration, targetFramework, runtimeIdentifier);
+            var baseDirectory = new DirectoryInfo(output);
+
+            return new DirectoryInfo(Path.Combine(baseDirectory.FullName, "publish"));
         }
     }
 }
