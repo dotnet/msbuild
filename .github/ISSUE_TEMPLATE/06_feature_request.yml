@@ -1,0 +1,27 @@
+name: 💡 Feature  Request
+description: Suggest an idea for this project.
+title: "[Feature Request]: "
+labels: ["Feature Request"]
+body:
+  - type: textarea
+    attributes:
+      label: Summary
+      description: Brief summary of what this proposal is about.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Background and Motivation
+      description: What is the problem we are solving and in what context did you encounter it?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed Feature
+      description: Please provide a sketch of the feature you are proposing.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Alternative Designs
+      description: If you have an idea how to achieve this new feature, let us know that here. Please include any pointers to code, relevant changes, or related issues you know of.
