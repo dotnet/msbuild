@@ -72,14 +72,12 @@ internal sealed class LiveLogger : INodeLogger
     private readonly List<string> _nodeStringBuffer = new();
 
     /// <summary>
-    /// Tracks the status of all interesting projects seen so far.
+    /// Tracks the status of all relevant projects seen so far.
     /// </summary>
     /// <remarks>
     /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
-    /// A project build is deemed "notable" if its initial targets don't contain targets usually called for internal
-    /// purposes, <seealso cref="IsNotableProject(ProjectStartedEventArgs)"/>.
     /// </remarks>
-    private readonly Dictionary<ProjectContext, Project> _notableProjects = new();
+    private readonly Dictionary<ProjectContext, Project> _projects = new();
 
     /// <summary>
     /// Number of live rows currently displaying node status.
@@ -233,7 +231,7 @@ internal sealed class LiveLogger : INodeLogger
         _cts.Cancel();
         _refresher?.Join();
 
-        _notableProjects.Clear();
+        _projects.Clear();
         _usedNodes = 0;
 
         Terminal.BeginUpdate();
@@ -268,17 +266,15 @@ internal sealed class LiveLogger : INodeLogger
             return;
         }
 
-        bool notable = IsNotableProject(e);
-
         ProjectContext c = new ProjectContext(buildEventContext);
 
-        if (notable)
+        if (_restoreContext is null)
         {
             if (e.GlobalProperties?.TryGetValue("TargetFramework", out string? targetFramework) != true)
             {
                 targetFramework = null;
             }
-            _notableProjects[c] = new(targetFramework);
+            _projects[c] = new(targetFramework);
         }
 
         if (e.TargetNames == "Restore")
@@ -287,27 +283,6 @@ internal sealed class LiveLogger : INodeLogger
             Terminal.WriteLine("Restoring");
             return;
         }
-    }
-
-    /// <summary>
-    /// A helper to determine if a given project build is to be considered notable.
-    /// </summary>
-    /// <param name="e">The <see cref="ProjectStartedEventArgs"/> corresponding to the project.</param>
-    /// <returns>True if the project is notable, false otherwise.</returns>
-    private bool IsNotableProject(ProjectStartedEventArgs e)
-    {
-        if (_restoreContext is not null)
-        {
-            return false;
-        }
-
-        return e.TargetNames switch
-        {
-            "" or "Restore" => true,
-            "GetTargetFrameworks" or "GetTargetFrameworksWithPlatformForSingleTargetFramework" or
-            "GetNativeManifest" or "GetCopyToOutputDirectoryItems" or "GetCopyToPublishDirectoryItems" => false,
-            _ => true,
-        };
     }
 
     /// <summary>
@@ -359,7 +334,7 @@ internal sealed class LiveLogger : INodeLogger
             {
                 _restoreContext = null;
 
-                Stopwatch projectStopwatch = _notableProjects[restoreContext].Stopwatch;
+                Stopwatch projectStopwatch = _projects[restoreContext].Stopwatch;
                 double duration = projectStopwatch.Elapsed.TotalSeconds;
                 projectStopwatch.Stop();
 
@@ -383,7 +358,7 @@ internal sealed class LiveLogger : INodeLogger
         }
 
         // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
-        if (_notableProjects.TryGetValue(c, out Project? project) && (project.OutputPath is not null || project.BuildMessages is not null))
+        if (_projects.TryGetValue(c, out Project? project) && (project.OutputPath is not null || project.BuildMessages is not null))
         {
             lock (_lock)
             {
@@ -539,7 +514,7 @@ internal sealed class LiveLogger : INodeLogger
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             project.Stopwatch.Start();
 
@@ -575,7 +550,7 @@ internal sealed class LiveLogger : INodeLogger
             // This will yield the node, so preemptively mark it idle
             _nodes[NodeIndexForContext(buildEventContext)] = null;
 
-            if (_notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
             {
                 project.Stopwatch.Stop();
             }
@@ -604,7 +579,7 @@ internal sealed class LiveLogger : INodeLogger
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
                 if (!projectFileName.IsEmpty &&
                     message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) &&
-                    _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+                    _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
                     project.OutputPath = outputPath;
@@ -619,7 +594,7 @@ internal sealed class LiveLogger : INodeLogger
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
             project.AddBuildMessage(MessageSeverity.Warning, $"⚠ {message}");
@@ -632,7 +607,7 @@ internal sealed class LiveLogger : INodeLogger
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
             project.AddBuildMessage(MessageSeverity.Error, $"❌ {message}");
