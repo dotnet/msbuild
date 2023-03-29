@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
     {
         public WasmAoTPublishIntegrationTest(ITestOutputHelper log) : base(log) { }
 
-        [RequiresMSBuildVersionFact("17.0.0")]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/31491")]
         public void AoT_Publish_InRelease_Works()
         {
             // Arrange
@@ -54,11 +54,11 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             };
 
             publishDirectory.Should().HaveFiles(expectedFiles);
-            
+
             new FileInfo(Path.Combine(blazorPublishDirectory, "css", "app.css")).Should().Contain(".publish");
         }
 
-        [RequiresMSBuildVersionFact("17.0.0")]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/31491")]
         public void AoT_Publish_WithExistingWebConfig_Works()
         {
             // Arrange
@@ -78,7 +78,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             new FileInfo(Path.Combine(publishDirectory.ToString(), "..", "web.config")).Should().Contain(webConfigContents);
         }
 
-        [RequiresMSBuildVersionFact("17.0.0")]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/31491")]
         public void AoT_Publish_HostedAppWithScopedCss_VisualStudio()
         {
             // Simulates publishing the same way VS does by setting BuildProjectReferences=false.

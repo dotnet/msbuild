@@ -43,7 +43,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.webassembly.js")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
-            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.timezones.blat")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm.gz")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm-minimal.dll")).Should().Exist();
         }
@@ -292,7 +291,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             bootJsonData.icuDataMode.Should().Be(ICUDataMode.Invariant);
             var runtime = bootJsonData.resources.runtime;
             runtime.Should().ContainKey("dotnet.wasm");
-            runtime.Should().ContainKey("dotnet.timezones.blat");
 
             runtime.Should().NotContainKey("icudt.dat");
             runtime.Should().NotContainKey("icudt_EFIGS.dat");
@@ -332,7 +330,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             bootJsonData.icuDataMode.Should().Be(ICUDataMode.Invariant);
             var runtime = bootJsonData.resources.runtime;
             runtime.Should().ContainKey("dotnet.wasm");
-            runtime.Should().ContainKey("dotnet.timezones.blat");
 
             runtime.Should().NotContainKey("icudt.dat");
             runtime.Should().NotContainKey("icudt_EFIGS.dat");
@@ -372,7 +369,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var runtime = bootJsonData.resources.runtime;
 
             runtime.Should().ContainKey("dotnet.wasm");
-            runtime.Should().ContainKey("dotnet.timezones.blat");
             runtime.Should().ContainKey(customIcuFilename);
             runtime.Should().NotContainKey("icudt.dat");
             runtime.Should().NotContainKey("icudt_CJK.dat");
@@ -415,7 +411,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var runtime = bootJsonData.resources.runtime;
 
             runtime.Should().ContainKey("dotnet.wasm");
-            runtime.Should().ContainKey("dotnet.timezones.blat");
             runtime.Should().ContainKey(customIcuFilename);
             runtime.Should().NotContainKey("icudt.dat");
             runtime.Should().NotContainKey("icudt_CJK.dat");
@@ -458,7 +453,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var runtime = bootJsonData.resources.runtime;
 
             runtime.Should().ContainKey("dotnet.wasm");
-            runtime.Should().ContainKey("dotnet.timezones.blat");
             runtime.Should().ContainKey("icudt.dat");
             runtime.Should().ContainKey("icudt_EFIGS.dat");
 
@@ -498,7 +492,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var runtime = bootJsonData.resources.runtime;
 
             runtime.Should().ContainKey("dotnet.wasm");
-            runtime.Should().ContainKey("dotnet.timezones.blat");
             runtime.Should().ContainKey("icudt.dat");
             runtime.Should().ContainKey("icudt_EFIGS.dat");
 
