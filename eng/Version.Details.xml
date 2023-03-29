@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="8.0.100-preview.4.23178.1">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="8.0.100-preview.4.23179.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>ecefbc9596d70141d070579086fc6f5b0732a3d0</Sha>
+      <Sha>ac3dd21b2c8a031704934d95e9ef8e2b06590595</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="8.0.0-preview.4.23179.4">
@@ -101,9 +101,9 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>3a6acd95c769bbbd2e5288d5844c81dee45fc958</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.6.0-preview.3.57">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.6.0-preview.3.58">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>80c3c74ca5c6d67912a19833e8cc2b10f875dc95</Sha>
+      <Sha>545330e99bc4a1c4e1ee3ee1e3d664419cec8efe</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.6.0-preview-20230323-05">
       <Uri>https://github.com/microsoft/vstest</Uri>
@@ -250,9 +250,9 @@
       <Sha>8374d5fca634a93458c84414b1604c12f765d1ab</Sha>
       <SourceBuild RepoName="command-line-api" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-externals" Version="8.0.0-alpha.1.23171.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-externals" Version="8.0.0-alpha.1.23178.2">
       <Uri>https://github.com/dotnet/source-build-externals</Uri>
-      <Sha>4b8fe3ff0cfb2b38901803c798c647ca8123c222</Sha>
+      <Sha>cbd9d61c5a92d7e4a0548a2c8ff4d1a28aaf6379</Sha>
       <SourceBuild RepoName="source-build-externals" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Deployment.DotNet.Releases" Version="1.0.0-preview6.1.23159.4">
