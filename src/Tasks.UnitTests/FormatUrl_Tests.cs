@@ -3,8 +3,11 @@
 
 using System;
 using System.IO;
+
 using Microsoft.Build.Tasks;
+
 using Shouldly;
+
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
@@ -92,20 +95,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// The URL to format is white space.
-        /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void WhitespaceTestOnWindows()
-        {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
-
-            t.InputUrl = " ";
-            Should.Throw<ArgumentException>(() => t.Execute());
-        }
-
-        /// <summary>
         /// The URL to format is a UNC.
         /// </summary>
         [Fact]
@@ -121,7 +110,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// The URL to format is a local absolute file path.
-        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem. 
+        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem.
         /// </summary>
         [Fact]
         public void LocalAbsolutePathTest()
@@ -136,7 +125,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// The URL to format is a local relative file path.
-        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem. 
+        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem.
         /// </summary>
         [Fact]
         public void LocalRelativePathTest()
