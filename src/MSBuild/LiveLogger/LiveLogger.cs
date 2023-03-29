@@ -322,8 +322,23 @@ internal sealed class LiveLogger : INodeLogger
                         Terminal.Write(projectFile);
                         Terminal.Write(" ");
                     }
-                    Terminal.WriteColor(TerminalColor.White, "completed");
 
+                    // Print 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and the diagnostic messages
+                    // reported during the build.
+                    if (!e.Succeeded)
+                    {
+                        Terminal.WriteColor(TerminalColor.Red, "failed");
+                    }
+                    else if (project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true)
+                    {
+                        Terminal.WriteColor(TerminalColor.Yellow, "succeeded with warnings");
+                    }
+                    else
+                    {
+                        Terminal.WriteColor(TerminalColor.Green, "succeeded");
+                    }
+
+                    // Print the output path as a link if we have it.
                     if (outputPath is not null)
                     {
                         ReadOnlySpan<char> url = outputPath.Value.Span;
@@ -334,11 +349,11 @@ internal sealed class LiveLogger : INodeLogger
                         }
                         catch
                         { }
-                        Terminal.WriteLine($"({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
+                        Terminal.WriteLine($" ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
                     }
                     else
                     {
-                        Terminal.WriteLine($"({duration:F1}s)");
+                        Terminal.WriteLine($" ({duration:F1}s)");
                     }
 
                     // Print diagnostic output under the Project -> Output line.
