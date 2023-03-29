@@ -34,7 +34,7 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", "net7.0")
+        new DotnetCommand(_testOutput, "new", "console", "-f", "net8.0")
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
@@ -74,7 +74,7 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", "net7.0")
+        new DotnetCommand(_testOutput, "new", "console", "-f", "net8.0")
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
@@ -130,7 +130,7 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", "net7.0")
+        new DotnetCommand(_testOutput, "new", "console", "-f", "net8.0")
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();

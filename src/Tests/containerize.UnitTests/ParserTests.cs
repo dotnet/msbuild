@@ -41,7 +41,7 @@ public class ParserTests
 
         ParseResult parseResult = command.Parse(baseArgs.ToArray());
 
-        Dictionary<string, string>? labels = parseResult.GetValueForOption(command.LabelsOption);
+        Dictionary<string, string>? labels = parseResult.GetValue(command.LabelsOption);
 
         Assert.NotNull(labels);
         Assert.Equal(6, labels.Count);
@@ -79,7 +79,7 @@ public class ParserTests
 
         ParseResult parseResult = command.Parse(string.Join(" ", baseArgs));
 
-        Dictionary<string, string>? labels = parseResult.GetValueForOption(command.LabelsOption);
+        Dictionary<string, string>? labels = parseResult.GetValue(command.LabelsOption);
 
         Assert.NotNull(labels);
         Assert.Equal(2, labels.Count);
@@ -153,7 +153,7 @@ public class ParserTests
         ParseResult parseResult = command.Parse(baseArgs.ToArray());
         Assert.Empty(parseResult.Errors);
 
-        Dictionary<string, string>? envVars = parseResult.GetValueForOption(command.EnvVarsOption);
+        Dictionary<string, string>? envVars = parseResult.GetValue(command.EnvVarsOption);
 
         Assert.NotNull(envVars);
         Assert.Equal(6, envVars.Count);
@@ -195,7 +195,7 @@ public class ParserTests
         ParseResult parseResult = command.Parse(baseArgs.ToArray());
         Assert.Empty(parseResult.Errors);
 
-        Port[]? ports = parseResult.GetValueForOption(command.PortsOption);
+        Port[]? ports = parseResult.GetValue(command.PortsOption);
 
         Assert.NotNull(ports);
         Assert.Equal(4, ports.Length);

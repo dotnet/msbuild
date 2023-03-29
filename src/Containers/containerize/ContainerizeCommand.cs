@@ -15,7 +15,7 @@ internal class ContainerizeCommand : RootCommand
     internal Argument<DirectoryInfo> PublishDirectoryArgument { get; } = new Argument<DirectoryInfo>(
             name: "PublishDirectory",
             description: "The directory for the build outputs to be published.")
-            .LegalFilePathsOnly().ExistingOnly();
+            .AcceptLegalFilePathsOnly().AcceptExistingOnly();
 
     internal Option<string> BaseRegistryOption { get; } = new Option<string>(
             name: "--baseregistry",
@@ -34,7 +34,7 @@ internal class ContainerizeCommand : RootCommand
     internal Option<string> BaseImageTagOption { get; } = new Option<string>(
             name: "--baseimagetag",
             description: "The base image tag. Ex: 6.0",
-            getDefaultValue: () => "latest");
+            defaultValueFactory: () => "latest");
 
     internal Option<string> OutputRegistryOption { get; } = new Option<string>(
             name: "--outputregistry",
@@ -82,7 +82,7 @@ internal class ContainerizeCommand : RootCommand
     internal Option<string> LocalContainerDaemonOption { get; } = new Option<string>(
             name: "--localcontainerdaemon",
             description: "The local daemon type to push to")
-        .FromAmong(KnownDaemonTypes.SupportedLocalDaemonTypes);
+        .AcceptOnlyFromAmong(KnownDaemonTypes.SupportedLocalDaemonTypes);
 
     internal Option<Dictionary<string, string>> LabelsOption { get; } = new(
             name: "--labels",
@@ -189,23 +189,23 @@ internal class ContainerizeCommand : RootCommand
 
         this.SetHandler(async (context) =>
         {
-            DirectoryInfo _publishDir = context.ParseResult.GetValueForArgument(PublishDirectoryArgument);
-            string _baseReg = context.ParseResult.GetValueForOption(BaseRegistryOption)!;
-            string _baseName = context.ParseResult.GetValueForOption(BaseImageNameOption)!;
-            string _baseTag = context.ParseResult.GetValueForOption(BaseImageTagOption)!;
-            string? _outputReg = context.ParseResult.GetValueForOption(OutputRegistryOption);
-            string _name = context.ParseResult.GetValueForOption(ImageNameOption)!;
-            string[] _tags = context.ParseResult.GetValueForOption(ImageTagsOption)!;
-            string _workingDir = context.ParseResult.GetValueForOption(WorkingDirectoryOption)!;
-            string[] _entrypoint = context.ParseResult.GetValueForOption(EntrypointOption)!;
-            string[]? _entrypointArgs = context.ParseResult.GetValueForOption(EntrypointArgsOption);
-            Dictionary<string, string> _labels = context.ParseResult.GetValueForOption(LabelsOption) ?? new Dictionary<string, string>();
-            Port[]? _ports = context.ParseResult.GetValueForOption(PortsOption);
-            Dictionary<string, string> _envVars = context.ParseResult.GetValueForOption(EnvVarsOption) ?? new Dictionary<string, string>();
-            string _rid = context.ParseResult.GetValueForOption(RidOption)!;
-            string _ridGraphPath = context.ParseResult.GetValueForOption(RidGraphPathOption)!;
-            string _localContainerDaemon = context.ParseResult.GetValueForOption(LocalContainerDaemonOption)!;
-            string? _containerUser = context.ParseResult.GetValueForOption(ContainerUserOption);
+            DirectoryInfo _publishDir = context.ParseResult.GetValue(PublishDirectoryArgument);
+            string _baseReg = context.ParseResult.GetValue(BaseRegistryOption)!;
+            string _baseName = context.ParseResult.GetValue(BaseImageNameOption)!;
+            string _baseTag = context.ParseResult.GetValue(BaseImageTagOption)!;
+            string? _outputReg = context.ParseResult.GetValue(OutputRegistryOption);
+            string _name = context.ParseResult.GetValue(ImageNameOption)!;
+            string[] _tags = context.ParseResult.GetValue(ImageTagsOption)!;
+            string _workingDir = context.ParseResult.GetValue(WorkingDirectoryOption)!;
+            string[] _entrypoint = context.ParseResult.GetValue(EntrypointOption)!;
+            string[]? _entrypointArgs = context.ParseResult.GetValue(EntrypointArgsOption);
+            Dictionary<string, string> _labels = context.ParseResult.GetValue(LabelsOption) ?? new Dictionary<string, string>();
+            Port[]? _ports = context.ParseResult.GetValue(PortsOption);
+            Dictionary<string, string> _envVars = context.ParseResult.GetValue(EnvVarsOption) ?? new Dictionary<string, string>();
+            string _rid = context.ParseResult.GetValue(RidOption)!;
+            string _ridGraphPath = context.ParseResult.GetValue(RidGraphPathOption)!;
+            string _localContainerDaemon = context.ParseResult.GetValue(LocalContainerDaemonOption)!;
+            string? _containerUser = context.ParseResult.GetValue(ContainerUserOption);
             await ContainerBuilder.ContainerizeAsync(
                 _publishDir,
                 _workingDir,
