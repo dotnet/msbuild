@@ -85,6 +85,21 @@ internal sealed class LiveLogger : INodeLogger
     private int _usedNodes = 0;
 
     /// <summary>
+    /// The timestamp of the <see cref="IEventSource.BuildStarted"/> event.
+    /// </summary>
+    private DateTime _buildStartTime;
+
+    /// <summary>
+    /// True if the build has encountered at least one error.
+    /// </summary>
+    private bool _buildHasErrors;
+
+    /// <summary>
+    /// True if the build has encountered at least one warning.
+    /// </summary>
+    private bool _buildHasWarnings;
+
+    /// <summary>
     /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
     /// bot restoring.
     /// </summary>
@@ -165,9 +180,6 @@ internal sealed class LiveLogger : INodeLogger
         eventSource.MessageRaised += new BuildMessageEventHandler(MessageRaised);
         eventSource.WarningRaised += new BuildWarningEventHandler(WarningRaised);
         eventSource.ErrorRaised += new BuildErrorEventHandler(ErrorRaised);
-
-        _refresher = new Thread(ThreadProc);
-        _refresher.Start();
     }
 
     /// <summary>
@@ -201,17 +213,45 @@ internal sealed class LiveLogger : INodeLogger
     }
 
     /// <summary>
-    /// The <see cref="IEventSource.BuildStarted"/> callback. Unused.
+    /// The <see cref="IEventSource.BuildStarted"/> callback.
     /// </summary>
     private void BuildStarted(object sender, BuildStartedEventArgs e)
     {
+        _notableProjects.Clear();
+
+        _buildHasErrors = false;
+        _buildHasWarnings = false;
+
+        _refresher = new Thread(ThreadProc);
+        _refresher.Start();
+
+        _buildStartTime = e.Timestamp;
     }
 
     /// <summary>
-    /// The <see cref="IEventSource.BuildFinished"/> callback. Unused.
+    /// The <see cref="IEventSource.BuildFinished"/> callback.
     /// </summary>
     private void BuildFinished(object sender, BuildFinishedEventArgs e)
     {
+        _cts.Cancel();
+        _refresher?.Join();
+
+        Terminal.BeginUpdate();
+        try
+        {
+
+            Terminal.WriteLine("");
+            Terminal.Write("Build ");
+
+            PrintBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
+
+            double duration = (e.Timestamp - _buildStartTime).TotalSeconds;
+            Terminal.WriteLine($" in {duration:F1}s");
+        }
+        finally
+        {
+            Terminal.EndUpdate();
+        }
     }
 
     /// <summary>
@@ -261,6 +301,35 @@ internal sealed class LiveLogger : INodeLogger
             "GetNativeManifest" or "GetCopyToOutputDirectoryItems" or "GetCopyToPublishDirectoryItems" => false,
             _ => true,
         };
+    }
+
+    /// <summary>
+    /// Print a build result summary to the output.
+    /// </summary>
+    /// <param name="succeeded">True if the build completed with success.</param>
+    /// <param name="hadError">True if the build logged at least one error.</param>
+    /// <param name="hadWarning">True if the build logged at least one warning.</param>
+    private void PrintBuildResult(bool succeeded, bool hasError, bool hasWarning)
+    {
+        if (!succeeded)
+        {
+            // If the build failed, we print one of three red strings.
+            string text = (hasError, hasWarning) switch
+            {
+                (true, _) => "failed with errors",
+                (false, true) => "failed with warnings",
+                _ => "failed",
+            };
+            Terminal.WriteColor(TerminalColor.Red, text);
+        }
+        else if (hasWarning)
+        {
+            Terminal.WriteColor(TerminalColor.Yellow, "succeeded with warnings");
+        }
+        else
+        {
+            Terminal.WriteColor(TerminalColor.Green, "succeeded");
+        }
     }
 
     /// <summary>
@@ -330,20 +399,14 @@ internal sealed class LiveLogger : INodeLogger
                         Terminal.Write(" ");
                     }
 
-                    // Print 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and the diagnostic messages
-                    // reported during the build.
-                    if (!e.Succeeded)
-                    {
-                        Terminal.WriteColor(TerminalColor.Red, "failed");
-                    }
-                    else if (project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true)
-                    {
-                        Terminal.WriteColor(TerminalColor.Yellow, "succeeded with warnings");
-                    }
-                    else
-                    {
-                        Terminal.WriteColor(TerminalColor.Green, "succeeded");
-                    }
+                    // Print 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
+                    // reported during build.
+                    bool haveErrors = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Error) == true;
+                    bool haveWarnings = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true;
+                    PrintBuildResult(e.Succeeded, haveErrors, haveWarnings);
+
+                    _buildHasErrors |= haveErrors;
+                    _buildHasWarnings |= haveWarnings;
 
                     // Print the output path as a link if we have it.
                     if (outputPath is not null)
@@ -568,9 +631,6 @@ internal sealed class LiveLogger : INodeLogger
     /// <inheritdoc/>
     public void Shutdown()
     {
-        _cts.Cancel();
-        _refresher?.Join();
-
         Terminal.Dispose();
     }
 }
