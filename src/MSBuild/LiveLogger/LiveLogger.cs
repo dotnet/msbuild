@@ -36,9 +36,14 @@ internal sealed class LiveLogger : INodeLogger
     {
         public override string ToString()
         {
-            return $"{Project} {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)";
+            return $"{Indentation}{Project} {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)";
         }
     }
+
+    /// <summary>
+    /// The indentation to use for all build output.
+    /// </summary>
+    private const string Indentation = "  ";
 
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
@@ -316,6 +321,8 @@ internal sealed class LiveLogger : INodeLogger
                     double duration = project.Stopwatch.Elapsed.TotalSeconds;
                     ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
+                    Terminal.Write(Indentation);
+
                     if (e.ProjectFile is not null)
                     {
                         string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
@@ -367,7 +374,7 @@ internal sealed class LiveLogger : INodeLogger
                                 MessageSeverity.Error => TerminalColor.Red,
                                 _ => TerminalColor.Default,
                             };
-                            Terminal.WriteColorLine(color, $"  {buildMessage.Message}");
+                            Terminal.WriteColorLine(color, $"{Indentation}{Indentation}{buildMessage.Message}");
                         }
                     }
 
