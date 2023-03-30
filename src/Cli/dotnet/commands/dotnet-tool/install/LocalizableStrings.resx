@@ -235,7 +235,4 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
   <data name="CreateManifestIfNeededOptionDescription" xml:space="preserve">
     <value>Create tool manifest when installing tools if manifest not exist.</value>
   </data>
-  <data name="CreateManifestIfNeededOptionName" xml:space="preserve">
-    <value>MANIFEST</value>
-  </data>
 </root>
