@@ -158,7 +158,6 @@
   <PropertyGroup>
     <MicrosoftAspNetCoreMvcRazorExtensionsToolingInternalPackageVersion>7.0.0-preview.23167.3</MicrosoftAspNetCoreMvcRazorExtensionsToolingInternalPackageVersion>
     <MicrosoftCodeAnalysisRazorToolingInternalVersion>7.0.0-preview.23167.3</MicrosoftCodeAnalysisRazorToolingInternalVersion>
-    <MicrosoftAspNetCoreRazorSourceGeneratorToolingInternalPackageVersion>7.0.0-preview.23151.4</MicrosoftAspNetCoreRazorSourceGeneratorToolingInternalPackageVersion>
     <MicrosoftNETSdkRazorSourceGeneratorsTransportPackageVersion>7.0.0-preview.23167.3</MicrosoftNETSdkRazorSourceGeneratorsTransportPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
