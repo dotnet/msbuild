@@ -88,8 +88,10 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             ShouldRerender = false;
+            // Summary (messages, warnings and errors)
+            string lineSummary = MessageCount + WarningCount + ErrorCount > 0 ? $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)" : string.Empty;
             // Project details
-            string lineContents = ANSIBuilder.Alignment.SpaceBetween(ToANSIString(), $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)", Console.BufferWidth - 1);
+            string lineContents = ANSIBuilder.Alignment.SpaceBetween(ToANSIString(), lineSummary, Console.BufferWidth - 1);
             // Create or update line
             if (Line is null)
             {
