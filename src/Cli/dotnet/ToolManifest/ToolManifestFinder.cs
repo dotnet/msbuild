@@ -212,7 +212,13 @@ namespace Microsoft.DotNet.ToolManifest
 
         private string WriteManifestFile(DirectoryPath folderPath)
         {
-            var manifestFileContent = "{\r\n  \"version\": 1,\r\n  \"isRoot\": true,\r\n  \"tools\": {}\r\n}";
+            var manifestFileContent = """
+                {
+                  "version": 1,
+                  "isRoot": true,
+                  "tools": {}
+                }
+                """;
             _fileSystem.Directory.CreateDirectory(Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName));
             string manifestFileLocation = Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName, Constants.ToolManifestFileName);
             _fileSystem.File.WriteAllText(manifestFileLocation, manifestFileContent);
