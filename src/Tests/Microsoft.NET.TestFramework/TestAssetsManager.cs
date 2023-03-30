@@ -108,12 +108,15 @@ namespace Microsoft.NET.TestFramework
 
             var testAsset = CreateTestProjectsInDirectory(testProjects, testDestinationDirectory, targetExtension);
 
-            new DotnetNewCommand(Log, "sln")
+            var slnCreationResult = new DotnetNewCommand(Log, "sln")
                 .WithVirtualHive()
                 .WithWorkingDirectory(testDestinationDirectory)
-                .Execute()
-                .Should()
-                .Pass();
+                .Execute();
+
+            if (slnCreationResult.ExitCode != 0)
+            {
+                throw new Exception($"This test failed during a call to dotnet new. If {testDestinationDirectory} is valid, it's likely this test is failing because of dotnet new. If there are failing .NET new tests, please fix those and then see if this test still fails.");
+            }
 
             foreach (var testProject in testProjects)
             {
