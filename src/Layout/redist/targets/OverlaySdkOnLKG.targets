@@ -62,7 +62,6 @@
     <OverrideAndCreateBundledNETCoreAppPackageVersion
       Stage0MicrosoftNETCoreAppRefPackageVersionPath="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledVersions.props"
       MicrosoftNETCoreAppRefPackageVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
-      MicrosoftNETILLinkTasksPackageVersion="$(MicrosoftNETILLinkTasksPackageVersion)"
       NewSDKVersion="$(Version)"
       OutputPath="$(SdkOutputDirectory)/Microsoft.NETCoreSdk.BundledVersions.props"/>
 
