@@ -179,6 +179,12 @@ namespace Microsoft.DotNet.ToolManifest
                             EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
         }
 
+        /*
+        The --create-manifest-if-needed will use the following priority to choose the folder where the tool manifest goes:
+            1. Walk up the directory tree searching for one that has a.git subfolder
+            2. Walk up the directory tree searching for one that has a .sln/git file in it
+            3. Use the current working directory
+        */
         private DirectoryPath GetDirectoryToCreateToolManifest()
         {
             DirectoryPath? currentSearchDirectory = _probeStart;
