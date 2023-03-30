@@ -7,11 +7,6 @@
         <target state="new">Create tool manifest when installing tools if manifest not exist.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CreateManifestIfNeededOptionName">
-        <source>MANIFEST</source>
-        <target state="new">MANIFEST</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
         <target state="translated">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de herramienta (--tool-path), solo pueden estar una cada vez. Especifique solo una de las opciones: {0}.</target>
