@@ -38,10 +38,7 @@ namespace Microsoft.DotNet.Cli
             ArgumentHelpName = LocalizableStrings.FrameworkOptionName
         };
 
-        public static readonly Option<bool> CreateManifestIfNeededOption = new Option<bool>("--create-manifest-if-needed", LocalizableStrings.CreateManifestIfNeededOptionDescription)
-        {
-            ArgumentHelpName = LocalizableStrings.CreateManifestIfNeededOptionName
-        };
+        public static readonly Option<bool> CreateManifestIfNeededOption = new Option<bool>("--create-manifest-if-needed", LocalizableStrings.CreateManifestIfNeededOptionDescription);
 
         public static readonly Option<bool> PrereleaseOption = ToolSearchCommandParser.PrereleaseOption;
 
