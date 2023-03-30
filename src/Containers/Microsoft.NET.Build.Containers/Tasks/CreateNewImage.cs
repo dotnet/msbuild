@@ -80,6 +80,11 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
 
         SetPorts(imageBuilder, ExposedPorts);
 
+        if (ContainerUser is { } user)
+        {
+            imageBuilder.SetUser(user);
+        }
+
         // at the end of this step, if any failed then bail out.
         if (Log.HasLoggedErrors)
         {

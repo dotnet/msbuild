@@ -206,7 +206,7 @@ internal class ContainerizeCommand : RootCommand
             string _ridGraphPath = context.ParseResult.GetValueForOption(RidGraphPathOption)!;
             string _localContainerDaemon = context.ParseResult.GetValueForOption(LocalContainerDaemonOption)!;
             string? _containerUser = context.ParseResult.GetValueForOption(ContainerUserOption);
-            await ContainerBuilder.ContainerizeAsync(
+            context.ExitCode = await ContainerBuilder.ContainerizeAsync(
                 _publishDir,
                 _workingDir,
                 _baseReg,
