@@ -38,7 +38,7 @@
 
     <Target Name="PreparePackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec">
         <PropertyGroup>
-            <PackageReleaseNotesFile>../docs/ReleaseNotes/v0.5.0.md</PackageReleaseNotesFile>
+            <PackageReleaseNotesFile>../docs/ReleaseNotes/v7.0.300.md</PackageReleaseNotesFile>
             <PackageReleaseNotes>$([System.IO.File]::ReadAllText($(PackageReleaseNotesFile)))</PackageReleaseNotes>
         </PropertyGroup>
     </Target>
