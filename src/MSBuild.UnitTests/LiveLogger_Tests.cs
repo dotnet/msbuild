@@ -36,18 +36,31 @@ namespace Microsoft.Build.UnitTests
 
 #pragma warning disable CS0067
         public event BuildMessageEventHandler? MessageRaised;
+
         public event BuildErrorEventHandler? ErrorRaised;
+
         public event BuildWarningEventHandler? WarningRaised;
+
         public event BuildStartedEventHandler? BuildStarted;
+
         public event BuildFinishedEventHandler? BuildFinished;
+
         public event ProjectStartedEventHandler? ProjectStarted;
+
         public event ProjectFinishedEventHandler? ProjectFinished;
+
         public event TargetStartedEventHandler? TargetStarted;
+
         public event TargetFinishedEventHandler? TargetFinished;
+
         public event TaskStartedEventHandler? TaskStarted;
+
         public event TaskFinishedEventHandler? TaskFinished;
+
         public event CustomBuildEventHandler? CustomEventRaised;
+
         public event BuildStatusEventHandler? StatusEventRaised;
+
         public event AnyEventHandler? AnyEventRaised;
 #pragma warning restore CS0067
 
