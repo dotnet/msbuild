@@ -461,7 +461,11 @@ internal sealed class LiveLogger : INodeLogger
             project.Stopwatch.Start();
 
             string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
-            _nodes[NodeIndexForContext(buildEventContext)] = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
+            NodeStatus? nodeStatus = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
+            lock (_lock)
+            {
+                _nodes[NodeIndexForContext(buildEventContext)] = nodeStatus;
+            }
         }
     }
 
@@ -490,7 +494,10 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && e.TaskName == "MSBuild")
         {
             // This will yield the node, so preemptively mark it idle
-            _nodes[NodeIndexForContext(buildEventContext)] = null;
+            lock (_lock)
+            {
+                _nodes[NodeIndexForContext(buildEventContext)] = null;
+            }
 
             if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
             {
