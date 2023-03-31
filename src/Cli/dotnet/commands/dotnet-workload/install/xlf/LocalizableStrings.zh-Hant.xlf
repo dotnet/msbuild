@@ -198,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">機器有擱置中的重新開機。安裝將繼續，但您可能需要重新開機。</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">機器有擱置中的重新開機。安裝將繼續，但您可能需要重新開機。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

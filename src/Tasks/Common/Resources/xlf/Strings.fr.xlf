@@ -153,8 +153,8 @@
         <note>{StrBegin="NETSDK1194: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
-        <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</source>
-        <target state="translated">NETSDK1134: La génération d'une solution avec un RuntimeIdentifier spécifique n'est pas prise en charge. Si vous voulez publier pour un RID unique, spécifiez le RID au niveau du projet individuel à la place.</target>
+        <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specify the RID at the individual project level instead.</source>
+        <target state="needs-review-translation">NETSDK1134: La génération d'une solution avec un RuntimeIdentifier spécifique n'est pas prise en charge. Si vous voulez publier pour un RID unique, spécifiez le RID au niveau du projet individuel à la place.</target>
         <note>{StrBegin="NETSDK1134: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSupportedOSPlatformVersionHigherThanTargetPlatformVersion">

@@ -8,8 +8,9 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.Sdk.WebAssembly;
 
-namespace Microsoft.NET.Sdk.BlazorWebAssembly
+namespace Microsoft.NET.Sdk.WebAssembly
 {
     // This target computes the list of publish static web assets based on the changes that happen during publish and the list of build static
     // web assets.
@@ -25,10 +26,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
     //   * We update static web assets for satellite assemblies and compressed assets accordingly.
     // * Look at the list of "native" assets and determine whether we need to create new publish assets for the current build assets or if we need to
     //   update the native assets because the app was ahead of time compiled.
-    public class ComputeBlazorPublishAssets : Task
+    public class ComputeWasmPublishAssets : Task
     {
         [Required]
         public ITaskItem[] ResolvedFilesToPublish { get; set; }
+
+        public ITaskItem CustomIcuCandidate { get; set; }
 
         [Required]
         public ITaskItem[] WasmAotAssets { get; set; }
@@ -50,6 +53,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         [Required]
         public string DotNetJsVersion { get; set; }
+
+        public bool FingerprintDotNetJs { get; set; }
 
         [Output]
         public ITaskItem[] NewCandidates { get; set; }
@@ -191,7 +196,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 {
                     var aotDotNetJs = WasmAotAssets.SingleOrDefault(a => $"{a.GetMetadata("FileName")}{a.GetMetadata("Extension")}" == "dotnet.js");
                     ITaskItem newDotNetJs = null;
-                    if (aotDotNetJs != null)
+                    if (aotDotNetJs != null && FingerprintDotNetJs)
                     {
                         newDotNetJs = new TaskItem(Path.GetFullPath(aotDotNetJs.ItemSpec), asset.CloneCustomMetadata());
                         newDotNetJs.SetMetadata("OriginalItemSpec", aotDotNetJs.ItemSpec);
@@ -372,7 +377,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 var assetTraitName = asset.GetMetadata("AssetTraitName");
                 switch (assetTraitName)
                 {
-                    case "BlazorWebAssemblyResource":
+                    case "WasmResource":
                         ITaskItem newAsemblyAsset = null;
                         if (linkedAssets.TryGetValue(asset.ItemSpec, out var linked))
                         {
@@ -522,9 +527,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             Dictionary<string, ITaskItem> resolvedSymbolsToPublish,
             Dictionary<string, ITaskItem> resolvedNativeAssetToPublish)
         {
-            foreach (var candidate in ResolvedFilesToPublish)
+            var resolvedFilesToPublish = ResolvedFilesToPublish.ToList();
+            if (AssetsComputingHelper.TryGetAssetFilename(CustomIcuCandidate, out string customIcuCandidateFilename))
             {
-                if (ComputeBlazorBuildAssets.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
+                var customIcuCandidate = AssetsComputingHelper.GetCustomIcuAsset(CustomIcuCandidate);
+                resolvedFilesToPublish.Add(customIcuCandidate);
+            }
+
+            foreach (var candidate in resolvedFilesToPublish)
+            {
+                if (AssetsComputingHelper.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuCandidateFilename, out var reason))
                 {
                     Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                     if (!resolvedFilesToPublishToRemove.ContainsKey(candidate.ItemSpec))
@@ -613,6 +625,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         private static bool IsCulture(string traitName) => string.Equals(traitName, "Culture", StringComparison.Ordinal);
 
-        private static bool IsWebAssemblyResource(string traitName) => string.Equals(traitName, "BlazorWebAssemblyResource", StringComparison.Ordinal);
+        private static bool IsWebAssemblyResource(string traitName) => string.Equals(traitName, "WasmResource", StringComparison.Ordinal);
     }
 }

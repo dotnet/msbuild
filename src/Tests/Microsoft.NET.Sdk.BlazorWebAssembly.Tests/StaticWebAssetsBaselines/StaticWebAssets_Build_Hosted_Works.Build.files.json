@@ -390,8 +390,6 @@
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.pdb.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.js",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.js.gz",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.wasm",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.wasm.gz",
   "${OutputPath}\\wwwroot\\_framework\\icudt.dat",

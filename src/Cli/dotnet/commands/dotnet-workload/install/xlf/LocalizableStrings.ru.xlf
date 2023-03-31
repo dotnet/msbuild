@@ -198,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Ожидается перезагрузка компьютера. Установка будет продолжена, но, возможно, потребуется перезагрузить компьютер.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Ожидается перезагрузка компьютера. Установка будет продолжена, но, возможно, потребуется перезагрузить компьютер.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

@@ -8,15 +8,18 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.Sdk.WebAssembly;
 
-namespace Microsoft.NET.Sdk.BlazorWebAssembly
+namespace Microsoft.NET.Sdk.WebAssembly
 {
     // This task does the build work of processing the project inputs and producing a set of pseudo-static web assets
     // specific to Blazor.
-    public class ComputeBlazorBuildAssets : Task
+    public class ComputeWasmBuildAssets : Task
     {
         [Required]
         public ITaskItem[] Candidates { get; set; }
+
+        public ITaskItem CustomIcuCandidate { get; set; }
 
         [Required]
         public ITaskItem[] ProjectAssembly { get; set; }
@@ -41,6 +44,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         [Required]
         public bool CopySymbols { get; set; }
+
+        public bool FingerprintDotNetJs { get; set; }
 
         [Output]
         public ITaskItem[] AssetCandidates { get; set; }
@@ -67,10 +72,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     return true;
                 }
 
+                if (AssetsComputingHelper.TryGetAssetFilename(CustomIcuCandidate, out string customIcuCandidateFilename))
+                {
+                    var customIcuCandidate = AssetsComputingHelper.GetCustomIcuAsset(CustomIcuCandidate);
+                    assetCandidates.Add(customIcuCandidate);
+                }
+
                 for (int i = 0; i < Candidates.Length; i++)
                 {
                     var candidate = Candidates[i];
-                    if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
+                    if (AssetsComputingHelper.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, customIcuCandidateFilename, out var reason))
                     {
                         Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                         filesToRemove.Add(candidate);
@@ -95,8 +106,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         continue;
                     }
 
-                    var destinationSubPath = candidate.GetMetadata("DestinationSubPath");
-                    if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
+                    if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js" && FingerprintDotNetJs)
                     {
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
                         var cacheBustedDotNetJSFileName = $"dotnet.{candidate.GetMetadata("NuGetPackageVersion")}.{itemHash}.js";
@@ -112,20 +122,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         var newRelativePath = $"_framework/{cacheBustedDotNetJSFileName}";
                         newDotNetJs.SetMetadata("RelativePath", newRelativePath);
 
-                        newDotNetJs.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                        newDotNetJs.SetMetadata("AssetTraitName", "WasmResource");
                         newDotNetJs.SetMetadata("AssetTraitValue", "native");
 
                         assetCandidates.Add(newDotNetJs);
                         continue;
                     }
-                    else if (string.IsNullOrEmpty(destinationSubPath))
-                    {
-                        var relativePath = candidate.GetMetadata("FileName") + candidate.GetMetadata("Extension");
-                        candidate.SetMetadata("RelativePath", $"_framework/{relativePath}");
-                    }
                     else
                     {
-                        candidate.SetMetadata("RelativePath", $"_framework/{destinationSubPath}");
+                        string relativePath = AssetsComputingHelper.GetCandidateRelativePath(candidate);
+                        candidate.SetMetadata("RelativePath", relativePath);
                     }
 
                     // Workaround for https://github.com/dotnet/aspnetcore/issues/37574.
@@ -226,7 +232,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 case ".dll":
                     if (string.IsNullOrEmpty(candidate.GetMetadata("AssetTraitName")))
                     {
-                        candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                        candidate.SetMetadata("AssetTraitName", "WasmResource");
                         candidate.SetMetadata("AssetTraitValue", "runtime");
                     }
                     if (string.Equals(candidate.GetMetadata("ResolvedFrom"), "{HintPathFromItem}", StringComparison.Ordinal))
@@ -237,57 +243,17 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 case ".wasm":
                 case ".blat":
                 case ".dat" when filename.StartsWith("icudt"):
-                    candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                    candidate.SetMetadata("AssetTraitName", "WasmResource");
                     candidate.SetMetadata("AssetTraitValue", "native");
                     break;
                 case ".pdb":
-                    candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                    candidate.SetMetadata("AssetTraitName", "WasmResource");
                     candidate.SetMetadata("AssetTraitValue", "symbol");
                     candidate.RemoveMetadata("OriginalItemSpec");
                     break;
                 default:
                     break;
             }
-        }
-
-        public static bool ShouldFilterCandidate(
-            ITaskItem candidate,
-            bool timezoneSupport,
-            bool invariantGlobalization,
-            bool copySymbols,
-            out string reason)
-        {
-            var extension = candidate.GetMetadata("Extension");
-            var fileName = candidate.GetMetadata("FileName");
-            var assetType = candidate.GetMetadata("AssetType");
-            var fromMonoPackage = string.Equals(
-                candidate.GetMetadata("NuGetPackageId"),
-                "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-                StringComparison.Ordinal);
-
-            reason = extension switch
-            {
-                ".a" when fromMonoPackage => "extension is .a is not supported.",
-                ".c" when fromMonoPackage => "extension is .c is not supported.",
-                ".h" when fromMonoPackage => "extension is .h is not supported.",
-                // It is safe to filter out all XML files since we are not interested in any XML file from the list
-                // of ResolvedFilesToPublish to become a static web asset. Things like this include XML doc files and
-                // so on.
-                ".xml" => "it is a documentation file",
-                ".rsp" when fromMonoPackage => "extension is .rsp is not supported.",
-                ".props" when fromMonoPackage => "extension is .props is not supported.",
-                ".blat" when !timezoneSupport => "timezone support is not enabled.",
-                ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
-                ".json" when fromMonoPackage && (fileName == "emcc-props" || fileName == "package") => $"{fileName}{extension} is not used by Blazor",
-                ".ts" when fromMonoPackage && fileName == "dotnet.d" => "dotnet type definition is not used by Blazor",
-                ".ts" when fromMonoPackage && fileName == "dotnet-legacy.d" => "dotnet type definition is not used by Blazor",
-                ".js" when assetType == "native" && fileName != "dotnet" => $"{fileName}{extension} is not used by Blazor",
-                ".pdb" when !copySymbols => "copying symbols is disabled",
-                ".symbols" when fromMonoPackage => "extension .symbols is not required.",
-                _ => null
-            };
-
-            return reason != null;
         }
     }
 }

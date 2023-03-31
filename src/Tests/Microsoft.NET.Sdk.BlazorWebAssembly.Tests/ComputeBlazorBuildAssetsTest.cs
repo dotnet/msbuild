@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.Sdk.WebAssembly;
 using Moq;
 using Xunit;
 
@@ -17,7 +18,7 @@ public class ComputeBlazorBuildAssetsTest
     public void Execute_FixesReferencesTo()
     {
         // Arrange
-        var taskInstance = new ComputeBlazorBuildAssets
+        var taskInstance = new ComputeWasmBuildAssets
         {
             Candidates = new[]
             {

@@ -11,6 +11,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup>
+    <UsingMicrosoftNETSdkWebProjectSystem>true</UsingMicrosoftNETSdkWebProjectSystem>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Web.ProjectSystem.props"
 		Condition="Exists('$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.Web.ProjectSystem.props')" />
 

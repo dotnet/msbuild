@@ -27,7 +27,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     }
 
     [Serializable]
-    abstract class WorkloadManifestException: Exception
+    abstract public class WorkloadManifestException: Exception
     {
         protected WorkloadManifestException() { }
         protected WorkloadManifestException(string messageFormat, params object?[] args) : base(string.Format (messageFormat, args)) { }

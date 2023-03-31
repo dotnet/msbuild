@@ -11,14 +11,17 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<string, string>;
 
-namespace Microsoft.NET.Sdk.BlazorWebAssembly
+namespace Microsoft.NET.Sdk.WebAssembly
 {
-    public class GenerateBlazorWebAssemblyBootJson : Task
+    public class GenerateWasmBootJson : Task
     {
+        private static readonly string[] jiterpreterOptions = new[] { "jiterpreter-traces-enabled", "jiterpreter-interp-entry-enabled", "jiterpreter-jit-call-enabled" };
+
         [Required]
         public string AssemblyPath { get; set; }
 
@@ -36,9 +39,19 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         public bool LoadAllICUData { get; set; }
 
+        public bool LoadCustomIcuData { get; set; }
+
         public string InvariantGlobalization { get; set; }
 
         public ITaskItem[] ConfigurationFiles { get; set; }
+
+        public ITaskItem[] Extensions { get; set; }
+        
+        public string StartupMemoryCache { get; set; }
+
+        public string Jiterpreter { get; set; }
+
+        public string RuntimeOptions { get; set; }
 
         [Required]
         public string OutputPath { get; set; }
@@ -75,6 +88,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             {
                 icuDataMode = ICUDataMode.All;
             }
+            else if (LoadCustomIcuData)
+            {
+                icuDataMode = ICUDataMode.Custom;
+            }
 
             var result = new BootJsonData
             {
@@ -85,7 +102,35 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 resources = new ResourcesData(),
                 config = new List<string>(),
                 icuDataMode = icuDataMode,
+                startupMemoryCache = ParseOptionalBool(StartupMemoryCache),
             };
+
+            if (!String.IsNullOrEmpty(RuntimeOptions))
+            {
+                string[] runtimeOptions = RuntimeOptions.Split(' ');
+                result.runtimeOptions = runtimeOptions;
+            }
+
+            bool? jiterpreter = ParseOptionalBool(Jiterpreter);
+            if (jiterpreter != null)
+            {
+                var runtimeOptions = result.runtimeOptions?.ToHashSet() ?? new HashSet<string>(3);
+                foreach (var jiterpreterOption in jiterpreterOptions)
+                {
+                    if (jiterpreter == true)
+                    {
+                        if (!runtimeOptions.Contains($"--no-{jiterpreterOption}"))
+                            runtimeOptions.Add($"--{jiterpreterOption}");
+                    }
+                    else
+                    {
+                        if (!runtimeOptions.Contains($"--{jiterpreterOption}"))
+                            runtimeOptions.Add($"--no-{jiterpreterOption}");
+                    }
+                }
+
+                result.runtimeOptions = runtimeOptions.ToArray();
+            }
 
             // Build a two-level dictionary of the form:
             // - assembly:
@@ -148,7 +193,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as an app assembly.", resource.ItemSpec);
                         resourceList = resourceData.assembly;
                     }
-                    else if (string.Equals(assetTraitName, "BlazorWebAssemblyResource", StringComparison.OrdinalIgnoreCase) &&
+                    else if (string.Equals(assetTraitName, "WasmResource", StringComparison.OrdinalIgnoreCase) &&
                             string.Equals(assetTraitValue, "native", StringComparison.OrdinalIgnoreCase))
                     {
                         Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as a native application resource.", resource.ItemSpec);
@@ -170,8 +215,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         Debug.Assert(!string.IsNullOrEmpty(targetPath), "Target path for '{0}' must exist.", resource.ItemSpec);
                         AddResourceToList(resource, resourceList, targetPath);
                         continue;
-                    } 
-                    else if (string.Equals("BlazorWebAssemblyResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
+                    }
+                    else if (string.Equals("WasmResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
                              assetTraitValue.StartsWith("extension:", StringComparison.OrdinalIgnoreCase))
                     {
                         Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as an extension resource '{1}'.", resource.ItemSpec, assetTraitValue);
@@ -235,6 +280,22 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 }
             }
 
+            if (Extensions != null && Extensions.Length > 0)
+            {
+                var configSerializer = new DataContractJsonSerializer(typeof(Dictionary<string, object>), new DataContractJsonSerializerSettings
+                {
+                    UseSimpleDictionaryFormat = true
+                });
+
+                result.extensions = new Dictionary<string, Dictionary<string, object>> ();
+                foreach (var configExtension in Extensions)
+                {
+                    var key = configExtension.GetMetadata("key");
+                    var config = (Dictionary<string, object>)configSerializer.ReadObject(File.OpenRead(configExtension.ItemSpec));
+                    result.extensions[key] = config;
+                }
+            }
+
             var serializer = new DataContractJsonSerializer(typeof(BootJsonData), new DataContractJsonSerializerSettings
             {
                 UseSimpleDictionaryFormat = true
@@ -251,6 +312,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     resourceList.Add(resourceKey, $"sha256-{resource.GetMetadata("FileHash")}");
                 }
             }
+        }
+
+        private bool? ParseOptionalBool(string value)
+        {
+            if (String.IsNullOrEmpty(value) || !bool.TryParse(value, out var boolValue))
+                return null;
+
+            return boolValue;
         }
 
         private void AddToAdditionalResources(ITaskItem resource, Dictionary<string, AdditionalAsset> additionalResources, string resourceName, string behavior)
@@ -270,15 +339,5 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         {
             return (lazyLoadedAssembly = LazyLoadedAssemblies?.SingleOrDefault(a => a.ItemSpec == fileName)) != null;
         }
-    }
-
-    [DataContract]
-    public class AdditionalAsset
-    {
-        [DataMember(Name = "hash")]
-        public string Hash { get; set; }
-
-        [DataMember(Name = "behavior")]
-        public string Behavior { get; set; }
     }
 }

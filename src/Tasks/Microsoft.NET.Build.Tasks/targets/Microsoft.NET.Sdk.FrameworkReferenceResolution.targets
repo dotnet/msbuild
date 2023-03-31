@@ -421,7 +421,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ResolveOffByDefaultAnalyzers" AfterTargets="ResolveTargetingPackAssets"
           Condition="'@(FrameworkReference)' != ''">
     <ItemGroup>
-      <OffByDefaultAnalyzer Include="Microsoft.AspNetCore.Http.Generators"
+      <OffByDefaultAnalyzer Include="Microsoft.AspNetCore.Http.RequestDelegateGenerator"
                             IsEnabled="$(EnableRequestDelegateGenerator)"/>
     </ItemGroup>
 

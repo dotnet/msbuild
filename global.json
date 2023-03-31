@@ -1,6 +1,6 @@
 {
   "tools": {
-    "dotnet": "8.0.100-alpha.1.23067.5",
+    "dotnet": "8.0.100-preview.4.23174.9",
     "runtimes": {
       "dotnet": [
         "$(VSRedistCommonNetCoreSharedFrameworkx6480PackageVersion)"
@@ -11,7 +11,7 @@
     }
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "8.0.0-beta.23120.1",
-    "Microsoft.DotNet.Helix.Sdk": "8.0.0-beta.23120.1"
+    "Microsoft.DotNet.Arcade.Sdk": "8.0.0-beta.23177.4",
+    "Microsoft.DotNet.Helix.Sdk": "8.0.0-beta.23177.4"
   }
 }

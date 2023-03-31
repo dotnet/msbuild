@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         public IList<PackInfo> InstalledPacks;
         public List<PackInfo> RolledBackPacks = new List<PackInfo>();
-        public IList<(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache)> InstalledManifests = 
+        public IList<(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache)> InstalledManifests =
             new List<(ManifestVersionUpdate manifestUpdate, DirectoryPath?)>();
         public string CachePath;
         public bool GarbageCollectionCalled = false;
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public int ExitCode => 0;
 
-        public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, 
+        public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null,
             IList<PackInfo> installedPacks = null, bool failingGarbageCollection = false)
         {
             InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload, installedWorkloads);
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null) => throw new NotImplementedException();
 
-        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
+        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null, bool cleanAllPacks = false)
         {
             if (FailingGarbageCollection)
             {
