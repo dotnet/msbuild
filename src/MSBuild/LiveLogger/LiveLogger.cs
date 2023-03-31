@@ -28,17 +28,16 @@ internal sealed class LiveLogger : INodeLogger
 
     private readonly Dictionary<ProjectContext, Stopwatch> _projectTimeCounter = new();
 
-    private int _usedNodes = 0;
-
     private ProjectContext? _restoreContext;
 
     private Thread? _refresher;
 
-    private readonly List<string> _nodeStringBuffer = new();
+    private NodesFrame _currentFrame = new(Array.Empty<NodeStatus>());
 
     private Encoding? _originalOutputEncoding;
 
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
+
     public string Parameters { get => ""; set { } }
 
     /// <summary>
@@ -97,11 +96,7 @@ internal sealed class LiveLogger : INodeLogger
 
             lock (_lock)
             {
-                if (UpdateNodeStringBuffer())
-                {
-                    EraseNodes();
-                    DisplayNodes();
-                }
+                DisplayNodes();
             }
         }
 
@@ -184,10 +179,7 @@ internal sealed class LiveLogger : INodeLogger
 
                 double duration = _notableProjects[restoreContext].Stopwatch.Elapsed.TotalSeconds;
 
-                UpdateNodeStringBuffer();
                 EraseNodes();
-                Console.WriteLine($"\x1b[{_usedNodes + 1}F");
-                Console.Write($"\x1b[0J");
                 Console.WriteLine($"Restore complete ({duration:F1}s)");
                 DisplayNodes();
                 return;
@@ -198,7 +190,6 @@ internal sealed class LiveLogger : INodeLogger
         {
             lock (_lock)
             {
-                UpdateNodeStringBuffer();
                 EraseNodes();
 
                 Project project = _notableProjects[c];
@@ -236,66 +227,27 @@ internal sealed class LiveLogger : INodeLogger
         }
     }
 
-    private bool UpdateNodeStringBuffer()
-    {
-        bool stringBufferWasUpdated = false;
-
-        int i = 0;
-        foreach (NodeStatus? n in _nodes)
-        {
-            if (n is null)
-            {
-                continue;
-            }
-            string str = n.ToString();
-
-            if (i < _nodeStringBuffer.Count)
-            {
-                if (_nodeStringBuffer[i] != str)
-                {
-                    _nodeStringBuffer[i] = str;
-                    stringBufferWasUpdated = true;
-                }
-            }
-            else
-            {
-                _nodeStringBuffer.Add(str);
-                stringBufferWasUpdated = true;
-            }
-            i++;
-        }
-
-        if (i < _nodeStringBuffer.Count)
-        {
-            _nodeStringBuffer.RemoveRange(i, _nodeStringBuffer.Count - i);
-            stringBufferWasUpdated = true;
-        }
-
-        return stringBufferWasUpdated;
-    }
-
     private void DisplayNodes()
     {
-        foreach (string str in _nodeStringBuffer)
-        {
-            Console.Out.WriteLine(FitToWidth(str));
-        }
-        _usedNodes = _nodeStringBuffer.Count;
-    }
+        NodesFrame newFrame = new NodesFrame(_nodes);
+        string rendered = newFrame.Render(_currentFrame);
 
-    private ReadOnlySpan<char> FitToWidth(ReadOnlySpan<char> input)
-    {
-        return input.Slice(0, Math.Min(input.Length, Console.BufferWidth - 1));
+        // Move cursor back to 1st line of nodes
+        Console.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
+        Console.Write(rendered);
+
+        _currentFrame = newFrame;
     }
 
     private void EraseNodes()
     {
-        if (_usedNodes == 0)
+        if (_currentFrame.NodesCount == 0)
         {
             return;
         }
-        Console.WriteLine($"\x1b[{_usedNodes + 1}F");
+        Console.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
         Console.Write($"\x1b[0J");
+        _currentFrame.Clear();
     }
 
     private void TargetStarted(object sender, TargetStartedEventArgs e)
@@ -382,6 +334,125 @@ internal sealed class LiveLogger : INodeLogger
         if (_originalOutputEncoding is not null)
         {
             Console.OutputEncoding = _originalOutputEncoding;
+        }
+    }
+
+    /// <summary>
+    /// Capture states on nodes to be rendered on display.
+    /// </summary>
+    private class NodesFrame
+    {
+        private readonly List<string> _nodeStrings = new();
+        private StringBuilder _renderBuilder = new();
+
+        public int NodesCount { get; private set; }
+
+        public NodesFrame(NodeStatus?[] nodes)
+        {
+            Init(nodes);
+        }
+
+        public string NodeString(int index)
+        {
+            if (index >= NodesCount)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            return _nodeStrings[index];
+        }
+
+        private void Init(NodeStatus?[] nodes)
+        {
+            int i = 0;
+            foreach (NodeStatus? n in nodes)
+            {
+                if (n is null)
+                {
+                    continue;
+                }
+                string str = n.ToString();
+
+                if (i < _nodeStrings.Count)
+                {
+                    _nodeStrings[i] = str;
+                }
+                else
+                {
+                    _nodeStrings.Add(str);
+                }
+                i++;
+            }
+
+            NodesCount = i;
+        }
+
+        private ReadOnlySpan<char> FitToWidth(ReadOnlySpan<char> input)
+        {
+            return input.Slice(0, Math.Min(input.Length, Console.BufferWidth - 1));
+        }
+
+        /// <summary>
+        /// Render VT100 string to update current to next frame.
+        /// </summary>
+        public string Render(NodesFrame previousFrame)
+        {
+            StringBuilder sb = _renderBuilder;
+            sb.Clear();
+
+            int i = 0;
+            for (; i < NodesCount; i++)
+            {
+                var needed = FitToWidth(this.NodeString(i));
+
+                // Do we have previous node string to compare with?
+                if (previousFrame.NodesCount > i)
+                {
+                    var previous = FitToWidth(previousFrame.NodeString(i));
+
+                    if (!previous.SequenceEqual(needed))
+                    {
+                        int commonPrefixLen = previous.CommonPrefixLength(needed);
+                        if (commonPrefixLen == 0)
+                        {
+                            // whole string
+                            sb.Append(needed);
+                        }
+                        else
+                        {
+                            // set cursor to different char
+                            sb.Append($"\x1b[{commonPrefixLen}C");
+                            sb.Append(needed.Slice(commonPrefixLen));
+                            // Shall we clear rest of line
+                            if (needed.Length < previous.Length)
+                            {
+                                sb.Append($"\x1b[K");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // From now on we have to simply WriteLine
+                    sb.Append(needed);
+                }
+
+                // Next line
+                sb.AppendLine();
+            }
+
+            // clear no longer used lines
+            if (i < previousFrame.NodesCount)
+            {
+                sb.Append($"\x1b[0J");
+            }
+
+            return sb.ToString();
+        }
+
+        public void Clear()
+        {
+            NodesCount = 0;
         }
     }
 }
