@@ -160,6 +160,9 @@
     <!-- for now adding as part of Microsoft.NET.Sdk.Web as it is only used there -->
     <Copy SourceFiles="$(ArtifactsDir)packages\$(Configuration)\Shipping\Microsoft.NET.Build.Containers.$(Version).nupkg"
             DestinationFiles="$(OutputPath)\Sdks\Microsoft.NET.Sdk.Web\library-packs\Microsoft.NET.Build.Containers.$(Version).nupkg" />
+
+    <!-- update containers package version in Sdk.props-->
+    <UpdateProperty FilePath ="$(OutputPath)Sdks\Microsoft.NET.Sdk.Web\Sdk\Sdk.props" PropertyName ="_BuiltInMicrosoftNETBuildContainersVersion" PropertyValue="$(Version)"/>   
   </Target>
 
   <Target Name="PublishTestCli"

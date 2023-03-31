@@ -73,9 +73,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
 
-  <!--Built in Microsoft.NET.Build.Containers version is same as SDK version-->
   <PropertyGroup>
-    <SdkContainerSupportPackageVersion Condition="'$(SdkContainerSupportPackageVersion)' == ''">$(NETCoreSdkVersion)</SdkContainerSupportPackageVersion>
+    <!-- this property will be updated when generating layout with valid built-in version of the package-->
+    <_BuiltInMicrosoftNETBuildContainersVersion></_BuiltInMicrosoftNETBuildContainersVersion>
+    <SdkContainerSupportPackageVersion Condition="'$(SdkContainerSupportPackageVersion)' == ''">$(_BuiltInMicrosoftNETBuildContainersVersion)</SdkContainerSupportPackageVersion>
   </PropertyGroup>
 
   <!--Implicit package references don't work well with central package management, so disable it. -->
