@@ -11,12 +11,12 @@ namespace Microsoft.Build.Logging.LiveLogger;
 internal interface ITerminal : IDisposable
 {
     /// <summary>
-    /// Width of terminal buffer
+    /// Width of the terminal buffer.
     /// </summary>
     int Width { get; }
 
     /// <summary>
-    /// Height of terminal buffer
+    /// Height of the terminal buffer.
     /// </summary>
     int Height { get; }
 

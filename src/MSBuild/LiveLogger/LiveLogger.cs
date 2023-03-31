@@ -60,17 +60,17 @@ internal sealed class LiveLogger : INodeLogger
     private readonly CancellationTokenSource _cts = new();
 
     /// <summary>
-    /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
-    /// </summary>
-    private NodeStatus?[] _nodes = Array.Empty<NodeStatus>();
-
-    /// <summary>
     /// Tracks the status of all relevant projects seen so far.
     /// </summary>
     /// <remarks>
     /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
     /// </remarks>
     private readonly Dictionary<ProjectContext, Project> _projects = new();
+
+    /// <summary>
+    /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
+    /// </summary>
+    private NodeStatus?[] _nodes = Array.Empty<NodeStatus>();
 
     /// <summary>
     /// The timestamp of the <see cref="IEventSource.BuildStarted"/> event.
@@ -107,12 +107,6 @@ internal sealed class LiveLogger : INodeLogger
     /// The <see cref="Terminal"/> to write console output to.
     /// </summary>
     private ITerminal Terminal { get; }
-
-    /// <inheritdoc/>
-    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
-
-    /// <inheritdoc/>
-    public string Parameters { get => ""; set { } }
 
     /// <summary>
     /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
@@ -153,6 +147,14 @@ internal sealed class LiveLogger : INodeLogger
         Terminal = terminal;
     }
 
+    #region INodeLogger implementation
+
+    /// <inheritdoc/>
+    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
+
+    /// <inheritdoc/>
+    public string Parameters { get => ""; set { } }
+
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
@@ -177,23 +179,15 @@ internal sealed class LiveLogger : INodeLogger
         eventSource.ErrorRaised += ErrorRaised;
     }
 
-    /// <summary>
-    /// The <see cref="_refresher"/> thread proc.
-    /// </summary>
-    private void ThreadProc()
+    /// <inheritdoc/>
+    public void Shutdown()
     {
-        while (!_cts.IsCancellationRequested)
-        {
-            Thread.Sleep(1_000 / 30); // poor approx of 30Hz
-
-            lock (_lock)
-            {
-                DisplayNodes();
-            }
-        }
-
-        EraseNodes();
+        Terminal.Dispose();
     }
+
+    #endregion
+
+    #region Logger callbacks
 
     /// <summary>
     /// The <see cref="IEventSource.BuildStarted"/> callback.
@@ -263,35 +257,6 @@ internal sealed class LiveLogger : INodeLogger
         {
             _restoreContext = c;
             Terminal.WriteLine("Restoring");
-        }
-    }
-
-    /// <summary>
-    /// Print a build result summary to the output.
-    /// </summary>
-    /// <param name="succeeded">True if the build completed with success.</param>
-    /// <param name="hasError">True if the build has logged at least one error.</param>
-    /// <param name="hasWarning">True if the build has logged at least one warning.</param>
-    private void PrintBuildResult(bool succeeded, bool hasError, bool hasWarning)
-    {
-        if (!succeeded)
-        {
-            // If the build failed, we print one of three red strings.
-            string text = (hasError, hasWarning) switch
-            {
-                (true, _) => "failed with errors",
-                (false, true) => "failed with warnings",
-                _ => "failed",
-            };
-            Terminal.WriteColor(TerminalColor.Red, text);
-        }
-        else if (hasWarning)
-        {
-            Terminal.WriteColor(TerminalColor.Yellow, "succeeded with warnings");
-        }
-        else
-        {
-            Terminal.WriteColor(TerminalColor.Green, "succeeded");
         }
     }
 
@@ -415,43 +380,6 @@ internal sealed class LiveLogger : INodeLogger
     }
 
     /// <summary>
-    /// Render Nodes section.
-    /// It shows what all build nodes do.
-    /// </summary>
-    private void DisplayNodes()
-    {
-        NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
-
-        // Do not render delta but clear everything is Terminal width or height have changed
-        if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
-        {
-            EraseNodes();
-        }
-
-        string rendered = newFrame.Render(_currentFrame);
-
-        // Move cursor back to 1st line of nodes
-        Terminal.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
-        Terminal.Write(rendered);
-
-        _currentFrame = newFrame;
-    }
-
-    /// <summary>
-    /// Erases the previously printed live node output.
-    /// </summary>
-    private void EraseNodes()
-    {
-        if (_currentFrame.NodesCount == 0)
-        {
-            return;
-        }
-        Terminal.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
-        Terminal.Write($"\x1b[0J");
-        _currentFrame.Clear();
-    }
-
-    /// <summary>
     /// The <see cref="IEventSource.TargetStarted"/> callback.
     /// </summary>
     private void TargetStarted(object sender, TargetStartedEventArgs e)
@@ -468,15 +396,6 @@ internal sealed class LiveLogger : INodeLogger
                 _nodes[NodeIndexForContext(buildEventContext)] = nodeStatus;
             }
         }
-    }
-
-    /// <summary>
-    /// Returns the <see cref="_nodes"/> index corresponding to the given <see cref="BuildEventContext"/>.
-    /// </summary>
-    private int NodeIndexForContext(BuildEventContext context)
-    {
-        // Node IDs reported by the build are 1-based.
-        return context.NodeId - 1;
     }
 
     /// <summary>
@@ -564,16 +483,69 @@ internal sealed class LiveLogger : INodeLogger
         }
     }
 
-    /// <inheritdoc/>
-    public void Shutdown()
+    #endregion
+
+    #region Refresher thread implementation
+
+    /// <summary>
+    /// The <see cref="_refresher"/> thread proc.
+    /// </summary>
+    private void ThreadProc()
     {
-        Terminal.Dispose();
+        while (!_cts.IsCancellationRequested)
+        {
+            Thread.Sleep(1_000 / 30); // poor approx of 30Hz
+
+            lock (_lock)
+            {
+                DisplayNodes();
+            }
+        }
+
+        EraseNodes();
+    }
+
+    /// <summary>
+    /// Render Nodes section.
+    /// It shows what all build nodes do.
+    /// </summary>
+    private void DisplayNodes()
+    {
+        NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
+
+        // Do not render delta but clear everything is Terminal width or height have changed
+        if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
+        {
+            EraseNodes();
+        }
+
+        string rendered = newFrame.Render(_currentFrame);
+
+        // Move cursor back to 1st line of nodes
+        Terminal.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
+        Terminal.Write(rendered);
+
+        _currentFrame = newFrame;
+    }
+
+    /// <summary>
+    /// Erases the previously printed live node output.
+    /// </summary>
+    private void EraseNodes()
+    {
+        if (_currentFrame.NodesCount == 0)
+        {
+            return;
+        }
+        Terminal.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
+        Terminal.Write($"\x1b[0J");
+        _currentFrame.Clear();
     }
 
     /// <summary>
     /// Capture states on nodes to be rendered on display.
     /// </summary>
-    private class NodesFrame
+    private sealed class NodesFrame
     {
         private readonly List<string> _nodeStrings = new();
         private readonly StringBuilder _renderBuilder = new();
@@ -699,6 +671,51 @@ internal sealed class LiveLogger : INodeLogger
             NodesCount = 0;
         }
     }
+
+    #endregion
+
+    #region Helpers
+
+    /// <summary>
+    /// Print a build result summary to the output.
+    /// </summary>
+    /// <param name="succeeded">True if the build completed with success.</param>
+    /// <param name="hasError">True if the build has logged at least one error.</param>
+    /// <param name="hasWarning">True if the build has logged at least one warning.</param>
+    private void PrintBuildResult(bool succeeded, bool hasError, bool hasWarning)
+    {
+        if (!succeeded)
+        {
+            // If the build failed, we print one of three red strings.
+            string text = (hasError, hasWarning) switch
+            {
+                (true, _) => "failed with errors",
+                (false, true) => "failed with warnings",
+                _ => "failed",
+            };
+            Terminal.WriteColor(TerminalColor.Red, text);
+        }
+        else if (hasWarning)
+        {
+            Terminal.WriteColor(TerminalColor.Yellow, "succeeded with warnings");
+        }
+        else
+        {
+            Terminal.WriteColor(TerminalColor.Green, "succeeded");
+        }
+    }
+
+    /// <summary>
+    /// Returns the <see cref="_nodes"/> index corresponding to the given <see cref="BuildEventContext"/>.
+    /// </summary>
+    private int NodeIndexForContext(BuildEventContext context)
+    {
+        // Node IDs reported by the build are 1-based.
+        return context.NodeId - 1;
+    }
+
+    #endregion
+
 }
 
 internal record ProjectContext(int Id)
