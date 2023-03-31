@@ -247,7 +247,7 @@ namespace Microsoft.Build.Construction
             };
             using (XmlWriter xw = XmlWriter.Create(solutionConfigurationContents, settings))
             {
-                // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
+                // TODO: Consider augmenting SolutionConfiguration with this code
                 xw.WriteStartElement("SolutionConfiguration");
 
                 // add a project configuration entry for each project in the solution

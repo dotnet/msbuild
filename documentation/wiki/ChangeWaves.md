@@ -28,6 +28,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Eliminate project string cache](https://github.com/dotnet/msbuild/pull/7965)
 - [Log an error when no provided search path for an import exists](https://github.com/dotnet/msbuild/pull/8095)
 - [Log assembly loads](https://github.com/dotnet/msbuild/pull/8316)
+- [AnyHaveMetadataValue returns false when passed an empty list](https://github.com/dotnet/msbuild/pull/8603)
 
 ### 17.4
 - [Respect deps.json when loading assemblies](https://github.com/dotnet/msbuild/pull/7520)
