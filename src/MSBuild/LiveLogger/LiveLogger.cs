@@ -12,39 +12,115 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging.LiveLogger;
 
+/// <summary>
+/// A logger which updates the console output "live" during the build.
+/// </summary>
+/// <remarks>
+/// Uses ANSI/VT100 control codes to erase and overwrite lines as the build is progressing.
+/// </remarks>
 internal sealed class LiveLogger : INodeLogger
 {
+    /// <summary>
+    /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
+    /// </summary>
+    internal record struct ProjectContext(int Id)
+    {
+        public ProjectContext(BuildEventContext context)
+            : this(context.ProjectContextId)
+        { }
+    }
+
+    /// <summary>
+    /// Encapsulates the per-node data shown in live node output.
+    /// </summary>
+    internal record NodeStatus(string Project, string? TargetFramework, string Target, Stopwatch Stopwatch)
+    {
+        public override string ToString()
+        {
+            return string.IsNullOrEmpty(TargetFramework)
+                ? $"{Indentation}{Project} {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)"
+                : $"{Indentation}{Project} [{TargetFramework}] {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)";
+        }
+    }
+
+    /// <summary>
+    /// The indentation to use for all build output.
+    /// </summary>
+    private const string Indentation = "  ";
+
+    /// <summary>
+    /// Protects access to state shared between the logger callbacks and the rendering thread.
+    /// </summary>
     private readonly object _lock = new();
 
+    /// <summary>
+    /// A cancellation token to signal the rendering thread that it should exit.
+    /// </summary>
     private readonly CancellationTokenSource _cts = new();
 
+    /// <summary>
+    /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
+    /// </summary>
     private NodeStatus?[] _nodes = Array.Empty<NodeStatus>();
 
-    private readonly Dictionary<ProjectContext, Project> _notableProjects = new();
+    /// <summary>
+    /// Tracks the status of all relevant projects seen so far.
+    /// </summary>
+    /// <remarks>
+    /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
+    /// </remarks>
+    private readonly Dictionary<ProjectContext, Project> _projects = new();
 
-    private readonly Dictionary<ProjectContext, (bool Notable, string? Path, string? Targets)> _notabilityByContext = new();
+    /// <summary>
+    /// The timestamp of the <see cref="IEventSource.BuildStarted"/> event.
+    /// </summary>
+    private DateTime _buildStartTime;
 
-    private readonly Dictionary<ProjectInstance, ProjectContext> _relevantContextByInstance = new();
+    /// <summary>
+    /// True if the build has encountered at least one error.
+    /// </summary>
+    private bool _buildHasErrors;
 
-    private readonly Dictionary<ProjectContext, Stopwatch> _projectTimeCounter = new();
+    /// <summary>
+    /// True if the build has encountered at least one warning.
+    /// </summary>
+    private bool _buildHasWarnings;
 
+    /// <summary>
+    /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
+    /// bot restoring.
+    /// </summary>
     private ProjectContext? _restoreContext;
 
+    /// <summary>
+    /// The thread that performs periodic refresh of the console output.
+    /// </summary>
     private Thread? _refresher;
 
+    /// <summary>
+    /// What is currently displaying in Nodes section as strings representing per-node console output.
+    /// </summary>
     private NodesFrame _currentFrame = new(Array.Empty<NodeStatus>());
 
-    private Encoding? _originalOutputEncoding;
+    /// <summary>
+    /// The <see cref="Terminal"/> to write console output to.
+    /// </summary>
+    private ITerminal Terminal { get; }
 
+    /// <inheritdoc/>
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
 
+    /// <inheritdoc/>
     public string Parameters { get => ""; set { } }
 
     /// <summary>
     /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
     /// </summary>
     /// <remarks>
-    /// If LiveLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+    /// If LiveLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
+    /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+    /// Important: Note that LiveLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
+    /// so changing this list may impact the minimum message importance logging optimization.
     /// </remarks>
     public static readonly string[] ConfigurableForwardingLoggerParameters =
     {
@@ -60,6 +136,23 @@ internal sealed class LiveLogger : INodeLogger
             "ERROREVENT"
     };
 
+    /// <summary>
+    /// Default constructor, used by the MSBuild logger infra.
+    /// </summary>
+    public LiveLogger()
+    {
+        Terminal = new Terminal();
+    }
+
+    /// <summary>
+    /// Internal constructor accepting a custom <see cref="ITerminal"/> for testing.
+    /// </summary>
+    internal LiveLogger(ITerminal terminal)
+    {
+        Terminal = terminal;
+    }
+
+    /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
         _nodes = new NodeStatus[nodeCount];
@@ -67,6 +160,7 @@ internal sealed class LiveLogger : INodeLogger
         Initialize(eventSource);
     }
 
+    /// <inheritdoc/>
     public void Initialize(IEventSource eventSource)
     {
         eventSource.BuildStarted += new BuildStartedEventHandler(BuildStarted);
@@ -80,14 +174,11 @@ internal sealed class LiveLogger : INodeLogger
         eventSource.MessageRaised += new BuildMessageEventHandler(MessageRaised);
         eventSource.WarningRaised += new BuildWarningEventHandler(WarningRaised);
         eventSource.ErrorRaised += new BuildErrorEventHandler(ErrorRaised);
-
-        _originalOutputEncoding = Console.OutputEncoding;
-        Console.OutputEncoding = Encoding.UTF8;
-
-        _refresher = new Thread(ThreadProc);
-        _refresher.Start();
     }
 
+    /// <summary>
+    /// The <see cref="_refresher"/> thread proc.
+    /// </summary>
     private void ThreadProc()
     {
         while (!_cts.IsCancellationRequested)
@@ -103,14 +194,51 @@ internal sealed class LiveLogger : INodeLogger
         EraseNodes();
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.BuildStarted"/> callback.
+    /// </summary>
     private void BuildStarted(object sender, BuildStartedEventArgs e)
     {
+        _refresher = new Thread(ThreadProc);
+        _refresher.Start();
+
+        _buildStartTime = e.Timestamp;
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.BuildFinished"/> callback.
+    /// </summary>
     private void BuildFinished(object sender, BuildFinishedEventArgs e)
     {
+        _cts.Cancel();
+        _refresher?.Join();
+
+        _projects.Clear();
+
+        Terminal.BeginUpdate();
+        try
+        {
+
+            Terminal.WriteLine("");
+            Terminal.Write("Build ");
+
+            PrintBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
+
+            double duration = (e.Timestamp - _buildStartTime).TotalSeconds;
+            Terminal.WriteLine($" in {duration:F1}s");
+        }
+        finally
+        {
+            Terminal.EndUpdate();
+        }
+
+        _buildHasErrors = false;
+        _buildHasWarnings = false;
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.ProjectStarted"/> callback.
+    /// </summary>
     private void ProjectStarted(object sender, ProjectStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
@@ -119,48 +247,57 @@ internal sealed class LiveLogger : INodeLogger
             return;
         }
 
-        bool notable = IsNotableProject(e);
-
         ProjectContext c = new ProjectContext(buildEventContext);
 
-        if (notable)
+        if (_restoreContext is null)
         {
-            _notableProjects[c] = new();
+            if (e.GlobalProperties?.TryGetValue("TargetFramework", out string? targetFramework) != true)
+            {
+                targetFramework = null;
+            }
+            _projects[c] = new(targetFramework);
         }
-
-        _projectTimeCounter[c] = Stopwatch.StartNew();
 
         if (e.TargetNames == "Restore")
         {
             _restoreContext = c;
-            Console.WriteLine("Restoring");
+            Terminal.WriteLine("Restoring");
             return;
         }
-
-        _notabilityByContext[c] = (notable, e.ProjectFile, e.TargetNames);
-
-        var key = new ProjectInstance(buildEventContext);
-        if (!_relevantContextByInstance.ContainsKey(key))
-        {
-            _relevantContextByInstance.Add(key, c);
-        }
     }
 
-    private bool IsNotableProject(ProjectStartedEventArgs e)
+    /// <summary>
+    /// Print a build result summary to the output.
+    /// </summary>
+    /// <param name="succeeded">True if the build completed with success.</param>
+    /// <param name="hasError">True if the build has logged at least one error.</param>
+    /// <param name="hasWarning">True if the build has logged at least one warning.</param>
+    private void PrintBuildResult(bool succeeded, bool hasError, bool hasWarning)
     {
-        if (_restoreContext is not null)
+        if (!succeeded)
         {
-            return false;
+            // If the build failed, we print one of three red strings.
+            string text = (hasError, hasWarning) switch
+            {
+                (true, _) => "failed with errors",
+                (false, true) => "failed with warnings",
+                _ => "failed",
+            };
+            Terminal.WriteColor(TerminalColor.Red, text);
         }
-
-        return e.TargetNames switch
+        else if (hasWarning)
         {
-            "" or "Restore" => true,
-            "GetTargetFrameworks" or "GetTargetFrameworks" or "GetNativeManifest" or "GetCopyToOutputDirectoryItems" => false,
-            _ => true,
-        };
+            Terminal.WriteColor(TerminalColor.Yellow, "succeeded with warnings");
+        }
+        else
+        {
+            Terminal.WriteColor(TerminalColor.Green, "succeeded");
+        }
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.ProjectFinished"/> callback.
+    /// </summary>
     private void ProjectFinished(object sender, ProjectFinishedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
@@ -171,62 +308,114 @@ internal sealed class LiveLogger : INodeLogger
 
         ProjectContext c = new(buildEventContext);
 
+        // First check if we're done restoring.
         if (_restoreContext is ProjectContext restoreContext && c == restoreContext)
         {
             lock (_lock)
             {
                 _restoreContext = null;
 
-                double duration = _notableProjects[restoreContext].Stopwatch.Elapsed.TotalSeconds;
+                Stopwatch projectStopwatch = _projects[restoreContext].Stopwatch;
+                double duration = projectStopwatch.Elapsed.TotalSeconds;
+                projectStopwatch.Stop();
 
-                EraseNodes();
-                Console.WriteLine($"Restore complete ({duration:F1}s)");
-                DisplayNodes();
+                Terminal.BeginUpdate();
+                try
+                {
+                    EraseNodes();
+                    Terminal.WriteLine($"Restore complete ({duration:F1}s)");
+                    DisplayNodes();
+                }
+                finally
+                {
+                    Terminal.EndUpdate();
+                }
                 return;
             }
         }
 
-        if (_notabilityByContext[c].Notable && _relevantContextByInstance[new ProjectInstance(buildEventContext)] == c)
+        // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
+        if (_projects.TryGetValue(c, out Project? project) && (project.OutputPath is not null || project.BuildMessages is not null))
         {
             lock (_lock)
             {
-                EraseNodes();
-
-                Project project = _notableProjects[c];
-                double duration = project.Stopwatch.Elapsed.TotalSeconds;
-                ReadOnlyMemory<char>? outputPath = project.OutputPath;
-
-                if (outputPath is not null)
+                Terminal.BeginUpdate();
+                try
                 {
-                    ReadOnlySpan<char> url = outputPath.Value.Span;
-                    try
+                    EraseNodes();
+
+                    double duration = project.Stopwatch.Elapsed.TotalSeconds;
+                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
+
+                    Terminal.Write(Indentation);
+
+                    if (e.ProjectFile is not null)
                     {
-                        // If possible, make the link point to the containing directory of the output.
-                        url = Path.GetDirectoryName(url);
+                        string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
+                        Terminal.Write(projectFile);
+                        Terminal.Write(" ");
                     }
-                    catch
-                    { }
-                    Console.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
-                }
-                else
-                {
-                    Console.WriteLine($"{e.ProjectFile} \x1b[1mcompleted\x1b[22m ({duration:F1}s)");
-                }
-
-                // Print diagnostic output under the Project -> Output line.
-                if (project.BuildMessages is not null)
-                {
-                    foreach (string message in project.BuildMessages)
+                    if (!string.IsNullOrEmpty(project.TargetFramework))
                     {
-                        Console.WriteLine(message);
+                        Terminal.Write($"[{project.TargetFramework}] ");
                     }
-                }
 
-                DisplayNodes();
+                    // Print 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
+                    // reported during build.
+                    bool haveErrors = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Error) == true;
+                    bool haveWarnings = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true;
+                    PrintBuildResult(e.Succeeded, haveErrors, haveWarnings);
+
+                    _buildHasErrors |= haveErrors;
+                    _buildHasWarnings |= haveWarnings;
+
+                    // Print the output path as a link if we have it.
+                    if (outputPath is not null)
+                    {
+                        ReadOnlySpan<char> url = outputPath.Value.Span;
+                        try
+                        {
+                            // If possible, make the link point to the containing directory of the output.
+                            url = Path.GetDirectoryName(url);
+                        }
+                        catch
+                        { }
+                        Terminal.WriteLine($" ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
+                    }
+                    else
+                    {
+                        Terminal.WriteLine($" ({duration:F1}s)");
+                    }
+
+                    // Print diagnostic output under the Project -> Output line.
+                    if (project.BuildMessages is not null)
+                    {
+                        foreach (BuildMessage buildMessage in project.BuildMessages)
+                        {
+                            TerminalColor color = buildMessage.Severity switch
+                            {
+                                MessageSeverity.Warning => TerminalColor.Yellow,
+                                MessageSeverity.Error => TerminalColor.Red,
+                                _ => TerminalColor.Default,
+                            };
+                            Terminal.WriteColorLine(color, $"{Indentation}{Indentation}{buildMessage.Message}");
+                        }
+                    }
+
+                    DisplayNodes();
+                }
+                finally
+                {
+                    Terminal.EndUpdate();
+                }
             }
         }
     }
 
+    /// <summary>
+    /// Render Nodes section.
+    /// It shows what all build nodes do.
+    /// </summary>
     private void DisplayNodes()
     {
         NodesFrame newFrame = new NodesFrame(_nodes);
@@ -239,6 +428,9 @@ internal sealed class LiveLogger : INodeLogger
         _currentFrame = newFrame;
     }
 
+    /// <summary>
+    /// Erases the previously printed live node output.
+    /// </summary>
     private void EraseNodes()
     {
         if (_currentFrame.NodesCount == 0)
@@ -250,24 +442,40 @@ internal sealed class LiveLogger : INodeLogger
         _currentFrame.Clear();
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.TargetStarted"/> callback.
+    /// </summary>
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null)
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
-            _nodes[NodeIndexForContext(buildEventContext)] = new(e.ProjectFile, e.TargetName, _projectTimeCounter[new ProjectContext(buildEventContext)]);
+            project.Stopwatch.Start();
+
+            string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
+            _nodes[NodeIndexForContext(buildEventContext)] = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
         }
     }
 
+    /// <summary>
+    /// Returns the <see cref="_nodes"/> index corresponding to the given <see cref="BuildEventContext"/>.
+    /// </summary>
     private int NodeIndexForContext(BuildEventContext context)
     {
+        // Node IDs reported by the build are 1-based.
         return context.NodeId - 1;
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.TargetFinished"/> callback. Unused.
+    /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.TaskStarted"/> callback.
+    /// </summary>
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
@@ -275,9 +483,17 @@ internal sealed class LiveLogger : INodeLogger
         {
             // This will yield the node, so preemptively mark it idle
             _nodes[NodeIndexForContext(buildEventContext)] = null;
+
+            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+            {
+                project.Stopwatch.Stop();
+            }
         }
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.MessageRaised"/> callback.
+    /// </summary>
     private void MessageRaised(object sender, BuildMessageEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
@@ -297,7 +513,7 @@ internal sealed class LiveLogger : INodeLogger
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
                 if (!projectFileName.IsEmpty &&
                     message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) &&
-                    _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+                    _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
                     project.OutputPath = outputPath;
@@ -306,35 +522,36 @@ internal sealed class LiveLogger : INodeLogger
         }
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.WarningRaised"/> callback.
+    /// </summary>
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage($"  \x1b[33;1m⚠ {message}\x1b[m");
+            project.AddBuildMessage(MessageSeverity.Warning, $"⚠ {message}");
         }
     }
 
+    /// <summary>
+    /// The <see cref="IEventSource.ErrorRaised"/> callback.
+    /// </summary>
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _notableProjects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage($"  \x1b[31;1m❌ {message}\x1b[m");
+            project.AddBuildMessage(MessageSeverity.Error, $"❌ {message}");
         }
     }
 
+    /// <inheritdoc/>
     public void Shutdown()
     {
-        _cts.Cancel();
-        _refresher?.Join();
-
-        if (_originalOutputEncoding is not null)
-        {
-            Console.OutputEncoding = _originalOutputEncoding;
-        }
+        Terminal.Dispose();
     }
 
     /// <summary>

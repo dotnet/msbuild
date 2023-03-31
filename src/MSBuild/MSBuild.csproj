@@ -172,7 +172,8 @@
     <Compile Include="DistributedLoggerRecord.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="LiveLogger\*.cs" />
+    <!-- LiveLogger is supported only in Core builds -->
+    <Compile Include="LiveLogger\*.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
     <Compile Include="InitializationException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -189,8 +190,6 @@
     <Compile Include="XMake.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <!-- LiveLogger is supported only in Core builds -->
-    <Compile Remove="LiveLogger\**\*.*" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
     <!-- This is to enable CodeMarkers in MSBuild.exe -->
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
