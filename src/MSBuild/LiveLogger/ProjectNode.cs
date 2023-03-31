@@ -88,10 +88,29 @@ namespace Microsoft.Build.Logging.LiveLogger
             }
 
             ShouldRerender = false;
+
             // Summary (messages, warnings and errors)
-            string lineSummary = MessageCount + WarningCount + ErrorCount > 0 ? $"({MessageCount} ℹ️, {WarningCount} ⚠️, {ErrorCount} ❌)" : string.Empty;
+            List<string> lineSummaryList = new();
+            if (MessageCount > 0)
+            {
+                lineSummaryList.Add($"{MessageCount} ℹ️");
+            }
+
+            if (WarningCount > 0)
+            {
+                lineSummaryList.Add($"{WarningCount} ⚠️");
+            }
+
+            if (ErrorCount > 0)
+            {
+                lineSummaryList.Add($"{ErrorCount} ❌");
+            }
+
+            string lineSummary = lineSummaryList.Count > 0 ? "(" + string.Join(", ", lineSummaryList) + ")" : string.Empty;
+
             // Project details
             string lineContents = ANSIBuilder.Alignment.SpaceBetween(ToANSIString(), lineSummary, Console.BufferWidth - 1);
+
             // Create or update line
             if (Line is null)
             {
