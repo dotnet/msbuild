@@ -156,6 +156,24 @@ namespace Microsoft.Build.UnitTests
             duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
+#if FEATURE_LIVELOGGER
+        [Theory]
+        [InlineData("ll")]
+        [InlineData("LL")]
+        [InlineData("livelogger")]
+        [InlineData("LiveLogger")]
+        [InlineData("LIVELOGGER")]
+        public void LiveLoggerSwitchIdentificationTests(string livelogger)
+        {
+            CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
+            string duplicateSwitchErrorMessage;
+
+            CommandLineSwitches.IsParameterlessSwitch(livelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.LiveLogger);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+        }
+#endif
+
         [Theory]
         [InlineData("flp")]
         [InlineData("FLP")]
