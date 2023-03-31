@@ -162,7 +162,17 @@
             DestinationFiles="$(OutputPath)\Sdks\Microsoft.NET.Sdk.Web\library-packs\Microsoft.NET.Build.Containers.$(Version).nupkg" />
 
     <!-- update containers package version in Sdk.props-->
-    <UpdateProperty FilePath ="$(OutputPath)Sdks\Microsoft.NET.Sdk.Web\Sdk\Sdk.props" PropertyName ="_BuiltInMicrosoftNETBuildContainersVersion" PropertyValue="$(Version)"/>   
+    <PropertyGroup>
+      <MSBuildNamespaces>
+          <Namespace Prefix="dn" Uri="http://schemas.microsoft.com/developer/msbuild/2003" />
+      </MSBuildNamespaces>
+    </PropertyGroup>
+    
+    <XmlPoke
+      XmlInputPath="$(OutputPath)Sdks\Microsoft.NET.Sdk.Web\Sdk\Sdk.props"
+      Value="$(Version)"
+      Query="/dn:Project/dn:PropertyGroup/dn:_BuiltInMicrosoftNETBuildContainersVersion"
+      Namespaces="$(MSBuildNamespaces)" />
   </Target>
 
   <Target Name="PublishTestCli"
