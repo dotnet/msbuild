@@ -164,17 +164,17 @@ internal sealed class LiveLogger : INodeLogger
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource)
     {
-        eventSource.BuildStarted += new BuildStartedEventHandler(BuildStarted);
-        eventSource.BuildFinished += new BuildFinishedEventHandler(BuildFinished);
-        eventSource.ProjectStarted += new ProjectStartedEventHandler(ProjectStarted);
-        eventSource.ProjectFinished += new ProjectFinishedEventHandler(ProjectFinished);
-        eventSource.TargetStarted += new TargetStartedEventHandler(TargetStarted);
-        eventSource.TargetFinished += new TargetFinishedEventHandler(TargetFinished);
-        eventSource.TaskStarted += new TaskStartedEventHandler(TaskStarted);
+        eventSource.BuildStarted += BuildStarted;
+        eventSource.BuildFinished += BuildFinished;
+        eventSource.ProjectStarted += ProjectStarted;
+        eventSource.ProjectFinished += ProjectFinished;
+        eventSource.TargetStarted += TargetStarted;
+        eventSource.TargetFinished += TargetFinished;
+        eventSource.TaskStarted += TaskStarted;
 
-        eventSource.MessageRaised += new BuildMessageEventHandler(MessageRaised);
-        eventSource.WarningRaised += new BuildWarningEventHandler(WarningRaised);
-        eventSource.ErrorRaised += new BuildErrorEventHandler(ErrorRaised);
+        eventSource.MessageRaised += MessageRaised;
+        eventSource.WarningRaised += WarningRaised;
+        eventSource.ErrorRaised += ErrorRaised;
     }
 
     /// <summary>
@@ -263,7 +263,6 @@ internal sealed class LiveLogger : INodeLogger
         {
             _restoreContext = c;
             Terminal.WriteLine("Restoring");
-            return;
         }
     }
 
@@ -352,7 +351,7 @@ internal sealed class LiveLogger : INodeLogger
 
                     if (e.ProjectFile is not null)
                     {
-                        string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
+                        string projectFile = Path.GetFileName(e.ProjectFile);
                         Terminal.Write(projectFile);
                         Terminal.Write(" ");
                     }
@@ -380,7 +379,9 @@ internal sealed class LiveLogger : INodeLogger
                             url = Path.GetDirectoryName(url);
                         }
                         catch
-                        { }
+                        {
+                            // Ignore any GetDirectoryName exceptions
+                        }
                         Terminal.WriteLine($" ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
                     }
                     else
@@ -460,8 +461,8 @@ internal sealed class LiveLogger : INodeLogger
         {
             project.Stopwatch.Start();
 
-            string projectFile = Path.GetFileName(e.ProjectFile) ?? e.ProjectFile;
-            NodeStatus? nodeStatus = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
+            string projectFile = Path.GetFileName(e.ProjectFile);
+            NodeStatus nodeStatus = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
             lock (_lock)
             {
                 _nodes[NodeIndexForContext(buildEventContext)] = nodeStatus;
@@ -522,7 +523,7 @@ internal sealed class LiveLogger : INodeLogger
         {
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
-            int index = message.IndexOf(" -> ");
+            int index = message.IndexOf(" -> ", StringComparison.Ordinal);
             if (index > 0)
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
@@ -641,7 +642,6 @@ internal sealed class LiveLogger : INodeLogger
         public string Render(NodesFrame previousFrame)
         {
             StringBuilder sb = _renderBuilder;
-            bool forceFullRefresh = previousFrame.Width != Width || previousFrame.Height != Height;
             sb.Clear();
 
             int i = 0;
