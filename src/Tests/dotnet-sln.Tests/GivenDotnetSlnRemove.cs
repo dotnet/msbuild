@@ -619,13 +619,13 @@ EndGlobal
 
             var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";
 
-            var releaseDirectory = Directory.EnumerateDirectories(
-                Path.Combine(projectDirectory, "App", "bin"),
-                "Release",
-                SearchOption.AllDirectories);
-            releaseDirectory.Count().Should().Be(1, $"App {reasonString}");
-            Directory.EnumerateFiles(releaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(1, $"App {reasonString}");
+            var outputCalculator = OutputPathCalculator.FromProject(Path.Combine(projectDirectory, "App"));
+
+            new DirectoryInfo(outputCalculator.GetOutputDirectory(configuration: "Debug")).Should().NotExist(reasonString);
+
+            var outputDirectory = new DirectoryInfo(outputCalculator.GetOutputDirectory(configuration: "Release"));
+            outputDirectory.Should().Exist();
+            outputDirectory.Should().HaveFile("App.dll");
         }
 
         [Fact]

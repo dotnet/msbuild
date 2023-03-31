@@ -102,6 +102,8 @@ namespace Microsoft.NET.Publish.Tests
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
 
+            testProject.RecordProperties("RuntimeIdentifier");
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var buildCommand = new BuildCommand(testAsset);
 
@@ -110,12 +112,11 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            string targetFrameworkOutputDirectory = Path.Combine(buildCommand.GetNonSDKOutputDirectory().FullName, testProject.TargetFrameworks);
-            string outputDirectoryWithRuntimeIdentifier = Directory.EnumerateDirectories(targetFrameworkOutputDirectory, "*", SearchOption.AllDirectories).FirstOrDefault();
-            outputDirectoryWithRuntimeIdentifier.Should().NotBeNullOrWhiteSpace();
+            var runtimeIdentifier = testProject.GetPropertyValues(testAsset.TestRoot)["RuntimeIdentifier"];
+            runtimeIdentifier.Should().NotBeNullOrWhiteSpace();
 
             var selfContainedExecutable = $"{testProject.Name}{Constants.ExeSuffix}";
-            string selfContainedExecutableFullPath = Path.Combine(outputDirectoryWithRuntimeIdentifier, selfContainedExecutable);
+            string selfContainedExecutableFullPath = Path.Combine(buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier).FullName, selfContainedExecutable);
 
             new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()

@@ -62,11 +62,10 @@ namespace Microsoft.NET.ToolPack.Tests
         public void It_builds_and_result_contains_dependencies_dll()
         {
             TestAsset testAsset = SetupAndRestoreTestAsset();
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "App");
             var buildCommand = new BuildCommand(testAsset, "App");
             buildCommand.Execute();
 
-            var packCommand = new PackCommand(Log, appProjectDirectory);
+            var packCommand = new PackCommand(testAsset, "App");
             // Do not run pack, just use it to get nupkg since it should be run by build.
             var nugetPackage = packCommand.GetNuGetPackage();
 

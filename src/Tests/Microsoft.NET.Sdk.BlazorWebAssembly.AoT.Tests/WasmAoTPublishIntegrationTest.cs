@@ -30,7 +30,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             var testInstance = CreateAspNetSdkTestAssetWithAot(testAppName, new [] { "blazorwasm" });
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute("/p:Configuration=Release").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm, "Release");
@@ -68,14 +68,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             var webConfigContents = "test webconfig contents";
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "web.config"), webConfigContents);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute("/p:Configuration=Release").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm, "Release");
 
+            var webConfig = new BuildCommand(testInstance, "blazorwasm").GetOutputDirectory(configuration: "Release").File("web.config");
+
             // Verify web.config
-            new FileInfo(Path.Combine(publishDirectory.ToString(), "..", "web.config")).Should().Exist();
-            new FileInfo(Path.Combine(publishDirectory.ToString(), "..", "web.config")).Should().Contain(webConfigContents);
+            webConfig.Should().Exist();
+            webConfig.Should().Contain(webConfigContents);
         }
 
         [Fact(Skip = "https://github.com/dotnet/sdk/issues/31491")]
@@ -91,7 +93,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             buildCommand.Execute("/p:BuildInsideVisualStudio=true /p:Configuration=Release").Should().Pass();
 
             // Publish
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.Execute("/p:BuildProjectReferences=false /p:BuildInsideVisualStudio=true /p:Configuration=Release").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);

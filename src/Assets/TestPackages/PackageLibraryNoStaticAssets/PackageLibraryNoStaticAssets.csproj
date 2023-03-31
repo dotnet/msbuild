@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Copyright>© Microsoft</Copyright>
     <Product>Razor Test</Product>

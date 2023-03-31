@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-o", "<output>" }, "-property:OutputPath=<cwd><output> -property:_CommandLineDefinedOutputPath=true")]
         [InlineData(new string[] { "--output", "<output>" }, "-property:OutputPath=<cwd><output> -property:_CommandLineDefinedOutputPath=true")]
+        [InlineData(new string[] { "--artifacts-path", "foo" }, "-property:ArtifactsPath=<cwd>foo")]
         [InlineData(new string[] { "-f", "<framework>" }, "-property:TargetFramework=<framework>")]
         [InlineData(new string[] { "--framework", "<framework>" }, "-property:TargetFramework=<framework>")]
         [InlineData(new string[] { "-c", "<configuration>" }, "-property:Configuration=<configuration>")]

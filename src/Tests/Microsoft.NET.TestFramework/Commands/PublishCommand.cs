@@ -24,13 +24,23 @@ namespace Microsoft.NET.TestFramework.Commands
 
         }
 
-        public override DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.1", string configuration = "Debug", string runtimeIdentifier = "")
+        public override DirectoryInfo GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
         {
+            if (TestAsset != null)
+            {
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetPublishDirectory(targetFramework, configuration, runtimeIdentifier));
+            }
+
+            if (string.IsNullOrEmpty(targetFramework))
+            {
+                targetFramework = "netcoreapp1.1";
+            }
+
             DirectoryInfo baseDirectory = base.GetOutputDirectory(targetFramework, configuration, runtimeIdentifier); 
             return new DirectoryInfo(Path.Combine(baseDirectory.FullName, PublishSubfolderName));
         }
 
-        public string GetPublishedAppPath(string appName, string targetFramework = "netcoreapp1.1")
+        public string GetPublishedAppPath(string appName, string targetFramework = "")
         {
             return Path.Combine(GetOutputDirectory(targetFramework).FullName, $"{appName}.dll");
         }

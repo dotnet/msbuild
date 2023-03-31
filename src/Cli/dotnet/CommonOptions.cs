@@ -51,6 +51,15 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
             .AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
+        public static Option<string> ArtifactsPathOption =
+            new ForwardedOption<string>(
+                //  --artifacts-path is pretty verbose, should we use --artifacts instead (or possibly support both)?
+                new string[] { "--artifacts-path" },
+                description: CommonLocalizableStrings.ArtifactsPathOptionDescription)
+            {
+                ArgumentHelpName = CommonLocalizableStrings.ArtifactsPathArgumentName
+            }.ForwardAsSingle(o => $"-property:ArtifactsPath={CommandDirectoryContext.GetFullPath(o)}");            
+
         private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
         public static IEnumerable<string> RuntimeArgFunc(string rid)
         {

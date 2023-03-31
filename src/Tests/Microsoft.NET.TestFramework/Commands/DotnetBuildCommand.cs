@@ -16,7 +16,14 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public DotnetBuildCommand(TestAsset testAsset, params string[] args) : this(testAsset.Log, args)
         {
-            WorkingDirectory = Path.Combine(testAsset.TestRoot, testAsset.TestProject.Name);
+            if (testAsset.TestProject != null)
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testAsset.TestProject.Name);
+            }
+            else
+            {
+                WorkingDirectory = testAsset.TestRoot;
+            }
         }
     }
 }

@@ -40,12 +40,14 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            new BuildCommand(testAsset, "CSConsoleApp")
+            var buildCommand = new BuildCommand(testAsset, "CSConsoleApp");
+            buildCommand
                 .Execute(new string[] { "-p:Platform=x64", "-p:BuildProjectReferences=false" })
                 .Should()
                 .Pass();
 
-            var exe = Path.Combine( //find the platform directory
+            var exe = Path.Combine(
+                //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
                 ToolsetInfo.CurrentTargetFramework,

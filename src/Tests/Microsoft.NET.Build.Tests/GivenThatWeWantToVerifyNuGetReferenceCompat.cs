@@ -207,7 +207,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testProjectTestAsset);
             buildCommand.Execute().Should().Pass();
 
-            var referencedDll = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).File("net462_net472_pkg.dll").FullName;
+            var referencedDll = buildCommand.GetOutputDirectory().File("net462_net472_pkg.dll").FullName;
             var referencedTargetFramework = AssemblyInfo.Get(referencedDll)["TargetFrameworkAttribute"];
             referencedTargetFramework.Should().Be(".NETFramework,Version=v4.6.2");
         }

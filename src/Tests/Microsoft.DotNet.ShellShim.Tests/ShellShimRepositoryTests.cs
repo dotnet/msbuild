@@ -495,9 +495,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDirectory = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", configuration))
-                .EnumerateDirectories()
-                .Single();
+            var outputDirectory = new DirectoryInfo(OutputPathCalculator.FromProject(testInstance.Path, testInstance).GetOutputDirectory(configuration: configuration));
 
             return new FilePath(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"));
         }

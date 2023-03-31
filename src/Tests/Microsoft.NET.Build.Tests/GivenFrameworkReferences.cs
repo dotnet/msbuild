@@ -107,9 +107,9 @@ namespace FrameworkReferenceTest
                 .Should()
                 .Pass();
 
-            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: testProject.RuntimeIdentifier);
 
-            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             List<string> includedFrameworkNames = GetIncludedFrameworks(runtimeConfigFile);
             if (shouldHaveIncludedFrameworks)
             {
@@ -724,13 +724,13 @@ namespace FrameworkReferenceTest
 
             var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage);
 
-            var packCommand = new PackCommand(Log, packageAsset.TestRoot, referencedPackage.Name);
+            var packCommand = new PackCommand(packageAsset);
 
             packCommand.Execute()
                 .Should()
                 .Pass();
 
-            var nupkgFolder = packCommand.GetOutputDirectory(null);
+            var nupkgFolder = packCommand.GetPackageDirectory();
 
             var testProject = new TestProject()
             {
@@ -1110,7 +1110,7 @@ namespace FrameworkReferenceTest
                 testAsset = testAsset.WithProjectChanges(projectChanges);
             }
 
-            var command = new MSBuildCommand(Log, "WriteResolvedVersions", Path.Combine(testAsset.TestRoot, testProject.Name));
+            var command = new MSBuildCommand(testAsset, "WriteResolvedVersions");
 
             command.ExecuteWithoutRestore()
                 .Should()

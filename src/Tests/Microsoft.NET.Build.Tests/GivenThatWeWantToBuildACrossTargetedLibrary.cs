@@ -24,16 +24,16 @@ namespace Microsoft.NET.Build.Tests
         public void It_builds_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("CrossTargeting")
+                .CopyTestAsset(Path.Combine("CrossTargeting", "NetStandardAndNetCoreApp"))
                 .WithSource();
 
-            var buildCommand = new BuildCommand(testAsset, "NetStandardAndNetCoreApp");
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "");
+            var outputDirectory = new DirectoryInfo(Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug"));
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.dll",
                 $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.pdb",
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "");
+            var outputDirectory = new DirectoryInfo(Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug"));
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "net40/DesktopAndNetStandard.dll",
                 "net40/DesktopAndNetStandard.pdb",
