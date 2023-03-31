@@ -11,6 +11,16 @@ namespace Microsoft.Build.Logging.LiveLogger;
 internal interface ITerminal : IDisposable
 {
     /// <summary>
+    /// Width of terminal buffer
+    /// </summary>
+    int Width { get; }
+
+    /// <summary>
+    /// Height of terminal buffer
+    /// </summary>
+    int Height { get; }
+
+    /// <summary>
     /// Starts buffering the text passed via the <c>Write*</c> methods.
     /// </summary>
     /// <remarks>

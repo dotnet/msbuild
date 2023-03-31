@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
@@ -100,7 +101,7 @@ internal sealed class LiveLogger : INodeLogger
     /// <summary>
     /// What is currently displaying in Nodes section as strings representing per-node console output.
     /// </summary>
-    private NodesFrame _currentFrame = new(Array.Empty<NodeStatus>());
+    private NodesFrame _currentFrame = new(Array.Empty<NodeStatus>(), 0, 0);
 
     /// <summary>
     /// The <see cref="Terminal"/> to write console output to.
@@ -418,12 +419,19 @@ internal sealed class LiveLogger : INodeLogger
     /// </summary>
     private void DisplayNodes()
     {
-        NodesFrame newFrame = new NodesFrame(_nodes);
+        NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
+
+        // Do not render delta but clear everything is Terminal width or height have changed
+        if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
+        {
+            EraseNodes();
+        }
+
         string rendered = newFrame.Render(_currentFrame);
 
         // Move cursor back to 1st line of nodes
-        Console.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
-        Console.Write(rendered);
+        Terminal.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
+        Terminal.Write(rendered);
 
         _currentFrame = newFrame;
     }
@@ -437,8 +445,8 @@ internal sealed class LiveLogger : INodeLogger
         {
             return;
         }
-        Console.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
-        Console.Write($"\x1b[0J");
+        Terminal.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
+        Terminal.Write($"\x1b[0J");
         _currentFrame.Clear();
     }
 
@@ -560,12 +568,16 @@ internal sealed class LiveLogger : INodeLogger
     private class NodesFrame
     {
         private readonly List<string> _nodeStrings = new();
-        private StringBuilder _renderBuilder = new();
+        private readonly StringBuilder _renderBuilder = new();
 
+        public int Width { get; }
+        public int Height { get; }
         public int NodesCount { get; private set; }
 
-        public NodesFrame(NodeStatus?[] nodes)
+        public NodesFrame(NodeStatus?[] nodes, int width, int height)
         {
+            Width = width;
+            Height = height;
             Init(nodes);
         }
 
@@ -599,6 +611,13 @@ internal sealed class LiveLogger : INodeLogger
                     _nodeStrings.Add(str);
                 }
                 i++;
+
+                // We cant output more than what fits on screen
+                // -2 because cursor command F cant reach, in Windows Terminal, very 1st line, and last line is empty caused by very last WriteLine
+                if (i >= Height - 2)
+                {
+                    break;
+                }
             }
 
             NodesCount = i;
@@ -606,15 +625,16 @@ internal sealed class LiveLogger : INodeLogger
 
         private ReadOnlySpan<char> FitToWidth(ReadOnlySpan<char> input)
         {
-            return input.Slice(0, Math.Min(input.Length, Console.BufferWidth - 1));
+            return input.Slice(0, Math.Min(input.Length, Width - 1));
         }
 
         /// <summary>
-        /// Render VT100 string to update current to next frame.
+        /// Render VT100 string to update from current to next frame.
         /// </summary>
         public string Render(NodesFrame previousFrame)
         {
             StringBuilder sb = _renderBuilder;
+            bool forceFullRefresh = previousFrame.Width != Width || previousFrame.Height != Height;
             sb.Clear();
 
             int i = 0;

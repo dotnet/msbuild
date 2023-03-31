@@ -26,6 +26,12 @@ internal sealed class Terminal : ITerminal
     /// </summary>
     private bool _isBuffering = false;
 
+    /// <inheritdoc/>
+    public int Height => Console.BufferHeight;
+
+    /// <inheritdoc/>
+    public int Width => Console.BufferWidth;
+
     public Terminal()
     {
         _originalOutputEncoding = Console.OutputEncoding;
@@ -98,7 +104,7 @@ internal sealed class Terminal : ITerminal
     /// <inheritdoc/>
     public void WriteLineFitToWidth(ReadOnlySpan<char> input)
     {
-        WriteLine(input.Slice(0, Math.Min(input.Length, Console.BufferWidth - 1)));
+        WriteLine(input.Slice(0, Math.Min(input.Length, Width - 1)));
     }
 
     /// <inheritdoc/>

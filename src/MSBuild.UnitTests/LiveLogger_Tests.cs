@@ -15,6 +15,7 @@ namespace Microsoft.Build.UnitTests
     {
         private const int _nodeCount = 8;
         private const int _terminalWidth = 80;
+        private const int _terminalHeight = 40;
         private const string _eventSender = "Test";
         private const string _projectFile = @"C:\src\project.proj";
 
@@ -26,7 +27,7 @@ namespace Microsoft.Build.UnitTests
 
         public LiveLogger_Tests()
         {
-            _mockTerminal = new MockTerminal(_terminalWidth);
+            _mockTerminal = new MockTerminal(_terminalWidth, _terminalHeight);
             _liveLogger = new LiveLogger(_mockTerminal);
 
             _liveLogger.Initialize(this, _nodeCount);

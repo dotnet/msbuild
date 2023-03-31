@@ -14,6 +14,7 @@ namespace Microsoft.Build.UnitTests
     internal sealed class MockTerminal : ITerminal
     {
         private readonly int _width;
+        private readonly int _height;
 
         /// <summary>
         /// Contains output lines written to the terminal.
@@ -23,9 +24,10 @@ namespace Microsoft.Build.UnitTests
         private StringBuilder _bufferedOutput = new();
         private bool _isBuffering = false;
 
-        public MockTerminal(int width)
+        public MockTerminal(int width, int height)
         {
             _width = width;
+            _height = height;
             _outputLines.Add("");
         }
 
@@ -68,6 +70,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         #region ITerminal implementation
+
+        public int Width => _width;
+        public int Height => _height;
 
         public void BeginUpdate()
         {
