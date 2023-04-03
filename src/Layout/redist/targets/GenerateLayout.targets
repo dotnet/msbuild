@@ -155,6 +155,24 @@
     </ItemGroup>
     <Copy SourceFiles="@(NETSdksContent)"
       DestinationFiles="@(NETSdksContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- adding Microsoft.NET.Build.Containers nuget package to library packs for Microsoft.NET.Sdk.Web to be able to implicitly reference package as required by VS-->
+    <!-- for now adding as part of Microsoft.NET.Sdk.Web as it is only used there -->
+    <Copy SourceFiles="$(ArtifactsDir)packages\$(Configuration)\Shipping\Microsoft.NET.Build.Containers.$(Version).nupkg"
+            DestinationFiles="$(OutputPath)\Sdks\Microsoft.NET.Sdk.Web\library-packs\Microsoft.NET.Build.Containers.$(Version).nupkg" />
+
+    <!-- update containers package version in Sdk.props-->
+    <PropertyGroup>
+      <MSBuildNamespaces>
+          <Namespace Prefix="dn" Uri="http://schemas.microsoft.com/developer/msbuild/2003" />
+      </MSBuildNamespaces>
+    </PropertyGroup>
+    
+    <XmlPoke
+      XmlInputPath="$(OutputPath)Sdks\Microsoft.NET.Sdk.Web\Sdk\Sdk.props"
+      Value="$(Version)"
+      Query="/dn:Project/dn:PropertyGroup/dn:_BuiltInMicrosoftNETBuildContainersVersion"
+      Namespaces="$(MSBuildNamespaces)" />
   </Target>
 
   <Target Name="PublishTestCli"

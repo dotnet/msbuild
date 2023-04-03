@@ -74,10 +74,18 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <PropertyGroup>
-    <SdkContainerSupportPackageVersion>0.3.2</SdkContainerSupportPackageVersion>
+    <!-- this property will be updated when generating layout with valid built-in version of the package-->
+    <_BuiltInMicrosoftNETBuildContainersVersion></_BuiltInMicrosoftNETBuildContainersVersion>
+    <SdkContainerSupportPackageVersion Condition="'$(SdkContainerSupportPackageVersion)' == ''">$(_BuiltInMicrosoftNETBuildContainersVersion)</SdkContainerSupportPackageVersion>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true'">
+  <!--Implicit package references don't work well with central package management, so disable it. -->
+  <!--In this case the package reference should be added explicitly. -->
+  <PropertyGroup Condition=" '$(ManagePackageVersionsCentrally)' == 'true' ">
+    <DisableImplicitMicrosoftNETBuildContainersReference Condition="'$(DisableImplicitMicrosoftNETBuildContainersReference)' == ''">true</DisableImplicitMicrosoftNETBuildContainersReference>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true' AND '$(DisableImplicitMicrosoftNETBuildContainersReference)' != 'true'">
     <PackageReference Include="Microsoft.NET.Build.Containers" Version="$(SdkContainerSupportPackageVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
 

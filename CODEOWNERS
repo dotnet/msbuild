@@ -77,3 +77,9 @@
 /src/Tests/Microsoft.DotNet.ApiCompatibility*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
 /src/Tests/Microsoft.DotNet.ApiCompat*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
 /src/Tests/Microsoft.DotNet.PackageValidation*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+
+# Area: dotnet containers
+/src/Cli/Containers @dotnet/sdk-container-builds-maintainers
+/src/Tests/containerize.UnitTests @dotnet/sdk-container-builds-maintainers
+/src/Tests/Microsoft.NET.Build.Containers.IntegrationTests @dotnet/sdk-container-builds-maintainers
+/src/Tests/Microsoft.NET.Build.Containers.UnitTests @dotnet/sdk-container-builds-maintainers
