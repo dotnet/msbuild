@@ -2042,6 +2042,56 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: expected,
                 includeInternalSymbols: includeInternalSymbols);
         }
+
+        [Fact]
+        public void TestGenericClassImplementsGenericInterface()
+        {
+            RunTest(original: """
+                    using System;
+                    namespace A
+                    {
+                        public class Foo<T> : System.Collections.ICollection, System.Collections.Generic.ICollection<T>
+                        {
+                            int System.Collections.Generic.ICollection<T>.Count => throw new NotImplementedException();
+                            bool System.Collections.Generic.ICollection<T>.IsReadOnly => throw new NotImplementedException();
+                            int System.Collections.ICollection.Count => throw new NotImplementedException();
+                            bool System.Collections.ICollection.IsSynchronized => throw new NotImplementedException();
+                            object System.Collections.ICollection.SyncRoot => throw new NotImplementedException();
+                            void System.Collections.Generic.ICollection<T>.Add(T item) => throw new NotImplementedException();
+                            void System.Collections.Generic.ICollection<T>.Clear() => throw new NotImplementedException();
+                            bool System.Collections.Generic.ICollection<T>.Contains(T item) => throw new NotImplementedException();
+                            void System.Collections.Generic.ICollection<T>.CopyTo(T[] array, int arrayIndex) => throw new NotImplementedException();
+                            bool System.Collections.Generic.ICollection<T>.Remove(T item) => throw new NotImplementedException();
+                            System.Collections.Generic.IEnumerator<T> System.Collections.Generic.IEnumerable<T>.GetEnumerator() => throw new NotImplementedException();
+                            void System.Collections.ICollection.CopyTo(System.Array array, int index) => throw new NotImplementedException();
+                            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => throw new NotImplementedException();
+
+                        }
+                    }
+                    
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Foo<T> : System.Collections.ICollection, System.Collections.Generic.ICollection<T>
+                        {
+                            int System.Collections.Generic.ICollection<T>.Count { get { throw null; } }
+                            bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
+                            int System.Collections.ICollection.Count { get { throw null; } }
+                            bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
+                            object System.Collections.ICollection.SyncRoot { get { throw null; } }
+                            void System.Collections.Generic.ICollection<T>.Add(T item) { }
+                            void System.Collections.Generic.ICollection<T>.Clear() { }
+                            bool System.Collections.Generic.ICollection<T>.Contains(T item) { throw null; }
+                            void System.Collections.Generic.ICollection<T>.CopyTo(T[] array, int arrayIndex) { }
+                            bool System.Collections.Generic.ICollection<T>.Remove(T item) { throw null; }
+                            System.Collections.Generic.IEnumerator<T> System.Collections.Generic.IEnumerable<T>.GetEnumerator() { throw null; }
+                            void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
+                            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
     }
 }
-
