@@ -6,6 +6,7 @@
       "src\\ApiCompat\\Microsoft.DotNet.ApiCompat.Task\\Microsoft.DotNet.ApiCompat.Task.csproj",
       "src\\ApiCompat\\Microsoft.DotNet.ApiCompatibility\\Microsoft.DotNet.ApiCompatibility.csproj",
       "src\\ApiCompat\\Microsoft.DotNet.PackageValidation\\Microsoft.DotNet.PackageValidation.csproj",
+      "src\\WasmSdk\\Tasks\\Microsoft.NET.Sdk.WebAssembly.Tasks.csproj",
       "src\\BlazorWasmSdk\\Tasks\\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.csproj",
       "src\\BlazorWasmSdk\\Tool\\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj",
       "src\\BuiltInTools\\BrowserRefresh\\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj",
