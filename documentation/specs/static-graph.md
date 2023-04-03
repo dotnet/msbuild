@@ -223,11 +223,13 @@ A project reference protocol may contain multiple targets, for example `A -> B, 
 
 The common project reference protocols (Build, Rebuild, Restore, Clean) will be specified by the common props and targets file in the msbuild repository. Other SDKs can implement their own protocols (e.g. ASPNET implementing Publish).
 
+For this section and the remainder of this spec, a project's default target(s) (what it would execute if no other targets are specified, so often Build but configurable via DefaultTargets) will be referred to as `<default>`. In MSBuild code, since angle brackets are difficult to use, it will instead use `.default` to indicate the default target.
+
 Here are the rules for the common protocols:
 
 `Build -> GetTargetFrameworks, <default>, GetNativeManifest, GetCopyToOutputDirectoryItems`
 
-The default target (represented in this spec's pseudo protocol representation as `<default>`) is resolved for each project.
+`<default>` is resolved for each project.
 
 `Clean -> GetTargetFrameworks, Clean`
 
