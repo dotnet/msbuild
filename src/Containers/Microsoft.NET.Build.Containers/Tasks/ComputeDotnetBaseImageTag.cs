@@ -97,6 +97,14 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
                     return null;
                 }
             }
+            else if (channel == "alpha")
+            {
+                return $"{major}.{minor}-preview.1";
+            }
+            else if (channel == "dev" || channel == "ci")
+            {
+                return $"{major}.{minor}-preview";
+            }
             else
             {
                 Log.LogError(Resources.Strings.InvalidSdkPrereleaseVersion, channel);

@@ -131,7 +131,7 @@ public class EndToEndTests
             .Execute()
             .Should().Pass();
 
-        new DotnetCommand(_testOutput, "publish", "-bl", "MinimalTestApp", "-r", rid, "-f", tfm)
+        new DotnetCommand(_testOutput, "publish", "-bl", "MinimalTestApp", "-r", rid, "-f", tfm, "-c", "Debug")
             .WithWorkingDirectory(workingDirectory)
             .Execute()
             .Should().Pass();
@@ -141,11 +141,12 @@ public class EndToEndTests
     }
 
     [DockerDaemonAvailableTheory]
-    [InlineData(false)]
+    //ignored until is in: https://github.com/dotnet/sdk/pull/31488 to avoid adding Microsoft.NET.Build.Containers v0.4.0 to feeds
+    //[InlineData(false)]
     [InlineData(true)]
     public async Task EndToEnd_NoAPI_Web(bool addPackageReference)
     {
-        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "CreateNewImageTest"));
+        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, $"CreateNewImageTest_{addPackageReference}"));
         DirectoryInfo privateNuGetAssets = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "ContainerNuGet"));
 
         if (newProjectDir.Exists)
@@ -182,10 +183,7 @@ public class EndToEndTests
 
         if (addPackageReference)
         {
-            new DotnetCommand(_testOutput, "new", "nugetconfig")
-                .WithWorkingDirectory(newProjectDir.FullName)
-                .Execute()
-                .Should().Pass();
+            File.Copy(Path.Combine(TestContext.Current.TestExecutionDirectory, "NuGet.config"), Path.Combine(newProjectDir.FullName, "NuGet.config"));
 
             new DotnetCommand(_testOutput, "nuget", "add", "source", packagedir.FullName, "--name", "local-temp")
                 .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
@@ -194,7 +192,7 @@ public class EndToEndTests
                 .Should().Pass();
 
             // Add package to the project
-            new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "--prerelease", "-f", ToolsetInfo.CurrentTargetFramework)
+            new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "-f", ToolsetInfo.CurrentTargetFramework, "-v", TestContext.Current.ToolsetUnderTest.SdkVersion)
                 .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
                 .WithWorkingDirectory(newProjectDir.FullName)
                 .Execute()
@@ -318,7 +316,6 @@ public class EndToEndTests
             Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
         }
 
-
         new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
             .WithWorkingDirectory(newProjectDir.FullName)
             // do not pollute the primary/global NuGet package store with the private package(s)
@@ -326,10 +323,7 @@ public class EndToEndTests
             .Execute()
             .Should().Pass();
 
-        new DotnetCommand(_testOutput, "new", "nugetconfig")
-            .WithWorkingDirectory(newProjectDir.FullName)
-            .Execute()
-            .Should().Pass();
+        File.Copy(Path.Combine(TestContext.Current.TestExecutionDirectory, "NuGet.config"), Path.Combine(newProjectDir.FullName, "NuGet.config"));
 
         new DotnetCommand(_testOutput, "nuget", "add", "source", packagedir.FullName, "--name", "local-temp")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
@@ -338,7 +332,7 @@ public class EndToEndTests
             .Should().Pass();
 
         // Add package to the project
-        new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "--prerelease", "-f", ToolsetInfo.CurrentTargetFramework)
+        new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "-f", ToolsetInfo.CurrentTargetFramework, "-v", TestContext.Current.ToolsetUnderTest.SdkVersion)
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
