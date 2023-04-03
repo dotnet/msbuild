@@ -169,7 +169,7 @@ namespace Microsoft.Build.Experimental
                 string.Join(" ", _commandLine);
 #endif
 
-            CommunicationsUtilities.Trace("Trying execute build at server with command line '{0}'", descriptiveCommandLine);
+            CommunicationsUtilities.Trace("Executing build using MSBuild Server with command line '{0}'", descriptiveCommandLine);
 
             try
             {
