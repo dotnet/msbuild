@@ -272,9 +272,12 @@ namespace Microsoft.Build.Graph
                         string.Join(";", solution.SolutionParserErrorCodes)));
             }
 
-            var projectsInSolution = GetBuildableProjects(solution);
+            IReadOnlyCollection<ProjectInSolution> projectsInSolution = GetBuildableProjects(solution);
 
-            var currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionGlobalProperties);
+            SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionGlobalProperties);
+
+            string solutionConfigurationXml = SolutionProjectGenerator.GetSolutionConfiguration(solution, currentSolutionConfiguration);
+            solutionGlobalProperties = solutionGlobalProperties.SetItem("CurrentSolutionConfigurationContents", solutionConfigurationXml);
 
             var newEntryPoints = new List<ProjectGraphEntryPoint>(projectsInSolution.Count);
 
@@ -544,7 +547,6 @@ namespace Microsoft.Build.Graph
         private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject)
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
-
 
             foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, _projectInstanceFactory))
             {
