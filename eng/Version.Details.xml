@@ -13,6 +13,7 @@
     <Dependency Name="VS.Redist.Common.NetCore.SharedFramework.x64.8.0" Version="8.0.0-preview.4.23181.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>958b1e046cbfff5c0bc647f531b4fcf9eb197a6c</Sha>
+      <SourceBuild RepoName="runtime" ManagedOnly="false" />
     </Dependency>
     <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.8.0" Version="8.0.0-preview.4.23181.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -45,6 +46,7 @@
     <Dependency Name="Microsoft.Build" Version="17.6.0-preview-23174-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>e7de1330724224a542668e1ef82c997613c7080c</Sha>
+      <SourceBuild RepoName="msbuild" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Build.Localization" Version="17.6.0-preview-23174-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
@@ -62,7 +64,7 @@
     <Dependency Name="dotnet-format" Version="8.0.416301">
       <Uri>https://github.com/dotnet/format</Uri>
       <Sha>0b968051beac5d7c1a62a52aee7fbbbb47dc1f47</Sha>
-      <SourceBuildTarball RepoName="format" ManagedOnly="true" />
+      <SourceBuild RepoName="format" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.6.0-2.23177.13">
       <Uri>https://github.com/dotnet/roslyn</Uri>
@@ -255,6 +257,11 @@
       <Sha>cbd9d61c5a92d7e4a0548a2c8ff4d1a28aaf6379</Sha>
       <SourceBuild RepoName="source-build-externals" ManagedOnly="true" />
     </Dependency>
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23156.5">
+      <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
+      <Sha>e2279a0388f89a1f771ff7e4ded01f0e657bcafb</Sha>
+      <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
+    </Dependency>
     <Dependency Name="Microsoft.Deployment.DotNet.Releases" Version="1.0.0-preview6.1.23159.4">
       <Uri>https://github.com/dotnet/deployment-tools</Uri>
       <Sha>b60c95e1ce736630d17e16626c59e3dd85ebae2b</Sha>
@@ -272,6 +279,11 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>747f53d751983dd062f39f4654bff074536e0012</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
+    </Dependency>
+    <Dependency Name="Microsoft.SourceLink.GitHub" Version="1.2.0-beta-23175-02" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>ccfca8dce5f7525433756281c2c275386348a9ad</Sha>
+      <SourceBuild RepoName="sourcelink" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="8.0.0-beta.23177.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
