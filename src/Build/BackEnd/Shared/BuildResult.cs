@@ -598,9 +598,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CacheIfPossible()
         {
-            foreach (string target in _resultsByTarget.Keys)
+            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget)
             {
-                _resultsByTarget[target].CacheItems(ConfigurationId, target);
+                targetResultPair.Value.CacheItems(ConfigurationId, targetResultPair.Key);
             }
         }
 
