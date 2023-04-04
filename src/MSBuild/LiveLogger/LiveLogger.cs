@@ -521,9 +521,18 @@ internal sealed class LiveLogger : INodeLogger
 
         string rendered = newFrame.Render(_currentFrame);
 
-        // Move cursor back to 1st line of nodes
-        Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
-        Terminal.Write(rendered);
+        // Hide the cursor to prevent it from jumping around as we overwrite the live lines.
+        Terminal.Write(AnsiCodes.HideCursor);
+        try
+        {
+            // Move cursor back to 1st line of nodes
+            Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
+            Terminal.Write(rendered);
+        }
+        finally
+        {
+            Terminal.Write(AnsiCodes.ShowCursor);
+        }
 
         _currentFrame = newFrame;
     }

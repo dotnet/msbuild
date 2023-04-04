@@ -75,4 +75,14 @@ internal static class AnsiCodes
     /// Print <see cref="CSI"/><see cref="EraseInLine"/> to clear.
     /// </remarks>
     public const string EraseInLine = "K";
+
+    /// <summary>
+    /// Hides the cursor.
+    /// </summary>
+    public const string HideCursor = "\x1b[?25l";
+
+    /// <summary>
+    /// Shows/restores the cursor.
+    /// </summary>
+    public const string ShowCursor = "\x1b[?25h";
 }
