@@ -2808,7 +2808,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- We need to do this here because we only want references which have been passed into rar but are not project to project references. -->
     <ItemGroup>
-      <_ReferencesFromRAR Include="@(ReferencePath->WithMetadataValue('ReferenceSourceTarget', 'ResolveAssemblyReference'))"/>
+      <_ReferencesFromRAR Condition="$([MSBuild]::AreFeaturesEnabled('17.8'))" Include="@(ReferencePath->WithMetadataValue('ReferenceSourceTarget', 'ResolveAssemblyReference'))" Exclude="@(ReferencePath->HasMetadata('FrameworkReferenceName'))" />
+      <_ReferencesFromRAR Condition="!$([MSBuild]::AreFeaturesEnabled('17.8'))" Include="@(ReferencePath->WithMetadataValue('ReferenceSourceTarget', 'ResolveAssemblyReference'))" />
     </ItemGroup>
 
   </Target>
