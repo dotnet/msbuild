@@ -313,11 +313,10 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="needs-review-translation">
- -warnNotAsError[:code[;code2]]
- Lista kodów ostrzeżeń, które mają być traktowane jako błędy. 
- Rozdziel średnik lub przecinek
- wiele kodów ostrzeżeń. Nie ma żadnego efektu, jeśli przełącznik -warnaserror
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
                      switch is not set.
 
                      Example:

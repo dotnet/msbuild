@@ -308,14 +308,13 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="needs-review-translation">
-      -warnNotAsError[:code[;code2]]
-                     Список кодов предупреждений, которые не будут рассматриваться как ошибки.
-                     Используйте точку с запятой или запятую для разделения
-                     нескольких кодов предупреждения. Не действует, если параметр -warnaserror
-                     не задан.
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-                     Пример:
+                     Example:
                        -warnNotAsError:MSB3026
     </target>
         <note>

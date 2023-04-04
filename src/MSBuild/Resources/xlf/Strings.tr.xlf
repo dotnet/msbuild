@@ -309,14 +309,13 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="needs-review-translation">
--warnNotAsError[:code[;code2]]
-                     Hata olarak kabul edilmeyen uyarı kodlarının listesi.
-                     Ayırmak için noktalı virgül veya virgül kullanın
-                    çoklu uyarı kodları -warnaserror ise hiçbir etkisi yoktur
-                     anahtarı ayarlanmadı.
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-Örnek:
+                     Example:
                        -warnNotAsError:MSB3026
     </target>
         <note>

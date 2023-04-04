@@ -310,14 +310,13 @@ arquivo de resposta.
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="needs-review-translation">
-      -warnNotAsError[:code[;code2]]
-                     Lista de códigos de aviso para tratar e não tratar como erros.
-                     Use ponto e vírgula ou vírgula para separar
-                     vários códigos de aviso. Não tem efeito se o -warnaserror
-                     interruptor não está definido.
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-                     Examplo:
+                     Example:
                        -warnNotAsError:MSB3026
     </target>
         <note>
