@@ -5,7 +5,6 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using FakeItEasy;
-using Microsoft.NET.TestFramework;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
