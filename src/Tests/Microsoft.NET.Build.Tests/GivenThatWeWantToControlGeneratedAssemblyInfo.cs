@@ -30,6 +30,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("AssemblyCopyrightAttribute")]
         [InlineData("AssemblyDescriptionAttribute")]
         [InlineData("AssemblyTitleAttribute")]
+        [InlineData("AssemblyTrademarkAttribute")]
         [InlineData("NeutralResourcesLanguageAttribute")]
         [InlineData("All")]
         public void It_respects_opt_outs(string attributeToOptOut)
@@ -50,6 +51,7 @@ namespace Microsoft.NET.Build.Tests
                     "/p:Description=TestDescription",
                     "/p:Product=TestProduct",
                     "/p:AssemblyTitle=TestTitle",
+                    "/p:Trademark=TestTrademark",
                     "/p:NeutralLanguage=fr",
                     attributeToOptOut == "All" ?
                         "/p:GenerateAssemblyInfo=false" :
@@ -69,6 +71,7 @@ namespace Microsoft.NET.Build.Tests
                 { "AssemblyDescriptionAttribute", "TestDescription" },
                 { "AssemblyProductAttribute", "TestProduct" },
                 { "AssemblyTitleAttribute", "TestTitle" },
+                { "AssemblyTrademarkAttribute", "TestTrademark" },
                 { "NeutralResourcesLanguageAttribute", "fr" },
             };
 
