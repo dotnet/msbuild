@@ -1023,6 +1023,7 @@ namespace Microsoft.Build.UnitTests
                                         isolateProjects: ProjectIsolationMode.False,
                                         graphBuildOptions: null,
                                         lowPriority: false,
+                                        question: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
                                         commandLine: null);

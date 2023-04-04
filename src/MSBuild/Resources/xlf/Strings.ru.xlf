@@ -33,6 +33,27 @@
         <target state="new">Included response file: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="HelpMessage_41_QuestionSwitch">
+        <source>  -question
+                     (Experimental) Question whether there is any build work.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
+                     (Short form: -q)
+    </source>
+        <target state="new">  -question
+                     (Experimental) Question whether there is any build work.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
+                     (Short form: -q)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-question" and "-q" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="new">MSBuild version {0} for {1}</target>
@@ -278,8 +299,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_40_WarnNotAsErrorSwitch">
-        <source>
-      -warnNotAsError[:code[;code2]]
+        <source>  -warnNotAsError[:code[;code2]]
                      List of warning codes to treats not treat as errors.
                      Use a semicolon or a comma to separate
                      multiple warning codes. Has no effect if the -warnaserror
@@ -288,7 +308,7 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="translated">
+        <target state="needs-review-translation">
       -warnNotAsError[:code[;code2]]
                      Список кодов предупреждений, которые не будут рассматриваться как ошибки.
                      Используйте точку с запятой или запятую для разделения

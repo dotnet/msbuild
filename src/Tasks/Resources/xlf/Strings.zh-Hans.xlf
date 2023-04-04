@@ -624,6 +624,11 @@
         <target state="translated">MSB3094: “{2}”引用 {0} 个项，而“{3}”引用 {1} 个项。它们必须具有相同的项数。</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="new">Creating binding redirection file "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
         <target state="translated">MSB3831: 应用程序配置文件必须具有根配置元素。</target>
@@ -2138,6 +2143,11 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">可再发行程序包列表文件“{0}”在 FileList 元素中具有 null 或空的可再发行程序包名称。请确保可再发行程序包名称不为 null 或空值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="new">Updating assembly cache file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

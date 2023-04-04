@@ -60,19 +60,45 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
+                // Question new task, should be false.
                 Unzip unzip = new Unzip
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
-                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    FailIfNotIncremental = true,
                 };
+                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                _mockEngine.Log = string.Empty;
 
-                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                // Run the task.
+                Unzip unzip2 = new Unzip
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    FailIfNotIncremental = false,
+                };
+                unzip2.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
                 _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
                 _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
+
+                // Question ran task, should be true
+                Unzip unzip3 = new Unzip
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = true,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    FailIfNotIncremental = true,
+                };
+                unzip3.Execute().ShouldBeTrue(() => _mockEngine.Log);
             }
         }
 

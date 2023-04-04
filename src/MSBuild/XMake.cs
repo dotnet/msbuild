@@ -706,6 +706,7 @@ namespace Microsoft.Build.CommandLine
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
+                bool question = false;
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
@@ -741,6 +742,7 @@ namespace Microsoft.Build.CommandLine
                                             ref inputResultsCaches,
                                             ref outputResultsCache,
                                             ref lowPriority,
+                                            ref question,
                                             recursing: false,
 #if FEATURE_GET_COMMANDLINE
                                             commandLine);
@@ -808,6 +810,7 @@ namespace Microsoft.Build.CommandLine
                                     isolateProjects,
                                     graphBuildOptions,
                                     lowPriority,
+                                    question,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     commandLine))
@@ -1121,6 +1124,7 @@ namespace Microsoft.Build.CommandLine
             ProjectIsolationMode isolateProjects,
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
+            bool question,
             string[] inputResultsCaches,
             string outputResultsCache,
 #if FEATURE_GET_COMMANDLINE
@@ -1292,6 +1296,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.ProjectIsolationMode = isolateProjects;
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
+                    parameters.Question = question;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -2215,6 +2220,7 @@ namespace Microsoft.Build.CommandLine
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
             ref bool lowPriority,
+            ref bool question,
             bool recursing,
             string commandLine)
         {
@@ -2330,6 +2336,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref inputResultsCaches,
                                                            ref outputResultsCache,
                                                            ref lowPriority,
+                                                           ref question,
                                                            recursing: true,
                                                            commandLine);
                     }
@@ -2393,9 +2400,12 @@ namespace Microsoft.Build.CommandLine
                         graphBuild = ProcessGraphBuildSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild]);
                     }
 
+                    question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
+
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
+
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -4045,6 +4055,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_OutputCacheFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_39_LowPrioritySwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_41_QuestionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

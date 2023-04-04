@@ -625,6 +625,9 @@
   <data name="GenerateBindingRedirects.ProcessingSuggestedRedirect">
     <value>Processing suggested binding redirect on "{0}" with MaxVersion "{1}".</value>
   </data>
+  <data name="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+    <value>Creating binding redirection file "{0}".</value>
+  </data>
   <!--
         The GenerateBootstrapper message bucket is: MSB3141 - MSB3170
 
@@ -1763,6 +1766,10 @@
   </data>
   <data name="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
     <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
+    <comment></comment>
+  </data>
+  <data name="ResolveAssemblyReference.WritingCacheFile">
+    <value>Updating assembly cache file "{0}".</value>
     <comment></comment>
   </data>
   <!--

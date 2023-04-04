@@ -624,6 +624,11 @@
         <target state="translated">MSB3094: "{2}", {0} öğeye; "{3}", {1} öğeye başvuruyor. Aynı sayıda öğeye sahip olmaları gerekir.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="new">Creating binding redirection file "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
         <target state="translated">MSB3831: Uygulama yapılandırma dosyasının kök yapılandırma öğesi olmalıdır.</target>
@@ -2138,6 +2143,11 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">"{0}" yeniden dağıtım liste dosyasının FileList öğesindeki Redist adı null veya boş. Redist adının null veya boş olmadığından emin olun.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="new">Updating assembly cache file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
