@@ -1984,7 +1984,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Reusing node {0} (PID: {1}).</value>
   </data>
   <data name="ItemReferencingSelfInTarget" xml:space="preserve">
-    <value>MSB4120: Item '{0}' definition within target is referencing self via metadata '{1}' (qualified or unqualified). This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-batching#item-batching-on-self-referencing-metadata</value>
+    <value>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://learn.microsoft.com/visualstudio/msbuild/msbuild-batching#item-batching-on-self-referencing-metadata</value>
     <comment>{StrBegin="MSB4120: "}</comment>
   </data>
 </root>
