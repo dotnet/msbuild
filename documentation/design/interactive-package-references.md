@@ -21,7 +21,7 @@ We envision the 'packages sourcing' to be a first-class-citizen within nuget cli
 dotnet restore MyProj.csproj  
 ```
 
-The command would resolve and fetch remote sources of proper revision (unless explicitly pointed to local sources), build the dependency and add it to `project.assets.json` indicating the sources expansion.
+The command would resolve and fetch remote sources of proper revision (unless explicitly pointed to local sources with active changes), build the dependency and add it to `project.assets.json` indicating the sources expansion.
 
 There would need to be special treatment for some aspect of behavior of `PackageReference` that diverges or are not defined for source code references (`ProjectReference`), listed in https://github.com/dotnet/msbuild/issues/8507.
 
@@ -45,7 +45,7 @@ The initial proof of concept of the feature is envisioned to be facilitated via 
 # User scenarios
 
 ## OSS package reference
-* Alice is referencing FooBar nuget in her project and she is using automated PRs to consume the latest available version
+* Alice is referencing FooBar nuget in her project and she is using automated PRs (e.g. dependabot) to consume the latest available version
 * A new version of FooBar nuget is published, automated PR into Alice project is created to update the `PackageReference` and the PR is failing
 * Alice is investigating the issue and suspecting problem in FooBar library. If the package was properly SourceLink-ed and symbols published, Alice can debug into the code and diagnose the issue
 * Alice would like to try to fix the issue, test the fix and contribute back to the OSS. She can achieve this with `Packages Sourcing` feature
@@ -94,7 +94,7 @@ The initial proof of concept of the feature is envisioned to be facilitated via 
 FooBar.Baz:
 Sources located: github.com/FooBar/Baz@0abcb66
 Local checkout: C:\Users\jankrivanek\.nuget\sources\FooBar\6.5.4\
-Build recipe created: FooBar-package-sourcing.proj
+Build instructions located: FooBar-package-sourcing.proj
 Build reconstructed: OK
 Reference replaced: OK
 
