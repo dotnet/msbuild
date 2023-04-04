@@ -166,21 +166,21 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>70ae3df4a6f3c92fb6b315afc405edd10ff38579</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="6.0.16">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="6.0.17">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>bde268e756b9e5b8240cce27114a150e9f61967e</Sha>
+      <Sha>c2b2855856f4a7643d0d17ab04b42f8df0a72dac</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.6.0" Version="6.0.16-servicing.23177.4">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.6.0" Version="6.0.17-servicing.23204.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>bde268e756b9e5b8240cce27114a150e9f61967e</Sha>
+      <Sha>c2b2855856f4a7643d0d17ab04b42f8df0a72dac</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.6.0" Version="6.0.16-servicing.23177.4">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.6.0" Version="6.0.17-servicing.23204.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>bde268e756b9e5b8240cce27114a150e9f61967e</Sha>
+      <Sha>c2b2855856f4a7643d0d17ab04b42f8df0a72dac</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="6.0.16">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="6.0.17">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>bde268e756b9e5b8240cce27114a150e9f61967e</Sha>
+      <Sha>c2b2855856f4a7643d0d17ab04b42f8df0a72dac</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="6.0.16-servicing.23175.3" CoherentParentDependency="Microsoft.WindowsDesktop.App.Runtime.win-x64">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
