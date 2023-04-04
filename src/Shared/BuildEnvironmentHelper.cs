@@ -81,9 +81,9 @@ namespace Microsoft.Build.Shared
             {
                 TryFromEnvironmentVariable,
                 TryFromVisualStudioProcess,
-                TryFromDevConsole,
                 TryFromMSBuildProcess,
                 TryFromMSBuildAssembly,
+                TryFromDevConsole,
                 TryFromSetupApi,
                 TryFromAppContextBaseDirectory
             };
