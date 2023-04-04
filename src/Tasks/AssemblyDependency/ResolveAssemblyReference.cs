@@ -1069,10 +1069,11 @@ namespace Microsoft.Build.Tasks
                 if (!Silent)
                 {
                     // First, loop over primaries and display information.
-                    foreach (AssemblyNameExtension assemblyName in dependencyTable.References.Keys)
+                    foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
-                        Reference primaryCandidate = dependencyTable.GetReference(assemblyName);
+                        Reference primaryCandidate = assembly.Value;
 
                         if (primaryCandidate.IsPrimary && !(primaryCandidate.IsConflictVictim && primaryCandidate.IsCopyLocal))
                         {
@@ -1081,10 +1082,11 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Second, loop over dependencies and display information.
-                    foreach (AssemblyNameExtension assemblyName in dependencyTable.References.Keys)
+                    foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
-                        Reference dependencyCandidate = dependencyTable.GetReference(assemblyName);
+                        Reference dependencyCandidate = assembly.Value;
 
                         if (!dependencyCandidate.IsPrimary && !(dependencyCandidate.IsConflictVictim && dependencyCandidate.IsCopyLocal))
                         {
@@ -1093,10 +1095,11 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Third, show conflicts and their resolution.
-                    foreach (AssemblyNameExtension assemblyName in dependencyTable.References.Keys)
+                    foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
-                        Reference conflictCandidate = dependencyTable.GetReference(assemblyName);
+                        Reference conflictCandidate = assembly.Value;
 
                         if (conflictCandidate.IsConflictVictim)
                         {

@@ -35,6 +35,33 @@ namespace Microsoft.Build.Graph.UnitTests
     {
 
         [Fact]
+        public void ValidateGlobalPropertyCopyByValueNotReference()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+
+                TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
+                                                                                                <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                                                                <Platform>x64</Platform>
+                                                                                                <PlatformLookupTable>win32=x64</PlatformLookupTable>
+                                                                                            </PropertyGroup>
+                                                                                            <ItemGroup>
+                                                                                                <ProjectReference Include=""$(MSBuildThisFileDirectory)2.proj"" />
+                                                                                            </ItemGroup>");
+                var proj2 = env.CreateFile("2.proj", @"
+                                                    <Project>
+                                                        <PropertyGroup>
+                                                            <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                            <Platforms>AnyCPU</Platforms>
+                                                        </PropertyGroup>
+                                                    </Project>");
+
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                GetFirstNodeWithProjectNumber(graph, 1).ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+            }
+        }
+
+        [Fact]
         public void ValidateSetPlatformOverride()
         {
             using (var env = TestEnvironment.Create())
@@ -71,6 +98,48 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+            }
+        }
+
+        [Fact]
+        public void ValidateNegotiationOverride()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+
+                TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
+                                                                                                <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                                                                <Platform>x64</Platform>
+                                                                                                <PlatformLookupTable>win32=x64</PlatformLookupTable>
+                                                                                            </PropertyGroup>
+                                                                                            <ItemGroup>
+                                                                                                <ProjectReference Include=""$(MSBuildThisFileDirectory)2.proj"" >
+                                                                                                    <OverridePlatformNegotiationValue>x86</OverridePlatformNegotiationValue>
+                                                                                                </ProjectReference>
+                                                                                            </ItemGroup>");
+                var proj2 = env.CreateFile("2.proj", @"
+                                                    <Project>
+                                                        <PropertyGroup>
+                                                            <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                            <Platforms>x64;AnyCPU</Platforms>
+                                                            <Platform>x86</Platform>
+                                                        </PropertyGroup>
+                                                        <ItemGroup>
+                                                            <ProjectReference Include=""$(MSBuildThisFileDirectory)3.proj"" >
+                                                            </ProjectReference>
+                                                        </ItemGroup>
+                                                    </Project>");
+                var proj3 = env.CreateFile("3.proj", @"
+                                                    <Project>
+                                                        <PropertyGroup>
+                                                            <Platforms>AnyCPU;x86</Platforms>
+                                                        </PropertyGroup>
+                                                    </Project>");
+
+
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
                 GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
             }
         }

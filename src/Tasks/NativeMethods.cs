@@ -537,6 +537,7 @@ namespace Microsoft.Build.Tasks
 
         internal const int HRESULT_E_CLASSNOTREGISTERED = -2147221164;
 
+        internal const int ERROR_INVALID_FILENAME = -2147024773; // Illegal characters in name
         internal const int ERROR_ACCESS_DENIED = -2147024891; // ACL'd or r/o
         internal const int ERROR_SHARING_VIOLATION = -2147024864; // File locked by another use
 
@@ -809,7 +810,7 @@ namespace Microsoft.Build.Tasks
             else
             {
                 hardLinkCreated = link(exitingFileName, newFileName) == 0;
-                errorMessage = hardLinkCreated ? null : log.FormatResourceString("Copy.LinklibraryFailedPrefix", "link()", Marshal.GetLastWin32Error());
+                errorMessage = hardLinkCreated ? null : log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "link()", Marshal.GetLastWin32Error());
             }
 
             return hardLinkCreated;

@@ -19,7 +19,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class PlatformNegotiation
     {
-        internal static string GetNearestPlatform(string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, string platformLookupTable, string projectPath, string currentProjectPlatform, TaskLoggingHelper? log = null)
+        internal static string GetNearestPlatform(string overridePlatformValue, string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, string platformLookupTable, string projectPath, string currentProjectPlatform, TaskLoggingHelper? log = null)
         {
             Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(platformLookupTable, log);
 
@@ -41,9 +41,14 @@ namespace Microsoft.Build.Shared
 
             string buildProjectReferenceAs = string.Empty;
 
+            // If an override value is set define that as the platform value as the top priority
+            if (!string.IsNullOrEmpty(overridePlatformValue))
+            {
+                buildProjectReferenceAs = overridePlatformValue;
+            }
             // If the referenced project has a defined `Platform` that's compatible, it will build that way by default.
             // Don't set `buildProjectReferenceAs` and the `_GetProjectReferencePlatformProperties` target will handle the rest.
-            if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(currentProjectPlatform, StringComparison.OrdinalIgnoreCase))
+            else if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(currentProjectPlatform, StringComparison.OrdinalIgnoreCase))
             {
                 log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
             }

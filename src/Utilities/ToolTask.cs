@@ -354,7 +354,7 @@ namespace Microsoft.Build.Utilities
         protected virtual bool SkipTaskExecution() { canBeIncremental = false; return false; }
 
         /// <summary>
-        /// ToolTask is not incremental it can't be questioned.  However, when SkipTaskExecution is override, then Question feature can task effect.
+        /// ToolTask is not incremental by default. When a derived class overrides SkipTaskExecution, then Question feature can take into effect.
         /// </summary>
         protected bool canBeIncremental { get; set; } = true;
 

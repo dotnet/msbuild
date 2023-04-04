@@ -594,9 +594,10 @@ namespace Microsoft.Build.Utilities
                 // Write out the dependency information as a new tlog
                 using (StreamWriter outputs = FileUtilities.OpenWrite(firstTlog, false, System.Text.Encoding.Unicode))
                 {
-                    foreach (string rootingMarker in DependencyTable.Keys)
+                    foreach (KeyValuePair<string, Dictionary<string, DateTime>> kvp in DependencyTable)
                     {
-                        Dictionary<string, DateTime> dependencies = DependencyTable[rootingMarker];
+                        string rootingMarker = kvp.Key;
+                        Dictionary<string, DateTime> dependencies = kvp.Value;
                         outputs.WriteLine("^" + rootingMarker);
                         foreach (string file in dependencies.Keys)
                         {
@@ -754,8 +755,9 @@ namespace Microsoft.Build.Utilities
                 var dependenciesWithoutMissingFiles = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
                 int keyIndex = 0;
 
-                foreach (string file in dependencies.Keys)
+                foreach (KeyValuePair<string, DateTime> kvp in dependencies)
                 {
+                    string file = kvp.Key;
                     if (keyIndex++ > 0)
                     {
                         // Record whether or not each file exists and cache it.
@@ -772,7 +774,7 @@ namespace Microsoft.Build.Utilities
                         // Does the cached file exist?
                         if (fileExists)
                         {
-                            dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
+                            dependenciesWithoutMissingFiles.Add(file, kvp.Value);
                         }
                     }
                     else

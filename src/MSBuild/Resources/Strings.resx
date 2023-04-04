@@ -849,7 +849,7 @@
   </data>
   <data name="HelpMessage_41_QuestionSwitch" Visibility="Public">
     <value>  -question
-                     (Experimental) Question the build if it is fully built.
+                     (Experimental) Question whether there is any build work.
                      MSBuild will error out when it detects a target or task
                      that can be incremental (has inputs and outputs),
                      but isn't up to date.
@@ -1347,6 +1347,9 @@
   </data>
   <data name="MSBuildDebugPath" Visibility="Public">
     <value>MSBuild logs and debug information will be at "{0}"</value>
+  </data>
+  <data name="DeferredResponseFile" Visibility="Public">
+    <value>Included response file: {0}</value>
   </data>
   <data name="SwitchErrorWithArguments" Visibility="Public">
     <value>{0}
