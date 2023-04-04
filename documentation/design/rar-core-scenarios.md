@@ -55,7 +55,7 @@ the reference.
 `Microsoft.VisualBasic.Core, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a` so it can map it back to the reference when it sees
 such an AssemblyRef in another assembly.
 
-- For project references (reference given as a path to an assembly file that is not guatanteed to have its dependencies resolved), RAR must be able to look
+- For project references (reference given as a path to an assembly file that is not guaranteed to have its dependencies resolved), RAR must be able to look
 up dependencies. If a dependency is not found in the assembly name -> file path map, RAR first searches the directory where the primary reference is located.
 Failing that, it then uses pre-defined strategies, four of which are enabled by default when building modern projects: `CandidateAssemblyFiles`, `HintPathFromItem`,
 `TargetFrameworkDirectory`, and `RawFileName`. Of these, only `CandidateAssemblyFiles` tends to actually be of potential use. `CandidateAssemblyFiles` is
