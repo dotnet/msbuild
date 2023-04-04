@@ -108,6 +108,7 @@ An opt-out mechanism would allow usage of properly denoted tasks with plain stri
   * Redacting **will NOT** occure on:
     * Log events emited from tasks (this might be added as extra opt-in option - but would lead to significant build performance degradation).
     * Any other alternative output of tasks (direct writes to file system, network connections etc.)
+    * MSBuild xml nodes (elements/attributes) names. (Sensitive data within MSBuild script itself is strongly discouraged)
     * Passing values to task and there embedding into additional text and passing out as output parameter - unless such is explicitly marked as containing sensitive data.
     * Encrypting/securing data in memory during therun of the build.
  
@@ -122,7 +123,7 @@ There needs to be a way how user specifies which data should be redacted from lo
    ```xml
    <DataToRedactFromLogs>Foo;Bar;Baz->SomeMetadata;MyItem->*</DataToRedactFromLogs>
    ```
-   single property might look bit cryptic for denoting different data types
+   single property might look bit cryptic for denoting different data types. On the other hand it might be more efficient in simple redacting scenarios (pointing to a set of regexes; single sustom redactor etc.) and would allow limiting the log events pre-buffering needs.
 
  * Item with global scope - e.g. 
    ```xml
@@ -170,15 +171,24 @@ There needs to be a way how user specifies which data should be redacted from lo
 
    public class Classifier: IValueClassifier
    {
-      public bool NeedsRedaction(string value) {/* Logic goes here */}
+      public ISet<string>? GetPartsToRedact(string value) {/* Logic goes here */}
    }
    ```
    This option has additional security considerations, but allows most versatile secrets redaction.
 
    The last option can possibly be allowed to be injected via other means, that MSBuild currently uses for injecting pluggable fnctionality (command line argument; environment variable; binary placed in a specific search location)
+* A built in redacting plugin - to be opted-in via env var or command line. Plugin will use same extension point as custom plugins - with extended interface allowing to provide redaction values as well:
+   ```csharp
+
+   public interface IValueRedactor
+   {
+      public ISet<Tuple<string, string>>? GetPartsToRedact(string value);
+   }
+   ```
+   This plugin will allow for no-touch redacting of most comon secret patterns by various providers. The default plugin is going to be provided as contribution by 1ES (by @michaelcfanning) and is currently out of scope of this document.
 
 
-First two presented option are not to be used. All the other options will likely be supported.
+First presented option is not to be used. All the other options will likely be supported.
 
 # Special considerations
 
@@ -230,7 +240,7 @@ First two presented option are not to be used. All the other options will likely
 In case we'd want to redact all occurences of value of `MySecret` from the task result - we might get a lot of false positives and very confusing results.
 
 # Open questions
- * What to use as a replacement of the data to be redacted? (Randomized hash, fixed token, etc.) - *very likely just a static pattern ('******').*
+ * What to use as a replacement of the data to be redacted? (Randomized hash, fixed token, etc.) - *very likely just a static pattern ('******'). The built-in redactor plugin will be allowed to provide custom replacements*
  * Do we want to allow to supply custom replacement value for injectable redaction functionality? There would need to be very strong compeling reason, as this is easily suspectible to [log forging attack](https://owasp.org/www-community/attacks/Log_Injection) - *most likely no.*
  * Balancing performance and accuracy - can we afford to not support arbitrary output of tasks? Otherwise we'd need to process all log events (similar experiments indicate 4 times slowdown of the build of mid-size project (Orchard)). On the other with explicit 'secret metadata' feature users might expect 100% correctness. Should we make this configurable as well (input data only vs all log entries)? Plus this might be suspectible to false positives (see above).
 
