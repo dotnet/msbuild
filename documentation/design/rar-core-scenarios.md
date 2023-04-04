@@ -66,7 +66,7 @@ if `Content` or `None` contains `MyLibrary.dll`, RAR will get its assembly name 
 
 The typical total number of references processed by RAR when building one project is in the order of hundreds. Even if the project referenced everything
 that comes with the .NET SDK, consumed a large number of NuGet packages, and was part of a large solution, it would likely reach only low thousands of references.
-In the OrchardCode solution, for example, the median number of references passed to and from RAR is 317 and the maximum is 629.
+In the OrchardCore solution, for example, the median number of references passed to and from RAR is 317 and the maximum is 629.
 
 While CPU optimizations can definitely make a difference, at this scale I/O is far more concerning. Building upon the design notes above, here is where RAR
 has to touch the disk.
