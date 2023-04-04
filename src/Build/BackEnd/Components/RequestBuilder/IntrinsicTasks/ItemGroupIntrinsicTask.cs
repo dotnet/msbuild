@@ -192,7 +192,7 @@ namespace Microsoft.Build.BackEnd
                         // Referring to unqualified metadata of other item (transform) is fine.
                         child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)
                     {
-                        expanderOptions |= ExpanderOptions.WarnOnItemMetadataSelfReference;
+                        expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
                         // Temporary workaround of unavailability of full Location info on metadata: https://github.com/dotnet/msbuild/issues/8579
                         location = child.Location;
                     }

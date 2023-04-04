@@ -89,11 +89,11 @@ namespace Microsoft.Build.Evaluation
         Truncate = 0x40,
 
         /// <summary>
-        /// Issues warning if item references unqualified or qualified metadata odf self - as this can lead to unintended expansion and
+        /// Issues build message if item references unqualified or qualified metadata odf self - as this can lead to unintended expansion and
         ///  cross-combination of other items.
         /// More info: https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-batching#item-batching-on-self-referencing-metadata
         /// </summary>
-        WarnOnItemMetadataSelfReference = 0x80,
+        LogOnItemMetadataSelfReference = 0x80,
 
         /// <summary>
         /// Expand only properties and then item lists
@@ -1015,7 +1015,7 @@ namespace Microsoft.Build.Evaluation
                     LoggingContext loggingContext)
                 {
                     _metadata = metadata;
-                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate | ExpanderOptions.WarnOnItemMetadataSelfReference);
+                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate | ExpanderOptions.LogOnItemMetadataSelfReference);
                     _elementLocation = elementLocation;
                     _loggingContext = loggingContext;
 
@@ -1049,7 +1049,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
 
-                        if ((_options & ExpanderOptions.WarnOnItemMetadataSelfReference) != 0 &&
+                        if ((_options & ExpanderOptions.LogOnItemMetadataSelfReference) != 0 &&
                             _loggingContext != null &&
                             !string.IsNullOrEmpty(metadataName) &&
                             _metadata is IItemMetadata itemMetadata &&
