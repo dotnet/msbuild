@@ -793,7 +793,7 @@ namespace Microsoft.Build.UnitTests
                       </Target>
                     </Project>
                 """;
-            var projectFile = env.CreateFile("test.proj",  ObjectModelHelpers.CleanupFileContents(projectContent));
+            var projectFile = env.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(projectContent));
 
             MockLogger logger = new MockLogger(_testOutput);
             ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
