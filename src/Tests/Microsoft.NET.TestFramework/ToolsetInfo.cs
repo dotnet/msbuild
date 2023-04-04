@@ -12,6 +12,7 @@ using System.Reflection;
 using Xunit.Abstractions;
 using Microsoft.Build.Utilities;
 using NuGet.Versioning;
+using System.CommandLine;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -271,7 +272,14 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                dotnetRoot = Path.GetDirectoryName(ResolveCommand("dotnet"));
+                if (TryResolveCommand("dotnet", out string pathToDotnet))
+                {
+                    dotnetRoot = Path.GetDirectoryName(pathToDotnet);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Could not resolve path to dotnet");
+                }
                 hostNotFoundReason = "";
             }
 
@@ -289,7 +297,14 @@ namespace Microsoft.NET.TestFramework
             }
             else if (commandLine.UseFullFrameworkMSBuild)
             {
-                ret.FullFrameworkMSBuildPath = ResolveCommand("MSBuild");
+                if (TryResolveCommand("MSBuild", out string pathToMSBuild))
+                {
+                    ret.FullFrameworkMSBuildPath = Path.GetDirectoryName(pathToMSBuild);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Could not resolve path to MSBuild");
+                }
             }
 
             var microsoftNETBuildExtensionsTargetsFromEnvironment = Environment.GetEnvironmentVariable("MicrosoftNETBuildExtensionsTargets");
@@ -334,8 +349,15 @@ namespace Microsoft.NET.TestFramework
             return ret;
         }
 
-        private static string ResolveCommand(string command)
+        /// <summary>
+        /// Attempts to resolve full path to command from PATH/PATHEXT environment variable.
+        /// </summary>
+        /// <param name="command">The command to resolve.</param>
+        /// <param name="fullExePath">The full path to the command</param>
+        /// <returns><see langword="true"/> when command can be resolved, <see langword="false"/> otherwise.</returns>
+        public static bool TryResolveCommand(string command, out string fullExePath)
         {
+            fullExePath = null;
             char pathSplitChar;
             string[] extensions = new string[] { string.Empty };
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -356,10 +378,11 @@ namespace Microsoft.NET.TestFramework
 
             if (result == null)
             {
-                throw new InvalidOperationException("Could not resolve path to " + command);
+                return false;
             }
 
-            return result;
+            fullExePath = result;
+            return true;
         }
 
         private static string FindFileInTree(string relativePath, string startPath, bool throwIfNotFound = true)
