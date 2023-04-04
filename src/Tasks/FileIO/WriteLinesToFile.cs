@@ -122,9 +122,9 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        if (WriteOnlyWhenDifferent && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+                        if (WriteOnlyWhenDifferent)
                         {
-                            Log.LogWarningWithCodeFromResources("WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
+                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
                         }
                         Directory.CreateDirectory(directoryPath);
                         System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);

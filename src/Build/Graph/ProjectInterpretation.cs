@@ -33,6 +33,7 @@ namespace Microsoft.Build.Graph
         private const string PlatformMetadataName = "Platform";
         private const string PlatformsMetadataName = "Platforms";
         private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
+        private const string OverridePlatformNegotiationValue = "OverridePlatformNegotiationValue";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
@@ -134,7 +135,9 @@ namespace Microsoft.Build.Graph
                         null, // Platform negotiation requires an evaluation with no global properties first
                         _projectCollection);
 
-                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
+                    string overridePlatformNegotiationMetadataValue = projectReferenceItem.GetMetadataValue(OverridePlatformNegotiationValue);
+
+                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(overridePlatformNegotiationMetadataValue, projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
 
                     if (selectedPlatform.Equals(String.Empty))
                     {
