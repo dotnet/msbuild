@@ -153,13 +153,8 @@ namespace Microsoft.Build.Graph
                     }
                     else
                     {
-                        string globalPropertiesToRemove = projectReferenceItem.GetMetadataValue("GlobalPropertiesToRemove");
-                        if (!string.IsNullOrEmpty(globalPropertiesToRemove))
-                        {
-                            globalPropertiesToRemove += ";";
-                        }
-
-                        projectReferenceItem.SetMetadata("GlobalPropertiesToRemove", EscapingUtilities.Escape(globalPropertiesToRemove + "Configuration;Platform"));
+                        referenceGlobalProperties.Remove(ConfigurationMetadataName);
+                        referenceGlobalProperties.Remove(PlatformMetadataName);
                     }
                 }
 
