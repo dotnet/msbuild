@@ -4,7 +4,7 @@
 #nullable disable
 namespace Microsoft.Build.Evaluation;
 
-internal interface IItemMetadata
+internal interface IItemTypeDefinition
 {
     /// <summary>
     /// The item type to which this metadata applies.

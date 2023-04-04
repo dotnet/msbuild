@@ -1052,7 +1052,7 @@ namespace Microsoft.Build.Evaluation
                         if ((_options & ExpanderOptions.LogOnItemMetadataSelfReference) != 0 &&
                             _loggingContext != null &&
                             !string.IsNullOrEmpty(metadataName) &&
-                            _metadata is IItemMetadata itemMetadata &&
+                            _metadata is IItemTypeDefinition itemMetadata &&
                             (string.IsNullOrEmpty(itemType) || string.Equals(itemType, itemMetadata.ItemType, StringComparison.Ordinal)))
                         {
                             _loggingContext.LogComment(MessageImportance.High, new BuildEventFileInfo(_elementLocation),
