@@ -715,27 +715,4 @@ internal sealed class LiveLogger : INodeLogger
     }
 
     #endregion
-
-}
-
-internal record ProjectContext(int Id)
-{
-    public ProjectContext(BuildEventContext context)
-        : this(context.ProjectContextId)
-    { }
-}
-
-internal record ProjectInstance(int Id)
-{
-    public ProjectInstance(BuildEventContext context)
-        : this(context.ProjectInstanceId)
-    { }
-}
-
-internal record NodeStatus(string Project, string Target, Stopwatch Stopwatch)
-{
-    public override string ToString()
-    {
-        return $"{Project} {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)";
-    }
 }

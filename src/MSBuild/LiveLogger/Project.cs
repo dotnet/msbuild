@@ -50,14 +50,3 @@ internal sealed class Project
         BuildMessages.Add(new BuildMessage(severity, message));
     }
 }
-
-/// <summary>
-/// Enumerates the supported message severities.
-/// </summary>
-internal enum MessageSeverity { Warning, Error }
-
-/// <summary>
-/// Represents a piece of diagnostic output (message/warning/error).
-/// </summary>
-internal record struct BuildMessage(MessageSeverity Severity, string Message)
-{ }
