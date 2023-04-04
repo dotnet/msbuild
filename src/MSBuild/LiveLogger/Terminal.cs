@@ -113,15 +113,15 @@ internal sealed class Terminal : ITerminal
         if (_isBuffering)
         {
             _outputBuilder
-                .Append("\x1b[")
+                .Append(AnsiCodes.CSI)
                 .Append((int)color)
-                .Append(";1m")
+                .Append(AnsiCodes.SetColor)
                 .Append(text)
-                .Append("\x1b[m");
+                .Append(AnsiCodes.SetDefaultColor);
         }
         else
         {
-            Write($"\x1b[{(int)color};1m{text}\x1b[m");
+            Write($"{AnsiCodes.CSI}{(int)color}{AnsiCodes.SetColor}{text}{AnsiCodes.SetDefaultColor}");
         }
     }
 
@@ -135,7 +135,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            WriteLine($"\x1b[{(int)color};1m{text}\x1b[m");
+            WriteLine($"{AnsiCodes.CSI}{(int)color}{AnsiCodes.SetColor}{text}{AnsiCodes.SetDefaultColor}");
         }
     }
 

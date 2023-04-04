@@ -347,7 +347,7 @@ internal sealed class LiveLogger : INodeLogger
                         {
                             // Ignore any GetDirectoryName exceptions
                         }
-                        Terminal.WriteLine($" ({duration:F1}s) → \x1b]8;;{url}\x1b\\{outputPath}\x1b]8;;\x1b\\");
+                        Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}");
                     }
                     else
                     {
@@ -522,7 +522,7 @@ internal sealed class LiveLogger : INodeLogger
         string rendered = newFrame.Render(_currentFrame);
 
         // Move cursor back to 1st line of nodes
-        Terminal.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
+        Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
         Terminal.Write(rendered);
 
         _currentFrame = newFrame;
@@ -537,8 +537,8 @@ internal sealed class LiveLogger : INodeLogger
         {
             return;
         }
-        Terminal.WriteLine($"\x1b[{_currentFrame.NodesCount + 1}F");
-        Terminal.Write($"\x1b[0J");
+        Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
+        Terminal.Write($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
         _currentFrame.Clear();
     }
 
@@ -619,7 +619,7 @@ internal sealed class LiveLogger : INodeLogger
             int i = 0;
             for (; i < NodesCount; i++)
             {
-                var needed = FitToWidth(this.NodeString(i));
+                var needed = FitToWidth(NodeString(i));
 
                 // Do we have previous node string to compare with?
                 if (previousFrame.NodesCount > i)
@@ -637,12 +637,12 @@ internal sealed class LiveLogger : INodeLogger
                         else
                         {
                             // set cursor to different char
-                            sb.Append($"\x1b[{commonPrefixLen}C");
+                            sb.Append($"{AnsiCodes.CSI}{commonPrefixLen}{AnsiCodes.MoveForward}");
                             sb.Append(needed.Slice(commonPrefixLen));
                             // Shall we clear rest of line
                             if (needed.Length < previous.Length)
                             {
-                                sb.Append($"\x1b[K");
+                                sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
                             }
                         }
                     }
@@ -660,7 +660,7 @@ internal sealed class LiveLogger : INodeLogger
             // clear no longer used lines
             if (i < previousFrame.NodesCount)
             {
-                sb.Append($"\x1b[0J");
+                sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
             }
 
             return sb.ToString();
