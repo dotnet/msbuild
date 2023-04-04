@@ -391,11 +391,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public static IEnumerable<object?[]> CanParseMultiChoiceTemplateOptionsData =>
             new object?[][]
             {
-                new[] { $"foo --framework net5.0 --framework {ToolsetInfo.CurrentTargetFramework}", "framework", $"net5.0|net6.0|{ToolsetInfo.CurrentTargetFramework}", null, $"net5.0|{ToolsetInfo.CurrentTargetFramework}" },
-                new[] { "foo -f net5.0", "framework", $"net5.0|net6.0|{ToolsetInfo.CurrentTargetFramework}", null, "net5.0" },
-                new[] { $"foo -f net5.0 -f {ToolsetInfo.CurrentTargetFramework} -f net6.0", "framework", $"net5.0|net6.0|{ToolsetInfo.CurrentTargetFramework}", null, $"net5.0|{ToolsetInfo.CurrentTargetFramework}|net6.0" },
-                new[] { "foo --framework net6.0", "framework", $"net5.0|net6.0|{ToolsetInfo.CurrentTargetFramework}", null, "net6.0" },
-                new[] { "foo --framework ", "framework", $"net5.0|net6.0|{ToolsetInfo.CurrentTargetFramework}", "net5.0|net6.0", "net5.0|net6.0" },
+                new[] { "foo --framework net5.0 --framework net7.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0|net7.0" },
+                new[] { "foo -f net5.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0" },
+                new[] { "foo -f net5.0 -f net7.0 -f net6.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0|net7.0|net6.0" },
+                new[] { "foo --framework net6.0", "framework", "net5.0|net6.0|net7.0", null, "net6.0" },
+                new[] { "foo --framework ", "framework", "net5.0|net6.0|net7.0", "net5.0|net6.0", "net5.0|net6.0" },
             };
 
         [Theory]

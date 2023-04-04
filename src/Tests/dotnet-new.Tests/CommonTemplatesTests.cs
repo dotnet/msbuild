@@ -168,8 +168,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             var templatesToTest = new[]
             {
-                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net6.0", ToolsetInfo.CurrentTargetFramework } },
-                new { Template = "classlib", Frameworks = new[] { null, "net6.0", ToolsetInfo.CurrentTargetFramework, "netstandard2.0", "netstandard2.1" } }
+                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net6.0", "net7.0" } },
+                new { Template = "classlib", Frameworks = new[] { null, "net6.0", "net7.0", "netstandard2.0", "netstandard2.1" } }
             };
 
             //features: top-level statements; nullables; implicit usings; filescoped namespaces
@@ -178,9 +178,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             //C# 12 is not supported yet - https://github.com/dotnet/sdk/issues/29195
             string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
 
-            string?[] nullableSupportedInFrameworkByDefault = { null, "net6.0", ToolsetInfo.CurrentTargetFramework, "netstandard2.1" };
-            string?[] implicitUsingsSupportedInFramework = { null, "net6.0", ToolsetInfo.CurrentTargetFramework };
-            string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net6.0", ToolsetInfo.CurrentTargetFramework };
+            string?[] nullableSupportedInFrameworkByDefault = { null, "net6.0", "net7.0", "netstandard2.1" };
+            string?[] implicitUsingsSupportedInFramework = { null, "net6.0", "net7.0" };
+            string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net6.0", "net7.0" };
 
             string?[] nullableSupportedLanguages = { "8.0", "9.0", "10.0", "11.0", "11", /*"12",*/ "latest", "latestMajor", "default", "preview" };
             string?[] topLevelStatementSupportedLanguages = { null, "9.0", "10.0", "11", "11.0", /*"12",*/ "latest", "latestMajor", "default", "preview" };
