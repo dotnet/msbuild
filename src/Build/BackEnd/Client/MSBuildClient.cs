@@ -296,7 +296,7 @@ namespace Microsoft.Build.Experimental
         {
             bool isBusy = ServerWasBusy();
             Stopwatch sw = Stopwatch.StartNew();
-            while (isBusy && sw.Elapsed < TimeSpan.FromMilliseconds(milliseconds))
+            while (isBusy && sw.ElapsedMilliseconds < milliseconds)
             {
                 CommunicationsUtilities.Trace("Wait for server to be not busy - will retry soon...");
                 Thread.Sleep(100);
