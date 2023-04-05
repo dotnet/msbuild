@@ -238,6 +238,10 @@
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
       <Sha>916b9a6842c8d09c385cd25e4f02477e216eb630</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.5-beta1.23181.1">
+      <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
+      <Sha>916b9a6842c8d09c385cd25e4f02477e216eb630</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.5-beta1.23181.1">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
       <Sha>916b9a6842c8d09c385cd25e4f02477e216eb630</Sha>
