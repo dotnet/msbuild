@@ -238,6 +238,10 @@
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
       <Sha>916b9a6842c8d09c385cd25e4f02477e216eb630</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.5-beta1.23181.1">
+      <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
+      <Sha>916b9a6842c8d09c385cd25e4f02477e216eb630</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.5-beta1.23181.1">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
       <Sha>916b9a6842c8d09c385cd25e4f02477e216eb630</Sha>
@@ -257,9 +261,9 @@
       <Sha>cbd9d61c5a92d7e4a0548a2c8ff4d1a28aaf6379</Sha>
       <SourceBuild RepoName="source-build-externals" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23156.5">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23204.3">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>e2279a0388f89a1f771ff7e4ded01f0e657bcafb</Sha>
+      <Sha>2d28a5e97867316939ef8108f219a8de073d0f03</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Deployment.DotNet.Releases" Version="1.0.0-preview6.1.23159.4">
