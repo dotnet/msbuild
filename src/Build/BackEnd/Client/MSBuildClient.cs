@@ -265,9 +265,10 @@ namespace Microsoft.Build.Experimental
                 return true;
             }
 
-            // Check that server is not busy.
-            bool serverWasBusy = ServerWasBusy();
-            if (serverWasBusy)
+            // Check and wait for server to be not busy for some short time to avoid race condition when server reports build is finished but had not released ServerBusy mutex yet.
+            // If during that short time, a script would try to shutdown server, it would be rejected and server would continue to run.
+            bool serverIsBusy = ServerIsBusyWithWaitAndRetry(250);
+            if (serverIsBusy)
             {
                 CommunicationsUtilities.Trace("Server cannot be shut down for it is not idle.");
                 return false;
@@ -289,6 +290,20 @@ namespace Microsoft.Build.Experimental
             ReadPacketsLoop(cancellationToken);
 
             return _exitResult.MSBuildClientExitType == MSBuildClientExitType.Success;
+        }
+
+        private bool ServerIsBusyWithWaitAndRetry(int milliseconds)
+        {
+            bool isBusy = ServerWasBusy();
+            Stopwatch sw = Stopwatch.StartNew();
+            while (isBusy && sw.ElapsedMilliseconds < milliseconds)
+            {
+                CommunicationsUtilities.Trace("Wait for server to be not busy - will retry soon...");
+                Thread.Sleep(100);
+                isBusy = ServerWasBusy();
+            }
+
+            return isBusy;
         }
 
         internal bool ServerIsRunning()
