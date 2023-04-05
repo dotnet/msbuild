@@ -24,6 +24,7 @@
 
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" />
+    <PackageReference Include="NuGet.Build.Tasks.Console" />
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" />
 
     <!-- As of 17.5, NuGet.Build.Tasks and Microsoft.Build.NuGetSdkResolver depends on Newtonsoft.Json version 13.0.1,
