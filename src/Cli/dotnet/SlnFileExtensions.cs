@@ -83,6 +83,25 @@ namespace Microsoft.DotNet.Tools.Common
 
                 if (solutionFolders != null)
                 {
+                    if (solutionFolders.Any())
+                    {
+                        // Check for any existing projects if there is a new matching solution folder
+                        var duplicateProjects = slnFile.Projects.Where(p => solutionFolders.Contains(p.Name)).ToList();
+                        foreach (SlnProject duplicateProject in duplicateProjects)
+                        {
+                            slnFile.AddSolutionFolders(duplicateProject, solutionFolders);
+                        }
+                    }
+                    else
+                    {
+                        // if there is an existing duplicate, it must be a solution folder
+                        var duplicateProject = slnFile.Projects.Where(p => string.Equals(p.Name, slnProject.Name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                        if (duplicateProject != null)
+                        {
+                            slnFile.AddSolutionFolders(slnProject, new List<string>() { duplicateProject.Name });
+                        }
+                    }
+
                     slnFile.AddSolutionFolders(slnProject, solutionFolders);
                 }
 
@@ -90,16 +109,6 @@ namespace Microsoft.DotNet.Tools.Common
 
                 Reporter.Output.WriteLine(
                     string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, relativeProjectPath));
-            }
-        }
-
-        public static void UpdateDuplicateProjects(this SlnFile slnFile,IList<string> solutionFolders)
-        {
-            //Update any duplicates with the new solution Folder
-            var duplicateProjects = slnFile.Projects.Where(p => solutionFolders.Contains(p.Name));
-            foreach (SlnProject duplicateProject in duplicateProjects)
-            {
-                slnFile.AddSolutionFolders(duplicateProject, solutionFolders);
             }
         }
 

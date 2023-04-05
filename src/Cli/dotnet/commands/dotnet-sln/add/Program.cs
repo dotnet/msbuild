@@ -74,11 +74,6 @@ namespace Microsoft.DotNet.Tools.Sln.Add
                 var solutionFolders = DetermineSolutionFolder(slnFile, fullProjectPath);
 
                 slnFile.AddProject(fullProjectPath, solutionFolders);
-
-                if (solutionFolders.Count > 0)
-                {
-                    slnFile.UpdateDuplicateProjects(solutionFolders);
-                }
             }
 
             if (slnFile.Projects.Count > preAddProjectCount)
