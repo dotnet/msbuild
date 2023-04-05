@@ -20,7 +20,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
   -->
   <PropertyGroup>
-    <ProduceReferenceAssembly Condition=" '$(ProduceReferenceAssembly)' == '' ">true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition=" '$(ProduceReferenceAssembly)' == '' and '$(ProduceOnlyReferenceAssembly)' != 'true' ">true</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <!--
