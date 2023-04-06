@@ -220,7 +220,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },                     ParameterlessSwitch.FileLogger9,           null),
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },           ParameterlessSwitch.DistributedFileLogger, null),
 #if FEATURE_LIVELOGGER
-            new ParameterlessSwitchInfo(  new string[] { "livelogger", "ll" },                       ParameterlessSwitch.LiveLogger,            null),
+            new ParameterlessSwitchInfo(  new string[] { "livelogger", "ll", "terminallogger", "tl" }, ParameterlessSwitch.LiveLogger,          null),
 #endif
 #if DEBUG
             new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },                 ParameterlessSwitch.WaitForDebugger,       null),
