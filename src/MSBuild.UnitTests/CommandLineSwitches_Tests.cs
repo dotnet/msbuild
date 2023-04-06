@@ -163,6 +163,11 @@ namespace Microsoft.Build.UnitTests
         [InlineData("livelogger")]
         [InlineData("LiveLogger")]
         [InlineData("LIVELOGGER")]
+        [InlineData("tl")]
+        [InlineData("TL")]
+        [InlineData("terminallogger")]
+        [InlineData("TerminalLogger")]
+        [InlineData("TERMINALLOGGER")]
         public void LiveLoggerSwitchIdentificationTests(string livelogger)
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
