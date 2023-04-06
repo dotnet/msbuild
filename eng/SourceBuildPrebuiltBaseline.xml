@@ -55,6 +55,7 @@
     <UsagePattern IdentityGlob="System.Text.Encoding.CodePages/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encodings.Web/*6.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encodings.Web/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Text.Json/*4.7.0*" />
     <UsagePattern IdentityGlob="System.Text.Json/*6.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Json/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Json/*7.0.1*" />

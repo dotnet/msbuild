@@ -43,14 +43,14 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>958b1e046cbfff5c0bc647f531b4fcf9eb197a6c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.6.0-preview-23174-01">
+    <Dependency Name="Microsoft.Build" Version="17.7.0-preview-23204-03">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>e7de1330724224a542668e1ef82c997613c7080c</Sha>
+      <Sha>413571dea9ebb0023f26e5c0f5cd514d30b61465</Sha>
       <SourceBuild RepoName="msbuild" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.6.0-preview-23174-01">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.7.0-preview-23204-03">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>e7de1330724224a542668e1ef82c997613c7080c</Sha>
+      <Sha>413571dea9ebb0023f26e5c0f5cd514d30b61465</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="12.5.0-beta.23180.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
@@ -238,6 +238,10 @@
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
       <Sha>fee402d1950ce7d8228baba93197d9022234fa61</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.5-beta1.23205.2">
+      <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
+      <Sha>fee402d1950ce7d8228baba93197d9022234fa61</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.5-beta1.23205.2">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
       <Sha>fee402d1950ce7d8228baba93197d9022234fa61</Sha>
@@ -257,9 +261,9 @@
       <Sha>cbd9d61c5a92d7e4a0548a2c8ff4d1a28aaf6379</Sha>
       <SourceBuild RepoName="source-build-externals" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23156.5">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23204.3">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>e2279a0388f89a1f771ff7e4ded01f0e657bcafb</Sha>
+      <Sha>2d28a5e97867316939ef8108f219a8de073d0f03</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Deployment.DotNet.Releases" Version="1.0.0-preview6.1.23159.4">
