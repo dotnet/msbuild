@@ -170,12 +170,16 @@ namespace Microsoft.Build.UnitTests
         [InlineData("TERMINALLOGGER")]
         public void LiveLoggerSwitchIdentificationTests(string livelogger)
         {
-            CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
+            CommandLineSwitches.ParameterizedSwitch parameterlessSwitch;
             string duplicateSwitchErrorMessage;
 
-            CommandLineSwitches.IsParameterlessSwitch(livelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
-            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.LiveLogger);
+            CommandLineSwitches.IsParameterizedSwitch(livelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.LiveLogger);
             duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeTrue();
         }
 #endif
 

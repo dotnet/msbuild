@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -2405,6 +2405,8 @@ namespace Microsoft.Build.CommandLine
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
 
+                    bool liveLogger = ProcessLiveLoggerConfiguration(commandLineSwitches);
+
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
 
@@ -2414,11 +2416,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-#if FEATURE_LIVELOGGER
-                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.LiveLogger],
-#else
-                        false,
-#endif
+                        liveLogger,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -2483,6 +2481,79 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        private static bool ProcessLiveLoggerConfiguration(CommandLineSwitches commandLineSwitches)
+        {
+#if FEATURE_LIVELOGGER
+            string liveLoggerArg;
+
+            // Command line wins, so check it first
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LiveLogger))
+            {
+                // There's a switch set, but there might be more than one
+                string[] switches = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LiveLogger];
+
+                liveLoggerArg = switches[switches.Length - 1];
+
+                // if the switch was set but not to an explicit value, the value is "auto"
+                if (string.IsNullOrEmpty(liveLoggerArg))
+                {
+                    liveLoggerArg = "auto";
+                }
+            }
+            else
+            {
+                liveLoggerArg = Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER");
+
+                if (string.IsNullOrWhiteSpace(liveLoggerArg))
+                {
+                    return false;
+                }
+                else
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
+                }
+            }
+
+            // We now have a string. It can be "true" or "false" which means just that:
+            if (bool.TryParse(liveLoggerArg, out bool result))
+            {
+                return result;
+            }
+
+            // or it can be "auto", meaning "enable if we can"
+            if (!liveLoggerArg.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            {
+                CommandLineSwitchException.Throw("InvalidLiveLoggerValue", liveLoggerArg);
+            }
+
+            return DoesEnvironmentSupportLiveLogger();
+
+            static bool DoesEnvironmentSupportLiveLogger()
+            {
+                (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+                if (!outputIsScreen)
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
+                    return false;
+                }
+
+                // LiveLogger is not used if the terminal does not support ANSI/VT100 escape sequences.
+                if (!acceptAnsiColorCodes)
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low));
+                    return false;
+                }
+                return true;
+            }
+#else
+            return false;
+#endif
         }
 
         private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
@@ -3232,7 +3303,7 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
-            bool liveLoggerCommandLineOptIn,
+            bool liveLoggerOptIn,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3267,8 +3338,7 @@ namespace Microsoft.Build.CommandLine
 
             // Choose default console logger
 #if FEATURE_LIVELOGGER
-            if ((liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
-                && DoesEnvironmentSupportLiveLogger())
+            if (liveLoggerOptIn)
             {
                 ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
             }
@@ -3448,27 +3518,6 @@ namespace Microsoft.Build.CommandLine
         }
 
 #if FEATURE_LIVELOGGER
-        private static bool DoesEnvironmentSupportLiveLogger()
-        {
-            (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
-
-            if (!outputIsScreen)
-            {
-                s_globalMessagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
-                return false;
-            }
-
-            // LiveLogger is not used if the terminal does not support ANSI/VT100 escape sequences.
-            if (!acceptAnsiColorCodes)
-            {
-                s_globalMessagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low));
-                return false;
-            }
-            return true;
-        }
-
         private static void ProcessLiveLogger(
             bool noConsoleLogger,
             List<DistributedLoggerRecord> distributedLoggerRecords,
