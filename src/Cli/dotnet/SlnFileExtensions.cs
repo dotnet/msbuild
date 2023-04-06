@@ -85,20 +85,22 @@ namespace Microsoft.DotNet.Tools.Common
                 {
                     if (solutionFolders.Any())
                     {
-                        // Check for any existing projects if there is a new matching solution folder
-                        var duplicateProjects = slnFile.Projects.Where(p => solutionFolders.Contains(p.Name)).ToList();
+                        // Check for any existing projects if there is a new matching solution folder and add them to their own solution folder
+                        var duplicateProjects = slnFile.Projects.Where(p => solutionFolders.Contains(p.Name)
+                                                                        && p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid).ToList();
                         foreach (SlnProject duplicateProject in duplicateProjects)
                         {
-                            slnFile.AddSolutionFolders(duplicateProject, solutionFolders);
+                            slnFile.AddSolutionFolders(duplicateProject, new List<string>() { Path.GetDirectoryName(duplicateProject.FilePath) });
                         }
                     }
                     else
                     {
-                        // if there is an existing duplicate, it must be a solution folder
-                        var duplicateProject = slnFile.Projects.Where(p => string.Equals(p.Name, slnProject.Name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                        // If the project conflicts with a solution folder, add it's own folder as a solution folder
+                        var duplicateProject = slnFile.Projects.Where(p => string.Equals(p.Name, slnProject.Name, StringComparison.OrdinalIgnoreCase)
+                                                                       && p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid).FirstOrDefault();
                         if (duplicateProject != null)
                         {
-                            slnFile.AddSolutionFolders(slnProject, new List<string>() { duplicateProject.Name });
+                            slnFile.AddSolutionFolders(slnProject, new List<string>() { Path.GetDirectoryName(relativeProjectPath) });
                         }
                     }
 
@@ -241,6 +243,11 @@ namespace Microsoft.DotNet.Tools.Common
 
                 var pathToGuidMap = slnFile.GetSolutionFolderPaths(nestedProjectsSection.Properties);
 
+                if (slnFile.HasSolutionFolder(nestedProjectsSection.Properties, slnProject))
+                {
+                    return;
+                }
+
                 string parentDirGuid = null;
                 var solutionFolderHierarchy = string.Empty;
                 foreach (var dir in solutionFolders)
@@ -298,6 +305,14 @@ namespace Microsoft.DotNet.Tools.Common
             }
 
             return solutionFolderPaths;
+        }
+
+        private static bool HasSolutionFolder(
+            this SlnFile slnFile,
+            SlnPropertySet properties,
+            SlnProject slnProject)
+        {
+            return properties.ContainsKey(slnProject.Id);
         }
 
         public static bool RemoveProject(this SlnFile slnFile, string projectPath)
