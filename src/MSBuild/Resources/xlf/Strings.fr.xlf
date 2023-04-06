@@ -309,16 +309,15 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="needs-review-translation">
-     -warnNotAsError[:code[;code2]]
-                     Liste des codes d’avertissement à traiter non comme des erreurs.
-                     Utiliser un point-virgule ou une virgule pour séparer
-                     plusieurs codes d’avertissement. N’a aucun effet si -warnaserror
-                     n’est pas défini.
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-                     Exemple:
+                     Example:
                        -warnNotAsError:MSB3026
-   </target>
+    </target>
         <note>
       LOCALIZATION: "-warnNotAsError" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.

@@ -309,14 +309,13 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="needs-review-translation">
-      -warnNotAsError[:code[;code2]]
-                     Seznam kódů upozornění, které se nemají považovat za chyby.
-                     Pomocí středníku nebo čárky oddělte
-                     více kódů upozornění. Nemá žádný vliv, pokud přepínač -warnaserror
-                     není nastavený.
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-                     Příklad:
+                     Example:
                        -warnNotAsError:MSB3026
     </target>
         <note>

@@ -309,14 +309,13 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="needs-review-translation">
-      -warnNotAsError[:code[;code2]]
-                     不视为错误的警告代码列表.
-                     使用分号或逗号分隔
-                     多个警告代码。如果未设置 -warnaserror
-                     开关，则不会产生任何影响。
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-                     示例:
+                     Example:
                        -warnNotAsError:MSB3026
     </target>
         <note>
