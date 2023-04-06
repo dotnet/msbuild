@@ -130,6 +130,44 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IncludeProjectsNotInAssetsFileInDepsFile Condition="'$(IncludeProjectsNotInAssetsFileInDepsFile)' == ''">true</IncludeProjectsNotInAssetsFileInDepsFile>
   </PropertyGroup>
 
+  <!--
+    BinaryFormatter Disabling
+    ===========================
+
+    The EnableUnsafeBinaryFormatterSerialization setting controls both runtime and compile-time behavior.
+    The behavior is slightly different depending on the project type and target runtime.
+
+    If the property is explicitly set to TRUE:
+      - The APIs are obsolete as warning, and calls to the APIs will succeed at runtime.
+    
+    If the property is explicitly set to FALSE:
+      - On .NET 5 & 6, the APIs are obsolete as warning, and calls to the APIs will fail at runtime.
+      - On .NET 7+, the APIs are obsolete as error, and calls to the APIs will fail at runtime.
+
+    If the property is not explicitly TRUE or FALSE:
+      - On .NET 5 & 6, the APIs are obsolete as warning, and calls to the APIs will succeed at runtime.
+      - On .NET 7, the APIs are obsolete as error, but calls to the APIs will succeed at runtime.
+      - On .NET 8+, the APIs are obsolete as error, and calls to the APIs will fail at runtime
+        unless the SDK has opted in to keeping legacy BinaryFormatter behavior around.
+    
+    n.b. The APIs are already marked obsolete (as warning) in .NET 5, so we don't need to special-case
+    them unless we want to upgrade them to warn-as-error.
+  -->
+
+  <PropertyGroup Condition="'$(EnableUnsafeBinaryFormatterSerialization)' != 'true' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '7.0'))">
+    <!--
+      Certain project types need to re-enable BinaryFormatter by default; it will still be warn-as-error but will work at runtime.
+      WinForms: enabled through 8.0 (but not after)
+      WPF: enabled through 8.0 (but not after)
+    -->
+    <_ProjectTypeRequiresBinaryFormatter Condition="'$(UseWindowsForms)' == 'true' AND $([MSBuild]::VersionLessThanOrEquals($(TargetFrameworkVersion), '8.0'))">true</_ProjectTypeRequiresBinaryFormatter>
+    <_ProjectTypeRequiresBinaryFormatter Condition="'$(UseWPF)' == 'true' AND $([MSBuild]::VersionLessThanOrEquals($(TargetFrameworkVersion), '8.0'))">true</_ProjectTypeRequiresBinaryFormatter>
+    <!-- controls warn as error -->
+    <_BinaryFormatterObsoleteAsError>true</_BinaryFormatterObsoleteAsError>
+    <!-- controls runtime behavior (AppContext & trimming) -->
+    <EnableUnsafeBinaryFormatterSerialization Condition="$([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '8.0')) AND '$(_ProjectTypeRequiresBinaryFormatter)' != 'true'">false</EnableUnsafeBinaryFormatterSerialization>
+  </PropertyGroup>
+
   <PropertyGroup>
     <CoreBuildDependsOn>
       _CheckForBuildWithNoBuild;
