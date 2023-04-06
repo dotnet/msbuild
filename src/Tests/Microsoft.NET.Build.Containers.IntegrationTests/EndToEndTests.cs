@@ -385,7 +385,7 @@ public class EndToEndTests
     [DockerDaemonAvailableTheory]
     public async Task CanPackageForAllSupportedContainerRIDs(string dockerPlatform, string rid, string workingDir)
     {
-        string publishDirectory = BuildLocalApp(tfm: "net8.0", rid: rid);
+        string publishDirectory = BuildLocalApp(tfm: ToolsetInfo.CurrentTargetFramework, rid: rid);
 
         // Build the image
         Registry registry = new(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.BaseImageSource));
