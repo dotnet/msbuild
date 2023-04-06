@@ -677,6 +677,7 @@ namespace Microsoft.Build.Utilities
             _standardOutputDataAvailable = new ManualResetEvent(false);
 
             _toolExited = new ManualResetEvent(false);
+            _terminatedTool = false;
             _toolTimeoutExpired = new ManualResetEvent(false);
 
             _eventsDisposed = false;
