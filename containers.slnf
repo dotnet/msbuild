@@ -1,0 +1,16 @@
+{
+  "solution": {
+    "path": "sdk.sln",
+    "projects": [
+      "src\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj",
+      "src\\Cli\\Microsoft.DotNet.InternalAbstractions\\Microsoft.DotNet.InternalAbstractions.csproj",
+      "src\\Containers\\Microsoft.NET.Build.Containers\\Microsoft.NET.Build.Containers.csproj",
+      "src\\Containers\\containerize\\containerize.csproj",
+      "src\\Containers\\packaging\\package.csproj",
+      "src\\Tests\\Microsoft.NET.Build.Containers.IntegrationTests\\Microsoft.NET.Build.Containers.IntegrationTests.csproj",
+      "src\\Tests\\Microsoft.NET.Build.Containers.UnitTests\\Microsoft.NET.Build.Containers.UnitTests.csproj",
+      "src\\Tests\\Microsoft.NET.TestFramework\\Microsoft.NET.TestFramework.csproj",
+      "src\\Tests\\containerize.UnitTests\\containerize.UnitTests.csproj"
+    ]
+  }
+}
