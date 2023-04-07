@@ -1437,6 +1437,11 @@
         <target state="translated">MSBUILD : error MSB1015: MSBuild kann unter dieser Version des Betriebssystems nicht ausgeführt werden. Nur Windows 7 und Folgeversionen werden unterstützt.</target>
         <note>{StrBegin="MSBUILD : error MSB1015: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="UnsupportedSwitchForSolutionFiles">
+        <source>The '{0}' switch is not supported for solution files.</source>
+        <target state="new">The '{0}' switch is not supported for solution files.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Using35Engine">
         <source>Forcing load of Microsoft.Build.Engine because MSBUILDOLDOM=1...</source>
         <target state="translated">Laden von "Microsoft.Build.Engine" wird erzwungen, da MSBUILDOLDOM=1...</target>
