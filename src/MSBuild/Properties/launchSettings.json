@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "MSBuild": {
-      "commandName": "Project",
-      "commandLineArgs": "Solution.proj /m /nr:false /bl",
-      "workingDirectory": "C:\\test\\fastslowTest"
-    }
-  }
-}
