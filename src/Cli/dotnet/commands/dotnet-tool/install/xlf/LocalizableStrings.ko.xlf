@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CreateManifestIfNeededOptionDescription">
-        <source>Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://learn.microsoft.com/dotnet/core/tools/global-tools#install-a-local-tool</source>
-        <target state="new">Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://learn.microsoft.com/dotnet/core/tools/global-tools#install-a-local-tool</target>
+        <source>Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</source>
+        <target state="new">Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
