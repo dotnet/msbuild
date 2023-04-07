@@ -9,7 +9,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class FileSetWatcher : IDisposable
+    internal sealed class FileSetWatcher : IDisposable
     {
         private readonly FileWatcher _fileWatcher;
         private readonly FileSet _fileSet;
@@ -21,8 +21,6 @@ namespace Microsoft.DotNet.Watcher.Internal
             _fileSet = fileSet;
             _fileWatcher = new FileWatcher(reporter);
         }
-
-        public bool WatchForNewFiles { get; init; }
 
         public async Task<FileItem?> GetChangedFileAsync(CancellationToken cancellationToken, Action startedWatching)
         {
@@ -39,10 +37,6 @@ namespace Microsoft.DotNet.Watcher.Internal
                 if (_fileSet.TryGetValue(path, out var fileItem))
                 {
                     tcs.TrySetResult(fileItem);
-                }
-                else if (WatchForNewFiles && newFile)
-                {
-                    tcs.TrySetResult(new FileItem { FilePath = path, IsNewFile = newFile });
                 }
             }
 

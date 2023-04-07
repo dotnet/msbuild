@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             CompilationOptions resultOptions = (CompilationOptions)s_convertFromMethod.Invoke(null, new object[] {taskItem});
 
-            resultOptions.ShouldBeEquivalentTo(expectedOptions);
+            resultOptions.Should().BeEquivalentTo(expectedOptions);
         }
 
         public static IEnumerable<object[]> CompilerOptionsData

@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Datei \"MSBuild Directory.Build.props\"",
+  "description": "Eine leere \"Directory.Build.props\"-Datei, die zum Angeben von MSBuild-Eigenschaften für einen gesamten Ordner verwendet werden kann.",
+  "symbols/inherit/displayName": "Erben",
+  "symbols/inherit/description": "Bei \"true\" wird ein Import für die nächstgelegene Datei \"Directory.Build.props\" in der Verzeichnishierarchie des Dateisystems hinzugefügt. \"Directory.Build.props\" erbt nicht standardmäßig. Auf diese Weise können Sie einen Satz von Anpassungen für einzelne Ordner erstellen."
+}

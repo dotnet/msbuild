@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "App.sln");
             buildCommand
-                .Execute("/p:RuntimeIdentifier=win-x64")
+                .Execute($"/p:RuntimeIdentifier={ToolsetInfo.LatestWinRuntimeIdentifier}-x64")
                 .Should()
                 .Fail()
                 .And
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "PropertyGroup");
                     project.Root.Add(itemGroup);
-                    itemGroup.Add(new XElement(ns + "RuntimeIdentifier", "win-x64"));
+                    itemGroup.Add(new XElement(ns + "RuntimeIdentifier", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64"));
                 });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "App.sln");

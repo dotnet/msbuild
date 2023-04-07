@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,9 +28,9 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
             IReporter reporter = null)
             : base(result)
         {
-            bool msbuild = result.ValueForOption<bool>(ServerShutdownCommandParser.MSBuildOption);
-            bool vbcscompiler = result.ValueForOption<bool>(ServerShutdownCommandParser.VbcsOption);
-            bool razor = result.ValueForOption<bool>(ServerShutdownCommandParser.RazorOption);
+            bool msbuild = result.GetValue(ServerShutdownCommandParser.MSBuildOption);
+            bool vbcscompiler = result.GetValue(ServerShutdownCommandParser.VbcsOption);
+            bool razor = result.GetValue(ServerShutdownCommandParser.RazorOption);
             bool all = !msbuild && !vbcscompiler && !razor;
 
             _enumerationFlags = ServerEnumerationFlags.None;
@@ -146,7 +147,7 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
                         exception.InnerException.Message).Red());
             }
 
-            if (Reporter.IsVerbose)
+            if (CommandLoggingContext.IsVerbose)
             {
                 Reporter.Verbose.WriteLine(exception.ToString().Red());
             }

@@ -97,35 +97,35 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
-        [WindowsOnlyTheory]
-        [InlineData("net5.0", "TargetPlatformIdentifier", "Windows", "Exe")]
-        [InlineData("net5.0", "UseWindowsForms", "true", "WinExe")]
-        [InlineData("netcoreapp3.1", "UseWindowsForms", "true", "Exe")]
-        [InlineData("net5.0", "UseWPF", "true", "WinExe")]
-        [InlineData("netcoreapp3.1", "UseWPF", "true", "Exe")]
-        [InlineData("net5.0", "UseWPF", "false", "Exe")]
-        [InlineData("netcoreapp3.1", "UseWPF", "false", "Exe")]
-        public void It_infers_WinExe_output_type(string targetFramework, string propName, string propValue, string expectedOutputType)
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
+        public void AppTargetingWindows10CanBuildOnNonWindows()
         {
             var testProject = new TestProject()
             {
-                Name = "WinExeOutput",
-                TargetFrameworks = targetFramework,
-                IsExe = true,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework + "-windows10.0.19041.0",
+                IsWinExe = true
             };
-            testProject.AdditionalProperties[propName] = propValue;
+            testProject.AdditionalProperties["EnableWindowsTargeting"] = "true";
 
-            var asset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework +  propName +  propValue);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var getValuesCommand = new GetValuesCommand(asset, "OutputType");
-            getValuesCommand
+            new BuildCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();
+        }
 
-            var values = getValuesCommand.GetValues();
-            values.Count.Should().Be(1);
-            values.First().Should().Be(expectedOutputType);
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
+        public void WindowsFormsAppCanBuildOnNonWindows()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("WindowsFormsTestApp")
+                .WithSource();
+
+            new BuildCommand(Log, testInstance.Path)
+                .WithEnvironmentVariable("EnableWindowsTargeting", "true")
+                .Execute()
+                .Should()
+                .Pass();
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
@@ -210,7 +210,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            void Assert(DirectoryInfo outputDir)
+            static void Assert(DirectoryInfo outputDir)
             {
                 outputDir.File("Microsoft.Windows.SDK.NET.dll").Exists.Should().BeTrue("The output has cswinrt dll");
                 outputDir.File("WinRT.Runtime.dll").Exists.Should().BeTrue("The output has cswinrt dll");
@@ -222,7 +222,7 @@ namespace Microsoft.NET.Build.Tests
             Assert(buildCommand.GetOutputDirectory(tfm));
 
             var publishCommand = new PublishCommand(asset);
-            var runtimeIdentifier = "win-x64";
+            var runtimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64";
             publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();

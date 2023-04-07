@@ -1,0 +1,8 @@
+{
+  "author": "Microsoft",
+  "name": "Configurazione NuGet",
+  "description": "Un file per la configurazione del NuGet dei percorsi eseguirà la ricerca dei pacchetti",
+  "postActions/chmod/description": "Applica autorizzazioni",
+  "postActions/chmod/manualInstructions/default/text": "Esegui 'chmod 600 nuget.config'",
+  "postActions/open-file/description": "Apre nuget.config nell'editor"
+}

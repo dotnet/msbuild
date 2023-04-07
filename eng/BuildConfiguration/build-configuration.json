@@ -1,0 +1,10 @@
+{
+   "RetryCountLimit":0,
+   "RetryByPipeline":{
+      "RetryStages":[
+         {
+            "StageName":"build"
+         }
+      ]
+   }
+}

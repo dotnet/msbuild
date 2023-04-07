@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Tests
     {
         public CommandResult FirstDotnetNonVerbUseCommandResult;
         public CommandResult FirstDotnetVerbUseCommandResult;
+        public CommandResult FirstDotnetWorkloadInfoResult;
         public DirectoryInfo NugetFallbackFolder;
         public DirectoryInfo DotDotnetFolder;
         public string TestDirectory;
@@ -112,7 +113,7 @@ namespace Microsoft.DotNet.Tests
                 .StartWith(firstTimeNonVerbUseMessage);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShowsTheAppropriateMessageToTheUser()
         {
 
@@ -160,7 +161,7 @@ namespace Microsoft.DotNet.Tests
             homeFolder.Should().NotExist();
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShowsTheTelemetryNoticeWhenInvokingACommandAfterInternalReportInstallSuccessHasBeenInvoked()
         {
             var dotnetFirstTime = new DotNetFirstTime();

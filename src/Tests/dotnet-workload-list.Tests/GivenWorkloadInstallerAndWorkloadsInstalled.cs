@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,7 @@ using FluentAssertions;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Workload.Install.Tests;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Workloads.Workload.List;
@@ -31,8 +33,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         private WorkloadListCommand _workloadListCommand;
         private string _testDirectory;
 
-        private List<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
-            Workloads)> _mockManifestUpdates;
+        private List<(ManifestVersionUpdate manifestUpdate, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> _mockManifestUpdates;
 
         private MockNuGetPackageDownloader _nugetDownloader;
         private string _dotnetRoot;
@@ -46,13 +47,17 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             _testDirectory = _testAssetsManager.CreateTestDirectory(identifier: identifier).Path;
             _dotnetRoot = Path.Combine(_testDirectory, "dotnet");
             _nugetDownloader = new(_dotnetRoot);
+            var currentSdkFeatureBand = new SdkFeatureBand(CurrentSdkVersion);
 
             _mockManifestUpdates = new()
             {
                 (
-                    new ManifestId("manifest1"),
-                    new ManifestVersion(CurrentSdkVersion),
-                    new ManifestVersion(UpdateAvailableVersion),
+                    new ManifestVersionUpdate(
+                        new ManifestId("manifest1"),
+                        new ManifestVersion(CurrentSdkVersion),
+                        currentSdkFeatureBand.ToString(),
+                        new ManifestVersion(UpdateAvailableVersion),
+                        currentSdkFeatureBand.ToString()),
                     new Dictionary<WorkloadId, WorkloadDefinition>
                     {
                         [new WorkloadId(InstallingWorkload)] = new(
@@ -63,9 +68,12 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                             WorkloadDefinitionKind.Dev, null, null, null)
                     }),
                 (
-                    new ManifestId("manifest-other"),
-                    new ManifestVersion(CurrentSdkVersion),
-                    new ManifestVersion("7.0.101"),
+                    new ManifestVersionUpdate(
+                        new ManifestId("manifest-other"),
+                        new ManifestVersion(CurrentSdkVersion),
+                        currentSdkFeatureBand.ToString(),
+                        new ManifestVersion("7.0.101"),
+                        currentSdkFeatureBand.ToString()),
                     new Dictionary<WorkloadId, WorkloadDefinition>
                     {
                         [new WorkloadId("other-manifest-workload")] = new(
@@ -74,9 +82,12 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                             WorkloadDefinitionKind.Dev, null, null, null)
                     }),
                 (
-                    new ManifestId("manifest-older-version"),
-                    new ManifestVersion(CurrentSdkVersion),
-                    new ManifestVersion("6.0.100"),
+                    new ManifestVersionUpdate(
+                        new ManifestId("manifest-older-version"),
+                        new ManifestVersion(CurrentSdkVersion),
+                        currentSdkFeatureBand.ToString(),
+                        new ManifestVersion("6.0.100"),
+                        currentSdkFeatureBand.ToString()),
                     new Dictionary<WorkloadId, WorkloadDefinition>
                     {
                         [new WorkloadId("other-manifest-workload")] = new(
@@ -86,9 +97,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                     })
             };
 
-            ParseResult listParseResult = Parser.GetWorkloadsInstance.Parse(new[]
+            ParseResult listParseResult = Parser.Instance.Parse(new[]
             {
-                "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "7.0.100"
+                "dotnet", "workload", "list", "--machine-readable", InstallingWorkloadCommandParser.VersionOption.Aliases.First(), "7.0.100"
             });
 
             _workloadListCommand = new WorkloadListCommand(
@@ -96,7 +107,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 _reporter,
                 nugetPackageDownloader: _nugetDownloader,
                 workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
-                userHome: _testDirectory,
+                userProfileDir: _testDirectory,
                 currentSdkVersion: CurrentSdkVersion,
                 dotnetDir: _dotnetRoot,
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
@@ -128,40 +139,40 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenLowerTargetVersionItShouldThrow()
         {
             _workloadListCommand = new WorkloadListCommand(
-                Parser.GetWorkloadsInstance.Parse(new[]
+                Parser.Instance.Parse(new[]
                 {
-                    "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "5.0.306"
+                    "dotnet", "workload", "list", "--machine-readable", InstallingWorkloadCommandParser.VersionOption.Aliases.First(), "5.0.306"
                 }),
                 _reporter,
                 nugetPackageDownloader: _nugetDownloader,
                 workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
-                userHome: _testDirectory,
+                userProfileDir: _testDirectory,
                 currentSdkVersion: CurrentSdkVersion,
                 dotnetDir: _dotnetRoot,
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
 
             Action a = () => _workloadListCommand.Execute();
-            a.ShouldThrow<ArgumentException>();
+            a.Should().Throw<ArgumentException>();
         }
 
         [Fact]
         public void GivenSameLowerTargetVersionBandItShouldNotThrow()
         {
             _workloadListCommand = new WorkloadListCommand(
-                Parser.GetWorkloadsInstance.Parse(new[]
+                Parser.Instance.Parse(new[]
                 {
-                    "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "6.0.100"
+                    "dotnet", "workload", "list", "--machine-readable", InstallingWorkloadCommandParser.VersionOption.Aliases.First(), "6.0.100"
                 }),
                 _reporter,
                 nugetPackageDownloader: _nugetDownloader,
                 workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
-                userHome: _testDirectory,
+                userProfileDir: _testDirectory,
                 currentSdkVersion: "6.0.101",
                 dotnetDir: _dotnetRoot,
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
 
             Action a = () => _workloadListCommand.Execute();
-            a.ShouldNotThrow();
+            a.Should().NotThrow();
         }
 
         internal class MockMatchingFeatureBandInstallationRecordRepository : IWorkloadInstallationRecordRepository

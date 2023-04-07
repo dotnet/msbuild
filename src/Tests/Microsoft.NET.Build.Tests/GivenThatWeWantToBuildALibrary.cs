@@ -17,6 +17,7 @@ using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Newtonsoft.Json.Linq;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -29,7 +30,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("netstandard1.5")]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_builds_the_library_successfully(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -75,10 +76,10 @@ namespace Microsoft.NET.Build.Tests
             ITestOutputHelper log,
             TestAssetsManager testAssetsManager,
             string itemTypeOrPropertyName,
-            Action<GetValuesCommand> setup = null, 
+            Action<GetValuesCommand> setup = null,
             string[] msbuildArgs = null,
-            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item, 
-            [CallerMemberName] string callingMethod = "", 
+            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item,
+            [CallerMemberName] string callingMethod = "",
             Action<XDocument> projectChanges = null,
             string identifier = null)
         {
@@ -188,7 +189,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("vb", false)]
         public void It_allows_us_to_override_the_documentation_file_name(string language, bool setGenerateDocumentationFileProperty)
         {
-            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibDoc.xml", language,  "OverrideDocFileName");
+            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibDoc.xml", language, "OverrideDocFileName");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -217,7 +218,8 @@ namespace Microsoft.NET.Build.Tests
             };
 
             // vb uses DocumentationFile relative to the IntermediateOutputPath
-            if (language != "vb") {
+            if (language != "vb")
+            {
                 expectedProjectDirectoryFiles.Add("TestLibDoc.xml");
             }
 
@@ -316,14 +318,16 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6", "NETSTANDARD1_0_OR_GREATER", "NETSTANDARD1_1_OR_GREATER", "NETSTANDARD1_2_OR_GREATER",
             "NETSTANDARD1_3_OR_GREATER", "NETSTANDARD1_4_OR_GREATER", "NETSTANDARD1_5_OR_GREATER", "NETSTANDARD1_6_OR_GREATER" })]
         [InlineData("net45", new[] { "NETFRAMEWORK", "NET45", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER" })]
-        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER", 
+        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
             "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER" })]
-        [InlineData("net48", new[] { "NETFRAMEWORK", "NET48", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER", 
+        [InlineData("net48", new[] { "NETFRAMEWORK", "NET48", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
             "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER", "NET462_OR_GREATER", "NET47_OR_GREATER", "NET471_OR_GREATER", "NET472_OR_GREATER", "NET48_OR_GREATER" })]
+        [InlineData("net481", new[] { "NETFRAMEWORK", "NET481", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
+            "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER", "NET462_OR_GREATER", "NET47_OR_GREATER", "NET471_OR_GREATER", "NET472_OR_GREATER", "NET48_OR_GREATER", "NET481_OR_GREATER" })]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0", "NETCOREAPP1_0_OR_GREATER" })]
-        [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", 
+        [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER",
             "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER" })]
-        [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", 
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER",
             "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" })]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { })]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER" })]
@@ -366,7 +370,7 @@ namespace Microsoft.NET.Build.Tests
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
                 });
-            
+
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
@@ -391,6 +395,16 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID12_12", "ANDROID11_11_OR_GREATER", "ANDROID12_12_OR_GREATER" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_platform(string[] sdkSupportedTargetPlatformVersion, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
+            if (targetPlatformIdentifier.Equals("windows", StringComparison.OrdinalIgnoreCase))
+            {
+                var sdkVersion = SemanticVersion.Parse(TestContext.Current.ToolsetUnderTest.SdkVersion);
+                if (new SemanticVersion(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch) < new SemanticVersion(7, 0, 200))
+                {
+                    //  Fixed in 7.0.200: https://github.com/dotnet/sdk/pull/29009
+                    return;
+                }
+            }
+
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework, identifier: expectedDefines.GetHashCode().ToString())
@@ -423,8 +437,8 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, 
-                new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER",  "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" }
+            AssertDefinedConstantsOutput(testAsset, targetFramework,
+                new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" }
                 .Concat(expectedDefines).ToArray());
         }
 
@@ -486,8 +500,8 @@ namespace Microsoft.NET.Build.Tests
                 testProj.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
                 testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
             }
-            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
-            File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
+
+            testProj.SourceFiles[$"{testProj.Name}.cs"] = @"
 using System;
 class Program
 {
@@ -527,7 +541,8 @@ class Program
             Console.WriteLine(""IOS"");
         #endif
     }
-}");
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
             buildCommand
@@ -565,15 +580,15 @@ class Program
         [InlineData(true)]
         public void It_fails_gracefully_if_targetframework_should_be_targetframeworks(bool useSolution)
         {
-            string targetFramework = "netcoreapp2.0;net461";
+            string targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net462";
             TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
         }
 
         [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
-        [InlineData("net5.0", "", false)]
-        [InlineData("net5.0", "UseWPF", true)]
-        [InlineData("net5.0", "UseWindowsForms", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "UseWPF", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "UseWindowsForms", true)]
         [InlineData("netcoreapp3.1", "", true)]
         public void It_defines_target_platform_defaults_correctly(string targetFramework, string propertyName, bool defaultsDefined)
         {
@@ -607,7 +622,7 @@ class Program
         }
 
         [Theory]
-        [InlineData("net5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("netcoreapp3.1")]
         public void It_defines_windows_version_default_correctly(string targetFramework)
         {
@@ -626,7 +641,7 @@ class Program
                 .Should()
                 .Pass();
 
-            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "7.0" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "7.0" });
         }
 
         private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
@@ -660,17 +675,17 @@ class Program
 
             if (useSolution)
             {
-                var dotnetCommand = new DotnetCommand(Log)
-                {
-                    WorkingDirectory = testAsset.TestRoot
-                };
-
-                dotnetCommand.Execute("new", "sln")
+                new DotnetNewCommand(Log)
+                    .WithVirtualHive()
+                    .WithWorkingDirectory(testAsset.TestRoot)
+                    .Execute("sln")
                     .Should()
                     .Pass();
 
                 var relativePathToProject = Path.Combine(testProject.Name, testProject.Name + ".csproj");
-                dotnetCommand.Execute($"sln", "add", relativePathToProject)
+                new DotnetCommand(Log)
+                    .WithWorkingDirectory(testAsset.TestRoot)
+                    .Execute($"sln", "add", relativePathToProject)
                     .Should()
                     .Pass();
 
@@ -703,7 +718,7 @@ class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp6.1")]
+        [InlineData("netcoreapp9.1")]
         [InlineData("netstandard2.2")]
         public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
         {
@@ -735,12 +750,12 @@ class Program
         [Fact]
         public void It_passes_ridless_target_to_compiler()
         {
-            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp2.0");
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             var testProject = new TestProject()
             {
                 Name = "CompileDoesntUseRid",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = runtimeIdentifier,
             };
 
@@ -803,7 +818,7 @@ class Program
                 Name = "Library",
                 TargetFrameworks = "netstandard2.0",
                 // references from packages go through a different code path to be marked externally resolved.
-                PackageReferences = { new TestPackageReference("NewtonSoft.Json", "10.0.1") }
+                PackageReferences = { new TestPackageReference("NewtonSoft.Json", "13.0.1") }
             };
 
             var asset = _testAssetsManager.CreateTestProject(
@@ -841,12 +856,65 @@ class Program
             }
         }
 
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("net5.0", false, false, false, null)]   // Pre .NET 6.0 predefinedCulturesOnly is not supported.
+        [InlineData("net5.0", true, false, false, null)]    // Pre .NET 6.0 predefinedCulturesOnly is not supported.
+        [InlineData("net5.0", false, true, true, "True")]   // Pre .NET 6.0 predefinedCulturesOnly can end up in the runtime config file but with no effect at runtime.
+        [InlineData("net5.0", true, true, true, "True")]    // Pre .NET 6.0 predefinedCulturesOnly can end up in the runtime config file but with no effect at runtime.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false, false, false, null)]   // predefinedCulturesOnly will not be included in the runtime config file if invariant is not defined.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false, false, true, "False")] // predefinedCulturesOnly explicitly defined as false.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false, true, true, "True")]   // predefinedCulturesOnly explicitly defined as true.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true, false, false, "True")]  // predefinedCulturesOnly default value is true when Invariant is true.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true, false, true, "False")]  // predefinedCulturesOnly explicitly defined as false.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true, true, true, "True")]    // predefinedCulturesOnly explicitly defined as true.
+        public void It_can_implicitly_define_predefined_Cultures_only(string targetFramework, bool invariantValue, bool predefinedCulturesOnlyValue, bool definePredefinedCulturesOnly, string expectedPredefinedValue)
+        {
+            var testProj = new TestProject()
+            {
+                Name = "CheckPredefineCulturesOnly",
+                TargetFrameworks = targetFramework,
+                IsExe = true,
+            };
+
+            testProj.AdditionalProperties["InvariantGlobalization"] = invariantValue ? "true" : "false";
+
+            if (definePredefinedCulturesOnly)
+            {
+                testProj.AdditionalProperties["PredefinedCulturesOnly"] = predefinedCulturesOnlyValue ? "true" : "false";
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: $"{targetFramework}{invariantValue}{predefinedCulturesOnlyValue}{definePredefinedCulturesOnly}");
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string runtimeConfigName = $"{testProj.Name}.runtimeconfig.json";
+            var outputDirectory = buildCommand.GetOutputDirectory(testProj.TargetFrameworks);
+            outputDirectory.Should().HaveFile(runtimeConfigName);
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            JToken predefinedCulturesOnly = runtimeConfig["runtimeOptions"]["configProperties"]["System.Globalization.PredefinedCulturesOnly"];
+
+            if (expectedPredefinedValue is null)
+            {
+                predefinedCulturesOnly.Should().BeNull();
+            }
+            else
+            {
+                predefinedCulturesOnly.Value<string>().Should().Be(expectedPredefinedValue);
+            }
+        }
+
         [Theory]
         [InlineData("netcoreapp2.2", null, false, null, false)]
-        [InlineData("netcoreapp3.0", null, true, null, true)]
-        [InlineData("netcoreapp3.0", "LatestMajor", true, null, true)]
-        [InlineData("netcoreapp3.0", null, true, false, false)]
-        [InlineData("netcoreapp3.0", "LatestMajor", true, false, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, null, true, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "LatestMajor", true, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, null, true, false, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "LatestMajor", true, false, false)]
         public void It_can_build_with_dynamic_loading_enabled(string targetFramework, string rollForwardValue, bool shouldSetRollForward, bool? copyLocal, bool shouldCopyLocal)
         {
             var testProject = new TestProject()
@@ -861,13 +929,13 @@ class Program
                 testProject.AdditionalProperties["RollForward"] = rollForwardValue;
             }
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             if (copyLocal.HasValue)
             {
                 testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = copyLocal.ToString().ToLower();
             }
 
-            var identifier = targetFramework + shouldSetRollForward + shouldCopyLocal +  (rollForwardValue == null? "Null" : rollForwardValue);
+            var identifier = targetFramework + shouldSetRollForward + shouldCopyLocal + (rollForwardValue == null ? "Null" : rollForwardValue);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: identifier);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -881,7 +949,7 @@ class Program
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().HaveFiles(new[] {
                 runtimeConfigName,
-                $"{testProject.Name}.runtimeconfig.dev.json"
+                $"{testProject.Name}.runtimeconfig.json"
             });
 
             if (shouldCopyLocal)
@@ -896,7 +964,7 @@ class Program
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
             string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
             JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
-            JToken rollForward= runtimeConfig["runtimeOptions"]["rollForward"];
+            JToken rollForward = runtimeConfig["runtimeOptions"]["rollForward"];
             if (shouldSetRollForward)
             {
                 rollForward.Value<string>().Should().Be(string.IsNullOrEmpty(rollForwardValue) ? "LatestMinor" : rollForwardValue);
@@ -905,8 +973,6 @@ class Program
             {
                 rollForward.Should().BeNull();
             }
-
-
         }
 
         [Theory]
@@ -939,7 +1005,7 @@ namespace ProjectNameWithSpaces
 }");
             string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
 
-            var buildCommand = new BuildCommand(testAsset, $"{ testProject.Name}");
+            var buildCommand = new BuildCommand(testAsset, $"{testProject.Name}");
             buildCommand
                 .Execute()
                 .Should()
@@ -966,14 +1032,18 @@ namespace ProjectNameWithSpaces
             GetPropertyValue("RootNamespace").Should().Be("Project_Name_With_Spaces");
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.9.0-preview-21076-28")]
+        [WindowsOnlyFact]
         public void It_errors_on_windows_sdk_assembly_version_conflicts()
         {
             var testProjectA = new TestProject()
             {
                 Name = "ProjA",
-                TargetFrameworks = "net5.0-windows10.0.19041"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041"
             };
+            //  Use a previous version of the Microsoft.Windows.SDK.NET.Ref package, to
+            //  simulate the scenario where a project is compiling against a library from NuGet
+            //  which was built with a more recent SDK version.
+            testProjectA.AdditionalProperties["WindowsSdkPackageVersion"] = "10.0.19041.6-preview";
             testProjectA.SourceFiles.Add("ProjA.cs", @"namespace ProjA
 {
     public class ProjAClass
@@ -985,7 +1055,7 @@ namespace ProjectNameWithSpaces
             var testProjectB = new TestProject()
             {
                 Name = "ProjB",
-                TargetFrameworks = "net5.0-windows10.0.19041",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041",
             };
             testProjectB.SourceFiles.Add("ProjB.cs", @"namespace ProjB
 {
@@ -996,22 +1066,7 @@ namespace ProjectNameWithSpaces
 }");
             testProjectA.ReferencedProjects.Add(testProjectB);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProjectA)
-                .WithProjectChanges((path, project) =>
-                {
-                    if (Path.GetFileName(path).Equals("ProjA.csproj"))
-                    {
-                        //  Use a previous version of the Microsoft.Windows.SDK.NET.Ref package, to
-                        //  simulate the scenario where a project is compiling against a library from NuGet
-                        //  which was built with a more recent SDK version.
-                        var ns = project.Root.Name.Namespace;
-                        var itemGroup = project.Root.Elements(ns + "ItemGroup").First();
-                        var updateKnownFrameworkRef = new XElement(ns + "KnownFrameworkReference",
-                            new XAttribute("Update", "Microsoft.Windows.SDK.NET.Ref"),
-                            new XAttribute("TargetingPackVersion", "10.0.19041.6-preview"));
-                        itemGroup.Add(updateKnownFrameworkRef);
-                    }
-                });
+            var testAsset = _testAssetsManager.CreateTestProject(testProjectA);
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
@@ -1019,7 +1074,31 @@ namespace ProjectNameWithSpaces
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1149");
+                .HaveStdOutContaining("NETSDK1148");
+        }
+
+        [Fact]
+        public void It_Has_Unescaped_PackageConflictPreferredPackages_Values()
+        {
+            string targetFramework = ToolsetInfo.CurrentTargetFramework;
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", identifier: targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework, "TestLibrary");
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, "TestLibrary"), targetFramework, "PackageConflictPreferredPackages");
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            List<string> preferredPackages = getValuesCommand.GetValues();
+            preferredPackages.Should().NotBeEmpty();
+            preferredPackages.Count.Should().BeGreaterThan(1);
+
+            preferredPackages.Should().NotContain(packageName => packageName.Contains(';'),
+                because: "No package name should have a semicolon in it--PackageConflictPreferredPackages should be a semicolon delimited list of package names");
         }
     }
 }

@@ -1,6 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+//Microsoft.NET.Build.Extensions.Tasks (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
+#nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
+
 using Microsoft.Build.Framework;
 using System;
 using System.IO;
@@ -19,7 +24,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         Reference,
         CopyLocal,
         Runtime,
-        Platform
+        Platform,
+        Analyzer
     }
 
     internal interface IConflictItem

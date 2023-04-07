@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -21,21 +22,21 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         public AddProjectToProjectReferenceCommand(ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.ValueForArgument<string>(AddCommandParser.ProjectArgument);
+            _fileOrDirectory = parseResult.GetValue(AddCommandParser.ProjectArgument);
         }
 
         public override int Execute()
         {
             var projects = new ProjectCollection();
-            bool interactive = _parseResult.HasOption(AddProjectToProjectReferenceParser.InteractiveOption);
+            bool interactive = _parseResult.GetValue(AddProjectToProjectReferenceParser.InteractiveOption);
             MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(
                 projects,
                 _fileOrDirectory,
                 interactive);
 
-            var frameworkString = _parseResult.ValueForOption<string>(AddProjectToProjectReferenceParser.FrameworkOption);
+            var frameworkString = _parseResult.GetValue(AddProjectToProjectReferenceParser.FrameworkOption);
 
-            var arguments = _parseResult.ValueForArgument<IEnumerable<string>>(AddProjectToProjectReferenceParser.ProjectPathArgument).ToList().AsReadOnly();
+            var arguments = _parseResult.GetValue(AddProjectToProjectReferenceParser.ProjectPathArgument).ToList().AsReadOnly();
             PathUtility.EnsureAllPathsExist(arguments,
                 CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
             List<MsbuildProject> refs =

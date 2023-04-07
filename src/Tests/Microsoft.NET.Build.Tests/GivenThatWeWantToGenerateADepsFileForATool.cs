@@ -232,7 +232,7 @@ class Program
                 FileName = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
                 Arguments = dotnetArgs
             };
-            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec);
+            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec.Environment);
 
             ICommand toolCommand = toolCommandSpec.ToCommand().CaptureStdOut();
 

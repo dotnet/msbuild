@@ -27,6 +27,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_publishes_projects_with_simple_dependencies()
         {
+            string targetFramework = ToolsetInfo.CurrentTargetFramework;
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset("SimpleDependencies")
                 .WithSource();
@@ -37,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory();
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
 
             publishDirectory.Should().OnlyHaveFiles(new[] {
                 "SimpleDependencies.dll",
@@ -45,11 +46,10 @@ namespace Microsoft.NET.Publish.Tests
                 "SimpleDependencies.deps.json",
                 "SimpleDependencies.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
-                "System.Runtime.Serialization.Primitives.dll",
-                "System.Collections.NonGeneric.dll",
+                $"SimpleDependencies{EnvironmentInfo.ExecutableExtension}"
             });
 
-            string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies");
+            string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies", targetFramework);
 
             TestCommand runAppCommand = new DotnetCommand(Log,  appPath, "one", "two" );
 
@@ -80,7 +80,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", "win7-x86");
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             publishDirectory.Should().HaveFiles(new[]
             {
@@ -149,9 +149,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var runtimeConfig = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.runtimeconfig.json"));
             runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be(targetFramework);
-
             var depsJson = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.deps.json"));
-            depsJson["libraries"]["Newtonsoft.Json/9.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
+            depsJson["libraries"]["Newtonsoft.Json/13.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
 
             // The end-to-end test of running the published app happens in the dotnet/cli repo.
             // See https://github.com/dotnet/cli/blob/358568b07f16749108dd33e7fea2f2c84ccf4563/test/dotnet-store.Tests/GivenDotnetStoresAndPublishesProjects.cs
@@ -214,13 +213,13 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("KitchenSink", identifier: $"{expectAppDocPublished}_{expectLibProjectDocPublished}")
                 .WithSource();
             
-            var publishCommand = new PublishCommand(Log, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
+            var publishCommand = new PublishCommand(kitchenSinkAsset, "TestApp");
             var publishArgs = properties.Split(';').Select(p => $"/p:{p}").ToArray();
             var publishResult = publishCommand.Execute(publishArgs);
 
             publishResult.Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: "netcoreapp2.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework);
 
             if (expectAppDocPublished)
             {
@@ -265,19 +264,18 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestApp",
                 IsExe = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 References = { publishedLibPath }
             };
 
             var appAsset = _testAssetsManager.CreateTestProject(appProject, identifier: identifier);
-            var appSourcePath  = Path.Combine(appAsset.TestRoot, "TestApp");
 
             new RestoreCommand(appAsset, "TestApp").Execute().Should().Pass();
-            var appPublishCommand = new PublishCommand(Log, appSourcePath);
+            var appPublishCommand = new PublishCommand(appAsset);
             var appPublishResult = appPublishCommand.Execute("/p:" + property);
             appPublishResult.Should().Pass();
 
-            var appPublishDirectory = appPublishCommand.GetOutputDirectory("netcoreapp2.0");
+            var appPublishDirectory = appPublishCommand.GetOutputDirectory(appProject.TargetFrameworks);
 
             if (expectAssemblyDocumentationFilePublished)
             {

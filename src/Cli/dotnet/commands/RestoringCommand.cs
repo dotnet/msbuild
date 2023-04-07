@@ -4,8 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Restore;
+using Microsoft.DotNet.Workloads.Workload.Install;
 
 namespace Microsoft.DotNet.Tools
 {
@@ -13,13 +16,20 @@ namespace Microsoft.DotNet.Tools
     {
         public RestoreCommand SeparateRestoreCommand { get; }
 
+        private bool AdvertiseWorkloadUpdates;
+
         public RestoringCommand(
             IEnumerable<string> msbuildArgs,
             bool noRestore,
-            string msbuildPath = null)
+            string msbuildPath = null,
+            string userProfileDir = null,
+            bool advertiseWorkloadUpdates = true)
             : base(GetCommandArguments(msbuildArgs, noRestore), msbuildPath)
         {
+            userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            Task.Run(() => WorkloadManifestUpdater.BackgroundUpdateAdvertisingManifestsAsync(userProfileDir));
             SeparateRestoreCommand = GetSeparateRestoreCommand(msbuildArgs, noRestore, msbuildPath);
+            AdvertiseWorkloadUpdates = advertiseWorkloadUpdates;
         }
 
         private static IEnumerable<string> GetCommandArguments(
@@ -65,7 +75,7 @@ namespace Microsoft.DotNet.Tools
         private static bool HasArgumentToExcludeFromRestore(IEnumerable<string> arguments)
             => arguments.Any(a => IsExcludedFromRestore(a));
 
-        private static readonly string[] propertyPrefixes = new string[]{ "-", "/" };
+        private static readonly string[] propertyPrefixes = new string[]{ "-", "/", "--" };
 
         private static bool IsExcludedFromRestore(string argument)
             => propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}property:TargetFramework=", StringComparison.Ordinal)) ||
@@ -81,16 +91,22 @@ namespace Microsoft.DotNet.Tools
 
         public override int Execute()
         {
+            int exitCode;
             if (SeparateRestoreCommand != null)
             {
-                int exitCode = SeparateRestoreCommand.Execute();
+                exitCode = SeparateRestoreCommand.Execute();
                 if (exitCode != 0)
                 {
                     return exitCode;
                 }
             }
 
-            return base.Execute();
+            exitCode = base.Execute();
+            if (AdvertiseWorkloadUpdates)
+            {
+                WorkloadManifestUpdater.AdvertiseWorkloadUpdates();
+            }
+            return exitCode;
         }
     }
 }

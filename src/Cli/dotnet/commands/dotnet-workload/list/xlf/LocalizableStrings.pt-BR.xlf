@@ -4,13 +4,18 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List workloads available.</source>
-        <target state="needs-review-translation">Ferramentas de lista instaladas de forma global ou local.</target>
+        <target state="translated">Listar as cargas de trabalho disponíveis.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Workload Id</source>
-        <target state="new">Workload Id</target>
-        <note />
+      <trans-unit id="WorkloadListFooter">
+        <source>Use `dotnet workload search` to find additional workloads to install.</source>
+        <target state="translated">Use `dotnet workload search` para encontrar cargas de trabalho adicionais a serem instaladas.</target>
+        <note>{Locked="dotnet workload search"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">As atualizações estão disponíveis para as seguintes cargas de trabalho(s): {0}. Execute `dotnet workload update` para obter o mais recente.</target>
+        <note>{Locked="dotnet workload update"}</note>
       </trans-unit>
     </body>
   </file>

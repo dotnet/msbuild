@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Deployment.DotNet.Releases;
@@ -16,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             _path = path;
         }
 
-        public ProductCollection GetProductCollection()
+        public ProductCollection GetProductCollection(Uri uri = null, string filePath = null)
         {
             return ProductCollection.GetFromFileAsync(Path.Combine(_path, "releases-index.json"), false).Result;
         }

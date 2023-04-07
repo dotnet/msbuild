@@ -5,6 +5,9 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
+//  Work around https://github.com/dotnet/roslyn-analyzers/issues/6094
+#pragma warning disable CA1420
+
 namespace Microsoft.Win32.Msi
 {
     /// <summary>
@@ -24,6 +27,10 @@ namespace Microsoft.Win32.Msi
 
     internal static class NativeMethods
     {
+        [DllImport("msi.dll", CharSet = CharSet.Unicode)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        public static extern uint MsiConfigureProductEx(string szProduct, int iInstallLevel, InstallState eInstallState, string szCommandLine);
+
         [DllImport("msi.dll", CharSet = CharSet.Unicode)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         public static extern uint MsiEnableLog(uint dwLogMode, string szLogFile, uint dwLogAttributes);
@@ -47,7 +54,7 @@ namespace Microsoft.Win32.Msi
 
         [DllImport("msi.dll", CharSet = CharSet.Unicode)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        public static extern uint MsiReinstallProdcut(string szProduct, uint szReinstallMode);
+        public static extern uint MsiReinstallProduct(string szProduct, uint szReinstallMode);
 
         [DllImport("msi.dll", CharSet = CharSet.Unicode)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

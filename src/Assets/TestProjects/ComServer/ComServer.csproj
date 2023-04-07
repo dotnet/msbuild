@@ -2,7 +2,8 @@
   <PropertyGroup>
     <Version>42.43.44.45-alpha</Version>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
     <EnableComHosting>true</EnableComHosting>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
 </Project>

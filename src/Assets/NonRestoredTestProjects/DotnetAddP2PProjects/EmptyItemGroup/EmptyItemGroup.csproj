@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net451;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net451;$(CurrentTargetFramework)</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

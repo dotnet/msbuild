@@ -57,6 +57,7 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ReadyToRunCompositeBuildInput => _r2rCompositeInput.ToArray();
 
         private bool _crossgen2IsVersion5;
+        private int _perfmapFormatVersion;
 
         private List<ITaskItem> _compileList = new List<ITaskItem>();
         private List<ITaskItem> _symbolsCompileList = new List<ITaskItem>();
@@ -65,12 +66,39 @@ namespace Microsoft.NET.Build.Tasks
         private List<ITaskItem> _r2rCompositeReferences = new List<ITaskItem>();
         private List<ITaskItem> _r2rCompositeInput = new List<ITaskItem>();
 
+        private bool IsTargetWindows
+        {
+            get
+            {
+                // Crossgen2 V6 and above always has TargetOS metadata available
+                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS))) 
+                    return Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "windows";
+                else
+                    return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            }
+        }
+
+        private bool IsTargetLinux
+        {
+            get
+            {
+                // Crossgen2 V6 and above always has TargetOS metadata available
+                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS))) 
+                    return Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "linux";
+                else
+                    return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            }
+        }
+
         protected override void ExecuteCore()
         {
             if (ReadyToRunUseCrossgen2)
             {
                 string isVersion5 = Crossgen2Tool.GetMetadata(MetadataKeys.IsVersion5);
                 _crossgen2IsVersion5 = !string.IsNullOrEmpty(isVersion5) && bool.Parse(isVersion5);
+
+                string perfmapVersion = Crossgen2Tool.GetMetadata(MetadataKeys.PerfmapFormatVersion);
+                _perfmapFormatVersion = !string.IsNullOrEmpty(perfmapVersion) ? int.Parse(perfmapVersion) : 0;
 
                 if (Crossgen2Composite && EmitSymbols && _crossgen2IsVersion5)
                 {
@@ -136,24 +164,33 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (EmitSymbols)
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && hasValidDiaSymReaderLib)
+                    if (IsTargetWindows && hasValidDiaSymReaderLib)
                     {
                         outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.pdb");
                         outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.pdb");
                         crossgen1CreatePDBCommand = $"/CreatePDB \"{Path.GetDirectoryName(outputPDBImage)}\"";
                     }
-                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    else if (IsTargetLinux)
                     {
-                        using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
+                        string perfmapExtension;
+                        if (ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5 && _perfmapFormatVersion >= 1)
                         {
-                            PEReader pereader = new PEReader(fs);
-                            MetadataReader mdReader = pereader.GetMetadataReader();
-                            Guid mvid = mdReader.GetGuid(mdReader.GetModuleDefinition().Mvid);
-
-                            outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.{" + mvid + "}.map");
-                            outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.{" + mvid + "}.map");
-                            crossgen1CreatePDBCommand = $"/CreatePerfMap \"{Path.GetDirectoryName(outputPDBImage)}\"";
+                            perfmapExtension = ".ni.r2rmap";
                         }
+                        else
+                        {
+                            using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
+                            {
+                                PEReader pereader = new PEReader(fs);
+                                MetadataReader mdReader = pereader.GetMetadataReader();
+                                Guid mvid = mdReader.GetGuid(mdReader.GetModuleDefinition().Mvid);
+                                perfmapExtension = ".ni.{" + mvid + "}.map";
+                            }
+                        }
+
+                        outputPDBImage = Path.ChangeExtension(outputR2RImage, perfmapExtension);
+                        outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, perfmapExtension);
+                        crossgen1CreatePDBCommand = $"/CreatePerfMap \"{Path.GetDirectoryName(outputPDBImage)}\"";
                     }
                 }
 
@@ -233,15 +270,16 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     string compositePDBImage = null;
                     string compositePDBRelativePath = null;
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && hasValidDiaSymReaderLib)
+                    if (IsTargetWindows && hasValidDiaSymReaderLib)
                     {
                         compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.pdb");
                         compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.pdb");
                     }
-                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    else if (IsTargetLinux)
                     {
-                        compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.{composite}.map");
-                        compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.{composite}.map");
+                        string perfmapExtension = (_perfmapFormatVersion >= 1 ? ".ni.r2rmap" : ".ni.{composite}.map");
+                        compositePDBImage = Path.ChangeExtension(compositeR2RImage, perfmapExtension);
+                        compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, perfmapExtension);
                     }
 
                     if (compositePDBImage != null && ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5)
@@ -341,6 +379,12 @@ namespace Microsoft.NET.Build.Tasks
         private static Eligibility GetInputFileEligibility(ITaskItem file, bool compositeCompile, HashSet<string> exclusionSet, HashSet<string> r2rCompositeExclusionSet)
         {
             // Check to see if this is a valid ILOnly image that we can compile
+            if (!file.ItemSpec.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) && !file.ItemSpec.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                // If it isn't a dll or an exe, it certainly isn't a valid ILOnly image for compilation
+                return Eligibility.None;
+            }
+
             using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
             {
                 try

@@ -1,0 +1,20 @@
+<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. -->
+<Project>
+  <PropertyGroup>
+    <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tools\net472\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
+    <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core' and Exists('$(MSBuildThisFileDirectory)..\tools\net8.0\Microsoft.DotNet.ApiCompat.Task.dll')">$(MSBuildThisFileDirectory)..\tools\net8.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
+    <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core' and '$(DotNetApiCompatTaskAssembly)' == ''">$(MSBuildThisFileDirectory)..\tools\net6.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
+    <UseApiCompatPackage>true</UseApiCompatPackage>
+    <!-- TODO: Remove when the consumers of this package upgraded to a newer SDK with this change. -->
+    <UseCompatibilityPackage>true</UseCompatibilityPackage>
+  </PropertyGroup>
+
+  <Import Project="Microsoft.NET.ApiCompat.Common.targets" />
+  <Import Project="Microsoft.NET.ApiCompat.ValidatePackage.targets" />
+
+  <ImportGroup Condition="'$(ApiCompatValidateAssemblies)' == 'true'">
+    <Import Project="Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets" />
+    <Import Project="Microsoft.DotNet.ApiCompat.ValidateAssemblies.NonCrossTargeting.targets" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+    <Import Project="Microsoft.DotNet.ApiCompat.ValidateAssemblies.CrossTargeting.targets" Condition="'$(IsCrossTargetingBuild)' == 'true'" />
+  </ImportGroup>
+</Project>

@@ -1,15 +1,14 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
@@ -28,13 +27,14 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
     {
         private readonly SourceCacheContext _cacheSettings;
         private readonly IFilePermissionSetter _filePermissionSetter;
-        
+
         /// <summary>
         /// In many commands we don't passing NuGetConsoleLogger and pass NullLogger instead to reduce the verbosity
         /// </summary>
         private readonly ILogger _verboseLogger;
         private readonly DirectoryPath _packageInstallDir;
         private readonly RestoreActionConfig _restoreActionConfig;
+        private readonly Func<IEnumerable<Task>> _retryTimer;
 
         /// <summary>
         /// Reporter would output to the console regardless
@@ -42,20 +42,30 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly IReporter _reporter;
         private readonly IFirstPartyNuGetPackageSigningVerifier _firstPartyNuGetPackageSigningVerifier;
         private bool _validationMessagesDisplayed = false;
+        private IDictionary<PackageSource, SourceRepository> _sourceRepositories;
 
-        public NuGetPackageDownloader(DirectoryPath packageInstallDir,
+        private bool _verifySignatures;
+
+        public NuGetPackageDownloader(
+            DirectoryPath packageInstallDir,
             IFilePermissionSetter filePermissionSetter = null,
             IFirstPartyNuGetPackageSigningVerifier firstPartyNuGetPackageSigningVerifier = null,
-            ILogger verboseLogger = null, IReporter reporter = null, RestoreActionConfig restoreActionConfig = null)
+            ILogger verboseLogger = null,
+            IReporter reporter = null,
+            RestoreActionConfig restoreActionConfig = null,
+            Func<IEnumerable<Task>> timer = null,
+            bool verifySignatures = false)
         {
             _packageInstallDir = packageInstallDir;
             _reporter = reporter ?? Reporter.Output;
             _verboseLogger = verboseLogger ?? new NuGetConsoleLogger();
             _firstPartyNuGetPackageSigningVerifier = firstPartyNuGetPackageSigningVerifier ??
-                                                     new FirstPartyNuGetPackageSigningVerifier(
-                                                         tempDirectory: packageInstallDir, logger: _verboseLogger);
+                                                     new FirstPartyNuGetPackageSigningVerifier();
             _filePermissionSetter = filePermissionSetter ?? new FilePermissionSetter();
             _restoreActionConfig = restoreActionConfig ?? new RestoreActionConfig();
+            _retryTimer = timer;
+            _sourceRepositories = new Dictionary<PackageSource, SourceRepository>();
+            _verifySignatures = verifySignatures;
 
             _cacheSettings = new SourceCacheContext
             {
@@ -63,6 +73,9 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 DirectDownload = true,
                 IgnoreFailedSources = _restoreActionConfig.IgnoreFailedSources,
             };
+
+            DefaultCredentialServiceUtility.SetupDefaultCredentialService(new NuGetConsoleLogger(),
+                !_restoreActionConfig.Interactive);
         }
 
         public async Task<string> DownloadPackageAsync(PackageId packageId,
@@ -73,17 +86,11 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
-            if (_restoreActionConfig.Interactive)
-            {
-                DefaultCredentialServiceUtility.SetupDefaultCredentialService(_verboseLogger,
-                    _restoreActionConfig.Interactive);
-            }
-
-            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion,
+            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVersion(packageId, packageVersion,
                 packageSourceLocation, includePreview);
 
             FindPackageByIdResource resource = null;
-            SourceRepository repository = Repository.Factory.GetCoreV3(source);
+            SourceRepository repository = GetSourceRepository(source);
 
             resource = await repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken)
                 .ConfigureAwait(false);
@@ -91,7 +98,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             if (resource == null)
             {
                 throw new NuGetPackageNotFoundException(
-                    string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
+                    string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds, packageId, source.Source));
             }
 
             string nupkgPath = downloadFolder == null || !downloadFolder.HasValue
@@ -103,13 +110,14 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using FileStream destinationStream = File.Create(nupkgPath);
-            bool success = await resource.CopyNupkgToStreamAsync(
+            bool success = await ExponentialRetry.ExecuteWithRetryOnFailure(async () => await resource.CopyNupkgToStreamAsync(
                 packageId.ToString(),
                 resolvedPackageVersion,
                 destinationStream,
                 _cacheSettings,
                 _verboseLogger,
-                cancellationToken);
+                cancellationToken));
+            destinationStream.Close();
 
             if (!success)
             {
@@ -125,36 +133,26 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         private void VerifySigning(string nupkgPath)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (_firstPartyNuGetPackageSigningVerifier.IsExecutableIsFirstPartySignedWithoutValidation(new FilePath(
-                    typeof(DotNet.Cli.Program).Assembly.Location)))
-                {
-                    if (!_firstPartyNuGetPackageSigningVerifier.Verify(new FilePath(nupkgPath),
-                        out string commandOutput))
-                    {
-                        throw new NuGetPackageInstallerException(LocalizableStrings.FailedToValidatePackageSigning +
-                                                                 Environment.NewLine +
-                                                                 commandOutput);
-                    }
-                }
-                else
-                {
-                    if (!_validationMessagesDisplayed)
-                    {
-                        _reporter.WriteLine(
-                            LocalizableStrings.SkipNuGetpackageSigningValidationSDKNotFirstParty);
-                        _validationMessagesDisplayed = true;
-                    }
-                }
-            }
-            else
+            if (!_verifySignatures)
             {
                 if (!_validationMessagesDisplayed)
                 {
                     _reporter.WriteLine(
-                        LocalizableStrings.SkipNuGetpackageSigningValidationmacOSLinux);
+                        LocalizableStrings.NuGetPackageSignatureVerificationSkipped);
                     _validationMessagesDisplayed = true;
+                }
+
+                return;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!_firstPartyNuGetPackageSigningVerifier.Verify(new FilePath(nupkgPath),
+                    out string commandOutput))
+                {
+                    throw new NuGetPackageInstallerException(LocalizableStrings.FailedToValidatePackageSigning +
+                                                             Environment.NewLine +
+                                                             commandOutput);
                 }
             }
         }
@@ -164,9 +162,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             PackageSourceLocation packageSourceLocation = null,
             bool includePreview = false)
         {
-            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion, packageSourceLocation, includePreview);
-
-            SourceRepository repository = Repository.Factory.GetCoreV3(source);
+            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVersion(packageId, packageVersion, packageSourceLocation, includePreview);
+            
+            SourceRepository repository = GetSourceRepository(source);
+            if (repository.PackageSource.IsLocal)
+            {
+                return Path.Combine(repository.PackageSource.Source, $"{packageId}.{resolvedPackageVersion}.nupkg");
+            }
 
             ServiceIndexResourceV3 serviceIndexResource = repository.GetResourceAsync<ServiceIndexResourceV3>().Result;
             IReadOnlyList<Uri> packageBaseAddress =
@@ -211,21 +213,12 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                                 fileAndPermission.Permission);
                     }
                 }
-                else
-                {
-                    // https://github.com/dotnet/sdk/issues/18239
-                    foreach (FilePath filePath in FindAllFilesNeedExecutablePermission(allFilesInPackage,
-                        targetFolder.Value))
-                    {
-                        _filePermissionSetter.SetPermission(filePath.Value, "755");
-                    }
-                }
             }
 
             return allFilesInPackage;
         }
 
-        private async Task<(PackageSource, NuGetVersion)> GetPackageSourceAndVerion(PackageId packageId,
+        private async Task<(PackageSource, NuGetVersion)> GetPackageSourceAndVersion(PackageId packageId,
              NuGetVersion packageVersion = null,
              PackageSourceLocation packageSourceLocation = null,
              bool includePreview = false)
@@ -320,6 +313,29 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             PackageSourceProvider packageSourceProvider = new PackageSourceProvider(settings);
             defaultSources = packageSourceProvider.LoadPackageSources().Where(source => source.IsEnabled);
 
+
+            if (packageSourceLocation?.AdditionalSourceFeed?.Any() ?? false)
+            {
+                foreach (string source in packageSourceLocation?.AdditionalSourceFeed)
+                {
+                    if (string.IsNullOrWhiteSpace(source))
+                    {
+                        continue;
+                    }
+
+                    PackageSource packageSource = new PackageSource(source);
+                    if (packageSource.TrySourceAsUri == null)
+                    {
+                        _verboseLogger.LogWarning(string.Format(
+                            LocalizableStrings.FailedToLoadNuGetSource,
+                            source));
+                        continue;
+                    }
+
+                    defaultSources = defaultSources.Append(packageSource);
+                }
+            }
+
             if (!packageSourceLocation?.SourceFeedOverrides.Any() ?? true)
             {
                 if (!defaultSources.Any())
@@ -402,8 +418,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!foundPackagesBySource.Any())
             {
-                throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
-                    string.Join(" ", packageSources.Select(s => s.Source))));
+                throw new NuGetPackageNotFoundException(
+                    string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds, packageIdentifier, packageSources.Select(s => s.Source)));
             }
 
             IEnumerable<(PackageSource source, IPackageSearchMetadata package)> accumulativeSearchResults =
@@ -411,8 +427,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     .SelectMany(result => result.foundPackages.Select(package => (result.source, package)));
 
             if (!accumulativeSearchResults.Any())
-            {
-                throw new NuGetPackageInstallerException(
+            {  
+                throw new NuGetPackageNotFoundException(
                     string.Format(
                         LocalizableStrings.IsNotFoundInNuGetFeeds,
                         packageIdentifier,
@@ -513,7 +529,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     string.Join(";", sources.Select(s => s.Source))));
             }
 
-            throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds,
+            throw new NuGetPackageNotFoundException(string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds,
                 $"{packageIdentifier}::{packageVersion}", string.Join(";", sources.Select(s => s.Source))));
         }
 
@@ -533,7 +549,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             try
             {
-                SourceRepository repository = Repository.Factory.GetCoreV3(source);
+                SourceRepository repository = GetSourceRepository(source);
                 PackageMetadataResource resource = await repository
                     .GetResourceAsync<PackageMetadataResource>(cancellationToken).ConfigureAwait(false);
 
@@ -552,6 +568,30 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             }
 
             return (source, foundPackages);
+        }
+
+        public async Task<NuGetVersion> GetLatestPackageVersion(PackageId packageId,
+             PackageSourceLocation packageSourceLocation = null,
+             bool includePreview = false)
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            IPackageSearchMetadata packageMetadata;
+            IEnumerable<PackageSource> packagesSources = LoadNuGetSources(packageSourceLocation);
+
+            (_, packageMetadata) = await GetLatestVersionInternalAsync(packageId.ToString(), packagesSources,
+                includePreview, cancellationToken).ConfigureAwait(false);
+
+            return packageMetadata.Identity.Version;
+        }
+
+        private SourceRepository GetSourceRepository(PackageSource source)
+        {
+            if (!_sourceRepositories.ContainsKey(source))
+            {
+                _sourceRepositories.Add(source, Repository.Factory.GetCoreV3(source));
+            }
+
+            return _sourceRepositories[source];
         }
     }
 }

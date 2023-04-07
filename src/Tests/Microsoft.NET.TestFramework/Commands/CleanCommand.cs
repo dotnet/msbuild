@@ -17,6 +17,11 @@ namespace Microsoft.NET.TestFramework.Commands
         {
         }
 
+        public CleanCommand(TestAsset testAsset, string relativePathToProject = null)
+           : base(testAsset, "Clean", relativePathToProject)
+        {
+        }
+
         protected override bool ExecuteWithRestoreByDefault => false;
     }
 }

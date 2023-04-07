@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class WorkloadOptionsExtensions
     {
-        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath)
+        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath, string userProfileDir, bool checkIfFeatureBandManifestsExist)
         {
 
             if (string.IsNullOrEmpty(versionOption))
@@ -26,24 +26,25 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else
             {
-                var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption).GetManifests();
-                if (!manifests.Any())
+                var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir).GetManifests();
+                if (!manifests.Any() && checkIfFeatureBandManifestsExist)
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption));
+                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, new SdkFeatureBand(versionOption).ToString()), isUserError: false);
                 }
                 try
                 {
-                    foreach ((string manifestId, Stream manifestStream) in manifests)
+                    foreach (var readableManifest in manifests)
                     {
-                        using (manifestStream)
+                        using (var manifestStream = readableManifest.OpenManifestStream())
+                        using (var localizationStream = readableManifest.OpenLocalizationStream())
                         {
-                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
+                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(readableManifest.ManifestId, manifestStream, localizationStream, readableManifest.ManifestPath);
                         }
                     }
                 }
                 catch
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, versionOption));
+                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, versionOption), isUserError: false);
                 }
 
                 return new ReleaseVersion(versionOption);

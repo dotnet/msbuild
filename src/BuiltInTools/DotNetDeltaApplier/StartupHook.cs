@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.HotReload;
@@ -11,8 +13,13 @@ internal sealed class StartupHook
 {
     private static readonly bool LogDeltaClientMessages = Environment.GetEnvironmentVariable("HOTRELOAD_DELTA_CLIENT_LOG_MESSAGES") == "1";
 
+    /// <summary>
+    /// Invoked by the runtime when the containing assembly is listed in DOTNET_STARTUP_HOOKS.
+    /// </summary>
     public static void Initialize()
     {
+        ClearHotReloadEnvironmentVariables(Environment.GetEnvironmentVariable, Environment.SetEnvironmentVariable);
+
         Task.Run(async () =>
         {
             using var hotReloadAgent = new HotReloadAgent(Log);
@@ -25,6 +32,32 @@ internal sealed class StartupHook
                 Log(ex.Message);
             }
         });
+    }
+
+    internal static void ClearHotReloadEnvironmentVariables(
+        Func<string, string?> getEnvironmentVariable,
+        Action<string, string?> setEnvironmentVariable)
+    {
+        // Workaround for https://github.com/dotnet/runtime/issues/58000
+        // Clear any hot-reload specific environment variables. This should prevent child processes from being
+        // affected by the current app's hot reload settings.
+        const string StartupHooksEnvironment = "DOTNET_STARTUP_HOOKS";
+        var environment = getEnvironmentVariable(StartupHooksEnvironment);
+        setEnvironmentVariable(StartupHooksEnvironment, RemoveCurrentAssembly(environment));
+
+        static string? RemoveCurrentAssembly(string? environment)
+        {
+            if (string.IsNullOrEmpty(environment))
+            {
+                return environment;
+            }
+
+            var assemblyLocation = typeof(StartupHook).Assembly.Location;
+            var updatedValues = environment.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+                .Where(e => !string.Equals(e, assemblyLocation, StringComparison.OrdinalIgnoreCase));
+
+            return string.Join(Path.PathSeparator, updatedValues);
+        }
     }
 
     public static async Task ReceiveDeltas(HotReloadAgent hotReloadAgent)
@@ -47,7 +80,7 @@ internal sealed class StartupHook
             return;
         }
 
-        var initPayload = new ClientInitializationPayload { Capabilities = GetApplyUpdateCapabilities() };
+        var initPayload = new ClientInitializationPayload(hotReloadAgent.Capabilities);
         Log("Writing capabilities: " + initPayload.Capabilities);
         initPayload.Write(pipeClient);
 
@@ -58,19 +91,9 @@ internal sealed class StartupHook
 
             hotReloadAgent.ApplyDeltas(update.Deltas);
             pipeClient.WriteByte((byte)ApplyResult.Success);
-
         }
+
         Log("Stopped received delta updates. Server is no longer connected.");
-    }
-
-    private static string GetApplyUpdateCapabilities()
-    {
-        var method = typeof(System.Reflection.Metadata.AssemblyExtensions).GetMethod("GetApplyUpdateCapabilities", BindingFlags.NonPublic | BindingFlags.Static);
-        if (method is null)
-        {
-            return string.Empty;
-        }
-        return (string)method.Invoke(obj: null, parameters: null)!;
     }
 
     private static void Log(string message)

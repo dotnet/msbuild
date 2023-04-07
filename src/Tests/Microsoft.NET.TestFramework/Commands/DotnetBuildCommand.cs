@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Xunit.Abstractions;
 
@@ -11,6 +12,18 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             Arguments.Add("build");
             Arguments.AddRange(args);
+        }
+
+        public DotnetBuildCommand(TestAsset testAsset, params string[] args) : this(testAsset.Log, args)
+        {
+            if (testAsset.TestProject != null)
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testAsset.TestProject.Name);
+            }
+            else
+            {
+                WorkingDirectory = testAsset.TestRoot;
+            }
         }
     }
 }

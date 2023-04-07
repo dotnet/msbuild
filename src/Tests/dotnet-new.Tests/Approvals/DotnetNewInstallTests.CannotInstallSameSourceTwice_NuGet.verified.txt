@@ -1,0 +1,5 @@
+﻿Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 is already installed.
+To reinstall the same version of the template package, use '--force' option:
+   dotnet new install Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 --force
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#106

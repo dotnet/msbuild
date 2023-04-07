@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Archivo Directory.Build.props de MSBuild",
+  "description": "Un archivo Directory.Build.props vacío que se puede usar para especificar propiedades de MSBuild para toda una carpeta",
+  "symbols/inherit/displayName": "Heredar",
+  "symbols/inherit/description": "Si es true, agrega una importación para el archivo Directory.Build.props más cercano en la jerarquía de directorios del sistema de archivos. Directory.Build.props no hereda de forma predeterminada, por lo que esto le permite crear un conjunto de personalizaciones carpeta por carpeta."
+}

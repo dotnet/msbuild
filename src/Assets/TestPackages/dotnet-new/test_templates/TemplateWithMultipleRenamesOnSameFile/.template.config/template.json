@@ -1,0 +1,30 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithMultipleRenamesOnSameFile",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithMultipleRenamesOnSameFile",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithMultipleRenamesOnSameFile",
+  "shortName": "TestAssets.TemplateWithMultipleRenamesOnSameFile",
+  "symbols": {
+    "fooRename": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "foo"
+    },
+    "barRename": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "bar"
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "barandfoo.txt"
+    },
+    {
+      "path": "foobar.txt"
+    }
+  ]
+}

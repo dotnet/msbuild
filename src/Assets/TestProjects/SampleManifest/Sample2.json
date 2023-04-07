@@ -1,0 +1,82 @@
+{
+    "version": "5.0.0-preview1",
+    "workloads": {
+        "xamarin-android": {
+            "description": "Create, build and run Android apps",
+            "kind": "dev",
+            "packs": [
+                "Xamarin.Android.Templates"
+            ],
+            "extends": [
+                "xamarin-android-build"
+            ]
+        },
+        "xamarin-android-build": {
+            "description": "Build and run Android apps",
+            "packs": [
+                "Xamarin.Android.Sdk",
+                "Xamarin.Android.Framework",
+                "Xamarin.Android.Runtime"
+            ]
+        },
+        "android-sdk-workload":{
+            "description": "Test workload",
+            "packs": [
+                "Xamarin.Android.Sdk"
+            ]
+        },
+        "android-templates-workload":{
+            "description": "Test workload",
+            "packs": [
+                "Xamarin.Android.Templates"
+            ]
+        },
+        "android-buildtools-workload":{
+            "description": "Test workload",
+            "packs": [
+                "Xamarin.Android.BuildTools"
+            ]
+        },
+        "xamarin-empty-mock": {
+            "description": "Empty mock workload for testing",
+            "kind": "dev",
+            "packs": [],
+            "extends": []
+        }
+    },
+    "packs": {
+        "Xamarin.Android.Sdk": {
+            "kind": "sdk",
+            "version": "8.4.7"
+        },
+        "Xamarin.Android.Templates": {
+            "kind": "template",
+            "version": "1.0.3"
+        },
+        "Xamarin.Android.Framework": {
+            "kind": "framework",
+            "version": "8.4.0"
+        },
+        "Xamarin.Android.Runtime": {
+            "kind": "framework",
+            "version": "8.4.7.4"
+        },
+        "Xamarin.Android.BuildTools": {
+            "version": "8.4.7",
+            "kind": "sdk",
+            "alias-to": {
+                "osx": "Xamarin.Android.BuildTools.MacHost",
+                "win": "Xamarin.Android.BuildTools.WinHost",
+                "linux": "Xamarin.Android.BuildTools.LinuxHost"
+            }
+        },
+        "Test.Pack.A": {
+            "version": "1.0.0",
+            "kind": "sdk"
+        },
+        "Test.Pack.B": {
+            "version": "2.0.0",
+            "kind": "framework"
+        }
+    }
+}

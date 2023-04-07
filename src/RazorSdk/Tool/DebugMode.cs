@@ -1,5 +1,6 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Diagnostics;
@@ -16,7 +17,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             {
                 args = args.Skip(1).ToArray();
 
-                Console.WriteLine("Waiting for debugger in pid: {0}", Process.GetCurrentProcess().Id);
+                Console.WriteLine("Waiting for debugger in pid: {0}", Environment.ProcessId);
                 while (!Debugger.IsAttached)
                 {
                     Thread.Sleep(TimeSpan.FromSeconds(3));

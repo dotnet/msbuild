@@ -52,6 +52,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Setting this property to true restores pre-16.7 behaviour of ResolvePackageDependencies to produce
          TargetDefinitions, FileDefinitions and FileDependencies items. -->
     <EmitLegacyAssetsFileItems Condition="'$(EmitLegacyAssetsFileItems)' == ''">false</EmitLegacyAssetsFileItems>
+
+    <!-- A flag that NuGet packages containing multi-targeted analyzers can check to see if the NuGet package needs to do
+         its own multi-targeting logic, or if the current SDK targets will pick the assets correctly. -->
+    <SupportsRoslynComponentVersioning>true</SupportsRoslynComponentVersioning>
   </PropertyGroup>
 
   <!-- Target Moniker + RID-->
@@ -62,7 +66,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Embed all project.assets.json files into the binary log when building with /bl -->
   <ItemGroup>
-    <EmbedInBinlog Include="$(ProjectAssetsFile)" Condition="Exists('$(ProjectAssetsFile)') AND $(EmbedProjectAssetsFile) != false" />
+    <EmbedInBinlog Include="$(ProjectAssetsFile)" Condition="$(EmbedProjectAssetsFile) != false AND Exists('$(ProjectAssetsFile)')" />
   </ItemGroup>
 
   <!--
@@ -171,7 +175,7 @@ Copyright (c) .NET Foundation. All rights reserved.
            AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.ResolvePackageAssets"
             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
+  
   <!-- The condition on this target causes it to be skipped during design-time builds if
         the restore operation hasn't run yet.  This is to avoid displaying an error in
         the Visual Studio error list when a project is created before NuGet restore has
@@ -188,18 +192,17 @@ Copyright (c) .NET Foundation. All rights reserved.
       RuntimeIdentifier="$(RuntimeIdentifier)"
       Condition=" '$(DesignTimeBuild)' != 'true'"/>
 
+    <!-- Included for backwards compatibility when the EmitLegacyAssetsFileItems property is true. -->
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectLanguage="$(Language)"
-      EmitLegacyAssetsFileItems="$(EmitLegacyAssetsFileItems)"
       TargetFramework="$(TargetFramework)"
-      ContinueOnError="ErrorAndContinue">
+      ContinueOnError="ErrorAndContinue"
+      Condition="'$(EmitLegacyAssetsFileItems)' == 'true'">
 
       <Output TaskParameter="PackageDefinitions" ItemName="PackageDefinitions" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
-
-      <!-- These outputs only produced when EmitLegacyAssetsFileItems is true -->
       <Output TaskParameter="TargetDefinitions" ItemName="TargetDefinitions" />
       <Output TaskParameter="FileDefinitions" ItemName="FileDefinitions" />
       <Output TaskParameter="FileDependencies" ItemName="FileDependencies" />
@@ -207,9 +210,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <!-- Reads the version of the compiler APIs that are currently being used in order to pick the correct Roslyn components. -->
+  <Target Name="_ResolveCompilerVersion"
+          Condition="'$(CompilerApiVersion)' == '' And
+                     ('$(Language)' == 'C#' Or '$(Language)' == 'VB') And
+                     Exists('$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll')">
+    
+    <GetAssemblyIdentity AssemblyFiles="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll">
+      <Output TaskParameter="Assemblies" ItemName="_CodeAnalysisIdentity" />
+    </GetAssemblyIdentity>
+
+    <PropertyGroup>
+      <_RoslynApiVersion>$([System.Version]::Parse(%(_CodeAnalysisIdentity.Version)).Major).$([System.Version]::Parse(%(_CodeAnalysisIdentity.Version)).Minor)</_RoslynApiVersion>
+      <CompilerApiVersion>roslyn$(_RoslynApiVersion)</CompilerApiVersion>
+    </PropertyGroup>
+    
+  </Target>
+
   <Target Name="ResolvePackageAssets"
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
-          DependsOnTargets="ProcessFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary;_ComputePackageReferencePublish">
+          Condition="('$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')) And '$(SkipResolvePackageAssets)' != 'true'"
+          DependsOnTargets="ProcessFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary;_ComputePackageReferencePublish;_ResolveCompilerVersion">
 
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                           and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'
@@ -248,6 +268,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ProjectAssetsCacheFile="$(ProjectAssetsCacheFile)"
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectLanguage="$(Language)"
+      CompilerApiVersion="$(CompilerApiVersion)"
       EmitAssetsLogMessages="$(EmitAssetsLogMessages)"
       TargetFramework="$(TargetFramework)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
@@ -268,13 +289,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
       DesignTimeBuild="$(DesignTimeBuild)"
       ContinueOnError="$(ContinueOnError)"
-      PackageReferences="@(PackageReference)">
+      PackageReferences="@(PackageReference)"
+      DefaultImplicitPackages= "$(DefaultImplicitPackages)">
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->
       <Output TaskParameter="Analyzers" ItemName="ResolvedAnalyzers" />
       <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiersResolvePackageAssets" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
+      <Output TaskParameter="DebugSymbolsFiles" ItemName="_DebugSymbolsFiles" />
+      <Output TaskParameter="ReferenceDocumentationFiles" ItemName="_ReferenceDocumentationFiles" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
       <Output TaskParameter="FrameworkReferences" ItemName="TransitiveFrameworkReference" />
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
@@ -285,7 +309,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
       <Output TaskParameter="PackageFolders" ItemName="AssetsFilePackageFolder" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
+      <Output TaskParameter="PackageDependenciesDesignTime" ItemName="_PackageDependenciesDesignTime" />
     </ResolvePackageAssets>
+
+    <ItemGroup Condition="'$(CopyDebugSymbolFilesFromPackages)' == 'true'">
+      <ReferenceCopyLocalPaths Include="@(_DebugSymbolsFiles)"></ReferenceCopyLocalPaths>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(CopyDocumentationFilesFromPackages)' == 'true'">
+      <ReferenceCopyLocalPaths Include="@(_ReferenceDocumentationFiles)"></ReferenceCopyLocalPaths>
+    </ItemGroup>
 
     <ItemGroup Condition="'$(UseAppHostFromAssetsFile)' == 'true'">
       <_NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
@@ -307,23 +340,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
 
-  <UsingTask TaskName="Microsoft.NET.Build.Tasks.PreprocessPackageDependenciesDesignTime"
-             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
   <Target Name="ResolvePackageDependenciesDesignTime"
           Returns="@(_PackageDependenciesDesignTime)"
-          DependsOnTargets="RunResolvePackageDependencies;ResolveAssemblyReferencesDesignTime">
-
-    <PreprocessPackageDependenciesDesignTime
-          PackageDefinitions="@(PackageDefinitions)"
-          PackageDependencies="@(PackageDependencies)"
-          DefaultImplicitPackages="$(DefaultImplicitPackages)"
-          TargetFramework="$(TargetFramework)">
-
-      <Output TaskParameter="PackageDependenciesDesignTime" ItemName="_PackageDependenciesDesignTime" />
-    </PreprocessPackageDependenciesDesignTime>
-
-  </Target>
+          DependsOnTargets="ResolvePackageAssets;RunResolvePackageDependencies;ResolveAssemblyReferencesDesignTime" />
 
   <!--
     ============================================================
@@ -386,7 +405,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="RunProduceContentAssets"
           DependsOnTargets="ResolvePackageAssets"
-          Condition="'@(_ContentFilesToPreprocess)' != ''">
+          Condition="'@(_ContentFilesToPreprocess)' != '' and '$(_CleaningWithoutRebuilding)' != 'true'">
 
     <ProduceContentAssets
       ContentFileDependencies="@(_ContentFilesToPreprocess)"
@@ -397,7 +416,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />
       <Output TaskParameter="ProcessedContentItems" ItemName="_ProcessedContentItems" />
-      <Output TaskParameter="FileWrites" ItemName="FileWrites" />
+      <Output TaskParameter="ProcessedContentItems" ItemName="FileWrites" />
     </ProduceContentAssets>
 
     <!-- The items in _ProcessedContentItems need to go into the appropriately-named item group,
@@ -405,7 +424,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CreateItem Include="@(_ProcessedContentItems)" Condition="'@(_ProcessedContentItems)' != ''">
       <Output TaskParameter="Include" ItemName="%(_ProcessedContentItems.ProcessedItemType)" />
     </CreateItem>
-
   </Target>
 
   <!--

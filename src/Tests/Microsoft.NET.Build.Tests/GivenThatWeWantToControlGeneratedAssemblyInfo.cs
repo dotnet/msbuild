@@ -2,18 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using FluentAssertions;
-using System.Runtime.InteropServices;
-using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using System.Xml.Linq;
-using Xunit.Sdk;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -83,9 +81,9 @@ namespace Microsoft.NET.Build.Tests
                 expectedInfo.Remove(attributeToOptOut);
             }
 
-            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v2.1");
+            expectedInfo.Add("TargetFrameworkAttribute", $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}");
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp2.1", "Release").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, "Release").FullName, "HelloWorld.dll");
             var actualInfo = AssemblyInfo.Get(assemblyPath);
 
             actualInfo.Should().Equal(expectedInfo);
@@ -97,7 +95,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -105,7 +103,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -114,7 +112,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -136,7 +134,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -145,7 +143,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -168,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -177,7 +175,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -204,7 +202,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0+xyz" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0+xyz" });
         }
 
         [Fact]
@@ -213,7 +211,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -241,11 +239,11 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.2.3+abc.xyz" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.2.3+abc.xyz" });
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp2.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("net45")]
         public void It_respects_version_prefix(string targetFramework)
         {
@@ -273,7 +271,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp2.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("net45")]
         public void It_respects_version_changes_on_incremental_build(string targetFramework)
         {
@@ -370,14 +368,15 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TestPreviewFeatures(bool enablePreviewFeatures)
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(true, true, "net5.0")]
+        [InlineData(true, true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(true, false, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, false, ToolsetInfo.CurrentTargetFramework)]
+        public void TestPreviewFeatures(bool enablePreviewFeatures, bool generateRequiresPreviewFeaturesAttribute, string targetFramework)
         {
-            const string targetFramework = "net6.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}")
+                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}${generateRequiresPreviewFeaturesAttribute}${targetFramework}")
                 .WithSource()
                 .WithTargetFramework(targetFramework)
                 .WithProjectChanges((path, project) =>
@@ -387,6 +386,13 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(
                         new XElement(ns + "PropertyGroup",
                             new XElement(ns + "EnablePreviewFeatures", $"{enablePreviewFeatures}")));
+
+                    if (enablePreviewFeatures && !generateRequiresPreviewFeaturesAttribute)
+                    {
+                        project.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "GenerateRequiresPreviewFeaturesAttribute", $"False")));
+                    }
                 });
 
             var buildCommand = new BuildCommand(testAsset);
@@ -410,25 +416,35 @@ namespace Microsoft.NET.Build.Tests
 
             var values = getValuesCommand.GetValues();
             var langVersion = values.FirstOrDefault() ?? string.Empty;
-            if (!enablePreviewFeatures)
+
+            if (enablePreviewFeatures && generateRequiresPreviewFeaturesAttribute)
+            {
+                if (targetFramework == ToolsetInfo.CurrentTargetFramework)
+                {
+                    Assert.Equal("Preview", langVersion);
+                    Assert.True(contains);
+                }
+                else
+                {
+                    // The assembly level attribute is generated only for the latest TFM for the given sdk
+                    Assert.False(contains);
+                    Assert.NotEqual("Preview", langVersion);
+                }
+            }
+
+            if (!generateRequiresPreviewFeaturesAttribute)
             {
                 Assert.False(contains);
-                Assert.True(langVersion.Equals(string.Empty, System.StringComparison.Ordinal));
-            }
-            else
-            {
-                Assert.True(contains);
-                Assert.True(langVersion.Equals("Preview", System.StringComparison.Ordinal));
             }
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_doesnt_includes_requires_preview_features()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .WithTargetFramework("net6.0")
+                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
                 .WithProjectChanges((path, project) =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -441,7 +457,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("net6.0").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).FullName, "HelloWorld.dll");
 
             var parameterlessAttributes = AssemblyInfo.GetParameterlessAttributes(assemblyPath);
             bool contains = false;
@@ -601,7 +617,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "UserSecretTest",
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             testProject.AdditionalProperties["UserSecretsId"] = "SecretsIdValue";
@@ -643,14 +659,14 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WebApp",
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
 
             var testTestProject = new TestProject()
             {
                 Name = "WebAppTests",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 ReferencedProjects = { testProject }
             };
 
@@ -684,7 +700,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RepoUrlProject",
-                TargetFrameworks = "netcoreapp3.1"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             if (privateRepo)
@@ -702,7 +718,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp3.1").FullName, testProject.Name + ".dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
         }
@@ -710,7 +726,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("net40", false)]
         [InlineData("net45", true)]
-        [InlineData("netcoreapp2.1", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void It_does_not_write_to_undefined_assembly_metadata_attribute(string targetFramework, bool containsAttribute)
         {
             var fakeUrl = "fakeUrl";
@@ -724,7 +740,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();
@@ -740,5 +756,59 @@ namespace Microsoft.NET.Build.Tests
                 AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().Be(false);
             }
         }
+
+        [Theory]
+        [InlineData("netcoreapp3.1", ".NET Core 3.1")]
+        [InlineData("netcoreapp2.1", ".NET Core 2.1")]
+        [InlineData("netstandard2.1", ".NET Standard 2.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, $".NET {ToolsetInfo.CurrentTargetFrameworkVersion}")]
+        public void CheckTargetFrameworkDisplayName(string targetFrameworkVersion, string expectedFrameworkDisplayName)
+        {
+            TestProject libraryProject = new TestProject()
+            {
+                Name = "LibraryProject",
+                TargetFrameworks = targetFrameworkVersion
+            };
+            libraryProject.AdditionalProperties["NoWarn"] = "NETSDK1138";
+            libraryProject.SourceFiles["Class.cs"] = @"
+public class LibraryClass{}
+";
+
+            TestProject testProject = new TestProject()
+            {
+                Name = "HelloWorld",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+
+            testProject.ReferencedProjects.Add(libraryProject);
+            testProject.SourceFiles["Program.cs"] = @"
+using System;
+using System.Reflection;
+using System.Runtime.Versioning;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var str = typeof(LibraryClass).Assembly.GetCustomAttribute<TargetFrameworkAttribute>().FrameworkDisplayName;
+        Console.WriteLine(str);
+    }
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFrameworkVersion);
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.WithWorkingDirectory(testAsset.Path)
+                .Execute()
+                .Should()
+                .Pass();
+
+            var result = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
+                .Execute();
+            result.Should().Pass();
+            result.StdOut.Should().BeEquivalentTo(expectedFrameworkDisplayName);
+
+        }
+
     }
 }

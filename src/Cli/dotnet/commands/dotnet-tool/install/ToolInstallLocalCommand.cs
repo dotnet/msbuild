@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             IReporter reporter = null)
             : base(parseResult)
         {
-            _explicitManifestFile = parseResult.ValueForOption<string>(ToolAppliedOption.ToolManifestOptionAlias);
+            _explicitManifestFile = parseResult.GetValue(ToolAppliedOption.ToolManifestOption);
 
             _reporter = (reporter ?? Reporter.Output);
 

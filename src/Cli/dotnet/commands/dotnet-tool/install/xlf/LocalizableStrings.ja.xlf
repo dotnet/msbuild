@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 ツール '{1}' (バージョン '{2}') が正常にインストールされました。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">ランタイム識別子 {0} は無効です。有効なランタイム識別子は {1} です。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">ツールをインストールし、ローカル ツール マニフェスト (既定値) に追加します。</target>
@@ -66,6 +71,11 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">ツールをインストールするターゲット フレームワーク。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">--prerelease および --version オプションは同じコマンド内ではサポートされません</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">

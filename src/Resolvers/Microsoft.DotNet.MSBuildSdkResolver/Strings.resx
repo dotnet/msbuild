@@ -130,9 +130,12 @@
     <value>Version {0} of the .NET SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET SDK is installed or increase the version specified in global.json.</value>
   </data>
   <data name="UnableToLocateNETCoreSdk" xml:space="preserve">
-    <value>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</value>
+    <value>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</value>
   </data>
   <data name="GlobalJsonResolutionFailed" xml:space="preserve">
     <value>Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.</value>
+  </data>
+  <data name="GlobalJsonResolutionFailedSpecificVersion" xml:space="preserve">
+    <value>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</value>
   </data>
 </root>

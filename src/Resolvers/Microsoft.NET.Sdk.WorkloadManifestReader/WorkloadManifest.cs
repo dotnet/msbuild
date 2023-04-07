@@ -12,11 +12,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </summary>
     public class WorkloadManifest
     {
-        internal WorkloadManifest(string id, FXVersion version, string? description, Dictionary<WorkloadId, WorkloadDefinition> workloads, Dictionary<WorkloadPackId, WorkloadPack> packs, Dictionary<string, FXVersion>? dependsOnManifests)
+        internal WorkloadManifest(string id, FXVersion version, string? description, string manifestPath,  Dictionary<WorkloadId, BaseWorkloadDefinition> workloads, Dictionary<WorkloadPackId, WorkloadPack> packs, Dictionary<string, FXVersion>? dependsOnManifests)
         {
             Id = id;
             ParsedVersion = version;
             Description = description;
+            ManifestPath = manifestPath;
             Workloads = workloads;
             Packs = packs;
             DependsOnManifests = dependsOnManifests;
@@ -44,7 +45,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public string? Description { get; }
 
-        public Dictionary<WorkloadId, WorkloadDefinition> Workloads { get; }
+        public string ManifestPath { get; }
+
+        public Dictionary<WorkloadId, BaseWorkloadDefinition> Workloads { get; }
         public Dictionary<WorkloadPackId, WorkloadPack> Packs { get; }
     }
 }

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
@@ -15,8 +14,6 @@ namespace Microsoft.DotNet.ShellShim
 {
     internal class ShellShimRepository : IShellShimRepository
     {
-        private const string ApphostNameWithoutExtension = "apphost";
-
         private readonly DirectoryPath _shimsDirectory;
         private readonly IFileSystem _fileSystem;
         private readonly IAppHostShellShimMaker _appHostShellShimMaker;
@@ -24,7 +21,7 @@ namespace Microsoft.DotNet.ShellShim
 
         public ShellShimRepository(
             DirectoryPath shimsDirectory,
-            string appHostSourceDirectory = null,
+            string appHostSourceDirectory,
             IFileSystem fileSystem = null,
             IAppHostShellShimMaker appHostShellShimMaker = null,
             IFilePermissionSetter filePermissionSetter = null)
@@ -88,7 +85,8 @@ namespace Microsoft.DotNet.ShellShim
                             ex);
                     }
                 },
-                rollback: () => {
+                rollback: () =>
+                {
                     foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                     {
                         File.Delete(file.Value);
@@ -100,12 +98,13 @@ namespace Microsoft.DotNet.ShellShim
         {
             var files = new Dictionary<string, string>();
             TransactionalAction.Run(
-                action: () => {
+                action: () =>
+                {
                     try
                     {
                         foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
-                            var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                            var tempPath = Path.Combine(_fileSystem.Directory.CreateTemporarySubdirectory(), Path.GetRandomFileName());
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(file.Value, tempPath));
                             files[file.Value] = tempPath;
                         }
@@ -121,13 +120,15 @@ namespace Microsoft.DotNet.ShellShim
                             ex);
                     }
                 },
-                commit: () => {
+                commit: () =>
+                {
                     foreach (var value in files.Values)
                     {
                         _fileSystem.File.Delete(value);
                     }
                 },
-                rollback: () => {
+                rollback: () =>
+                {
                     foreach (var kvp in files)
                     {
                         FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(kvp.Value, kvp.Key));

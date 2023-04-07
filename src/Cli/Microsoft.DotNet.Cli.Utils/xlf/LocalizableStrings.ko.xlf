@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="DotnetWorkloadInfoLabel">
+        <source>.NET workloads installed:</source>
+        <target state="new">.NET workloads installed:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MalformedText">
         <source>Malformed command text '{0}'</source>
         <target state="translated">형식이 잘못된 명령 텍스트 '{0}'</target>
@@ -37,7 +42,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">디버거가 연결될 때까지 대기하는 중입니다. 계속하려면 &lt;Enter&gt; 키를 누르세요.</target>
+        <target state="translated">디버거가 연결되기를 기다리는 중입니다. 계속하려면 Enter 키를 누르세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">
@@ -76,8 +81,8 @@ Possible reasons for this include:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET SDK (reflecting any global.json):</source>
-        <target state="translated">.NET SDK(global.json 반영):</target>
+        <source>.NET SDK:</source>
+        <target state="translated">.NET SDK:</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">

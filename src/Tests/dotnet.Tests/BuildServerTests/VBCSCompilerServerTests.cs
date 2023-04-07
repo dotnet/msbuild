@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
 
             Action a = () => server.Shutdown();
 
-            a.ShouldThrow<BuildServerException>().WithMessage(
+            a.Should().Throw<BuildServerException>().WithMessage(
                 string.Format(
                     LocalizableStrings.ShutdownCommandFailed,
                     ErrorMessage));

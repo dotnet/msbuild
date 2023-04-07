@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
@@ -58,13 +58,13 @@
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
-        <source>determining whether to include pre-release packages.</source>
-        <target state="translated">正在确定是否包括预发行包。</target>
+        <source>Include pre-release packages.</source>
+        <target state="needs-review-translation">正在确定是否包括预发行包。</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
-        <source>Search Term</source>
-        <target state="translated">搜索词</target>
+        <source>SEARCH_TERM</source>
+        <target state="needs-review-translation">搜索词</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">

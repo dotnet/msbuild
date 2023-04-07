@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,13 +11,15 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public sealed class NoRestoreFilter : IWatchFilter
+    internal sealed class NoRestoreFilter : IWatchFilter
     {
         private bool _canUseNoRestore;
         private string[] _noRestoreArguments;
 
         public ValueTask ProcessAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            Debug.Assert(!context.HotReloadEnabled);
+
             if (context.SuppressMSBuildIncrementalism)
             {
                 return default;

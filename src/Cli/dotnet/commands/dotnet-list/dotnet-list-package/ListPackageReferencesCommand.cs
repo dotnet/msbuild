@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
             ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = PathUtility.GetAbsolutePath(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()),
-                parseResult.ValueForArgument<string>(ListCommandParser.SlnOrProjectArgument));
+                parseResult.GetValue(ListCommandParser.SlnOrProjectArgument));
         }
 
         public override int Execute()
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
         internal static void EnforceOptionRules(ParseResult parseResult)
         {
             var mutexOptionCount = 0;
-            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.DepreciatedOption) ? 1 : 0;
+            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.DeprecatedOption) ? 1 : 0;
             mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.OutdatedOption) ? 1 : 0;
             mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.VulnerableOption) ? 1 : 0;
             if (mutexOptionCount > 1)

@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using System.Globalization;
@@ -90,34 +91,35 @@ namespace Microsoft.DotNet.Cli.Telemetry
             new AllowListToSendFirstAppliedOptions(new HashSet<string> {"add", "remove", "list", "sln", "nuget"}),
             new TopLevelCommandNameAndOptionToLog
             (
-                topLevelCommandName: new HashSet<string> {"new"},
-                optionsToLog: new HashSet<string> {"language"}
-            ),
-            new TopLevelCommandNameAndOptionToLog
-            (
                 topLevelCommandName: new HashSet<string> {"build", "publish"},
-                optionsToLog: new HashSet<string> {"framework", "runtime", "configuration"}
+                optionsToLog: new HashSet<Option> { BuildCommandParser.FrameworkOption, PublishCommandParser.FrameworkOption,
+                    BuildCommandParser.RuntimeOption, PublishCommandParser.RuntimeOption, BuildCommandParser.ConfigurationOption,
+                    PublishCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"run", "clean", "test"},
-                optionsToLog: new HashSet<string> {"framework", "configuration"}
+                optionsToLog: new HashSet<Option> { RunCommandParser.FrameworkOption, CleanCommandParser.FrameworkOption,
+                    TestCommandParser.FrameworkOption, RunCommandParser.ConfigurationOption, CleanCommandParser.ConfigurationOption,
+                    TestCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"pack"},
-                optionsToLog: new HashSet<string> {"configuration"}
+                optionsToLog: new HashSet<Option> { PackCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"vstest"},
-                optionsToLog: new HashSet<string> {"platform", "framework", "logger"}
+                optionsToLog: new HashSet<Option> { CommonOptions.TestPlatformOption,
+                    CommonOptions.TestFrameworkOption, CommonOptions.TestLoggerOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"publish"},
-                optionsToLog: new HashSet<string> {"runtime"}
-            )
+                optionsToLog: new HashSet<Option> { PublishCommandParser.RuntimeOption }
+            ),
+            new AllowListToSendVerbSecondVerbFirstArgument(new HashSet<string> {"workload", "tool", "new"}),
         };
 
         private static void LogVerbosityForAllTopLevelCommand(
@@ -126,14 +128,15 @@ namespace Microsoft.DotNet.Cli.Telemetry
             string topLevelCommandName,
             Dictionary<string, double> measurements = null)
         {
-            if (parseResult.IsDotnetBuiltInCommand() && parseResult.HasOption("--verbosity"))
+            if (parseResult.IsDotnetBuiltInCommand() &&
+                parseResult.SafelyGetValueForOption(CommonOptions.VerbosityOption) is VerbosityOptions verbosity)
             {
                 result.Add(new ApplicationInsightsEntryFormat(
                     "sublevelparser/command",
                     new Dictionary<string, string>()
                     {
                         { "verb", topLevelCommandName},
-                        {"verbosity", Enum.GetName(parseResult.ValueForOption<VerbosityOptions>("--verbosity"))}
+                        { "verbosity", Enum.GetName(verbosity)}
                     },
                     measurements));
             }

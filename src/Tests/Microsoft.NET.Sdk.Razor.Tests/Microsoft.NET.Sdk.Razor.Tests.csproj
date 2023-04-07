@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
@@ -23,17 +23,29 @@
       <_Parameter1>AspNetTestTfm</_Parameter1>
       <_Parameter2>$(SdkTargetFramework)</_Parameter2>
     </AssemblyAttribute>
+    <!-- We use these to templatize the output from our build/publish tests to ensure the right set of
+         files gets published in all circumstances.
+    -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>NetCoreAppRuntimePackageVersion</_Parameter1>
+      <_Parameter2>$(MicrosoftNETCoreAppRuntimePackageVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>DefaultTestBaselinePackageVersion</_Parameter1>
+      <_Parameter2>5.0</_Parameter2>
+    </AssemblyAttribute>
   </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
-    <PackageReference Include="Moq" Version="4.8.2" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\RazorSdk\Tasks\Microsoft.NET.Sdk.Razor.Tasks.csproj" />
+    <ProjectReference Include="..\..\..\src\StaticWebAssetsSdk\Tasks\Microsoft.NET.Sdk.StaticWebAssets.Tasks.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
@@ -44,6 +56,8 @@
     <None Include="TestFiles\Generated\*.bundle.scp.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <EmbeddedResource Include="StaticWebAssetsBaselines\**">
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

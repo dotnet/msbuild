@@ -1,11 +1,12 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.Build.Utilities;
-using Microsoft.AspNetCore.Razor.Tasks;
 using Xunit;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 
 namespace Microsoft.NET.Sdk.Razor.Test
 {
@@ -34,11 +35,34 @@ namespace Microsoft.NET.Sdk.Razor.Test
         }
 
         [Fact]
+        public void DoesNotDiscoversScopedCssFilesForViews_IfFeatureIsUnsupported()
+        {
+            // Arrange
+            var taskInstance = new DiscoverDefaultScopedCssItems()
+            {
+                Content = new[]
+                {
+                    new TaskItem("TestFiles/Pages/Counter.cshtml.css"),
+                    new TaskItem("TestFiles/Pages/Index.cshtml.css"),
+                    new TaskItem("TestFiles/Pages/Profile.cshtml.css"),
+                }
+            };
+
+            // Act
+            var result = taskInstance.Execute();
+
+            // Assert
+            result.Should().BeTrue();
+            taskInstance.DiscoveredScopedCssInputs.Should().BeEmpty();
+        }
+
+        [Fact]
         public void DiscoversScopedCssFilesForViews_BasedOnTheirExtension()
         {
             // Arrange
             var taskInstance = new DiscoverDefaultScopedCssItems()
             {
+                SupportsScopedCshtmlCss = true,
                 Content = new[]
                 {
                     new TaskItem("TestFiles/Pages/Counter.cshtml.css"),
@@ -61,6 +85,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
             // Arrange
             var taskInstance = new DiscoverDefaultScopedCssItems()
             {
+                SupportsScopedCshtmlCss = true,
                 Content = new[]
                 {
                     new TaskItem("TestFiles/Pages/Counter.cshtml.css"),

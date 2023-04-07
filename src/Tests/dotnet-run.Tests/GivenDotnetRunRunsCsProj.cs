@@ -3,12 +3,16 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Microsoft.NET.TestFramework.Utilities;
+using Microsoft.TemplateEngine.Utils;
 using Xunit;
 using Xunit.Abstractions;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
@@ -69,7 +73,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass()
                          .And.HaveStdOutContaining("This string came from the test library!");
         }
@@ -135,7 +139,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass()
                          .And.HaveStdOut("Hello World!");
         }
@@ -170,7 +174,8 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
                 .Execute($"--project", projectFile)
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.NotHaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
         }
 
         [Fact]
@@ -186,7 +191,38 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
                 .Execute("--project", testProjectDirectory)
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.NotHaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
+        }
+
+        [Fact]
+        public void ItWarnsWhenShortFormOfProjectArgumentIsUsed()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var projectFile = Path.Combine(testInstance.Path, testAppName + ".csproj");
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
+                .Execute($"-p", projectFile)
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.HaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
+        }
+
+        [Theory]
+        [InlineData("-p project1 -p project2")]
+        [InlineData("--project project1 -p project2")]
+        public void ItErrorsWhenMultipleProjectsAreSpecified(string args)
+        {
+            new DotnetCommand(Log, "run")
+                .Execute(args.Split(" "))
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(LocalizableStrings.OnlyOneProjectAllowed);
         }
 
         [Fact]
@@ -195,10 +231,11 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             var rootPath = _testAssetsManager.CreateTestDirectory().Path;
 
             string dir = "pkgs";
-            string [] args = new string[] { "--packages", dir };
+            string[] args = new string[] { "--packages", dir };
 
-            string [] newArgs = new string[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new")
+            string[] newArgs = new string[] { "console", "-o", rootPath, "--no-restore" };
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()
@@ -214,7 +251,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(rootPath)
                 .Execute("--no-restore")
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World");
+                         .And.HaveStdOutContaining("Hello, World");
         }
 
         [Fact]
@@ -251,6 +288,91 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItCanPassOptionArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--", "-d", "-a")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:-d;-a");
+        }
+
+        [Fact]
+        public void ItCanPassOptionAndArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--", "foo", "-d", "-a")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;-d;-a");
+        }
+
+        [Fact]
+        public void ItCanPassArgumentsToSubjectAppWithoutDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("foo", "bar", "baz")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;bar;baz");
+        }
+
+        [Fact]
+        public void ItCanPassUnrecognizedOptionArgumentsToSubjectAppWithoutDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("-x", "-y", "-z")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:-x;-y;-z");
+        }
+
+        [Fact]
+        public void ItCanPassOptionArgumentsAndArgumentsToSubjectAppWithoutAndByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("foo", "--", "-z")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;-z");
+        }
+
+        [Fact]
         public void ItGivesAnErrorWhenAttemptingToUseALaunchProfileThatDoesNotExistWhenThereIsNoLaunchSettingsFile()
         {
             var testAppName = "MSBuildTestApp";
@@ -259,12 +381,18 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             var testProjectDirectory = testInstance.Path;
 
-            new DotnetCommand(Log, "run")
+            var runResult = new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--launch-profile", "test")
-                .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!")
-                         .And.HaveStdErrContaining(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile);
+                .Execute("--launch-profile", "test");
+
+            string[] expectedErrorWords = LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Replace("\'{0}\'", "").Split(" ");
+            runResult
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
+
+            expectedErrorWords.ForEach(word => runResult.Should().HaveStdErrContaining(word));
         }
 
         [Fact]
@@ -481,7 +609,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                             .WithSource();
 
             var result = new DotnetCommand(Log, "run")
-                .WithWorkingDirectory( testInstance.Path)
+                .WithWorkingDirectory(testInstance.Path)
                 .Execute("-v:n");
 
             result.Should().Pass()
@@ -635,6 +763,46 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                .Pass()
                .And
                .HaveStdOutContaining(expectedValue);
+        }
+
+        [Fact]
+        public void ItIncludesCommandArgumentsSpecifiedInLaunchSettings()
+        {
+            var expectedValue = "TestAppCommandLineArguments";
+            var secondExpectedValue = "SecondTestAppCommandLineArguments";
+            var testAppName = "TestAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .HaveStdOutContaining(expectedValue)
+               .And
+               .HaveStdOutContaining(secondExpectedValue);
+        }
+
+        [Fact]
+        public void ItCLIArgsOverrideCommandArgumentsSpecifiedInLaunchSettings()
+        {
+            var expectedValue = "TestAppCommandLineArguments";
+            var secondExpectedValue = "SecondTestAppCommandLineArguments";
+            var testAppName = "TestAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run", "-- test")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining(expectedValue)
+               .And
+               .NotHaveStdOutContaining(secondExpectedValue);
         }
     }
 }

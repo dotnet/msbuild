@@ -118,51 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Restore workloads required for the project.</value>
+    <value>Restore workloads required for a project.</value>
   </data>
-  <data name="InvalidPackageWarning" xml:space="preserve">
-    <value>Warning: workload package '{0}' is invalid</value>
+  <data name="InstallingWorkloads" xml:space="preserve">
+    <value>Installing workloads: {0}</value>
   </data>
-  <data name="PackageIdColumn" xml:space="preserve">
-    <value>Package Id</value>
+  <data name="CouldNotFindAProject" xml:space="preserve">
+    <value>Couldn't find a project. Ensure that a project exists in {0}, or pass the path to the project using {1}.</value>
   </data>
-  <data name="VersionColumn" xml:space="preserve">
-    <value>Version</value>
-  </data>
-  <data name="CommandsColumn" xml:space="preserve">
-    <value>Commands</value>
-  </data>
-  <data name="AddSourceOptionDescription" xml:space="preserve">
-    <value>Add an additional NuGet package source to use during installation.</value>
-  </data>
-  <data name="AddSourceOptionName" xml:space="preserve">
-    <value>SOURCE</value>
-  </data>
-  <data name="ConfigFileOptionDescription" xml:space="preserve">
-    <value>The NuGet configuration file to use.</value>
-  </data>
-  <data name="ConfigFileOptionName" xml:space="preserve">
-    <value>FILE</value>
-  </data>
-  <data name="VersionOptionDescription" xml:space="preserve">
-    <value>The version of the workload package to install.</value>
-  </data>
-  <data name="VersionOptionName" xml:space="preserve">
-    <value>VERSION</value>
-  </data>
-  <data name="PackageFailedToRestore" xml:space="preserve">
-    <value>Package "{0}" failed to restore, due to {1}</value>
-  </data>
-  <data name="RestoreSuccessful" xml:space="preserve">
-    <value>Workload '{0}' (version '{1}') was restored. Available commands: {2}</value>
-  </data>
-  <data name="RestorePartiallyFailed" xml:space="preserve">
-    <value>Restore partially failed.</value>
-  </data>
-  <data name="RestoreFailed" xml:space="preserve">
-    <value>Restore failed.</value>
-  </data>
-  <data name="NoWorkloadsWereRestored" xml:space="preserve">
-    <value>No workloads were restored.</value>
+  <data name="FailedToRunTarget" xml:space="preserve">
+    <value>Failed to restore workload for project {0}: Failed to run MSBuild Target _GetRequiredWorkloads.</value>
   </data>
 </root>

@@ -118,15 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Install a workload.</value>
+    <value>Repair workload installations.</value>
   </data>
   <data name="WorkloadRepairFailed" xml:space="preserve">
     <value>Workload repair failed: {0}</value>
   </data>
   <data name="RepairSucceeded" xml:space="preserve">
-    <value>Successfully repaired worklods: {0}</value>
+    <value>Successfully repaired workloads: {0}</value>
   </data>
   <data name="RepairingWorkloads" xml:space="preserve">
     <value>Repairing workload installation for workloads: {0}</value>
+  </data>
+  <data name="NoWorkloadsToRepair" xml:space="preserve">
+    <value>No workloads are installed, nothing to repair. Run `dotnet workload search` to find workloads to install.</value>
   </data>
 </root>

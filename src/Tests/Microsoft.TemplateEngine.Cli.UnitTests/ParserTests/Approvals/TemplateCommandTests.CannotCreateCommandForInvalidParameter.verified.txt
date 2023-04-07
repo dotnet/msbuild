@@ -1,0 +1,6 @@
+﻿Template foo.1 (foo) is malformed. The following template parameters are invalid:
+   have:colon
+      Parameter name 'have:colon' contains colon, which is forbidden.
+   n2
+      Failed to assign long option alias for parameter 'n2', tried: '--name'; '--param:name'.
+      Failed to assign short option alias for parameter 'n2', tried: '-n'; '-p:n'.

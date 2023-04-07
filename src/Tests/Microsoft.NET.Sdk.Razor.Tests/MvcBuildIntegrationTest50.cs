@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.IO;
 using System.Threading.Tasks;
@@ -92,6 +93,21 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(Path.Combine(outputPath, "ClassLibrary.dll")).Should().Exist();
             new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.dll")).Should().Exist();
             new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.pdb")).Should().Exist();
+        }
+
+        [CoreMSBuildOnlyFact]
+        public void CshtmlCss_InNET5App_DoesNotProduceErrors()
+        {
+            // Regression test for https://github.com/dotnet/aspnetcore/issues/39526
+            var testAsset = $"Razor{TestProjectName}";
+            var project = CreateAspNetSdkTestAsset(testAsset);
+            var scopedCssPath = Path.Combine(project.Path, "wwwroot", "Views", "Home", "Index.cshtml.css");
+            Directory.CreateDirectory(Path.GetDirectoryName(scopedCssPath));
+            File.WriteAllText(scopedCssPath, "Nothing to see here");
+
+            // Build
+            var build = new BuildCommand(project);
+            build.Execute().Should().Pass();
         }
     }
 }

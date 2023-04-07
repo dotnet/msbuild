@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace EndToEnd
 {
@@ -18,7 +19,7 @@ namespace EndToEnd
         }
 
         [WindowsOnlyFact]
-        public void ANET461ProjectCanReferenceANETStandardProject()
+        public void Anet462ProjectCanReferenceANETStandardProject()
         {
             var _testInstance = _testAssetsManager.CopyTestAsset("NETFrameworkReferenceNETStandard20", testAssetSubdirectory: TestAssetSubdirectories.DesktopTestProjects)
                 .WithSource();

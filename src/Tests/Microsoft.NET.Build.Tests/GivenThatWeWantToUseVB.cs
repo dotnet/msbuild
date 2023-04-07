@@ -6,15 +6,14 @@ using System.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-
 using FluentAssertions;
-
 using Xunit.Abstractions;
 using Xunit;
 using System;
 using System.IO;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Microsoft.Build.Utilities;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -33,7 +32,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("net45", true)]
+        [InlineData("net472", true)]
         [InlineData("netstandard2.0", false)]
         [InlineData("netcoreapp2.1", true)]
         [InlineData("netcoreapp3.0", true)]
@@ -106,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
         {
             switch ((targetFramework, isExe))
             {
-                case ("net45", true):
+                case ("net472", true):
                     var files = new[]
                         {
                             "HelloWorld.exe",
@@ -133,14 +132,15 @@ namespace Microsoft.NET.Build.Tests
                     });
 
                 case ("netcoreapp3.0", true):
-                    return (VBRuntime.Referenced, AssertionHelper.AppendApphostOnNonMacOS("HelloWorld", new[]
+                    return (VBRuntime.Referenced, new[]
                     {
+                        $"HelloWorld{Constants.ExeSuffix}",
                         "HelloWorld.dll",
                         "HelloWorld.pdb",
                         "HelloWorld.runtimeconfig.json",
                         "HelloWorld.runtimeconfig.dev.json",
                         "HelloWorld.deps.json",
-                    }));
+                    });
 
                 case ("netcoreapp3.0", false):
                    return (VBRuntime.Referenced, new[]
@@ -180,14 +180,17 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [WindowsOnlyFact(Skip="https://github.com/dotnet/sdk/issues/3678")]
+        [WindowsOnlyFact]
         public void It_builds_a_vb_wpf_app()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
 
-            var newCommand = new DotnetCommand(Log, "new", "wpf", "-lang", "vb");
-            newCommand.WorkingDirectory = testDirectory;
-            newCommand.Execute().Should().Pass();
+            new DotnetNewCommand(Log, "wpf", "-lang", "vb")
+                .WithVirtualHive()
+                .WithWorkingDirectory(testDirectory)
+                .Execute()
+                .Should()
+                .Pass();
 
             var buildCommand = new BuildCommand(Log, testDirectory);
             buildCommand.Execute().Should().Pass();

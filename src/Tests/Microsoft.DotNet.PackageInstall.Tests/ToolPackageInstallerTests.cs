@@ -29,10 +29,26 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Utilities;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {
-    public class ToolPackageInstallerTests : SdkTest
+    internal class DotnetEnvironmentTestFixture : IDisposable
+    {
+        private readonly string _originalPath;
+        private const string _PATH_VAR_NAME = "PATH";
+
+        public DotnetEnvironmentTestFixture()
+        {
+            string dotnetRootUnderTest = TestContext.Current.ToolsetUnderTest.DotNetRoot;
+            _originalPath = Environment.GetEnvironmentVariable(_PATH_VAR_NAME);
+            Environment.SetEnvironmentVariable(_PATH_VAR_NAME, dotnetRootUnderTest + Path.PathSeparator + _originalPath);
+        }
+
+        public void Dispose() => Environment.SetEnvironmentVariable(_PATH_VAR_NAME, _originalPath);
+    }
+
+    public class ToolPackageInstallerTests : SdkTest, IClassFixture<DotnetEnvironmentTestFixture>
     {
         [Theory]
         [InlineData(false)]
@@ -46,7 +62,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             Action a = () => installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion), targetFramework: _testTargetframework);
 
-            a.ShouldThrow<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+            a.Should().Throw<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
 
             reporter.Lines.Count.Should().Be(1);
             reporter.Lines[0].Should().Contain(TestPackageId.ToString());
@@ -250,6 +266,90 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        public void GivenOfflineFeedInstallWhenCallWithprereleaseItSucceeds(bool testMockBehaviorIsInSync)
+        {
+            IToolPackageInstaller installer = null;
+            IToolPackageUninstaller uninstaller = null;
+            if (testMockBehaviorIsInSync == false)
+            {
+                var testFeedWithOnlyPreviewPackages =
+                    Path.Combine(Path.GetTempPath(),
+                        Path.GetRandomFileName());
+
+                Directory.CreateDirectory(testFeedWithOnlyPreviewPackages);
+                var tempFeed = GetTestLocalFeedPath();
+                File.Copy(Path.Combine(GetTestLocalFeedPath(), "global.tool.console.demo.1.0.4.nupkg"),
+                    Path.Combine(testFeedWithOnlyPreviewPackages, "global.tool.console.demo.1.0.4.nupkg"));
+                File.Copy(Path.Combine(GetTestLocalFeedPath(), "global.tool.console.demo.2.0.1-preview1.nupkg"),
+                    Path.Combine(testFeedWithOnlyPreviewPackages, "global.tool.console.demo.2.0.1-preview1.nupkg"));
+
+                var (store, storeQuery, realInstaller, realUninstaller, reporter, fileSystem) = Setup(
+                    useMock: testMockBehaviorIsInSync,
+                    offlineFeed: new DirectoryPath(testFeedWithOnlyPreviewPackages),
+                    feeds: GetOfflineMockFeed());
+
+                installer = realInstaller;
+                uninstaller = realUninstaller;
+            }
+            else
+            {
+                var fileSystem = new FileSystemMockBuilder().Build();
+                var root = new DirectoryPath(_testAssetsManager
+                    .CreateTestDirectory(nameof(GivenOfflineFeedInstallWhenCallWithprereleaseItSucceeds) +
+                                         testMockBehaviorIsInSync).Path);
+                var toolPackageStoreMock = new ToolPackageStoreMock(root, fileSystem);
+                var store = toolPackageStoreMock;
+                var storeQuery = toolPackageStoreMock;
+                installer = new ToolPackageInstallerMock(
+                    fileSystem: fileSystem,
+                    store: toolPackageStoreMock,
+                    projectRestorer: new ProjectRestorerMock(
+                        fileSystem: fileSystem,
+                        reporter: new BufferedReporter(),
+                        feeds: new List<MockFeed>
+                        {
+                            new MockFeed
+                            {
+                                Type = MockFeedType.ImplicitAdditionalFeed,
+                                Packages = new List<MockFeedPackage>
+                                {
+                                    new MockFeedPackage
+                                    {
+                                        PackageId = TestPackageId.ToString(),
+                                        Version = "1.0.4",
+                                        ToolCommandName = "SimulatorCommand"
+                                    },
+                                    new MockFeedPackage
+                                    {
+                                        PackageId = TestPackageId.ToString(),
+                                        Version = "2.0.1-preview1",
+                                        ToolCommandName = "SimulatorCommand"
+                                    }
+                                }
+                            }
+                        }));
+                uninstaller = new ToolPackageUninstallerMock(fileSystem, toolPackageStoreMock);
+            }
+
+
+            var package = installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
+                versionRange: VersionRange.Parse("*-*"), targetFramework: _testTargetframework);
+
+            package.Version.ToNormalizedString().Should().Be("2.0.1-preview1");
+
+            uninstaller.Uninstall(package.PackageDirectory);
+
+            var package2 = installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
+                versionRange: VersionRange.Parse("2.0*-*"), targetFramework: _testTargetframework);
+
+            package2.Version.ToNormalizedString().Should().Be("2.0.1-preview1");
+
+            uninstaller.Uninstall(package.PackageDirectory);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         public void GivenAllButNoTargetFrameworkItCanDownloadThePackage(bool testMockBehaviorIsInSync)
         {
             var nugetConfigPath = GenerateRandomNugetConfigFilePath();
@@ -375,7 +475,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+            a.Should().Throw<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
 
             AssertInstallRollBack(fileSystem, store);
         }
@@ -391,7 +491,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            void FailedStepAfterSuccessRestore() => throw new GracefulException("simulated error");
+            static void FailedStepAfterSuccessRestore() => throw new GracefulException("simulated error");
 
             Action a = () =>
             {
@@ -409,7 +509,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<GracefulException>().WithMessage("simulated error");
+            a.Should().Throw<GracefulException>().WithMessage("simulated error");
 
             AssertInstallRollBack(fileSystem, store);
         }
@@ -436,7 +536,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework);
 
-                    first.ShouldNotThrow();
+                    first.Should().NotThrow();
 
                     installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                         packageId: TestPackageId,
@@ -447,7 +547,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<ToolPackageException>().Where(
+            a.Should().Throw<ToolPackageException>().Where(
                 ex => ex.Message ==
                       string.Format(
                           CommonLocalizableStrings.ToolPackageConflictPackageId,
@@ -482,7 +582,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             reporter.Lines.Should().BeEmpty();
 
-            secondCall.ShouldThrow<ToolPackageException>().Where(
+            secondCall.Should().Throw<ToolPackageException>().Where(
                 ex => ex.Message ==
                       string.Format(
                           CommonLocalizableStrings.ToolPackageConflictPackageId,
@@ -736,7 +836,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     versionRange: VersionRange.Parse(packageVersion),
                     targetFramework: _testTargetframework);
 
-                action.ShouldNotThrow<ToolConfigurationException>();
+                action.Should().NotThrow<ToolConfigurationException>();
 
                 fileSystem.File.Exists(package.Commands[0].Executable.Value).Should().BeTrue($"{package.Commands[0].Executable.Value} should exist");
 
@@ -760,6 +860,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             package.Id.Should().Be(TestPackageId);
             package.Version.ToNormalizedString().Should().Be(TestPackageVersion);
             package.PackageDirectory.Value.Should().Contain(store.Root.Value);
+            package.Frameworks.Should().BeEquivalentTo(TestFrameworks);
 
             storeQuery.EnumeratePackageVersions(TestPackageId)
                 .Select(p => p.Version.ToNormalizedString())
@@ -892,8 +993,10 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             if (useMock)
             {
                 fileSystem = new FileSystemMockBuilder().Build();
+                var frameworksMap = new Dictionary<PackageId, IEnumerable<NuGetFramework>>()
+                        { {TestPackageId, TestFrameworks } };
                 WriteNugetConfigFileToPointToTheFeed(fileSystem, writeLocalFeedToNugetConfig);
-                var toolPackageStoreMock = new ToolPackageStoreMock(root, fileSystem);
+                var toolPackageStoreMock = new ToolPackageStoreMock(root, fileSystem, frameworksMap);
                 store = toolPackageStoreMock;
                 storeQuery = toolPackageStoreMock;
                 installer = new ToolPackageInstallerMock(
@@ -904,7 +1007,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                         reporter: reporter,
                         feeds: feeds == null
                             ? GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig)
-                            : feeds.Concat(GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig)).ToList()));
+                            : feeds.Concat(GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig)).ToList()),
+                    frameworksMap: frameworksMap);
                 uninstaller = new ToolPackageUninstallerMock(fileSystem, toolPackageStoreMock);
             }
             else
@@ -970,6 +1074,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";
         private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo");
+        private static readonly IEnumerable<NuGetFramework> TestFrameworks = new NuGetFramework[] { NuGetFramework.Parse("netcoreapp2.1") };
 
         public ToolPackageInstallerTests(ITestOutputHelper log) : base(log)
         {

@@ -1,0 +1,6 @@
+﻿Unable to resolve the template, these templates matched your input:
+Template Name  Short Name  Language  Tags      
+-------------  ----------  --------  ----------
+Basic FSharp   basic       F#,VB     Test Asset
+
+Re-run the command specifying the language to use with --language option.

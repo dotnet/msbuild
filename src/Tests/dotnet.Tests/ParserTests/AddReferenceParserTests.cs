@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet add reference my.csproj");
 
-            result.ValueForArgument<string>(AddCommandParser.ProjectArgument)
+            result.GetValue<string>(AddCommandParser.ProjectArgument)
                 .Should()
                 .BeEquivalentTo(
                     PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet add reference my.csproj --interactive");
 
-            result.ValueForOption<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
+            result.GetValue<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
                 .Should().BeTrue();
         }
 
@@ -49,7 +50,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet add reference my.csproj");
 
-            result.ValueForOption<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
+            result.GetValue<bool>(AddProjectToProjectReferenceParser.InteractiveOption)
                 .Should().BeFalse();
         }
 

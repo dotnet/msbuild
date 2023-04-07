@@ -1,5 +1,6 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Collections.Generic;
@@ -7,9 +8,9 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
-using Microsoft.NET.Sdk.Razor.Tool;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.Sdk.Razor.Tool;
 
 namespace Microsoft.AspNetCore.Razor.Tasks
 {
@@ -83,7 +84,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         {
             if (Debug)
             {
-                Log.LogMessage(MessageImportance.High, "Waiting for debugger in pid: {0}", Process.GetCurrentProcess().Id);
+#if NET5_0_OR_GREATER
+                var processId = Environment.ProcessId;
+#else
+                var processId = Process.GetCurrentProcess().Id;
+#endif
+
+                Log.LogMessage(MessageImportance.High, "Waiting for debugger in pid: {0}", processId);
                 while (!Debugger.IsAttached)
                 {
                     Thread.Sleep(TimeSpan.FromSeconds(3));

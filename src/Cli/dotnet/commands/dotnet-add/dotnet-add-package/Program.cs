@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -21,8 +22,8 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         public AddPackageReferenceCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.ValueForArgument<string>(AddCommandParser.ProjectArgument);
-            _packageId = parseResult.ValueForArgument<string>(AddPackageParser.CmdPackageArgument);
+            _fileOrDirectory = parseResult.GetValue(AddCommandParser.ProjectArgument);
+            _packageId = parseResult.GetValue(AddPackageParser.CmdPackageArgument);
         }
 
         public override int Execute()

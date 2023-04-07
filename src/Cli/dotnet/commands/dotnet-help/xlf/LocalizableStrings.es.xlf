@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="FormatDefinition">
+        <source>Apply style preferences to a project or solution.</source>
+        <target state="translated">Aplicar preferencias de estilo a un proyecto o solución.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
         <target state="translated">Reenviar a la versión del marco (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
@@ -9,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">Administra la instalación del SDK de .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -50,6 +55,11 @@
       <trans-unit id="HostOptions">
         <source>Host options (passed before the command)</source>
         <target state="translated">Opciones de host (pasadas antes que el comando)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="translated">Administre los tokens web JSON en el desarrollo.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">
@@ -262,11 +272,6 @@
         <target state="translated">Crea y administra certificados de desarrollo.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Herramientas de la línea de comandos de la caché de SQL Server.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Administra secretos de usuario de desarrollo.</target>
@@ -295,6 +300,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">Inicie F# interactivo o ejecute scripts de F#.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">Administrar cargas de trabajo opcionales.</target>
         <note />
       </trans-unit>
     </body>

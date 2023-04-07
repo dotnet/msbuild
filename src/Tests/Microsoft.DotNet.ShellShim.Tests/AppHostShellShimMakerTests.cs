@@ -9,6 +9,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.HostModel.AppHost;
 using Microsoft.NET.TestFramework;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {
@@ -32,7 +33,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         public void GivenNonWindowsMachineWhenCallWithWpfDllItCanCreateShimWithoutThrow()
         {
             Action a = () => CreateApphostAndReturnShimPath();
-            a.ShouldNotThrow("It should skip copying PE bits without throw");
+            a.Should().NotThrow("It should skip copying PE bits without throw");
         }
 
         private static string CreateApphostAndReturnShimPath()

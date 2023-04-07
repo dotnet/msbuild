@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -99,7 +98,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             {
                 if (logMessages)
                 {
-                    Log.LogError(String.Format(Resources.ZIPDEPLOY_FailedDeploy, zipDeployPublishUrl, response.StatusCode));
+                    Log.LogError(string.Format(Resources.ZIPDEPLOY_FailedDeploy, zipDeployPublishUrl, response.StatusCode));
                 }
 
                 return false;
@@ -114,16 +113,21 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
                 string deploymentUrl = response.GetHeader("Location").FirstOrDefault();
                 if (!string.IsNullOrEmpty(deploymentUrl))
                 {
-                    ZipDeploymentStatus deploymentStatus = new ZipDeploymentStatus(client, userAgent, Log, logMessages);
-                    DeployStatus status = await deploymentStatus.PollDeploymentStatusAsync(deploymentUrl, userName, password);
-                    if (status == DeployStatus.Success)
+                    ZipDeploymentStatus deploymentStatus = new(client, userAgent, Log, logMessages);
+
+                    DeploymentResponse deploymentResponse = await deploymentStatus.PollDeploymentStatusAsync(deploymentUrl, userName, password);
+                    if (deploymentResponse?.Status == DeployStatus.Success)
                     {
                         Log.LogMessage(MessageImportance.High, Resources.ZIPDEPLOY_Succeeded);
                         return true;
                     }
-                    else if (status == DeployStatus.Failed || status == DeployStatus.Unknown)
+                    else if (deploymentResponse is null || deploymentResponse?.Status == DeployStatus.Failed || deploymentResponse?.Status == DeployStatus.Unknown)
                     {
-                        Log.LogError(String.Format(Resources.ZIPDEPLOY_Failed, zipDeployPublishUrl, status));
+                        Log.LogError(string.Format(Resources.ZIPDEPLOY_FailedDeployWithLogs,
+                            zipDeployPublishUrl,
+                            deploymentResponse?.Status ?? DeployStatus.Unknown,
+                            deploymentResponse?.GetLogUrlWithId()));
+
                         return false;
                     }
                 }

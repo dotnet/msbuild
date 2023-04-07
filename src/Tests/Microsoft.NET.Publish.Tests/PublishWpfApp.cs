@@ -18,15 +18,17 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_and_runs_self_contained_wpf_app()
         {
             var testDir = _testAssetsManager.CreateTestDirectory();
 
-            var newCommand = new DotnetCommand(Log);
-            newCommand.WorkingDirectory = testDir.Path;
-
-            newCommand.Execute("new", "wpf", "--debug:ephemeral-hive").Should().Pass();
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
+                .WithWorkingDirectory(testDir.Path)
+                .Execute("wpf")
+                .Should()
+                .Pass();
 
             var project = XDocument.Load(Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj"));
             var ns = project.Root.Name.Namespace;
@@ -55,13 +57,13 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(
+            var publishDirectory = OutputPathCalculator.FromProject(Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj")).GetPublishDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid);
 
             var runAppCommand = new SdkCommandSpec()
             {
-                FileName = Path.Combine(publishDirectory.FullName, Path.GetFileName(testDir.Path) + ".exe")
+                FileName = Path.Combine(publishDirectory, Path.GetFileName(testDir.Path) + ".exe")
             };
 
             runAppCommand.Environment["DOTNET_ROOT"] = Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath);

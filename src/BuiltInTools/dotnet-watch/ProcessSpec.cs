@@ -9,7 +9,7 @@ using Microsoft.DotNet.Watcher.Internal;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public class ProcessSpec
+    internal sealed class ProcessSpec
     {
         public string Executable { get; set; }
         public string WorkingDirectory { get; set; }
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Watcher
 
         public CancellationToken CancelOutputCapture { get; set; }
 
-        public sealed class ProcessSpecEnvironmentVariables : Dictionary<string, string>
+        internal sealed class ProcessSpecEnvironmentVariables : Dictionary<string, string>
         {
             public List<string> DotNetStartupHooks { get; } = new();
             public List<string> AspNetCoreHostingStartupAssemblies { get; } = new();

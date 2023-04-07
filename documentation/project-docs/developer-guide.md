@@ -29,7 +29,15 @@ build.cmd
 
 The build script will output a `dotnet` installation to `artifacts\bin\redist\Debug\dotnet` that will include any local changes to the .NET Core CLI.
 
-To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated `artifacts\sdk-build-env.bat`. Finally, open Visual Studio with `devenv sdk.sln`.
+As part of the build, some intermediate files will get generated which may run into long-path issues. If you encounter a build failure with an error message similar to `Resource file [filename].resx cannot be found.`, [enable long paths](https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd#enable-long-paths-in-windows-10-version-1607-and-later) and try again.
+
+To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated environment for your shell. If you're using `cmd`, then run `artifacts\sdk-build-env.bat`. If you're using powershell, you need to 'dot source' `artifacts/sdk-build-env.ps1`. Finally, open Visual Studio with `devenv sdk.sln`.
+
+In addition, Visual Studio must have the following option set:
+
+![image](https://user-images.githubusercontent.com/23152278/211684116-923ed37e-6d56-42bf-befe-a5ef66758000.png)
+
+Go to `Tools` -> `Options` to make sure "Use previews of the .NET SDK (requires restart)" is checked and restart VS.
 
 ### Linux and macOS
 
@@ -63,7 +71,14 @@ Run the following command from the root of the repository to run all the .NET Co
 
 The `dotnet` executable in the artifacts directory can be run directly.
 
-However, it's easier to configure a test environment to run the built `dotnet`.
+However, it's easier to configure a test environment to run the built `dotnet`. This test environment is managed by dogfood. 
+The dogfood script starts a new Powershell with the environment configured to redirect SDK resolution to your build.
+
+From that shell your SDK will be available in:
+
+- any Visual Studio instance launched (via `& devenv.exe`)
+- `dotnet build`
+- `msbuild`
 
 ### Windows
 
@@ -88,7 +103,7 @@ You can now run `dotnet` commands to test changes.
 Run the following commands from the root of the repository to setup the test environment:
 
 ```
-.\eng\dogfood.sh
+source ./eng/dogfood.sh
 ```
 
 Ensure the `dotnet` being used is from the artifacts directory:
@@ -123,6 +138,8 @@ build.cmd # to have a full build first
 .\artifacts\sdk-build-env.bat
 devenv sdk.sln
 ```
+
+Note again that in Visual studio "Use previews of the .NET SDK (requires restart)" must be checked. See the above comment for how to enable this.
 
 ## A simple test
 

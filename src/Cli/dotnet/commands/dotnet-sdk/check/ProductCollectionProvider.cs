@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -10,11 +11,13 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
 {
     public class ProductCollectionProvider : IProductCollectionProvider
     {
-        public ProductCollection GetProductCollection()
+        public ProductCollection GetProductCollection(Uri uri = null, string filePath = null)
         {
             try
             {
-                return ProductCollection.GetAsync().Result;
+                return uri != null ? Task.Run(() => ProductCollection.GetAsync(uri.ToString())).Result :
+                    filePath != null ? Task.Run(() => ProductCollection.GetFromFileAsync(filePath, false)).Result :
+                    Task.Run(() => ProductCollection.GetAsync()).Result;
             }
             catch (Exception e)
             {

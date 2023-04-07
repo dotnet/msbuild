@@ -1,5 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#nullable enable
 
 using System;
 using System.Buffers;
@@ -20,9 +22,8 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         private static readonly string _namedPipeName = Guid.NewGuid().ToString();
         private readonly IReporter _reporter;
-        private Task _connectionTask;
-        private Task<ImmutableArray<string>> _capabilities;
-        private NamedPipeServerStream _pipe;
+        private Task<ImmutableArray<string>>? _capabilitiesTask;
+        private NamedPipeServerStream? _pipe;
 
         public DefaultDeltaApplier(IReporter reporter)
         {
@@ -36,24 +37,16 @@ namespace Microsoft.DotNet.Watcher.Tools
             if (!SuppressNamedPipeForTests)
             {
                 _pipe = new NamedPipeServerStream(_namedPipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-                _connectionTask = _pipe.WaitForConnectionAsync(cancellationToken);
-
-                _capabilities = Task.Run(async () =>
+                _capabilitiesTask = Task.Run(async () =>
                 {
-                    try
-                    {
-                        await _connectionTask;
-                        // When the client connects, the first payload it sends is the initialization payload which includes the apply capabilities.
-                        var capabiltiies = ClientInitializationPayload.Read(_pipe).Capabilities;
-                        _reporter.Verbose($"Application supports the following capabilities {capabiltiies}.");
-                        return capabiltiies.Split(' ').ToImmutableArray();
-                    }
-                    catch
-                    {
-                        // Do nothing. This is awaited by Apply which will surface the error.
-                    }
+                    _reporter.Verbose($"Connecting to the application.");
 
-                    return ImmutableArray<string>.Empty;
+                    await _pipe.WaitForConnectionAsync(cancellationToken);
+
+                    // When the client connects, the first payload it sends is the initialization payload which includes the apply capabilities.
+
+                    var capabilities = ClientInitializationPayload.Read(_pipe).Capabilities;
+                    return capabilities.Split(' ').ToImmutableArray();
                 });
             }
 
@@ -70,27 +63,22 @@ namespace Microsoft.DotNet.Watcher.Tools
         }
 
         public Task<ImmutableArray<string>> GetApplyUpdateCapabilitiesAsync(DotNetWatchContext context, CancellationToken cancellationToken)
-            => _capabilities;
+            => _capabilitiesTask ?? Task.FromResult(ImmutableArray<string>.Empty);
 
-        public async ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
+        public async ValueTask<bool> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
         {
-            if (!_connectionTask.IsCompletedSuccessfully || !_pipe.IsConnected)
+            if (_capabilitiesTask is null || !_capabilitiesTask.IsCompletedSuccessfully || _pipe is null || !_pipe.IsConnected)
             {
                 // The client isn't listening
                 _reporter.Verbose("No client connected to receive delta updates.");
                 return false;
             }
 
-            var payload = new UpdatePayload
-            {
-                ChangedFile = changedFile,
-                Deltas = ImmutableArray.CreateRange(solutionUpdate, c => new UpdateDelta
-                {
-                    ModuleId = c.ModuleId,
-                    ILDelta = c.ILDelta.ToArray(),
-                    MetadataDelta = c.MetadataDelta.ToArray(),
-                }),
-            };
+            var payload = new UpdatePayload(ImmutableArray.CreateRange(solutionUpdate, c => new UpdateDelta(
+                c.ModuleId,
+                metadataDelta: c.MetadataDelta.ToArray(),
+                ilDelta: c.ILDelta.ToArray(),
+                c.UpdatedTypes.ToArray())));
 
             await payload.WriteAsync(_pipe, cancellationToken);
             await _pipe.FlushAsync(cancellationToken);
@@ -99,15 +87,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var bytes = ArrayPool<byte>.Shared.Rent(1);
             try
             {
-                var timeout =
-#if DEBUG
-                 Timeout.InfiniteTimeSpan;
-#else
-                 TimeSpan.FromSeconds(5);
-#endif
-
-                using var cancellationTokenSource = new CancellationTokenSource(timeout);
-                var numBytes = await _pipe.ReadAsync(bytes, cancellationTokenSource.Token);
+                var numBytes = await _pipe.ReadAsync(bytes, cancellationToken);
 
                 if (numBytes == 1)
                 {
@@ -129,7 +109,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            await context.BrowserRefreshServer.SendJsonSerlialized(new AspNetCoreHotReloadApplied(), cancellationToken);
+            if (context.BrowserRefreshServer is not null)
+            {
+                // BrowserRefreshServer will be null in non web projects or if we failed to establish a websocket connection
+                await context.BrowserRefreshServer.SendJsonSerlialized(new AspNetCoreHotReloadApplied(), cancellationToken);
+            }
+
             return true;
         }
 
@@ -151,14 +136,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             _pipe?.Dispose();
         }
 
-        public readonly struct HotReloadDiagnostics
+        private readonly struct HotReloadDiagnostics
         {
             public string Type => "HotReloadDiagnosticsv1";
 
             public IEnumerable<string> Diagnostics { get; init; }
         }
 
-        public readonly struct AspNetCoreHotReloadApplied
+        private readonly struct AspNetCoreHotReloadApplied
         {
             public string Type => "AspNetCoreHotReloadApplied";
         }

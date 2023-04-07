@@ -129,4 +129,7 @@
   <data name="Error_QuietAndVerboseSpecified" xml:space="preserve">
     <value>Cannot specify both '--quiet' and '--verbose' options.</value>
   </data>
+  <data name="Warning_ProjectAbbreviationDeprecated" xml:space="preserve">
+    <value>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</value>
+  </data>
 </root>

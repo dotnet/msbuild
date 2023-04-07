@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="FormatDefinition">
+        <source>Apply style preferences to a project or solution.</source>
+        <target state="translated">프로젝트 또는 솔루션에 스타일 기본 설정을 적용합니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
         <target state="translated">프레임워크 버전(LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable)으로 롤포워드합니다.</target>
@@ -9,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">.NET SDK 설치를 관리합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -50,6 +55,11 @@
       <trans-unit id="HostOptions">
         <source>Host options (passed before the command)</source>
         <target state="translated">호스트 옵션(명령 전에 전달됨)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="translated">개발 중인 JSON 웹 토큰을 관리합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">
@@ -262,11 +272,6 @@
         <target state="translated">개발 인증서를 만들고 관리합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server 캐시 명령줄 도구입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">개발 사용자 비밀을 관리합니다.</target>
@@ -295,6 +300,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">F# Interactive를 시작하고 F# 스크립트를 실행합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">선택적 워크로드를 관리합니다.</target>
         <note />
       </trans-unit>
     </body>

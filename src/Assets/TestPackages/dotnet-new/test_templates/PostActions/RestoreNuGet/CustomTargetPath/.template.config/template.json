@@ -1,0 +1,33 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.PostActions.RestoreNuGet.CustomTargetPath",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.PostActions.RestoreNuGet.CustomTargetPath",
+    "precedence": "100",
+    "identity": "TestAssets.PostActions.RestoreNuGet.CustomTargetPath",
+    "shortName": "TestAssets.PostActions.RestoreNuGet.CustomTargetPath",
+    "sourceName": "Basic",
+    "sources": [
+        {
+            "target": "./Custom/Path/"
+        }
+    ],
+    "primaryOutputs": [
+        {
+            "path": "./Custom/Path/Basic.csproj"
+        }
+    ],
+    "postActions": [
+        {
+            "description": "Restore NuGet packages required by this project.",
+            "manualInstructions": [
+                {
+                    "text": "Run 'dotnet restore'"
+                }
+            ],
+            "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+            "continueOnError": true
+        }
+    ]
+}

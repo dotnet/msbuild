@@ -38,6 +38,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_ContentIncludedByDefault Include="@(Content)" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(Language)' == 'C#' AND ('$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable')">
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Hosting" />
+    <Using Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="../targets/Microsoft.NET.Sdk.Web.DefaultItems.props" />
 
 </Project>

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
@@ -26,7 +27,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool search");
             Action a = () => new ToolSearchCommand(result);
-            a.ShouldThrow<CommandParsingException>();
+            a.Should().Throw<CommandParsingException>();
         }
 
         [Fact]
@@ -34,14 +35,14 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool search mytool --detail --skip 3 --take 4 --prerelease");
 
-            var packageId = result.ValueForArgument<string>(ToolSearchCommandParser.SearchTermArgument);
+            var packageId = result.GetValue<string>(ToolSearchCommandParser.SearchTermArgument);
 
             packageId.Should().Be("mytool");
             result.UnmatchedTokens.Should().BeEmpty();
-            result.ValueForOption<bool>(ToolSearchCommandParser.DetailOption).Should().Be(true);
-            result.ValueForOption<string>(ToolSearchCommandParser.SkipOption).Should().Be("3");
-            result.ValueForOption<string>(ToolSearchCommandParser.TakeOption).Should().Be("4");
-            result.ValueForOption<bool>(ToolSearchCommandParser.PrereleaseOption).Should().Be(true);
+            result.GetValue<bool>(ToolSearchCommandParser.DetailOption).Should().Be(true);
+            result.GetValue<string>(ToolSearchCommandParser.SkipOption).Should().Be("3");
+            result.GetValue<string>(ToolSearchCommandParser.TakeOption).Should().Be("4");
+            result.GetValue<bool>(ToolSearchCommandParser.PrereleaseOption).Should().Be(true);
         }
     }
 }

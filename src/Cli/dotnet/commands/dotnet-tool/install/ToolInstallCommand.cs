@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli;
@@ -32,10 +33,10 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 toolInstallGlobalOrToolPathCommand
                 ?? new ToolInstallGlobalOrToolPathCommand(_parseResult);
 
-            _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
-            _local = parseResult.ValueForOption<bool>(ToolAppliedOption.LocalOptionAlias);
-            _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
-            _framework = parseResult.ValueForOption<string>(ToolInstallCommandParser.FrameworkOption);
+            _global = parseResult.GetValue(ToolAppliedOption.GlobalOption);
+            _local = parseResult.GetValue(ToolAppliedOption.LocalOption);
+            _toolPath = parseResult.GetValue(ToolAppliedOption.ToolPathOption);
+            _framework = parseResult.GetValue(ToolInstallCommandParser.FrameworkOption);
         }
 
         public override int Execute()

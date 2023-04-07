@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
         public override string ToString()
         {
-            return ToQuotedString();
+            return Value;
         }
 
         public DirectoryPath GetDirectoryPath()

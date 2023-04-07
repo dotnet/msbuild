@@ -15,6 +15,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
     <IsPublishable Condition="'$(IsPublishable)' == ''">true</IsPublishable>
+    <!-- PublishAot depends on PublishTrimmed. This must be set early enough for the KnownILLinkPack to be restored. -->
+    <PublishTrimmed Condition="'$(PublishTrimmed)' == '' And '$(PublishAot)' == 'true'">true</PublishTrimmed>
+    <_IsTrimmingEnabled Condition="'$(_IsTrimmingEnabled)' == '' And ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true')">true</_IsTrimmingEnabled>
+    <_IsTrimmingEnabled Condition="'$(_IsTrimmingEnabled)' == ''">false</_IsTrimmingEnabled>
+    <DynamicCodeSupport Condition="'$(DynamicCodeSupport)' == '' And '$(PublishAot)' == 'true'">false</DynamicCodeSupport>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -72,7 +77,14 @@ Copyright (c) .NET Foundation. All rights reserved.
          the published assets were copied. -->
     <Message Importance="High" Text="$(MSBuildProjectName) -> $([System.IO.Path]::GetFullPath('$(PublishDir)'))" />
 
-    <AllowEmptyTelemetry EventName="PublishProperties" EventData="PublishReadyToRun=$(PublishReadyToRun);PublishTrimmed=$(PublishTrimmed);PublishSingleFile=$(PublishSingleFile)" />
+    <ItemGroup>
+      <PublishTelemetry Include="PublishReadyToRun" Value="$(PublishReadyToRun)" />
+      <PublishTelemetry Include="PublishTrimmed" Value="$(PublishTrimmed)" />
+      <PublishTelemetry Include="PublishSingleFile" Value="$(PublishSingleFile)" />
+      <PublishTelemetry Include="PublishAot" Value="$(PublishAot)" />
+      <PublishTelemetry Include="PublishProtocol" Value="$(PublishProtocol)" />
+    </ItemGroup>
+    <AllowEmptyTelemetry EventName="PublishProperties" EventData="@(PublishTelemetry)" />
   </Target>
 
   <!-- Don't let project reference resolution build project references in NoBuild case. -->
@@ -111,11 +123,21 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(EnableCompressionInSingleFile)' == 'true' And
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
-    <NetSdkWarning Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true'"
-                 ResourceName="TrimmingWindowsFormsIsNotSupported" />
-    <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
-                 ResourceName="TrimmingWpfIsNotSupported" />
 
+    <NETSdkWarning Condition="'$(PublishProfileImported)' != 'true' and '$(PublishProfile)' != ''"
+                   ResourceName="PublishProfileNotPresent" 
+                   FormatArguments="$(PublishProfile)"/>
+
+    <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations.
+    SolutionExt is used to check if we are publishing a solution. Will be undefined if not.-->
+    <NETSdkError Condition="'$(_IsPublishing)' == 'true' and
+                            '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE)' != 'true' and
+                            '$(DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS)' == 'true' and
+                            '$(SolutionExt)' == '.sln' and
+                            '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
+                 ResourceName="SolutionProjectConfigurationsConflict"
+                 FormatArguments="PublishRelease;$(ProjectName)"/>
+    
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
@@ -300,7 +322,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 EmitSymbols="$(PublishReadyToRunEmitSymbols)"
-                                ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)">
+                                ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                PerfmapFormatVersion="$(PublishReadyToRunPerfmapFormatVersion)">
 
       <Output TaskParameter="CrossgenTool" ItemName="CrossgenTool" />
       <Output TaskParameter="Crossgen2Tool" ItemName="Crossgen2Tool" />
@@ -355,6 +378,17 @@ Copyright (c) .NET Foundation. All rights reserved.
                             GenerateSingleFileBundle">
   </Target>
 
+  <!--
+    ============================================================
+                                        ILLink
+
+    Initially an empty placeholder target. When trimming, this
+    will be redefined to invoke ILLink to perform IL trimming.
+    The placeholder exists to allow other targets to depend on it for ordering purposes.
+    ============================================================
+    -->
+  <Target Name="ILLink" />
+
   <PropertyGroup>
     <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
     <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
@@ -391,7 +425,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <!-- Copy the runtime config file. -->
       <ResolvedFileToPublish Include="$(ProjectRuntimeConfigFilePath)"
-                             Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'">
+                             Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'  and '$(PublishAot)' != 'true'">
         <RelativePath>$(ProjectRuntimeConfigFileName)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
@@ -480,37 +514,37 @@ Copyright (c) .NET Foundation. All rights reserved.
                             ResolveRuntimePackAssets;
                             _ComputePackageReferencePublish">
 
-      <!-- For future: Delete ResolveCopyLocalAssets task.  Need to figure out how to get correct DestinationSubPath for
+    <!-- For future: Delete ResolveCopyLocalAssets task.  Need to figure out how to get correct DestinationSubPath for
            PreserveStoreLayout without this task, and how to handle RuntimeStorePackages. -->
-      <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
-                              TargetFramework="$(TargetFramework)"
-                              RuntimeIdentifier="$(RuntimeIdentifier)"
-                              PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              RuntimeFrameworks="@(RuntimeFramework)"
-                              ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
-                              RuntimeStorePackages="@(RuntimeStorePackages)"
-                              PreserveStoreLayout="$(PreserveStoreLayout)"
-                              ResolveRuntimeTargets="$(CopyLocalRuntimeTargetAssets)"
-                              IsSelfContained="$(SelfContained)"
-                              Condition="'$(PreserveStoreLayout)' == 'true' Or '@(RuntimeStorePackages)' != ''">
-        <Output TaskParameter="ResolvedAssets" ItemName="_ResolvedCopyLocalPublishAssets" />
-      </ResolveCopyLocalAssets>
+    <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
+                            TargetFramework="$(TargetFramework)"
+                            RuntimeIdentifier="$(RuntimeIdentifier)"
+                            PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                            RuntimeFrameworks="@(RuntimeFramework)"
+                            ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
+                            RuntimeStorePackages="@(RuntimeStorePackages)"
+                            PreserveStoreLayout="$(PreserveStoreLayout)"
+                            ResolveRuntimeTargets="$(CopyLocalRuntimeTargetAssets)"
+                            IsSelfContained="$(SelfContained)"
+                            Condition="'$(PreserveStoreLayout)' == 'true' Or '@(RuntimeStorePackages)' != ''">
+      <Output TaskParameter="ResolvedAssets" ItemName="_ResolvedCopyLocalPublishAssets" />
+    </ResolveCopyLocalAssets>
 
 
-      <ItemGroup>
-        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
-                                         Condition="('$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true') and '%(RuntimePackAsset.AssetType)' != 'pgodata'" />
-      </ItemGroup>
+    <ItemGroup>
+      <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
+                                       Condition="('$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true') and '%(RuntimePackAsset.AssetType)' != 'pgodata'" />
+    </ItemGroup>
 
-      <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
-        <!-- Remove the apphost executable from publish copy local assets; we will copy the generated apphost instead -->
-        <_ResolvedCopyLocalPublishAssets Remove="@(_NativeRestoredAppHostNETCore)" />
-      </ItemGroup>
+    <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
+      <!-- Remove the apphost executable from publish copy local assets; we will copy the generated apphost instead -->
+      <_ResolvedCopyLocalPublishAssets Remove="@(_NativeRestoredAppHostNETCore)" />
+    </ItemGroup>
 
-      <ItemGroup Condition="'$(PreserveStoreLayout)' != 'true' And '@(RuntimeStorePackages)' == ''">
-        <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalBuildAssets)"
-                                         Condition="'%(_ResolvedCopyLocalBuildAssets.CopyToPublishDirectory)' != 'false' "/>
-      </ItemGroup>
+    <ItemGroup Condition="'$(PreserveStoreLayout)' != 'true' And '@(RuntimeStorePackages)' == ''">
+      <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalBuildAssets)"
+                                       Condition="'%(_ResolvedCopyLocalBuildAssets.CopyToPublishDirectory)' != 'false' "/>
+    </ItemGroup>
 
   </Target>
 
@@ -522,13 +556,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <UsingTask TaskName="ParseTargetManifests" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-    <Target Name="_ParseTargetManifestFiles"
-            Condition="'$(TargetManifestFiles)' != ''"
-            Returns="@(RuntimeStorePackages)">
+  <Target Name="_ParseTargetManifestFiles"
+          Condition="'$(TargetManifestFiles)' != ''"
+          Returns="@(RuntimeStorePackages)">
 
-      <ParseTargetManifests TargetManifestFiles="$(TargetManifestFiles)">
-        <Output TaskParameter="RuntimeStorePackages" ItemName="RuntimeStorePackages"/>
-      </ParseTargetManifests>
+    <ParseTargetManifests TargetManifestFiles="$(TargetManifestFiles)">
+      <Output TaskParameter="RuntimeStorePackages" ItemName="RuntimeStorePackages"/>
+    </ParseTargetManifests>
 
   </Target>
 
@@ -641,7 +675,7 @@ Copyright (c) .NET Foundation. All rights reserved.
              Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
              Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToPublishDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false'"
              ContinueOnError="$(ContinueOnError)"
-             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
 
       <Output TaskParameter="TargetOutputs" ItemName="_AllChildProjectPublishItemsWithTargetPath"/>
 
@@ -865,14 +899,26 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PublishedSingleFileName>$(AssemblyName)$(_NativeExecutableExtension)</PublishedSingleFileName>
       <PublishedSingleFilePath>$(PublishDir)$(PublishedSingleFileName)</PublishedSingleFilePath>
     </PropertyGroup>
+  </Target>
 
+  <Target Name="PrepareForBundle"
+      DependsOnTargets="_ComputeFilesToBundle"
+      Condition="'$(PublishSingleFile)' == 'true'">
+
+    <ItemGroup>
+      <FilesToBundle Include="@(_FilesToBundle)"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <AppHostFile>$(PublishedSingleFileName)</AppHostFile>
+    </PropertyGroup>
   </Target>
 
   <UsingTask TaskName="GenerateBundle" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="GenerateSingleFileBundle"
           Condition="'$(PublishSingleFile)' == 'true'"
-          DependsOnTargets="_ComputeFilesToBundle"
-          Inputs="@(_FilesToBundle)"
+          DependsOnTargets="_ComputeFilesToBundle;PrepareForBundle"
+          Inputs="@(FilesToBundle)"
           Outputs="$(PublishedSingleFilePath)">
 
     <PropertyGroup>
@@ -886,7 +932,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(IncludeAllContentForSelfExtract)' == 'true' And '$(IncludeNativeLibrariesForSelfExtract)' != 'true'"
                  ResourceName="CannotIncludeAllContentButNotNativeLibrariesInSingleFile" />
 
-    <GenerateBundle FilesToBundle="@(_FilesToBundle)"
+    <GenerateBundle FilesToBundle="@(FilesToBundle)"
                     AppHostName="$(PublishedSingleFileName)"
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
                     EnableCompressionInSingleFile="$(EnableCompressionInSingleFile)"
@@ -921,7 +967,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputeUserRuntimeAssemblies;
                             ResolveRuntimePackAssets;
                             _ComputePackageReferencePublish"
-          Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
+          Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true' and '$(PublishAot)' != 'true'">
 
     <PropertyGroup>
       <!-- IntermediateDepsFilePath is the location where the deps.json file is originally created
@@ -971,7 +1017,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       IsSelfContained="$(SelfContained)"
                       IsSingleFile="$(_IsSingleFilePublish)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
-                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"/>
+                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                      IncludeProjectsNotInAssetsFile="$(IncludeProjectsNotInAssetsFileInDepsFile)"/>
 
     <ItemGroup>
       <ResolvedFileToPublish Include="$(IntermediateDepsFilePath)">

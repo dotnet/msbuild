@@ -318,7 +318,7 @@ namespace Microsoft.NET.Build.Tasks
             // 5.0 Crossgen2 doesn't support PDB generation.
             if (!Crossgen2IsVersion5 && _emitSymbols)
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "windows")
                 {
                     result.AppendLine("--pdb");
                     result.AppendLine($"--pdb-path:{Path.GetDirectoryName(_outputPDBImage)}");
@@ -327,6 +327,12 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     result.AppendLine("--perfmap");
                     result.AppendLine($"--perfmap-path:{Path.GetDirectoryName(_outputPDBImage)}");
+                    
+                    string perfmapFormatVersion = Crossgen2Tool.GetMetadata(MetadataKeys.PerfmapFormatVersion);
+                    if (!string.IsNullOrEmpty(perfmapFormatVersion))
+                    {
+                        result.AppendLine($"--perfmap-format-version:{perfmapFormatVersion}");
+                    }
                 }
             }
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.DotNetSdkResolver;
 using Microsoft.DotNet.NativeWrapper;
 using System;
@@ -30,19 +31,21 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         public override int Priority => 5000;
 
         private readonly Func<string, string> _getEnvironmentVariable;
+        private readonly Func<string> _getCurrentProcessPath;
         private readonly NETCoreSdkResolver _netCoreSdkResolver;
 
         private static CachingWorkloadResolver _staticWorkloadResolver = new CachingWorkloadResolver();
 
         public DotNetMSBuildSdkResolver() 
-            : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
+            : this(Environment.GetEnvironmentVariable, null, VSSettings.Ambient)
         {
         }
 
         // Test constructor
-        public DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
+        public DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, Func<string> getCurrentProcessPath, VSSettings vsSettings)
         {
             _getEnvironmentVariable = getEnvironmentVariable;
+            _getCurrentProcessPath = getCurrentProcessPath;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
         }
 
@@ -86,8 +89,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (msbuildSdksDir == null)
             {
-                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
-                string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
+                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, _getCurrentProcessPath);
+                string globalJsonStartDir = GetGlobalJsonStartDir(context);
                 var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetRoot);
 
                 if (resolverResult.ResolvedSdkDirectory == null)
@@ -150,7 +153,16 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     {
                         warnings = new List<string>();
                     }
-                    warnings.Add(Strings.GlobalJsonResolutionFailed);
+
+                    if (!string.IsNullOrWhiteSpace(resolverResult.RequestedVersion))
+                    {
+                        warnings.Add(string.Format(Strings.GlobalJsonResolutionFailedSpecificVersion, resolverResult.RequestedVersion));
+                    }
+                    else
+                    {
+                        warnings.Add(Strings.GlobalJsonResolutionFailed);
+                    }
+
                     if (propertiesToAdd == null)
                     {
                         propertiesToAdd = new Dictionary<string, string>();
@@ -170,7 +182,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             };
 
             //  First check if requested SDK resolves to a workload SDK pack
-            var workloadResult = workloadResolver.Resolve(sdkReference.Name, dotnetRoot, netcoreSdkVersion);
+            string userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
+            var workloadResult = workloadResolver.Resolve(sdkReference.Name, dotnetRoot, netcoreSdkVersion, userProfileDir);
 
             if (workloadResult is not CachingWorkloadResolver.NullResolutionResult)
             {
@@ -192,6 +205,32 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         private static SdkResult Failure(SdkResultFactory factory, string format, params object[] args)
         {
             return factory.IndicateFailure(new[] { string.Format(format, args) });
+        }
+
+        /// <summary>
+        /// Gets the starting path to search for global.json.
+        /// </summary>
+        /// <param name="context">A <see cref="SdkResolverContext" /> that specifies where the current project is located.</param>
+        /// <returns>The full path to a starting directory to use when searching for a global.json.</returns>
+        private static string GetGlobalJsonStartDir(SdkResolverContext context)
+        {
+            // Evaluating in-memory projects with MSBuild means that they won't have a solution or project path.
+            // Default to using the current directory as a best effort to finding a global.json.  This could result in
+            // using the wrong one but without a starting directory, SDK resolution won't work at all.  In most cases, a
+            // global.json won't be found and the default SDK will be used.
+
+            string startDir = Environment.CurrentDirectory;
+
+            if (!string.IsNullOrWhiteSpace(context.SolutionFilePath))
+            {
+                startDir = Path.GetDirectoryName(context.SolutionFilePath);
+            }
+            else if(!string.IsNullOrWhiteSpace(context.ProjectFilePath))
+            {
+                startDir = Path.GetDirectoryName(context.ProjectFilePath);
+            }
+
+            return startDir;
         }
 
         private static string GetMinimumVSDefinedSDKVersion()

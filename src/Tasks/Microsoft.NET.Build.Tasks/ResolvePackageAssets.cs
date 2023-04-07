@@ -8,12 +8,14 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -27,6 +29,8 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ResolvePackageAssets : TaskBase
     {
+        #region Input Items
+
         /// <summary>
         /// Path to assets.json.
         /// </summary>
@@ -119,6 +123,12 @@ namespace Microsoft.NET.Build.Tasks
         public string ProjectLanguage { get; set; }
 
         /// <summary>
+        /// Optional version of the compiler API (E.g. 'roslyn3.9', 'roslyn4.0')
+        /// Impacts applicability of analyzer assets.
+        /// </summary>
+        public string CompilerApiVersion { get; set; }
+
+        /// <summary>
         /// Check that there is at least one package dependency in the RID graph that is not in the RID-agnostic graph.
         /// Used as a heuristic to detect invalid RIDs.
         /// </summary>
@@ -149,8 +159,20 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
 
+        /// <summary>
+        /// True indicates we are doing a design-time build. Otherwise we are in a build.
+        /// </summary>
         public bool DesignTimeBuild { get; set; }
 
+        /// <summary>
+        /// Eg: "Microsoft.NETCore.App;NETStandard.Library"
+        /// </summary>
+        [Required]
+        public string DefaultImplicitPackages { get; set; }
+
+        #endregion
+
+        #region Output Items
         /// <summary>
         /// Full paths to assemblies from packages to pass to compiler as analyzers.
         /// </summary>
@@ -225,6 +247,37 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] PackageDependencies { get; private set; }
 
         /// <summary>
+        /// Filters and projects items produced by <see cref="ResolvePackageDependencies"/> for consumption by
+        /// the dependencies tree, via design-time builds.
+        /// </summary>
+        /// <remarks>
+        /// Changes to the implementation of output must be coordinated with <c>PackageRuleHandler</c>
+        /// in the dotnet/project-system repo.
+        /// </remarks>
+        [Output]
+        public ITaskItem[] PackageDependenciesDesignTime { get; private set; }
+
+        /// <summary>
+        /// List of symbol files (.pdb) related to NuGet packages.
+        /// </summary>
+        /// <remarks>
+        /// Pdb files to be copied to the output directory
+        /// </remarks>
+        [Output]
+        public ITaskItem[] DebugSymbolsFiles { get; private set;}
+
+        /// <summary>
+        /// List of xml files related to NuGet packages.
+        /// </summary>
+        /// <remarks>
+        ///  The XML files should only be included in the publish output if PublishReferencesDocumentationFiles is true
+        /// </remarks>
+        [Output]
+        public ITaskItem[] ReferenceDocumentationFiles { get; private set; }
+
+        #endregion
+
+        /// <summary>
         /// Messages from the assets file.
         /// These are logged directly and therefore not returned to the targets (note private here).
         /// However,they are still stored as ITaskItem[] so that the same cache reader/writer code
@@ -277,7 +330,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 10;
+        private const int CacheFormatVersion = 12;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -304,11 +357,14 @@ namespace Microsoft.NET.Build.Tasks
                 ApphostsForShimRuntimeIdentifiers = reader.ReadItemGroup();
                 CompileTimeAssemblies = reader.ReadItemGroup();
                 ContentFilesToPreprocess = reader.ReadItemGroup();
+                DebugSymbolsFiles = reader.ReadItemGroup();
                 FrameworkAssemblies = reader.ReadItemGroup();
                 FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
                 PackageDependencies = reader.ReadItemGroup();
+                PackageDependenciesDesignTime = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
+                ReferenceDocumentationFiles = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
                 RuntimeAssemblies = reader.ReadItemGroup();
                 RuntimeTargets = reader.ReadItemGroup();
@@ -424,6 +480,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
                     }
                     writer.Write(ProjectLanguage ?? "");
+                    writer.Write(CompilerApiVersion ?? "");
                     writer.Write(ProjectPath);
                     writer.Write(RuntimeIdentifier ?? "");
                     if (ShimRuntimeIdentifiers != null)
@@ -502,7 +559,7 @@ namespace Microsoft.NET.Build.Tasks
                 BinaryReader reader = null;
                 try
                 {
-                    if (File.GetLastWriteTimeUtc(task.ProjectAssetsCacheFile) > File.GetLastWriteTimeUtc(task.ProjectAssetsFile))
+                    if (IsCacheFileUpToDate())
                     {
                         reader = OpenCacheFile(task.ProjectAssetsCacheFile, settingsHash);
                     }
@@ -529,6 +586,8 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 return reader;
+
+                bool IsCacheFileUpToDate() => File.GetLastWriteTimeUtc(task.ProjectAssetsCacheFile) > File.GetLastWriteTimeUtc(task.ProjectAssetsFile);
             }
 
             private static BinaryReader OpenCacheStream(Stream stream, byte[] settingsHash)
@@ -625,8 +684,8 @@ namespace Microsoft.NET.Build.Tasks
             private ResolvePackageAssets _task;
             private BinaryWriter _writer;
             private LockFile _lockFile;
-            private NuGetPackageResolver _packageResolver;
             private LockFileTarget _compileTimeTarget;
+            private IPackageResolver _packageResolver;
             private LockFileTarget _runtimeTarget;
             private Dictionary<string, int> _stringTable;
             private List<string> _metadataStrings;
@@ -643,6 +702,17 @@ namespace Microsoft.NET.Build.Tasks
 
             private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
+            private const char RelatedPropertySeparator = ';';
+
+            /// <summary>
+            /// This constructor should only be used for testing - IPackgeResolver carries a lot of
+            /// state so using mocks really help with testing this component.
+            /// </summary>
+            public CacheWriter(ResolvePackageAssets task, IPackageResolver resolver) : this(task)
+            {
+                _packageResolver = resolver;
+            }
+
             public CacheWriter(ResolvePackageAssets task)
             {
                 _targetFramework = task.TargetFramework;
@@ -650,7 +720,6 @@ namespace Microsoft.NET.Build.Tasks
                 _task = task;
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
                 _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile);
-
 
                 //  If we are doing a design-time build, we do not want to fail the build if we can't find the
                 //  target framework and/or runtime identifier in the assets file.  This is because the design-time
@@ -768,11 +837,14 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteApphostsForShimRuntimeIdentifiers);
                 WriteItemGroup(WriteCompileTimeAssemblies);
                 WriteItemGroup(WriteContentFilesToPreprocess);
+                WriteItemGroup(WriteDebugSymbolsFiles);
                 WriteItemGroup(WriteFrameworkAssemblies);
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
                 WriteItemGroup(WritePackageDependencies);
-                WriteItemGroup(WritePackageFolders);                
+                WriteItemGroup(WritePackageDependenciesDesignTime);
+                WriteItemGroup(WritePackageFolders);
+                WriteItemGroup(WriteReferenceDocumentationFiles);
                 WriteItemGroup(WriteResourceAssemblies);
                 WriteItemGroup(WriteRuntimeAssemblies);
                 WriteItemGroup(WriteRuntimeTargets);
@@ -822,9 +894,32 @@ namespace Microsoft.NET.Build.Tasks
                 Position = savedPosition;
             }
 
+            class LibraryComparer : IEqualityComparer<(string, NuGetVersion)>
+            {
+                public bool Equals((string, NuGetVersion) l1, (string, NuGetVersion) l2)
+                {
+                    return StringComparer.OrdinalIgnoreCase.Equals(l1.Item1, l2.Item1)
+                        && l1.Item2.Equals(l2.Item2);
+                    
+                }
+                public int GetHashCode((string, NuGetVersion) library)
+                {
+#if NET
+                    return HashCode.Combine(
+                        StringComparer.OrdinalIgnoreCase.GetHashCode(library.Item1),
+                        library.Item2.GetHashCode());
+#else
+                    int hashCode = -1507694697;
+                    hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(library.Item1);
+                    hashCode = hashCode * -1521134295 + library.Item2.GetHashCode();
+                    return hashCode;
+#endif
+                }
+            }
+
             private void WriteAnalyzers()
             {
-                Dictionary<string, LockFileTargetLibrary> targetLibraries = null;
+                AnalyzerResolver resolver = new AnalyzerResolver(this);
 
                 foreach (var library in _lockFile.Libraries)
                 {
@@ -835,23 +930,188 @@ namespace Microsoft.NET.Build.Tasks
 
                     foreach (var file in library.Files)
                     {
-                        if (!NuGetUtils.IsApplicableAnalyzer(file, _task.ProjectLanguage))
-                        {
-                            continue;
-                        }
+                        resolver.AddFile(file, library);
+                    }
 
-                        if (targetLibraries == null)
-                        {
-                            targetLibraries = _runtimeTarget
-                                .Libraries
-                                .ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
-                        }
+                    resolver.CompleteLibraryAnalyzers();
+                }
+            }
 
-                        if (targetLibraries.TryGetValue(library.Name, out var targetLibrary))
+            /// <summary>
+            /// Resolves the correct analyzer assets from a NuGet package.
+            /// </summary>
+            /// <remarks>
+            /// This allows packages to ship multiple analyzers that target different versions
+            /// of the compiler. For example, a package may include:
+            ///
+            /// "analyzers/dotnet/roslyn3.7/analyzer.dll"
+            /// "analyzers/dotnet/roslyn3.8/analyzer.dll"
+            /// "analyzers/dotnet/roslyn4.0/analyzer.dll"
+            ///
+            /// When the <paramref name="compilerApiVersion"/> is 'roslyn3.9', only the assets 
+            /// in the folder with the highest applicable compiler version are picked.
+            /// In this case,
+            /// 
+            /// "analyzers/dotnet/roslyn3.8/analyzer.dll"
+            /// 
+            /// will be picked, and the other analyzer assets will be excluded.
+            /// </remarks>
+            private class AnalyzerResolver
+            {
+                private readonly CacheWriter _cacheWriter;
+                private readonly string? _compilerNameSearchString;
+                private readonly Version? _compilerVersion;
+                private Dictionary<(string, NuGetVersion), LockFileTargetLibrary>? _targetLibraries;
+                private List<(string, LockFileLibrary, Version)>? _potentialAnalyzers;
+                private Version _maxApplicableVersion;
+
+                private Dictionary<(string, NuGetVersion), LockFileTargetLibrary> TargetLibraries =>
+                    _targetLibraries ??=
+                        _cacheWriter._compileTimeTarget.Libraries.ToDictionary(l => (l.Name, l.Version), new LibraryComparer());
+
+                public AnalyzerResolver(CacheWriter cacheWriter)
+                {
+                    _cacheWriter = cacheWriter;
+
+                    if (ParseCompilerApiVersion(_cacheWriter._task.CompilerApiVersion, out ReadOnlyMemory<char> compilerName, out Version compilerVersion))
+                    {
+#if NET
+                        _compilerNameSearchString = string.Concat("/".AsSpan(), compilerName.Span);
+#else
+                        _compilerNameSearchString = "/" + compilerName;
+#endif                   
+                        _compilerVersion = compilerVersion;
+                    }
+                }
+
+                public void AddFile(string file, LockFileLibrary library)
+                {
+                    if (NuGetUtils.IsApplicableAnalyzer(file, _cacheWriter._task.ProjectLanguage))
+                    {
+                        if (IsFileCompilerVersionSpecific(file, out Version fileCompilerVersion))
                         {
-                            WriteItem(_packageResolver.ResolvePackageAssetPath(targetLibrary, file), targetLibrary);
+                            if (fileCompilerVersion > _compilerVersion)
+                            {
+                                // version is too high - skip this file
+                                return;
+                            }
+
+                            _potentialAnalyzers ??= new List<(string, LockFileLibrary, Version)>();
+                            _potentialAnalyzers.Add((file, library, fileCompilerVersion));
+
+                            if (_maxApplicableVersion == null || fileCompilerVersion > _maxApplicableVersion)
+                            {
+                                _maxApplicableVersion = fileCompilerVersion;
+                            }
+                        }
+                        else
+                        {
+                            // if this file isn't specific to a compiler version, just write it directly
+                            WriteAnalyzer(file, library);
                         }
                     }
+                }
+
+                private bool IsFileCompilerVersionSpecific(string file, out Version fileCompilerVersion)
+                {
+                    fileCompilerVersion = null;
+
+                    if (_compilerNameSearchString == null)
+                    {
+                        // unable to tell if this file is specific to a compiler version
+                        return false;
+                    }
+
+                    int compilerNameStart = file.IndexOf(_compilerNameSearchString);
+                    if (compilerNameStart == -1)
+                    {
+                        return false;
+                    }
+
+                    int compilerVersionStart = compilerNameStart + _compilerNameSearchString.Length;
+                    int compilerVersionStop = file.IndexOf('/', compilerVersionStart);
+                    if (compilerVersionStop == -1)
+                    {
+                        return false;
+                    }
+
+                    return TryParseVersion(file, compilerVersionStart, compilerVersionStop - compilerVersionStart, out fileCompilerVersion);
+                }
+
+                public void CompleteLibraryAnalyzers()
+                {
+                    if (_maxApplicableVersion != null && _potentialAnalyzers?.Count > 0)
+                    {
+                        foreach (var (file, library, version) in _potentialAnalyzers)
+                        {
+                            if (version == _maxApplicableVersion)
+                            {
+                                WriteAnalyzer(file, library);
+                            }
+                        }
+                    }
+
+                    // clear the variables that are scoped per library
+                    _maxApplicableVersion = null;
+                    _potentialAnalyzers?.Clear();
+                }
+
+                private void WriteAnalyzer(string file, LockFileLibrary library)
+                {
+                    if (TargetLibraries.TryGetValue((library.Name, library.Version), out var targetLibrary))
+                    {
+                        _cacheWriter.WriteItem(_cacheWriter._packageResolver.ResolvePackageAssetPath(targetLibrary, file), targetLibrary);
+                    }
+                }
+
+                /// <summary>
+                /// Parses the <paramref name="compilerApiVersion"/> string into its component parts:
+                /// compilerName:, e.g. "roslyn"
+                /// compilerVersion: e.g. 3.9
+                /// </summary>
+                private static bool ParseCompilerApiVersion(string compilerApiVersion, out ReadOnlyMemory<char> compilerName, out Version compilerVersion)
+                {
+                    compilerName = default;
+                    compilerVersion = default;
+
+                    if (string.IsNullOrEmpty(compilerApiVersion))
+                    {
+                        return false;
+                    }
+
+                    int compilerVersionStart = -1;
+                    for (int i = 0; i < compilerApiVersion.Length; i++)
+                    {
+                        if (char.IsDigit(compilerApiVersion[i]))
+                        {
+                            compilerVersionStart = i;
+                            break;
+                        }
+                    }
+
+                    if (compilerVersionStart > 0)
+                    {
+                        if (TryParseVersion(compilerApiVersion, compilerVersionStart, out compilerVersion))
+                        {
+                            compilerName = compilerApiVersion.AsMemory(0, compilerVersionStart);
+                            return true;
+                        }
+                    }
+
+                    // didn't find a compiler name or version
+                    return false;
+                }
+
+                private static bool TryParseVersion(string value, int startIndex, out Version version) =>
+                    TryParseVersion(value, startIndex, value.Length - startIndex, out version);
+
+                private static bool TryParseVersion(string value, int startIndex, int length, out Version version)
+                {
+#if NET
+                    return Version.TryParse(value.AsSpan(startIndex, length), out version);
+#else
+                    return Version.TryParse(value.Substring(startIndex, length), out version);
+#endif
                 }
             }
 
@@ -895,6 +1155,57 @@ namespace Microsoft.NET.Build.Tasks
                     });
             }
 
+            private void WriteDebugSymbolsFiles()
+            {
+                WriteDebugItems(
+                    p => p.RuntimeAssemblies,
+                    MetadataKeys.PdbExtension);
+            }
+
+            private void WriteReferenceDocumentationFiles()
+            {
+                WriteDebugItems(
+                    p => p.CompileTimeAssemblies,
+                    MetadataKeys.XmlExtension);
+            }
+
+            private void WriteDebugItems(
+                Func<LockFileTargetLibrary, IEnumerable<LockFileItem>> getAssets,
+                string extension)
+            {
+                foreach (var library in _runtimeTarget.Libraries)
+                {
+                    if (!library.IsPackage())
+                    {
+                        continue;
+                    }
+
+                    foreach (LockFileItem asset in getAssets(library))
+                    {
+                        if (asset.IsPlaceholderFile() || !asset.Properties.ContainsKey(MetadataKeys.RelatedProperty))
+                        {
+                            continue;
+                        }
+
+                        string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
+
+                        string relatedExtensions = asset.Properties[MetadataKeys.RelatedProperty];
+
+                        foreach (string fileExtension in relatedExtensions.Split(RelatedPropertySeparator))
+                        {
+                            if (StringComparer.InvariantCulture.Equals(fileExtension, extension))
+                            {
+                                string xmlFilePath = Path.ChangeExtension(itemSpec, fileExtension);
+                                if (File.Exists(xmlFilePath))
+                                {
+                                    WriteItem(xmlFilePath, library);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             private void WriteFrameworkAssemblies()
             {
                 if (_task.DisableFrameworkAssemblies)
@@ -931,7 +1242,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteLogMessages()
             {
-                string GetSeverity(LogLevel level)
+                static string GetSeverity(LogLevel level)
                 {
                     switch (level)
                     {
@@ -982,7 +1293,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteMismatchedPlatformPackageVersionMessageIfNecessary()
             {
-                bool hasTwoPeriods(string s)
+                static bool hasTwoPeriods(string s)
                 {
                     int firstPeriodIndex = s.IndexOf('.');
                     if (firstPeriodIndex < 0)
@@ -1126,6 +1437,110 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            private void WritePackageDependenciesDesignTime()
+            {
+                var implicitPackageReferences = CollectSDKReferencesDesignTime.GetImplicitPackageReferences(_task.DefaultImplicitPackages);
+
+                // Scan PackageDependencies to build the set of packages in our target.
+                var allowItemSpecs = GetPackageDependencies();
+
+                foreach (var package in _lockFile.Libraries)
+                {
+                    var packageVersion = package.Version.ToNormalizedString();
+                    string packageId = $"{package.Name}/{packageVersion}";
+
+                    // Find PackageDefinitions that match our allowed item specs
+                    if (string.IsNullOrEmpty(package.Name) || !allowItemSpecs.Contains(packageId))
+                    {
+                        // Only include packages from the allow list.
+                        // This excludes transitive packages and those from other targets.
+                        continue;
+                    }
+
+                    var dependencyType = GetDependencyType(package.Type);
+
+                    if (dependencyType == DependencyType.Package ||
+                        dependencyType == DependencyType.Unresolved)
+                    {
+                        WriteItem(packageId);
+                        WriteMetadata(MetadataKeys.Name, package.Name);
+
+                        var version = packageVersion ?? string.Empty;
+                        WriteMetadata(MetadataKeys.Version, version);
+
+                        var isImplicitlyDefined = implicitPackageReferences.Contains(package.Name);
+                        WriteMetadata(MetadataKeys.IsImplicitlyDefined, isImplicitlyDefined.ToString());
+
+                        string resolvedPackagePath = _packageResolver.GetPackageDirectory(package.Name, package.Version);
+                        var resolvedPath = resolvedPackagePath ?? string.Empty;
+                        var resolved = !string.IsNullOrEmpty(resolvedPath);
+                        WriteMetadata(MetadataKeys.Resolved, resolved.ToString());
+
+                        string itemPath = package.Path ?? string.Empty;
+                        var path = (resolved
+                            ? resolvedPath
+                            : itemPath) ?? string.Empty;
+                        WriteMetadata(MetadataKeys.Path, path);
+
+                        string itemDiagnosticLevel = GetPackageDiagnosticLevel(package);
+                        var diagnosticLevel = itemDiagnosticLevel ?? string.Empty;
+                        WriteMetadata(MetadataKeys.DiagnosticLevel, diagnosticLevel);
+                    }
+                }
+
+                HashSet<string> GetPackageDependencies()
+                {
+                    HashSet<string> projectFileDependencies = _lockFile.GetProjectFileDependencySet(_compileTimeTarget.Name);
+
+                    HashSet<string> results = new(StringComparer.OrdinalIgnoreCase);
+
+                    foreach (var package in _compileTimeTarget.Libraries)
+                    {
+                        if (projectFileDependencies.Contains(package.Name))
+                        {
+                            string itemSpec = GetPackageId(package);
+
+                            bool added = results.Add(itemSpec);
+
+                            Debug.Assert(added);
+                        }
+                    }
+
+                    return results;
+                }
+
+                static string GetPackageId(LockFileTargetLibrary package) => $"{package.Name}/{package.Version.ToNormalizedString()}";
+
+                string GetPackageDiagnosticLevel(LockFileLibrary package)
+                {
+                    string target = _task.TargetFramework ?? "";
+
+                    var messages = _lockFile.LogMessages.Where(log =>
+                        log.LibraryId == package.Name &&
+                        log.TargetGraphs.Any(tg =>
+                        {
+                            var parsedTargetGraph = NuGetFramework.Parse(tg);
+                            var alias = _lockFile.PackageSpec.TargetFrameworks
+                                .FirstOrDefault(tf => tf.FrameworkName == parsedTargetGraph)
+                                ?.TargetAlias ?? tg;
+                            return alias == target;
+                        }));
+
+                    if (!messages.Any())
+                    {
+                        return string.Empty;
+                    }
+
+                    return messages.Max(log => log.Level).ToString();
+                }
+
+                static DependencyType GetDependencyType(string dependencyTypeString)
+                {
+                    Enum.TryParse(dependencyTypeString, ignoreCase: true, out DependencyType dependencyType);
+                    return dependencyType;
+                }
+            }
+
             private void WriteResourceAssemblies()
             {
                 WriteItems(
@@ -1138,6 +1553,42 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         WriteMetadata(MetadataKeys.AssetType, "resources");
                         string locale = asset.Properties["locale"];
+                        // Locales from packages can be free-form, so we normalize them to the standard
+                        // forms here. If the locale is mixed-case, that can cause issues on case-sensitive
+                        // file systems when the locale-specific assets are copied.
+                        try
+                        {
+                            var normalizedLocale = System.Globalization.CultureInfo.GetCultureInfo(locale).Name;
+                            if (normalizedLocale != locale)
+                            {
+                                var tfm = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
+                                if (tfm.Version.Major >= 7)
+                                {
+                                    _task.Log.LogWarning(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                                }
+                                else
+                                {
+                                    _task.Log.LogMessage(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                                }
+                            }
+                            locale = normalizedLocale;
+                        }
+                        catch (System.Globalization.CultureNotFoundException cnf)
+                        {
+                            var tfm = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
+                            if (tfm.Version.Major >= 7)
+                            {
+                                _task.Log.LogWarning(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                            } else
+                            {
+                                _task.Log.LogMessage(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                            }
+
+                            // We could potentially strip this unknown locale at this point, but we do not.
+                            // Locale data can change over time (it's typically an OS database that's kept updated),
+                            // and the data on the system running the build may not be the same data as
+                            // the system executing the built code. So we should be permissive for this case.
+                        }
                         bool wroteCopyLocalMetadata = WriteCopyLocalMetadataIfNeeded(
                                 package,
                                 Path.GetFileName(asset.Path),
@@ -1423,7 +1874,7 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             //  Libraries explicitly marked as exclude from publish should be excluded from
                             //  publish even if there are other transitive dependencies to them
-                            if (publishPackageExclusions.Contains(library.Name))
+                            if (excludeFromPublishPackageIds.Contains(library.Name))
                             {
                                 publishPackageExclusions.Add(library.Name);
                             }

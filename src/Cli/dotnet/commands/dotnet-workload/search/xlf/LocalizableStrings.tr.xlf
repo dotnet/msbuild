@@ -3,33 +3,33 @@
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Search for avaliable workloads.</source>
-        <target state="needs-review-translation">Genel veya yerel olarak yüklü araçları listeleyin.</target>
+        <source>Search for available workloads.</source>
+        <target state="translated">Kullanılabilir iş yüklerini arayın.</target>
         <note />
       </trans-unit>
       <trans-unit id="DescriptionColumnName">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">Açıklama</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformColumnName">
         <source>Platforms</source>
-        <target state="new">Platforms</target>
+        <target state="translated">Platformlar</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdColumnName">
         <source>Workload ID</source>
-        <target state="new">Workload ID</target>
+        <target state="translated">İş yükü kimliği</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentDescription">
-        <source>Workload id to search for.</source>
-        <target state="new">Workload id to search for.</target>
+        <source>The text to search for in the IDs and descriptions of available workloads.</source>
+        <target state="translated">Kullanılabilir iş yüklerinin kimliklerinde ve açıklamalarında aranacak metin.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentName">
-        <source>WORKLOAD_ID</source>
-        <target state="new">WORKLOAD_ID</target>
+        <source>SEARCH_STRING</source>
+        <target state="translated">SEARCH_STRING</target>
         <note />
       </trans-unit>
     </body>

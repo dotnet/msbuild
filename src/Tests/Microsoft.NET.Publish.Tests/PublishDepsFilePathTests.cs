@@ -80,7 +80,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "TestsPublishDepsFilePath",
-                TargetFrameworks = "netcoreapp3.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 

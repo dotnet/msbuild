@@ -106,6 +106,40 @@ namespace Microsoft.NET.Build.Tests
 
         }
 
+        [Fact]
+        public void AspNetRuntimePackIsNotRestoredForAndroid()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+            testProject.AdditionalProperties["RuntimeIdentifiers"] = "android-arm;android-arm64;android-x86;android-x64";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var knownFrameworkReferenceUpdate = new XElement("KnownFrameworkReference",
+                new XAttribute("Update", "Microsoft.AspNetCore.App"),
+                new XAttribute("RuntimePackExcludedRuntimeIdentifiers", "android"));
+
+            AddItem(testAsset, knownFrameworkReferenceUpdate);
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "PackageDownload", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "ProcessFrameworkReferences",
+                ShouldRestore = false
+            };
+
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var packageDownloads = getValuesCommand.GetValues();
+
+            packageDownloads.Should().NotContain(packageDownload => packageDownload.StartsWith("Microsoft.AspNetCore.App.Runtime."));
+        }
+
         private XElement CreateTestKnownRuntimePack()
         {
             var knownRuntimePack = new XElement("KnownRuntimePack",

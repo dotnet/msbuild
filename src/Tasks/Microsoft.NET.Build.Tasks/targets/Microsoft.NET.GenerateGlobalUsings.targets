@@ -1,0 +1,57 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.GenerateGlobalUsings.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    ============================================================
+                                     GenerateGlobalUsings
+
+    Generates implicit namespace imports source to intermediate directory for C# projects
+    ============================================================
+    -->
+  <UsingTask TaskName="GenerateGlobalUsings" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <PropertyGroup>
+    <GeneratedGlobalUsingsFile Condition="'$(GeneratedGlobalUsingsFile)' ==''">$(IntermediateOutputPath)$(MSBuildProjectName).GlobalUsings.g$(DefaultLanguageSourceExtension)</GeneratedGlobalUsingsFile>
+  </PropertyGroup>
+
+  <!--
+    Note that this must run before every invocation of CoreCompile to ensure that all compiler
+    runs see the generated global usings. There is at least one scenario involving Xaml
+    where CoreCompile is invoked without other potential hooks such as Compile or CoreBuild,
+    etc., so we hook directly on to CoreCompile. Furthermore, we  must run *after*
+    PrepareForBuild to ensure that the intermediate directory has been created.
+
+    Targets that generate Compile items are also expected to run before
+    BeforeCompile targets (common targets convention).
+   -->
+  <Target Name="GenerateGlobalUsings"
+          BeforeTargets="BeforeCompile;CoreCompile"
+          AfterTargets="PrepareForBuild"
+          Condition="@(Using->Count()) != 0">
+
+    <GenerateGlobalUsings Usings="@(Using)">
+      <Output TaskParameter="Lines" ItemName="_GlobalUsingLines" />
+    </GenerateGlobalUsings>
+
+    <WriteLinesToFile
+      File="$(GeneratedGlobalUsingsFile)"
+      Lines="@(_GlobalUsingLines)"
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
+
+    <ItemGroup>
+      <Compile Include="$(GeneratedGlobalUsingsFile)" />
+      <!-- Performing a clean and waiting without a build results in build warnings in VS due to all the missing namespaces, so we'll avoid recording it in FileWrites -->
+    </ItemGroup>
+  </Target>
+
+</Project>
