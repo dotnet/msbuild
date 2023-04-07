@@ -19,6 +19,5 @@
     <GetCurrentProcessFileName>
       <Output TaskParameter="CurrentProcessFileName" PropertyName="NuGetConsoleProcessFileName" />
     </GetCurrentProcessFileName>
-    <Message Text="NuGetConsoleProcessFileName=$(NuGetConsoleProcessFileName)" Importance="High" />
   </Target>
 </Project>
