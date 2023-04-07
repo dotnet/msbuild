@@ -1366,6 +1366,9 @@
     <value>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</value>
     <comment>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</comment>
   </data>
+  <data name="UnsupportedSwitchForSolutionFiles" Visibility="Public">
+    <value>The '{0}' switch is not supported for solution files.</value>
+  </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
