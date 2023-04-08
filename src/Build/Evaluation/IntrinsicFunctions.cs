@@ -46,25 +46,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Add two longs
-        /// </summary>
-        internal static long Add(long a, long b)
-        {
-            return a + b;
-        }
-
-        /// <summary>
         /// Subtract two doubles
         /// </summary>
         internal static double Subtract(double a, double b)
-        {
-            return a - b;
-        }
-
-        /// <summary>
-        /// Subtract two longs
-        /// </summary>
-        internal static long Subtract(long a, long b)
         {
             return a - b;
         }
@@ -78,14 +62,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Multiply two longs
-        /// </summary>
-        internal static long Multiply(long a, long b)
-        {
-            return a * b;
-        }
-
-        /// <summary>
         /// Divide two doubles
         /// </summary>
         internal static double Divide(double a, double b)
@@ -94,25 +70,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Divide two longs
-        /// </summary>
-        internal static long Divide(long a, long b)
-        {
-            return a / b;
-        }
-
-        /// <summary>
         /// Modulo two doubles
         /// </summary>
         internal static double Modulo(double a, double b)
-        {
-            return a % b;
-        }
-
-        /// <summary>
-        /// Modulo two longs
-        /// </summary>
-        internal static long Modulo(long a, long b)
         {
             return a % b;
         }
