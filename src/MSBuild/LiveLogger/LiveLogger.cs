@@ -271,6 +271,12 @@ internal sealed class LiveLogger : INodeLogger
             return;
         }
 
+        // Mark node idle until something uses it again
+        lock (_lock)
+        {
+            _nodes[NodeIndexForContext(buildEventContext)] = null;
+        }
+
         ProjectContext c = new(buildEventContext);
 
         // First check if we're done restoring.
