@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.300-preview.true.23166.3">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.300">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>cb88a0af251c7879f963119d200ca03569d0a581</Sha>
+      <Sha>0c67829694065369769d26a1e98813885c1ba76d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Mocks" Version="7.0.300-preview.true.23166.3">
+    <Dependency Name="Microsoft.TemplateEngine.Mocks" Version="7.0.300-rtm.23181.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>cb88a0af251c7879f963119d200ca03569d0a581</Sha>
+      <Sha>0c67829694065369769d26a1e98813885c1ba76d</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="7.0.4">
@@ -46,21 +46,25 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>0a396acafe9a7d46bce11f4338dbb3dd0d99b1b4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.7.0-preview-23205-01">
+    <Dependency Name="Microsoft.Build" Version="17.7.0-preview-23207-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>344a18823a81fa7531cf492e033c4aee41b5ea25</Sha>
+      <Sha>e2fa2d70f5b1d9f1b8a595391ee3d7c457b0fe26</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.7.0-preview-23205-01">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.7.0-preview-23207-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>344a18823a81fa7531cf492e033c4aee41b5ea25</Sha>
+      <Sha>e2fa2d70f5b1d9f1b8a595391ee3d7c457b0fe26</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.5.0-beta.23205.4">
-      <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>dfd988875fbddf3f2e9e2fdbc6ce17786c355654</Sha>
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.msbuild" Version="17.7.0-preview-23206-03">
+      <Uri>https://github.com/dotnet/msbuild</Uri>
+      <Sha>cfc1d400eafec60a34d6e0ac4b0979054c03227a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.400-beta.23205.4">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.5.0-beta.23209.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>dfd988875fbddf3f2e9e2fdbc6ce17786c355654</Sha>
+      <Sha>9ca38d4070014a8a68666e3b479854f08d2dcd0e</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.400-beta.23209.1">
+      <Uri>https://github.com/dotnet/fsharp</Uri>
+      <Sha>9ca38d4070014a8a68666e3b479854f08d2dcd0e</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="dotnet-format" Version="7.0.357101">
@@ -105,17 +109,17 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
       <Sha>e56abc45c4f8adc518abfc11a59849d616431e2c</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.6.0-preview.3.57">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.6.0-preview.3.61">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>80c3c74ca5c6d67912a19833e8cc2b10f875dc95</Sha>
+      <Sha>0fa557836fa35aee7d60776ef0c88176dbcd22ac</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.6.0-preview-20230223-05">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.6.0-release-20230324-04">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>05c0c4c4f084782533443dfeae0f6627018c5b6a</Sha>
+      <Sha>5bef4cdc79ad79f5627c028b6cf06a4197aa9c54</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.23165.1">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.23207.1">
       <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>d3fc41eadc9ff73ae8e20eb6f874cf5321714c0b</Sha>
+      <Sha>08a09f27f664fb84368aa4b9eb862b13bf808579</Sha>
       <SourceBuild RepoName="linker" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.ILCompiler" Version="7.0.4">
@@ -123,9 +127,9 @@
       <Sha>0a396acafe9a7d46bce11f4338dbb3dd0d99b1b4</Sha>
       <SourceBuildTarball RepoName="runtime" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="7.0.100-1.23165.1">
+    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="7.0.100-1.23207.1">
       <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>d3fc41eadc9ff73ae8e20eb6f874cf5321714c0b</Sha>
+      <Sha>08a09f27f664fb84368aa4b9eb862b13bf808579</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="7.0.0">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
