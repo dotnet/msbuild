@@ -472,7 +472,7 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage(MessageSeverity.Warning, $"⚠ {message}");
+            project.AddBuildMessage(MessageSeverity.Warning, $"⚠\uFE0E {message}");
         }
     }
 
@@ -485,7 +485,7 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage(MessageSeverity.Error, $"❌ {message}");
+            project.AddBuildMessage(MessageSeverity.Error, $"❌\uFE0E {message}");
         }
     }
 
