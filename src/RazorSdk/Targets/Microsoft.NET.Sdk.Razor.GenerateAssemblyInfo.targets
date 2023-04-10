@@ -109,9 +109,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RazorTargetAssemblyAttribute Include="System.Reflection.AssemblyVersionAttribute" Condition="'$(RazorAssemblyVersion)' != '' and '$(GenerateAssemblyVersionAttribute)' == 'true'">
         <_Parameter1>$(RazorAssemblyVersion)</_Parameter1>
       </RazorTargetAssemblyAttribute>
-      <RazorTargetAssemblyAttribute Include="System.Reflection.AssemblyVersionAttribute" Condition="'$(RazorAssemblyVersion)' != '' and '$(GenerateAssemblyVersionAttribute)' == 'true'">
-        <_Parameter1>$(RazorAssemblyVersion)</_Parameter1>
-      </RazorTargetAssemblyAttribute>
     </ItemGroup>
 
   </Target>
