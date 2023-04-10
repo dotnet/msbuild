@@ -256,7 +256,7 @@ internal sealed class LiveLogger : INodeLogger
         if (e.TargetNames == "Restore")
         {
             _restoreContext = c;
-            Terminal.WriteLine("Restoring");
+            _nodes[0] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
         }
     }
 
@@ -272,9 +272,12 @@ internal sealed class LiveLogger : INodeLogger
         }
 
         // Mark node idle until something uses it again
-        lock (_lock)
+        if (_restoreContext is null)
         {
-            _nodes[NodeIndexForContext(buildEventContext)] = null;
+            lock (_lock)
+            {
+                _nodes[NodeIndexForContext(buildEventContext)] = null;
+            }
         }
 
         ProjectContext c = new(buildEventContext);
@@ -391,7 +394,7 @@ internal sealed class LiveLogger : INodeLogger
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             project.Stopwatch.Start();
 
@@ -417,7 +420,7 @@ internal sealed class LiveLogger : INodeLogger
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && e.TaskName == "MSBuild")
+        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
         {
             // This will yield the node, so preemptively mark it idle
             lock (_lock)
