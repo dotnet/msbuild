@@ -55,9 +55,9 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
     }
 
 
-    private string? ComputeVersionInternal(SemanticVersion version, SemanticVersion tfm)
+    private string? ComputeVersionInternal(SemanticVersion version, SemanticVersion? tfm)
     {
-        if (tfm.Major < version.Major || tfm.Minor < version.Minor)
+        if (tfm != null && (tfm.Major < version.Major || tfm.Minor < version.Minor))
         {
             // in this case the TFM is earlier, so we are assumed to be in a stable scenario
             return $"{tfm.Major}.{tfm.Minor}";
