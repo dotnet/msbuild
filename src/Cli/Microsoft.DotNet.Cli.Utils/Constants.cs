@@ -10,12 +10,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public const string DefaultConfiguration = "Debug";
 
         public static readonly string ProjectFileName = "project.json";
+        public static readonly string ToolManifestFileName = "dotnet-tools.json";
         public static readonly string DotConfigDirectoryName = ".config";
         public static readonly string ExeSuffix =
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
 
         public static readonly string BinDirectoryName = "bin";
         public static readonly string ObjDirectoryName = "obj";
+        public static readonly string GitDirectoryName = ".git";
 
         public static readonly string MSBUILD_EXE_PATH = "MSBUILD_EXE_PATH";
         public static readonly string MSBuildExtensionsPath = "MSBuildExtensionsPath";

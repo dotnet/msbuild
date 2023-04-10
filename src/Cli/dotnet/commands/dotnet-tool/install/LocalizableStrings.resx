@@ -232,4 +232,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
   <data name="PrereleaseAndVersionAreNotSupportedAtTheSameTime" xml:space="preserve">
     <value>The --prerelease and --version options are not supported in the same command</value>
   </data>
+  <data name="CreateManifestIfNeededOptionDescription" xml:space="preserve">
+    <value>Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</value>
+  </data>
 </root>
