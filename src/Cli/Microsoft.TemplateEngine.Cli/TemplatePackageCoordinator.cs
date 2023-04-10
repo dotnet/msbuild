@@ -116,8 +116,8 @@ namespace Microsoft.TemplateEngine.Cli
                 return default;
             }
 
-            NuGetVersion managedPackageVersion;
-            NuGetVersion unmanagedPackageVersion;
+            NuGetVersion? managedPackageVersion;
+            NuGetVersion? unmanagedPackageVersion;
 
             if (NuGetVersion.TryParse(managedTemplatePackage.Version, out managedPackageVersion) && NuGetVersion.TryParse(matchingTemplatePackage.Version, out unmanagedPackageVersion))
             {
