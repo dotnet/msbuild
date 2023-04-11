@@ -37,11 +37,6 @@
         <target state="new">Display solution folder paths.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectsSolutionFolderHeader">
-        <source>Project(s) (Solution Folder)</source>
-        <target state="new">Project(s) (Solution Folder)</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
         <target state="translated">從解決方案檔移除一或多個專案。</target>
@@ -100,6 +95,11 @@
       <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
         <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
         <target state="translated">不可同時使用 --solution-folder 和 --in-root 選項; 請只使用其中一個選項。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderHeader">
+        <source>Solution Folder(s)</source>
+        <target state="new">Solution Folder(s)</target>
         <note />
       </trans-unit>
     </body>

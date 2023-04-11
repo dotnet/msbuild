@@ -21,17 +21,29 @@ namespace Microsoft.DotNet.Tools.Sln.List
             ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
-            _displaySolutionFolders = parseResult.ValueForOption(SlnListParser.SolutionFolderOption);
+            _displaySolutionFolders = parseResult.GetValue(SlnListParser.SolutionFolderOption);
         }
 
         public override int Execute()
         {
             var slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
-            string[] paths = slnFile.Projects
-                .GetProjectsNotOfType(ProjectTypeGuids.SolutionFolderGuid)
-                .Select(project => _displaySolutionFolders ? project.GetFullSolutionFolderPath() : project.FilePath)
-                .ToArray();
+            string[] paths;
+
+            if (_displaySolutionFolders)
+            {
+                paths = slnFile.Projects
+                    .GetProjectsByType(ProjectTypeGuids.SolutionFolderGuid)
+                    .Select(folder => folder.GetFullSolutionFolderPath())
+                    .ToArray();
+            }
+            else
+            {
+                paths = slnFile.Projects
+                    .GetProjectsNotOfType(ProjectTypeGuids.SolutionFolderGuid)
+                    .Select(project => project.FilePath)
+                    .ToArray();
+            }
 
             if (paths.Length == 0)
             {
@@ -41,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Sln.List
             {
                 Array.Sort(paths);
 
-                string header = _displaySolutionFolders ? LocalizableStrings.ProjectsSolutionFolderHeader : LocalizableStrings.ProjectsHeader;
+                string header = _displaySolutionFolders ? LocalizableStrings.SolutionFolderHeader : LocalizableStrings.ProjectsHeader;
                 Reporter.Output.WriteLine($"{header}");
                 Reporter.Output.WriteLine(new string('-', header.Length));
                 foreach (string slnProject in paths)

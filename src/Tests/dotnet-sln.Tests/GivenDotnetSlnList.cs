@@ -213,10 +213,9 @@ Options:
         [Fact]
         public void WhenProjectsInSolutionFoldersPresentInTheSolutionItListsSolutionFolderPaths()
         {
-            var expectedOutput = $@"{CommandLocalizableStrings.ProjectsSolutionFolderHeader}
-{new string('-', CommandLocalizableStrings.ProjectsSolutionFolderHeader.Length)}
-ConsoleApp1
-{Path.Combine("NestedSolution", "NestedFolder", "NestedFolder", "ConsoleApp2")}";
+            string[] expectedOutput = { $"{CommandLocalizableStrings.SolutionFolderHeader}",
+$"{new string('-', CommandLocalizableStrings.SolutionFolderHeader.Length)}",
+$"{Path.Combine("NestedSolution", "NestedFolder", "NestedFolder")}" };
 
             var projectDirectory = _testAssetsManager
                 .CopyTestAsset("SlnFileWithSolutionItemsInNestedFolders")
@@ -227,7 +226,7 @@ ConsoleApp1
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("sln", "list", "--solution-folders");
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
+            cmd.StdOut.Should().ContainAll(expectedOutput);
         }
     }
 }

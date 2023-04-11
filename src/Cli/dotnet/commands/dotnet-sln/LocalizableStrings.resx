@@ -174,7 +174,7 @@
   <data name="ListSolutionFoldersArgumentDescription" xml:space="preserve">
     <value>Display solution folder paths.</value>
   </data>
-  <data name="ProjectsSolutionFolderHeader" xml:space="preserve">
-    <value>Project(s) (Solution Folder)</value>
+  <data name="SolutionFolderHeader" xml:space="preserve">
+    <value>Solution Folder(s)</value>
   </data>
 </root>

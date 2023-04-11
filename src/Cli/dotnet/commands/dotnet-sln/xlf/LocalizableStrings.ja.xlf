@@ -37,11 +37,6 @@
         <target state="new">Display solution folder paths.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectsSolutionFolderHeader">
-        <source>Project(s) (Solution Folder)</source>
-        <target state="new">Project(s) (Solution Folder)</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
         <target state="translated">1 つ以上のプロジェクトをソリューション ファイルから削除します。</target>
@@ -100,6 +95,11 @@
       <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
         <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
         <target state="translated">--solution-folder オプションと --in-root オプションを一緒に使用することはできません。いずれかのオプションだけを使用します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderHeader">
+        <source>Solution Folder(s)</source>
+        <target state="new">Solution Folder(s)</target>
         <note />
       </trans-unit>
     </body>
