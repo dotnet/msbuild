@@ -624,6 +624,11 @@
         <target state="translated">MSB3094: "{2}" fa riferimento a {0} elemento/i, mentre "{3}" fa riferimento a {1} elemento/i. Devono avere lo stesso numero di elementi.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="new">Creating binding redirection file "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
         <target state="translated">MSB3831: il file di configurazione dell'applicazione deve avere un elemento di configurazione radice.</target>
@@ -2138,6 +2143,11 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">Il file di elenco di pacchetti ridistribuibili "{0}" include un nome di Redist Null o vuoto nell'elemento FileList. Verificare che il nome di Redist non sia Null o vuoto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="new">Updating assembly cache file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

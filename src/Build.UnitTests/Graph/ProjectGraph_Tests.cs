@@ -2508,6 +2508,71 @@ $@"
             targetLists[project2].ShouldBe(new[] { "SomeDefaultTarget2", "SomeOtherTarget" });
         }
 
+        [Fact]
+        public void MultitargettingTargetsWithBuildProjectReferencesFalse()
+        {
+            // This test should emulate Microsoft.Managed.After.targets's handling of multitargetting projects.
+            ProjectGraph graph = Helpers.CreateProjectGraph(
+                env: _env,
+                dependencyEdges: new Dictionary<int, int[]>()
+                {
+                    { 1, new[] { 2 } },
+                },
+                globalProperties: new Dictionary<string, string> { { "BuildProjectReferences", "false" } },
+                extraContentForAllNodes: """
+                <PropertyGroup>
+                  <TargetFrameworks>netcoreapp3.1;net6.0;net7.0</TargetFrameworks>
+                </PropertyGroup>
+
+                <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
+                  <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
+                </PropertyGroup>
+
+                <PropertyGroup>
+                  <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                  <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                </PropertyGroup>
+
+                <PropertyGroup Condition="'$(IsGraphBuild)' == 'true' and '$(IsCrossTargetingBuild)' != 'true'">
+                  <_MainReferenceTargetForBuild Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTargetForBuild>
+                  <_MainReferenceTargetForBuild Condition="'$(_MainReferenceTargetForBuild)' == ''">GetTargetPath</_MainReferenceTargetForBuild>
+
+                  <ProjectReferenceTargetsForBuild>$(_MainReferenceTargetForBuild);GetNativeManifest;$(_RecursiveTargetForContentCopying);$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+                </PropertyGroup>
+                <PropertyGroup Condition="'$(IsGraphBuild)' == 'true' and '$(IsCrossTargetingBuild)' == 'true'">
+                  <ProjectReferenceTargetsForBuild>.default;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+                </PropertyGroup>
+
+                <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+                  <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworks" OuterBuild="true" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+                  <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+
+                  <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+                </ItemGroup>
+
+                <Target Name="Build" />
+                <Target Name="GetTargetPath" />
+                <Target Name="GetNativeManifest" />
+                <Target Name="GetTargetFrameworks" />
+                <Target Name="GetTargetFrameworksWithPlatformForSingleTargetFramework" />
+                """);
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(Array.Empty<string>());
+
+            targetLists[GetOuterBuild(graph, 1)].ShouldBe(new[] { "Build" });
+            foreach (ProjectGraphNode inner in GetInnerBuilds(graph, 1))
+            {
+                targetLists[inner].ShouldBe(new[] { "Build" });
+            }
+
+            targetLists[GetOuterBuild(graph, 2)].ShouldBe(new[] { "GetTargetFrameworks" });
+            foreach (ProjectGraphNode inner in GetInnerBuilds(graph, 2))
+            {
+                // GetTargetFrameworks actually shouldn't be here...
+                targetLists[inner].ShouldBe(new[] { "GetTargetFrameworks", "GetTargetPath", "GetNativeManifest", "GetTargetFrameworksWithPlatformForSingleTargetFramework" });
+            }
+        }
+
         public void Dispose()
         {
             _env.Dispose();

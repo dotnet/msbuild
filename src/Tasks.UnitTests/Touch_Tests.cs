@@ -332,5 +332,80 @@ namespace Microsoft.Build.UnitTests
             Assert.Contains("MSB3371", engine.Log);
             Assert.Contains(nonexisting_txt, engine.Log);
         }
+
+        /// <summary>
+        /// Question touch on non-existing file should return false.
+        /// </summary>
+        [Fact]
+        public void QuestionTouchNonExisting()
+        {
+            Touch t = new Touch();
+            MockEngine engine = new MockEngine();
+            t.BuildEngine = engine;
+            t.FailIfNotIncremental = true;
+
+            t.Files = new ITaskItem[]
+            {
+                new TaskItem(mynonexisting_txt)
+            };
+
+            bool success = Execute(t);
+
+            // Not success because the file doesn't exist
+            Assert.False(success);
+
+            Assert.Contains(
+                String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt),
+                engine.Log);
+        }
+
+        /// <summary>
+        /// Question touch on a non-existing file with AlwaysCreate property should return false.
+        /// </summary>
+        [Fact]
+        public void QuestionTouchNonExistingAlwaysCreate()
+        {
+            Touch t = new Touch();
+            MockEngine engine = new MockEngine();
+            t.BuildEngine = engine;
+            t.FailIfNotIncremental = true;
+            t.AlwaysCreate = true;
+            t.Files = new ITaskItem[]
+            {
+                new TaskItem(mynonexisting_txt)
+            };
+
+            bool success = Execute(t);
+
+            Assert.False(success);
+
+            Assert.Contains(
+                String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate"),
+                engine.Log);
+        }
+
+        /// <summary>
+        /// Question touch should return true and the file is not touched.
+        /// </summary>
+        [Fact]
+        public void QuestionTouchExisting()
+        {
+            Touch t = new Touch();
+            MockEngine engine = new MockEngine();
+            t.BuildEngine = engine;
+            t.FailIfNotIncremental = true;
+            t.Files = new ITaskItem[]
+            {
+                new TaskItem(myexisting_txt)
+            };
+
+            bool success = Execute(t);
+
+            Assert.False(success);
+
+            Assert.Contains(
+                String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),
+                engine.Log);
+        }
     }
 }

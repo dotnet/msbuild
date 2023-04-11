@@ -833,8 +833,7 @@
     </comment>
   </data>
   <data name="HelpMessage_40_WarnNotAsErrorSwitch" Visibility="Public">
-    <value>
-      -warnNotAsError[:code[;code2]]
+    <value>  -warnNotAsError[:code[;code2]]
                      List of warning codes to treats not treat as errors.
                      Use a semicolon or a comma to separate
                      multiple warning codes. Has no effect if the -warnaserror
@@ -845,6 +844,20 @@
     </value>
     <comment>
       LOCALIZATION: "-warnNotAsError" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_41_QuestionSwitch" Visibility="Public">
+    <value>  -question
+                     (Experimental) Question whether there is any build work.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
+                     (Short form: -q)
+    </value>
+    <comment>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-question" and "-q" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
@@ -1335,6 +1348,9 @@
   <data name="MSBuildDebugPath" Visibility="Public">
     <value>MSBuild logs and debug information will be at "{0}"</value>
   </data>
+  <data name="DeferredResponseFile" Visibility="Public">
+    <value>Included response file: {0}</value>
+  </data>
   <data name="SwitchErrorWithArguments" Visibility="Public">
     <value>{0}
     Full command line: '{1}'
@@ -1349,6 +1365,9 @@
   <data name="NotWarnAsErrorWithoutWarnAsError" Visibility="Public">
     <value>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</value>
     <comment>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</comment>
+  </data>
+  <data name="UnsupportedSwitchForSolutionFiles" Visibility="Public">
+    <value>The '{0}' switch is not supported for solution files.</value>
   </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999

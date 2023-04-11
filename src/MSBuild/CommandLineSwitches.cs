@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -106,6 +106,7 @@ namespace Microsoft.Build.CommandLine
             InputResultsCaches,
             OutputResultsCache,
             LowPriority,
+            Question,
             DetailedSummary,
             NumberOfParameterizedSwitches,
         }
@@ -150,12 +151,15 @@ namespace Microsoft.Build.CommandLine
             /// <summary>
             /// Initializes struct data.
             /// </summary>
-            /// <param name="switchNames"></param>
-            /// <param name="parameterizedSwitch"></param>
-            /// <param name="duplicateSwitchErrorMessage"></param>
-            /// <param name="multipleParametersAllowed"></param>
-            /// <param name="missingParametersErrorMessage"></param>
-            /// <param name="unquoteParameters"></param>
+            /// <param name="switchNames">Names of the switch (without leading switch indicator).</param>
+            /// <param name="parameterizedSwitch">The switch id.</param>
+            /// <param name="duplicateSwitchErrorMessage">If <see langword="null"/>, indicates that switch is allowed to appear multiple times on the command line; otherwise, holds the error message to display if switch appears more than once</param>
+            /// <param name="multipleParametersAllowed">Indicates if switch can take multiple parameters (equivalent to switch appearing multiple times on command line)
+            /// NOTE: for most switches, if a switch is allowed to appear multiple times on the command line, then multiple
+            /// parameters can be provided per switch; however, some switches cannot take multiple parameters.</param>
+            /// <param name="missingParametersErrorMessage">If <see langword="null"/>, indicates that switch is allowed to have no parameters; otherwise, holds the error message to show if switch is found without parameters on the command line</param>
+            /// <param name="unquoteParameters">Indicates if quotes should be removed from the switch parameters</param>
+            /// <param name="emptyParametersAllowed">Indicates if empty parameters are allowed and if so an empty string will be added to the list of parameter values.</param>
             internal ParameterizedSwitchInfo(
                 string[] switchNames,
                 ParameterizedSwitch parameterizedSwitch,
@@ -174,23 +178,12 @@ namespace Microsoft.Build.CommandLine
                 this.emptyParametersAllowed = emptyParametersAllowed;
             }
 
-            // names of the switch (without leading switch indicator)
             internal string[] switchNames;
-            // if null, indicates that switch is allowed to appear multiple times on the command line; otherwise, holds the error
-            // message to display if switch appears more than once
             internal string duplicateSwitchErrorMessage;
-            // indicates if switch can take multiple parameters (equivalent to switch appearing multiple times on command line)
-            // NOTE: for most switches, if a switch is allowed to appear multiple times on the command line, then multiple
-            // parameters can be provided per switch; however, some switches cannot take multiple parameters
             internal bool multipleParametersAllowed;
-            // if null, indicates that switch is allowed to have no parameters; otherwise, holds the error message to show if
-            // switch is found without parameters on the command line
             internal string missingParametersErrorMessage;
-            // indicates if quotes should be removed from the switch parameters
             internal bool unquoteParameters;
-            // the switch id
             internal ParameterizedSwitch parameterizedSwitch;
-            // indicates if empty parameters are allowed and if so an empty string will be added to the list of parameter values
             internal bool emptyParametersAllowed;
         }
 
@@ -270,6 +263,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "inputResultsCaches", "irc" },         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true),
             new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true),
             new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "question", "q" },                     ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false),
         };
 

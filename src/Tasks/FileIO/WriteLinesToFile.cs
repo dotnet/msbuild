@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Appends a list of items to a file. One item per line with carriage returns in-between.
     /// </summary>
-    public class WriteLinesToFile : TaskExtension
+    public class WriteLinesToFile : TaskExtension, IIncrementalTask
     {
         // Default encoding taken from System.IO.WriteAllText()
         private static readonly Encoding s_defaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
@@ -49,6 +49,14 @@ namespace Microsoft.Build.Tasks
         public bool WriteOnlyWhenDifferent { get; set; }
 
         /// <summary>
+        /// Question whether this task is incremental.
+        /// </summary>
+        /// <remarks>When question is true, then this task would not write to disk.  If CanBeIncremental is true, then error out.</remarks>
+        public bool FailIfNotIncremental { get; set; }
+
+        public bool CanBeIncremental => WriteOnlyWhenDifferent;
+
+        /// <summary>
         /// Execute the task.
         /// </summary>
         /// <returns></returns>
@@ -61,7 +69,7 @@ namespace Microsoft.Build.Tasks
                 // do not return if Lines is null, because we may
                 // want to delete the file in that case
                 StringBuilder buffer = new StringBuilder();
-                if (Lines != null)
+                if (Lines != null && (!FailIfNotIncremental || WriteOnlyWhenDifferent))
                 {
                     foreach (ITaskItem line in Lines)
                     {
@@ -108,6 +116,11 @@ namespace Microsoft.Build.Tasks
                                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
                                             return true;
                                         }
+                                        else if (FailIfNotIncremental)
+                                        {
+                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                                            return false;
+                                        }
                                     }
                                 }
                             }
@@ -118,16 +131,33 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
 
-                        System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
+                        if (FailIfNotIncremental)
+                        {
+                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                            return false;
+                        }
+                        else
+                        {
+                            System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
+                        }
                     }
                     else
                     {
-                        if (WriteOnlyWhenDifferent)
+                        if (FailIfNotIncremental)
                         {
-                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
+                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, string.Empty);
+                            return false;
                         }
-                        Directory.CreateDirectory(directoryPath);
-                        System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
+                        else
+                        {
+                            if (WriteOnlyWhenDifferent)
+                            {
+                                Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
+                            }
+
+                            Directory.CreateDirectory(directoryPath);
+                            System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
+                        }
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

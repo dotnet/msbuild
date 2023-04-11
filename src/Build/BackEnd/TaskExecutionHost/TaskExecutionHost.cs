@@ -369,6 +369,11 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            if (this.TaskInstance is IIncrementalTask incrementalTask)
+            {
+                incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
+            }
+
             if (taskInitialized)
             {
                 // See if any required properties were not set

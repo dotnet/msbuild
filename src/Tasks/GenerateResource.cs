@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
     /// to transform resource files.
     /// </summary>
     [RequiredRuntime("v2.0")]
-    public sealed partial class GenerateResource : TaskExtension
+    public sealed partial class GenerateResource : TaskExtension, IIncrementalTask
     {
 
         #region Fields
@@ -552,6 +552,8 @@ namespace Microsoft.Build.Tasks
             // do nothing
         }
 
+        public bool FailIfNotIncremental { get; set; }
+
         /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
         /// passed to this task. Since this task is replacing Resgen, and we used
@@ -720,6 +722,10 @@ namespace Microsoft.Build.Tasks
                     }
 
                     Log.LogMessageFromResources("GenerateResource.NothingOutOfDate");
+                }
+                else if (FailIfNotIncremental)
+                {
+                    Log.LogErrorFromResources("GenerateResource.OutOfDate");
                 }
                 else
                 {
