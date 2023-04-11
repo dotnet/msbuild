@@ -1,5 +1,22 @@
 <UsageData>
   <IgnorePatterns>
-    <UsagePattern IdentityGlob="*/*" />
+    <UsagePattern IdentityGlob="Microsoft.SourceBuild.Intermediate.*/*" />
+
+    <!-- This package targets net6.0. We don't have any net6.0 SBRPs in the 7.0 SBRP branch
+         at this point. Since msbuild is moving to 8.0 in the mid-term, and main does have this
+         SBRP, baseline. -->
+    <UsagePattern IdentityGlob="System.Windows.Extensions/*7.0.0*" />
+
+    <!-- Baseline sourcelink packages until https://github.com/dotnet/arcade/pull/13204 is merged and
+         flowed to this repo -->
+    <UsagePattern IdentityGlob="Microsoft.Build.Tasks.Git/*1.1.0-beta-20206-02*" />
+    <UsagePattern IdentityGlob="Microsoft.SourceLink.AzureRepos.Git/*1.1.0-beta-20206-02*" />
+    <UsagePattern IdentityGlob="Microsoft.SourceLink.Common/*1.1.0-beta-20206-02*" />
+    <UsagePattern IdentityGlob="Microsoft.SourceLink.GitHub/*1.1.0-beta-20206-02*" />
+
+    <!-- These dependencies are a result of building for netframework TFMs. These are filtered out 
+         in full source-build, and would be filtered out if msbuild was using an 8.0 arcade + 8.0 SDK -->
+    <UsagePattern IdentityGlob="Microsoft.NETFramework.ReferenceAssemblies/*1.0.3*" />
+    <UsagePattern IdentityGlob="Microsoft.NETFramework.ReferenceAssemblies.net472/*1.0.3*" />
   </IgnorePatterns>
 </UsageData>
