@@ -203,7 +203,7 @@ namespace Microsoft.Build.Evaluation
             /// concatenation of the string representation of the values, each additionally subjected
             /// to file path adjustment.
             /// </returns>
-            public object GetResult()
+            public readonly object GetResult()
             {
                 CheckDisposed();
                 if (_firstObject != null)
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Throws <see cref="ObjectDisposedException"/> if this concatenator is already disposed.
             /// </summary>
-            private void CheckDisposed() =>
+            private readonly void CheckDisposed() =>
                 ErrorUtilities.VerifyThrowObjectDisposed(!_disposed, nameof(SpanBasedConcatenator));
 
             /// <summary>
@@ -3113,7 +3113,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public UsedUninitializedProperties UsedUninitializedProperties { get; set; }
 
-            internal Function<T> Build()
+            internal readonly Function<T> Build()
             {
                 return new Function<T>(
                     ReceiverType,

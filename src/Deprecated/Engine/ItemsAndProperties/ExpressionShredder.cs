@@ -425,13 +425,13 @@ namespace Microsoft.Build.BuildEngine
 
         internal Hashtable Items
         {
-            get { return items; }
+            readonly get { return items; }
             set { items = value; }
         }
 
         internal Dictionary<string, MetadataReference> Metadata
         {
-            get { return metadata; }
+            readonly get { return metadata; }
             set { metadata = value; }
         }
     }
