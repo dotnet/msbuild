@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 namespace A
                 {
                 namespace B {}
-                
+
                 namespace C.D { public struct Bar {} }
                 }
                 """,
@@ -135,21 +135,37 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    internal partial struct InternalStruct { }
+                    internal partial struct InternalStruct
+                    {
+                    }
 
-                    public readonly partial struct PublicReadonlyRefStruct { }
+                    public readonly partial struct PublicReadonlyRefStruct
+                    {
+                    }
 
-                    public readonly partial struct PublicReadonlyStruct { }
+                    public readonly partial struct PublicReadonlyStruct
+                    {
+                    }
 
-                    public partial struct PublicRefStruct { }
+                    public partial struct PublicRefStruct
+                    {
+                    }
 
-                    public partial struct PublicStruct { }
+                    public partial struct PublicStruct
+                    {
+                    }
 
-                    internal readonly partial struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct> { }
+                    internal readonly record struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct>
+                    {
+                    }
 
-                    internal readonly partial struct ReadonlyStruct { }
+                    internal readonly partial struct ReadonlyStruct
+                    {
+                    }
 
-                    internal partial struct RecordStruct : System.IEquatable<RecordStruct> { }
+                    internal record struct RecordStruct : System.IEquatable<RecordStruct>
+                    {
+                    }
                 }
                 """);
         }
@@ -165,7 +181,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         // Property signatures:
                         int X { get; set; }
                         int Y { get; set; }
-                        
+
                         double CalculateDistance(IPoint p);
                     }
                 }
@@ -178,7 +194,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         // Property signatures:
                         int X { get; set; }
                         int Y { get; set; }
-                        
+
                         double CalculateDistance(IPoint p);
                     }
                 }
@@ -280,7 +296,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         void Paint();
                     }
-                
+
                     public class SampleClass : IControl, ISurface
                     {
                         public void Paint()
@@ -300,7 +316,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         void Paint();
                     }
-                
+
                     public partial class SampleClass : IControl, ISurface
                     {
                         public void Paint()
@@ -318,9 +334,9 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 namespace Foo
                 {
                     public class BaseNodeMultiple<T, U> { }
-                
+
                     public class Node4<T> : BaseNodeMultiple<T, int> { }
-                
+
                     public class Node5<T, U> : BaseNodeMultiple<T, U> { }
                 }
                 """,
@@ -328,9 +344,9 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 namespace Foo
                 {
                     public partial class BaseNodeMultiple <T, U> { }
-                
+
                     public partial class Node4 <T> : BaseNodeMultiple<T, int> { }
-                
+
                     public partial class Node5 <T, U> : BaseNodeMultiple<T, U> { }
                 }
                 """);
@@ -370,17 +386,17 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         None = 0,
                         Disable = 1
                     }
-                
+
                     public readonly struct Options
                     {
                         public readonly bool BoolMember = true;
                         public readonly Kind KindMember = Kind.Disable;
-                
+
                         public Options(Kind kindVal)
                             : this(kindVal, false)
                         {
                         }
-                
+
                         public Options(Kind kindVal, bool boolVal)
                         {
                             BoolMember = boolVal;
@@ -563,7 +579,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         Cat = 2,
                         Bird = 3
                     }
-                
+
                     public partial class AnimalProperty {
                         public Animal _animal;
 
@@ -681,7 +697,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public int? AMember { get { throw null; } set { } }
                         public string? BMember { get { throw null; } }
-                
+
                         public string? Execute(string? a, int? b) { throw null; }
                     }
                 }
@@ -951,7 +967,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     #pragma warning disable CS8597
                         public override TResult? Accept<TResult>(int a) where TResult : default { throw null; }
                     #pragma warning restore CS8597
-                    } 
+                    }
                 }
                 """,
                 expected: """
@@ -1312,7 +1328,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             [System.Obsolete("Constructor is deprecated.", true)]
                             public B(int p1) { }
                         }
-                    
+
                         public partial class C : B
                         {
                             public C() : base(default, default!) { }
@@ -1349,7 +1365,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             [System.Obsolete("Constructor is deprecated.")]
                             public B(int p1) { }
                         }
-                    
+
                         public partial class C : B
                         {
                             public C() : base(default) { }
@@ -1386,7 +1402,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             [System.Obsolete(null)]
                             public B(int p1) { }
                         }
-                    
+
                         public partial class C : B
                         {
                             public C() : base(default) { }
@@ -1589,7 +1605,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         {
                             public unsafe Bar(char* f) { }
                         }
-                    
+
                         public partial class Foo : Bar
                         {
                             public unsafe Foo(char* f) : base(default) { }
@@ -1657,7 +1673,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         {
                             public Bar(int a) { }
                         }
-                    
+
                         public class Foo : Bar
                         {
                             private Foo() : base(1) { }
@@ -1683,7 +1699,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         {
                             public Bar(int a) { }
                         }
-                    
+
                         public partial class Foo : Bar
                         {
                             internal Foo() : base(default) { }
@@ -1830,7 +1846,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         public partial interface IOption
                         {
                         }
-                    
+
                         public partial class PerLanguageOption : IOption
                         {
                         }
@@ -2030,7 +2046,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             {
                                 XType = xType;
                             }
-                    
+
                             public System.Type XType { get; set; }
                         }
 
