@@ -75,6 +75,19 @@ internal sealed class Terminal : ITerminal
     }
 
     /// <inheritdoc/>
+    public void Write(ReadOnlySpan<char> text)
+    {
+        if (_isBuffering)
+        {
+            _outputBuilder.Append(text);
+        }
+        else
+        {
+            Console.Out.Write(text);
+        }
+    }
+
+    /// <inheritdoc/>
     public void WriteLine(string text)
     {
         if (_isBuffering)
@@ -88,23 +101,18 @@ internal sealed class Terminal : ITerminal
     }
 
     /// <inheritdoc/>
-    public void WriteLine(ReadOnlySpan<char> text)
+    public void WriteLineFitToWidth(ReadOnlySpan<char> text)
     {
+        ReadOnlySpan<char> truncatedText = text.Slice(0, Math.Min(text.Length, Width - 1));
         if (_isBuffering)
         {
-            _outputBuilder.Append(text);
+            _outputBuilder.Append(truncatedText);
             _outputBuilder.AppendLine();
         }
         else
         {
-            Console.Out.WriteLine(text);
+            Console.Out.WriteLine(truncatedText);
         }
-    }
-
-    /// <inheritdoc/>
-    public void WriteLineFitToWidth(ReadOnlySpan<char> input)
-    {
-        WriteLine(input.Slice(0, Math.Min(input.Length, Width - 1)));
     }
 
     /// <inheritdoc/>

@@ -41,18 +41,18 @@ internal interface ITerminal : IDisposable
     /// <summary>
     /// Writes a string to the output. Or buffers it if <see cref="BeginUpdate"/> was called.
     /// </summary>
-    void WriteLine(string text);
+    void Write(ReadOnlySpan<char> text);
 
     /// <summary>
     /// Writes a string to the output. Or buffers it if <see cref="BeginUpdate"/> was called.
     /// </summary>
-    void WriteLine(ReadOnlySpan<char> text);
+    void WriteLine(string text);
 
     /// <summary>
     /// Writes a string to the output, truncating it if it wouldn't fit on one screen line.
     /// Or buffers it if <see cref="BeginUpdate"/> was called.
     /// </summary>
-    void WriteLineFitToWidth(ReadOnlySpan<char> input);
+    void WriteLineFitToWidth(ReadOnlySpan<char> text);
 
     /// <summary>
     /// Writes a string to the output using the given color. Or buffers it if <see cref="BeginUpdate"/> was called.

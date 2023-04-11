@@ -325,7 +325,7 @@ internal sealed class LiveLogger : INodeLogger
 
                     if (e.ProjectFile is not null)
                     {
-                        string projectFile = Path.GetFileName(e.ProjectFile);
+                        ReadOnlySpan<char> projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile.AsSpan());
                         Terminal.Write(projectFile);
                         Terminal.Write(" ");
                     }
@@ -398,7 +398,7 @@ internal sealed class LiveLogger : INodeLogger
         {
             project.Stopwatch.Start();
 
-            string projectFile = Path.GetFileName(e.ProjectFile);
+            string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
             NodeStatus nodeStatus = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
             lock (_lock)
             {
@@ -522,7 +522,7 @@ internal sealed class LiveLogger : INodeLogger
     {
         NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
 
-        // Do not render delta but clear everything is Terminal width or height have changed
+        // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
         {
             EraseNodes();
@@ -534,7 +534,7 @@ internal sealed class LiveLogger : INodeLogger
         Terminal.Write(AnsiCodes.HideCursor);
         try
         {
-            // Move cursor back to 1st line of nodes
+            // Move cursor back to 1st line of nodes.
             Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
             Terminal.Write(rendered);
         }

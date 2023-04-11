@@ -96,13 +96,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         public void Write(string text) => AddOutput(text);
+        public void Write(ReadOnlySpan<char> text) { AddOutput(text.ToString()); }
         public void WriteColor(TerminalColor color, string text) => AddOutput(text);
         public void WriteColorLine(TerminalColor color, string text) { AddOutput(text); AddOutput("\n"); }
         public void WriteLine(string text) { AddOutput(text); AddOutput("\n"); }
-        public void WriteLine(ReadOnlySpan<char> text) { AddOutput(text.ToString()); AddOutput("\n"); }
-        public void WriteLineFitToWidth(ReadOnlySpan<char> input)
+        public void WriteLineFitToWidth(ReadOnlySpan<char> text)
         {
-            AddOutput(input.Slice(0, Math.Min(input.Length, _width - 1)).ToString());
+            AddOutput(text.Slice(0, Math.Min(text.Length, _width - 1)).ToString());
             AddOutput("\n");
         }
 
