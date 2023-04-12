@@ -193,7 +193,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             }
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void BuildProjectWithReferences_IncorporatesInitializersFromClassLibraries()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -229,7 +229,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             file.Should().Contain("_content/ClassLibrary/ClassLibrary.lib.module.js");
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void PublishProjectWithReferences_IncorporatesInitializersFromClassLibrariesAndPublishesAssetsToTheRightLocation()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -273,7 +273,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             file.Should().NotContain("_content/ClassLibrary/AnotherClassLib.lib.module.js");
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void PublishProjectWithReferences_DifferentBuildAndPublish_LibraryInitializers()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";

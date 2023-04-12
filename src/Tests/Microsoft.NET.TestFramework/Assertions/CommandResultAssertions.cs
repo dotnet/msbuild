@@ -116,6 +116,13 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> HaveStdErr(string expectedOutput)
+        {
+            Execute.Assertion.ForCondition(_commandResult.StdErr.Equals(expectedOutput, StringComparison.Ordinal))
+                .FailWith(AppendDiagnosticsTo($"Command did not output the expected output to StdErr.{Environment.NewLine}Expected: {expectedOutput}{Environment.NewLine}Actual:   {_commandResult.StdErr}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> HaveStdErrContaining(string pattern)
         {
             Execute.Assertion.ForCondition(_commandResult.StdErr.Contains(pattern))

@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             foreach (var option in _optionsToLog)
             {
                 if (_topLevelCommandName.Contains(topLevelCommandName)
-                    && parseResult.HasOption(option))
+                    && parseResult.SafelyGetValueForOption(option) is string optionValue)
                 {
                     result.Add(new ApplicationInsightsEntryFormat(
                         "sublevelparser/command",

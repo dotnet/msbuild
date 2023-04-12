@@ -7,7 +7,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
+//only Microsoft.DotNet.NativeWrapper (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
 #nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
 
 namespace Microsoft.DotNet.NativeWrapper
 {
@@ -72,7 +75,11 @@ namespace Microsoft.DotNet.NativeWrapper
 
             if (string.IsNullOrWhiteSpace(dotnetExe))
             {
+#if NET6_0_OR_GREATER
+                dotnetExe = Environment.ProcessPath;
+#else
                 dotnetExe = Process.GetCurrentProcess().MainModule.FileName;
+#endif
             }
 
             return Path.GetDirectoryName(dotnetExe);

@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CreateWorkItemPerAssemblyAssembliesNotEqual">
         <source>When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</source>
-        <target state="new">When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</target>
+        <target state="translated">アセンブリごとに作業項目をキューに登録する場合、左右のアセンブリで渡される数が等しい必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidRexegStringTransformationPattern">
         <source>Invalid transformation pattern provided: '{0} - {1}'.</source>
-        <target state="new">Invalid transformation pattern provided: '{0} - {1}'.</target>
+        <target state="translated">無効な変換パターンを指定済み: '{0} - {1}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
-        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <target state="translated">互換性抑制ファイルを正常に生成するには、ファイル パスを渡す必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSdkVersion">
         <source>The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</source>
-        <target state="new">The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</target>
+        <target state="translated">Roslyn に必要な最小バージョンは '{1}' で、あなたは Roslyn の '{0}' バージョンを使用しています。SDK を更新して最新バージョンを取得することができます。</target>
         <note />
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">互換性抑制を '{0}' に正常に書き込みました。</target>
         <note />
       </trans-unit>
     </body>

@@ -6,6 +6,8 @@ This repo contains core functionality needed to create .NET projects that is sha
 
 Please refer to [dotnet/project-system](https://github.com/dotnet/project-system) for the project system work that is specific to Visual Studio.
 
+This repo also contains [common project and item templates](https://github.com/dotnet/sdk/tree/main/template_feed).
+
 ## Build status
 
 |Windows x64 |

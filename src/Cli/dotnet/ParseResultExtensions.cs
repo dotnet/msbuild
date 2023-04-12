@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.DotNet.Cli.Parser;
 
@@ -34,20 +35,50 @@ namespace Microsoft.DotNet.Cli
             Parser.Instance.Parse(tokenList).Invoke();
         }
 
+
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
         {
             if (parseResult.Errors.Any())
             {
                 var unrecognizedTokenErrors = parseResult.Errors.Where(error =>
-                    error.Message.Contains(Parser.Instance.Configuration.LocalizationResources.UnrecognizedCommandOrArgument(string.Empty).Replace("'", string.Empty)));
+                {
+                    // Can't really cache this access in a static or something because it implicitly depends on the environment.
+                    var rawResourcePartsForThisLocale = DistinctFormatStringParts(CommandLineValidation.LocalizableStrings.UnrecognizedCommandOrArgument);
+                    return ErrorContainsAllParts(error.Message, rawResourcePartsForThisLocale);
+                });
                 if (parseResult.CommandResult.Command.TreatUnmatchedTokensAsErrors ||
                     parseResult.Errors.Except(unrecognizedTokenErrors).Any())
                 {
                     throw new CommandParsingException(
                         message: string.Join(Environment.NewLine,
-                                             parseResult.Errors.Select(e => e.Message)), 
+                                             parseResult.Errors.Select(e => e.Message)),
                         parseResult: parseResult);
                 }
+            }
+
+            ///<summary>Splits a .NET format string by the format placeholders (the {N} parts) to get an array of the literal parts, to be used in message-checking</summary> 
+            static string[] DistinctFormatStringParts(string formatString)
+            {
+                return Regex.Split(formatString, @"{[0-9]+}"); // match the literal '{', followed by any of 0-9 one or more times, followed by the literal '}'
+            }
+
+
+            /// <summary>given a string and a series of parts, ensures that all parts are present in the string in sequential order</summary>
+            static bool ErrorContainsAllParts(ReadOnlySpan<char> error, string[] parts)
+            {
+                foreach(var part in parts) {
+                    var foundIndex = error.IndexOf(part);
+                    if (foundIndex != -1)
+                    {
+                        error = error.Slice(foundIndex + part.Length);
+                        continue;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                return true;
             }
         }
 
@@ -60,7 +91,7 @@ namespace Microsoft.DotNet.Cli
 
         public static bool IsDotnetBuiltInCommand(this ParseResult parseResult)
         {
-            return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) || 
+            return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) ||
                 Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null;
         }
 
@@ -129,7 +160,7 @@ namespace Microsoft.DotNet.Cli
 
         public static bool BothArchAndOsOptionsSpecified(this ParseResult parseResult) =>
             (parseResult.HasOption(CommonOptions.ArchitectureOption) ||
-            parseResult.HasOption(CommonOptions.LongFormArchitectureOption)) && 
+            parseResult.HasOption(CommonOptions.LongFormArchitectureOption)) &&
             parseResult.HasOption(CommonOptions.OperatingSystemOption);
 
         internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
@@ -191,6 +222,42 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.HasOption(CommonOptions.DebugOption))
             {
                 DebugHelper.WaitForDebugger();
+            }
+        }
+
+        /// <summary>
+        /// Only returns the value for this option if the option is present and there are no parse errors for that option.
+        /// This allows cross-cutting code like the telemetry filters to safely get the value without throwing on null-ref errors.
+        /// If you are inside a command handler or 'normal' System.CommandLine code then you don't need this - the parse error handling
+        /// will have covered these cases.
+        /// </summary>
+        public static object SafelyGetValueForOption(this ParseResult parseResult, Option optionToGet)
+        {
+            if (parseResult.FindResultFor(optionToGet) is OptionResult optionResult &&
+                !parseResult.Errors.Any(e => e.SymbolResult == optionResult))
+            {
+                return optionResult.GetValueForOption(optionToGet);
+            }
+            else {
+                return default;
+            }
+        }
+
+        /// <summary>
+        /// Only returns the value for this option if the option is present and there are no parse errors for that option.
+        /// This allows cross-cutting code like the telemetry filters to safely get the value without throwing on null-ref errors.
+        /// If you are inside a command handler or 'normal' System.CommandLine code then you don't need this - the parse error handling
+        /// will have covered these cases.
+        /// </summary>
+        public static T SafelyGetValueForOption<T>(this ParseResult parseResult, Option<T> optionToGet)
+        {
+            if (parseResult.FindResultFor(optionToGet) is OptionResult optionResult &&
+                !parseResult.Errors.Any(e => e.SymbolResult == optionResult))
+            {
+                return optionResult.GetValueForOption(optionToGet);
+            }
+            else {
+                return default;
             }
         }
     }

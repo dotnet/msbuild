@@ -72,7 +72,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          the published assets were copied. -->
     <Message Importance="High" Text="$(MSBuildProjectName) -> $([System.IO.Path]::GetFullPath('$(PublishDir)'))" />
 
-    <AllowEmptyTelemetry EventName="PublishProperties" EventData="PublishReadyToRun=$(PublishReadyToRun);PublishTrimmed=$(PublishTrimmed);PublishSingleFile=$(PublishSingleFile)" />
+    <AllowEmptyTelemetry EventName="PublishProperties" EventData="PublishReadyToRun=$(PublishReadyToRun);PublishTrimmed=$(PublishTrimmed);PublishSingleFile=$(PublishSingleFile);PublishAot=$(PublishAot);PublishProtocol=$(PublishProtocol)" />
   </Target>
 
   <!-- Don't let project reference resolution build project references in NoBuild case. -->
@@ -111,6 +111,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(EnableCompressionInSingleFile)' == 'true' And
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
+    <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(PublishAotSupported)' != 'true'"
+                ResourceName="AotNotSupported" />
+
+    <!-- Enable warning for trying to use PublishRelease or PackRelease with a solution if env-var is not set.-->
+    <NETSdkWarning Condition="'$(PublishRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS)' == ''"
+                   ResourceName="PReleaseRequiresEnvVarOnSln" 
+                   FormatArguments="PublishRelease;DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS"
+    />
 
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
@@ -388,7 +396,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <!-- Copy the runtime config file. -->
       <ResolvedFileToPublish Include="$(ProjectRuntimeConfigFilePath)"
-                             Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'">
+                             Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'  and '$(PublishAot)' != 'true'">
         <RelativePath>$(ProjectRuntimeConfigFileName)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
@@ -477,37 +485,37 @@ Copyright (c) .NET Foundation. All rights reserved.
                             ResolveRuntimePackAssets;
                             _ComputePackageReferencePublish">
 
-      <!-- For future: Delete ResolveCopyLocalAssets task.  Need to figure out how to get correct DestinationSubPath for
+    <!-- For future: Delete ResolveCopyLocalAssets task.  Need to figure out how to get correct DestinationSubPath for
            PreserveStoreLayout without this task, and how to handle RuntimeStorePackages. -->
-      <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
-                              TargetFramework="$(TargetFramework)"
-                              RuntimeIdentifier="$(RuntimeIdentifier)"
-                              PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              RuntimeFrameworks="@(RuntimeFramework)"
-                              ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
-                              RuntimeStorePackages="@(RuntimeStorePackages)"
-                              PreserveStoreLayout="$(PreserveStoreLayout)"
-                              ResolveRuntimeTargets="$(CopyLocalRuntimeTargetAssets)"
-                              IsSelfContained="$(SelfContained)"
-                              Condition="'$(PreserveStoreLayout)' == 'true' Or '@(RuntimeStorePackages)' != ''">
-        <Output TaskParameter="ResolvedAssets" ItemName="_ResolvedCopyLocalPublishAssets" />
-      </ResolveCopyLocalAssets>
+    <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
+                            TargetFramework="$(TargetFramework)"
+                            RuntimeIdentifier="$(RuntimeIdentifier)"
+                            PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                            RuntimeFrameworks="@(RuntimeFramework)"
+                            ExcludedPackageReferences="@(_ExcludeFromPublishPackageReference)"
+                            RuntimeStorePackages="@(RuntimeStorePackages)"
+                            PreserveStoreLayout="$(PreserveStoreLayout)"
+                            ResolveRuntimeTargets="$(CopyLocalRuntimeTargetAssets)"
+                            IsSelfContained="$(SelfContained)"
+                            Condition="'$(PreserveStoreLayout)' == 'true' Or '@(RuntimeStorePackages)' != ''">
+      <Output TaskParameter="ResolvedAssets" ItemName="_ResolvedCopyLocalPublishAssets" />
+    </ResolveCopyLocalAssets>
 
 
-      <ItemGroup>
-        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
-                                         Condition="('$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true') and '%(RuntimePackAsset.AssetType)' != 'pgodata'" />
-      </ItemGroup>
+    <ItemGroup>
+      <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
+                                       Condition="('$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true') and '%(RuntimePackAsset.AssetType)' != 'pgodata'" />
+    </ItemGroup>
 
-      <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
-        <!-- Remove the apphost executable from publish copy local assets; we will copy the generated apphost instead -->
-        <_ResolvedCopyLocalPublishAssets Remove="@(_NativeRestoredAppHostNETCore)" />
-      </ItemGroup>
+    <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
+      <!-- Remove the apphost executable from publish copy local assets; we will copy the generated apphost instead -->
+      <_ResolvedCopyLocalPublishAssets Remove="@(_NativeRestoredAppHostNETCore)" />
+    </ItemGroup>
 
-      <ItemGroup Condition="'$(PreserveStoreLayout)' != 'true' And '@(RuntimeStorePackages)' == ''">
-        <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalBuildAssets)"
-                                         Condition="'%(_ResolvedCopyLocalBuildAssets.CopyToPublishDirectory)' != 'false' "/>
-      </ItemGroup>
+    <ItemGroup Condition="'$(PreserveStoreLayout)' != 'true' And '@(RuntimeStorePackages)' == ''">
+      <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalBuildAssets)"
+                                       Condition="'%(_ResolvedCopyLocalBuildAssets.CopyToPublishDirectory)' != 'false' "/>
+    </ItemGroup>
 
   </Target>
 
@@ -519,13 +527,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <UsingTask TaskName="ParseTargetManifests" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-    <Target Name="_ParseTargetManifestFiles"
-            Condition="'$(TargetManifestFiles)' != ''"
-            Returns="@(RuntimeStorePackages)">
+  <Target Name="_ParseTargetManifestFiles"
+          Condition="'$(TargetManifestFiles)' != ''"
+          Returns="@(RuntimeStorePackages)">
 
-      <ParseTargetManifests TargetManifestFiles="$(TargetManifestFiles)">
-        <Output TaskParameter="RuntimeStorePackages" ItemName="RuntimeStorePackages"/>
-      </ParseTargetManifests>
+    <ParseTargetManifests TargetManifestFiles="$(TargetManifestFiles)">
+      <Output TaskParameter="RuntimeStorePackages" ItemName="RuntimeStorePackages"/>
+    </ParseTargetManifests>
 
   </Target>
 
@@ -876,7 +884,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AppHostFile>$(PublishedSingleFileName)</AppHostFile>
     </PropertyGroup>
   </Target>
-  
+
   <UsingTask TaskName="GenerateBundle" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="GenerateSingleFileBundle"
           Condition="'$(PublishSingleFile)' == 'true'"
@@ -930,7 +938,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputeUserRuntimeAssemblies;
                             ResolveRuntimePackAssets;
                             _ComputePackageReferencePublish"
-          Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
+          Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true' and '$(PublishAot)' != 'true'">
 
     <PropertyGroup>
       <!-- IntermediateDepsFilePath is the location where the deps.json file is originally created

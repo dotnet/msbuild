@@ -15,17 +15,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Analysis level is a single property that can be used to control both the compiler warning waves
          and enable .NET analyzers. Valid values are 'none', 'latest', 'preview', or a version number  -->
 
-    <!-- Automatically set AnalysisLevel to 5 if targeting .net 5 and nothing else specified -->
+    <!-- If not specified and equal to the current most-recent TFM, default the AnalysisLevel to latest.
+         Otherwise, default AnalysisLevel to the TFM. We set 'latest' indirectly here because the
+         next chunk of logic handles user-defined prefix/suffix, which can also set 'latest', so
+         we choose to only do the 'latest' => actual value translation one time. -->
+
+    <_NoneAnalysisLevel>4.0</_NoneAnalysisLevel>
+    <!-- When the base TFM of the platform bumps, these must be bumped as well. Preview should always be the 'next' TFM. -->
+    <_LatestAnalysisLevel>7.0</_LatestAnalysisLevel>
+    <_PreviewAnalysisLevel>8.0</_PreviewAnalysisLevel>
+
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
                               '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                              $([MSBuild]::VersionEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">5.0</AnalysisLevel>
-
-    <!-- Automatically set AnalysisLevel if not specified -->
+                              $([MSBuild]::VersionEquals($(_TargetFrameworkVersionWithoutV), '$(_LatestAnalysisLevel)'))">latest</AnalysisLevel>
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
-                              (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                               $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))) Or
-                               '$(AnalysisMode)' != '')">latest</AnalysisLevel>
-
+                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">$(_TargetFrameworkVersionWithoutV)</AnalysisLevel>
 
     <!-- AnalysisLevel can also contain compound values with a prefix and suffix separated by a '-' character.
          The prefix indicates the core AnalysisLevel and the suffix indicates the bucket of
@@ -40,15 +45,24 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
          and an implied numerical option (such as '4')-->
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">4.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">6.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">7.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">$(_NoneAnalysisLevel)</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">$(_LatestAnalysisLevel)</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">$(_PreviewAnalysisLevel)</EffectiveAnalysisLevel>
 
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
                                        '$(AnalysisLevelPrefix)' != ''">$(AnalysisLevelPrefix)</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
                                        '$(AnalysisLevel)' != ''">$(AnalysisLevel)</EffectiveAnalysisLevel>
+
+    <!-- Set WarningLevel based on all we know about the project -->
+    <!-- NOTE: at this time only the C# compiler supports warning waves like this. -->
+    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
+    <!-- The CSharp.props used to hard-code WarningLevel to 4, so to maintain parity with .NET Framework projects we do that here. -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETFramework' ">4</WarningLevel>
+    <!-- .NET projects, however, can float up to their TFM's major version -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">$(_TargetFrameworkVersionWithoutV.Substring(0, 1))</WarningLevel>
   </PropertyGroup>
 
   <!-- Enable Analyzers based on EffectiveAnalysisLevel -->
@@ -60,30 +74,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Intermediate step to enable ILLink.Analyzers so ILLink, Blazor, Xamarin, AOT, etc. can enable the same flags -->
     <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == '' And
-                                         '$(PublishSingleFile)' == 'true'">true</EnableSingleFileAnalyzer>
+                                         ('$(PublishSingleFile)' == 'true' Or '$(PublishAot)' == 'true')">true</EnableSingleFileAnalyzer>
 
     <!-- Enable the trim analyzer when any trimming settings are enabled. Warnings may suppressed based on other settings. -->
-    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true')">true</EnableTrimAnalyzer>
+    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And 
+                                   ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true' Or '$(PublishAot)' == 'true')">true</EnableTrimAnalyzer>
 
-    <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
-         NOTE: at this time only the C# compiler supports warning waves -->
-    <WarningLevel Condition="'$(Language)' == 'C#'">5</WarningLevel>
-  </PropertyGroup>
-
-  <!-- Set the default WarningLevel based on EffectiveAnalysisLevel
-       For .NET 6 we want the Warning level to be 6 -->
-  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' != '' And
-                             $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '6.0'))">
-    <WarningLevel Condition="'$(Language)' == 'C#'">6</WarningLevel>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
+    <!-- Enable the AOT analyzer when AOT is enabled. Warnings may suppressed based on other settings. -->
+    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == '' And '$(PublishAot)' == 'true'">true</EnableAotAnalyzer>
 
     <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
     <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
-    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
-    <WarningLevel Condition="'$(Language)' == 'C#' And '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
+  </PropertyGroup>
+
+  <!-- Establish good defaults for scenarios where no EffectiveAnalysisLevel was set (e.g. .NETFramework) -->
+  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' == '' Or ('$(EffectiveAnalysisLevel)' != '' And $([MSBuild]::VersionLessThanOrEquals($(EffectiveAnalysisLevel), '4.0')))">
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
+    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == ''">false</EnableTrimAnalyzer>
+    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == ''">false</EnableAotAnalyzer>
+    <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == ''">false</EnableSingleFileAnalyzer>
   </PropertyGroup>
 
   <!-- Unconditionally import 'Microsoft.CodeAnalysis.NetAnalyzers.props' for all C# and VB projects for supporting https://github.com/dotnet/roslyn-analyzers/issues/3977 -->
@@ -92,7 +102,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.NET.ILLink.Analyzers.props"
-          Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'" />
+          Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'" />
 
   <Import Project="$(MSBuildThisFileDirectory)..\codestyle\cs\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.targets"
           Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'" />
@@ -115,7 +125,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!-- ILLinker Analyzers -->
-  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'">
+  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'">
     <Analyzer
       Include="$(MSBuildThisFileDirectory)..\analyzers\ILLink.*.dll"
       IsImplicitlyDefined="true" />

@@ -134,8 +134,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             // Best effort to verify that the server was not started indirectly or being spoofed.
             if ((ParentProcess == null) || (ParentProcess.StartTime > CurrentProcess.StartTime) ||
-                string.IsNullOrWhiteSpace(CurrentProcess.MainModule.FileName) ||
-                !string.Equals(ParentProcess.MainModule.FileName, CurrentProcess.MainModule.FileName, StringComparison.OrdinalIgnoreCase))
+                !string.Equals(ParentProcess.MainModule.FileName, Environment.ProcessPath, StringComparison.OrdinalIgnoreCase))
             {
                 throw new SecurityException(String.Format(LocalizableStrings.NoTrustWithParentPID, ParentProcess?.Id));
             }
@@ -154,7 +153,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 PipeAccessRights.Read | PipeAccessRights.Write | PipeAccessRights.Synchronize, AccessControlType.Allow));
 
             // Initialize the named pipe for dispatching commands. The name of the pipe is based off the server PID since
-            // the client knows this value and ensures both processes can generate the same name. 
+            // the client knows this value and ensures both processes can generate the same name.
             string pipeName = WindowsUtils.CreatePipeName(CurrentProcess.Id);
             NamedPipeServerStream serverPipe = NamedPipeServerStreamAcl.Create(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Message,
                 PipeOptions.None, 65535, 65535, pipeSecurity);

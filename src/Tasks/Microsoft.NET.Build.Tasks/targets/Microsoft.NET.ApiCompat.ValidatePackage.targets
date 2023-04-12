@@ -1,0 +1,77 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.ApiCompat.ValidatePackage.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project>
+  <PropertyGroup>
+    <ApiCompatValidatePackageSemaphoreFile>$(IntermediateOutputPath)$(MSBuildThisFileName).semaphore</ApiCompatValidatePackageSemaphoreFile>
+    <!-- Add any custom targets that need to run before package validation to the following property. -->
+    <RunPackageValidationDependsOn>CollectApiCompatInputs;_GetReferencePathFromInnerProjects;$(RunPackageValidationDependsOn)</RunPackageValidationDependsOn>
+  </PropertyGroup>
+
+  <Target Name="RunPackageValidation"
+          DependsOnTargets="$(RunPackageValidationDependsOn)"
+          AfterTargets="Pack"
+          Inputs="@(NuGetPackInput);$(CompatibilitySuppressionFilePath)"
+          Outputs="$(ApiCompatValidatePackageSemaphoreFile)"
+          Condition="'$(EnablePackageValidation)' == 'true' and '$(IsPackable)' == 'true'">
+    <PropertyGroup>
+      <PackageValidationBaselineName Condition="'$(PackageValidationBaselineName)' == ''">$(PackageId)</PackageValidationBaselineName>
+      <PackageValidationBaselinePath Condition="'$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName.ToLower())', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName.ToLower()).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
+      <_packageValidationBaselinePath Condition="'$(DisablePackageBaselineValidation)' != 'true'">$(PackageValidationBaselinePath)</_packageValidationBaselinePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_PackageTargetPath Include="@(NuGetPackOutput->WithMetadataValue('Extension', '.nupkg'))"
+                          Condition="!$([System.String]::new('%(Identity)').EndsWith('.symbols.nupkg'))" />
+    </ItemGroup>
+
+    <!-- PackageTargetPath isn't exposed by NuGet: https://github.com/NuGet/Home/issues/6671. -->
+    <Microsoft.DotNet.ApiCompat.Task.ValidatePackageTask
+      PackageTargetPath="@(_PackageTargetPath)"
+      RuntimeGraph="$(RuntimeIdentifierGraphPath)"
+      NoWarn="$(NoWarn)"
+      EnableRuleAttributesMustMatch="$(ApiCompatEnableRuleAttributesMustMatch)"
+      ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"
+      EnableRuleCannotChangeParameterName="$(ApiCompatEnableRuleCannotChangeParameterName)"
+      RunApiCompat="$(RunApiCompat)"
+      EnableStrictModeForCompatibleTfms="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleTfms)', 'true'))"
+      EnableStrictModeForCompatibleFrameworksInPackage="$(EnableStrictModeForCompatibleFrameworksInPackage)"
+      EnableStrictModeForBaselineValidation="$(EnableStrictModeForBaselineValidation)"
+      GenerateCompatibilitySuppressionFile="$(GenerateCompatibilitySuppressionFile)"
+      CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
+      BaselinePackageTargetPath="$(_packageValidationBaselinePath)"
+      RoslynAssembliesPath="$(RoslynAssembliesPath)"
+      PackageAssemblyReferences="@(PackageValidationReferencePath)" />
+
+    <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="GetReferencesForApiCompatValidatePackage"
+          DependsOnTargets="FindReferenceAssembliesForReferences"
+          Returns="@(ApiCompatAssemblyReferencesWithTargetFramework)">
+    <ItemGroup>
+      <ApiCompatAssemblyReferencesWithTargetFramework Include="$(TargetFramework)"
+                                                      ReferencePath="@(ReferencePathWithRefAssemblies, ',')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Depends on NuGet's _GetTargetFrameworksOutput target to calculate inner target frameworks. -->
+  <Target Name="_GetReferencePathFromInnerProjects"
+          DependsOnTargets="_GetTargetFrameworksOutput"
+          Condition="'$(RunPackageValidationWithoutReferences)' != 'true'">
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Targets="GetReferencesForApiCompatValidatePackage"
+             Properties="TargetFramework=%(_TargetFrameworks.Identity);
+                         BuildProjectReferences=false">
+      <Output ItemName="PackageValidationReferencePath" TaskParameter="TargetOutputs" />
+    </MSBuild>
+  </Target>
+</Project>

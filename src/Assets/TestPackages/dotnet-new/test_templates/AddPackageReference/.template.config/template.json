@@ -1,0 +1,29 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.AddReference",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.AddReference",
+    "precedence": "100",
+    "identity": "TestAssets.AddReference",
+    "shortName": "TestAssets.AddReference",
+    "sourceName": "Basic",
+    "postActions": [
+        {
+            "Description": "Adding Reference to Newtonsoft.Json NuGet package",
+            "ActionId": "B17581D1-C5C9-4489-8F0A-004BE667B814",
+            "ContinueOnError": "false",
+            "ManualInstructions": [
+                {
+                    "Text": "Manually add the reference to  Newtonsoft.Json to your project file"
+                }
+            ],
+            "args": {
+                "referenceType": "package",
+                "reference": "Newtonsoft.Json",
+                "version": "13.0.1",
+                "projectFileExtensions": ".csproj"
+            }
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+﻿
+// value of paramA: valA
+// value of paramB: valB
+
+// A is enabled
+
+// B is enabled

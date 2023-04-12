@@ -395,10 +395,15 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID12_12", "ANDROID11_11_OR_GREATER", "ANDROID12_12_OR_GREATER" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_platform(string[] sdkSupportedTargetPlatformVersion, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
-            // Skip Test if SDK is < 7.0.200
-            var sdkVersion = SemanticVersion.Parse(TestContext.Current.ToolsetUnderTest.SdkVersion);
-            if (new SemanticVersion(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch) < new SemanticVersion(7, 0, 200))
-                return; // Fixed by https://github.com/dotnet/sdk/pull/29009
+            if (targetPlatformIdentifier.Equals("windows", StringComparison.OrdinalIgnoreCase))
+            {
+                var sdkVersion = SemanticVersion.Parse(TestContext.Current.ToolsetUnderTest.SdkVersion);
+                if (new SemanticVersion(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch) < new SemanticVersion(7, 0, 200))
+                {
+                    //  Fixed in 7.0.200: https://github.com/dotnet/sdk/pull/29009
+                    return;
+                }
+            }
 
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
@@ -495,8 +500,8 @@ namespace Microsoft.NET.Build.Tests
                 testProj.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
                 testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
             }
-            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
-            File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
+
+            testProj.SourceFiles[$"{testProj.Name}.cs"] = @"
 using System;
 class Program
 {
@@ -536,7 +541,8 @@ class Program
             Console.WriteLine(""IOS"");
         #endif
     }
-}");
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
             buildCommand
@@ -574,7 +580,7 @@ class Program
         [InlineData(true)]
         public void It_fails_gracefully_if_targetframework_should_be_targetframeworks(bool useSolution)
         {
-            string targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net461";
+            string targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net462";
             TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
         }
@@ -635,7 +641,7 @@ class Program
                 .Should()
                 .Pass();
 
-            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "7.0" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "7.0" });
         }
 
         private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
@@ -712,7 +718,7 @@ class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp6.1")]
+        [InlineData("netcoreapp9.1")]
         [InlineData("netstandard2.2")]
         public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
         {

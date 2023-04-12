@@ -20,7 +20,6 @@ namespace Microsoft.DotNet.Watcher.Internal
         private const string TargetName = "GenerateWatchList";
         private const string WatchTargetsFileName = "DotNetWatch.targets";
 
-        private readonly string _muxerPath;
         private readonly IReporter _reporter;
         private readonly DotNetWatchOptions _dotNetWatchOptions;
         private readonly string _projectFile;
@@ -35,14 +34,13 @@ namespace Microsoft.DotNet.Watcher.Internal
             string projectFile,
             bool waitOnError,
             bool trace)
-            : this(dotNetWatchOptions, DotnetMuxer.MuxerPath, reporter, projectFile, new OutputSink(), waitOnError, trace)
+            : this(dotNetWatchOptions, reporter, projectFile, new OutputSink(), waitOnError, trace)
         {
         }
 
         // output sink is for testing
         internal MsBuildFileSetFactory(
             DotNetWatchOptions dotNetWatchOptions,
-            string muxerPath,
             IReporter reporter,
             string projectFile,
             OutputSink outputSink,
@@ -53,7 +51,6 @@ namespace Microsoft.DotNet.Watcher.Internal
             Ensure.NotNullOrEmpty(projectFile, nameof(projectFile));
             Ensure.NotNull(outputSink, nameof(outputSink));
 
-            _muxerPath = muxerPath;
             _reporter = reporter;
             _dotNetWatchOptions = dotNetWatchOptions;
             _projectFile = projectFile;
@@ -93,7 +90,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
                     var processSpec = new ProcessSpec
                     {
-                        Executable = _muxerPath,
+                        Executable = DotnetMuxer.MuxerPath,
                         WorkingDirectory = projectDir,
                         Arguments = arguments,
                         OutputCapture = capture

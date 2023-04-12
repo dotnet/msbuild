@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
+using Xunit.Sdk;
 
 namespace Microsoft.NET.TestFramework.ProjectConstruction
 {
@@ -62,6 +63,12 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public List<KeyValuePair<string, Dictionary<string, string>>> AdditionalItems { get; } = new ();
 
         public List<Action<XDocument>> ProjectChanges { get; } = new List<Action<XDocument>>();
+
+        /// <summary>
+        /// A list of properties to record the values for when the project is built.
+        /// Values can be retrieved with <see cref="GetPropertyValues"/>
+        /// </summary>
+        public List<string> PropertiesToRecord { get; } = new List<string>();
 
         public IEnumerable<string> TargetFrameworkIdentifiers
         {
@@ -327,11 +334,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             if (SourceFiles.Count == 0)
             {
-                string source;
-
                 if (this.IsExe || this.IsWinExe)
                 {
-                    source =
+                    string source =
     @"using System;
 
 class Program
@@ -343,40 +348,49 @@ class Program
 
                     foreach (var dependency in this.ReferencedProjects)
                     {
-                        source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.Name);" + Environment.NewLine;
-                        source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.List);" + Environment.NewLine;
+                        string safeDependencyName = dependency.Name.Replace('.', '_');
+
+                        source += $"        Console.WriteLine({safeDependencyName}.{safeDependencyName}Class.Name);" + Environment.NewLine;
+                        source += $"        Console.WriteLine({safeDependencyName}.{safeDependencyName}Class.List);" + Environment.NewLine;
                     }
 
                     source +=
     @"    }
 }";
+                    string sourcePath = Path.Combine(targetFolder, this.Name + "Program.cs");
+
+                    File.WriteAllText(sourcePath, source);
                 }
-                else
+
                 {
-                    source =
+                    string safeThisName = this.Name.Replace('.', '_');
+                    string source =
     $@"using System;
 using System.Collections.Generic;
 
-namespace {this.Name}
+namespace {safeThisName}
 {{
-    public class {this.Name}Class
+    public class {safeThisName}Class
     {{
         public static string Name {{ get {{ return ""{this.Name}""; }} }}
         public static List<string> List {{ get {{ return null; }} }}
 ";
                     foreach (var dependency in this.ReferencedProjects)
                     {
-                        source += $"        public string {dependency.Name}Name {{ get {{ return {dependency.Name}.{dependency.Name}Class.Name; }} }}" + Environment.NewLine;
-                        source += $"        public List<string> {dependency.Name}List {{ get {{ return {dependency.Name}.{dependency.Name}Class.List; }} }}" + Environment.NewLine;
+                        string safeDependencyName = dependency.Name.Replace('.', '_');
+
+                        source += $"        public string {safeDependencyName}Name {{ get {{ return {safeDependencyName}.{safeDependencyName}Class.Name; }} }}" + Environment.NewLine;
+                        source += $"        public List<string> {safeDependencyName}List {{ get {{ return {safeDependencyName}.{safeDependencyName}Class.List; }} }}" + Environment.NewLine;
                     }
 
                     source +=
     @"    }
 }";
-                }
-                string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
+                    string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
 
-                File.WriteAllText(sourcePath, source);
+                    File.WriteAllText(sourcePath, source);
+                }
+
             }
             else
             {
@@ -390,6 +404,41 @@ namespace {this.Name}
             {
                 File.WriteAllText(Path.Combine(targetFolder, kvp.Key), kvp.Value);
             }
+
+            if (PropertiesToRecord.Any())
+            {
+                string propertiesElements = "";
+                foreach (var propertyName in PropertiesToRecord)
+                {
+                    propertiesElements += $"      <LinesToWrite Include=`{propertyName}: $({propertyName})`/>" + Environment.NewLine;
+                }
+
+                string injectTargetContents =
+    $@"<Project>
+  <Target Name=`WritePropertyValues` BeforeTargets=`AfterBuild`>
+    <ItemGroup>
+{propertiesElements}
+    </ItemGroup>
+    <WriteLinesToFile
+      File=`$(IntermediateOutputPath)\PropertyValues.txt`
+      Lines=`@(LinesToWrite)`
+      Overwrite=`true`
+      Encoding=`Unicode`
+      />
+  </Target>
+</Project>";
+
+                injectTargetContents = injectTargetContents.Replace('`', '"');
+
+                string targetPath = Path.Combine(targetFolder, "obj", Name + ".csproj.WriteValuesToFile.g.targets");
+
+                if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+                }
+
+                File.WriteAllText(targetPath, injectTargetContents);
+            }
         }
 
         public void AddItem(string itemName, string attributeName, string attributeValue)
@@ -400,6 +449,35 @@ namespace {this.Name}
         public void AddItem(string itemName, Dictionary<string, string> attributes)
         {
             AdditionalItems.Add(new(itemName, attributes));
+        }
+
+        public void RecordProperties(params string[] propertyNames)
+        {
+            PropertiesToRecord.AddRange(propertyNames);
+        }
+
+        public Dictionary<string, string> GetPropertyValues(string testRoot, string configuration = "Debug", string targetFramework = null, string runtimeIdentifier = null)
+        {
+            var propertyValues = new Dictionary<string, string>();
+
+            string intermediateOutputPath = Path.Combine(testRoot, Name, "obj", configuration, targetFramework ?? TargetFrameworks);
+            if (!string.IsNullOrEmpty(runtimeIdentifier))
+            {
+                intermediateOutputPath = Path.Combine(intermediateOutputPath, runtimeIdentifier);
+            }
+
+            foreach (var line in File.ReadAllLines(Path.Combine(intermediateOutputPath, "PropertyValues.txt")))
+            {
+                int colonIndex = line.IndexOf(':');
+                if (colonIndex > 0)
+                {
+                    string propertyName = line.Substring(0, colonIndex);
+                    string propertyValue = line.Length == colonIndex + 1 ? String.Empty : line.Substring(colonIndex + 2);
+                    propertyValues[propertyName] = propertyValue;
+                }
+            }
+
+            return propertyValues;
         }
 
         public static bool ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion targetFrameworkVersion)

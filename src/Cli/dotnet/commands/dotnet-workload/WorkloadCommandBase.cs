@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                 ? parseResult.GetValueForOption(CommonOptions.VerbosityOption)
                 : parseResult.GetValueForOption(verbosityOptions);
 
-            ILogger nugetLogger = Verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
+            ILogger nugetLogger = Verbosity.IsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
 
             Reporter = reporter ?? Cli.Utils.Reporter.Output;
 
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Workloads.Workload
 
             PackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(TempPackagesDirectory,
                 filePermissionSetter: null,
-                new FirstPartyNuGetPackageSigningVerifier(TempPackagesDirectory, nugetLogger),
+                new FirstPartyNuGetPackageSigningVerifier(),
                 nugetLogger,
                 restoreActionConfig: RestoreActionConfiguration,
                 verifySignatures: VerifySignatures);

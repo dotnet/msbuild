@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option OutdatedOption = new ForwardedOption<bool>("--outdated", LocalizableStrings.CmdOutdatedDescription)
             .ForwardAs("--outdated");
 
-        public static readonly Option DepreciatedOption = new ForwardedOption<bool>("--deprecated", LocalizableStrings.CmdDeprecatedDescription)
+        public static readonly Option DeprecatedOption = new ForwardedOption<bool>("--deprecated", LocalizableStrings.CmdDeprecatedDescription)
             .ForwardAs("--deprecated");
 
         public static readonly Option VulnerableOption = new ForwardedOption<bool>("--vulnerable", LocalizableStrings.CmdVulnerableDescription)
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddOption(VerbosityOption);
             command.AddOption(OutdatedOption);
-            command.AddOption(DepreciatedOption);
+            command.AddOption(DeprecatedOption);
             command.AddOption(VulnerableOption);
             command.AddOption(FrameworkOption);
             command.AddOption(TransitiveOption);

@@ -18,6 +18,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
     <PublishReadyToRunUseCrossgen2 Condition="'$(_TargetFrameworkVersionWithoutV)' >= '6.0'">true</PublishReadyToRunUseCrossgen2>
+    <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)' == '' and '$(PublishSingleFile)' == 'true'  and '$(PublishReadyToRun)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' >= '7.0'">true</PublishReadyToRunComposite>
     <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '6.0'">false</PublishReadyToRunComposite>
     <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)' == ''">true</PublishReadyToRunComposite>
     <PublishReadyToRunComposite Condition="'$(PublishReadyToRunUseCrossgen2)' != 'true' or '$(SelfContained)' != 'true'">false</PublishReadyToRunComposite>
@@ -330,7 +331,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <PropertyGroup>
-    <MicrosoftNETCrossgenBuildTasksAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tasks\net6.0\Microsoft.NET.Sdk.Crossgen.dll</MicrosoftNETCrossgenBuildTasksAssembly>
+    <MicrosoftNETCrossgenBuildTasksAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tasks\net7.0\Microsoft.NET.Sdk.Crossgen.dll</MicrosoftNETCrossgenBuildTasksAssembly>
     <MicrosoftNETCrossgenBuildTasksAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tasks\net472\Microsoft.NET.Sdk.Crossgen.dll</MicrosoftNETCrossgenBuildTasksAssembly>
   </PropertyGroup>
 

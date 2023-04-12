@@ -233,7 +233,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true')" >true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true') and '$(MSBuildProjectExtension)' != '.fsproj'" >true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 7.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true') and '$(MSBuildProjectExtension)' == '.fsproj'" >true</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <!--

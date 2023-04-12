@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Abstractions for making code that uses file system and environment testable.</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <WarningsAsErrors>true</WarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>

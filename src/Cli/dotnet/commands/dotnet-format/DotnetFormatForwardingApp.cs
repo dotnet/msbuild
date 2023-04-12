@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CommandLine;
-using System.CommandLine.Parsing;
+using System.Collections.Generic;
 using System.IO;
-
 using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Format
@@ -21,12 +19,7 @@ namespace Microsoft.DotNet.Tools.Format
         private static string GetRuntimeConfigPath()
             => Path.Combine(AppContext.BaseDirectory, "DotnetTools/dotnet-format/dotnet-format.runtimeconfig.json");
 
-        public DotnetFormatForwardingApp(ParseResult parseResult)
-            : this(parseResult.GetArguments())
-        {
-        }
-
-        public DotnetFormatForwardingApp(string[] argsToForward)
+        public DotnetFormatForwardingApp(IEnumerable<string> argsToForward)
             : base(forwardApplicationPath: GetForwardApplicationPath(),
                 argsToForward: argsToForward,
                 depsFile: GetDepsFilePath(),

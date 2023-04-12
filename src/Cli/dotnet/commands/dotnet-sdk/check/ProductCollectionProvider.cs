@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -14,9 +15,9 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
         {
             try
             {
-                return uri != null ? ProductCollection.GetAsync(uri.ToString()).Result :
-                    filePath != null ? ProductCollection.GetFromFileAsync(filePath, false).Result :
-                    ProductCollection.GetAsync().Result;
+                return uri != null ? Task.Run(() => ProductCollection.GetAsync(uri.ToString())).Result :
+                    filePath != null ? Task.Run(() => ProductCollection.GetFromFileAsync(filePath, false)).Result :
+                    Task.Run(() => ProductCollection.GetAsync()).Result;
             }
             catch (Exception e)
             {

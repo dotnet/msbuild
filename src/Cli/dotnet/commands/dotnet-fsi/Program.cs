@@ -10,10 +10,10 @@ namespace Microsoft.DotNet.Tools.Fsi
 {
     public class FsiCommand
     {
-        public static int Run(ParseResult parseResult)
+        public static int Run(string[] args)
         {
-            parseResult.HandleDebugSwitch();
-            return new FsiForwardingApp(parseResult).Execute();
+            DebugHelper.HandleDebugSwitch(ref args);
+            return new FsiForwardingApp(args).Execute();
         }
     }
 }

@@ -52,9 +52,14 @@
         <target state="translated">Средство "{0}" обновлено с версии "{1}" до версии "{2}" (файл манифеста {3}).</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="translated">Инструмент "{0}" был переустановлен с последней предварительной версией (версией "{1}").</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <target state="translated">Инструмент "{0}" был переустановлен с последней стабильной версией (версией "{1}").</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
@@ -73,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">Обновление глобального средства.</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">Обновление глобального или локального средства.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

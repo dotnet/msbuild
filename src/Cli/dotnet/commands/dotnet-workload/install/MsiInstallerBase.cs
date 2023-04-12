@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Installer.Windows
             List<WorkloadPackRecord> workloadPackRecords = new();
             using RegistryKey installedPacksKey = Registry.LocalMachine.OpenSubKey(@$"SOFTWARE\Microsoft\dotnet\InstalledPacks\{HostArchitecture}");
 
-            void SetRecordMsiProperties(WorkloadPackRecord record, RegistryKey key)
+            static void SetRecordMsiProperties(WorkloadPackRecord record, RegistryKey key)
             {
                 record.ProviderKeyName = (string)key.GetValue("DependencyProviderKey");
                 record.ProductCode = (string)key.GetValue("ProductCode");

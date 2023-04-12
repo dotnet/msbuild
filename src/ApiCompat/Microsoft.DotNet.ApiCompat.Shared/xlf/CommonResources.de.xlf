@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CreateWorkItemPerAssemblyAssembliesNotEqual">
         <source>When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</source>
-        <target state="new">When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</target>
+        <target state="translated">Beim Einreihen von Arbeitselementen pro Assembly muss die Anzahl der übergebenen linken und rechten Assemblys gleich sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidRexegStringTransformationPattern">
         <source>Invalid transformation pattern provided: '{0} - {1}'.</source>
-        <target state="new">Invalid transformation pattern provided: '{0} - {1}'.</target>
+        <target state="translated">Ungültiges Transformationsmuster angegeben: „{0} – {1}“.</target>
         <note />
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
-        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <target state="translated">Ein Dateipfad muss übergeben werden, um erfolgreich eine Kompatibilitätsunterdrückungsdatei zu generieren.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSdkVersion">
         <source>The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</source>
-        <target state="new">The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</target>
+        <target state="translated">Die erforderliche Mindestversion von Roslyn ist „{1}“, und Sie verwenden die Version „{0}“ von Roslyn. Sie können das SDK aktualisieren, um die aktuelle Version zu erhalten.</target>
         <note />
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">Kompatibilitätsunterdrückungen wurden erfolgreich in „{0}“ geschrieben.</target>
         <note />
       </trans-unit>
     </body>

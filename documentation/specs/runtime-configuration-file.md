@@ -127,8 +127,8 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
 
 This section is created when building a project. Settings include:
 * `configProperties` - Indicates configuration properties to configure the runtime and the framework
-  * Examples:
-    * Full list of [configuration properties](https://github.com/dotnet/coreclr/blob/main/Documentation/project-docs/clr-configuration-knobs.md) for CoreCLR.
+  * Examples:    
+    * Full list of [configuration properties](https://github.com/dotnet/docs/blob/main/docs/core/run-time-config/index.md) for CoreCLR. 
     * `System.GC.Server` (old: `gcServer`) - Boolean indicating if the server GC should be used (Default: `true`).
     * `System.GC.Concurrent` (old: `gcConcurrent`) - Boolean indicating if background garbage collection should be used.
 * `framework` - Indicates the `name`, `version`, and other properties of the shared framework to use when activating the application including `applyPathes` and `rollForwardOnNoCandidateFx`. The presence of this section (or another framework in the new `frameworks` section) indicates that the application is a framework-dependent app.

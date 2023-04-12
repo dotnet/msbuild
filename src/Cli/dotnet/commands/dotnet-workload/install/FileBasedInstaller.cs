@@ -5,18 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using System.Text.Json;
+using System.Threading.Tasks;
+
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -51,11 +53,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _userProfileDir = userProfileDir;
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _tempPackagesDir = new DirectoryPath(tempDirPath ?? PathUtilities.CreateTempSubdirectory());
-            ILogger logger = verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
+            ILogger logger = verbosity.IsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
             _restoreActionConfig = restoreActionConfig;
             _nugetPackageDownloader = nugetPackageDownloader ??
                                       new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null,
-                                          new FirstPartyNuGetPackageSigningVerifier(_tempPackagesDir), logger,
+                                          new FirstPartyNuGetPackageSigningVerifier(), logger,
                                           restoreActionConfig: _restoreActionConfig);
             bool userLocal = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString());
             _workloadMetadataDir = Path.Combine(userLocal ? _userProfileDir : _dotnetDir, "metadata", "workloads");

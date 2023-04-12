@@ -7,29 +7,14 @@
         <target state="translated">Elenca i carichi di lavoro disponibili.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="new">Installed Workload Ids</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
         <target state="translated">Utilizzare la 'ricerca del carico di lavoro DotNet' per trovare i carichi di lavoro aggiuntivi da installare.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadManfiestVersionColumn">
-        <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadSourceColumn">
-        <source>Installation Source</source>
-        <target state="new">Installation Source</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
-        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="needs-review-translation">Gli aggiornamenti sono disponibili per i carichi di lavoro seguenti: {0}. Per ottenere la versione più recente, eseguire 'dotnet workload update'.</target>
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">Gli aggiornamenti sono disponibili per i carichi di lavoro seguenti: {0}. Per ottenere la versione più recente, eseguire 'dotnet workload update'.</target>
         <note />
       </trans-unit>
     </body>

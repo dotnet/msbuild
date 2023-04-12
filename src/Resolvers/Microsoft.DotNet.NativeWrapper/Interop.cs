@@ -6,7 +6,16 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+//only Microsoft.DotNet.NativeWrapper (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
 #nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
+
+//  Work around https://github.com/dotnet/roslyn-analyzers/issues/6094
+#pragma warning disable CA1420
+
+//  Work around https://github.com/dotnet/roslyn-analyzers/issues/6094
+#pragma warning disable CA1420
 
 namespace Microsoft.DotNet.NativeWrapper
 {
@@ -85,6 +94,7 @@ namespace Microsoft.DotNet.NativeWrapper
         {
             resolved_sdk_dir = 0,
             global_json_path = 1,
+            requested_version = 2,
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]

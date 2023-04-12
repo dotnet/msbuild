@@ -91,11 +91,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
             new AllowListToSendFirstAppliedOptions(new HashSet<string> {"add", "remove", "list", "sln", "nuget"}),
             new TopLevelCommandNameAndOptionToLog
             (
-                topLevelCommandName: new HashSet<string> {"new"},
-                optionsToLog: new HashSet<Option> { NewCommandParser.LanguageOption }
-            ),
-            new TopLevelCommandNameAndOptionToLog
-            (
                 topLevelCommandName: new HashSet<string> {"build", "publish"},
                 optionsToLog: new HashSet<Option> { BuildCommandParser.FrameworkOption, PublishCommandParser.FrameworkOption,
                     BuildCommandParser.RuntimeOption, PublishCommandParser.RuntimeOption, BuildCommandParser.ConfigurationOption,
@@ -124,7 +119,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 topLevelCommandName: new HashSet<string> {"publish"},
                 optionsToLog: new HashSet<Option> { PublishCommandParser.RuntimeOption }
             ),
-            new AllowListToSendVerbSecondVerbFirstArgument(new HashSet<string> {"workload", "tool"}),
+            new AllowListToSendVerbSecondVerbFirstArgument(new HashSet<string> {"workload", "tool", "new"}),
         };
 
         private static void LogVerbosityForAllTopLevelCommand(
@@ -133,14 +128,15 @@ namespace Microsoft.DotNet.Cli.Telemetry
             string topLevelCommandName,
             Dictionary<string, double> measurements = null)
         {
-            if (parseResult.IsDotnetBuiltInCommand() && parseResult.HasOption(CommonOptions.VerbosityOption))
+            if (parseResult.IsDotnetBuiltInCommand() &&
+                parseResult.SafelyGetValueForOption(CommonOptions.VerbosityOption) is VerbosityOptions verbosity)
             {
                 result.Add(new ApplicationInsightsEntryFormat(
                     "sublevelparser/command",
                     new Dictionary<string, string>()
                     {
                         { "verb", topLevelCommandName},
-                        {"verbosity", Enum.GetName(parseResult.GetValueForOption(CommonOptions.VerbosityOption))}
+                        { "verbosity", Enum.GetName(verbosity)}
                     },
                     measurements));
             }

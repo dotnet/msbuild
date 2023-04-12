@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => command.Execute();
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And
                 .Message
                 .Should()
@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 uninstallCallback: () => throw new IOException("simulated error"))
                 .Execute();
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And
                 .Message
                 .Should()
@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => uninstallCommand.Execute();
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And
                 .Message
                 .Should()

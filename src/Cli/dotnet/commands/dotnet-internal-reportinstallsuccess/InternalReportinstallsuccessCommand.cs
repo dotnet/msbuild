@@ -2,13 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Cli.Telemetry;
 using System.CommandLine;
-using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
 {

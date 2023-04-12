@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
             testProject.AdditionalProperties["SelfContained"] = "true";
-            
+
             var testInstance = _testAssetsManager.CreateTestProject(testProject);
 
             new DotnetBuildCommand(Log)
@@ -246,6 +246,55 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             new DotnetBuildCommand(Log)
                .WithWorkingDirectory(testInstance.Path)
                .Execute("-r", "win-x64")
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining("NETSDK1179");
+        }
+
+        [Theory]
+        [InlineData("--self-contained")]
+        [InlineData("-p:PublishTrimmed=true")]
+        [InlineData("")]
+        public void It_builds_with_implicit_rid_with_rid_specific_properties(string executeOptionsAndProperties)
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFrameworkOrFrameworks("net6.0", false)
+                .Restore(Log);
+
+            new DotnetBuildCommand(Log)
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute(executeOptionsAndProperties)
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining("NETSDK1031") // Self Contained Checks
+               .And
+               .NotHaveStdErrContaining("NETSDK1190"); // Check that publish properties don't interfere with build either 
+        }
+
+        [RequiresMSBuildVersionFact("17.4.0.41702")]
+        public void It_builds_referenced_exe_with_self_contained_specified_via_command_line_argument()
+        {
+            var referencedProject = new TestProject("ReferencedProject")
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+
+            var testProject = new TestProject("TestProject")
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+            testProject.ReferencedProjects.Add(referencedProject);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new DotnetCommand(Log)
+               .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
+               .Execute("build", "-r", EnvironmentInfo.GetCompatibleRid(), "--self-contained")
                .Should()
                .Pass()
                .And

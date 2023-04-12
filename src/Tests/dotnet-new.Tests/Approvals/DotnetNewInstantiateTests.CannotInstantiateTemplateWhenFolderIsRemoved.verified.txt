@@ -1,0 +1,14 @@
+﻿StdErr:
+Unable to locate the specified template content, the template package might be removed or corrupted.
+
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103
+StdOut:
+To rescan installed template packages, run:
+   dotnet new --debug:rebuild-cache
+
+To uninstall the template package, run:
+   dotnet new uninstall %template location%
+
+To install the template package, run:
+   dotnet new install %template location%

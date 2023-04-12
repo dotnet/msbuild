@@ -54,7 +54,21 @@ namespace Microsoft.NET.TestFramework
         //  able to run on the current OS
         public static bool SupportsTargetFramework(string targetFramework)
         {
-            var nugetFramework = NuGetFramework.Parse(targetFramework);
+            NuGetFramework nugetFramework = null;
+            try
+            {
+                nugetFramework = NuGetFramework.Parse(targetFramework);
+            }
+            catch
+            {
+                return false;
+            }
+
+            if (nugetFramework == null)
+            {
+                return false;
+            }
+
             string currentRid = RuntimeInformation.RuntimeIdentifier;
 
             string ridOS = currentRid.Split('.')[0];
@@ -125,7 +139,7 @@ namespace Microsoft.NET.TestFramework
             {
                 string restOfRid = currentRid.Substring(ridOS.Length + 1);
                 string ubuntuVersionString = restOfRid.Split('-')[0];
-                if (float.TryParse(ubuntuVersionString, out float ubuntuVersion))
+                if (float.TryParse(ubuntuVersionString, System.Globalization.CultureInfo.InvariantCulture, out float ubuntuVersion))
                 {
                     if (ubuntuVersion > 16.04f)
                     {

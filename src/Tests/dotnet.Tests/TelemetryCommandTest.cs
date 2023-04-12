@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tests
         {
             string[] args = { "publish", "-r"};
             Action a = () => { Cli.Program.ProcessArgs(args); };
-            a.ShouldNotThrow<ArgumentOutOfRangeException>();
+            a.Should().NotThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tests
         {
             string[] args = { "restore", "-v" };
             Action a = () => { Cli.Program.ProcessArgs(args); };
-            a.ShouldNotThrow<ArgumentOutOfRangeException>();
+            a.Should().NotThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tests
                               e.Properties["verb"] == Sha256Hasher.Hash("NEW"));
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/24190")]
         public void DotnetNewCommandFirstArgumentShouldBeSentToTelemetryWithPerformanceData()
         {
             const string argumentToSend = "console";
@@ -240,7 +240,7 @@ namespace Microsoft.DotNet.Tests
                               e.Properties["verb"] == Sha256Hasher.Hash("NUGET"));
         }
 
-        [Fact]
+        [Fact(Skip = "dotnet new sends the telemetry inside own commands")]
         public void DotnetNewCommandLanguageOpinionShouldBeSentToTelemetry()
         {
             const string optionKey = "language";

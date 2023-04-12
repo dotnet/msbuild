@@ -5,12 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Common;
 using NuGet.Packaging;
 using NuGet.Packaging.Signing;
 using HashAlgorithmName = System.Security.Cryptography.HashAlgorithmName;
@@ -27,18 +24,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             };
 
         private readonly HashSet<string> _upperFirstPartyCertificateThumbprints =
-            new(StringComparer.OrdinalIgnoreCase) { "51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862" };
+            new(StringComparer.OrdinalIgnoreCase) {"51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862"};
 
         private const string FirstPartyCertificateSubject =
             "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US";
 
-        private DirectoryPath _tempDirectory;
-        private ILogger _logger;
-
-        public FirstPartyNuGetPackageSigningVerifier(DirectoryPath? tempDirectory = null, ILogger logger = null)
+        public FirstPartyNuGetPackageSigningVerifier()
         {
-            _tempDirectory = tempDirectory ?? new DirectoryPath(PathUtilities.CreateTempSubdirectory());
-            _logger = logger ?? new NullLogger();
         }
 
         public bool Verify(FilePath nupkgToVerify, out string commandOutput)
@@ -84,7 +76,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         private static bool NuGetVerify(FilePath nupkgToVerify, out string commandOutput)
         {
-            var args = new[] { "verify", "--all", nupkgToVerify.Value };
+            var args = new[] {"verify", "--all", nupkgToVerify.Value};
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
                 .Create("nuget", args);
 

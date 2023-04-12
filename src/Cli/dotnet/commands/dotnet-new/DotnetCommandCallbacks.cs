@@ -1,0 +1,62 @@
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
+
+#nullable enable
+
+using Microsoft.DotNet.Tools.Add.PackageReference;
+using Microsoft.DotNet.Tools;
+using System.Collections.Generic;
+using System.CommandLine;
+using System.Linq;
+using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
+using Microsoft.DotNet.Tools.Restore;
+using Microsoft.DotNet.Tools.Sln.Add;
+using Microsoft.DotNet.Cli;
+
+namespace Microsoft.DotNet.Tools.New
+{
+    internal static class DotnetCommandCallbacks
+    {
+        internal static bool AddPackageReference(string projectPath, string packageName, string? version)
+        {
+            PathUtility.EnsureAllPathsExist(new[] { projectPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+            IEnumerable<string> commandArgs = new[] { "add", projectPath, "package", packageName };
+            if (!string.IsNullOrWhiteSpace(version))
+            {
+                commandArgs = commandArgs.Append(AddPackageParser.VersionOption.Aliases.First()).Append(version);
+            }
+            var addPackageReferenceCommand = new AddPackageReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
+            return addPackageReferenceCommand.Execute() == 0;
+        }
+
+        internal static bool AddProjectReference(string projectPath, string projectToAdd)
+        {
+            PathUtility.EnsureAllPathsExist(new[] { projectPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+            PathUtility.EnsureAllPathsExist(new[] { projectToAdd }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+            IEnumerable<string> commandArgs = new[] { "add", projectPath, "reference", projectToAdd };
+            var addProjectReferenceCommand = new AddProjectToProjectReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
+            return addProjectReferenceCommand.Execute() == 0;
+        }
+
+        internal static bool RestoreProject(string pathToRestore)
+        {
+            PathUtility.EnsureAllPathsExist(new[] { pathToRestore }, CommonLocalizableStrings.FileNotFound, allowDirectories: true);
+            return RestoreCommand.Run(new string[] { pathToRestore }) == 0;
+        }
+
+        internal static bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
+        {
+            PathUtility.EnsureAllPathsExist(new[] { solutionPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+            PathUtility.EnsureAllPathsExist(projectsToAdd, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+            IEnumerable<string> commandArgs = new[] { "sln", solutionPath, "add" }.Concat(projectsToAdd);
+            if (!string.IsNullOrWhiteSpace(solutionFolder))
+            {
+                commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Aliases.First()).Append(solutionFolder);
+            }
+            var addProjectToSolutionCommand = new AddProjectToSolutionCommand(SlnCommandParser.GetCommand().Parse(commandArgs.ToArray()));
+            return addProjectToSolutionCommand.Execute() == 0;
+        }
+    }
+}

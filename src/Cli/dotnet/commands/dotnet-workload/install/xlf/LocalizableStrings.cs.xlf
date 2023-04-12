@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="ManifestPackageUrlNotResolved">
         <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
-        <target state="new">Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</target>
+        <target state="translated">Balíček manifestu nebyl přeložen. Balíček manifestu nebo adresa URL pro {0} neexistuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">

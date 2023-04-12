@@ -1,8 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable disable
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -182,7 +180,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <param name="message">The message to log.</param>
         protected override void WriteMessage(string message)
         {
-            if (!_messageQueue.IsCompleted)
+            if (!_messageQueue.IsAddingCompleted)
             {
                 _messageQueue.Add(message);
             }

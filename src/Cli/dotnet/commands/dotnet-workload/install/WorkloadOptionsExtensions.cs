@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir).GetManifests();
                 if (!manifests.Any() && checkIfFeatureBandManifestsExist)
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption), isUserError: false);     
+                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, new SdkFeatureBand(versionOption).ToString()), isUserError: false);
                 }
                 try
                 {

@@ -43,7 +43,6 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         private ITaskItem _runtimePack;
-        private ITaskItem _crossgen2Pack;
         private string _targetRuntimeIdentifier;
         private string _targetPlatform;
         private string _hostRuntimeIdentifier;
@@ -57,7 +56,6 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             _runtimePack = GetNETCoreAppRuntimePack();
-            _crossgen2Pack = Crossgen2Packs?.FirstOrDefault();
             _targetRuntimeIdentifier = _runtimePack?.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
             // Get the list of runtime identifiers that we support and can target
@@ -133,9 +131,11 @@ namespace Microsoft.NET.Build.Tasks
 
         private bool ValidateCrossgen2Support()
         {
-            _crossgen2Tool.PackagePath = _crossgen2Pack?.GetMetadata(MetadataKeys.PackageDirectory);
-            if (_crossgen2Tool.PackagePath == null ||
-                !NuGetVersion.TryParse(_crossgen2Pack.GetMetadata(MetadataKeys.NuGetPackageVersion), out NuGetVersion crossgen2PackVersion))
+            ITaskItem crossgen2Pack = Crossgen2Packs?.FirstOrDefault();
+            _crossgen2Tool.PackagePath = crossgen2Pack?.GetMetadata(MetadataKeys.PackageDirectory);
+
+            if (string.IsNullOrEmpty(_crossgen2Tool.PackagePath) ||
+                !NuGetVersion.TryParse(crossgen2Pack.GetMetadata(MetadataKeys.NuGetPackageVersion), out NuGetVersion crossgen2PackVersion))
             {
                 Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);
                 return false;

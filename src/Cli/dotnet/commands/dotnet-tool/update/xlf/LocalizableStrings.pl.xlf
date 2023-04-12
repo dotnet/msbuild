@@ -52,9 +52,14 @@
         <target state="translated">Narzędzie „{0}” zostało pomyślnie zaktualizowane z wersji „{1}” do wersji „{2}” (plik manifestu {3}).</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="translated">Narzędzie „{0}” zostało ponownie zainstalowane przy użyciu najnowszej stabilnej wersji (wersja „{1}”).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <target state="translated">Narzędzie „{0}” zostało ponownie zainstalowane przy użyciu najnowszej stabilnej wersji (wersja „{1}”).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
@@ -73,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">Aktualizuj narzędzie globalne.</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">Zaktualizuj narzędzie globalne lub lokalne.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

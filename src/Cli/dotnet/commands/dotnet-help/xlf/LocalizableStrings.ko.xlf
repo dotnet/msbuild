@@ -17,11 +17,6 @@
         <target state="translated">.NET SDK 설치를 관리합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="new">SQL Server cache command-line tools.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">사용법</target>
@@ -60,6 +55,11 @@
       <trans-unit id="HostOptions">
         <source>Host options (passed before the command)</source>
         <target state="translated">호스트 옵션(명령 전에 전달됨)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="translated">개발 중인 JSON 웹 토큰을 관리합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">

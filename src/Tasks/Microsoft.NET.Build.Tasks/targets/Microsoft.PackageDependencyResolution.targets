@@ -297,6 +297,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="Analyzers" ItemName="ResolvedAnalyzers" />
       <Output TaskParameter="ApphostsForShimRuntimeIdentifiers" ItemName="_ApphostsForShimRuntimeIdentifiersResolvePackageAssets" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
+      <Output TaskParameter="DebugSymbolsFiles" ItemName="_DebugSymbolsFiles" />
+      <Output TaskParameter="ReferenceDocumentationFiles" ItemName="_ReferenceDocumentationFiles" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
       <Output TaskParameter="FrameworkReferences" ItemName="TransitiveFrameworkReference" />
       <Output TaskParameter="NativeLibraries" ItemName="NativeCopyLocalItems" />
@@ -308,6 +310,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="PackageFolders" ItemName="AssetsFilePackageFolder" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
     </ResolvePackageAssets>
+
+    <ItemGroup Condition="'$(CopyDebugSymbolFilesFromPackages)' == 'true'">
+      <ReferenceCopyLocalPaths Include="@(_DebugSymbolsFiles)"></ReferenceCopyLocalPaths>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(CopyDocumentationFilesFromPackages)' == 'true'">
+      <ReferenceCopyLocalPaths Include="@(_ReferenceDocumentationFiles)"></ReferenceCopyLocalPaths>
+    </ItemGroup>
 
     <ItemGroup Condition="'$(UseAppHostFromAssetsFile)' == 'true'">
       <_NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"

@@ -9,9 +9,9 @@ namespace Microsoft.DotNet.Tools.MSBuild
 {
     public class MSBuildCommand
     {
-        public static int Run(ParseResult parseResult)
+        public static int Run(string[] args)
         {
-            return new MSBuildForwardingApp(parseResult.GetArguments()).Execute();
+            return new MSBuildForwardingApp(args).Execute();
         }
     }
 }

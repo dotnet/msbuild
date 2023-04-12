@@ -7,6 +7,11 @@
         <target state="translated">Non è possibile trovare la versione di .NET SDK specificata in global.json. Verificare che sia installata la versione specificata.</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">Non è possibile trovare la versione '{0}' di .NET SDK specificata in global.json. Verificare che sia installata la versione specificata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
         <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
         <target state="translated">{0} non è stato trovato. Verificare che sia installata una versione abbastanza recente di .NET SDK e/o aumentare la versione specificata in global.json.</target>
@@ -28,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
-        <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="needs-review-translation">Non è possibile trovare .NET SDK. Verificare che sia installato, che PATH sia configurato per l'architettura corretta e che la versione specificata in global.json, se presente, corrisponda alla versione installata.</target>
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">Non è possibile trovare .NET SDK. Verificare che sia installato, che PATH sia configurato per l'architettura corretta e che la versione specificata in global.json, se presente, corrisponda alla versione installata.</target>
         <note />
       </trans-unit>
     </body>

@@ -52,9 +52,14 @@
         <target state="translated">已成功將工具 '{0}' 從 '{1}' 版更新為 '{2}' 版 (資訊清單檔 {3})。</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="translated">已使用最新搶鮮版 ('{0}' 版) 來重新安裝工具 '{1}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <target state="translated">已使用最新穩定版本 ('{1}' 版) 來重新安裝工具 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
@@ -73,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">更新全域工具。</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">更新全域或本機工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

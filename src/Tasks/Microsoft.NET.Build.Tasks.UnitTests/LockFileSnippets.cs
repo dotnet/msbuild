@@ -250,8 +250,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         public static readonly string NETCoreOsxGroup =
             CreateProjectFileDependencyGroup(".NETCoreApp,Version=v1.0/osx.10.11-x64");
 
-        public static readonly string NET461Group =
-            CreateProjectFileDependencyGroup(".NETFramework,Version=v4.6.1");
+        public static readonly string net462Group =
+            CreateProjectFileDependencyGroup(".NETFramework,Version=v4.6.2");
 
         public static readonly string LibADefn =
             CreateLibrary("LibA/1.2.3", "package", "lib/file/A.dll", "lib/file/B.dll", "lib/file/C.dll");

@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
                         exception.InnerException.Message).Red());
             }
 
-            if (Reporter.IsVerbose)
+            if (CommandLoggingContext.IsVerbose)
             {
                 Reporter.Verbose.WriteLine(exception.ToString().Red());
             }

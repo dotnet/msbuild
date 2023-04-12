@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public BrowserRefreshServer? BrowserRefreshServer { get; set; }
 
-        public LaunchSettingsProfile DefaultLaunchSettingsProfile { get; init; } = default!;
+        public LaunchSettingsProfile LaunchSettingsProfile { get; init; } = default!;
 
         public ProjectGraph? ProjectGraph { get; set; }
     }

@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         public void GetSubArgumentsRemovesTopLevelCommands(string[] input, string[] expected)
         {
             input.GetSubArguments()
-                .ShouldBeEquivalentTo(expected);
+                .Should().BeEquivalentTo(expected);
         }
     }
 }

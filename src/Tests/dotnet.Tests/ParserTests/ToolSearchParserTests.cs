@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool search");
             Action a = () => new ToolSearchCommand(result);
-            a.ShouldThrow<CommandParsingException>();
+            a.Should().Throw<CommandParsingException>();
         }
 
         [Fact]

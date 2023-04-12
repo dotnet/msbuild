@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var tempPackagesDir = new DirectoryPath(PathUtilities.CreateTempSubdirectory());
             var nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                                           filePermissionSetter: null,
-                                          new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
+                                          new FirstPartyNuGetPackageSigningVerifier(),
                                           new NullLogger(),
                                           reporter,
                                           verifySignatures: SignCheck.IsDotNetSigned());
@@ -425,9 +425,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private async Task<bool> UpdatedAdManifestPackagesExistAsync()
         {
             var manifests = GetInstalledManifestIds();
-            var avaliableUpdates = await Task.WhenAll(manifests.Select(manifest => NewerManifestPackageExists(manifest)))
+            var availableUpdates = await Task.WhenAll(manifests.Select(manifest => NewerManifestPackageExists(manifest)))
                 .ConfigureAwait(false);
-            return avaliableUpdates.Any();
+            return availableUpdates.Any();
         }
 
         private async Task<bool> NewerManifestPackageExists(ManifestId manifest)

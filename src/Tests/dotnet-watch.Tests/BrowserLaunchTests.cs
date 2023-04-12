@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await app.StartWatcherAsync();
 
             // Verify we launched the browser.
-            await app.Process.GetOutputLineStartsWithAsync(expected, TimeSpan.FromMinutes(2));
+            await app.Process.GetOutputLineStartsWithAsync(expected);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await app.StartWatcherAsync();
 
             // Verify we launched the browser.
-            await app.Process.GetOutputLineStartsWithAsync(launchBrowserMessage, TimeSpan.FromMinutes(2));
+            await app.Process.GetOutputLineStartsWithAsync(launchBrowserMessage);
         }
     }
 }

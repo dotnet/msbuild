@@ -1,0 +1,23 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "Basic Template",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.MissedRequiredParameter",
+  "precedence": "100",
+  "identity": "TestAssets.MissedRequiredParameter.BasicTemplate1",
+  "shortName": "basic",
+  "sourceName": "bar",
+  "symbols": {
+    "param": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "parameter description",
+      "isRequired": true
+    }
+  },
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  }
+}

@@ -1,0 +1,46 @@
+﻿{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithPortsAndCoalesce",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithPortsAndCoalesce",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithPortsAndCoalesce",
+  "shortName": "TestAssets.TemplateWithPortsAndCoalesce",
+  "symbols": {
+    "userPort1": {
+      "type": "parameter",
+      "dataType": "integer"
+    },
+    "generatedPort1": {
+      "type": "generated",
+      "generator": "port"
+    },
+    "port1": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "userPort1",
+        "fallbackVariableName": "generatedPort1"
+      },
+      "replaces": "1234"
+    },
+    "userPort2": {
+      "type": "parameter",
+      "dataType": "integer"
+    },
+    "generatedPort2": {
+      "type": "generated",
+      "generator": "port"
+    },
+    "port2": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "userPort2",
+        "fallbackVariableName": "generatedPort2"
+      },
+      "replaces": "1235"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Copyright>© Microsoft</Copyright>
+    <Product>Razor Test</Product>
+    <Company>Microsoft</Company>
+    <Description>PackageLibraryNoStaticAssets Description</Description>
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- We don't want to run build server when not running as tests. -->
+    <UseRazorBuildServer>false</UseRazorBuildServer>
+  </PropertyGroup>
+</Project>

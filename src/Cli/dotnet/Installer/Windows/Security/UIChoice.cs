@@ -4,7 +4,7 @@
 namespace Microsoft.DotNet.Installer.Windows.Security
 {
     /// <summary>
-    /// Describes the type of user inteface to display.
+    /// Describes the type of user interface to display.
     /// </summary>
     public enum UIChoice : uint
     {

@@ -26,6 +26,8 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         [Required]
         public string Source { get; set; }
 
+        public bool UpdateSourceType { get; set; } = true;
+
         [Output]
         public ITaskItem[] StaticWebAssets { get; set; }
 
@@ -62,7 +64,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
                     if (ShouldIncludeAssetAsReference(selected, out var reason))
                     {
-                        selected.SourceType = StaticWebAsset.SourceTypes.Project;
+                        selected.SourceType = UpdateSourceType ? StaticWebAsset.SourceTypes.Project : selected.SourceType;
                         resultAssets.Add(selected);
                     }
                     Log.LogMessage(MessageImportance.Low, reason);

@@ -93,7 +93,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                     reference.Name = "Reference";
                     reference.Add(new XElement(
                         "HintPath",
-                        Path.Combine("..", "razorclasslibrary", "bin", "Debug", "net6.0", "RazorClassLibrary.dll")));
+                        Path.Combine("..", "razorclasslibrary", "bin", "Debug", DefaultTfm, "RazorClassLibrary.dll")));
                 }
             });
 
@@ -434,7 +434,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "_bin", "blazorwasm.dll")).Should().NotExist();
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void Build_SatelliteAssembliesAreCopiedToBuildOutput()
         {
             // Arrange
@@ -491,7 +491,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             bootJsonPath.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/25959")]
+        [Fact]
         public void Build_WithCustomOutputPath_Works()
         {
             var testAppName = "BlazorWasmWithLibrary";

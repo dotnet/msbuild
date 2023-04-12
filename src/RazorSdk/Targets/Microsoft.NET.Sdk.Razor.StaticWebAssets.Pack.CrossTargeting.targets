@@ -1,0 +1,126 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Razor.StaticWebAssets.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="14.0">
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.StaticWebAssetsReadPackManifest"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />    
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.ResolveStaticWebAssetsEffectiveTargetFramework"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.ReadStaticWebAssetsManifestFile"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+  <PropertyGroup>
+
+    <GenerateNuspecDependsOn>
+      CrossTargetingIncludeStaticWebAssets;
+      $(GenerateNuspecDependsOn)
+    </GenerateNuspecDependsOn>
+
+    <CrossTargetingIncludeStaticWebAssetsDependsOn Condition="'$(NoBuild)' != 'true' and '$(GeneratePackageOnBuild)' != 'true'">
+      DispatchToInnerBuilds;$(CrossTargetingIncludeStaticWebAssetsDependsOn);
+    </CrossTargetingIncludeStaticWebAssetsDependsOn>
+
+  </PropertyGroup>
+
+  <!-- 
+    We have multiple target frameworks:
+     * We do nothing inside the inner builds.
+     * We look at the TargetFrameworks and pick the one with the 'highest' static web assets version.
+       * For example, if you have netstandard2.0 and net6.0, one is swa V1 and the other is swa V2. When packing
+         we always want to use V2, since the metadata is backwards compatible.
+      * We resolve the path for the pack manifest generated for that target version as well as the static web assets
+        build manifest.
+      * We remove any static web asset from the content/none item groups as we are in charge of the packing process.
+      * We read the pack manifest and add the static web assets as content with the appropriate package path.
+   -->
+
+  <Target Name="CrossTargetingIncludeStaticWebAssets" 
+    DependsOnTargets="$(CrossTargetingIncludeStaticWebAssetsDependsOn)">
+
+    <ItemGroup>
+      <_StaticWebAssetsTargetFrameworkCandidate Include="$(TargetFrameworks)">
+      </_StaticWebAssetsTargetFrameworkCandidate>
+      <_StaticWebAssetTargetFramework Include="@(_StaticWebAssetsTargetFrameworkCandidate->Trim()->Distinct())">
+        <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier(%(_StaticWebAssetsTargetFrameworkCandidate.Identity)))</TargetFrameworkIdentifier>
+        <TargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion(%(_StaticWebAssetsTargetFrameworkCandidate.Identity)))</TargetFrameworkVersion>
+      </_StaticWebAssetTargetFramework>
+    </ItemGroup>
+
+    <ResolveStaticWebAssetsEffectiveTargetFramework
+      TargetFrameworks="@(_StaticWebAssetTargetFramework)"
+    >
+      <Output TaskParameter="EffectiveTargetFramework" PropertyName="_StaticWebAssetsEffectiveTargetFramework" />
+    </ResolveStaticWebAssetsEffectiveTargetFramework>
+
+    <!-- Resolve the build and pack manifest paths for the chosen target framework -->
+
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+      Condition="'$(_StaticWebAssetsEffectiveTargetFramework)' != ''"
+      Targets="ResolveStaticWebAssetsManifestPaths"
+      SkipNonexistentTargets="true"
+      Properties="TargetFramework=$(_StaticWebAssetsEffectiveTargetFramework)"
+      BuildInParallel="$(BuildInParallel)"
+    >
+      <Output TaskParameter="TargetOutputs" ItemName="_ManifestPaths" />
+    </MSBuild>
+
+    <PropertyGroup>
+      <StaticWebAssetBuildManifestPath>%(_ManifestPaths.BuildManifest)</StaticWebAssetBuildManifestPath>
+      <StaticWebAssetPackManifestPath>%(_ManifestPaths.PackManifest)</StaticWebAssetPackManifestPath>
+    </PropertyGroup>
+
+    <!-- Clean up static web assets from existing item groups -->
+
+    <ReadStaticWebAssetsManifestFile
+      Condition="'$(StaticWebAssetBuildManifestPath)' != '' and Exists('$(StaticWebAssetBuildManifestPath)')"
+      ManifestPath="$(StaticWebAssetBuildManifestPath)">
+      <Output TaskParameter="Assets" ItemName="_CachedBuildStaticWebAssets" />
+    </ReadStaticWebAssetsManifestFile>
+
+    <ItemGroup>
+      <Content Remove="@(_CachedBuildStaticWebAssets->'%(OriginalItemSpec)')" />
+      <None Remove="@(_CachedBuildStaticWebAssets->'%(OriginalItemSpec)')" />
+    </ItemGroup>
+        
+    <!-- Add assets as content items to be packed -->
+    
+    <StaticWebAssetsReadPackManifest
+      Condition="'$(StaticWebAssetPackManifestPath)' != '' and Exists('$(StaticWebAssetPackManifestPath)')"
+      ManifestPath="$(StaticWebAssetPackManifestPath)"
+    >
+      <Output TaskParameter="Files" ItemName="_StaticWebAssetsFilesToPack" />
+      <!-- This is only used by V1 static web assets as they don't generate a build manifest -->
+      <Output TaskParameter="AdditionalElementsToRemoveFromPacking" ItemName="_LegacyAssetsToRemoveFromPacking" />
+    </StaticWebAssetsReadPackManifest>
+
+    <ItemGroup>
+      <Content Remove="@(_LegacyAssetsToRemoveFromPacking)" />
+      <None Remove="@(_LegacyAssetsToRemoveFromPacking)" />
+
+      <Content Include="@(_StaticWebAssetsFilesToPack)" 
+        Pack="true" 
+        CopyToOutputDirectory="Never"
+        CopyToPublishDirectory="Never" />
+    </ItemGroup>
+
+  </Target>
+
+</Project>

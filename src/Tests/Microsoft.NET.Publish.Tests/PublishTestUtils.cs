@@ -9,12 +9,13 @@ namespace Microsoft.NET.Publish.Tests
 {
     internal static class PublishTestUtils
     {
-#if NET6_0
+#if NET7_0
 
         public static IEnumerable<object[]> SupportedTfms { get; } = new List<object[]>
         {
             new object[] { "netcoreapp3.1" },
             new object[] { "net5.0" },
+            new object[] { "net6.0" },
             new object[] { ToolsetInfo.CurrentTargetFramework }
         };
 
@@ -22,12 +23,14 @@ namespace Microsoft.NET.Publish.Tests
         public static IEnumerable<object[]> Net5Plus { get; } = new List<object[]>
         {
             new object[] { "net5.0" },
+            new object[] { "net6.0" },
             new object[] { ToolsetInfo.CurrentTargetFramework }
         };
 
         // This list should contain all supported TFMs after net6.0
         public static IEnumerable<object[]> Net6Plus { get; } = new List<object[]>
         {
+            new object[] { "net6.0" },
             new object[] { ToolsetInfo.CurrentTargetFramework }
         };
 #else

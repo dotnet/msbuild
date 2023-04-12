@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand, string dotnetDir)
         {
             string installerTypePath = Path.Combine(dotnetDir, "metadata",
-                "workloads", $"{sdkFeatureBand}", "installertype");
+                "workloads", $"{sdkFeatureBand.ToStringWithoutPrerelease()}", "installertype");
 
             if (File.Exists(Path.Combine(installerTypePath, "msi")))
             {

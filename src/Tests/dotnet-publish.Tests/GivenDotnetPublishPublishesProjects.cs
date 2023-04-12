@@ -18,6 +18,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 {
     public class GivenDotnetPublishPublishesProjects : SdkTest
     {
+
+        private static string _defaultConfiguration = "Debug";
+
         public GivenDotnetPublishPublishesProjects(ITestOutputHelper log) : base(log)
         {
         }
@@ -40,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"{testAppName}.dll");
 
             new DotnetCommand(Log)
@@ -94,6 +97,24 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute("--framework", "netcoreapp3.0", "--no-restore")
                 .Should().Fail()
                 .And.HaveStdOutContaining("project.assets.json");
+        }
+
+        [Theory]
+        [InlineData("publish", "-property", "Configuration=Debug")]
+        [InlineData("publish", "-p", "Configuration=Debug")]
+        [InlineData("publish", "--property", "Configuration=Debug")]
+        public void ItParsesSpacedPropertiesInPublishReleaseEvaluationPhase(string command, string propertyKey, string propertyVal)
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple")
+                .WithSource()
+                .Restore(Log);
+
+            var rootDir = testInstance.Path;
+
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(rootDir)
+                .Execute(command, propertyKey, propertyVal)
+                .Should().Pass().And.NotHaveStdErr();
         }
 
         [Theory]
@@ -204,7 +225,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute(args?.Split() ?? Array.Empty<string>())
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
             return new DirectoryInfo(Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid ?? "", "publish"));
         }
 
@@ -225,7 +246,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute("--no-restore")
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             var outputProgram = Path.Combine(rootDir, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"TestAppSimple.dll");
 
@@ -276,7 +297,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             var outputProgram = Path.Combine(rootPath, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid, "publish", $"TestAppSimple.dll");
 
@@ -339,6 +360,33 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute("--no-restore", "-o", "publish")
                 .Should()
                 .Pass();
+        }
+
+
+        [Fact]
+        public void A_PublishRelease_property_does_not_override_other_command_configuration()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PublishPropertiesHelloWorld")
+               .WithSource();
+
+            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
+
+            new BuildCommand(helloWorldAsset)
+               .Execute()
+               .Should()
+               .Pass();
+
+            // Another command, which should not be affected by PublishRelease
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            Assert.False(File.Exists(expectedAssetPath));
         }
     }
 }

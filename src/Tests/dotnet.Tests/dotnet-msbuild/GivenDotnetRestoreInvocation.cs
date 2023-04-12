@@ -39,6 +39,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--locked-mode" }, "-property:RestoreLockedMode=true")]
         [InlineData(new string[] { "--force-evaluate" }, "-property:RestoreForceEvaluate=true")]
         [InlineData(new string[] { "--lock-file-path", "<lockFilePath>" }, "-property:NuGetLockFilePath=<lockFilePath>")]
+        [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>

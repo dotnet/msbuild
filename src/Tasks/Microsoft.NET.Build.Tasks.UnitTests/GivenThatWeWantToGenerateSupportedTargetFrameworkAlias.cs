@@ -109,7 +109,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
             task.Execute();
 
-            task.SupportedTargetFrameworkAlias.ShouldBeEquivalentTo(convertToItems(expectedResult));
+            task.SupportedTargetFrameworkAlias.Should().BeEquivalentTo(convertToItems(expectedResult));
         }
     }
 }

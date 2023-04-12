@@ -12,7 +12,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Common;
-using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 
@@ -156,6 +155,9 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
 
+        /// <summary>
+        /// True indicates we are doing a design-time build. Otherwise we are in a build.
+        /// </summary>
         public bool DesignTimeBuild { get; set; }
 
         /// <summary>
@@ -232,6 +234,24 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] PackageDependencies { get; private set; }
 
         /// <summary>
+        /// List of symbol files (.pdb) related to NuGet packages.
+        /// </summary>
+        /// <remarks>
+        /// Pdb files to be copied to the output directory
+        /// </remarks>
+        [Output]
+        public ITaskItem[] DebugSymbolsFiles { get; private set;}
+
+        /// <summary>
+        /// List of xml files related to NuGet packages.
+        /// </summary>
+        /// <remarks>
+        ///  The XML files should only be included in the publish output if PublishReferencesDocumentationFiles is true
+        /// </remarks>
+        [Output]
+        public ITaskItem[] ReferenceDocumentationFiles { get; private set; }
+
+        /// <summary>
         /// Messages from the assets file.
         /// These are logged directly and therefore not returned to the targets (note private here).
         /// However,they are still stored as ITaskItem[] so that the same cache reader/writer code
@@ -284,7 +304,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 10;
+        private const int CacheFormatVersion = 11;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -311,11 +331,13 @@ namespace Microsoft.NET.Build.Tasks
                 ApphostsForShimRuntimeIdentifiers = reader.ReadItemGroup();
                 CompileTimeAssemblies = reader.ReadItemGroup();
                 ContentFilesToPreprocess = reader.ReadItemGroup();
+                DebugSymbolsFiles = reader.ReadItemGroup();
                 FrameworkAssemblies = reader.ReadItemGroup();
                 FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
                 PackageDependencies = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
+                ReferenceDocumentationFiles = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
                 RuntimeAssemblies = reader.ReadItemGroup();
                 RuntimeTargets = reader.ReadItemGroup();
@@ -510,7 +532,7 @@ namespace Microsoft.NET.Build.Tasks
                 BinaryReader reader = null;
                 try
                 {
-                    if (File.GetLastWriteTimeUtc(task.ProjectAssetsCacheFile) > File.GetLastWriteTimeUtc(task.ProjectAssetsFile))
+                    if (IsCacheFileUpToDate())
                     {
                         reader = OpenCacheFile(task.ProjectAssetsCacheFile, settingsHash);
                     }
@@ -537,6 +559,8 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 return reader;
+
+                bool IsCacheFileUpToDate() => File.GetLastWriteTimeUtc(task.ProjectAssetsCacheFile) > File.GetLastWriteTimeUtc(task.ProjectAssetsFile);
             }
 
             private static BinaryReader OpenCacheStream(Stream stream, byte[] settingsHash)
@@ -633,8 +657,8 @@ namespace Microsoft.NET.Build.Tasks
             private ResolvePackageAssets _task;
             private BinaryWriter _writer;
             private LockFile _lockFile;
-            private NuGetPackageResolver _packageResolver;
             private LockFileTarget _compileTimeTarget;
+            private IPackageResolver _packageResolver;
             private LockFileTarget _runtimeTarget;
             private Dictionary<string, int> _stringTable;
             private List<string> _metadataStrings;
@@ -650,6 +674,17 @@ namespace Microsoft.NET.Build.Tasks
             private bool MismatchedAssetsFile => !CanWriteToCacheFile;
 
             private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
+
+            private const char RelatedPropertySeparator = ';';
+
+            /// <summary>
+            /// This constructor should only be used for testing - IPackgeResolver carries a lot of
+            /// state so using mocks really help with testing this component.
+            /// </summary>
+            public CacheWriter(ResolvePackageAssets task, IPackageResolver resolver) : this(task)
+            {
+                _packageResolver = resolver;
+            }
 
             public CacheWriter(ResolvePackageAssets task)
             {
@@ -776,11 +811,13 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteApphostsForShimRuntimeIdentifiers);
                 WriteItemGroup(WriteCompileTimeAssemblies);
                 WriteItemGroup(WriteContentFilesToPreprocess);
+                WriteItemGroup(WriteDebugSymbolsFiles);
                 WriteItemGroup(WriteFrameworkAssemblies);
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
                 WriteItemGroup(WritePackageDependencies);
-                WriteItemGroup(WritePackageFolders);                
+                WriteItemGroup(WritePackageFolders);
+                WriteItemGroup(WriteReferenceDocumentationFiles);
                 WriteItemGroup(WriteResourceAssemblies);
                 WriteItemGroup(WriteRuntimeAssemblies);
                 WriteItemGroup(WriteRuntimeTargets);
@@ -1091,6 +1128,61 @@ namespace Microsoft.NET.Build.Tasks
                     });
             }
 
+            private void WriteDebugSymbolsFiles()
+            {
+                WriteDebugItems(
+                    p => p.RuntimeAssemblies,
+                    MetadataKeys.PdbExtension);
+            }
+
+            private void WriteReferenceDocumentationFiles()
+            {
+                WriteDebugItems(
+                    p => p.CompileTimeAssemblies,
+                    MetadataKeys.XmlExtension);
+            }
+
+            private void WriteDebugItems(
+                Func<LockFileTargetLibrary, IEnumerable<LockFileItem>> getAssets,
+                string extension)
+            {
+                foreach (var library in _runtimeTarget.Libraries)
+                {
+                    if (!library.IsPackage())
+                    {
+                        continue;
+                    }
+
+                    foreach (LockFileItem asset in getAssets(library))
+                    {
+                        if (asset.IsPlaceholderFile() || !asset.Properties.ContainsKey(MetadataKeys.RelatedProperty))
+                        {
+                            continue;
+                        }
+
+                        string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
+
+                        string relatedExtensions = asset.Properties[MetadataKeys.RelatedProperty];
+
+                        foreach (string fileExtension in relatedExtensions.Split(RelatedPropertySeparator))
+                        {
+                            if (fileExtension.ToLower() == extension)
+                            {
+                                string xmlFilePath = Path.ChangeExtension(itemSpec, fileExtension);
+                                if (File.Exists(xmlFilePath))
+                                {
+                                    WriteItem(xmlFilePath, library);
+                                }
+                                else
+                                {
+                                    _task.Log.LogWarning(Strings.AssetsFileNotFound, xmlFilePath);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             private void WriteFrameworkAssemblies()
             {
                 if (_task.DisableFrameworkAssemblies)
@@ -1127,7 +1219,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteLogMessages()
             {
-                string GetSeverity(LogLevel level)
+                static string GetSeverity(LogLevel level)
                 {
                     switch (level)
                     {
@@ -1178,7 +1270,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteMismatchedPlatformPackageVersionMessageIfNecessary()
             {
-                bool hasTwoPeriods(string s)
+                static bool hasTwoPeriods(string s)
                 {
                     int firstPeriodIndex = s.IndexOf('.');
                     if (firstPeriodIndex < 0)
@@ -1334,6 +1426,42 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         WriteMetadata(MetadataKeys.AssetType, "resources");
                         string locale = asset.Properties["locale"];
+                        // Locales from packages can be free-form, so we normalize them to the standard
+                        // forms here. If the locale is mixed-case, that can cause issues on case-sensitive
+                        // file systems when the locale-specific assets are copied.
+                        try
+                        {
+                            var normalizedLocale = System.Globalization.CultureInfo.GetCultureInfo(locale).Name;
+                            if (normalizedLocale != locale)
+                            {
+                                var tfm = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
+                                if (tfm.Version.Major >= 7)
+                                {
+                                    _task.Log.LogWarning(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                                }
+                                else
+                                {
+                                    _task.Log.LogMessage(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                                }
+                            }
+                            locale = normalizedLocale;
+                        }
+                        catch (System.Globalization.CultureNotFoundException cnf)
+                        {
+                            var tfm = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
+                            if (tfm.Version.Major >= 7)
+                            {
+                                _task.Log.LogWarning(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                            } else
+                            {
+                                _task.Log.LogMessage(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                            }
+
+                            // We could potentially strip this unknown locale at this point, but we do not.
+                            // Locale data can change over time (it's typically an OS database that's kept updated),
+                            // and the data on the system running the build may not be the same data as
+                            // the system executing the built code. So we should be permissive for this case.
+                        }
                         bool wroteCopyLocalMetadata = WriteCopyLocalMetadataIfNeeded(
                                 package,
                                 Path.GetFileName(asset.Path),

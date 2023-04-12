@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Plik editorconfig",
+  "description": "Tworzy plik .editorconfig na potrzeby konfigurowania preferencji stylu kodu.",
+  "symbols/Empty/displayName": "Pusty",
+  "symbols/Empty/description": "Tworzy pusty plik. editorconfig zamiast wartości domyślnych dla środowiska .NET."
+}

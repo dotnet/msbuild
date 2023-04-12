@@ -27,12 +27,6 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
         public ITaskItem[] XUnitProjects { get; set; }
 
         /// <summary>
-        /// The path of a list of test projects partial name that cannot be run in Helix. 
-        /// </summary>
-        [Required]
-        public string TestProjectExclusionListPath { get; set; }
-
-        /// <summary>
         /// The path to the dotnet executable on the Helix agent. Defaults to "dotnet"
         /// </summary>
         public string PathToDotnet { get; set; } = "dotnet";
@@ -79,14 +73,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
         /// <returns></returns>
         private async Task ExecuteAsync()
         {
-            var testExclusion = File.ReadAllLines(TestProjectExclusionListPath)
-                .Select(l => l.Trim())
-                .Where(l => !string.IsNullOrWhiteSpace(l));
-
-            var xUnitProjectsCanRunInHelix
-                = XUnitProjects.Where(p => !testExclusion.Any(p.ItemSpec.Contains));
-
-            XUnitWorkItems = (await Task.WhenAll(xUnitProjectsCanRunInHelix.Select(PrepareWorkItem)))
+            XUnitWorkItems = (await Task.WhenAll(XUnitProjects.Select(PrepareWorkItem)))
                 .SelectMany(i => i)
                 .Where(wi => wi != null)
                 .ToArray();
@@ -120,27 +107,41 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
             string assemblyName = Path.GetFileName(targetPath);
 
-            var runtimeTargetFrameworkParsed = NuGetFramework.Parse(runtimeTargetFramework);
-            if (runtimeTargetFrameworkParsed.Framework != ".NETCoreApp")
-            {
-                throw new NotImplementedException("does not support non core runtime target");
-            }
+            string driver = $"{PathToDotnet}";
 
-            string driver = $"{PathToDotnet} exec ";
+            // netfx tests should only run on Windows full framework for testing VS scenarios
+            // These tests have to be executed slightly differently and we give them a different Identity so ADO can tell them apart
+            var runtimeTargetFrameworkParsed = NuGetFramework.Parse(runtimeTargetFramework);
+            var testIdentityDifferentiator = "";
+            bool netFramework = false;
+            if (runtimeTargetFrameworkParsed.Framework == ".NETFramework")
+            {
+                testIdentityDifferentiator = ".netfx";
+                netFramework = true;
+            }
+            else if (runtimeTargetFrameworkParsed.Framework != ".NETCoreApp")
+            {
+                throw new NotImplementedException("does not support non support the runtime specified");
+            }
 
             // On mac due to https://github.com/dotnet/sdk/issues/3923, we run against workitem directory
             // but on Windows, if we running against working item diretory, we would hit long path.
-            string testExecutionDirectory = IsPosixShell ? "-testExecutionDirectory $TestExecutionDirectory" : "-testExecutionDirectory %TestExecutionDirectory%";
+            string testExecutionDirectory = netFramework ? "-e DOTNET_SDK_TEST_EXECUTION_DIRECTORY=%TestExecutionDirectory%" : IsPosixShell ? "-testExecutionDirectory $TestExecutionDirectory"  : "-testExecutionDirectory %TestExecutionDirectory%";
 
-            string msbuildAdditionalSdkResolverFolder = IsPosixShell ? "" : "-msbuildAdditionalSdkResolverFolder %HELIX_CORRELATION_PAYLOAD%\\r";
+            string msbuildAdditionalSdkResolverFolder = netFramework ? "-e DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER=%HELIX_CORRELATION_PAYLOAD%\\r" : IsPosixShell ? "" : "-msbuildAdditionalSdkResolverFolder %HELIX_CORRELATION_PAYLOAD%\\r";
 
             var scheduler = new AssemblyScheduler(methodLimit: 32);
-            var assemblyPartitionInfos = scheduler.Schedule(targetPath);
+            var assemblyPartitionInfos = scheduler.Schedule(targetPath, netFramework: netFramework);
 
             var partitionedWorkItem = new List<ITaskItem>();
             foreach (var assemblyPartitionInfo in assemblyPartitionInfos)
             {
-                string command = $"{driver}{assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
+                string command = $"{driver} exec {assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
+                if (netFramework)
+                {
+                    var testFilter = String.IsNullOrEmpty(assemblyPartitionInfo.ClassListArgumentString) ? "" : $"--filter \"{assemblyPartitionInfo.ClassListArgumentString}\"";
+                    command = $"{driver} test {assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} --results-directory .\\ --logger trx {testFilter}";
+                }
 
                 Log.LogMessage($"Creating work item with properties Identity: {assemblyName}, PayloadDirectory: {publishDirectory}, Command: {command}");
 
@@ -153,9 +154,9 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
                     }
                 }
 
-                partitionedWorkItem.Add(new Microsoft.Build.Utilities.TaskItem(assemblyPartitionInfo.DisplayName, new Dictionary<string, string>()
+                partitionedWorkItem.Add(new Microsoft.Build.Utilities.TaskItem(assemblyPartitionInfo.DisplayName + testIdentityDifferentiator, new Dictionary<string, string>()
                     {
-                        { "Identity", assemblyPartitionInfo.DisplayName},
+                        { "Identity", assemblyPartitionInfo.DisplayName + testIdentityDifferentiator},
                         { "PayloadDirectory", publishDirectory },
                         { "Command", command },
                         { "Timeout", timeout.ToString() },

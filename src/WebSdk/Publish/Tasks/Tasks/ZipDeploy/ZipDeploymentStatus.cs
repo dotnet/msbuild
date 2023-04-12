@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.Sdk.Publish.Tasks.MsDeploy;
 using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 using Task = System.Threading.Tasks.Task;
 
@@ -33,50 +34,46 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             _logMessages = logMessages;
         }
 
-        public async Task<DeployStatus> PollDeploymentStatusAsync(string deploymentUrl, string userName, string password)
+        public async Task<DeploymentResponse> PollDeploymentStatusAsync(string deploymentUrl, string userName, string password)
         {
-            DeployStatus deployStatus = DeployStatus.Pending;
             var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(MaxMinutesToWait));
+
             if (_logMessages)
             {
                 _log.LogMessage(Resources.ZIPDEPLOY_DeploymentStatusPolling);
             }
-            while (!tokenSource.IsCancellationRequested && deployStatus != DeployStatus.Success && deployStatus != DeployStatus.Failed && deployStatus != DeployStatus.Unknown)
+
+            DeploymentResponse deploymentResponse = null;
+            DeployStatus? deployStatus = DeployStatus.Pending;
+
+            while (!tokenSource.IsCancellationRequested
+                && deployStatus != DeployStatus.Success
+                && deployStatus != DeployStatus.Failed
+                && deployStatus != DeployStatus.Unknown)
             {
                 try
                 {
-                    deployStatus = await GetDeploymentStatusAsync(deploymentUrl, userName, password, RetryCount, TimeSpan.FromSeconds(RetryDelaySeconds), tokenSource);
+                    deploymentResponse = await InvokeGetRequestWithRetryAsync<DeploymentResponse>(
+                        deploymentUrl, userName, password, RetryCount, TimeSpan.FromSeconds(RetryDelaySeconds), tokenSource);
+
+                    deployStatus = deploymentResponse?.Status is not null
+                        ? deploymentResponse.Status
+                        : DeployStatus.Unknown;
+
                     if (_logMessages)
                     {
-                        _log.LogMessage(String.Format(Resources.ZIPDEPLOY_DeploymentStatus, Enum.GetName(typeof(DeployStatus), deployStatus)));
+                        _log.LogMessage(string.Format(Resources.ZIPDEPLOY_DeploymentStatus, Enum.GetName(typeof(DeployStatus), deployStatus)));
                     }
                 }
                 catch (HttpRequestException)
                 {
-                    return DeployStatus.Unknown;
+                    return deploymentResponse;
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(StatusRefreshDelaySeconds));
             }
 
-            return deployStatus;
-        }
-
-        private async Task<DeployStatus> GetDeploymentStatusAsync(string deploymentUrl, string userName, string password, int retryCount, TimeSpan retryDelay, CancellationTokenSource cts)
-        {
-            Dictionary<string, object> json = await InvokeGetRequestWithRetryAsync<Dictionary<string, object>>(deploymentUrl, userName, password, retryCount, retryDelay, cts);
-            object status = null;
-            if (json!= null && !json.TryGetValue("status", out status))
-            {
-                return DeployStatus.Unknown;
-            }
-
-            if (status != null && Enum.TryParse(status.ToString(), out DeployStatus result))
-            {
-                return result;
-            }
-
-            return DeployStatus.Unknown;
+            return deploymentResponse ?? new() { Status = DeployStatus.Unknown };
         }
 
         private async Task<T> InvokeGetRequestWithRetryAsync<T>(string url, string userName, string password, int retryCount, TimeSpan retryDelay, CancellationTokenSource cts)

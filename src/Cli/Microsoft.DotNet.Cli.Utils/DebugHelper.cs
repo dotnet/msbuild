@@ -23,8 +23,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static void WaitForDebugger()
         {
+#if NET5_0_OR_GREATER
+            int processId = Environment.ProcessId;
+#else
+            int processId = Process.GetCurrentProcess().Id;
+#endif
+
             Console.WriteLine(LocalizableStrings.WaitingForDebuggerToAttach);
-            Console.WriteLine(string.Format(LocalizableStrings.ProcessId, Process.GetCurrentProcess().Id));
+            Console.WriteLine(string.Format(LocalizableStrings.ProcessId, processId));
             Console.ReadLine();
         }
     }

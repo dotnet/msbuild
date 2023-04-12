@@ -47,14 +47,14 @@ namespace Microsoft.NET.Publish.Tests
                 // TestLibrary has a hard dependency on Newtonsoft.Json.
                 // TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel, which depends on Newtonsoft.Json.
                 // This verifies that P2P references get walked correctly when doing PrivateAssets exclusion.
-                VerifyDependency(dependencyContext, "Newtonsoft.Json", "lib/netstandard1.0/", null);
+                VerifyDependency(dependencyContext, "Newtonsoft.Json", targetFramework == "net6.0" ? "lib/netstandard2.0/" : "lib/netstandard1.3/", null);
 
                 // Verify P2P references get created correctly in the .deps.json file.
                 VerifyDependency(dependencyContext, "TestLibrary", "", null,
                     "da", "de", "fr");
 
                 // Verify package reference with satellites gets created correctly in the .deps.json file
-                VerifyDependency(dependencyContext, "Humanizer.Core", targetFramework == ToolsetInfo.CurrentTargetFramework ? "lib/netstandard2.0/" : "lib/netstandard1.0/", "Humanizer",
+                VerifyDependency(dependencyContext, "Humanizer.Core", targetFramework == "net6.0" ? "lib/netstandard2.0/" : "lib/netstandard1.0/", "Humanizer",
                     "af", "ar", "az", "bg", "bn-BD", "cs", "da", "de", "el", "es", "fa", "fi-FI", "fr", "fr-BE", "he", "hr",
                     "hu", "hy", "id", "it", "ja", "lv", "ms-MY", "mt", "nb", "nb-NO", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr",
                     "sr-Latn", "sv", "tr", "uk", "uz-Cyrl-UZ", "uz-Latn-UZ", "vi", "zh-CN", "zh-Hans", "zh-Hant");
@@ -90,6 +90,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Runtime.TieredCompilation"": true,
             ""System.Runtime.TieredCompilation.QuickJit"": true,
             ""System.Runtime.TieredCompilation.QuickJitForLoops"": true,
+            ""System.Runtime.TieredPGO"": true,
             ""System.StartupHookProvider.IsSupported"": false,
             ""System.Text.Encoding.EnableUnsafeUTF7Encoding"": false,
             ""System.Threading.Thread.EnableAutoreleasePool"": false,
@@ -106,7 +107,7 @@ namespace Microsoft.NET.Publish.Tests
 }");
             baselineConfigJsonObject["runtimeOptions"]["tfm"] = targetFramework;
             baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] =
-                targetFramework == ToolsetInfo.CurrentTargetFramework ? "6.0.0" : "1.1.2";
+                targetFramework == "net6.0" ? "6.0.0" : "1.1.2";
             
             runtimeConfigJsonObject
                 .Should()
@@ -244,7 +245,7 @@ namespace Microsoft.NET.Publish.Tests
             get
             {
                 yield return new object[] {
-                    ToolsetInfo.CurrentTargetFramework,
+                    "net6.0",
                     new string[]
                     {
                         "TestApp.dll",
@@ -327,6 +328,12 @@ namespace Microsoft.NET.Publish.Tests
                         "TestLibrary.dll",
                         "TestLibrary.pdb",
                         "Newtonsoft.Json.dll",
+                        "System.Collections.NonGeneric.dll",
+                        "System.Collections.Specialized.dll",
+                        "System.ComponentModel.Primitives.dll",
+                        "System.ComponentModel.TypeConverter.dll",
+                        "System.Runtime.Serialization.Formatters.dll",
+                        "System.Xml.XmlDocument.dll",
                         "System.Runtime.Serialization.Primitives.dll",
                         "CompileCopyToOutput.cs",
                         "Resource1.resx",

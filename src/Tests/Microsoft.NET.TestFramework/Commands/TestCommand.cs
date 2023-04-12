@@ -46,6 +46,14 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
+        public TestCommand WithCulture(string locale) => WithEnvironmentVariable(UILanguageOverride.DOTNET_CLI_UI_LANGUAGE, locale);
+
+        public TestCommand WithTraceOutput()
+        {
+            WithEnvironmentVariable("DOTNET_CLI_VSTEST_TRACE", "1");
+            return this;
+        }
+
         private SdkCommandSpec CreateCommandSpec(IEnumerable<string> args)
         {
             var commandSpec = CreateCommand(args);

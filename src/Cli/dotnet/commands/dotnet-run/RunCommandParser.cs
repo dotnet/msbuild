@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<IEnumerable<string>>(new string[] { "--property", "-p" }, LocalizableStrings.PropertyOptionDescription)
                 .SetForwardingFunction((values, parseResult) => parseResult.GetRunCommandPropertyValues().Select(value => $"-p:{value}"));
 
-        public static readonly Option<string> LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription);
+        public static readonly Option<string> LaunchProfileOption = new Option<string>(new string[] { "--launch-profile", "-lp" }, LocalizableStrings.CommandOptionLaunchProfileDescription);
 
         public static readonly Option<bool> NoLaunchProfileOption = new Option<bool>("--no-launch-profile", LocalizableStrings.CommandOptionNoLaunchProfileDescription);
 
@@ -41,6 +41,8 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption;
 
         public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
+
+        public static readonly Argument<IEnumerable<string>> ApplicationArguments = new Argument<IEnumerable<string>>("applicationArguments", () => Array.Empty<string>(), "Arguments passed to the application that is being run.");
 
         private static readonly Command Command = ConstructCommand();
 
@@ -68,7 +70,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.ArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
-            command.TreatUnmatchedTokensAsErrors = false;
+
+            command.AddArgument(ApplicationArguments);
 
             command.SetHandler(RunCommand.Run);
 

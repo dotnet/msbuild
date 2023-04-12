@@ -53,7 +53,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(outputPath, "wwwroot", "blazorwasm-minimal.modules.json")).Should().NotExist();
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void JSModules_ManifestIncludesModuleTargetPaths()
         {
             // Arrange
@@ -255,7 +255,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void JsModules_Hosted_CanCustomizeBlazorInitialization()
         {
             // Arrange

@@ -17,11 +17,6 @@
         <target state="translated">Umožňuje spravovat instalaci sady .NET SDK.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="new">SQL Server cache command-line tools.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Použití</target>
@@ -60,6 +55,11 @@
       <trans-unit id="HostOptions">
         <source>Host options (passed before the command)</source>
         <target state="translated">Možnosti hostitele (předané před příkazem)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="translated">Spravujte webové tokeny JSON ve vývoji.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">

@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
+    <PackageReference Include="StyleCop.Analyzers" Version="$(StyleCopAnalyzersPackageVersion)" PrivateAssets="all" Condition="'$(EnableStyleCopAnalyzer)' == 'true'" />
+  </ItemGroup>
+</Project>

@@ -83,7 +83,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void StaticWebAssets_Build_Hosted_Works()
         {
             // Arrange
@@ -114,7 +114,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void StaticWebAssets_Publish_Hosted_Works()
         {
             // Arrange
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void StaticWebAssets_Publish_DoesNotIncludeXmlDocumentationFiles_AsAssets()
         {
             // Arrange
@@ -226,7 +226,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
+        [Fact]
         public void StaticWebAssets_BackCompatibilityPublish_Hosted_Works()
         {
             // Arrange

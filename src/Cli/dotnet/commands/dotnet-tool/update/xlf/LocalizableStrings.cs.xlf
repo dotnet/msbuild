@@ -52,9 +52,14 @@
         <target state="translated">Nástroj {0} byl úspěšně aktualizován z verze {1} na verzi {2} (soubor manifestu {3}).</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="translated">Nástroj{0}byl znovu nainstalován s nejnovější předběžnou verzí (verze{1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <target state="translated">Nástroj {0} byl přeinstalován nejnovější stabilní verzí (verze {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
@@ -73,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">Aktualizuje globální nástroj.</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">Aktualizace globálního nebo místního nástroje.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

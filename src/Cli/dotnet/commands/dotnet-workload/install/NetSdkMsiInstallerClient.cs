@@ -781,7 +781,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             // Extract the contents to a random folder to avoid potential file injection/hijacking
             // shenanigans before moving it to the final cache directory.
-            string extractionDirectory = PathUtilities.CreateTempSubdirectory();
+            string extractionDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(extractionDirectory);
             Log?.LogMessage($"Extracting '{packageId}' to '{extractionDirectory}'");
             _ = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(extractionDirectory)).Result;
@@ -946,7 +946,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string tempDirPath = null,
             RestoreActionConfig restoreActionConfig = null)
         {
-            TimestampedFileLogger logger = new(Path.Combine(Path.GetTempPath(), $"Microsoft.NET.Workload_{DateTime.Now:yyyyMMdd_HHmmss}.log"));
+            TimestampedFileLogger logger = new(Path.Combine(Path.GetTempPath(), $"Microsoft.NET.Workload_{Environment.ProcessId}_{DateTime.Now:yyyyMMdd_HHmmss}.log"));
             InstallClientElevationContext elevationContext = new(logger);
 
             if (nugetPackageDownloader == null)
@@ -954,7 +954,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? PathUtilities.CreateTempSubdirectory() : tempDirPath);
 
                 nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
-                    filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir),
+                    filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(),
                     new NullLogger(), restoreActionConfig: restoreActionConfig);
             }
 
