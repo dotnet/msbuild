@@ -165,7 +165,7 @@ namespace Microsoft.Build.Tasks
                     {
                         using (XmlReader xr = xmlinput.CreateReader(i))
                         {
-                            xslct.Transform(xr, arguments, xmlWriter);
+                            xslct.Transform(xr, arguments, xmlWriter, new XmlUrlResolver());
                         }
 
                         xmlWriter.Close();
