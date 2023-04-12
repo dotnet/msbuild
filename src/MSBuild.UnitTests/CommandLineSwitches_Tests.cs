@@ -156,7 +156,6 @@ namespace Microsoft.Build.UnitTests
             duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
-#if FEATURE_LIVELOGGER
         [Theory]
         [InlineData("ll")]
         [InlineData("LL")]
@@ -181,7 +180,6 @@ namespace Microsoft.Build.UnitTests
             unquoteParameters.ShouldBeTrue();
             emptyParametersAllowed.ShouldBeTrue();
         }
-#endif
 
         [Theory]
         [InlineData("flp")]

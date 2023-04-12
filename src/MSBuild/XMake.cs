@@ -34,9 +34,7 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
-#if FEATURE_LIVELOGGER
 using LiveLogger = Microsoft.Build.Logging.LiveLogger.LiveLogger;
-#endif
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
@@ -2520,7 +2518,6 @@ namespace Microsoft.Build.CommandLine
 
         private static bool ProcessLiveLoggerConfiguration(CommandLineSwitches commandLineSwitches)
         {
-#if FEATURE_LIVELOGGER
             string liveLoggerArg;
 
             // Command line wins, so check it first
@@ -2586,9 +2583,6 @@ namespace Microsoft.Build.CommandLine
                 }
                 return true;
             }
-#else
-            return false;
-#endif
         }
 
         private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
@@ -3372,13 +3366,11 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
-#if FEATURE_LIVELOGGER
             if (liveLoggerOptIn)
             {
                 ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
             }
             else
-#endif
             {
                 ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
@@ -3552,7 +3544,6 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-#if FEATURE_LIVELOGGER
         private static void ProcessLiveLogger(
             bool noConsoleLogger,
             List<DistributedLoggerRecord> distributedLoggerRecords,
@@ -3578,7 +3569,6 @@ namespace Microsoft.Build.CommandLine
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Returns a DistributedLoggerRecord containing this logger and a ConfigurableForwardingLogger.

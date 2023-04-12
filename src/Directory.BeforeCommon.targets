@@ -92,7 +92,6 @@
     <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
     <DefineConstants>$(DefineConstants);WORKAROUND_COREFX_19110</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SYMLINK_TARGET</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_LIVELOGGER</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">

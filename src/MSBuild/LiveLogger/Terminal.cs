@@ -3,6 +3,9 @@
 
 using System;
 using System.Text;
+#if NETFRAMEWORK
+using Microsoft.Build.Shared;
+#endif
 
 namespace Microsoft.Build.Logging.LiveLogger;
 

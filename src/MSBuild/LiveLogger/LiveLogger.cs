@@ -4,12 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
 
 namespace Microsoft.Build.Logging.LiveLogger;
 
@@ -354,9 +358,13 @@ internal sealed class LiveLogger : INodeLogger
                         }
                         catch
                         {
-                            // Ignore any GetDirectoryName exceptions
+                            // Ignore any GetDirectoryName exceptions.
                         }
+#if NETCOREAPP
                         Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}");
+#else
+                        Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url.ToString()}{AnsiCodes.LinkInfix}{outputPath.ToString()}{AnsiCodes.LinkSuffix}");
+#endif
                     }
                     else
                     {
@@ -637,12 +645,12 @@ internal sealed class LiveLogger : INodeLogger
             int i = 0;
             for (; i < NodesCount; i++)
             {
-                var needed = FitToWidth(NodeString(i));
+                var needed = FitToWidth(NodeString(i).AsSpan());
 
                 // Do we have previous node string to compare with?
                 if (previousFrame.NodesCount > i)
                 {
-                    var previous = FitToWidth(previousFrame.NodeString(i));
+                    var previous = FitToWidth(previousFrame.NodeString(i).AsSpan());
 
                     if (!previous.SequenceEqual(needed))
                     {
