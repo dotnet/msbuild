@@ -56,9 +56,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\EncodingUtilities.cs">
-      <Link>SharedUtilities\EncodingUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
     </Compile>

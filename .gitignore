@@ -218,3 +218,6 @@ stage1/
 
 # .DS_Store for macOS
 **/.DS_Store
+
+# We keep launchSettings.json local
+**/launchSettings.json

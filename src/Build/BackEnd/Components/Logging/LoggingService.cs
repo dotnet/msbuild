@@ -1637,7 +1637,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </remarks>
         private void UpdateMinimumMessageImportance(ILogger logger)
         {
-            var innerLogger = (logger is Evaluation.ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
+            var innerLogger = (logger is ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
 
             MessageImportance? minimumImportance = innerLogger switch
             {
@@ -1651,8 +1651,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // If the logger is not on our whitelist, there are no importance guarantees. Fall back to "any importance".
-                _ => MessageImportance.Low
+                // The live logger consumes only high priority messages.
+                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.LiveLogger.LiveLogger"
+                    ? MessageImportance.High
+                    // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
+                    : MessageImportance.Low,
             };
 
             if (minimumImportance != null)

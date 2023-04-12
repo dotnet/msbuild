@@ -28,6 +28,32 @@
         <target state="translated">MSBUILD : error MSB1027: MSBuild.rsp 자동 지시 파일과 자동 지시 파일에서 참조하는 모든 지시 파일에는 -noAutoResponse 스위치를 지정할 수 없습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DeferredResponseFile">
+        <source>Included response file: {0}</source>
+        <target state="new">Included response file: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpMessage_41_QuestionSwitch">
+        <source>  -question
+                     (Experimental) Question whether there is any build work.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
+                     (Short form: -q)
+    </source>
+        <target state="new">  -question
+                     (Experimental) Question whether there is any build work.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
+                     (Short form: -q)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-question" and "-q" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="new">MSBuild version {0} for {1}</target>
@@ -274,8 +300,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_40_WarnNotAsErrorSwitch">
-        <source>
-      -warnNotAsError[:code[;code2]]
+        <source>  -warnNotAsError[:code[;code2]]
                      List of warning codes to treats not treat as errors.
                      Use a semicolon or a comma to separate
                      multiple warning codes. Has no effect if the -warnaserror
@@ -284,16 +309,15 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="translated">
-       -warnNotAsError[:code[;code2]]
-                     오류로 처리하지 않을 경고 코드 목록입니다.
-                     세미콜론이나 쉼표를 사용하여 구분하세요.
-                     여러 경고 코드. -warnaserror
- 스위치가 설정되어 있지 않으면 효과가 없습니다.
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-                     예:
-                     -warnNotAsError:MSB3026
-   </target>
+                     Example:
+                       -warnNotAsError:MSB3026
+    </target>
         <note>
       LOCALIZATION: "-warnNotAsError" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -1412,6 +1436,11 @@
         <source>MSBUILD : error MSB1015: MSBuild does not run on this version of the operating system. It is only supported on Windows 7 and later versions.</source>
         <target state="translated">MSBUILD : error MSB1015: 이 운영 체제 버전에서는 MSBuild를 실행할 수 없습니다. MSBuild는 Windows 7 이상의 버전에서만 지원됩니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1015: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedSwitchForSolutionFiles">
+        <source>The '{0}' switch is not supported for solution files.</source>
+        <target state="new">The '{0}' switch is not supported for solution files.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Using35Engine">
         <source>Forcing load of Microsoft.Build.Engine because MSBUILDOLDOM=1...</source>

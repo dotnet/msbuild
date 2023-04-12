@@ -295,6 +295,9 @@ dotnet_diagnostic.IDE0049.severity = suggestion
 # Use compound assignment
 dotnet_diagnostic.IDE0054.severity = suggestion
 
+# Fix formatting
+dotnet_diagnostic.IDE0055.severity = suggestion
+
 # Indexing can be simplified
 dotnet_diagnostic.IDE0056.severity = suggestion
 
