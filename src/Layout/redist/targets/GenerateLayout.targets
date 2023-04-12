@@ -158,8 +158,18 @@
 
     <!-- adding Microsoft.NET.Build.Containers nuget package to library packs for Microsoft.NET.Sdk.Web to be able to implicitly reference package as required by VS-->
     <!-- for now adding as part of Microsoft.NET.Sdk.Web as it is only used there -->
-    <Copy SourceFiles="$(ArtifactsDir)packages\$(Configuration)\Shipping\Microsoft.NET.Build.Containers.$(Version).nupkg"
-            DestinationFiles="$(OutputPath)\Sdks\Microsoft.NET.Sdk.Web\library-packs\Microsoft.NET.Build.Containers.$(Version).nupkg" />
+
+    <!-- when the build is stabilized, version differs depending on whether the package is shipping --> 
+    <!-- if the DotNetFinalVersionKind is release and project is shipping, only $(VersionPrefix) is used, if the project is not shipping $(Version)-$(VersionSuffix) is used. -->
+    <!-- see https://github.com/dotnet/arcade/blob/main/src/Microsoft.DotNet.Arcade.Sdk/tools/Version.BeforeCommonTargets.targets#L125-L166 for more details-->
+    <!-- since Microsoft.NET.Build.Containers is shipping, use only $(VersionPrefix) after the build is stabilized. -->  
+    <PropertyGroup>
+      <_MicrosoftNETBuildContainersVersion>$(Version)</_MicrosoftNETBuildContainersVersion>
+      <_MicrosoftNETBuildContainersVersion Condition="'$(DotNetFinalVersionKind)' == 'release'">$(VersionPrefix)</_MicrosoftNETBuildContainersVersion>
+    </PropertyGroup>
+
+    <Copy SourceFiles="$(ArtifactsDir)packages\$(Configuration)\Shipping\Microsoft.NET.Build.Containers.$(_MicrosoftNETBuildContainersVersion).nupkg"
+            DestinationFiles="$(OutputPath)\Sdks\Microsoft.NET.Sdk.Web\library-packs\Microsoft.NET.Build.Containers.$(_MicrosoftNETBuildContainersVersion).nupkg" />
 
     <!-- update containers package version in Sdk.props-->
     <PropertyGroup>
@@ -170,7 +180,7 @@
     
     <XmlPoke
       XmlInputPath="$(OutputPath)Sdks\Microsoft.NET.Sdk.Web\Sdk\Sdk.props"
-      Value="$(Version)"
+      Value="$(_MicrosoftNETBuildContainersVersion)"
       Query="/dn:Project/dn:PropertyGroup/dn:_BuiltInMicrosoftNETBuildContainersVersion"
       Namespaces="$(MSBuildNamespaces)" />
   </Target>
