@@ -29,6 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyDescriptionAttribute Condition="'$(GenerateAssemblyDescriptionAttribute)' == ''">true</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyFileVersionAttribute Condition="'$(GenerateAssemblyFileVersionAttribute)' == ''">true</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute Condition="'$(GenerateAssemblyInformationalVersionAttribute)' == ''">true</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyTrademarkAttribute Condition="'$(GenerateAssemblyTrademarkAttribute)' == ''">true</GenerateAssemblyTrademarkAttribute>
     <GenerateAssemblyProductAttribute Condition="'$(GenerateAssemblyProductAttribute)' == ''">true</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute Condition="'$(GenerateAssemblyTitleAttribute)' == ''">true</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute Condition="'$(GenerateAssemblyVersionAttribute)' == ''">true</GenerateAssemblyVersionAttribute>
@@ -93,6 +94,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       </AssemblyAttribute>
       <AssemblyAttribute Include="System.Reflection.AssemblyProductAttribute" Condition="'$(Product)' != '' and '$(GenerateAssemblyProductAttribute)' == 'true'">
         <_Parameter1>$(Product)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyTrademarkAttribute" Condition="'$(Trademark)' != '' and '$(GenerateAssemblyTrademarkAttribute)' == 'true'">
+        <_Parameter1>$(Trademark)</_Parameter1>
       </AssemblyAttribute>
       <AssemblyAttribute Include="System.Reflection.AssemblyTitleAttribute" Condition="'$(AssemblyTitle)' != '' and '$(GenerateAssemblyTitleAttribute)' == 'true'">
         <_Parameter1>$(AssemblyTitle)</_Parameter1>
