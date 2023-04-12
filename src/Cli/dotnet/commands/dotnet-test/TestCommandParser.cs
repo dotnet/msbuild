@@ -140,6 +140,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(AdapterOption);
             command.AddOption(LoggerOption);
             command.AddOption(OutputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(DiagOption);
             command.AddOption(NoBuildOption);
             command.AddOption(ResultsOption);

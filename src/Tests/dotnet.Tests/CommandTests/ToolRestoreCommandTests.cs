@@ -416,7 +416,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 return _toReturn;
             }
 
-            public FilePath FindFirst()
+            public FilePath FindFirst(bool createManifestFileOption = false)
             {
                 throw new NotImplementedException();
             }
@@ -434,7 +434,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 throw new ToolManifestCannotBeFoundException("In test cannot find manifest");
             }
 
-            public FilePath FindFirst()
+            public FilePath FindFirst(bool createManifestFileOption = false)
             {
                 throw new NotImplementedException();
             }

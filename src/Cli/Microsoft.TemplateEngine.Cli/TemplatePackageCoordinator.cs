@@ -116,8 +116,8 @@ namespace Microsoft.TemplateEngine.Cli
                 return default;
             }
 
-            NuGetVersion managedPackageVersion;
-            NuGetVersion unmanagedPackageVersion;
+            NuGetVersion? managedPackageVersion;
+            NuGetVersion? unmanagedPackageVersion;
 
             if (NuGetVersion.TryParse(managedTemplatePackage.Version, out managedPackageVersion) && NuGetVersion.TryParse(matchingTemplatePackage.Version, out unmanagedPackageVersion))
             {
@@ -667,7 +667,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_DetailsHeader.Indent(level: 2));
                     foreach (KeyValuePair<string, string> detail in displayDetails)
                     {
-                        Reporter.Output.WriteLine($"{detail.Key}: {detail.Value}".Indent(level: 3));
+                        Reporter.Output.WriteLine($"{detail.Key}: {GetFormattedValue(detail.Value)}".Indent(level: 3));
                     }
                 }
 
@@ -692,6 +692,16 @@ namespace Microsoft.TemplateEngine.Cli
 
                 Reporter.Output.WriteLine();
             }
+        }
+
+        private string GetFormattedValue(string rawValue)
+        {
+            if (bool.TryParse(rawValue, out bool value))
+            {
+                return value ? "✔" : "✘";
+            }
+
+            return rawValue;
         }
 
         private async Task DisplayInstallResultAsync(string packageToInstall, InstallerOperationResult result, ParseResult parseResult, CancellationToken cancellationToken)

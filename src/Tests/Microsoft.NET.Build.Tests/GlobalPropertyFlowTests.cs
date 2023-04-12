@@ -160,7 +160,7 @@ namespace Microsoft.NET.Build.Tests
             bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
 
             ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained,
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: true,
                 //  Right now passing "--self-contained" also causes the RuntimeIdentifier to be passed as a global property.
                 //  That should change with https://github.com/dotnet/sdk/pull/26143, which will likely require updating this and other tests in this class
                 expectedRuntimeIdentifier: buildingSelfContained ? "" : _referencedProject.RuntimeIdentifier);
@@ -252,14 +252,6 @@ namespace Microsoft.NET.Build.Tests
         {
             targetFramework = targetFramework ?? testProject.TargetFrameworks;
 
-
-            if (string.IsNullOrEmpty(expectedRuntimeIdentifier) && (expectSelfContained || expectRuntimeIdentifier))
-            {
-                //  RuntimeIdentifier might be inferred, so look at the output path to figure out what the actual value used was
-                string dir = (Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Debug", targetFramework));
-                expectedRuntimeIdentifier = Path.GetFileName(Directory.GetDirectories(dir).Single());
-            }
-
             var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
             if (expectSelfContained)
             {
@@ -270,7 +262,23 @@ namespace Microsoft.NET.Build.Tests
                 properties["SelfContained"].ToLowerInvariant().Should().BeOneOf("false", "");
             }
 
-            properties["RuntimeIdentifier"].Should().Be(expectedRuntimeIdentifier);
+
+            if (expectRuntimeIdentifier)
+            {
+                if (!string.IsNullOrEmpty(expectedRuntimeIdentifier))
+                {
+                    properties["RuntimeIdentifier"].Should().Be(expectedRuntimeIdentifier);
+                }
+                else
+                {
+                    properties["RuntimeIdentifier"].Should().NotBeEmpty();
+                }
+            }
+            else
+            {
+                properties["RuntimeIdentifier"].Should().BeEmpty();
+            }
+            
         }
 
     }

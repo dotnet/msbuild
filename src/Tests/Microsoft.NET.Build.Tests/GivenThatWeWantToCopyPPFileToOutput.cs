@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputPath = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Debug", testProject.TargetFrameworks);
+            var outputPath = buildCommand.GetOutputDirectory().FullName;
             File.Exists(Path.Combine(outputPath, packageReference.ID + ".dll")).Should().BeTrue();
             File.Exists(Path.Combine(outputPath, "Nontransformed.ps1")).Should().BeTrue();
             File.Exists(Path.Combine(outputPath, "Test.ps1")).Should().BeTrue();
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
             packageAsset = packageAsset
                 .WithProjectChanges(project => AddContent(project));
 
-            var packCommand = new PackCommand(Log, packageAsset.TestRoot, referencedPackage.Name);
+            var packCommand = new PackCommand(packageAsset);
             packCommand.Execute()
                 .Should()
                 .Pass();

@@ -47,6 +47,12 @@ namespace Microsoft.TemplateEngine.Cli
             string? framework = isMicrosoftAuthored ? TelemetryHelper.PrepareHashedChoiceValue(templateToRun, templateParameters, "Framework") : null;
             string? auth = isMicrosoftAuthored ? TelemetryHelper.PrepareHashedChoiceValue(templateToRun, templateParameters, "auth") : null;
             string? templateName = Sha256Hasher.HashWithNormalizedCasing(templateToRun.Identity);
+            string? templateShortNames = templateToRun.ShortNameList.Any() ? Sha256Hasher.HashWithNormalizedCasing(string.Join(',', templateToRun.ShortNameList)) : null;
+
+            using TemplatePackageManager templatePackageManager = new(_environmentSettings);
+            var templatePackage = await templateArgs.Template.GetManagedTemplatePackageAsync(templatePackageManager, cancellationToken).ConfigureAwait(false);
+            string? packageName = string.IsNullOrEmpty(templatePackage?.Identifier) ? null : Sha256Hasher.HashWithNormalizedCasing(templatePackage.Identifier);
+            string? packageVersion = string.IsNullOrEmpty(templatePackage?.Version) ? null : Sha256Hasher.HashWithNormalizedCasing(templatePackage.Version);
 
             bool success = true;
 
@@ -80,6 +86,9 @@ namespace Microsoft.TemplateEngine.Cli
                         { TelemetryConstants.ArgError, "False" },
                         { TelemetryConstants.Framework, framework },
                         { TelemetryConstants.TemplateName, templateName },
+                        { TelemetryConstants.TemplateShortName, templateShortNames },
+                        { TelemetryConstants.PackageName, packageName },
+                        { TelemetryConstants.PackageVersion, packageVersion },
                         { TelemetryConstants.IsTemplateThirdParty, (!isMicrosoftAuthored).ToString() },
                         { TelemetryConstants.CreationResult, success.ToString() },
                         { TelemetryConstants.Auth, auth }

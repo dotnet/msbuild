@@ -33,11 +33,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            new BuildCommand(testAsset)
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testRoot, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{testAppName}.dll");
+            var outputDll = Path.Combine(buildCommand.GetOutputDirectory(configuration: configuration).FullName, $"{testAppName}.dll");
 
             // Call vstest
             var result = new DotnetTestCommand(Log)

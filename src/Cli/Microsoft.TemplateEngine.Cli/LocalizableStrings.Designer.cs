@@ -513,6 +513,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package Name / Owners.
+        /// </summary>
+        internal static string ColumnNamePackageNameAndOwners {
+            get {
+                return ResourceManager.GetString("ColumnNamePackageNameAndOwners", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Precedence.
         /// </summary>
         internal static string ColumnNamePrecedence {
@@ -563,6 +572,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string ColumnNameTotalDownloads {
             get {
                 return ResourceManager.GetString("ColumnNameTotalDownloads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trusted.
+        /// </summary>
+        internal static string ColumnNameTrusted {
+            get {
+                return ResourceManager.GetString("ColumnNameTrusted", resourceCulture);
             }
         }
         

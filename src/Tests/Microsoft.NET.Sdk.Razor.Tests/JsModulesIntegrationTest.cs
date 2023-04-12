@@ -243,7 +243,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // Notice that it does not follow the pattern $(PackageId).lib.module.js
             CreateFile("console.log('Hello world ClassLibrary')", "ClassLibrary", "wwwroot", "AnotherClassLib.lib.module.js");
 
-            var publish = new PublishCommand(Log, Path.Combine(ProjectDirectory.TestRoot, "AppWithPackageAndP2PReference"));
+            var publish = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             publish.WithWorkingDirectory(ProjectDirectory.Path);
             publish.Execute("/bl").Should().Pass();
 
@@ -295,7 +295,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                             new XAttribute("TargetPath", "wwwroot\\AnotherClassLib.lib.module.js"))));
                 }
             });
-            var publish = new PublishCommand(Log, Path.Combine(ProjectDirectory.TestRoot, "AppWithPackageAndP2PReference"));
+            var publish = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             publish.WithWorkingDirectory(ProjectDirectory.Path);
             publish.Execute("/bl").Should().Pass();
 

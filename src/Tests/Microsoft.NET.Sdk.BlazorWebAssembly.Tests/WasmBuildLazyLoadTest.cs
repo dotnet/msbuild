@@ -137,7 +137,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             });
 
             // Act
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
             publishCommand.Execute("/bl")
                 .Should().Pass();
@@ -186,7 +186,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             });
 
             // Act
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute("/p:Configuration=Release")
                 .Should().Pass();
 

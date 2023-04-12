@@ -11,6 +11,13 @@ namespace Microsoft.NET.TestFramework.Commands
         public PackCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null)
             : base(log, "Pack", projectPath, relativePathToProject)
         {
+
+        }
+
+        public PackCommand(TestAsset testAsset, string relativePathToProject = null)
+            : base(testAsset, "Pack", relativePathToProject)
+        {
+
         }
 
         public string GetIntermediateNuspecPath(string packageId = null, string configuration = "Debug", string packageVersion = "1.0.0")
@@ -30,7 +37,7 @@ namespace Microsoft.NET.TestFramework.Commands
                 packageId = Path.GetFileNameWithoutExtension(ProjectFile);
             }
 
-            return Path.Combine(GetOutputDirectory(null, configuration).FullName, $"{packageId}.{packageVersion}.nupkg");
+            return Path.Combine(GetPackageDirectory(configuration).FullName, $"{packageId}.{packageVersion}.nupkg");
         }
     }
 }

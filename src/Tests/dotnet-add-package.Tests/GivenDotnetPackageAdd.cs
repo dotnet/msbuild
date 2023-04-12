@@ -253,7 +253,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
         private string GetPackagePath(string targetFramework, string packageName, string version, [CallerMemberName] string callingMethod = "", string identifier = null)
         {
             var project = GetProject(targetFramework, packageName, version);
-            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier).TestRoot, packageName);
+            var packCommand = new PackCommand(_testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier));
 
             packCommand
                 .Execute()

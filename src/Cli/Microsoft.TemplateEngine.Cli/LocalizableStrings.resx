@@ -393,6 +393,10 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="ColumnNameAuthor" xml:space="preserve">
     <value>Author</value>
   </data>
+  <data name="ColumnNamePackageNameAndOwners" xml:space="preserve">
+    <value>Package Name / Owners</value>
+    <comment>information about NuGet package: its name and owner</comment>
+  </data>
   <data name="ColumnNamesAreNotSupported" xml:space="preserve">
     <value>The column {0} is/are not supported, the supported columns are: {1}.</value>
   </data>
@@ -813,5 +817,9 @@ The header is followed by the list of parameters and their errors (might be seve
   </data>
   <data name="UnexpectedResult" xml:space="preserve">
     <value>Template generation ended with unexpected result: '{0}'. Details: {1}</value>
+  </data>
+  <data name="ColumnNameTrusted" xml:space="preserve">
+    <value>Trusted</value>
+    <comment>information about NuGet package origin; if a package has PrefixReserved indicator </comment>
   </data>
 </root>

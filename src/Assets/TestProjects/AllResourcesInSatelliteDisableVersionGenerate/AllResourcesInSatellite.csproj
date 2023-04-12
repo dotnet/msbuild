@@ -9,15 +9,6 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
-  <!-- 
-    Also target desktop on Windows to get more test coverage:
-      * Desktop requires satellites to have same public key as parent whereas coreclr does not. 
-      * Reference path handling of satellite assembly generation used to be incorrect for desktop.
-   -->
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform(`Windows`))">
-    <TargetFrameworks>$(TargetFrameworks);net46</TargetFrameworks>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <PublicSign>false</PublicSign>
   </PropertyGroup>

@@ -177,7 +177,7 @@ namespace Microsoft.DotNet.GenAPI
         /// <param name="symbolFilter">Assembly symbol filter <see cref="ISymbolFilter"/>.</param>
         /// <returns>Boolean</returns>
         public static bool HasInaccessibleTypeArgument(this INamedTypeSymbol namedType, ISymbolFilter symbolFilter)
-            => namedType.IsGenericType && namedType.TypeArguments.Any(a => !symbolFilter.Include(a));
+            => namedType.IsGenericType && namedType.TypeArguments.Any(a => a.DeclaredAccessibility != Accessibility.NotApplicable && !symbolFilter.Include(a));
 
         /// <summary>
         /// Synthesize an internal default constructor for the type with implicit default constructor and the base type without.

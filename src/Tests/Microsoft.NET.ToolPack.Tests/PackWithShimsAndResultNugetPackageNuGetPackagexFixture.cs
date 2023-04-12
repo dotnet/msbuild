@@ -60,7 +60,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 nameof(NupkgOfPackWithShimsFixture) + multiTarget + targetFramework,
                 targetFramework);
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(helloWorldAsset);
             packCommand.Execute().Should().Pass();
 
             return packCommand.GetNuGetPackage(packageVersion: _packageVersion);

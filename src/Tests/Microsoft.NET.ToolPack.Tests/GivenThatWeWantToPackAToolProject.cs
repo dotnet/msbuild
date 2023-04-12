@@ -42,7 +42,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             _testRoot = helloWorldAsset.TestRoot;
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(helloWorldAsset);
 
             var result = packCommand.Execute();
             result.Should().Pass();

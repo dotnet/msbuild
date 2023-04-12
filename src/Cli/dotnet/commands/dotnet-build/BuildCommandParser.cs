@@ -66,6 +66,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.DebugOption);
             command.AddOption(OutputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(NoIncrementalOption);
             command.AddOption(NoDependenciesOption);
             command.AddOption(NoLogoOption);

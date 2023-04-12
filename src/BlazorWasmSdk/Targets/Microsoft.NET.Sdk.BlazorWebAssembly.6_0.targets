@@ -17,6 +17,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Trimmer defaults that depend on user-definable settings.
         This must be configured before it's initialized in the .NET SDK targets (which are imported by the Razor SDK). -->
     <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == '' And '$(TrimmerDefaultAction)' != 'link'">true</SuppressTrimAnalysisWarnings>
+
+    <!-- Must happen before WasmSDK import -->
+    <WasmNestedPublishAppDependsOn>_GatherBlazorFilesToPublish;$(WasmNestedPublishAppDependsOn)</WasmNestedPublishAppDependsOn>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.WebAssembly" Project="Sdk.targets" />
@@ -57,7 +60,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <DisableAutoWasmBuildApp>true</DisableAutoWasmBuildApp>
     <DisableAutoWasmPublishApp>true</DisableAutoWasmPublishApp>
-    <WasmNestedPublishAppDependsOn>_GatherBlazorFilesToPublish;$(WasmNestedPublishAppDependsOn)</WasmNestedPublishAppDependsOn>
     <BlazorEnableCompression Condition="'$(WasmBuildingForNestedPublish)' == 'true'">false</BlazorEnableCompression>
   </PropertyGroup>
 

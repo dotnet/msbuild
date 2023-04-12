@@ -56,6 +56,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(SlnOrProjectArgument);
             command.AddOption(OutputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(NoBuildOption);
             command.AddOption(IncludeSymbolsOption);
             command.AddOption(IncludeSourceOption);
