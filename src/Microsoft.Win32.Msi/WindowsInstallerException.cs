@@ -3,7 +3,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Runtime.Serialization;
 
 namespace Microsoft.Win32.Msi
 {
@@ -28,11 +27,6 @@ namespace Microsoft.Win32.Msi
         }
 
         public WindowsInstallerException(int error, string? message) : base(error, message)
-        {
-
-        }
-
-        public WindowsInstallerException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
 
         }
