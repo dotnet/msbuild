@@ -1049,7 +1049,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="translated">このテンプレートには、Microsoft 以外のパーティのテクノロジが含まれています。詳しくは、{0} をご覧ください。</target>
+        <target state="translated">このテンプレートには、Microsoft 以外のパーティのテクノロジーが含まれています。詳しくは、{0} をご覧ください。</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
