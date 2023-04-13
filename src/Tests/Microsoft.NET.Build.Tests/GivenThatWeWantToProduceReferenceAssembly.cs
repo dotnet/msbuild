@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = targetFramework
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework, targetExtension: extension);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + extension, targetExtension: extension);
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
