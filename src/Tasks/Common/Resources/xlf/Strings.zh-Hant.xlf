@@ -149,8 +149,8 @@
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelOutputPath">
         <source>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</source>
-        <target state="translated">NETSDK1194: 建置解決方案時不支援「--output」選項。指定解決方案層級輸出路徑會導致所有專案將輸出複製到相同的目錄，而這可能會導致組建不一致。</target>
-        <note>{StrBegin="NETSDK1194: "}</note>
+        <target state="needs-review-translation">NETSDK1194: 建置解決方案時不支援「--output」選項。指定解決方案層級輸出路徑會導致所有專案將輸出複製到相同的目錄，而這可能會導致組建不一致。</target>
+        <note>{StrBegin="NETSDK1194: "}{Locked="--output"}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
         <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specify the RID at the individual project level instead.</source>
@@ -813,7 +813,7 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
         <target state="needs-review-translation">NETSDK1179: 使用 '--runtime' 時，必須有一個 '--self-contained' 或 '--no-self-contained' 選項。</target>
-        <note>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
+        <note>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}{Locked="--runtime"}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>

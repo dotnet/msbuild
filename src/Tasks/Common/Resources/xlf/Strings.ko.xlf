@@ -149,8 +149,8 @@
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelOutputPath">
         <source>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</source>
-        <target state="translated">NETSDK1194: 솔루션을 빌드할 때 "--output" 옵션이 지원되지 않습니다. 솔루션 수준 출력 경로를 지정하면 모든 프로젝트가 동일한 디렉터리에 출력을 복사하게 되어 일관성 없는 빌드가 발생할 수 있습니다.</target>
-        <note>{StrBegin="NETSDK1194: "}</note>
+        <target state="needs-review-translation">NETSDK1194: 솔루션을 빌드할 때 "--output" 옵션이 지원되지 않습니다. 솔루션 수준 출력 경로를 지정하면 모든 프로젝트가 동일한 디렉터리에 출력을 복사하게 되어 일관성 없는 빌드가 발생할 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1194: "}{Locked="--output"}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
         <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specify the RID at the individual project level instead.</source>
@@ -813,7 +813,7 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
         <target state="needs-review-translation">NETSDK1179: '--runtime'을 사용하는 경우 '--no-self-contained' 또는 '--no-self-contained' 옵션 중 하나가 필요합니다.</target>
-        <note>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
+        <note>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}{Locked="--runtime"}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
