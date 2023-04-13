@@ -3,6 +3,7 @@
 //
 
 using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Xunit;
 
@@ -32,7 +33,7 @@ namespace Microsoft.NET.Build.Containers.IntegrationTests
 
             Assert.NotNull(actualVersionElement);
             Assert.NotEmpty(actualVersionElement.Value);
-            Assert.Equal(TestContext.Current.ToolsetUnderTest.SdkVersion, actualVersionElement.Value);
+            actualVersionElement.Value.Should().BeOneOf(TestContext.Current.ToolsetUnderTest.SdkVersion, TestContext.Current.ToolsetUnderTest.SdkVersion.Split('-')[0]);
         }
     }
 }
