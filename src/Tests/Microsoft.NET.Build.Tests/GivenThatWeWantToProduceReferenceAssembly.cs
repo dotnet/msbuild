@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
             var filePath = Path.Combine(testAsset.Path, testProject.Name, "obj", "Debug", targetFramework, "ref", $"{testProject.Name}.dll");
-            File.Exists(filePath).Should().Be(true);
+            File.Exists(filePath).Should().BeTrue();
         }
     }
 }
